@@ -104,8 +104,10 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 						// Sleep for 10 minutes
 						time.Sleep(10 * time.Minute)
-
 						curBlock := getLatestFinalizedBlock(t)
+
+						blobber1PassedChallenges := countPassedChallengesForBlobberAndAllocation(allocationId, blobberList[0].Id)
+						blobber2PassedChallenges := countPassedChallengesForBlobberAndAllocation(allocationId, blobberList[1].Id)
 
 						blobberBlockRewards := getBlockRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
 
@@ -116,6 +118,9 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 						blobber1TotalRewards := float64(blobberBlockRewards[4])
 						blobber2TotalRewards := float64(blobberBlockRewards[5])
 
+						blobber1Weight := calculateWeight(writePrice, readPrice, totalData, float64(readData)*totalData, stake[0], blobber1PassedChallenges)
+						blobber2Weight := calculateWeight(writePrice, readPrice, totalData, float64(readData)*totalData, stake[1], blobber2PassedChallenges)
+
 						// print all values
 						fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
 						fmt.Println("blobber2ProviderRewards", blobber2ProviderRewards)
@@ -123,6 +128,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 						fmt.Println("blobber2DelegateRewards", blobber2DelegateRewards)
 						fmt.Println("blobber1TotalRewards", blobber1TotalRewards)
 						fmt.Println("blobber2TotalRewards", blobber2TotalRewards)
+
+						require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
 						prevBlock = getLatestFinalizedBlock(t)
 
@@ -747,4 +754,19 @@ func resetNetwork(readPrice, writePrice float64) {
 	fmt.Println("Write Price : ", writePrice)
 
 	time.Sleep(15 * time.Minute)
+}
+
+func countPassedChallengesForBlobberAndAllocation(allocationID, blobberID string) float64 {
+	challenges, _ := getAllChallenges(allocationID)
+
+	var passedChallenges float64
+	passedChallenges = 0
+
+	for _, challenge := range challenges {
+		if challenge.Passed && challenge.BlobberID == blobberID {
+			passedChallenges++
+		}
+	}
+
+	return passedChallenges
 }
