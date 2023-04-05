@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subset of 0Chain System test suite [is_available/060d40e2] ran against [dev-3.devnet-0chain.net] at [2023-04-05_10.47.51]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">Subset of 0Chain System test suite [is_available/060d40e2] ran against [dev-3.devnet-0chain.net] at [2023-04-05_10.47.51]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>17</strong>Duration: <strong>2ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>15</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>2</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">April 5, 2023 10:55:10</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup failed " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberAvailability","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":67.82,"Output":["","","","","",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_blobber_availability_test.go","TestFunctionDetail":{"Line":15,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberAvailability/blobber_is_available_switch_controls_blobber_use_for_allocations","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":67.82,"Output":["","    zboxcli_blobber_availability_test.go:18: Test case [blobber is available switch controls blobber use for allocations] scheduled at [04-05-2023 10:47:59] \n","    system_test_framework.go:85: Test case [blobber is available switch controls blobber use for allocations] start at [04-05-2023 10:47:59] \n","    zboxcli_stake_unstake_token_test.go:287: Requesting blobber list...\n","    zboxcli_update_allocation_test.go:954: Executing faucet...\n","    zboxcli_create_allocation_test.go:434: Creating new allocation...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_stake_unstake_token_test.go:287: Requesting blobber list...\n","    zboxcli_create_allocation_test.go:434: Creating new allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d is not currently available for new allocations]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d is not currently available for new allocations]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox newallocation --data 1 --parity 5 --lock 1.5 --silent --wallet TestBlobberAvailability-blobber_is_available_switch_controls_blobber_use_for_allocations_wallet.json --configDir ./config --config ./zbox_config.yaml --allocationFileName TestBlobberAvailability-blobber_is_available_switch_controls_blobber_use_for_allocations_allocation.txt] Output: [Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d is not currently available for new allocations]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/04/05 10:48:45.475054 wallet_base.go:310: ******* Wallet SDK Version:v1.8.14-4-g9941e17f ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/04/05 10:48:45.475093 sdk.go:75: ******* Storage SDK Version: v1.8.14-4-g9941e17f *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/04/05 10:48:45.570612 transaction_base.go:138: ******* Wallet SDK Version:v1.8.14-4-g9941e17f ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/04/05 10:48:45.654366 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\",\"https://dev-3.devnet-0chain.net/miner02\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31mError creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d is not currently available for new allocations\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_stake_unstake_token_test.go:287: Requesting blobber list...\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zboxcli_blobber_availability_test.go:72\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:86\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1571\n","        \tError:      \tShould be true\n","        \tTest:       \tTestBlobberAvailability/blobber_is_available_switch_controls_blobber_use_for_allocations\n","        \tMessages:   \tblobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d should be deactivated\n","    zboxcli_blobber_availability_test.go:18: Test case [blobber is available switch controls blobber use for allocations] exit at [04-05-2023 10:48:56]\n","","","    zboxcli_blobber_availability_test.go:18: Test case [blobber is available switch controls blobber use for allocations] scheduled at [04-05-2023 10:52:54] \n","    system_test_framework.go:85: Test case [blobber is available switch controls blobber use for allocations] start at [04-05-2023 10:52:54] \n","    zboxcli_stake_unstake_token_test.go:287: Requesting blobber list...\n","    zboxcli_update_allocation_test.go:954: Executing faucet...\n","    zboxcli_create_allocation_test.go:434: Creating new allocation...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_stake_unstake_token_test.go:287: Requesting blobber list...\n","    zboxcli_create_allocation_test.go:434: Creating new allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d is not currently available for new allocations]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d is not currently available for new allocations]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox newallocation --data 1 --parity 5 --lock 1.5 --silent --wallet TestBlobberAvailability-blobber_is_available_switch_controls_blobber_use_for_allocations_wallet.json --configDir ./config --config ./zbox_config.yaml --allocationFileName TestBlobberAvailability-blobber_is_available_switch_controls_blobber_use_for_allocations_allocation.txt] Output: [Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d is not currently available for new allocations]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/04/05 10:53:40.492989 wallet_base.go:310: ******* Wallet SDK Version:v1.8.14-4-g9941e17f ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/04/05 10:53:40.493030 sdk.go:75: ******* Storage SDK Version: v1.8.14-4-g9941e17f *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/04/05 10:53:40.585469 transaction_base.go:138: ******* Wallet SDK Version:v1.8.14-4-g9941e17f ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/04/05 10:53:40.665759 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31mError creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d is not currently available for new allocations\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_stake_unstake_token_test.go:287: Requesting blobber list...\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zboxcli_blobber_availability_test.go:72\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:86\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1571\n","        \tError:      \tShould be true\n","        \tTest:       \tTestBlobberAvailability/blobber_is_available_switch_controls_blobber_use_for_allocations\n","        \tMessages:   \tblobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d should be deactivated\n","    zboxcli_blobber_availability_test.go:18: Test case [blobber is available switch controls blobber use for allocations] exit at [04-05-2023 10:53:51]\n","","","    zboxcli_blobber_availability_test.go:18: Test case [blobber is available switch controls blobber use for allocations] scheduled at [04-05-2023 10:54:02] \n","    system_test_framework.go:85: Test case [blobber is available switch controls blobber use for allocations] start at [04-05-2023 10:54:02] \n","    zboxcli_stake_unstake_token_test.go:287: Requesting blobber list...\n","    zboxcli_update_allocation_test.go:954: Executing faucet...\n","    zboxcli_create_allocation_test.go:434: Creating new allocation...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_stake_unstake_token_test.go:287: Requesting blobber list...\n","    zboxcli_create_allocation_test.go:434: Creating new allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d is not currently available for new allocations]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d is not currently available for new allocations]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox newallocation --data 1 --parity 5 --lock 1.5 --silent --wallet TestBlobberAvailability-blobber_is_available_switch_controls_blobber_use_for_allocations_wallet.json --configDir ./config --config ./zbox_config.yaml --allocationFileName TestBlobberAvailability-blobber_is_available_switch_controls_blobber_use_for_allocations_allocation.txt] Output: [Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d is not currently available for new allocations]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/04/05 10:54:48.987094 wallet_base.go:310: ******* Wallet SDK Version:v1.8.14-4-g9941e17f ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/04/05 10:54:48.987137 sdk.go:75: ******* Storage SDK Version: v1.8.14-4-g9941e17f *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/04/05 10:54:49.079837 transaction_base.go:138: ******* Wallet SDK Version:v1.8.14-4-g9941e17f ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/04/05 10:54:49.159317 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31mError creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d is not currently available for new allocations\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_stake_unstake_token_test.go:287: Requesting blobber list...\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/zboxcli_blobber_availability_test.go:72\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:86\n","        \t            \t\t\t\t/root/actions-runner3/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1571\n","        \tError:      \tShould be true\n","        \tTest:       \tTestBlobberAvailability/blobber_is_available_switch_controls_blobber_use_for_allocations\n","        \tMessages:   \tblobber 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d should be deactivated\n","    zboxcli_blobber_availability_test.go:18: Test case [blobber is available switch controls blobber use for allocations] exit at [04-05-2023 10:54:59]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":226.29,"Output":["","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_stake_unstake_token_test.go:287: Requesting blobber list...\n","","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","--- PASS: TestBlobberConfigUpdate (226.29s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_blobber_config_update_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_all_params_at_once_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":16.52,"Output":["","    zboxcli_blobber_config_update_test.go:324: Test case [update all params at once should work] scheduled at [04-05-2023 10:51:42] \n","    system_test_framework.go:85: Test case [update all params at once should work] start at [04-05-2023 10:51:42] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:390: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:324: Test case [update all params at once should work] exit at [04-05-2023 10:51:53]\n","--- PASS: TestBlobberConfigUpdate/update_all_params_at_once_should_work (16.52s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_capacity_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.05,"Output":["","    zboxcli_blobber_config_update_test.go:78: Test case [update blobber capacity should work] scheduled at [04-05-2023 10:49:12] \n","    system_test_framework.go:85: Test case [update blobber capacity should work] start at [04-05-2023 10:49:12] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:390: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:78: Test case [update blobber capacity should work] exit at [04-05-2023 10:49:23]\n","--- PASS: TestBlobberConfigUpdate/update_blobber_capacity_should_work (11.05s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_max_offer_duration_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.05,"Output":["","    zboxcli_blobber_config_update_test.go:100: Test case [update blobber max offer duration should work] scheduled at [04-05-2023 10:49:23] \n","    system_test_framework.go:85: Test case [update blobber max offer duration should work] start at [04-05-2023 10:49:23] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:390: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:100: Test case [update blobber max offer duration should work] exit at [04-05-2023 10:49:34]\n","--- PASS: TestBlobberConfigUpdate/update_blobber_max_offer_duration_should_work (11.05s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_max_stake_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.04,"Output":["","    zboxcli_blobber_config_update_test.go:121: Test case [update blobber max stake should work] scheduled at [04-05-2023 10:49:34] \n","    system_test_framework.go:85: Test case [update blobber max stake should work] start at [04-05-2023 10:49:34] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:390: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:121: Test case [update blobber max stake should work] exit at [04-05-2023 10:49:46]\n","--- PASS: TestBlobberConfigUpdate/update_blobber_max_stake_should_work (11.04s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_min_lock_demand_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":14.04,"Output":["","    zboxcli_blobber_config_update_test.go:171: Test case [update blobber min lock demand should work] scheduled at [04-05-2023 10:49:57] \n","    system_test_framework.go:85: Test case [update blobber min lock demand should work] start at [04-05-2023 10:49:57] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    utils.go:138: Waiting 3s...\n","    zboxcli_blobber_config_update_test.go:390: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:171: Test case [update blobber min lock demand should work] exit at [04-05-2023 10:50:11]\n","--- PASS: TestBlobberConfigUpdate/update_blobber_min_lock_demand_should_work (14.04s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_min_stake_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.04,"Output":["","    zboxcli_blobber_config_update_test.go:146: Test case [update blobber min stake should work] scheduled at [04-05-2023 10:49:46] \n","    system_test_framework.go:85: Test case [update blobber min stake should work] start at [04-05-2023 10:49:46] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:390: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:146: Test case [update blobber min stake should work] exit at [04-05-2023 10:49:57]\n","--- PASS: TestBlobberConfigUpdate/update_blobber_min_stake_should_work (11.04s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_number_of_delegates_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.03,"Output":["","    zboxcli_blobber_config_update_test.go:193: Test case [update blobber number of delegates should work] scheduled at [04-05-2023 10:50:11] \n","    system_test_framework.go:85: Test case [update blobber number of delegates should work] start at [04-05-2023 10:50:11] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:390: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:193: Test case [update blobber number of delegates should work] exit at [04-05-2023 10:50:22]\n","--- PASS: TestBlobberConfigUpdate/update_blobber_number_of_delegates_should_work (11.03s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_read_price_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.04,"Output":["","    zboxcli_blobber_config_update_test.go:278: Test case [update blobber read price should work] scheduled at [04-05-2023 10:51:20] \n","    system_test_framework.go:85: Test case [update blobber read price should work] start at [04-05-2023 10:51:20] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:390: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:278: Test case [update blobber read price should work] exit at [04-05-2023 10:51:31]\n","--- PASS: TestBlobberConfigUpdate/update_blobber_read_price_should_work (11.04s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_service_charge_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.09,"Output":["","    zboxcli_blobber_config_update_test.go:214: Test case [update blobber service charge should work] scheduled at [04-05-2023 10:50:22] \n","    system_test_framework.go:85: Test case [update blobber service charge should work] start at [04-05-2023 10:50:22] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:390: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:214: Test case [update blobber service charge should work] exit at [04-05-2023 10:50:33]\n","--- PASS: TestBlobberConfigUpdate/update_blobber_service_charge_should_work (11.09s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_blobber_write_price_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.04,"Output":["","    zboxcli_blobber_config_update_test.go:301: Test case [update blobber write price should work] scheduled at [04-05-2023 10:51:31] \n","    system_test_framework.go:85: Test case [update blobber write price should work] start at [04-05-2023 10:51:31] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:390: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Test case [update blobber write price should work] exit at [04-05-2023 10:51:42]\n","--- PASS: TestBlobberConfigUpdate/update_blobber_write_price_should_work (11.04s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_no_params_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.79,"Output":["","    zboxcli_blobber_config_update_test.go:235: Test case [update no params should work] scheduled at [04-05-2023 10:50:33] \n","    system_test_framework.go:85: Test case [update no params should work] start at [04-05-2023 10:50:33] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    zboxcli_blobber_config_update_test.go:235: Test case [update no params should work] exit at [04-05-2023 10:50:44]\n","--- PASS: TestBlobberConfigUpdate/update_no_params_should_work (10.79s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_with_invalid_blobber_ID_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.38,"Output":["","    zboxcli_blobber_config_update_test.go:257: Test case [update with invalid blobber ID should fail] scheduled at [04-05-2023 10:50:54] \n","    system_test_framework.go:85: Test case [update with invalid blobber ID should fail] start at [04-05-2023 10:50:54] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [requesting blobber: -\u003cNEWLINE\u003e- internal_error: missing blobber: invalid-blobber-id]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [requesting blobber: -\u003cNEWLINE\u003e- internal_error: missing blobber: invalid-blobber-id]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox bl-update --blobber_id invalid-blobber-id --silent --wallet wallets/blobber_owner_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [requesting blobber: -\u003cNEWLINE\u003e- internal_error: missing blobber: invalid-blobber-id]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/04/05 10:51:04.349678 wallet_base.go:310: ******* Wallet SDK Version:v1.8.14-4-g9941e17f ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/04/05 10:51:04.349725 sdk.go:75: ******* Storage SDK Version: v1.8.14-4-g9941e17f *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/04/05 10:51:04.443748 transaction_base.go:138: ******* Wallet SDK Version:v1.8.14-4-g9941e17f ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/04/05 10:51:04.526076 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\",\"https://dev-3.devnet-0chain.net/miner02\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31mrequesting blobber:\n","    utils.go:77: \u001b[31minternal_error: missing blobber: invalid-blobber-id\n","    zboxcli_blobber_config_update_test.go:257: Test case [update with invalid blobber ID should fail] exit at [04-05-2023 10:51:04]\n","--- PASS: TestBlobberConfigUpdate/update_with_invalid_blobber_ID_should_fail (10.38s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_with_invalid_blobber_wallet/owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":16.2,"Output":["","    zboxcli_blobber_config_update_test.go:267: Test case [update with invalid blobber wallet/owner should fail] scheduled at [04-05-2023 10:51:04] \n","    system_test_framework.go:85: Test case [update with invalid blobber wallet/owner should fail] start at [04-05-2023 10:51:04] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    utils.go:70: \u001b[31mCommand failed on final attempt [1/1] due to error [exit status 1]. Command String: [./zbox bl-update --blobber_id 334238e2c3753fec18d654099f21c911fa370188b4fc6d951efcf8fedfed1b6d --silent --wallet TestBlobberConfigUpdate-update_with_invalid_blobber_wallet-owner_should_fail_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [update_blobber_settings_failed: access denied, allowed for delegate_wallet owner only]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/04/05 10:51:15.366467 wallet_base.go:310: ******* Wallet SDK Version:v1.8.14-4-g9941e17f ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/04/05 10:51:15.366509 sdk.go:75: ******* Storage SDK Version: v1.8.14-4-g9941e17f *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/04/05 10:51:15.468048 transaction_base.go:138: ******* Wallet SDK Version:v1.8.14-4-g9941e17f ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/04/05 10:51:15.550409 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31mupdate_blobber_settings_failed: access denied, allowed for delegate_wallet owner only\n","    zboxcli_blobber_config_update_test.go:267: Test case [update with invalid blobber wallet/owner should fail] exit at [04-05-2023 10:51:20]\n","--- PASS: TestBlobberConfigUpdate/update_with_invalid_blobber_wallet/owner_should_fail (16.20s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberConfigUpdate/update_without_blobber_ID_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.17,"Output":["","    zboxcli_blobber_config_update_test.go:247: Test case [update without blobber ID should fail] scheduled at [04-05-2023 10:50:44] \n","    system_test_framework.go:85: Test case [update without blobber ID should fail] start at [04-05-2023 10:50:44] \n","    zwalletcli_register_wallet_test.go:107: Registering wallet...\n","    zboxcli_blobber_config_update_test.go:395: Updating blobber info...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error: required flag(s) \"blobber_id\" not set -\u003cNEWLINE\u003e- Usage: -\u003cNEWLINE\u003e- zbox bl-update [flags] -\u003cNEWLINE\u003e- Flags: -\u003cNEWLINE\u003e- --blobber_id string             blobber ID, required -\u003cNEWLINE\u003e- --capacity int                  update blobber capacity bid, optional -\u003cNEWLINE\u003e- -h, --help                          help for bl-update -\u003cNEWLINE\u003e- --is_available                  set blobber's availability for new allocations (default true) -\u003cNEWLINE\u003e- --max_offer_duration duration   update max_offer_duration, optional -\u003cNEWLINE\u003e- --max_stake float               update max_stake, optional -\u003cNEWLINE\u003e- --min_lock_demand float         update min_lock_demand, optional -\u003cNEWLINE\u003e- --min_stake float               update min_stake, optional -\u003cNEWLINE\u003e- --num_delegates int             update num_delegates, optional -\u003cNEWLINE\u003e- --read_price float              update read_price, optional -\u003cNEWLINE\u003e- --service_charge float          upd","ate service_charge, optional -\u003cNEWLINE\u003e- --write_price float             update write_price, optional -\u003cNEWLINE\u003e- Global Flags: -\u003cNEWLINE\u003e- --config string              config file (default is config.yaml) -\u003cNEWLINE\u003e- --configDir string           configuration directory (default is $HOME/.zcn) -\u003cNEWLINE\u003e- --network string             network file to overwrite the network details (if required, default is network.yaml) -\u003cNEWLINE\u003e- --silent                     Do not show interactive sdk logs (shown by default) -\u003cNEWLINE\u003e- --wallet string              wallet file (default is wallet.json) -\u003cNEWLINE\u003e- --wallet_client_id string    wallet client_id -\u003cNEWLINE\u003e- --wallet_client_key string   wallet client_key -\u003cNEWLINE\u003e- --withNonce int              nonce that will be used in transaction (default is 0) -\u003cNEWLINE\u003e- required flag(s) \"blobber_id\" not set]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error: required flag(s) \"blobber_id\" not set -\u003cNEWLINE\u003e- Usage: -\u003cNEWLINE\u003e- zbox bl-update [flags] -\u003cNEWLINE\u003e- Flags: -\u003cNEWLINE\u003e- --blobber_id string             blobber ID, required -\u003cNEWLINE\u003e- --capacity int                  update blobber capacity bid, optional -\u003cNEWLINE\u003e- -h, --help                          help for bl-update -\u003cNEWLINE\u003e- --is_available                  set blobber's availability for new allocations (default true) -\u003cNEWLINE\u003e- --max_offer_duration duration   update max_offer_duration, optional -\u003cNEWLINE\u003e- --max_stake float               update max_stake, optional -\u003cNEWLINE\u003e- --min_lock_demand float         update min_lock_demand, optional -\u003cNEWLINE\u003e- --min_stake float               update min_stake, optional -\u003cNEWLINE\u003e- --num_delegates int             update num_delegates, optional -\u003cNEWLINE\u003e- --read_price float              update read_price, optional -\u003cNEWLINE\u003e- --service_charge float          upd","ate service_charge, optional -\u003cNEWLINE\u003e- --write_price float             update write_price, optional -\u003cNEWLINE\u003e- Global Flags: -\u003cNEWLINE\u003e- --config string              config file (default is config.yaml) -\u003cNEWLINE\u003e- --configDir string           configuration directory (default is $HOME/.zcn) -\u003cNEWLINE\u003e- --network string             network file to overwrite the network details (if required, default is network.yaml) -\u003cNEWLINE\u003e- --silent                     Do not show interactive sdk logs (shown by default) -\u003cNEWLINE\u003e- --wallet string              wallet file (default is wallet.json) -\u003cNEWLINE\u003e- --wallet_client_id string    wallet client_id -\u003cNEWLINE\u003e- --wallet_client_key string   wallet client_key -\u003cNEWLINE\u003e- --withNonce int              nonce that will be used in transaction (default is 0) -\u003cNEWLINE\u003e- required flag(s) \"blobber_id\" not set]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox bl-update  --silent --wallet wallets/blobber_owner_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [Error: required flag(s) \"blobber_id\" not set -\u003cNEWLINE\u003e- Usage: -\u003cNEWLINE\u003e- zbox bl-update [flags] -\u003cNEWLINE\u003e- Flags: -\u003cNEWLINE\u003e- --blobber_id string             blobber ID, required -\u003cNEWLINE\u003e- --capacity int                  update blobber capacity bid, optional -\u003cNEWLINE\u003e- -h, --help                          help for bl-update -\u003cNEWLINE\u003e- --is_available                  set blobber's availability for new allocations (default true) -\u003cNEWLINE\u003e- --max_offer_duration duration   update max_offer_duration, optional -\u003cNEWLINE\u003e- --max_stake float               update max_stake, optional -\u003cNEWLINE\u003e- --min_lock_demand float         update min_lock_demand, optional -\u003cNEWLINE\u003e- --min_stake float               update min_stake, optional -\u003cNEWLINE\u003e- --num_delegates int             update ","num_delegates, optional -\u003cNEWLINE\u003e- --read_price float              update read_price, optional -\u003cNEWLINE\u003e- --service_charge float          update service_charge, optional -\u003cNEWLINE\u003e- --write_price float             update write_price, optional -\u003cNEWLINE\u003e- Global Flags: -\u003cNEWLINE\u003e- --config string              config file (default is config.yaml) -\u003cNEWLINE\u003e- --configDir string           configuration directory (default is $HOME/.zcn) -\u003cNEWLINE\u003e- --network string             network file to overwrite the network details (if required, default is network.yaml) -\u003cNEWLINE\u003e- --silent                     Do not show interactive sdk logs (shown by default) -\u003cNEWLINE\u003e- --wallet string              wallet file (default is wallet.json) -\u003cNEWLINE\u003e- --wallet_client_id string    wallet client_id -\u003cNEWLINE\u003e- --wallet_client_key string   wallet client_key -\u003cNEWLINE\u003e- --withNonce int              nonce that will be used in transaction (default is 0) -\u003cNEWLINE\u003e- required flag(s) \"blobber_id\" not set]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/04/05 10:50:54.023352 wallet_base.go:310: ******* Wallet SDK Version:v1.8.14-4-g9941e17f ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/04/05 10:50:54.023390 sdk.go:75: ******* Storage SDK Version: v1.8.14-4-g9941e17f *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/04/05 10:50:54.118327 transaction_base.go:138: ******* Wallet SDK Version:v1.8.14-4-g9941e17f ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/04/05 10:50:54.198812 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder01\",\"https://dev-3.devnet-0chain.net/sharder02\"]}\n","    utils.go:77: \u001b[31mError: required flag(s) \"blobber_id\" not set\n","    utils.go:77: \u001b[31mUsage:\n","    utils.go:77: \u001b[31mzbox bl-update [flags]\n","    utils.go:77: \u001b[31mFlags:\n","    utils.go:77: \u001b[31m--blobber_id string             blobber ID, required\n","    utils.go:77: \u001b[31m--capacity int                  update blobber capacity bid, optional\n","    utils.go:77: \u001b[31m-h, --help                          help for bl-update\n","    utils.go:77: \u001b[31m--is_available                  set blobber's availability for new allocations (default true)\n","    utils.go:77: \u001b[31m--max_offer_duration duration   update max_offer_duration, optional\n","    utils.go:77: \u001b[31m--max_stake float               update max_stake, optional\n","    utils.go:77: \u001b[31m--min_lock_demand float         update min_lock_demand, optional\n","    utils.go:77: \u001b[31m--min_stake float               update min_stake, optional\n","    utils.go:77: \u001b[31m--num_delegates int             update num_delegates, optional\n","    utils.go:77: \u001b[31m--read_price float              update read_price, optional\n","    utils.go:77: \u001b[31m--service_charge float          update service_charge, optional\n","    utils.go:77: \u001b[31m--write_price float             update write_price, optional\n","    utils.go:77: \u001b[31mGlobal Flags:\n","    utils.go:77: \u001b[31m--config string              config file (default is config.yaml)\n","    utils.go:77: \u001b[31m--configDir string           configuration directory (default is $HOME/.zcn)\n","    utils.go:77: \u001b[31m--network string             network file to overwrite the network details (if required, default is network.yaml)\n","    utils.go:77: \u001b[31m--silent                     Do not show interactive sdk logs (shown by default)\n","    utils.go:77: \u001b[31m--wallet string              wallet file (default is wallet.json)\n","    utils.go:77: \u001b[31m--wallet_client_id string    wallet client_id\n","    utils.go:77: \u001b[31m--wallet_client_key string   wallet client_key\n","    utils.go:77: \u001b[31m--withNonce int              nonce that will be used in transaction (default is 0)\n","    utils.go:77: \u001b[31mrequired flag(s) \"blobber_id\" not set\n","    zboxcli_blobber_config_update_test.go:247: Test case [update without blobber ID should fail] exit at [04-05-2023 10:50:54]\n","--- PASS: TestBlobberConfigUpdate/update_without_blobber_ID_should_fail (10.17s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
