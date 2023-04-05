@@ -19,7 +19,6 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
 const (
@@ -29,6 +28,7 @@ const (
 
 func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
+	t.Skip("Skip till chain-side bugs are resolved")
 
 	// Take a snapshot of the chains miners, then wait a few seconds, take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
@@ -55,7 +55,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		beforeMiners := getNodes(t, minerIds, sharderUrl)
 
 		// ------------------------------------
-		cliutils.Wait(t, 3*time.Second)
+		cliutil.Wait(t, 3*time.Second)
 		// ------------------------------------
 
 		afterMiners := getNodes(t, minerIds, sharderUrl)

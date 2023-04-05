@@ -282,9 +282,9 @@ func (c *ZboxClient) ListAllocation(t *test.SystemTest, idToken, csrfToken, phon
 	return allocWalletList, resp, err
 }
 
-func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletAlt, *resty.Response, error) {
+func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Posting wallet using 0box...")
-	var zboxWallet *model.ZboxWalletAlt
+	var zboxWallet *model.ZboxWallet
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -413,36 +413,10 @@ func (c *ZboxClient) DeleteWallet(t *test.SystemTest, walletId int, idToken, csr
 
 	return message, resp, err
 }
-func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (model.ZboxWalletKeys, *resty.Response, error) {
-	t.Logf("Listing wallets keys for [%v] using 0box...", phoneNumber)
-	var zboxWallets *model.ZboxWalletKeys
 
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/wallet/keys")
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &zboxWallets,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
-		}, //FIXME: List endpoint does not require signature see: https://github.com/0chain/0box/issues/376
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return *zboxWallets, resp, err
-}
-
-func (c *ZboxClient) PostUserInfoBiography(t *test.SystemTest, bio, idToken, csrfToken, phoneNumber string) (*model.ZboxSuccess, *resty.Response, error) {
+func (c *ZboxClient) PostUserInfoBiography(t *test.SystemTest, bio, idToken, csrfToken, phoneNumber string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("Posting user info biography using 0box...")
-	var zboxSuccess *model.ZboxSuccess
+	var ZboxMessageResponse *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -454,7 +428,7 @@ func (c *ZboxClient) PostUserInfoBiography(t *test.SystemTest, bio, idToken, csr
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxSuccess,
+		Dst:      &ZboxMessageResponse,
 		FormData: formData,
 		Headers: map[string]string{
 			"X-App-Client-ID":        X_APP_CLIENT_ID,
@@ -469,12 +443,12 @@ func (c *ZboxClient) PostUserInfoBiography(t *test.SystemTest, bio, idToken, csr
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
 
-	return zboxSuccess, resp, err
+	return ZboxMessageResponse, resp, err
 }
 
-func (c *ZboxClient) PostUserInfoAvatar(t *test.SystemTest, filePath, idToken, csrfToken, phoneNumber string) (*model.ZboxSuccess, *resty.Response, error) {
+func (c *ZboxClient) PostUserInfoAvatar(t *test.SystemTest, filePath, idToken, csrfToken, phoneNumber string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("Posting user info avatar using 0box...")
-	var zboxSuccess *model.ZboxSuccess
+	var ZboxMessageResponse *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -482,7 +456,7 @@ func (c *ZboxClient) PostUserInfoAvatar(t *test.SystemTest, filePath, idToken, c
 	urlBuilder.SetPath("/v2/userinfo/avatar")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxSuccess,
+		Dst:      &ZboxMessageResponse,
 		FileName: "avatar",
 		FilePath: filePath,
 		Headers: map[string]string{
@@ -498,12 +472,12 @@ func (c *ZboxClient) PostUserInfoAvatar(t *test.SystemTest, filePath, idToken, c
 		RequiredStatusCode: 200,
 	}, HttpFileUploadMethod)
 
-	return zboxSuccess, resp, err
+	return ZboxMessageResponse, resp, err
 }
 
-func (c *ZboxClient) PostUserInfoBackgroundImage(t *test.SystemTest, filePath, idToken, csrfToken, phoneNumber string) (*model.ZboxSuccess, *resty.Response, error) {
+func (c *ZboxClient) PostUserInfoBackgroundImage(t *test.SystemTest, filePath, idToken, csrfToken, phoneNumber string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("Posting user info background using 0box...")
-	var zboxSuccess *model.ZboxSuccess
+	var ZboxMessageResponse *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -511,7 +485,7 @@ func (c *ZboxClient) PostUserInfoBackgroundImage(t *test.SystemTest, filePath, i
 	urlBuilder.SetPath("/v2/userinfo/bgimg")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxSuccess,
+		Dst:      &ZboxMessageResponse,
 		FileName: "background",
 		FilePath: filePath,
 		Headers: map[string]string{
@@ -527,7 +501,7 @@ func (c *ZboxClient) PostUserInfoBackgroundImage(t *test.SystemTest, filePath, i
 		RequiredStatusCode: 200,
 	}, HttpFileUploadMethod)
 
-	return zboxSuccess, resp, err
+	return ZboxMessageResponse, resp, err
 }
 
 func (c *ZboxClient) GetUserInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxUserInfo, *resty.Response, error) {
@@ -715,9 +689,9 @@ func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, pho
 	return message, resp, err
 }
 
-func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletKeys, *resty.Response, error) {
+func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (model.ZboxWalletArr, *resty.Response, error) {
 	t.Logf("Getting wallet keys for [%v] using 0box...", phoneNumber)
-	var zboxWalletKeys *model.ZboxWalletKeys
+	var zboxWalletKeys *model.ZboxWalletArr
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -727,7 +701,7 @@ func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phone
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst: &zboxWalletKeys,
 		Headers: map[string]string{
-			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
 			"X-App-Client-Key":       X_APP_CLIENT_KEY,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
@@ -738,12 +712,12 @@ func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phone
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
-	return zboxWalletKeys, resp, err
+	return *zboxWalletKeys, resp, err
 }
 
-func (c *ZboxClient) UpdateWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletAlt, *resty.Response, error) {
+func (c *ZboxClient) UpdateWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Updating wallet using 0box...")
-	var zboxWallet *model.ZboxWalletAlt
+	var zboxWallet *model.ZboxWallet
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -927,9 +901,9 @@ func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToke
 	return ZboxNftCollection, resp, err
 }
 
-func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, stage_nft_upload, nft_reference, collectionId, owned_by, nft_activity, meta_data, allocationId, created_by, contract_address, token_id, token_standard string) (*model.ZboxNftAlt, *resty.Response, error) {
+func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, stage_nft_upload, nft_reference, collectionId, owned_by, nft_activity, meta_data, allocationId, created_by, contract_address, token_id, token_standard string) (*model.ZboxNft, *resty.Response, error) {
 	t.Logf("Posting nft using 0box...")
-	var ZboxNft *model.ZboxNftAlt
+	var ZboxNft *model.ZboxNft
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
