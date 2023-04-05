@@ -159,7 +159,6 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode())
 		require.Equal(t, zboxNftCollectionIdList.NftCollectionCount, 1)
-
 	})
 
 	t.RunSequentially("Get NFT collection by collection id with one nft present should work", func(t *test.SystemTest) {
@@ -176,7 +175,6 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		require.NotNil(t, zboxNFTList)
 		require.Equal(t, zboxNFTList.NftCollection.CollectionId, collection_id)
 	})
-
 }
 
 func Test0boxNft(testSetup *testing.T) {
