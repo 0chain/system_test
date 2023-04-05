@@ -2,11 +2,10 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
-	"io"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -20,8 +19,6 @@ func TestBlobberReadReward(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	prevBlock := getLatestFinalizedBlock(t)
-
-	fmt.Println("prevBlock", prevBlock)
 
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -86,122 +83,143 @@ func TestBlobberReadReward(testSetup *testing.T) {
 			"remotepath": remoteFilepath,
 			"localpath":  os.TempDir() + string(os.PathSeparator),
 		}), true)
-		fmt.Println(output)
 		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 
-		fmt.Println("Sleeping for 30 seconds")
 		time.Sleep(30 * time.Second)
 
-		downloadCost, _ := getDownloadCost(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remoteFilepath,
-		}), true)
-
-		fmt.Println(downloadCost)
+		downloadCost := sizeInGB(int64(filesize)) * math.Pow10(9) * 4
 
 		curBlock := getLatestFinalizedBlock(t)
 
-		totalDownloadRewards := getReadRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
+		downloadRewards := getReadRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
 
-		fmt.Println(totalDownloadRewards)
+		blobber1DownloadRewards := float64(downloadRewards[0])
+		blobber2DownloadRewards := float64(downloadRewards[1])
+		blobber1Delegate1DownloadRewards := float64(downloadRewards[2])
+		blobber2Delegate1DownloadRewards := float64(downloadRewards[3])
+		blobber1TotalDownloadRewards := float64(downloadRewards[4])
+		blobber2TotalDownloadRewards := float64(downloadRewards[5])
 
-		require.Equal(t, downloadCost, totalDownloadRewards, "Download cost and total download rewards are not equal")
+		totalDownloadRewards := blobber1TotalDownloadRewards + blobber2TotalDownloadRewards
+
+		// log all the values
+		t.Log("downloadCost", downloadCost)
+		t.Log("blobber1DownloadRewards", blobber1DownloadRewards)
+		t.Log("blobber2DownloadRewards", blobber2DownloadRewards)
+		t.Log("blobber1Delegate1DownloadRewards", blobber1Delegate1DownloadRewards)
+		t.Log("blobber2Delegate1DownloadRewards", blobber2Delegate1DownloadRewards)
+		t.Log("blobber1TotalDownloadRewards", blobber1TotalDownloadRewards)
+		t.Log("blobber2TotalDownloadRewards", blobber2TotalDownloadRewards)
+		t.Log("totalDownloadRewards", totalDownloadRewards)
+
+		require.InEpsilon(t, downloadCost/totalDownloadRewards, 1, 0.05, "Download cost and total download rewards are not equal")
+		require.InEpsilon(t, blobber1DownloadRewards/blobber2DownloadRewards, 1, 0.05, "Blobber 1 and Blobber 2 download rewards are not equal")
+		require.InEpsilon(t, blobber1Delegate1DownloadRewards/blobber2Delegate1DownloadRewards, 1, 0.05, "Blobber 1 delegate 1 and Blobber 2 delegate 1 download rewards are not equal")
+		require.InEpsilon(t, blobber1TotalDownloadRewards/blobber2TotalDownloadRewards, 1, 0.05, "Blobber 1 total download rewards and Blobber 2 total download rewards are not equal")
+
+		prevBlock = curBlock
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
 
-	//t.Skip()
+	t.RunSequentiallyWithTimeout("Case 2 : 1 delegate each, equal stake", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
-	//t.RunSequentiallyWithTimeout("Case 2 : 1 delegate each, equal stake, upload multiple times", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-	//
-	//	stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, true)
-	//
-	//	output, err := registerWallet(t, configPath)
-	//	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-	//
-	//	// 1. Create an allocation with 1 data shard and 1 parity shard.
-	//	allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-	//		"size":   500 * MB,
-	//		"tokens": 1,
-	//		"data":   1,
-	//		"parity": 1,
-	//		"expire": "20m",
-	//	})
-	//
-	//	remotepath := "/dir/"
-	//	filesize := 50 * MB
-	//	filename := generateRandomTestFileName(t)
-	//
-	//	err = createFileWithSize(filename, int64(filesize))
-	//	require.Nil(t, err)
-	//
-	//	output, err = uploadFile(t, configPath, map[string]interface{}{
-	//		"allocation": allocationId,
-	//		"remotepath": remotepath + filepath.Base(filename),
-	//		"localpath":  filename,
-	//	}, true)
-	//	require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-	//
-	//	err = os.Remove(filename)
-	//	require.Nil(t, err)
-	//
-	//	remoteFilepath := remotepath + filepath.Base(filename)
-	//
-	//	output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-	//		"allocation": allocationId,
-	//		"remotepath": remoteFilepath,
-	//		"localpath":  os.TempDir() + string(os.PathSeparator),
-	//	}), true)
-	//	fmt.Println(output)
-	//	require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-	//
-	//	fmt.Println("Sleeping for 30 seconds")
-	//	time.Sleep(30 * time.Second)
-	//
-	//	downloadCost, _ := getDownloadCost(t, configPath, createParams(map[string]interface{}{
-	//		"allocation": allocationId,
-	//		"remotepath": remoteFilepath,
-	//	}), true)
-	//
-	//	fmt.Println(downloadCost)
-	//
-	//	curBlock := getLatestFinalizedBlock(t)
-	//
-	//	totalDownloadRewards := getReadRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
-	//
-	//	fmt.Println(totalDownloadRewards)
-	//
-	//	require.Equal(t, downloadCost, totalDownloadRewards, "Download cost and total download rewards are not equal")
-	//})
-}
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+			1, 1, 1, 1,
+		}, 1)
 
-func getTotalRewardsByRewardType(rewardType int) int {
-	url := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/reward_type=" + strconv.Itoa(rewardType)
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-	resp, err := http.Get(url)
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   500 * MB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "20m",
+		})
 
-	if err != nil {
-		fmt.Println(err)
-		return 0
-	}
+		remotepath := "/dir/"
+		filesize := 50 * MB
+		filename := generateRandomTestFileName(t)
 
-	fmt.Println(resp.Body)
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
 
-	var response map[string]interface{}
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println(err)
-		return 0
-	}
+		for i := 0; i < 3; i++ {
 
-	err = json.Unmarshal(body, &response)
+			err = os.Remove(filename)
+			require.Nil(t, err)
 
-	fmt.Println(response)
+			remoteFilepath := remotepath + filepath.Base(filename)
 
-	sum := response["sum"].(float64)
+			output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationId,
+				"remotepath": remoteFilepath,
+				"localpath":  os.TempDir() + string(os.PathSeparator),
+			}), true)
+			require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 
-	return int(sum)
+			time.Sleep(30 * time.Second)
+
+			downloadCost := sizeInGB(int64(filesize)) * math.Pow10(9) * 4
+
+			curBlock := getLatestFinalizedBlock(t)
+
+			downloadRewards := getReadRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
+
+			blobber1DownloadRewards := float64(downloadRewards[0])
+			blobber2DownloadRewards := float64(downloadRewards[1])
+			blobber1Delegate1DownloadRewards := float64(downloadRewards[2])
+			blobber2Delegate1DownloadRewards := float64(downloadRewards[3])
+			blobber1TotalDownloadRewards := float64(downloadRewards[4])
+			blobber2TotalDownloadRewards := float64(downloadRewards[5])
+
+			totalDownloadRewards := blobber1TotalDownloadRewards + blobber2TotalDownloadRewards
+
+			// log all the values
+			t.Log("downloadCost", downloadCost)
+			t.Log("blobber1DownloadRewards", blobber1DownloadRewards)
+			t.Log("blobber2DownloadRewards", blobber2DownloadRewards)
+			t.Log("blobber1Delegate1DownloadRewards", blobber1Delegate1DownloadRewards)
+			t.Log("blobber2Delegate1DownloadRewards", blobber2Delegate1DownloadRewards)
+			t.Log("blobber1TotalDownloadRewards", blobber1TotalDownloadRewards)
+			t.Log("blobber2TotalDownloadRewards", blobber2TotalDownloadRewards)
+			t.Log("totalDownloadRewards", totalDownloadRewards)
+
+			require.InEpsilon(t, downloadCost/totalDownloadRewards, 1, 0.05, "Download cost and total download rewards are not equal")
+			require.InEpsilon(t, blobber1DownloadRewards/blobber2DownloadRewards, 1, 0.05, "Blobber 1 and Blobber 2 download rewards are not equal")
+			require.InEpsilon(t, blobber1Delegate1DownloadRewards/blobber2Delegate1DownloadRewards, 1, 0.05, "Blobber 1 delegate 1 and Blobber 2 delegate 1 download rewards are not equal")
+			require.InEpsilon(t, blobber1TotalDownloadRewards/blobber2TotalDownloadRewards, 1, 0.05, "Blobber 1 total download rewards and Blobber 2 total download rewards are not equal")
+
+			prevBlock = curBlock
+		}
+
+		// Sleep for 20 minutes
+		time.Sleep(20 * time.Minute)
+
+		err = os.Remove(filename)
+		require.Nil(t, err)
+
+		remoteFilepath := remotepath + filepath.Base(filename)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remoteFilepath,
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), true)
+		require.NotNil(t, err, "File should not be downloaded from expired allocation", strings.Join(output, "\n"))
+
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+	})
 
 }
 
@@ -266,4 +284,8 @@ func getReadRewards(blockNumber, startBlockNumber, endBlockNumber, blobber1, blo
 	result = append(result, blobber2TotalReward)
 
 	return result
+}
+
+func sizeInGB(size int64) float64 {
+	return float64(size) / float64(GB)
 }

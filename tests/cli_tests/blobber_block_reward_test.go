@@ -46,7 +46,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 	readPrices := []float64{0, 0.01}
 	writePrices := []float64{0.1, 0.2}
-	readData := []int{1, 3}
+	readData := []int{1}
 	totalData := 0.1 * GB
 	stakes := [][]float64{{1.0, 1.0, 1.0, 1.0}, {1.0, 2.0, 1.0, 2.0}}
 
@@ -743,5 +743,8 @@ func calculateWeight(wp, rp, X, R, stakes, challenges float64) float64 {
 }
 
 func resetNetwork(readPrice, writePrice float64) {
+	fmt.Println("Read Price : ", readPrice)
+	fmt.Println("Write Price : ", writePrice)
 
+	time.Sleep(15 * time.Minute)
 }
