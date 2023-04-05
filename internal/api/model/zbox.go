@@ -49,10 +49,7 @@ type ZboxAllocation struct {
 	AppType        string `json:"app_type"`
 	LastUpdate     string `json:"last_update"`
 }
-type ZboxAllocationList struct {
-	MessageContainer
-	Data []ZboxAllocation `json:"data"`
-}
+
 type MessageContainer struct {
 	Message string `json:"message"`
 }
