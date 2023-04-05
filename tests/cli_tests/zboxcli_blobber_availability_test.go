@@ -38,7 +38,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
-			"lock":   "1.5",
+			"lock":   "3.0",
 		}))
 		require.NoError(t, err, strings.Join(output, "\n"))
 		beforeAllocationId, err := getAllocationID(output[0])
@@ -58,7 +58,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
-			"lock":   "1.5",
+			"lock":   "3.0",
 		}))
 		require.Error(t, err, "create allocation should fail")
 		require.Len(t, output, 1)
@@ -76,7 +76,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
-			"lock":   "1.5",
+			"lock":   "3.0",
 		}))
 		require.NoError(t, err, strings.Join(output, "\n"))
 		afterAllocationId, err := getAllocationID(output[0])
