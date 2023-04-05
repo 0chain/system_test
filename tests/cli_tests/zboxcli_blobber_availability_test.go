@@ -5,6 +5,9 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
+
+	cliutil "github.com/0chain/system_test/internal/cli/util"
 
 	"github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
@@ -47,7 +50,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 
 		setAvailability(t, blobberToDeactivate.ID, false)
 		t.Cleanup(func() { setAvailability(t, blobberToDeactivate.ID, true) })
-
+		cliutil.Wait(t, 1*time.Second)
 		betweenBlobbers := getBlobbers(t)
 		for i := range betweenBlobbers {
 			if betweenBlobbers[i].ID == blobberToDeactivate.ID {
@@ -65,11 +68,11 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		require.True(t, strings.Contains(output[0], " is not currently available for new allocations"))
 
 		setAvailability(t, blobberToDeactivate.ID, true)
-
+		cliutil.Wait(t, 1*time.Second)
 		afterBlobbers := getBlobbers(t)
 		for i := range betweenBlobbers {
 			if afterBlobbers[i].ID == blobberToDeactivate.ID {
-				require.Truef(t, betweenBlobbers[i].IsAvailable, "blobber %s should be deactivated", blobberToDeactivate.ID)
+				require.Truef(t, afterBlobbers[i].IsAvailable, "blobber %s should be activated", blobberToDeactivate.ID)
 			}
 		}
 
