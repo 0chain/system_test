@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
@@ -43,7 +44,9 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
 	for _, blobber := range blobberList {
-		killProvider(blobber.Id)
+		killBlobber(t, configPath, createParams(map[string]interface{}{
+			"id": blobber.Id,
+		}), true)
 	}
 
 	return
@@ -83,7 +86,9 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 		time.Sleep(2*time.Minute + 30*time.Second)
 
 		// 3. Kill the blobber
-		killProvider(blobberList[0].Id)
+		killBlobber(t, configPath, createParams(map[string]interface{}{
+			"id": blobberList[0].Id,
+		}), true)
 
 		// 4. Wait for 2 minutes 30 seconds
 		time.Sleep(2*time.Minute + 30*time.Second)
@@ -95,61 +100,17 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 		}
 	})
 
-	t.Skip()
-
-	//t.RunSequentiallyWithTimeout("Test Cancel Allocation After Expiry Rewards when client uploads 50% of allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-	//	// 1. Create an allocation with 1 data shard and 1 parity shard.
-	//	allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-	//		"size":   500 * MB,
-	//		"tokens": 1,
-	//		"data":   1,
-	//		"parity": 1,
-	//		"expire": "50m",
-	//	})
-	//
-	//	remotepath := "/dir/"
-	//	filesize := 250 * MB
-	//	filename := generateRandomTestFileName(t)
-	//
-	//	err := createFileWithSize(filename, int64(filesize))
-	//	require.Nil(t, err)
-	//
-	//	output, err := uploadFile(t, configPath, map[string]interface{}{
-	//		"allocation": allocationId,
-	//		"remotepath": remotepath + filepath.Base(filename),
-	//		"localpath":  filename,
-	//	}, true)
-	//	require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-	//
-	//	// 2. Wait for 2 minutes 30 seconds
-	//	time.Sleep(2*time.Minute + 30*time.Second)
-	//
-	//	// 3. Kill the blobber
-	//	killProvider(blobberList[0].Id)
-	//
-	//	// 4. Wait for 2 minutes 30 seconds
-	//	time.Sleep(2*time.Minute + 30*time.Second)
-	//
-	//	// 5. Check the total challenge reward of the blobber
-	//	for _, blobber := range blobberList {
-	//		totalChallengeReward := getTotalChallengeRewardByProviderID(blobber.Id)
-	//		fmt.Println(totalChallengeReward)
-	//	}
-	//})
 }
 
-func killProvider(providerID string) {
-	res, err := http.Get("https://test2.zus.network/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/kill_blobber?provider_id=" + providerID)
-
-	fmt.Println(res, err)
-
-	// print the response in json
-	body, _ := io.ReadAll(res.Body)
-
-	fmt.Println("Killed provider: " + providerID)
-	fmt.Println("Response : ", string(body))
-	fmt.Println("Error : ", err)
-
+func killBlobber(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
+	t.Log("kill blobber...")
+	cmd := fmt.Sprintf("./zbox kill-blobber %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
+		params, scOwnerWallet, cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func getTotalChallengeRewardByProviderID(providerID string) int {

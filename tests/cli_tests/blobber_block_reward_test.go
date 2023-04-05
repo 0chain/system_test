@@ -16,6 +16,127 @@ import (
 	"time"
 )
 
+func TestBlockRewardsForBlobbers(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
+	prevBlock := getLatestFinalizedBlock(t)
+
+	fmt.Println("prevBlock", prevBlock)
+
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+	var blobberList []climodel.BlobberInfo
+	output, err = listBlobbers(t, configPath, "--json")
+	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	err = json.Unmarshal([]byte(output[0]), &blobberList)
+	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
+	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
+
+	var validatorList []climodel.Validator
+	output, err = listValidators(t, configPath, "--json")
+	require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	err = json.Unmarshal([]byte(output[0]), &validatorList)
+	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
+	require.True(t, len(validatorList) > 0, "No validators found in validator list")
+
+	readPrices := []float64{0, 0.01}
+	writePrices := []float64{0.1, 0.2}
+	readData := []int{1, 3}
+	totalData := 0.1 * GB
+	stakes := [][]float64{{1.0, 1.0, 1.0, 1.0}, {1.0, 2.0, 1.0, 2.0}}
+
+	var descriptions []string
+
+	idx := 0
+
+	for _, readPrice := range readPrices {
+		for _, writePrice := range writePrices {
+			for _, readData := range readData {
+				for _, stake := range stakes {
+					t.RunSequentiallyWithTimeout(descriptions[idx], (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+						stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, stake, 1)
+
+						output, err := registerWallet(t, configPath)
+						require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+						// 1. Create an allocation with 1 data shard and 1 parity shard.
+						allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+							"size":   1 * GB,
+							"tokens": 1,
+							"data":   1,
+							"parity": 1,
+							"expire": "20m",
+						})
+						fmt.Println("Allocation ID : ", allocationId)
+
+						remotepath := "/dir/"
+						filesize := totalData
+						filename := generateRandomTestFileName(t)
+
+						err = createFileWithSize(filename, int64(filesize))
+						require.Nil(t, err)
+
+						output, err = uploadFile(t, configPath, map[string]interface{}{
+							// fetch the latest block in the chain
+							"allocation": allocationId,
+							"remotepath": remotepath + filepath.Base(filename),
+							"localpath":  filename,
+						}, true)
+						require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+						for i := 0; i < readData; i++ {
+							err = os.Remove(filename)
+
+							remoteFilepath := remotepath + filepath.Base(filename)
+
+							output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+								"allocation": allocationId,
+								"remotepath": remoteFilepath,
+								"localpath":  os.TempDir() + string(os.PathSeparator),
+							}), true)
+							require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+						}
+
+						// Sleep for 10 minutes
+						time.Sleep(10 * time.Minute)
+
+						curBlock := getLatestFinalizedBlock(t)
+
+						blobberBlockRewards := getBlockRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
+
+						blobber1ProviderRewards := float64(blobberBlockRewards[0])
+						blobber2ProviderRewards := float64(blobberBlockRewards[1])
+						blobber1DelegateRewards := float64(blobberBlockRewards[2])
+						blobber2DelegateRewards := float64(blobberBlockRewards[3])
+						blobber1TotalRewards := float64(blobberBlockRewards[4])
+						blobber2TotalRewards := float64(blobberBlockRewards[5])
+
+						// print all values
+						fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
+						fmt.Println("blobber2ProviderRewards", blobber2ProviderRewards)
+						fmt.Println("blobber1DelegateRewards", blobber1DelegateRewards)
+						fmt.Println("blobber2DelegateRewards", blobber2DelegateRewards)
+						fmt.Println("blobber1TotalRewards", blobber1TotalRewards)
+						fmt.Println("blobber2TotalRewards", blobber2TotalRewards)
+
+						prevBlock = getLatestFinalizedBlock(t)
+
+						unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+
+						resetNetwork(writePrice, readPrice)
+					})
+				}
+			}
+
+		}
+	}
+}
+
 func TestBlobberBlockRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
@@ -520,120 +641,6 @@ func TestBlobberBlockRewards(testSetup *testing.T) {
 
 }
 
-func getAllBlockRewards(blobberList []climodel.BlobberInfo) map[string]int64 {
-
-	url := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/reward-providers?reward_type=3"
-	var response map[string]interface{}
-
-	result := make(map[string]int64)
-
-	for _, blobber := range blobberList {
-		result[blobber.Id] = 0
-	}
-
-	res, _ := http.Get(url)
-
-	// decode and save the res body to response
-	json.NewDecoder(res.Body).Decode(&response)
-
-	//fmt.Println(response)
-
-	fmt.Println("Total Block Rewards : ", int64(response["sum"].(float64)))
-
-	var blockData map[float64][]map[string]interface{}
-
-	// initialize blockData
-	blockData = make(map[float64][]map[string]interface{})
-
-	var a int64
-	var b int64
-	a = 0
-	b = 0
-
-	// run loop to get all the amount in rps in the response
-	for _, rps := range response["rps"].([]interface{}) {
-		amount := int64(rps.(map[string]interface{})["amount"].(float64))
-		blockNumber := rps.(map[string]interface{})["block_number"].(float64)
-		providerId := rps.(map[string]interface{})["provider_id"].(string)
-
-		if blockNumber < 5000 {
-			a += amount
-		} else {
-			b += amount
-		}
-
-		// check if the block number is present in the map an if not then create a new entry
-		if _, ok := blockData[blockNumber]; !ok {
-			blockData[blockNumber] = make([]map[string]interface{}, 0)
-		}
-
-		// append the provider id and amount to the block number
-		blockData[blockNumber] = append(blockData[blockNumber], map[string]interface{}{
-			"provider_id": providerId,
-			"amount":      amount,
-		})
-
-		//blockData[blockNumber] = append(blockData[blockNumber], map[string]interface{}{
-		//	"provider_id": providerId,
-		//	"amount":      amount,
-		//})
-
-		//fmt.Println("Block Number : ", blockNumber)
-		//fmt.Println("Provider ID : ", providerId)
-		//fmt.Println("Amount : ", amount)
-		//
-		//fmt.Println("\n\n----------------------------------------------------")
-
-		result["provider_id"] += amount
-	}
-
-	fmt.Println("A : ", a)
-	fmt.Println("B : ", b)
-
-	for blockNumber, data := range blockData {
-		fmt.Println("Block Number : ", blockNumber)
-
-		for _, d := range data {
-			fmt.Println("Provider ID : ", d["provider_id"])
-			fmt.Println("Amount : ", d["amount"])
-		}
-		fmt.Println("\n\n----------------------------------------------------")
-	}
-
-	fmt.Println("Block Data : ", blockData)
-
-	return result
-}
-
-func getTotalBlockRewardsByBlobberID(blobberID string) int64 {
-
-	url := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/reward-providers?reward_type=3"
-	var response map[string]interface{}
-
-	var result int64
-
-	res, _ := http.Get(url)
-
-	// decode and save the res body to response
-	json.NewDecoder(res.Body).Decode(&response)
-	//
-	//fmt.Println(response)
-
-	//fmt.Println("Total Block Rewards : ", int64(response["sum"].(float64)))
-
-	// run loop to get all the amount in rps in the response
-	for _, rps := range response["rps"].([]interface{}) {
-		amount := int64(rps.(map[string]interface{})["amount"].(float64))
-		providerId := rps.(map[string]interface{})["provider_id"].(string)
-
-		if providerId == blobberID {
-			result += amount
-		}
-	}
-
-	return result
-}
-
 func getBlockRewards(blockNumber, startBlockNumber, endBlockNumber, blobber1, blobber2 string) []int64 {
 	url := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/block-rewards?start_block_number=" + startBlockNumber + "&end_block_number=" + endBlockNumber
 	var response map[string]interface{}
@@ -641,7 +648,10 @@ func getBlockRewards(blockNumber, startBlockNumber, endBlockNumber, blobber1, bl
 	res, _ := http.Get(url)
 
 	// decode and save the res body to response
-	json.NewDecoder(res.Body).Decode(&response)
+	err := json.NewDecoder(res.Body).Decode(&response)
+	if err != nil {
+		return nil
+	}
 
 	var result []int64
 
@@ -700,12 +710,38 @@ func getBlockRewards(blockNumber, startBlockNumber, endBlockNumber, blobber1, bl
 func getZeta(wp, rp float64) float64 {
 
 	i := float64(1)
-	k := float64(1)
-	mu := float64(1)
+	k := float64(0.9)
+	mu := float64(0.2)
 
 	if wp == 0 {
 		return 0
 	}
 
 	return i - (k * (rp / (rp + (mu * wp))))
+}
+
+func getGamma(X, R float64) float64 {
+
+	A := float64(10)
+	B := float64(1)
+	alpha := float64(0.2)
+
+	if X == 0 {
+		return 0
+	}
+
+	factor := math.Abs((alpha*X - R) / (alpha*X + R))
+	return A - B*factor
+}
+
+func calculateWeight(wp, rp, X, R, stakes, challenges float64) float64 {
+
+	zeta := getZeta(wp, rp)
+	gamma := getGamma(X, R)
+
+	return (zeta*gamma + 1) * stakes * challenges
+}
+
+func resetNetwork(readPrice, writePrice float64) {
+
 }
