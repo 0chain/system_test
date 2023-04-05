@@ -48,7 +48,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
-			"lock":   1.5,
+			"lock":   3.0,
 		}))
 		require.NoError(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -81,7 +81,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
-			"lock":   1.5,
+			"lock":   3.0,
 		}))
 		require.Error(t, err, "should fail to create allocation")
 		require.Len(t, output, 1)
