@@ -65,7 +65,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		}))
 		require.Error(t, err, "create allocation should fail")
 		require.Len(t, output, 1)
-		require.True(t, strings.Contains(output[0], " is not currently available for new allocations"))
+		require.True(t, strings.Contains(output[0], "not enough blobbers to honor the allocation"))
 
 		setAvailability(t, blobberToDeactivate.ID, true)
 		cliutil.Wait(t, 1*time.Second)
