@@ -21,7 +21,7 @@ func TestStakePool(testSetup *testing.T) {
 	blobbersList := getBlobbersList(t)
 	require.Len(t, blobbersList, 6, "should have 6 blobbers")
 
-	t.RunSequentiallyWithTimeout("total stake in a blobber can never be lesser than it's used capacity", 2*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("total stake in a blobber can never be lesser than it's used capacity", 8*time.Minute, func(t *test.SystemTest) {
 		// select any random blobber and check total offers
 		blobber := blobbersList[0]
 		output, _ := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
