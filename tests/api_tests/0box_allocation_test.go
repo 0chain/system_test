@@ -158,6 +158,5 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, `{"error":"auth_failed: Authentication failed."}`, response.String())
-
 	})
 }
