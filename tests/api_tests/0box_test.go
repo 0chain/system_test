@@ -15,6 +15,7 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
+
 // Keeping at top otherwise it would not work
 func Test0BoxAllocation(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
@@ -162,17 +163,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		package api_tests
-
-		import (
-			"testing"
-		
-			"github.com/0chain/system_test/internal/api/util/test"
-			"github.com/stretchr/testify/require"
-		)
-		
-		
-			_, response, err = zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, "1234567890")
+		_, response, err = zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, "1234567890")
 
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
