@@ -126,44 +126,11 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, allocationId, allocationList[0].Id)
 	})
 
-	t.RunSequentially("List allocation with invalid phone number should not work", func(t *test.SystemTest) {
+	t.RunSequentially("List allocation with non-registered phone number should not work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		description := "wallet created as part of " + t.Name()
-		walletName := "wallet_name"
-		zboxWallet, response, err := zboxClient.PostWallet(t,
-			zboxClient.DefaultMnemonic,
-			walletName,
-			description,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-			zboxClient.DefaultAppType,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxWallet)
-		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
-
-		allocationName := "allocation created as part of " + t.Name()
-		allocation_id := "allocation ID created as part of " + t.Name()
-		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			allocation_id,
-			allocationName,
-			allocationDescription,
-			allocationType,
-			firebaseToken.IdToken,
-			csrfToken,
-			zboxClient.DefaultPhoneNumber,
-			zboxClient.DefaultAppType,
-		)
-		require.NoError(t, err)
-		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
-
-		_, response, err = zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, "1234567890")
+		csrfToken := createCsrfToken(t, "+917777777777")
+		
+		_, response, err := zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, "+917777777777")
 
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
