@@ -282,9 +282,9 @@ func (c *ZboxClient) ListAllocation(t *test.SystemTest, idToken, csrfToken, phon
 	return allocWalletList, resp, err
 }
 
-func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletAlt, *resty.Response, error) {
+func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Posting wallet using 0box...")
-	var zboxWallet *model.ZboxWalletAlt
+	var zboxWallet *model.ZboxWallet
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -412,32 +412,6 @@ func (c *ZboxClient) DeleteWallet(t *test.SystemTest, walletId int, idToken, csr
 	}, HttpDELETEMethod)
 
 	return message, resp, err
-}
-func (c *ZboxClient) ListWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (model.ZboxWalletKeys, *resty.Response, error) {
-	t.Logf("Listing wallets keys for [%v] using 0box...", phoneNumber)
-	var zboxWallets *model.ZboxWalletKeys
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/wallet/keys")
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &zboxWallets,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
-		}, //FIXME: List endpoint does not require signature see: https://github.com/0chain/0box/issues/376
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return *zboxWallets, resp, err
 }
 
 func (c *ZboxClient) PostUserInfoBiography(t *test.SystemTest, bio, idToken, csrfToken, phoneNumber string) (*model.ZboxMessageResponse, *resty.Response, error) {
@@ -736,9 +710,9 @@ func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, pho
 	return message, resp, err
 }
 
-func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletKeys, *resty.Response, error) {
+func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (model.ZboxWalletArr, *resty.Response, error) {
 	t.Logf("Getting wallet keys for [%v] using 0box...", phoneNumber)
-	var zboxWalletKeys *model.ZboxWalletKeys
+	var zboxWalletKeys *model.ZboxWalletArr
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -748,7 +722,7 @@ func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phone
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst: &zboxWalletKeys,
 		Headers: map[string]string{
-			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
 			"X-App-Client-Key":       X_APP_CLIENT_KEY,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
@@ -759,12 +733,12 @@ func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phone
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
-	return zboxWalletKeys, resp, err
+	return *zboxWalletKeys, resp, err
 }
 
-func (c *ZboxClient) UpdateWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletAlt, *resty.Response, error) {
+func (c *ZboxClient) UpdateWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Updating wallet using 0box...")
-	var zboxWallet *model.ZboxWalletAlt
+	var zboxWallet *model.ZboxWallet
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -948,9 +922,9 @@ func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToke
 	return ZboxNftCollection, resp, err
 }
 
-func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, stage_nft_upload, nft_reference, collectionId, owned_by, nft_activity, meta_data, allocationId, created_by, contract_address, token_id, token_standard string) (*model.ZboxNftAlt, *resty.Response, error) {
+func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, stage_nft_upload, nft_reference, collectionId, owned_by, nft_activity, meta_data, allocationId, created_by, contract_address, token_id, token_standard string) (*model.ZboxNft, *resty.Response, error) {
 	t.Logf("Posting nft using 0box...")
-	var ZboxNft *model.ZboxNftAlt
+	var ZboxNft *model.ZboxNft
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -1190,11 +1164,9 @@ func (c *ZboxClient) DeleteFCMToken(t *test.SystemTest, idToken, csrfToken, phon
 func (c *ZboxClient) GetGraphTotalChallengePools(t *test.SystemTest, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
 	t.Logf("Getting graph total challenge pools using 0box...")
 	var graphTotalChallengePools model.ZboxGraphInt64Response
-
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
-
 	urlBuilder.SetPath("/v2/graph-total-challenge-pools")
 	urlBuilder.queries.Set("from", req.From)
 	urlBuilder.queries.Set("to", req.To)
@@ -1208,10 +1180,71 @@ func (c *ZboxClient) GetGraphTotalChallengePools(t *test.SystemTest, req *model.
 	return &graphTotalChallengePools, resp, err
 }
 
+func (c *ZboxClient) GetAllNftCollectionId(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxNftCollectionList, *resty.Response, error) {
+	t.Logf("Getting All nft collection id using 0box...")
+	var ZboxNftCollectionList *model.ZboxNftCollectionList
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/nft/collections")
+
+	queryParams := map[string]string{}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:         &ZboxNftCollectionList,
+		QueryParams: queryParams,
+		Headers: map[string]string{
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-APP-TYPE":             "blimp",
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return ZboxNftCollectionList, resp, err
+}
+
+
+
+func (c *ZboxClient) GetNftCollectionById(t *test.SystemTest, idToken, csrfToken, phoneNumber, collection_id string) (*model.ZboxNftCollectionById, *resty.Response, error) {
+	t.Logf("Getting All nft collection using collection Id for 0box...")
+	var ZboxNftCollection *model.ZboxNftCollectionById
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/nft/collection")
+
+	queryParams := map[string]string{
+		"collection_id": collection_id,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:         &ZboxNftCollection,
+		QueryParams: queryParams,
+		Headers: map[string]string{
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-APP-TYPE":             "blimp",
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return ZboxNftCollection, resp, err
+}
+
 func (c *ZboxClient) GetGraphAllocatedStorage(t *test.SystemTest, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
 	t.Logf("Getting graph allocated storage using 0box...")
 	var graphAllocatedStorage model.ZboxGraphInt64Response
-
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")

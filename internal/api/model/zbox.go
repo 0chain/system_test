@@ -23,15 +23,17 @@ type CSRFToken struct {
 	CSRFToken string `json:"csrf_token"`
 }
 
-type ZboxWalletAlt struct { // FIXME THIS IS INCONSISTENT AND SHOULD BE FIXED SEE https://github.com/0chain/0box/issues/375
-	WalletId    int      `json:"wallet_id"`
-	PhoneNumber string   `json:"phone_number"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Mnemonic    string   `json:"mnemonic"`
-	AppType     []string `json:"app_type"`
-	Allocation  string   `json:"allocation"`
-	LastUpdate  string   `json:"last_update"`
+type ZboxWallet struct {
+	ClientID    string           `json:"client_id"`
+	WalletId    int              `json:"wallet_id"`
+	PhoneNumber string           `json:"phone_number"`
+	Name        string           `json:"name"`
+	Description string           `json:"description"`
+	Mnemonic    string           `json:"mnemonic"`
+	AppType     []string         `json:"app_type"`
+	Allocation  []ZboxAllocation `json:"allocation"`
+	PublicKey   string           `json:"public_key"`
+	LastUpdate  string           `json:"last_update"`
 }
 
 type ZboxResourceExist struct {
@@ -46,35 +48,13 @@ type ZboxFCMResponse struct {
 }
 
 type ZboxAllocation struct {
-	Id             string   `json:"id"`
-	WalletId       int      `json:"wallet_id"`
-	Name           string   `json:"name"`
-	Description    string   `json:"random_description"`
-	AllocationType string   `json:"allocation_type"`
-	AppType        string   `json:"app_type"`
-	NftState       NftState `json:"nft_state"`
-	LastUpdate     string   `json:"last_update"`
-}
-
-type NftState struct {
-	AllocationId string `json:"allocation_id"`
-	CollectionId string `json:"collection_id"`
-	OwnedBy      string `json:"owned_by"`
-	Stage        string `json:"stage"`
-	Reference    string `json:"reference"`
-	NftActivity  string `json:"nft_activity"`
-	Metadata     string `json:"meta_data"`
-	NftImage     string `json:"nft_image"`
-}
-
-type ZboxWallet struct {
-	ClientId          string   `json:"client_id"`
-	WalletId          int      `json:"wallet_id"`
-	WalletName        string   `json:"wallet_name"`
-	WalletDescription string   `json:"wallet_description"`
-	AppId             []string `json:"app_id"`
-	PublicKey         string   `json:"public_key"`
-	LastUpdate        string   `json:"last_update"`
+	Id             string `json:"id"`
+	WalletId       int    `json:"wallet_id"`
+	Name           string `json:"name"`
+	Description    string `json:"random_description"`
+	AllocationType string `json:"allocation_type"`
+	AppType        string `json:"app_type"`
+	LastUpdate     string `json:"last_update"`
 }
 
 type MessageContainer struct {
@@ -83,7 +63,7 @@ type MessageContainer struct {
 
 type ZboxWalletList struct {
 	MessageContainer
-	Data []ZboxWalletAlt `json:"data"`
+	Data []ZboxWallet `json:"data"`
 }
 
 type ZboxAllocationList struct {
@@ -91,8 +71,8 @@ type ZboxAllocationList struct {
 	Allocs     []ZboxAllocation `json:"allocs"`
 }
 
-type ZboxWalletKeys []struct {
-	ZboxWallet
+type ZboxWalletArr []struct {
+	*ZboxWallet
 }
 
 type DexState struct {
@@ -175,31 +155,15 @@ type ZboxNftCollection struct {
 	BatchSize              string `json:"batch_size"`
 }
 
-type ZboxNft struct {
-	Id              int    `json:"id"`
-	AllocationId    string `json:"allocation_id"`
-	ClientId        string `json:"client_id"`
-	CollectionId    string `json:"collection_id"`
-	OwnedBy         string `json:"owned_by"`
-	Stage           int    `json:"stage"`
-	Reference       string `json:"reference"`
-	NftActivity     string `json:"nft_activity"`
-	MetaData        string `json:"meta_data"`
-	NftImage        string `json:"nft_image"`
-	IsMinted        bool   `json:"is_minted"`
-	AuthTicket      string `json:"auth_ticket"`
-	RemotePath      string `json:"remote_path"`
-	CreatedBy       string `json:"created_by"`
-	CreatorName     string `json:"creator_name"`
-	ContractAddress string `json:"contract_address"`
-	TokenId         string `json:"token_id"`
-	TokenStandard   string `json:"token_standard"`
-	CreatedAtDate   string `json:"created_at_date"`
-	LastUpdate      string `json:"last_update"`
+type ZboxNftCollectionById struct {
+	NftCollection ZboxNftCollection `json:"collections"`
+}
+type ZboxNftCollectionList struct {
+	ZboxNftCollection  []ZboxNftCollection `json:"collections"`
+	NftCollectionCount int                 `json:"total"`
 }
 
-// FIXME descripencies in post wallet nft structure and and get nft
-type ZboxNftAlt struct {
+type ZboxNft struct {
 	Id              int    `json:"id"`
 	AllocationId    string `json:"allocation_id"`
 	ClientId        string `json:"client_id"`
