@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -75,7 +74,25 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 		}
 
-		getChallengeTimings()
+		time.Sleep(1 * time.Minute)
+
+		result := getChallengeTimings()
+
+		proofGenTimes := result[0]
+		txnSubmissions := result[1]
+		txnVerifications := result[2]
+
+		for _, proofGenTime := range proofGenTimes {
+			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
+		}
+
+		for _, txnSubmission := range txnSubmissions {
+			require.True(t, txnSubmission < 1680789860, "Transaction submission time is more than 2 seconds")
+		}
+
+		for _, txnVerification := range txnVerifications {
+			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
+		}
 	})
 
 	t.RunSequentiallyWithTimeout("Case 2: 1 allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -113,6 +130,26 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"localpath":  filename,
 			}, true)
 			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+		}
+
+		time.Sleep(1 * time.Minute)
+
+		result := getChallengeTimings()
+
+		proofGenTimes := result[0]
+		txnSubmissions := result[1]
+		txnVerifications := result[2]
+
+		for _, proofGenTime := range proofGenTimes {
+			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
+		}
+
+		for _, txnSubmission := range txnSubmissions {
+			require.True(t, txnSubmission < 1680789860, "Transaction submission time is more than 2 seconds")
+		}
+
+		for _, txnVerification := range txnVerifications {
+			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
 		}
 
 	})
@@ -157,6 +194,26 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		}
 
+		time.Sleep(1 * time.Minute)
+
+		result := getChallengeTimings()
+
+		proofGenTimes := result[0]
+		txnSubmissions := result[1]
+		txnVerifications := result[2]
+
+		for _, proofGenTime := range proofGenTimes {
+			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
+		}
+
+		for _, txnSubmission := range txnSubmissions {
+			require.True(t, txnSubmission < 1680789860, "Transaction submission time is more than 2 seconds")
+		}
+
+		for _, txnVerification := range txnVerifications {
+			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
+		}
+
 	})
 
 	t.RunSequentiallyWithTimeout("Case 4: 10 allocation, 100mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -197,6 +254,26 @@ func TestChallengeTimings(testSetup *testing.T) {
 			}, true)
 			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
+		}
+
+		time.Sleep(1 * time.Minute)
+
+		result := getChallengeTimings()
+
+		proofGenTimes := result[0]
+		txnSubmissions := result[1]
+		txnVerifications := result[2]
+
+		for _, proofGenTime := range proofGenTimes {
+			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
+		}
+
+		for _, txnSubmission := range txnSubmissions {
+			require.True(t, txnSubmission < 1680789860, "Transaction submission time is more than 2 seconds")
+		}
+
+		for _, txnVerification := range txnVerifications {
+			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
 		}
 
 	})
@@ -241,15 +318,35 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		}
 
+		time.Sleep(1 * time.Minute)
+
+		result := getChallengeTimings()
+
+		proofGenTimes := result[0]
+		txnSubmissions := result[1]
+		txnVerifications := result[2]
+
+		for _, proofGenTime := range proofGenTimes {
+			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
+		}
+
+		for _, txnSubmission := range txnSubmissions {
+			require.True(t, txnSubmission < 1680789860, "Transaction submission time is more than 2 seconds")
+		}
+
+		for _, txnVerification := range txnVerifications {
+			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
+		}
+
 	})
 
 }
 
 func getChallengeTimings() [][]int64 {
-	blobber1URL := "https://test2.zus.network/blobber01/challengetimings"
-	blobber2URL := "https://test2.zus.network/blobber02/challengetimings"
+	blobber1URL := "https://test1.zus.network/blobber01/challengetimings"
+	blobber2URL := "https://test1.zus.network/blobber02/challengetimings"
 
-	var blobber1Response, blobber2Response []map[string]string
+	var blobber1Response, blobber2Response []ChallengeTimings
 
 	// make get request to blobber1 and store response to blobber1Response
 
@@ -266,30 +363,45 @@ func getChallengeTimings() [][]int64 {
 	var txnVerifications []int64
 
 	for _, blobber := range blobber1Response {
-		proofGenTime, _ := strconv.ParseInt(blobber["proof_gen_time"], 10, 64)
-		proofGenTimes = append(proofGenTimes, proofGenTime)
-
-		txnSubmission, _ := strconv.ParseInt(blobber["txn_submission"], 10, 64)
-		txnSubmissions = append(txnSubmissions, txnSubmission)
-
-		txnVerification, _ := strconv.ParseInt(blobber["txn_verification"], 10, 64)
-		txnVerifications = append(txnVerifications, txnVerification)
+		proofGenTimes = append(proofGenTimes, blobber.ProofGenTime)
+		txnSubmissions = append(txnSubmissions, blobber.TxnSubmission)
+		txnVerifications = append(txnVerifications, blobber.TxnVerification)
 	}
 
 	for _, blobber := range blobber2Response {
-		proofGenTime, _ := strconv.ParseInt(blobber["proof_gen_time"], 10, 64)
-		proofGenTimes = append(proofGenTimes, proofGenTime)
-
-		txnSubmission, _ := strconv.ParseInt(blobber["txn_submission"], 10, 64)
-		txnSubmissions = append(txnSubmissions, txnSubmission)
-
-		txnVerification, _ := strconv.ParseInt(blobber["txn_verification"], 10, 64)
-		txnVerifications = append(txnVerifications, txnVerification)
+		proofGenTimes = append(proofGenTimes, blobber.ProofGenTime)
+		txnSubmissions = append(txnSubmissions, blobber.TxnSubmission)
+		txnVerifications = append(txnVerifications, blobber.TxnVerification)
 	}
 
 	fmt.Println("Proof Gen Times : ", proofGenTimes)
 	fmt.Println("Txn Submissions : ", txnSubmissions)
 	fmt.Println("Txn Verifications : ", txnVerifications)
+
+	// max values from all the lists
+	var maxProofGenTime, maxTxnSubmission, maxTxnVerification int64
+
+	for _, proofGenTime := range proofGenTimes {
+		if proofGenTime > maxProofGenTime {
+			maxProofGenTime = proofGenTime
+		}
+	}
+
+	for _, txnSubmission := range txnSubmissions {
+		if txnSubmission > maxTxnSubmission {
+			maxTxnSubmission = txnSubmission
+		}
+	}
+
+	for _, txnVerification := range txnVerifications {
+		if txnVerification > maxTxnVerification {
+			maxTxnVerification = txnVerification
+		}
+	}
+
+	fmt.Println("Max Proof Gen Time : ", maxProofGenTime)
+	fmt.Println("Max Txn Submission : ", maxTxnSubmission)
+	fmt.Println("Max Txn Verification : ", maxTxnVerification)
 
 	var result [][]int64
 	result = append(result, proofGenTimes)
@@ -297,4 +409,19 @@ func getChallengeTimings() [][]int64 {
 	result = append(result, txnVerifications)
 
 	return result
+}
+
+type ChallengeTimings struct {
+	Id                 string `json:"id"`
+	CreatedAtChain     int    `json:"created_at_chain"`
+	CreatedAtBlobber   int    `json:"created_at_blobber"`
+	FileSize           int    `json:"file_size"`
+	ProofGenTime       int64  `json:"proof_gen_time"`
+	CompleteValidation int    `json:"complete_validation"`
+	TxnSubmission      int64  `json:"txn_submission"`
+	TxnVerification    int64  `json:"txn_verification"`
+	Cancelled          int    `json:"cancelled"`
+	Expiration         int    `json:"expiration"`
+	Closed             int    `json:"closed"`
+	Updated            int    `json:"updated"`
 }

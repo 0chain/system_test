@@ -1166,7 +1166,7 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []climod
 
 func getAllChallenges(allocationID string) ([]Challenge, error) {
 
-	url := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/all-challenges?allocation_id=" + allocationID
+	url := "/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/all-challenges?allocation_id=" + allocationID
 
 	var result []Challenge
 
