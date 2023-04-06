@@ -377,6 +377,7 @@ type BlobberDetails struct {
 	LastHealthCheck   int64             `json:"last_health_check"`
 	PublicKey         string            `json:"-"`
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
+	IsAvailable       bool              `json:"is_available"`
 }
 
 type Validator struct {
