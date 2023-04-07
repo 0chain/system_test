@@ -184,7 +184,7 @@ func TestAllocation(testSetup *testing.T) {
 		blobber1CancellationReward := allocCancellationRewards[0]
 		blobber2CancellationReward := allocCancellationRewards[1]
 
-		totalExpectedCancellationReward := sizeInGB(int64(allocSize)) * 1000000000
+		totalExpectedCancellationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
 
 		fmt.Println("totalExpectedCancellationReward", totalExpectedCancellationReward)
 
@@ -393,7 +393,7 @@ func createFreeStorageAllocation(t *test.SystemTest, configFile, from, params st
 func getAllocationCancellationReward(t *test.SystemTest, startBlockNumber, endBlockNumber string, blobberList []climodel.BlobberInfo) ([]int64, error) {
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	sharderBaseUrl := getSharderUrl(t)
-	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/cancellation-rewards?start_block_number=" + startBlockNumber + "&end_block_number=" + endBlockNumber)
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/cancellation-rewards?start_block=" + startBlockNumber + "&end_block=" + endBlockNumber)
 
 	resp, err := http.Get(url)
 	if err != nil {
