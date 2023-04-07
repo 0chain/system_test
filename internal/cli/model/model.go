@@ -377,6 +377,7 @@ type BlobberDetails struct {
 	LastHealthCheck   int64             `json:"last_health_check"`
 	PublicKey         string            `json:"-"`
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
+	IsAvailable       bool              `json:"is_available"`
 }
 
 type Validator struct {
@@ -747,7 +748,6 @@ var StorageCurrencySettigs = []string{
 	"max_mint",
 	"readpool.min_lock",
 	"writepool.min_lock",
-	"stakepool.min_lock",
 	"max_total_free_allocation",
 	"max_individual_free_allocation",
 	"free_allocation_settings.read_price_range.min",
