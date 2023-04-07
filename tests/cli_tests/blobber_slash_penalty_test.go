@@ -43,11 +43,6 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
-	_, err = killBlobber(t, configPath, createParams(map[string]interface{}{
-		"id": blobberList[1].Id,
-	}), true)
-	require.Nil(t, err, "error killing blobber", strings.Join(output, "\n"))
-
 	t.RunSequentiallyWithTimeout("Test Cancel Allocation After Expiry Rewards when client uploads 10% of allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
@@ -99,7 +94,7 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 
 		fmt.Println(allocation.MovedToChallenge)
 
-		challenges, _ := getAllChallenges(allocationId)
+		challenges, _ := getAllChallenges(t, allocationId)
 
 		totalExpectedReward := float64(allocation.MovedToChallenge)
 
@@ -127,7 +122,7 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 			validator1DelegateReward := 0.0
 			validator2DelegateReward := 0.0
 
-			challengeRewards, err := getChallengeRewards(challenge.ChallengeID)
+			challengeRewards, err := getChallengeRewards(t, challenge.ChallengeID)
 
 			if err != nil {
 				fmt.Println(err)
@@ -225,8 +220,10 @@ func killBlobber(t *test.SystemTest, cliConfigFilename, params string, retry boo
 	}
 }
 
-func getTotalChallengeRewardByProviderID(providerID string) int {
-	url := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/all-challenges?provider_id=" + providerID
+func getTotalChallengeRewardByProviderID(t *test.SystemTest, providerID string) int {
+	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+	sharderBaseUrl := getSharderUrl(t)
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/transactions")
 	res, _ := http.Get(url)
 	body, _ := io.ReadAll(res.Body)
 

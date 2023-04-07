@@ -94,7 +94,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		fmt.Println(allocation.MovedToChallenge)
 
-		challenges, _ := getAllChallenges(allocationId)
+		challenges, _ := getAllChallenges(t, allocationId)
 
 		totalExpectedReward := float64(allocation.MovedToChallenge)
 
@@ -122,7 +122,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			validator1DelegateReward := 0.0
 			validator2DelegateReward := 0.0
 
-			challengeRewards, err := getChallengeRewards(challenge.ChallengeID)
+			challengeRewards, err := getChallengeRewards(t, challenge.ChallengeID)
 
 			if err != nil {
 				fmt.Println(err)
@@ -252,7 +252,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		fmt.Println(allocation.MovedToChallenge)
 
-		challenges, _ := getAllChallenges(allocationId)
+		challenges, _ := getAllChallenges(t, allocationId)
 
 		totalExpectedReward := float64(allocation.MovedToChallenge)
 
@@ -280,7 +280,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			validator1DelegateReward := 0.0
 			validator2DelegateReward := 0.0
 
-			challengeRewards, err := getChallengeRewards(challenge.ChallengeID)
+			challengeRewards, err := getChallengeRewards(t, challenge.ChallengeID)
 
 			if err != nil {
 				fmt.Println(err)
@@ -409,7 +409,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		fmt.Println(allocation.MovedToChallenge)
 
-		challenges, _ := getAllChallenges(allocationId)
+		challenges, _ := getAllChallenges(t, allocationId)
 
 		totalExpectedReward := float64(allocation.MovedToChallenge)
 
@@ -437,7 +437,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			validator1DelegateReward := 0.0
 			validator2DelegateReward := 0.0
 
-			challengeRewards, err := getChallengeRewards(challenge.ChallengeID)
+			challengeRewards, err := getChallengeRewards(t, challenge.ChallengeID)
 
 			if err != nil {
 				fmt.Println(err)
@@ -573,7 +573,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		fmt.Println(allocation.MovedToChallenge)
 
-		challenges, _ := getAllChallenges(allocationId)
+		challenges, _ := getAllChallenges(t, allocationId)
 
 		totalExpectedReward := float64(allocation.MovedToChallenge)
 
@@ -617,7 +617,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 			totalChallengeReward := 0.0
 
-			challengeRewards, err := getChallengeRewards(challenge.ChallengeID)
+			challengeRewards, err := getChallengeRewards(t, challenge.ChallengeID)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -832,7 +832,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		fmt.Println(allocation.MovedToChallenge)
 
-		challenges, _ := getAllChallenges(allocationId)
+		challenges, _ := getAllChallenges(t, allocationId)
 
 		totalExpectedReward := float64(allocation.MovedToChallenge)
 
@@ -876,7 +876,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 			totalChallengeReward := 0.0
 
-			challengeRewards, err := getChallengeRewards(challenge.ChallengeID)
+			challengeRewards, err := getChallengeRewards(t, challenge.ChallengeID)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -1164,9 +1164,10 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []climod
 	}
 }
 
-func getAllChallenges(allocationID string) ([]Challenge, error) {
-
-	url := "/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/all-challenges?allocation_id=" + allocationID
+func getAllChallenges(t *test.SystemTest, allocationID string) ([]Challenge, error) {
+	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+	sharderBaseUrl := getSharderUrl(t)
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/all-challenges?allocation_id=" + allocationID)
 
 	var result []Challenge
 
@@ -1204,19 +1205,11 @@ type Challenge struct {
 	ExpiredN       int              `json:"expired_n"`
 }
 
-func contains(s []string, str string) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
+func getChallengeRewards(t *test.SystemTest, challengeID string) (*ChallengeRewards, error) {
 
-	return false
-}
-
-func getChallengeRewards(challengeID string) (*ChallengeRewards, error) {
-
-	url := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/challenge-rewards?challenge_id=" + challengeID
+	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+	sharderBaseUrl := getSharderUrl(t)
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/challenge-rewards?challenge_id=" + challengeID)
 
 	var result *ChallengeRewards
 
@@ -1234,8 +1227,6 @@ func getChallengeRewards(challengeID string) (*ChallengeRewards, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	//fmt.Println("Printing Result : ", result)
 
 	return result, nil
 }

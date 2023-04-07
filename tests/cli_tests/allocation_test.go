@@ -93,7 +93,7 @@ func TestAllocation(testSetup *testing.T) {
 		allocation := getAllocation(t, allocationId)
 
 		// get all challenges
-		challenges, _ := getAllChallenges(allocationId)
+		challenges, _ := getAllChallenges(t, allocationId)
 
 		fmt.Println(challenges)
 
@@ -310,6 +310,13 @@ func createFreeStorageAllocation(t *test.SystemTest, configFile, from, params st
 		from+"_wallet.json",
 		configFile), 3, time.Second*5)
 }
+
+//func getAllocationCancellationReward(t *test.SystemTest, startBlockNumber, endBlockNumber string) (int64, error) {
+//	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+//	sharderBaseUrl := getSharderUrl(t)
+//	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/cancellation-rewards?start_block_number=" + startBlockNumber + "&end_block_number=" + endBlockNumber)
+//
+//}
 
 //// Free Allocation
 //err = bls.Init(bls.CurveFp254BNb)

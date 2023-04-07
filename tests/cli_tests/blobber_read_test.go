@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
@@ -91,7 +92,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 
 		curBlock := getLatestFinalizedBlock(t)
 
-		downloadRewards := getReadRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
+		downloadRewards := getReadRewards(t, strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
 
 		blobber1DownloadRewards := float64(downloadRewards[0])
 		blobber2DownloadRewards := float64(downloadRewards[1])
@@ -174,7 +175,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 
 			curBlock := getLatestFinalizedBlock(t)
 
-			downloadRewards := getReadRewards("", strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
+			downloadRewards := getReadRewards(t, strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
 
 			blobber1DownloadRewards := float64(downloadRewards[0])
 			blobber2DownloadRewards := float64(downloadRewards[1])
@@ -223,8 +224,11 @@ func TestBlobberReadReward(testSetup *testing.T) {
 
 }
 
-func getReadRewards(blockNumber, startBlockNumber, endBlockNumber, blobber1, blobber2 string) []int64 {
-	url := "https://test2.zus.network/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/read-rewards?start_block_number=" + startBlockNumber + "&end_block_number=" + endBlockNumber
+func getReadRewards(t *test.SystemTest, startBlockNumber, endBlockNumber, blobber1, blobber2 string) []int64 {
+	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+	sharderBaseUrl := getSharderUrl(t)
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/read-rewards?start_block_number=" + startBlockNumber + "&end_block_number=" + endBlockNumber)
+
 	var response map[string]interface{}
 
 	res, _ := http.Get(url)
