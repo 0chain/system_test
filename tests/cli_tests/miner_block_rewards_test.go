@@ -22,8 +22,9 @@ import (
 )
 
 const (
-	delta          = 1.0
-	restApiRetries = 3
+	delta                    = 1.0
+	restApiRetries           = 3
+	numberOfSystemTestMiners = 3
 )
 
 func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
@@ -41,11 +42,13 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunSequentiallyWithTimeout("Miner share of block rewards", 500*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner share of block rewards", 1000*time.Second, func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 		if !confirmDebugBuild(t) {
 			t.Skip("miner block rewards test skipped as it requires a debug event database")
 		}
+
+		waitForMinersToStart(t)
 
 		sharderUrl := getSharderUrl(t)
 		minerIds := getSortedMinerIds(t, sharderUrl)
@@ -540,4 +543,18 @@ func getStartAndEndRounds(
 	}
 	t.Logf("start round %d, end round %d", startRound, endRound)
 	return startRound, endRound
+}
+
+func waitForMinersToStart(t *test.SystemTest) {
+	var waitTime time.Duration
+	t.Log("waiting for miners...")
+	for {
+		minerIds := getMinersList(t)
+		if len(minerIds.Nodes) >= numberOfSystemTestMiners {
+			t.Logf("finsihed wiating for miners, time taken %v", waitTime)
+			return
+		}
+		cliutil.Wait(t, 30*time.Second)
+		waitTime += 30 * time.Second
+	}
 }
