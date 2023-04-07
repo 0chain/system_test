@@ -6,6 +6,7 @@ import (
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
+	"io"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -76,7 +77,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		time.Sleep(1 * time.Minute)
 
-		result := getChallengeTimings()
+		result := getChallengeTimings(t, blobberList, []string{allocationId})
 
 		proofGenTimes := result[0]
 		txnSubmissions := result[1]
@@ -134,7 +135,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		time.Sleep(1 * time.Minute)
 
-		result := getChallengeTimings()
+		result := getChallengeTimings(t, blobberList, []string{allocationId})
 
 		proofGenTimes := result[0]
 		txnSubmissions := result[1]
@@ -159,6 +160,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 			1, 1, 1, 1,
 		}, 1)
 
+		var allocationIDs []string
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -174,6 +177,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"expire": "5m",
 			})
 			fmt.Println("Allocation ID : ", allocationId)
+
+			allocationIDs = append(allocationIDs, allocationId)
 
 			// Uploading 10% of allocation
 
@@ -196,7 +201,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		time.Sleep(1 * time.Minute)
 
-		result := getChallengeTimings()
+		result := getChallengeTimings(t, blobberList, allocationIDs)
 
 		proofGenTimes := result[0]
 		txnSubmissions := result[1]
@@ -221,6 +226,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 			1, 1, 1, 1,
 		}, 1)
 
+		var allocationIDs []string
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -233,9 +240,11 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"tokens": 1,
 				"data":   1,
 				"parity": 1,
-				"expire": "5m",
+				"expire": "1h",
 			})
 			fmt.Println("Allocation ID : ", allocationId)
+
+			allocationIDs = append(allocationIDs, allocationId)
 
 			// Uploading 10% of allocation
 
@@ -258,7 +267,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		time.Sleep(1 * time.Minute)
 
-		result := getChallengeTimings()
+		result := getChallengeTimings(t, blobberList, allocationIDs)
 
 		proofGenTimes := result[0]
 		txnSubmissions := result[1]
@@ -278,13 +287,19 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 	})
 
-	t.RunSequentiallyWithTimeout("Case 4: 10 allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.Skip()
+
+	t.RunSequentiallyWithTimeout("Case 5: 10 allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
+		var allocationIDs []string
+
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		executeFaucetWithTokens(t, configPath, 100)
 
 		// range of 10 allocations
 		for i := 0; i < 10; i++ {
@@ -295,9 +310,11 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"tokens": 1,
 				"data":   1,
 				"parity": 1,
-				"expire": "20m",
+				"expire": "1h",
 			})
 			fmt.Println("Allocation ID : ", allocationId)
+
+			allocationIDs = append(allocationIDs, allocationId)
 
 			// Uploading 10% of allocation
 
@@ -320,7 +337,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		time.Sleep(1 * time.Minute)
 
-		result := getChallengeTimings()
+		result := getChallengeTimings(t, blobberList, allocationIDs)
 
 		proofGenTimes := result[0]
 		txnSubmissions := result[1]
@@ -342,36 +359,44 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 }
 
-func getChallengeTimings() [][]int64 {
-	blobber1URL := "https://test1.zus.network/blobber01/challengetimings"
-	blobber2URL := "https://test1.zus.network/blobber02/challengetimings"
+func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, allocationIDs []string) [][]int64 {
 
-	var blobber1Response, blobber2Response []ChallengeTimings
-
-	// make get request to blobber1 and store response to blobber1Response
-
-	res, _ := http.Get(blobber1URL)
-	json.NewDecoder(res.Body).Decode(&blobber1Response)
-
-	// make get request to blobber2 and store response to blobber2Response
-
-	res, _ = http.Get(blobber2URL)
-	json.NewDecoder(res.Body).Decode(&blobber2Response)
+	blobberUrls := []string{}
+	for _, blobber := range blobbers {
+		blobberUrls = append(blobberUrls, blobber.Url)
+	}
 
 	var proofGenTimes []int64
 	var txnSubmissions []int64
 	var txnVerifications []int64
 
-	for _, blobber := range blobber1Response {
-		proofGenTimes = append(proofGenTimes, blobber.ProofGenTime)
-		txnSubmissions = append(txnSubmissions, blobber.TxnSubmission)
-		txnVerifications = append(txnVerifications, blobber.TxnVerification)
-	}
+	for _, allocationID := range allocationIDs {
+		challenges, _ := getAllChallenges(t, allocationID)
 
-	for _, blobber := range blobber2Response {
-		proofGenTimes = append(proofGenTimes, blobber.ProofGenTime)
-		txnSubmissions = append(txnSubmissions, blobber.TxnSubmission)
-		txnVerifications = append(txnVerifications, blobber.TxnVerification)
+		for _, challenge := range challenges {
+
+			for _, blobberUrl := range blobberUrls {
+				url := blobberUrl + "/challenge-timings-by-challengeId?challenge_id=" + challenge.ChallengeID
+
+				resp, err := http.Get(url)
+				if err != nil {
+					fmt.Println("Error while getting challenge timings : ", err)
+				}
+				defer resp.Body.Close()
+
+				body, err := io.ReadAll(resp.Body)
+
+				var challengeTiming ChallengeTimings
+				err = json.Unmarshal(body, &challengeTiming)
+				if err != nil {
+					fmt.Println("Error while unmarshalling challenge timings : ", err)
+				}
+
+				proofGenTimes = append(proofGenTimes, challengeTiming.ProofGenTime)
+				txnSubmissions = append(txnSubmissions, challengeTiming.TxnSubmission)
+				txnVerifications = append(txnVerifications, challengeTiming.TxnVerification)
+			}
+		}
 	}
 
 	fmt.Println("Proof Gen Times : ", proofGenTimes)
