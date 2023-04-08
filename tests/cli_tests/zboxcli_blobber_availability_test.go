@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"encoding/json"
 	"strconv"
 	"strings"
 	"testing"
@@ -23,7 +22,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		var blobberToDeactivate *model.BlobberDetails
 		var activeBlobbers int
 		for i := range startBlobbers {
-			if startBlobbers[i].IsAvailable {
+			if startBlobbers[i].IsAvailable && !startBlobbers[i].IsKilled && !startBlobbers[i].IsShutdown {
 				activeBlobbers++
 				if blobberToDeactivate == nil {
 					blobberToDeactivate = &startBlobbers[i]
@@ -95,15 +94,4 @@ func setAvailability(t *test.SystemTest, blobberId string, availability bool) {
 	}))
 	require.NoError(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1)
-}
-
-func getBlobbers(t *test.SystemTest) []model.BlobberDetails {
-	var blobbers []model.BlobberDetails
-	output, err := listBlobbers(t, configPath, "--json")
-	require.NoError(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-	require.True(t, len(output) > 0, "no output to ls-blobbers")
-	err = json.Unmarshal([]byte(output[len(output)-1]), &blobbers)
-	require.NoError(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
-	require.True(t, len(blobbers) > 0, "No blobbers found in blobber list")
-	return blobbers
 }
