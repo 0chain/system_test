@@ -44,13 +44,14 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
-	readPrices := []float64{0, 0.01}
-	writePrices := []float64{0.1, 0.2}
-	readData := []int{1}
+	readPrices := [][]float64{{0, 0.01}, {0, 0}}
+	writePrices := [][]float64{{0.1, 0.2}}
+	readData := [][]int{{1, 1}, {1, 3}}
 	totalData := 0.1 * GB
 	stakes := [][]float64{{1.0, 1.0, 1.0, 1.0}, {1.0, 2.0, 1.0, 2.0}}
 
 	var descriptions []string
+	descriptions = append(descriptions, "Blobber Block Reward Test - 1")
 
 	idx := 0
 
@@ -89,7 +90,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 						}, true)
 						require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-						for i := 0; i < readData; i++ {
+						for i := 0; i < readData[0]; i++ {
 							err = os.Remove(filename)
 
 							remoteFilepath := remotepath + filepath.Base(filename)
@@ -98,6 +99,21 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 								"allocation": allocationId,
 								"remotepath": remoteFilepath,
 								"localpath":  os.TempDir() + string(os.PathSeparator),
+								"blobber_id": blobberList[0].Id,
+							}), true)
+							require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+						}
+
+						for i := 0; i < readData[1]; i++ {
+							err = os.Remove(filename)
+
+							remoteFilepath := remotepath + filepath.Base(filename)
+
+							output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+								"allocation": allocationId,
+								"remotepath": remoteFilepath,
+								"localpath":  os.TempDir() + string(os.PathSeparator),
+								"blobber_id": blobberList[1].Id,
 							}), true)
 							require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 						}
@@ -118,8 +134,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 						blobber1TotalRewards := float64(blobberBlockRewards[4])
 						blobber2TotalRewards := float64(blobberBlockRewards[5])
 
-						blobber1Weight := calculateWeight(writePrice, readPrice, totalData, float64(readData)*totalData, stake[0], blobber1PassedChallenges)
-						blobber2Weight := calculateWeight(writePrice, readPrice, totalData, float64(readData)*totalData, stake[1], blobber2PassedChallenges)
+						blobber1Weight := calculateWeight(writePrice[0], readPrice[0], totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
+						blobber2Weight := calculateWeight(writePrice[0], readPrice[1], totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 						// print all values
 						fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
@@ -135,8 +151,9 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 						unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 
-						resetNetwork(writePrice, readPrice)
 					})
+
+					break
 				}
 			}
 

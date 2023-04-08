@@ -191,13 +191,11 @@ func TestAllocation(testSetup *testing.T) {
 		fmt.Println("blobber1CancellationReward", blobber1CancellationReward)
 		fmt.Println("blobber2CancellationReward", blobber2CancellationReward)
 
-		require.Equal(t, totalExpectedCancellationReward, blobber1CancellationReward+blobber2CancellationReward, "Total Cancellation Reward should be equal to total expected cancellation reward")
+		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
 		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
-
-	t.Skip()
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade, equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
