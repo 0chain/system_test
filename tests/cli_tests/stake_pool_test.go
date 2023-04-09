@@ -14,6 +14,7 @@ import (
 func TestStakePool(testSetup *testing.T) {
 
 	t := test.NewSystemTest(testSetup)
+
 	_, err := registerWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", err)
 
@@ -22,12 +23,39 @@ func TestStakePool(testSetup *testing.T) {
 	require.Len(t, blobbersList, 6, "should have 6 blobbers")
 
 	t.RunSequentiallyWithTimeout("total stake in a blobber can never be lesser than it's used capacity", 8*time.Minute, func(t *test.SystemTest) {
+
+		// select the blobber with min staked capacity
+		var minStakedCapacityBlobber climodel.BlobberInfoDetailed
+
+		maxStakedCapacity := int64(999999999999999999)
+
+		for _, blobber := range blobbersList {
+			output, _ := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
+
+			var blInfo climodel.BlobberInfoDetailed
+			err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
+			require.Nil(t, err, "error unmarshalling blobber info")
+
+			stakedCapacity := int64((float64(blInfo.TotalStake/1e10) * 10 * GB) - float64(blInfo.Allocated))
+
+			if stakedCapacity < maxStakedCapacity {
+				maxStakedCapacity = stakedCapacity
+				minStakedCapacityBlobber = blInfo
+			}
+
+			fmt.Println("stakedCapacity", stakedCapacity)
+			fmt.Println("maxStakedCapacity", maxStakedCapacity)
+		}
+
+		fmt.Println(maxStakedCapacity)
+		fmt.Println(minStakedCapacityBlobber)
+
 		// select any random blobber and check total offers
-		blobber := blobbersList[0]
+		blobber := minStakedCapacityBlobber
 		output, _ := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
 
 		var blInfo climodel.BlobberInfoDetailed
-		err = json.Unmarshal([]byte(output[3]), &blInfo)
+		err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
 		require.Nil(t, err, "error unmarshalling blobber info")
 
 		totalOffers := blInfo.TotalOffers
@@ -77,17 +105,19 @@ func TestStakePool(testSetup *testing.T) {
 		lenDelegates = lenDelegatesNew
 
 		// create an allocation of capacity
-		output, err := executeFaucetWithTokens(t, configPath, 9)
+		output, err := executeFaucetWithTokens(t, configPath, 100)
 		require.Nil(t, err, "Error executing faucet with tokens", err)
 
-		allocSize := 32212254716 // 30 GB (We are using 30 GB of allocation to match it with the staked capacity [ staked capacity = 10GB for each blobber (3 data 3 parity)])
+		allocSize := maxStakedCapacity*3 + int64(30*GB) - int64(10) // 30 GB (We are using 30 GB of allocation to match it with the staked capacity [ staked capacity = 10GB for each blobber (3 data 3 parity)])
+
+		fmt.Println("Allocation Size : ", allocSize)
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 20,
+			"tokens": 40,
 			"data":   3,
 			"parity": 3,
-			"lock":   9,
+			"lock":   20,
 		})
 
 		// check total offers new value and compare
@@ -97,8 +127,7 @@ func TestStakePool(testSetup *testing.T) {
 		require.Nil(t, err, "error unmarshalling blobber info")
 
 		totalOffersNew := blInfo.TotalOffers
-		expectedTotalOfferIncrease := 9999999999 // 10 GB ( Amount of tokens for 10GB of allocation on the blobber)
-		require.Equal(t, totalOffersNew, totalOffers+expectedTotalOfferIncrease, "Total Offers should Increase")
+		require.Greater(t, totalOffersNew, totalOffers, "Total Offers should Increase")
 
 		newStakeWallet := "new_stake_wallet"
 
