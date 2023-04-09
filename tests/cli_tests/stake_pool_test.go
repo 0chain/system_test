@@ -105,12 +105,21 @@ func TestStakePool(testSetup *testing.T) {
 		lenDelegates = lenDelegatesNew
 
 		// create an allocation of capacity
-		output, err := executeFaucetWithTokens(t, configPath, 100)
-		require.Nil(t, err, "Error executing faucet with tokens", err)
 
 		allocSize := maxStakedCapacity*3 + int64(30*GB) - int64(10) // 30 GB (We are using 30 GB of allocation to match it with the staked capacity [ staked capacity = 10GB for each blobber (3 data 3 parity)])
 
-		fmt.Println("Allocation Size : ", allocSize)
+		options := map[string]interface{}{"cost": "", "size": allocSize, "data": 3, "parity": 3}
+		output, err := createNewAllocation(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		allocationCost, err := getAllocationCost(output[0])
+		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
+
+		for i := float64(0); i < (allocationCost/9 + 1); i++ {
+			_, err = executeFaucetWithTokens(t, configPath, 9)
+			require.Nil(t, err, "Error executing faucet with tokens", err)
+		}
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
