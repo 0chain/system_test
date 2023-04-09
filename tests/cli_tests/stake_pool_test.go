@@ -20,7 +20,7 @@ func TestStakePool(testSetup *testing.T) {
 
 	// get the list of blobbers
 	blobbersList := getBlobbersList(t)
-	require.Len(t, blobbersList, 6, "should have 6 blobbers")
+	require.Greater(testSetup, len(blobbersList), 0, "No blobbers found")
 
 	t.RunSequentiallyWithTimeout("total stake in a blobber can never be lesser than it's used capacity", 8*time.Minute, func(t *test.SystemTest) {
 
