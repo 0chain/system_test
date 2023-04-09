@@ -116,17 +116,17 @@ func TestStakePool(testSetup *testing.T) {
 		allocationCost, err := getAllocationCost(output[0])
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
-		for i := float64(0); i < (allocationCost/9 + 1); i++ {
+		for i := float64(0); i <= (allocationCost/9+2)*2; i++ {
 			_, err = executeFaucetWithTokens(t, configPath, 9)
 			require.Nil(t, err, "Error executing faucet with tokens", err)
 		}
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 40,
+			"tokens": (allocationCost + 1) * 2,
 			"data":   3,
 			"parity": 3,
-			"lock":   20,
+			"lock":   allocationCost + 1,
 		})
 
 		// check total offers new value and compare
