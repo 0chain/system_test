@@ -1286,9 +1286,9 @@ func registerAndCreateAllocation(t *test.SystemTest, configPath, wallet string) 
 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 	allocParam := createParams(map[string]interface{}{
-		"lock":   0.5,
-		"size":   10485760,
-		"expire": "2h",
+		"lock":   2,
+		"size":   10000,
+		"expire": "30m",
 		"parity": 1,
 		"data":   1,
 	})
