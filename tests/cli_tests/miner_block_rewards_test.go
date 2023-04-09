@@ -193,6 +193,9 @@ func countMinerBlockRewards(
 					round, pReward.ProviderId, roundHistory.Block.MinerID)
 			}
 		}
+		if !foundBlockRewardPayment {
+			t.Log(foundBlockRewardPayment)
+		}
 		require.Truef(t, foundBlockRewardPayment,
 			"rond %d, miner block reward payment not recorded. block rewards should be paid every round.", round)
 	}
@@ -554,6 +557,7 @@ func waitForMinersToStart(t *test.SystemTest) {
 			t.Logf("finsihed wiating for miners, time taken %v", waitTime)
 			return
 		}
+		t.Logf("only %d miners fond waiting for %d miners", len(minerIds.Nodes), numberOfSystemTestMiners)
 		cliutil.Wait(t, 30*time.Second)
 		waitTime += 30 * time.Second
 	}
