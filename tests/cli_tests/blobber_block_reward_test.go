@@ -135,7 +135,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 						blobber2TotalRewards := float64(blobberBlockRewards[5])
 
 						blobber1Weight := calculateWeight(writePrice[0], readPrice[0], totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
-						blobber2Weight := calculateWeight(writePrice[0], readPrice[1], totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
+						blobber2Weight := calculateWeight(writePrice[1], readPrice[1], totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 						// print all values
 						fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
