@@ -104,6 +104,7 @@ func TestBlobberRewards(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", 60*time.Second, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 9.0, client.TxSuccessfulStatus)
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 9.0, client.TxSuccessfulStatus) // Needs more tokens
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
