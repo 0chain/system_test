@@ -144,7 +144,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		output, err = readPoolLock(t, configPath, readPoolParams, false)
 		require.NotNil(t, err, "Locked 0 tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to lock tokens in read pool: read_pool_lock_failed: insufficient amount to lock", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Failed to lock tokens in read pool: read_pool_lock_failed: invalid amount to lock [ensure token > 0].", output[0], strings.Join(output, "\n"))
 
 		// Wallet balance should remain same
 		output, err = getBalance(t, configPath)
