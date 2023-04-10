@@ -43,12 +43,8 @@ func TestStakePool(testSetup *testing.T) {
 				minStakedCapacityBlobber = blInfo
 			}
 
-			fmt.Println("stakedCapacity", stakedCapacity)
-			fmt.Println("maxStakedCapacity", maxStakedCapacity)
+			fmt.Println("Blobber ID : ", blobber.Id, " Staked Capacity : ", stakedCapacity, " Allocated : ", blInfo.Allocated, " Total Stake : ", blInfo.TotalStake)
 		}
-
-		fmt.Println(maxStakedCapacity)
-		fmt.Println(minStakedCapacityBlobber)
 
 		// select any random blobber and check total offers
 		blobber := minStakedCapacityBlobber
@@ -106,7 +102,9 @@ func TestStakePool(testSetup *testing.T) {
 
 		// create an allocation of capacity
 
-		allocSize := maxStakedCapacity*3 + int64(30*GB) - int64(10) // 30 GB (We are using 30 GB of allocation to match it with the staked capacity [ staked capacity = 10GB for each blobber (3 data 3 parity)])
+		allocSize := maxStakedCapacity*3 + int64(30*GB) - int64(10)
+
+		fmt.Println("Allocation Size : ", allocSize)
 
 		options := map[string]interface{}{"cost": "", "size": allocSize, "data": 3, "parity": 3}
 		output, err := createNewAllocation(t, configPath, createParams(options))
@@ -226,7 +224,6 @@ func TestStakePool(testSetup *testing.T) {
 		// Cancel the allocation
 		output, err = cancelAllocation(t, configPath, allocationId, true)
 		require.Nil(t, err, "error cancelling allocation")
-		fmt.Println(output)
 
 		// Try to unstake tokens from the blobbers
 		for _, blobber := range blobbersList {
