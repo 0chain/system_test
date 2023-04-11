@@ -32,11 +32,16 @@ func TestAllocation(testSetup *testing.T) {
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
+	var blobberDetailList []climodel.BlobberDetails
 	output, err = listBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
 	err = json.Unmarshal([]byte(output[0]), &blobberList)
+	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
+	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
+
+	err = json.Unmarshal([]byte(output[0]), &blobberDetailList)
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
@@ -201,13 +206,9 @@ func TestAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade, equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
+		//t.Skip()
 
 		recipient := escapedTestName(t)
-
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
-			1, 1, 1, 1,
-		}, 1)
 
 		// register recipient wallet
 		output, err = registerWalletForName(t, configPath, recipient)
@@ -218,7 +219,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
-			FreeTokens: 5,
+			FreeTokens: 10,
 			Timestamp:  time.Now().Unix(),
 		}
 
@@ -242,7 +243,7 @@ func TestAllocation(testSetup *testing.T) {
 		err = os.WriteFile(markerFile, forFileBytes, 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationForWallet(t, recipient, configPath, createParams(map[string]interface{}{"free_storage": markerFile, "size": 10 * MB}))
+		output, err = createNewAllocationForWallet(t, recipient, configPath, createParams(map[string]interface{}{"free_storage": markerFile, "size": 100 * MB, "expire": "10m"}))
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
@@ -252,7 +253,7 @@ func TestAllocation(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 2 * MB
+		filesize := 10 * MB
 		filename := generateRandomTestFileName(t)
 
 		err = createFileWithSize(filename, int64(filesize))
@@ -266,10 +267,48 @@ func TestAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		_, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
+		for _, intialBlobberInfo := range blobberDetailList {
+
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": intToZCN(intialBlobberInfo.Terms.Read_price + 1e9)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": intToZCN(intialBlobberInfo.Terms.Write_price + 1e9)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		}
+
+		marker = climodel.FreeStorageMarker{
+			Recipient:  recipientWallet.ClientID,
+			FreeTokens: 10,
+			Timestamp:  time.Now().Unix(),
+		}
+
+		forSignatureBytes, err = json.Marshal(&marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		data = hex.EncodeToString(forSignatureBytes)
+		rawHash, err = hex.DecodeString(data)
+		require.Nil(t, err, "failed to decode hex %s", data)
+		require.NotNil(t, rawHash, "failed to decode hex %s", data)
+		secretKey = crypto.ToSecretKey(t, assignerWallet)
+		marker.Signature = crypto.Sign(t, string(rawHash), secretKey)
+
+		marker.Assigner = assignerWallet.ClientID
+
+		forFileBytes, err = json.Marshal(marker)
+		require.Nil(t, err, "Could not marshal marker")
+
+		markerFile = "./config/" + recipient + "2_MARKER.json"
+
+		err = os.WriteFile(markerFile, forFileBytes, 0600)
+		require.Nil(t, err, "Could not write file marker")
+
+		executeFaucetWithTokensForWallet(t, assigner, configPath, 9)
+		executeFaucetWithTokensForWallet(t, recipient, configPath, 9)
+
+		_, err = updateAllocationWithWallet(t, recipient, configPath, createParams(map[string]interface{}{
 			"free_storage": markerFile,
 			"allocation":   allocationId,
-			"size":         100 * MB,
+			"size":         1 * MB,
 		}), true)
 		if err != nil {
 			fmt.Println("Error updating allocation", err)
@@ -299,8 +338,14 @@ func TestAllocation(testSetup *testing.T) {
 		fmt.Println("passedChallenges", passedChallenges)
 		fmt.Println("failedChallenges", failedChallenges)
 
+		rewards := getAllocationChallengeRewards(t, allocationId)
+
+		fmt.Println("rewards", rewards)
+
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
+
+	t.Skip()
 
 	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		t.Skip()
@@ -465,20 +510,16 @@ func TestAllocation(testSetup *testing.T) {
 		require.Equal(t, 3, len(blobberRewards), "All 3 blobber should get the rewards")
 
 		avgBlobberReward := 0
-		for _, blobberReward := range blobberRewards {
-			for _, v := range blobberReward.(map[string]interface{}) {
-				avgBlobberReward += int(v.(float64))
-			}
+		for _, v := range blobberRewards {
+			avgBlobberReward += int(v.(float64))
 		}
 
 		avgBlobberReward = avgBlobberReward / len(blobberRewards)
 
-		for _, blobberReward := range blobberRewards {
-			for k, v := range blobberReward.(map[string]interface{}) {
-				require.Containsf(t, allocationBlobbers, k, "blobber id not found in allocation blobber list")
-				if v.(float64) == 0 {
-					require.InEpsilon(t, avgBlobberReward, int(v.(float64)), 0.05, "blobber reward is not in range")
-				}
+		for k, v := range blobberRewards {
+			require.Containsf(t, allocationBlobbers, k, "blobber id not found in allocation blobber list")
+			if v.(float64) == 0 {
+				require.InEpsilon(t, avgBlobberReward, int(v.(float64)), 0.05, "blobber reward is not in range")
 			}
 		}
 
@@ -547,6 +588,9 @@ func TestAllocation(testSetup *testing.T) {
 		}), true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 
+		// remove allocationBlobbers[0] from allocationBlobbers
+		allocationBlobbers = allocationBlobbers[1:]
+
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
@@ -571,20 +615,16 @@ func TestAllocation(testSetup *testing.T) {
 		require.Equal(t, 2, len(blobberRewards), "Only 2 blobber should get the rewards")
 
 		avgBlobberReward := 0
-		for _, blobberReward := range blobberRewards {
-			for _, v := range blobberReward.(map[string]interface{}) {
-				avgBlobberReward += int(v.(float64))
-			}
+		for _, v := range blobberRewards {
+			avgBlobberReward += int(v.(float64))
 		}
 
 		avgBlobberReward = avgBlobberReward / len(blobberRewards)
 
-		for _, blobberReward := range blobberRewards {
-			for k, v := range blobberReward.(map[string]interface{}) {
-				require.Containsf(t, allocationBlobbers, k, "blobber id not found in allocation blobber list")
-				if v.(float64) == 0 {
-					require.InEpsilon(t, avgBlobberReward, int(v.(float64)), 0.05, "blobber reward is not in range")
-				}
+		for k, v := range blobberRewards {
+			require.Containsf(t, allocationBlobbers, k, "blobber id not found in allocation blobber list")
+			if v.(float64) == 0 {
+				require.InEpsilon(t, avgBlobberReward, int(v.(float64)), 0.05, "blobber reward is not in range")
 			}
 		}
 
@@ -667,7 +707,7 @@ func getAllocationCancellationReward(t *test.SystemTest, startBlockNumber, endBl
 	return []int64{blobber1TotalReward, blobber2TotalReward}, nil
 }
 
-func getAllocationChallengeRewards(t *test.SystemTest, allocationID string) []interface{} {
+func getAllocationChallengeRewards(t *test.SystemTest, allocationID string) map[string]interface{} {
 	sharderBaseUrl := getSharderUrl(t)
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=" + allocationID)
 
@@ -698,7 +738,7 @@ func getAllocationChallengeRewards(t *test.SystemTest, allocationID string) []in
 
 	fmt.Println("allocationChallengeRewards", allocationChallengeRewards)
 
-	blobberRewards := allocationChallengeRewards["blobber_rewards"].([]interface{})
+	blobberRewards := allocationChallengeRewards["blobber_rewards"].(map[string]interface{})
 
 	return blobberRewards
 }

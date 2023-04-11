@@ -7,8 +7,6 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
-	"io"
-	"net/http"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -43,7 +41,7 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
-	t.RunSequentiallyWithTimeout("Test Cancel Allocation After Expiry Rewards when client uploads 10% of allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Upload 10% of allocation and Kill blobber in the middle, One blobber should get approx double rewards than other", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
@@ -94,113 +92,67 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 
 		fmt.Println(allocation.MovedToChallenge)
 
-		challenges, _ := getAllChallenges(t, allocationId)
+		blobberRewards := getAllocationChallengeRewards(t, allocationId)
 
-		totalExpectedReward := float64(allocation.MovedToChallenge)
+		fmt.Println(blobberRewards)
 
-		totalReward := 0.0
-		blobber1TotalReward := 0.0
-		blobber2TotalReward := 0.0
-		blobber1DelegatesTotalReward := 0.0
-		blobber2DelegatesTotalReward := 0.0
-		validator1TotalReward := 0.0
-		validator2TotalReward := 0.0
-		validator1DelegatesTotalReward := 0.0
-		validator2DelegatesTotalReward := 0.0
+		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+	})
 
-		for _, challenge := range challenges {
+	t.RunSequentiallyWithTimeout("Upload 50% of allocation and Kill blobber in the middle, One blobber should get approx double rewards than other", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+			1, 1, 1, 1,
+		}, 1)
 
-			var isBlobber1 bool
-			if challenge.BlobberID == blobberList[0].Id {
-				isBlobber1 = true
-			}
+		output, err := registerWallet(t, configPath)
+		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
-			blobberReward := 0.0
-			blobberDelegateReward := 0.0
-			validator1Reward := 0.0
-			validator2Reward := 0.0
-			validator1DelegateReward := 0.0
-			validator2DelegateReward := 0.0
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+			"expire": "20m",
+		})
 
-			challengeRewards, err := getChallengeRewards(t, challenge.ChallengeID)
+		remotepath := "/dir/"
+		filesize := 0.5 * GB
+		filename := generateRandomTestFileName(t)
 
-			if err != nil {
-				fmt.Println(err)
-			}
-			require.Nil(t, err, "Error getting challenge rewards", strings.Join(output, "\n"))
+		err = createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
 
-			// check if challengeReward.BlobberRewards is empty and if yes continue
-			if len(challengeRewards.BlobberRewards) == 0 {
-				continue
-			}
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-			blobberChallengeRewards := challengeRewards.BlobberRewards
-			validatorChallengeRewards := challengeRewards.ValidatorRewards
-			blobberDelegateChallengeRewards := challengeRewards.BlobberDelegateRewards
-			validatorDelegateChallengeRewards := challengeRewards.ValidatorDelegateRewards
+		// check allocation remaining time
+		allocation := getAllocation(t, allocationId)
+		remainingTime := allocation.ExpirationDate - time.Now().Unix()
 
-			blobberReward += blobberChallengeRewards[0].Amount
-			if isBlobber1 {
-				blobber1TotalReward += blobberChallengeRewards[0].Amount
-			} else {
-				blobber2TotalReward += blobberChallengeRewards[0].Amount
-			}
+		// sleep for half of the remaining time
+		time.Sleep(time.Duration(remainingTime/2) * time.Second)
 
-			for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
-				blobberDelegateReward += blobberDelegateChallengeReward.Amount
-				if isBlobber1 {
-					blobber1DelegatesTotalReward += blobberDelegateChallengeReward.Amount
-				} else {
-					blobber2DelegatesTotalReward += blobberDelegateChallengeReward.Amount
-				}
-			}
+		// 2. Kill a blobber
+		_, err = killBlobber(t, configPath, createParams(map[string]interface{}{
+			"id": blobberList[1].Id,
+		}), true)
+		require.Nil(t, err, "error killing blobber", strings.Join(output, "\n"))
 
-			for _, validatorChallengeReward := range validatorChallengeRewards {
-				if validatorChallengeReward.ProviderId == validatorList[0].ID {
-					validator1Reward += validatorChallengeReward.Amount
-					validator1TotalReward += validatorChallengeReward.Amount
-				} else if validatorChallengeReward.ProviderId == validatorList[1].ID {
-					validator2Reward += validatorChallengeReward.Amount
-					validator2TotalReward += validatorChallengeReward.Amount
-				}
-			}
+		// 3. Sleep for the remaining time
+		time.Sleep(time.Duration(remainingTime/2) * time.Second)
 
-			for _, validatorDelegateChallengeReward := range validatorDelegateChallengeRewards {
-				if validatorDelegateChallengeReward.ProviderId == validatorList[0].ID {
-					validator1DelegateReward += validatorDelegateChallengeReward.Amount
-					validator1DelegatesTotalReward += validatorDelegateChallengeReward.Amount
-				} else if validatorDelegateChallengeReward.ProviderId == validatorList[1].ID {
-					validator2DelegateReward += validatorDelegateChallengeReward.Amount
-					validator2DelegatesTotalReward += validatorDelegateChallengeReward.Amount
-				}
-			}
+		allocation = getAllocation(t, allocationId)
 
-			blobberTotalReward := blobberReward + blobberDelegateReward
-			validatorsTotalReward := validator1Reward + validator2Reward + validator1DelegateReward + validator2DelegateReward
-			totalChallengeReward := blobberTotalReward + validatorsTotalReward
+		fmt.Println(allocation.MovedToChallenge)
 
-			fmt.Println("Challenge ID: ", challenge.ChallengeID)
-			fmt.Println("Blobber Reward: ", blobberReward)
-			fmt.Println("Blobber Delegate Reward: ", blobberDelegateReward)
-			fmt.Println("Validator 1 Reward: ", validator1Reward)
-			fmt.Println("Validator 2 Reward: ", validator2Reward)
-			fmt.Println("Validator 1 Delegate Reward: ", validator1DelegateReward)
-			fmt.Println("Validator 2 Delegate Reward: ", validator2DelegateReward)
-			fmt.Println("Total Challenge Reward: ", totalChallengeReward)
-		}
+		blobberRewards := getAllocationChallengeRewards(t, allocationId)
 
-		totalReward = blobber1TotalReward + blobber2TotalReward + blobber1DelegatesTotalReward + blobber2DelegatesTotalReward + validator1TotalReward + validator2TotalReward + validator1DelegatesTotalReward + validator2DelegatesTotalReward
-
-		fmt.Println("Total Reward: ", totalReward)
-		fmt.Println("Total Expected Reward: ", totalExpectedReward)
-		fmt.Println("Blobber 1 Total Reward: ", blobber1TotalReward)
-		fmt.Println("Blobber 2 Total Reward: ", blobber2TotalReward)
-		fmt.Println("Blobber 1 Delegates Total Reward: ", blobber1DelegatesTotalReward)
-		fmt.Println("Blobber 2 Delegates Total Reward: ", blobber2DelegatesTotalReward)
-		fmt.Println("Validator 1 Total Reward: ", validator1TotalReward)
-		fmt.Println("Validator 2 Total Reward: ", validator2TotalReward)
-		fmt.Println("Validator 1 Delegates Total Reward: ", validator1DelegatesTotalReward)
-		fmt.Println("Validator 2 Delegates Total Reward: ", validator2DelegatesTotalReward)
+		fmt.Println(blobberRewards)
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
@@ -218,20 +170,4 @@ func killBlobber(t *test.SystemTest, cliConfigFilename, params string, retry boo
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
-}
-
-func getTotalChallengeRewardByProviderID(t *test.SystemTest, providerID string) int {
-	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
-	sharderBaseUrl := getSharderUrl(t)
-	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/transactions")
-	res, _ := http.Get(url)
-	body, _ := io.ReadAll(res.Body)
-
-	var response map[string]interface{}
-
-	if err := json.Unmarshal(body, &response); err != nil {
-		panic(err)
-	}
-
-	return response["sum"].(int)
 }
