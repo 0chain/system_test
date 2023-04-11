@@ -170,15 +170,15 @@ type TransactionEntity struct {
 }
 
 type RewardTransactionOutput struct {
-	Id        int `json:"ID"`
-	CreatedAt string `json:"CreatedAt"`
-	UpdatedAt string `json:"UpdatedAt"`
-	Amount    int64 `json:"amount"`
-	BlockNumber int `json:"block_number"`
-	ClientId string `json:"client_id"`
-	PoolID string `json:"pool_id,omitempty"`
+	Id           int    `json:"ID"`
+	CreatedAt    string `json:"CreatedAt"`
+	UpdatedAt    string `json:"UpdatedAt"`
+	Amount       int64  `json:"amount"`
+	BlockNumber  int    `json:"block_number"`
+	ClientId     string `json:"client_id"`
+	PoolID       string `json:"pool_id,omitempty"`
 	ProviderType string `json:"provider_type"`
-	ProviderID string `json:"provider_id"`
+	ProviderID   string `json:"provider_id"`
 }
 
 type TransactionPutResponse struct {
