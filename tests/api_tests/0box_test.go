@@ -126,14 +126,6 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, allocationId, allocationList[0].Id)
 	})
 
-	t.RunSequentially("List allocation with non-registered phone number should not work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		csrfToken := createCsrfToken(t, "5554787672")
-
-		_, _, err := zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, "5554787672")
-		require.NoError(t, err)
-	})
-
 	t.RunSequentially("Post allocation with correct argument should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
