@@ -27,7 +27,8 @@ func TestStakePool(testSetup *testing.T) {
 		// select the blobber with min staked capacity
 		var minStakedCapacityBlobber climodel.BlobberInfoDetailed
 
-		maxStakedCapacity := uint64(9999999999999999999999)
+		// set maxStakedCapacity to max uint64 value
+		maxStakedCapacity := uint64(18446744073709551614)
 
 		for _, blobber := range blobbersList {
 			output, _ := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
