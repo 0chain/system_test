@@ -27,7 +27,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 2,
+			"tokens": 9,
 		})
 
 		filesize := int64(0.5 * MB)
@@ -120,7 +120,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 2,
+			"tokens": 9,
 		})
 
 		filesize := int64(0.5 * MB)
@@ -237,7 +237,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 2,
+			"tokens": 9,
 		})
 
 		filesize := int64(0.5 * MB)
@@ -281,7 +281,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 2,
+			"tokens": 9,
 		})
 
 		filesize := int64(0.5 * MB)
@@ -324,7 +324,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 2,
+			"tokens": 9,
 		})
 
 		filesize := int64(0.5 * MB)
