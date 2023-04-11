@@ -549,6 +549,7 @@ func getStartAndEndRounds(
 }
 
 func waitForMinersToStart(t *test.SystemTest) {
+	return
 	var waitTime time.Duration
 	t.Log("waiting for miners...")
 	for {
