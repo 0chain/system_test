@@ -24,7 +24,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{
-			"cost": "",
+			"cost":   "",
 			"expire": "1h",
 			"size":   "10000",
 		}
