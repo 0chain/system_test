@@ -1024,7 +1024,7 @@ func (c *APIClient) GetStakePoolStat(t *test.SystemTest, providerID, providerTyp
 	return scRestGetStakePoolStat
 }
 
-func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) *model.TransactionPutResponse {
+func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) *model.TransactionGetConfirmationResponse {
 	collectRewardTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
@@ -1064,7 +1064,7 @@ func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, pro
 
 	wallet.IncNonce()
 
-	return collectRewardTransactionPutResponse
+	return collectRewardTransactionGetConfirmationResponse
 }
 
 func (c *APIClient) GetBlobber(t *test.SystemTest, blobberID string, requiredStatusCode int) *model.SCRestGetBlobberResponse {
