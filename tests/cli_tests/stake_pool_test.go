@@ -36,7 +36,9 @@ func TestStakePool(testSetup *testing.T) {
 			err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
 			require.Nil(t, err, "error unmarshalling blobber info")
 
-			stakedCapacity := uint64(((float64(blInfo.TotalStake) / 10000000000.0) * (10 * GB)) - float64(blInfo.Allocated))
+			stakedCapacity := uint64((float64(blInfo.TotalStake) / 10000000000.0) * (10 * GB))
+			require.Greater(t, stakedCapacity, blobber.Allocated, "Staked capacity should be greater than allocated capacity")
+			stakedCapacity -= uint64(blobber.Allocated)
 
 			if stakedCapacity < maxStakedCapacity {
 				maxStakedCapacity = stakedCapacity
