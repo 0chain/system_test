@@ -927,7 +927,7 @@ func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToke
 	return ZboxNftCollection, resp, err
 }
 
-func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, stage_nft_upload, nft_reference, collectionId, owned_by, nft_activity, meta_data, allocationId, created_by, contract_address, token_id, token_standard string) (*model.ZboxNft, *resty.Response, error) {
+func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, stage_nft_upload, nft_reference, collectionId, owned_by, nft_activity, meta_data, allocationId, created_by, contract_address, token_id, token_standard, tx_hash string) (*model.ZboxNft, *resty.Response, error) {
 	t.Logf("Posting nft using 0box...")
 	var ZboxNft *model.ZboxNft
 
@@ -948,6 +948,7 @@ func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, p
 		"contract_address": contract_address,
 		"token_id":         token_id,
 		"token_standard":   token_standard,
+		"tx_hash":          tx_hash,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
