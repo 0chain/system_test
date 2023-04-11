@@ -154,7 +154,7 @@ func TestBlobberRewards(testSetup *testing.T) {
 		})
 
 		collecRewardTxn := apiClient.CollectRewards(t, sdkWallet, newBlobberID, 3, client.TxSuccessfulStatus)
-		formmattedTxnOutput := strings.Replace(collecRewardTxn.Transaction.TransactionOutput, `\"`, `"`, -1)
+		formmattedTxnOutput := strings.ReplaceAll(collecRewardTxn.Transaction.TransactionOutput, `\"`, `"`)
 
 		collectRewardTxnOutput := model.RewardTransactionOutput{}
 

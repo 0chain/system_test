@@ -250,14 +250,14 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		newIsAvailable := !intialBlobberInfo.IsAvailable
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id":         intialBlobberInfo.ID,
-			"write_price":        newWritePrice,
-			"service_charge":     newServiceCharge,
-			"read_price":         newReadPrice,
-			"num_delegates":      newNumberOfDelegates,
-			"capacity":           newCapacity,
-			"min_lock_demand":    newMinLockDemand,
-			"is_available":       newIsAvailable,
+			"blobber_id":      intialBlobberInfo.ID,
+			"write_price":     newWritePrice,
+			"service_charge":  newServiceCharge,
+			"read_price":      newReadPrice,
+			"num_delegates":   newNumberOfDelegates,
+			"capacity":        newCapacity,
+			"min_lock_demand": newMinLockDemand,
+			"is_available":    newIsAvailable,
 		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
