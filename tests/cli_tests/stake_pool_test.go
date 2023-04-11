@@ -27,7 +27,7 @@ func TestStakePool(testSetup *testing.T) {
 		// select the blobber with min staked capacity
 		var minStakedCapacityBlobber climodel.BlobberInfoDetailed
 
-		maxStakedCapacity := uint64(999999999999999999)
+		maxStakedCapacity := uint64(9999999999999999999999)
 
 		for _, blobber := range blobbersList {
 			output, _ := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
@@ -36,7 +36,7 @@ func TestStakePool(testSetup *testing.T) {
 			err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
 			require.Nil(t, err, "error unmarshalling blobber info")
 
-			stakedCapacity := uint64((float64(blInfo.TotalStake/1e10) * 10 * GB) - float64(blInfo.Allocated))
+			stakedCapacity := uint64(((float64(blInfo.TotalStake) / 10000000000.0) * (10 * GB)) - float64(blInfo.Allocated))
 
 			if stakedCapacity < maxStakedCapacity {
 				maxStakedCapacity = stakedCapacity
@@ -102,7 +102,8 @@ func TestStakePool(testSetup *testing.T) {
 
 		// create an allocation of capacity
 
-		allocSize := maxStakedCapacity*3 + uint64(30*GB) - uint64(10)
+		allocSize := maxStakedCapacity*3 + uint64(30*GB)
+		allocSize -= allocSize / uint64(1000)
 
 		fmt.Println("Allocation Size : ", allocSize)
 
