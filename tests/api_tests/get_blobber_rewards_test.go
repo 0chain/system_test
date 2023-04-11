@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -151,11 +152,15 @@ func TestBlobberRewards(testSetup *testing.T) {
 			return rewards > 0
 		})
 
-		apiClient.CollectRewards(t, sdkWallet, newBlobberID, 3, client.TxSuccessfulStatus)
+		collecRewardTxn := apiClient.CollectRewards(t, sdkWallet, newBlobberID, 3, client.TxSuccessfulStatus)
+		collectRewardTxnOutput := model.RewardTransactionOutput{}
+
+		err := json.Unmarshal([]byte(collecRewardTxn.Request.TransactionOutput), &collectRewardTxnOutput)
+		require.Nil(t, err)
 
 		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
-		require.Equal(t, balanceAfter, balanceBefore+rewards)
+		require.Equal(t, balanceAfter, balanceBefore+collectRewardTxnOutput.Amount)
 	})
 }
