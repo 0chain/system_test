@@ -46,9 +46,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "max_offer_duration": intialBlobberInfo.Terms.Max_offer_duration}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "min_lock_demand": intialBlobberInfo.Terms.Min_lock_demand}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
@@ -85,27 +82,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		require.Equal(t, int64(newCapacity), finalBlobberInfo.Capacity)
-	})
-
-	t.RunSequentially("update blobber max offer duration should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		newMaxOfferDuration := 2668400 * time.Second
-
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "max_offer_duration": newMaxOfferDuration}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var finalBlobberInfo climodel.BlobberDetails
-		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		require.Equal(t, newMaxOfferDuration, finalBlobberInfo.Terms.Max_offer_duration)
 	})
 
 	t.RunSequentially("update blobber min lock demand should work", func(t *test.SystemTest) {
@@ -269,7 +245,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		newServiceCharge := intialBlobberInfo.StakePoolSettings.ServiceCharge + 0.1
 		newReadPrice := intToZCN(intialBlobberInfo.Terms.Read_price) + 1
 		newNumberOfDelegates := intialBlobberInfo.StakePoolSettings.MaxNumDelegates + 1
-		newMaxOfferDuration := intialBlobberInfo.Terms.Max_offer_duration + 1*time.Second
 		newCapacity := intialBlobberInfo.Capacity + 1
 		newMinLockDemand := intialBlobberInfo.Terms.Min_lock_demand + 0.01
 		newIsAvailable := !intialBlobberInfo.IsAvailable
@@ -280,7 +255,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 			"service_charge":     newServiceCharge,
 			"read_price":         newReadPrice,
 			"num_delegates":      newNumberOfDelegates,
-			"max_offer_duration": newMaxOfferDuration,
 			"capacity":           newCapacity,
 			"min_lock_demand":    newMinLockDemand,
 			"is_available":       newIsAvailable,
@@ -305,7 +279,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newServiceCharge, finalBlobberInfo.StakePoolSettings.ServiceCharge)
 		require.Equal(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price))
 		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.MaxNumDelegates)
-		require.Equal(t, newMaxOfferDuration, finalBlobberInfo.Terms.Max_offer_duration)
 		require.Equal(t, newCapacity, finalBlobberInfo.Capacity)
 		require.Equal(t, newMinLockDemand, finalBlobberInfo.Terms.Min_lock_demand)
 		require.Equal(t, newIsAvailable, finalBlobberInfo.IsAvailable)

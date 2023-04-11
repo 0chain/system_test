@@ -1,4 +1,4 @@
-block_worker: https://demo.zus.network/dns
+block_worker: https://dev-1.devnet-0chain.net/dns
 confirmation_chain_length: 3
 ethereum_node_url: "https://rpc.tenderly.co/fork/e753f650-9968-4f58-af77-5f02ace53cdc"
 min_confirmation: 50

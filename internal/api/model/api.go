@@ -367,7 +367,6 @@ type Terms struct {
 	ReadPrice        int64         `json:"read_price"`
 	WritePrice       int64         `json:"write_price"`
 	MinLockDemand    float64       `json:"min_lock_demand"`
-	MaxOfferDuration time.Duration `json:"max_offer_duration"`
 }
 
 type StakePoolSettings struct {
