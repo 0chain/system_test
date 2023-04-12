@@ -327,6 +327,7 @@ func TestUpload(testSetup *testing.T) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
+			"expire": "10m",
 		})
 
 		output, err := cliutils.RunCommand(t, "wget http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4 -O test_video.mp4", 3, 2*time.Second)
@@ -352,6 +353,7 @@ func TestUpload(testSetup *testing.T) {
 			"tokens": 9,
 			"size":   allocSize,
 			"lock":   9,
+			"expire": "30m",
 		})
 
 		filename := generateRandomTestFileName(t)

@@ -25,7 +25,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 		options := map[string]interface{}{
 			"cost":   "",
-			"expire": "1h",
+			"expire": "5m",
 			"size":   "10000",
 		}
 		output, err := createNewAllocation(t, configPath, createParams(options))

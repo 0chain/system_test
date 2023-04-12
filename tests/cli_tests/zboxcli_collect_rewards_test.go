@@ -212,7 +212,7 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		var validators []climodel.Validator
@@ -244,10 +244,11 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 
 		// Use all 6 blobbers
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
-			"data":   1,
-			"parity": 1,
+			"size":     allocSize,
+			"tokens":   9,
+			"data":     1,
+			"parity":   1,
+			"expire": "30m",
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, int64(filesize))

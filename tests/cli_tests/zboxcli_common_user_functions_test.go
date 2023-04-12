@@ -64,7 +64,7 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		// Lock 0.5 token for allocation
+		// Lock 5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"lock":   "5",
 			"size":   1 * MB,
@@ -91,7 +91,7 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		output, err = getBalance(t, configPath)
 		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 3.000 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		require.Regexp(t, regexp.MustCompile(`Balance: 3.800 ZCN \(\d*\.?\d+ USD\)$`), output[0])
 
 		createAllocationTestTeardown(t, allocationID)
 	})
