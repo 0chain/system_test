@@ -328,6 +328,7 @@ type SimpleNode struct {
 	TotalStake                    int64       `json:"total_stake"`
 	Stat                          interface{} `json:"stat"`
 	RoundServiceChargeLastUpdated int64       `json:"round_service_charge_last_updated"`
+	IsKilled                      bool        `json:"is_killed"`
 }
 
 type Sharder struct {
