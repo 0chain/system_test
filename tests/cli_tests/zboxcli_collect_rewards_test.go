@@ -244,10 +244,10 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 
 		// Use all 6 blobbers
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":     allocSize,
-			"tokens":   9,
-			"data":     1,
-			"parity":   1,
+			"size":   allocSize,
+			"tokens": 9,
+			"data":   1,
+			"parity": 1,
 			"expire": "30m",
 		})
 
