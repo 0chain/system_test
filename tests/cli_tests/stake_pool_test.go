@@ -37,16 +37,16 @@ func TestStakePool(testSetup *testing.T) {
 			err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
 			require.Nil(t, err, "error unmarshalling blobber info")
 
-			stakedCapacity := uint64((float64(blInfo.TotalStake) / 10000000000.0) * (10 * GB))
-			require.Greater(t, stakedCapacity, blobber.Allocated, "Staked capacity should be greater than allocated capacity")
+			stakedCapacity := uint64(float64(blInfo.TotalStake) * GB / float64(blInfo.Terms.WritePrice))
+			fmt.Println("Blobber ID : ", blobber.Id, " Staked Capacity : ", stakedCapacity, " Allocated : ", blInfo.Allocated, " Total Stake : ", blInfo.TotalStake)
+
+			require.Greater(t, stakedCapacity, uint64(blobber.Allocated), "Staked capacity should be greater than allocated capacity")
 			stakedCapacity -= uint64(blobber.Allocated)
 
 			if stakedCapacity < maxStakedCapacity {
 				maxStakedCapacity = stakedCapacity
 				minStakedCapacityBlobber = blInfo
 			}
-
-			fmt.Println("Blobber ID : ", blobber.Id, " Staked Capacity : ", stakedCapacity, " Allocated : ", blInfo.Allocated, " Total Stake : ", blInfo.TotalStake)
 		}
 
 		// select any random blobber and check total offers
@@ -127,7 +127,7 @@ func TestStakePool(testSetup *testing.T) {
 			"size":   allocSize,
 			"tokens": (allocationCost + 1) * 2,
 			"data":   3,
-			"parity": 3,
+			"parity": 4,
 			"lock":   allocationCost + 1,
 		})
 
