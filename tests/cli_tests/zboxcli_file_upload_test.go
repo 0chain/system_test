@@ -349,8 +349,13 @@ func TestUpload(testSetup *testing.T) {
 		allocSize := int64(2 * GB)
 		fileSize := int64(1 * GB)
 
+		for i := 0; i < 6; i++ {
+			output, err := executeFaucetWithTokens(t, configPath, 9.0)
+			require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+		}
+
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"tokens": 9,
+			"tokens": 50,
 			"size":   allocSize,
 			"lock":   9,
 			"expire": "30m",
