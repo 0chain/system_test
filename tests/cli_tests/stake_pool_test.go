@@ -110,7 +110,7 @@ func TestStakePool(testSetup *testing.T) {
 
 		fmt.Println("Allocation Size : ", allocSize)
 
-		options := map[string]interface{}{"cost": "", "size": allocSize, "data": 3, "parity": 3}
+		options := map[string]interface{}{"cost": "", "size": allocSize, "data": 3, "parity": 4}
 		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
