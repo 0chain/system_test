@@ -917,6 +917,18 @@ func getAllocationID(str string) (string, error) {
 	return match[1], nil
 }
 
+func getAllocationCost(str string) (float64, error) {
+	allocationCostInOutput, err := strconv.ParseFloat(strings.Fields(str)[5], 64)
+	if err != nil {
+		return 0.0, err
+	}
+
+	unit := strings.Fields(str)[6]
+	allocationCostInZCN := unitToZCN(allocationCostInOutput, unit)
+
+	return allocationCostInZCN, nil
+}
+
 func createParams(params map[string]interface{}) string {
 	var builder strings.Builder
 

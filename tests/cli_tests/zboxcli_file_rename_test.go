@@ -24,7 +24,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 
 	t.Parallel()
 
-	t.Run("rename file", func(t *test.SystemTest) {
+	t.Run("rename file should work", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -162,7 +162,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}
 	})
 
-	t.Run("rename file to same filename (no change)", func(t *test.SystemTest) {
+	t.Run("rename file to same filename (no change) shouldn't work", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -196,10 +196,9 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destname":   destName,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
+		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, " "), "file already exists")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -507,7 +506,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destname":   destName,
-		}, true)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "invalid_operation: cannot rename root path", output[0])
