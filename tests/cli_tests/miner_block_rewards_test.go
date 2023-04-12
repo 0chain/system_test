@@ -142,10 +142,6 @@ func checkMinerBlockRewards(
 				case climodel.BlockRewardMiner:
 					require.Falsef(t, beforeMiners[i].IsKilled,
 						"killed miners cannot receive rewards, %s is killed", id)
-					//require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
-					//	"%s not round lottery winner %s but nevertheless paid with block reward."+
-					//		"only the round lottery winner should get a miner block reward",
-					//	pReward.ProviderId, roundHistory.Block.MinerID)
 					var expectedServiceCharge int64
 					if len(beforeMiners[i].StakePool.Pools) > 0 {
 						expectedServiceCharge = int64(float64(minerBlockReward) * beforeMiners[i].Settings.ServiceCharge)

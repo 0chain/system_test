@@ -139,10 +139,6 @@ func checkMinerFeeAmounts(
 				case climodel.FeeRewardMiner:
 					require.Falsef(t, beforeMiners[i].IsKilled,
 						"killed miners cannot receive fees, %s is killed", id)
-					//require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
-					//	"%s not round lottery winner %s but nevertheless paid with fee reward."+
-					//		"only the round lottery winner shold get a miner block reward",
-					//	pReward.ProviderId, roundHistory.Block.MinerID)
 					feeRewards += pReward.Amount
 					recordedRoundRewards += pReward.Amount
 				case climodel.BlockRewardMiner:
