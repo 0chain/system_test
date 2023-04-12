@@ -355,9 +355,8 @@ func TestUpload(testSetup *testing.T) {
 		}
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"tokens": 50,
 			"size":   allocSize,
-			"lock":   9,
+			"lock":   50,
 			"expire": "30m",
 		})
 
