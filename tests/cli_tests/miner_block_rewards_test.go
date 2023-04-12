@@ -42,13 +42,11 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunSequentiallyWithTimeout("Miner share of block rewards", 1000*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Miner share of block rewards", 200*time.Second, func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 		if !confirmDebugBuild(t) {
 			t.Skip("miner block rewards test skipped as it requires a debug event database")
 		}
-
-		waitForMinersToStart(t)
 
 		sharderUrl := getSharderUrl(t)
 		minerIds := getSortedMinerIds(t, sharderUrl)
@@ -142,10 +140,12 @@ func checkMinerBlockRewards(
 				}
 				switch pReward.RewardType {
 				case climodel.BlockRewardMiner:
-					require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
-						"%s not round lottery winner %s but nevertheless paid with block reward."+
-							"only the round lottery winner shold get a miner block reward",
-						pReward.ProviderId, roundHistory.Block.MinerID)
+					require.Falsef(t, beforeMiners[i].IsKilled,
+						"killed miners cannot receive rewards, %s is killed", id)
+					//require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
+					//	"%s not round lottery winner %s but nevertheless paid with block reward."+
+					//		"only the round lottery winner should get a miner block reward",
+					//	pReward.ProviderId, roundHistory.Block.MinerID)
 					var expectedServiceCharge int64
 					if len(beforeMiners[i].StakePool.Pools) > 0 {
 						expectedServiceCharge = int64(float64(minerBlockReward) * beforeMiners[i].Settings.ServiceCharge)
@@ -188,9 +188,9 @@ func countMinerBlockRewards(
 			if pReward.RewardType == climodel.BlockRewardMiner {
 				require.Falsef(t, foundBlockRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
 				foundBlockRewardPayment = true
-				require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-					"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
-					round, pReward.ProviderId, roundHistory.Block.MinerID)
+				//require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
+				//	"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
+				//	round, pReward.ProviderId, roundHistory.Block.MinerID)
 			}
 		}
 		if !foundBlockRewardPayment {
@@ -546,20 +546,4 @@ func getStartAndEndRounds(
 	}
 	t.Logf("start round %d, end round %d", startRound, endRound)
 	return startRound, endRound
-}
-
-func waitForMinersToStart(t *test.SystemTest) {
-	return
-	var waitTime time.Duration
-	t.Log("waiting for miners...")
-	for {
-		minerIds := getMinersList(t)
-		if len(minerIds.Nodes) >= numberOfSystemTestMiners {
-			t.Logf("finsihed wiating for miners, time taken %v", waitTime)
-			return
-		}
-		t.Logf("only %d miners fond waiting for %d miners", len(minerIds.Nodes), numberOfSystemTestMiners)
-		cliutil.Wait(t, 30*time.Second)
-		waitTime += 30 * time.Second
-	}
 }

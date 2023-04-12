@@ -24,9 +24,7 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunSequentiallyWithTimeout("Sharder share of fee rewards for transactions", 1000*time.Second, func(t *test.SystemTest) {
-		waitForMinersToStart(t)
-
+	t.RunSequentiallyWithTimeout("Sharder share of fee rewards for transactions", 200*time.Second, func(t *test.SystemTest) {
 		walletId := initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 		output, err := executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -163,6 +161,8 @@ func checkSharderFeeAmounts(
 				}
 				switch pReward.RewardType {
 				case climodel.FeeRewardSharder:
+					require.Falsef(t, beforeSharders[i].IsKilled,
+						"killed sharders cannot receive fees, %s is killed", id)
 					require.Greaterf(t, feesForSharder, int64(0), "fee reward with no fees, reward %v", pReward)
 					feeRewards += pReward.Amount
 					recordedRoundRewards += pReward.Amount

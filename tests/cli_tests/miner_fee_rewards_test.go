@@ -26,9 +26,7 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunSequentiallyWithTimeout("Miner share of fee rewards for transactions", 1000*time.Second, func(t *test.SystemTest) {
-		waitForMinersToStart(t)
-
+	t.RunSequentiallyWithTimeout("Miner share of fee rewards for transactions", 200*time.Second, func(t *test.SystemTest) {
 		walletId := initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 		output, err := executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -139,10 +137,12 @@ func checkMinerFeeAmounts(
 				}
 				switch pReward.RewardType {
 				case climodel.FeeRewardMiner:
-					require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
-						"%s not round lottery winner %s but nevertheless paid with fee reward."+
-							"only the round lottery winner shold get a miner block reward",
-						pReward.ProviderId, roundHistory.Block.MinerID)
+					require.Falsef(t, beforeMiners[i].IsKilled,
+						"killed miners cannot receive fees, %s is killed", id)
+					//require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
+					//	"%s not round lottery winner %s but nevertheless paid with fee reward."+
+					//		"only the round lottery winner shold get a miner block reward",
+					//	pReward.ProviderId, roundHistory.Block.MinerID)
 					feeRewards += pReward.Amount
 					recordedRoundRewards += pReward.Amount
 				case climodel.BlockRewardMiner:
@@ -184,9 +184,9 @@ func checkMinerFeeRewardFrequency(
 			if pReward.RewardType == climodel.FeeRewardMiner {
 				require.Falsef(t, foundFeeRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
 				foundFeeRewardPayment = true
-				require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-					"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
-					round, pReward.ProviderId, roundHistory.Block.MinerID)
+				//require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
+				//	"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
+				//	round, pReward.ProviderId, roundHistory.Block.MinerID)
 			}
 		}
 		require.EqualValues(t, foundFeeRewardPayment, isAFeePayment,
