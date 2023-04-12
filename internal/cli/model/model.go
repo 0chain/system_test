@@ -159,8 +159,6 @@ type Terms struct {
 
 type Settings struct {
 	Delegate_wallet string  `json:"delegate_wallet"`
-	Min_stake       int     `json:"min_stake"`
-	Max_stake       int     `json:"max_stake"`
 	Num_delegates   int     `json:"num_delegates"`
 	Service_charge  float64 `json:"service_charge"`
 }

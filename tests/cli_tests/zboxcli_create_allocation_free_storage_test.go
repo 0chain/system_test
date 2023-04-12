@@ -129,7 +129,13 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		err = os.WriteFile(markerFile, forFileBytes, 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationForWallet(t, recipient, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationForWallet(t, recipient, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+			"size":         10000,
+			"expire":       "30m",
+			"data":         1,
+			"parity":       1,
+		}))
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
@@ -160,7 +166,13 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		err = os.WriteFile(markerFile, []byte("bad marker json"), 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+			"size":         10000,
+			"expire":       "30m",
+			"data":         1,
+			"parity":       1,
+		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "unmarshalling markerinvalid character 'b' looking for beginning of value", output[0])
@@ -176,7 +188,13 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		err = os.WriteFile(markerFile, []byte(`{"invalid_marker":true}`), 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+			"size":         10000,
+			"expire":       "30m",
+			"data":         1,
+			"parity":       1,
+		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker can be used only by its recipient", output[0])
@@ -209,7 +227,13 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		err = os.WriteFile(markerFile, forFileBytes, 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+			"size":         10000,
+			"expire":       "30m",
+			"data":         1,
+			"parity":       1,
+		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1)
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: encoding/hex: invalid byte: U+0073 's'", output[0])
@@ -254,7 +278,13 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		err = os.WriteFile(markerFile, forFileBytes, 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+			"size":         10000,
+			"expire":       "30m",
+			"data":         1,
+			"parity":       1,
+		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker can be used only by its recipient", output[0])
@@ -295,7 +325,13 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		err = os.WriteFile(markerFile, forFileBytes, 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+			"size":         10000,
+			"expire":       "30m",
+			"data":         1,
+			"parity":       1,
+		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1)
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: 110000000000 exceeded permitted free storage  100000000000", output[0])
