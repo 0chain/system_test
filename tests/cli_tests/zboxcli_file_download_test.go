@@ -1303,7 +1303,7 @@ func setupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, ex
 
 	// Lock half the tokens for read pool
 	readPoolParams := createParams(map[string]interface{}{
-		"tokens": tokens / 2,
+		"tokens": tokens / 3,
 	})
 	output, err := readPoolLock(t, cliConfigFilename, readPoolParams, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
