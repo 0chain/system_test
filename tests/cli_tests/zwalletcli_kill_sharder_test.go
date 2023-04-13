@@ -18,6 +18,28 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
 	sharderUrl := getSharderUrl(t)
+	// wait for a sharder to be registered
+	var sharderIds []string
+	for {
+		sharderIds = getSortedSharderIds(t, sharderUrl)
+		if len(sharderIds) > 0 {
+			break
+		}
+		cliutil.Wait(t, time.Second)
+	}
+
+	t.RunSequentially("kill sharder by non-smartcontract owner should fail", func(t *test.SystemTest) {
+		sharderIds := getSortedSharderIds(t, sharderUrl)
+		require.True(t, len(sharderIds) > 0, "no sharders found")
+
+		output, err := killSharder(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+			"id": sharderIds[0],
+		}), true)
+		require.Error(t, err, "kill sharder by non-smartcontract owner should fail")
+		require.Len(t, output, 1)
+		require.True(t, strings.Contains(output[0], "unauthorized access - only the owner can access"), "")
+	})
+
 	t.RunSequentiallyWithTimeout("Killed sharder does not receive rewards", 200*time.Second, func(t *test.SystemTest) {
 		sharderIds := getSortedSharderIds(t, sharderUrl)
 		require.True(t, len(sharderIds) > 0, "no sharders found")
@@ -50,18 +72,6 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 		sharderAfterRewardTest := getMinersDetail(t, sharderToKill)
 		require.Equalf(t, sharderAfterKill.TotalReward, sharderAfterRewardTest.TotalReward,
 			"killed sharder %s should not receive any more rewards", sharderToKill)
-	})
-
-	t.RunSequentially("kill sharder by non-smartcontract owner should fail", func(t *test.SystemTest) {
-		sharderIds := getSortedSharderIds(t, sharderUrl)
-		require.True(t, len(sharderIds) > 0, "no sharders found")
-
-		output, err := killSharder(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
-			"id": sharderIds[0],
-		}), true)
-		require.Error(t, err, "kill sharder by non-smartcontract owner should fail")
-		require.Len(t, output, 1)
-		require.True(t, strings.Contains(output[0], "unauthorized access - only the owner can access"), "")
 	})
 }
 
