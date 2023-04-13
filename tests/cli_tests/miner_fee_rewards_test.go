@@ -180,9 +180,6 @@ func checkMinerFeeRewardFrequency(
 			if pReward.RewardType == climodel.FeeRewardMiner {
 				require.Falsef(t, foundFeeRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
 				foundFeeRewardPayment = true
-				//require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-				//	"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
-				//	round, pReward.ProviderId, roundHistory.Block.MinerID)
 			}
 		}
 		require.EqualValues(t, foundFeeRewardPayment, isAFeePayment,

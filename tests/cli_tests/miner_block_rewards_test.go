@@ -22,9 +22,8 @@ import (
 )
 
 const (
-	delta                    = 1.0
-	restApiRetries           = 3
-	numberOfSystemTestMiners = 3
+	delta          = 1.0
+	restApiRetries = 3
 )
 
 func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
@@ -184,9 +183,6 @@ func countMinerBlockRewards(
 			if pReward.RewardType == climodel.BlockRewardMiner {
 				require.Falsef(t, foundBlockRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
 				foundBlockRewardPayment = true
-				//require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-				//	"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
-				//	round, pReward.ProviderId, roundHistory.Block.MinerID)
 			}
 		}
 		if !foundBlockRewardPayment {
