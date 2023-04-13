@@ -230,9 +230,9 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
 		cfg, _ := keyValuePairStringToMap(output)
-		stakePoolMinLock, err := strconv.ParseFloat(cfg["stakepool.min_lock"], 64)
+		stakePoolMinLock, err := strconv.ParseInt(cfg["stakepool.min_lock"], 0, 64)
 		require.Nil(t, err)
-		stakePoolMinLockInSAS := ConvertToValue(stakePoolMinLock)
+		stakePoolMinLockInSAS := stakePoolMinLock * TOKEN_UNIT
 
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{

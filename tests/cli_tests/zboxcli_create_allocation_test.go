@@ -24,9 +24,11 @@ func TestCreateAllocation(testSetup *testing.T) {
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{
-			"cost":   "",
-			"expire": "5m",
-			"size":   "10000",
+			"cost":        "",
+			"expire":      "5m",
+			"size":        "10000",
+			"read_price":  "0-1",
+			"write_price": "0-1",
 		}
 		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -50,7 +52,13 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Run("Create allocation for locking cost less than minimum cost should not work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"cost": ""}
+		options := map[string]interface{}{
+			"cost":        "",
+			"read_price":  "0-1",
+			"write_price": "0-1",
+			"size":        10000,
+			"expire":      "30m",
+		}
 		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
