@@ -38,14 +38,8 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		sharderUrl := getSharderUrl(t)
-		var sharderIds []string
-		for {
-			sharderIds = getSortedSharderIds(t, sharderUrl)
-			if len(sharderIds) > 0 {
-				break
-			}
-			cliutil.Wait(t, time.Second)
-		}
+		sharderIds := getSortedSharderIds(t, sharderUrl)
+		require.True(t, len(sharderIds) > 1, "this test needs at least two sharders")
 
 		beforeSharders := getNodes(t, sharderIds, sharderUrl)
 
