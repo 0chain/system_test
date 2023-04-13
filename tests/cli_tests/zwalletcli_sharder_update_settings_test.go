@@ -135,7 +135,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}), false)
 		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		const expected = "update_sharder_settings: number_of_delegates greater than max_delegates of SC: 201 \\u003e 200"
+		const expected = "update_sharder_settings: number_of_delegates greater than max_delegates of SC: 21 \\u003e 20"
 		require.Equal(t, expected, output[0])
 	})
 
