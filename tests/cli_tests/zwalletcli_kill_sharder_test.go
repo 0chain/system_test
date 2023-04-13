@@ -15,18 +15,17 @@ import (
 
 func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
+	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
+	sharderUrl := getSharderUrl(t)
 	t.RunSequentiallyWithTimeout("Killed sharder does not receive rewards", 200*time.Second, func(t *test.SystemTest) {
-		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
-
-		sharderUrl := getSharderUrl(t)
 		sharderIds := getSortedSharderIds(t, sharderUrl)
 		require.True(t, len(sharderIds) > 0, "no sharders found")
 
 		startSharders := getNodes(t, sharderIds, sharderUrl)
 		var sharderToKill string
 		for i := range startSharders.Nodes {
-			if startSharders.Nodes[i].IsKilled {
+			if !startSharders.Nodes[i].IsKilled {
 				sharderToKill = startSharders.Nodes[i].ID
 				break
 			}
@@ -54,11 +53,10 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 	})
 
 	t.RunSequentially("kill sharder by non-smartcontract owner should fail", func(t *test.SystemTest) {
-		sharderUrl := getSharderUrl(t)
 		sharderIds := getSortedSharderIds(t, sharderUrl)
 		require.True(t, len(sharderIds) > 0, "no sharders found")
 
-		output, err := killBlobber(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+		output, err := killSharder(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"id": sharderIds[0],
 		}), true)
 		require.Error(t, err, "kill sharder by non-smartcontract owner should fail")
@@ -69,7 +67,7 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 
 func killSharder(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Log("kill sharder...")
-	cmd := fmt.Sprintf("./zbox sh-kill %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
+	cmd := fmt.Sprintf("./zwallet sh-kill %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		params, wallet, cliConfigFilename)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)

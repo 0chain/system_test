@@ -15,18 +15,17 @@ import (
 
 func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
+	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 
+	sharderUrl := getSharderUrl(t)
 	t.RunSequentiallyWithTimeout("Killed miner does not receive rewards", 200*time.Second, func(t *test.SystemTest) {
-		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
-
-		sharderUrl := getSharderUrl(t)
 		minerIds := getSortedMinerIds(t, sharderUrl)
 		require.True(t, len(minerIds) > 0, "no miners found")
 
 		startMiners := getNodes(t, minerIds, sharderUrl)
 		var minerToKill string
 		for i := range startMiners.Nodes {
-			if startMiners.Nodes[i].IsKilled {
+			if !startMiners.Nodes[i].IsKilled {
 				minerToKill = startMiners.Nodes[i].ID
 				break
 			}
@@ -54,22 +53,23 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 	})
 
 	t.RunSequentially("kill miner by non-smartcontract owner should fail", func(t *test.SystemTest) {
-		sharderUrl := getSharderUrl(t)
+
 		minerIds := getSortedMinerIds(t, sharderUrl)
 		require.True(t, len(minerIds) > 0, "no miners found")
 
-		output, err := killBlobber(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+		output, err := killMiner(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"id": minerIds[0],
 		}), true)
 		require.Error(t, err, "kill miner by non-smartcontract owner should fail")
 		require.Len(t, output, 1)
 		require.True(t, strings.Contains(output[0], "unauthorized access - only the owner can access"), "")
 	})
+
 }
 
 func killMiner(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Log("kill miner...")
-	cmd := fmt.Sprintf("./zbox mn-kill %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
+	cmd := fmt.Sprintf("./zwallet mn-kill %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		params, wallet, cliConfigFilename)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
