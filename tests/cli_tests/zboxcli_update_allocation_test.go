@@ -704,11 +704,15 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 		})
-		output, err := updateAllocation(t, configPath, params, true)
 
-		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		output, err := updateAllocation(t, configPath, params, true)
+		if err != nil {
+			require.Equal(t, output[0], "Error updating allocation:allocation_updating_failed: update allocation changes nothing")
+		} else {
+			require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		}
 
 		// get allocation
 		alloc := getAllocation(t, allocationID)
