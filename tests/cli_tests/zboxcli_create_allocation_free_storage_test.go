@@ -164,10 +164,6 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
 			"free_storage": markerFile,
-			"size":         10000,
-			"expire":       "30m",
-			"data":         1,
-			"parity":       1,
 		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -186,12 +182,6 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
 			"free_storage": markerFile,
-			"size":         10000,
-			"expire":       "30m",
-			"data":         1,
-			"parity":       1,
-			"read_price":  "0-1",
-			"write_price": "0-1",
 		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
@@ -227,12 +217,6 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
 			"free_storage": markerFile,
-			"size":         10000,
-			"expire":       "30m",
-			"data":         1,
-			"parity":       1,
-			"read_price":  "0-1",
-			"write_price": "0-1",
 		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1)
@@ -280,12 +264,6 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
 			"free_storage": markerFile,
-			"size":         10000,
-			"expire":       "30m",
-			"data":         1,
-			"parity":       1,
-			"read_price":  "0-1",
-			"write_price": "0-1",
 		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), strings.Join(output, "\n"))
@@ -329,12 +307,6 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
 			"free_storage": markerFile,
-			"size":         10000,
-			"expire":       "30m",
-			"data":         1,
-			"parity":       1,
-			"read_price":  "0-1",
-			"write_price": "0-1",
 		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1)
