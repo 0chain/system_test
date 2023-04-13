@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -208,7 +209,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Making more pools than allowed by num_delegates of miner node should fail", func(t *test.SystemTest) {
+	t.Run("Making more pools than allowed by max_delegates in minersc should fail", func(t *test.SystemTest) {
 		var newMiner climodel.Node // Choose a different miner so it has 0 pools
 		for _, newMiner = range miners.Nodes {
 			if newMiner.ID == miner02ID {
@@ -222,8 +223,16 @@ func TestMinerStake(testSetup *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 9.9)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
+		output, err = getMinerSCConfig(t, configPath, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
+
+		cfg, _ := keyValuePairStringToMap(output)
+		maxDelegates, err := strconv.ParseInt(cfg["max_delegates"], 10, 0)
+		require.Nil(t, err)
+
 		wg := &sync.WaitGroup{}
-		for i := 0; i < newMiner.Settings.MaxNumDelegates; i++ {
+		for i := 0; i < int(maxDelegates); i++ {
 			wg.Add(1)
 			go func(i int) {
 				defer wg.Done()
