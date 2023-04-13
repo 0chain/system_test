@@ -259,7 +259,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 
 		output, err = updateBlobberInfo(t, configPath, "")
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 26)
+		require.Len(t, output, 27)
 		require.Equal(t, "Error: required flag(s) \"blobber_id\" not set", output[0])
 	})
 
