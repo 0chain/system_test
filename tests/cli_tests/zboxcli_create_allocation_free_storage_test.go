@@ -33,8 +33,8 @@ const (
 	minerSmartContractAddress   = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
 	txnTypeSmartContract        = 1000 // A smart contract transaction type
 
-	freeTokensIndividualLimit = 10.0
-	freeTokensTotalLimit      = 100.0
+	freeTokensIndividualLimit = 100.0
+	freeTokensTotalLimit      = 10000.0
 	configKeyReadPoolFraction = "free_allocation_settings.read_pool_fraction"
 )
 
