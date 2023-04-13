@@ -53,7 +53,6 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 	})
 
 	t.RunSequentially("kill miner by non-smartcontract owner should fail", func(t *test.SystemTest) {
-
 		minerIds := getSortedMinerIds(t, sharderUrl)
 		require.True(t, len(minerIds) > 0, "no miners found")
 
@@ -64,7 +63,6 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 		require.Len(t, output, 1)
 		require.True(t, strings.Contains(output[0], "unauthorized access - only the owner can access"), "")
 	})
-
 }
 
 func killMiner(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
