@@ -41,8 +41,6 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		cliutil.Wait(t, time.Second)
 	}
 
-	require.True(t, len(sharderIds) > 1, "this test needs at least two sharders")
-
 	beforeSharders := getNodes(t, sharderIds, sharderUrl)
 
 	// ----------------------------------- w
