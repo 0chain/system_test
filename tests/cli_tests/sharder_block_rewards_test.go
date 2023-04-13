@@ -13,7 +13,6 @@ import (
 
 func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
-	t.Skip("Skip till chain-side bugs are resolved")
 
 	// Take a snapshot of the chains sharders, then wait a few seconds, take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
@@ -27,38 +26,45 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunWithTimeout("Sharder share of block rewards", 500*time.Second, func(t *test.SystemTest) {
-		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
-		if !confirmDebugBuild(t) {
-			t.Skip("sharder block rewards test skipped as it requires a debug event database")
+	//t.RunWithTimeout("Sharder share of block rewards", 500*time.Second, func(t *test.SystemTest) {
+	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+	if !confirmDebugBuild(t) {
+		t.Skip("sharder block rewards test skipped as it requires a debug event database")
+	}
+	sharderUrl := getSharderUrl(t)
+	var sharderIds []string
+	for {
+		sharderIds = getSortedSharderIds(t, sharderUrl)
+		if len(sharderIds) > 0 {
+			break
 		}
+		cliutil.Wait(t, time.Second)
+	}
 
-		sharderUrl := getSharderUrl(t)
-		sharderIds := getSortedSharderIds(t, sharderUrl)
-		require.True(t, len(sharderIds) > 1, "this test needs at least two sharders")
+	require.True(t, len(sharderIds) > 1, "this test needs at least two sharders")
 
-		beforeSharders := getNodes(t, sharderIds, sharderUrl)
+	beforeSharders := getNodes(t, sharderIds, sharderUrl)
 
-		// ----------------------------------- w
-		time.Sleep(time.Second * 3)
-		// ----------------------------------=
+	// ----------------------------------- w
+	cliutil.Wait(t, 3*time.Second)
+	// ----------------------------------=
 
-		afterSharders := getNodes(t, sharderIds, sharderUrl)
+	afterSharders := getNodes(t, sharderIds, sharderUrl)
 
-		// we add rewards at the end of the round, and they don't appear until the next round
-		startRound, endRound := getStartAndEndRounds(
-			t, nil, nil, beforeSharders.Nodes, afterSharders.Nodes,
-		)
+	// we add rewards at the end of the round, and they don't appear until the next round
+	startRound, endRound := getStartAndEndRounds(
+		t, nil, nil, beforeSharders.Nodes, afterSharders.Nodes,
+	)
 
-		time.Sleep(time.Second) // give time for last round to be saved
+	time.Sleep(time.Second) // give time for last round to be saved
 
-		history := cliutil.NewHistory(startRound, endRound)
-		history.Read(t, sharderUrl, false)
+	history := cliutil.NewHistory(startRound, endRound)
+	history.Read(t, sharderUrl, false)
 
-		balanceSharderRewards(
-			t, startRound, endRound, sharderIds, beforeSharders.Nodes, afterSharders.Nodes, history,
-		)
-	})
+	balanceSharderRewards(
+		t, startRound, endRound, sharderIds, beforeSharders.Nodes, afterSharders.Nodes, history,
+	)
+	//	})
 }
 
 func balanceSharderRewards(
