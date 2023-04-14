@@ -67,6 +67,8 @@ func TestStakePool(testSetup *testing.T) {
 
 			if minRequiredTokensToMatchStakedCapacity == 0 {
 				continue
+			} else if minRequiredTokensToMatchStakedCapacity <= 1 {
+				minRequiredTokensToMatchStakedCapacity = 1
 			}
 
 			newRandomWalletName := "new_random_wallet_name_for_staking_tokens"
