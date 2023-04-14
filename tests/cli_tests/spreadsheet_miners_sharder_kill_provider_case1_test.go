@@ -29,45 +29,45 @@ func TestSpreadsheetMinerSharderKillProviderCase1(testSetup *testing.T) { // nol
 	t := test.NewSystemTest(testSetup)
 	t.Skip("waiting for kill miner and kill sharder functionality")
 
-	//  t.RunWithTimeout("Spreadsheet miner sharder case 1", 500*time.Second, func(t *test.SystemTest) {
-	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", false)
-	time.Sleep(time.Second * 3)
+	t.RunWithTimeout("Spreadsheet miner sharder case 1", 500*time.Second, func(t *test.SystemTest) {
+		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", false)
+		time.Sleep(time.Second * 3)
 
-	if !confirmDebugBuild(t) {
-		t.Skip("miner block rewards test skipped as it requires a debug event database")
-	}
-	sharderUrl := getSharderUrl(t)
-	minerIds := getSortedMinerIds(t, sharderUrl)
-	sharderIds := getSortedSharderIds(t, sharderUrl)
-
-	SSMKPSCase1Setup(t, minerIds, sharderIds, sharderUrl)
-
-	_ = waitForRound(t, killRound, sharderUrl, minerIds)
-
-	// todo put in code to kill a miner and sharder.
-
-	afterMiners := waitForRound(t, sSMNumberOfRounds, sharderUrl, minerIds)
-	afterSharders := getNodes(t, sharderIds, sharderUrl)
-
-	var endRound int64
-	for i := range afterMiners.Nodes {
-		if endRound < afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
-			endRound = afterMiners.Nodes[i].RoundServiceChargeLastUpdated
+		if !confirmDebugBuild(t) {
+			t.Skip("miner block rewards test skipped as it requires a debug event database")
 		}
-	}
-	for i := range afterSharders.Nodes {
-		if endRound < afterSharders.Nodes[i].RoundServiceChargeLastUpdated {
-			endRound = afterSharders.Nodes[i].RoundServiceChargeLastUpdated
+		sharderUrl := getSharderUrl(t)
+		minerIds := getSortedMinerIds(t, sharderUrl)
+		sharderIds := getSortedSharderIds(t, sharderUrl)
+
+		SSMKPSCase1Setup(t, minerIds, sharderIds, sharderUrl)
+
+		_ = waitForRound(t, killRound, sharderUrl, minerIds)
+
+		// todo put code im here to kill a miner and a sharder.
+
+		afterMiners := waitForRound(t, sSMNumberOfRounds, sharderUrl, minerIds)
+		afterSharders := getNodes(t, sharderIds, sharderUrl)
+
+		var endRound int64
+		for i := range afterMiners.Nodes {
+			if endRound < afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
+				endRound = afterMiners.Nodes[i].RoundServiceChargeLastUpdated
+			}
 		}
-	}
-	history := cliutil.NewHistory(1, endRound)
-	history.Read(t, sharderUrl, true)
+		for i := range afterSharders.Nodes {
+			if endRound < afterSharders.Nodes[i].RoundServiceChargeLastUpdated {
+				endRound = afterSharders.Nodes[i].RoundServiceChargeLastUpdated
+			}
+		}
+		history := cliutil.NewHistory(1, endRound)
+		history.Read(t, sharderUrl, true)
 
-	displayMetricsMinerSharders(
-		t, endRound, afterMiners.Nodes, afterSharders.Nodes, history, sharderUrl,
-	)
+		displayMetricsMinerSharders(
+			t, endRound, afterMiners.Nodes, afterSharders.Nodes, history, sharderUrl,
+		)
 
-	//  })
+	})
 }
 
 func SSMKPSCase1Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUrl string) {

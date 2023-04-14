@@ -25,66 +25,66 @@ import (
 func TestSpreadsheetMinerSharderCase2(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	//  t.RunWithTimeout("Spreadsheet miner sharder case 1", 500*time.Second, func(t *test.SystemTest) {
-	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", false)
-	time.Sleep(time.Second * 3)
+	t.RunWithTimeout("Spreadsheet miner sharder case 1", 500*time.Second, func(t *test.SystemTest) {
+		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", false)
+		time.Sleep(time.Second * 3)
 
-	if !confirmDebugBuild(t) {
-		t.Skip("miner block rewards test skipped as it requires a debug event database")
-	}
-	sharderUrl := getSharderUrl(t)
-	minerIds := getSortedMinerIds(t, sharderUrl)
-	sharderIds := getSortedSharderIds(t, sharderUrl)
-
-	walletsMiners, walletsSharders := SSMSCase2Setup(t, minerIds, sharderIds, sharderUrl)
-
-	// ----------------------------------- w
-	for i := range walletsMiners {
-		require.Len(t, walletsMiners[i], 2)
-		output, err := collectRewardsMinerSharder(t, configPath, createParams(map[string]interface{}{
-			"provider_type": climodel.ProviderMiner.String(),
-			"provider_id":   minerIds[i],
-		}), false, walletsMiners[i][0])
-		require.NoError(t, err)
-		require.Len(t, output, 1)
-		require.True(t, strings.HasPrefix(output[0], "locked with"))
-	}
-	for i := range walletsSharders {
-		require.Len(t, walletsMiners[i], 2)
-		output, err := collectRewardsMinerSharder(t, configPath, createParams(map[string]interface{}{
-			"provider_type": climodel.ProviderSharder.String(),
-			"provider_id":   sharderIds[i],
-		}), false, walletsSharders[i][0])
-		require.NoError(t, err)
-		require.Len(t, output, 1)
-		require.True(t, strings.HasPrefix(output[0], "locked with"))
-	}
-	// ----------------------------------=
-
-	afterMiners := waitForRound(t, sSMNumberOfRounds, sharderUrl, minerIds)
-	afterSharders := getNodes(t, sharderIds, sharderUrl)
-
-	time.Sleep(time.Second) // give time for last round to be saved
-
-	var endRound int64
-	for i := range afterMiners.Nodes {
-		if endRound < afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
-			endRound = afterMiners.Nodes[i].RoundServiceChargeLastUpdated
+		if !confirmDebugBuild(t) {
+			t.Skip("miner block rewards test skipped as it requires a debug event database")
 		}
-	}
-	for i := range afterSharders.Nodes {
-		if endRound < afterSharders.Nodes[i].RoundServiceChargeLastUpdated {
-			endRound = afterSharders.Nodes[i].RoundServiceChargeLastUpdated
+		sharderUrl := getSharderUrl(t)
+		minerIds := getSortedMinerIds(t, sharderUrl)
+		sharderIds := getSortedSharderIds(t, sharderUrl)
+
+		walletsMiners, walletsSharders := SSMSCase2Setup(t, minerIds, sharderIds, sharderUrl)
+
+		// ----------------------------------- w
+		for i := range walletsMiners {
+			require.Len(t, walletsMiners[i], 2)
+			output, err := collectRewardsMinerSharder(t, configPath, createParams(map[string]interface{}{
+				"provider_type": climodel.ProviderMiner.String(),
+				"provider_id":   minerIds[i],
+			}), false, walletsMiners[i][0])
+			require.NoError(t, err)
+			require.Len(t, output, 1)
+			require.True(t, strings.HasPrefix(output[0], "locked with"))
 		}
-	}
-	history := cliutil.NewHistory(1, endRound)
-	history.Read(t, sharderUrl, true)
+		for i := range walletsSharders {
+			require.Len(t, walletsMiners[i], 2)
+			output, err := collectRewardsMinerSharder(t, configPath, createParams(map[string]interface{}{
+				"provider_type": climodel.ProviderSharder.String(),
+				"provider_id":   sharderIds[i],
+			}), false, walletsSharders[i][0])
+			require.NoError(t, err)
+			require.Len(t, output, 1)
+			require.True(t, strings.HasPrefix(output[0], "locked with"))
+		}
+		// ----------------------------------=
 
-	displayMetricsMinerSharders(
-		t, endRound, afterMiners.Nodes, afterSharders.Nodes, history, sharderUrl,
-	)
+		afterMiners := waitForRound(t, sSMNumberOfRounds, sharderUrl, minerIds)
+		afterSharders := getNodes(t, sharderIds, sharderUrl)
 
-	//  })
+		time.Sleep(time.Second) // give time for last round to be saved
+
+		var endRound int64
+		for i := range afterMiners.Nodes {
+			if endRound < afterMiners.Nodes[i].RoundServiceChargeLastUpdated {
+				endRound = afterMiners.Nodes[i].RoundServiceChargeLastUpdated
+			}
+		}
+		for i := range afterSharders.Nodes {
+			if endRound < afterSharders.Nodes[i].RoundServiceChargeLastUpdated {
+				endRound = afterSharders.Nodes[i].RoundServiceChargeLastUpdated
+			}
+		}
+		history := cliutil.NewHistory(1, endRound)
+		history.Read(t, sharderUrl, true)
+
+		displayMetricsMinerSharders(
+			t, endRound, afterMiners.Nodes, afterSharders.Nodes, history, sharderUrl,
+		)
+
+	})
 }
 
 func SSMSCase2Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUrl string) (minerWallets, sharderWallets [][]string) {
