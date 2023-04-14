@@ -45,7 +45,7 @@ func TestOwnerUpdate(testSetup *testing.T) {
 		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
 
 		var storageSCCommitPeriod int64 = 200
-		lfb := getLatestFinalizedBlock(t)
+		lfb := GetLatestFinalizedBlock(t)
 		lfbRound := lfb.Round
 		updateConfigRound := lfbRound + (storageSCCommitPeriod - (lfbRound % storageSCCommitPeriod))
 		var frequency time.Duration = 2
@@ -53,7 +53,7 @@ func TestOwnerUpdate(testSetup *testing.T) {
 		for i := 0; i < int(storageSCCommitPeriod)/int(frequency); i++ {
 			t.Logf("fetching lfb in: %ds...", frequency)
 			time.Sleep(frequency * time.Second)
-			lfb = getLatestFinalizedBlock(t)
+			lfb = GetLatestFinalizedBlock(t)
 			if lfb.Round >= updateConfigRound {
 				found = true
 				break

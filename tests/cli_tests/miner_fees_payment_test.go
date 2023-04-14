@@ -46,14 +46,14 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		startBlock := getLatestFinalizedBlock(t)
+		startBlock := GetLatestFinalizedBlock(t)
 
 		fee := 0.1
 		output, err = sendTokens(t, configPath, targetWallet.ClientID, 0.5, escapedTestName(t), fee)
 		require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)
-		endBlock := getLatestFinalizedBlock(t)
+		endBlock := GetLatestFinalizedBlock(t)
 
 		block := getBlockContainingTransaction(t, startBlock, endBlock, wallet, escapedTestName(t))
 		blockMinerId := block.Block.MinerId
@@ -81,7 +81,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		startBlock := getLatestFinalizedBlock(t)
+		startBlock := GetLatestFinalizedBlock(t)
 
 		fee := 0.1
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
@@ -94,7 +94,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.Nil(t, err, "error adding vesting pool", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)
-		endBlock := getLatestFinalizedBlock(t)
+		endBlock := GetLatestFinalizedBlock(t)
 
 		block := getBlockContainingTransaction(t, startBlock, endBlock, wallet, "vestingpool")
 		blockMinerId := block.Block.MinerId
@@ -115,7 +115,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		startBlock := getLatestFinalizedBlock(t)
+		startBlock := GetLatestFinalizedBlock(t)
 
 		fee := 0.1
 		readPoolParams := createParams(map[string]interface{}{
@@ -128,7 +128,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		lockTimer := time.NewTimer(time.Minute)
 		cliutils.Wait(t, 30*time.Second)
 
-		endBlock := getLatestFinalizedBlock(t)
+		endBlock := GetLatestFinalizedBlock(t)
 
 		block := getBlockContainingTransaction(t, startBlock, endBlock, wallet, "read_pool_lock")
 		blockMinerId := block.Block.MinerId
@@ -147,14 +147,14 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 
 		<-lockTimer.C
 
-		startBlock = getLatestFinalizedBlock(t)
+		startBlock = GetLatestFinalizedBlock(t)
 
 		output, err = readPoolUnlock(t, configPath, createParams(map[string]interface{}{}), true)
 		require.Nil(t, err, "error unlocking read pool", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)
 
-		endBlock = getLatestFinalizedBlock(t)
+		endBlock = GetLatestFinalizedBlock(t)
 
 		block = getBlockContainingTransaction(t, startBlock, endBlock, wallet, "read_pool_unlock")
 		blockMinerId = block.Block.MinerId
@@ -177,7 +177,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 
 		allocationId := setupAllocation(t, configPath)
 
-		startBlock := getLatestFinalizedBlock(t)
+		startBlock := GetLatestFinalizedBlock(t)
 
 		// Lock 1 token in Write pool amongst all blobbers
 		fee := 0.1
@@ -191,7 +191,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		lockTimer := time.NewTimer(time.Minute * 2)
 		cliutils.Wait(t, 30*time.Second)
 
-		endBlock := getLatestFinalizedBlock(t)
+		endBlock := GetLatestFinalizedBlock(t)
 
 		block := getBlockContainingTransaction(t, startBlock, endBlock, wallet, "write_pool_lock")
 		blockMinerId := block.Block.MinerId
@@ -203,7 +203,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 
 		<-lockTimer.C
 
-		startBlock = getLatestFinalizedBlock(t)
+		startBlock = GetLatestFinalizedBlock(t)
 
 		output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
 			"pool_id": allocationId,
@@ -212,7 +212,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)
-		endBlock = getLatestFinalizedBlock(t)
+		endBlock = GetLatestFinalizedBlock(t)
 
 		block = getBlockContainingTransaction(t, startBlock, endBlock, wallet, "write_pool_unlock")
 		blockMinerId = block.Block.MinerId
@@ -246,7 +246,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
 
 		// Get miner's start balance
-		startBlock := getLatestFinalizedBlock(t)
+		startBlock := GetLatestFinalizedBlock(t)
 
 		// Stake tokens against this blobber
 		fee := 0.1
@@ -259,7 +259,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.Len(t, output, 1)
 
 		cliutils.Wait(t, 30*time.Second)
-		endBlock := getLatestFinalizedBlock(t)
+		endBlock := GetLatestFinalizedBlock(t)
 
 		block := getBlockContainingTransaction(t, startBlock, endBlock, wallet, "stake_pool_lock")
 		blockMinerId := block.Block.MinerId
@@ -270,7 +270,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.True(t, areMinerFeesPaidCorrectly, "Test Failed due to transfer from MinerSC to generator miner not found")
 
 		// Unstake with fee
-		startBlock = getLatestFinalizedBlock(t)
+		startBlock = GetLatestFinalizedBlock(t)
 
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
@@ -279,7 +279,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)
-		endBlock = getLatestFinalizedBlock(t)
+		endBlock = GetLatestFinalizedBlock(t)
 
 		block = getBlockContainingTransaction(t, startBlock, endBlock, wallet, "stake_pool_unlock")
 		blockMinerId = block.Block.MinerId
@@ -315,7 +315,7 @@ func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {
 	return http.Get(sharderBaseURL + "/v1/block/get/latest_finalized")
 }
 
-func getLatestFinalizedBlock(t *test.SystemTest) *climodel.LatestFinalizedBlock {
+func GetLatestFinalizedBlock(t *test.SystemTest) *climodel.LatestFinalizedBlock {
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 

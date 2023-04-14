@@ -198,7 +198,7 @@ func TestSharderStake(testSetup *testing.T) {
 // waitForRoundsGT waits for at least r rounds passed
 func waitForRoundsGT(t *test.SystemTest, r int) error {
 	var (
-		lfb      = getLatestFinalizedBlock(t)
+		lfb      = GetLatestFinalizedBlock(t)
 		endRound = lfb.Round + int64(r)
 		checkTk  = time.NewTicker(5 * time.Second)
 	)
@@ -208,7 +208,7 @@ func waitForRoundsGT(t *test.SystemTest, r int) error {
 		case <-time.After(3 * time.Minute):
 			return fmt.Errorf("wait timeout")
 		case <-checkTk.C:
-			lfb = getLatestFinalizedBlock(t)
+			lfb = GetLatestFinalizedBlock(t)
 			if lfb.Round > endRound {
 				return nil
 			}

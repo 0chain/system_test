@@ -496,5 +496,5 @@ func minerInfo(t *test.SystemTest, cliConfigFilename, params string, retry bool)
 }
 
 func getCurrentRound(t *test.SystemTest) int64 {
-	return getLatestFinalizedBlock(t).Round
+	return GetLatestFinalizedBlock(t).Round
 }
