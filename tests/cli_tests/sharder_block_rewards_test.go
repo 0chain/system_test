@@ -11,6 +11,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func waitForSharder(t *test.SystemTest, sharderUrl string) ([]string, climodel.NodeList) {
+	var sharderIds []string
+	timer := time.Now()
+	for {
+		sharderIds = getSortedSharderIds(t, sharderUrl)
+		if len(sharderIds) > 0 {
+			sharders := getNodes(t, sharderIds, sharderUrl)
+			for i := range sharders.Nodes {
+				if !sharders.Nodes[i].IsKilled {
+					return sharderIds, sharders
+				}
+			}
+		}
+		t.Logf("no registered sharders found, waiting for %v...", time.Since(timer))
+		cliutil.Wait(t, time.Second)
+	}
+}
+
 func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
@@ -26,7 +44,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunSequentiallyWithTimeout("Sharder share of block rewards", 200*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Sharder share of block rewards", 1000*time.Second, func(t *test.SystemTest) {
 		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 		if !confirmDebugBuild(t) {
 			t.Skip("sharder block rewards test skipped as it requires a debug event database")
@@ -34,15 +52,8 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 
 		sharderUrl := getSharderUrl(t)
 		var sharderIds []string
-		for {
-			sharderIds = getSortedSharderIds(t, sharderUrl)
-			if len(sharderIds) > 0 {
-				break
-			}
-			cliutil.Wait(t, time.Second)
-		}
-
-		beforeSharders := getNodes(t, sharderIds, sharderUrl)
+		var beforeSharders climodel.NodeList
+		sharderIds, beforeSharders = waitForSharder(t, sharderUrl)
 
 		// ----------------------------------- w
 		time.Sleep(time.Second * 3)

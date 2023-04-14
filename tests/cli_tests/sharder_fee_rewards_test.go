@@ -24,7 +24,7 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunSequentiallyWithTimeout("Sharder share of fee rewards for transactions", 200*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Sharder share of fee rewards for transactions", 1000*time.Second, func(t *test.SystemTest) {
 		walletId := initialiseTest(t, escapedTestName(t)+"_TARGET", true)
 		output, err := executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -38,15 +38,8 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 
 		sharderUrl := getSharderUrl(t)
 		var sharderIds []string
-		for {
-			sharderIds = getSortedSharderIds(t, sharderUrl)
-			if len(sharderIds) > 0 {
-				break
-			}
-			cliutil.Wait(t, time.Second)
-		}
-
-		beforeSharders := getNodes(t, sharderIds, sharderUrl)
+		var beforeSharders climodel.NodeList
+		sharderIds, beforeSharders = waitForSharder(t, sharderUrl)
 
 		// ------------------------------------
 		const numPaidTransactions = 3
