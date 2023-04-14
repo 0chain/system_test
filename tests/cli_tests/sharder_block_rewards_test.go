@@ -59,28 +59,6 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 	})
 }
 
-func waitForNSharder(t *test.SystemTest, sharderUrl string, n int) ([]string, climodel.NodeList) {
-	var sharderIds []string
-	timer := time.Now()
-	for {
-		sharderIds = getSortedSharderIds(t, sharderUrl)
-		if len(sharderIds) > 0 {
-			count := 0
-			sharders := getNodes(t, sharderIds, sharderUrl)
-			for i := range sharders.Nodes {
-				if !sharders.Nodes[i].IsKilled {
-					count++
-					if count >= n {
-						return sharderIds, sharders
-					}
-				}
-			}
-		}
-		t.Logf("no registered sharders found, waiting for %v...", time.Since(timer))
-		cliutil.Wait(t, time.Second)
-	}
-}
-
 func balanceSharderRewards(
 	t *test.SystemTest,
 	startRound, endRound int64,
@@ -298,4 +276,26 @@ func balanceSharderDelegatePoolBlockRewards(
 
 func getSortedSharderIds(t *test.SystemTest, sharderBaseURL string) []string {
 	return getSortedNodeIds(t, "getSharderList", sharderBaseURL)
+}
+
+func waitForNSharder(t *test.SystemTest, sharderUrl string, n int) ([]string, climodel.NodeList) {
+	var sharderIds []string
+	timer := time.Now()
+	for {
+		sharderIds = getSortedSharderIds(t, sharderUrl)
+		if len(sharderIds) > 0 {
+			count := 0
+			sharders := getNodes(t, sharderIds, sharderUrl)
+			for i := range sharders.Nodes {
+				if !sharders.Nodes[i].IsKilled {
+					count++
+					if count >= n {
+						return sharderIds, sharders
+					}
+				}
+			}
+		}
+		t.Logf("no registered sharders found, waiting for %v...", time.Since(timer))
+		cliutil.Wait(t, time.Second)
+	}
 }
