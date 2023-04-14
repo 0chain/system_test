@@ -11,6 +11,28 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func waitForNSharder(t *test.SystemTest, sharderUrl string, n int) ([]string, climodel.NodeList) {
+	var sharderIds []string
+	timer := time.Now()
+	for {
+		sharderIds = getSortedSharderIds(t, sharderUrl)
+		if len(sharderIds) > 0 {
+			count := 0
+			sharders := getNodes(t, sharderIds, sharderUrl)
+			for i := range sharders.Nodes {
+				if !sharders.Nodes[i].IsKilled {
+					count++
+					if count >= n {
+						return sharderIds, sharders
+					}
+				}
+			}
+		}
+		t.Logf("no registered sharders found, waiting for %v...", time.Since(timer))
+		cliutil.Wait(t, time.Second)
+	}
+}
+
 func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 	t.Skip("Skip till chain-side bugs are resolved")
@@ -38,10 +60,9 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		sharderUrl := getSharderUrl(t)
-		sharderIds := getSortedSharderIds(t, sharderUrl)
-		require.True(t, len(sharderIds) > 1, "this test needs at least two sharders")
-
-		beforeSharders := getNodes(t, sharderIds, sharderUrl)
+		var sharderIds []string
+		var beforeSharders climodel.NodeList
+		sharderIds, beforeSharders = waitForNSharder(t, sharderUrl, 2)
 
 		// ------------------------------------
 		const numPaidTransactions = 3
