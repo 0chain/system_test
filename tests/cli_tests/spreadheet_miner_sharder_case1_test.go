@@ -21,6 +21,7 @@ const (
 	sSMSNumberSharders            = 2 // todo change to 3
 	sSMSMinerSharderStakePoolSize = 1
 	sSMSServiceCharge             = 0.2
+	sSMNumberOfRounds             = int64(2000)
 )
 
 // TestSpreadsheetMinerSharderCase1
@@ -49,16 +50,8 @@ func TestSpreadsheetMinerSharderCase1(testSetup *testing.T) { // nolint:gocyclo 
 
 	SSMSCase1Setup(t, minerIds, sharderIds, sharderUrl)
 
-	// ----------------------------------- w
-	time.Sleep(time.Second * 3)
-	// ----------------------------------=
-
-	time.Sleep(time.Second) // give time for last round to be saved
-
-	afterMiners := getNodes(t, minerIds, sharderUrl)
+	afterMiners := waitForRound(t, sSMNumberOfRounds, sharderUrl, minerIds)
 	afterSharders := getNodes(t, sharderIds, sharderUrl)
-
-	time.Sleep(time.Second) // give time for last round to be saved
 
 	var endRound int64
 	for i := range afterMiners.Nodes {
@@ -79,6 +72,17 @@ func TestSpreadsheetMinerSharderCase1(testSetup *testing.T) { // nolint:gocyclo 
 	)
 
 	//  })
+}
+
+func waitForRound(t *test.SystemTest, endRound int64, sharderUrl string, minerIds []string) climodel.NodeList {
+	for {
+		afterMiners := getNodes(t, minerIds, sharderUrl)
+		if len(afterMiners.Nodes) > 0 && afterMiners.Nodes[0].RoundServiceChargeLastUpdated > endRound {
+			return afterMiners
+		}
+		t.Logf("running, round %d", afterMiners.Nodes[0].RoundServiceChargeLastUpdated)
+		cliutil.Wait(t, 3*time.Second)
+	}
 }
 
 func SSMSCase1Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUrl string) {

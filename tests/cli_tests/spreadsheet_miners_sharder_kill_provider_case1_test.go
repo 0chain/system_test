@@ -5,22 +5,29 @@ import (
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
-// TestSpreadsheetMinerSharderCase0
+const (
+	killRound = int64(1000)
+)
+
+// TestSpreadsheetMinerSharderKillProviderCase1
 // 11 miners, 3 sharders to represent a scaled version of 111 miners and 30 sharders for mainnet
-// no delegate each,
-// Loadtest is off
+// 1 delegate each, equal stake
+// Loadtest is off. Kill one miner, one sharder after 1000 rounds.
 // Txn fee set to zero, Service charge set to 20%. Turn challenge off. No blobbers
-// Miners and sharders should get equal rewards. May need to find the right share ratio
+// Miners and sharders should get equal rewards except one miner and sharder who will not receive after 1000 rounds.
+// You can have the test done for 2000 rounds and compare, in which case, it will be half as much
 // Total rewards to all miners and sharders needs to be equal to the total minted tokens on the network.
 // Each miner/sharder delegate income should be equal and is based on rewards minus the service charge.
 // The delegate should also receive the service fee portion.
 // Total Rewards = Rewards from all miners and sharders
-func TestSpreadsheetMinerSharderCase0(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+func TestSpreadsheetMinerSharderKillProviderCase1(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
+	t.Skip("waiting for kill miner and kill sharder functionality")
 
 	//  t.RunWithTimeout("Spreadsheet miner sharder case 1", 500*time.Second, func(t *test.SystemTest) {
 	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", false)
@@ -33,18 +40,14 @@ func TestSpreadsheetMinerSharderCase0(testSetup *testing.T) { // nolint:gocyclo 
 	minerIds := getSortedMinerIds(t, sharderUrl)
 	sharderIds := getSortedSharderIds(t, sharderUrl)
 
-	SSMSCase0Setup(t, minerIds, sharderIds, sharderUrl)
+	SSMKPSCase1Setup(t, minerIds, sharderIds, sharderUrl)
 
-	// ----------------------------------- w
+	_ = waitForRound(t, killRound, sharderUrl, minerIds)
+
+	// todo put in code to kill a miner and sharder.
+
 	afterMiners := waitForRound(t, sSMNumberOfRounds, sharderUrl, minerIds)
-	// ----------------------------------=
 	afterSharders := getNodes(t, sharderIds, sharderUrl)
-
-	// Miners and sharders should get equal rewards
-	minerScConfig := getMinerScMap(t)
-	minerBlockReward, sharderBlockReward := blockRewards(1, minerScConfig)
-	require.Equal(testSetup, minerBlockReward, sharderBlockReward,
-		"miner and sharder should have equal block rewards")
 
 	var endRound int64
 	for i := range afterMiners.Nodes {
@@ -67,21 +70,34 @@ func TestSpreadsheetMinerSharderCase0(testSetup *testing.T) { // nolint:gocyclo 
 	//  })
 }
 
-func SSMSCase0Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUrl string) {
+func SSMKPSCase1Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUrl string) {
 	// 11 miners, 3 sharders
 	require.Len(t, minerIds, sSMSNumberMiners)
 	require.Len(t, sharderIds, sSMSNumberSharders)
+	require.True(t, killRound < sSMNumberOfRounds)
 
-	// 0 delegate each
+	// 1 delegate each, equal stake
+	t.Log("locking tokens in new miner delegate pools")
+	_ = createStakePools(t, minerIds, []float64{sSMSMinerSharderStakePoolSize}, climodel.ProviderMiner)
+	t.Log("locking tokens in new sharder delegate pools")
+	_ = createStakePools(t, sharderIds, []float64{sSMSMinerSharderStakePoolSize}, climodel.ProviderSharder)
 	miners := getNodes(t, minerIds, sharderUrl)
 	sharders := getNodes(t, sharderIds, sharderUrl)
 	for i := range miners.Nodes {
-		require.Len(t, miners.Nodes[i].StakePool.Pools, 0,
+		require.Len(t, miners.Nodes[i].StakePool.Pools, 1,
 			"there should be exactly one stake pool per miner")
+		for _, pool := range miners.Nodes[i].StakePool.Pools {
+			require.Equal(t, pool.Balance, int64(sSMSMinerSharderStakePoolSize)*1e10,
+				"stake pools should be all have balance %v", sSMSMinerSharderStakePoolSize)
+		}
 	}
 	for i := range sharders.Nodes {
-		require.Len(t, sharders.Nodes[i].StakePool.Pools, 0,
+		require.Len(t, sharders.Nodes[i].StakePool.Pools, 1,
 			"there should be exactly one stake pool per sharder")
+		for _, pool := range sharders.Nodes[i].StakePool.Pools {
+			require.Equal(t, pool.Balance, int64(sSMSMinerSharderStakePoolSize)*1e10,
+				"stake pools should be all have balance %v", sSMSMinerSharderStakePoolSize)
+		}
 	}
 
 	// Service charge set to 20%
@@ -97,15 +113,16 @@ func SSMSCase0Setup(t *test.SystemTest, minerIds, sharderIds []string, sharderUr
 	challengesEnabled, ok := storageSettings.Boolean["challenge_enabled"]
 	require.True(t, ok, "missing challenge enabled setting")
 	require.Falsef(t, challengesEnabled, "challenge enabled setting should be false")
-	costCollectReward, ok := storageSettings.Numeric["cost.collect_reward"]
-	costCollectReward = costCollectReward
-	//require.Equal(t, 0, costCollectReward)
 
-	// cost.challenge_request set to zero
+	// costs all set to zero
+	checkCostValues(t, storageSettings.Numeric, 0)
+	checkCostValues(t, getMinerScMap(t), 0)
 
 	//  No blobbers
 	blobbers := getBlobbers(t)
-	require.Len(t, blobbers, 0)
-}
+	require.Len(t, blobbers, 0, " should be no blobbers")
 
-//
+	//No validators
+	validators := getValidators(t)
+	require.Len(t, validators, 0, "should be no validators")
+}

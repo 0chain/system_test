@@ -38,13 +38,7 @@ func TestSpreadsheetMinerSharderCase4(testSetup *testing.T) { // nolint:gocyclo 
 
 	SSMSCase4Setup(t, minerIds, sharderIds, sharderUrl)
 
-	// ----------------------------------- w
-	time.Sleep(time.Second * 3)
-	// ----------------------------------=
-
-	time.Sleep(time.Second) // give time for last round to be saved
-
-	afterMiners := getNodes(t, minerIds, sharderUrl)
+	afterMiners := waitForRound(t, sSMNumberOfRounds, sharderUrl, minerIds)
 	afterSharders := getNodes(t, sharderIds, sharderUrl)
 
 	time.Sleep(time.Second) // give time for last round to be saved

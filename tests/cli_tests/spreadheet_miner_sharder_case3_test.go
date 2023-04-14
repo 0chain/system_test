@@ -59,12 +59,9 @@ func TestSpreadsheetMinerSharderCase3(testSetup *testing.T) { // nolint:gocyclo 
 		require.Len(t, output, 1)
 		require.True(t, strings.HasPrefix(output[0], "locked with"))
 	}
-	time.Sleep(time.Second * 1)
 	// ----------------------------------=
 
-	time.Sleep(time.Second) // give time for last round to be saved
-
-	afterMiners := getNodes(t, minerIds, sharderUrl)
+	afterMiners := waitForRound(t, sSMNumberOfRounds, sharderUrl, minerIds)
 	afterSharders := getNodes(t, sharderIds, sharderUrl)
 
 	time.Sleep(time.Second) // give time for last round to be saved
