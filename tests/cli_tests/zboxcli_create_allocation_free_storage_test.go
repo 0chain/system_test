@@ -310,7 +310,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1)
-		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: 110000000000 exceeded permitted free storage  100000000000", output[0])
+		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: 1010000000000 exceeded permitted free storage  1000000000000", output[0])
 	})
 }
 
