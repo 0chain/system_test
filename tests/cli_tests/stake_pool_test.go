@@ -61,7 +61,7 @@ func TestStakePool(testSetup *testing.T) {
 			stakedCapacity := float64(blInfo.TotalStake)*GB/float64(blInfo.Terms.WritePrice) - float64(blInfo.Allocated)
 			requiredStakedCapacity := float64(maxStakedCapacity) - stakedCapacity
 
-			minRequiredTokensToMatchStakedCapacity := (requiredStakedCapacity * float64(blInfo.Terms.WritePrice)) / GB
+			minRequiredTokensToMatchStakedCapacity := (requiredStakedCapacity * float64(blInfo.Terms.WritePrice)) / (GB * 1e10)
 
 			fmt.Println("minRequiredTokensToMatchStakedCapacity : ", minRequiredTokensToMatchStakedCapacity, " requiredStakedCapacity : ", requiredStakedCapacity, " stakedCapacity : ", stakedCapacity, " maxStakedCapacity : ", maxStakedCapacity, "blobberID : ", blobber.Id)
 
