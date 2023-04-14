@@ -20,7 +20,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Create allocation for locking cost equal to minimum cost should work", func(t *test.SystemTest) {
+	t.Run("Create allocation for locking cost equal to the cost calculated should work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{
@@ -37,7 +37,13 @@ func TestCreateAllocation(testSetup *testing.T) {
 		allocationCost, err := getAllocationCost(output[0])
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
-		options = map[string]interface{}{"lock": allocationCost}
+		options = map[string]interface{}{
+			"lock":        allocationCost,
+			"expire":      "5m",
+			"size":        "10000",
+			"read_price":  "0-1",
+			"write_price": "0-1",
+		}
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
