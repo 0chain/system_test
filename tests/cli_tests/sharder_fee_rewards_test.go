@@ -39,7 +39,7 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		sharderUrl := getSharderUrl(t)
 		var sharderIds []string
 		var beforeSharders climodel.NodeList
-		sharderIds, beforeSharders = waitForSharder(t, sharderUrl)
+		sharderIds, beforeSharders = waitForNSharder(t, sharderUrl, 1)
 
 		// ------------------------------------
 		const numPaidTransactions = 3

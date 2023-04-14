@@ -11,24 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func waitForSharder(t *test.SystemTest, sharderUrl string) ([]string, climodel.NodeList) {
-	var sharderIds []string
-	timer := time.Now()
-	for {
-		sharderIds = getSortedSharderIds(t, sharderUrl)
-		if len(sharderIds) > 0 {
-			sharders := getNodes(t, sharderIds, sharderUrl)
-			for i := range sharders.Nodes {
-				if !sharders.Nodes[i].IsKilled {
-					return sharderIds, sharders
-				}
-			}
-		}
-		t.Logf("no registered sharders found, waiting for %v...", time.Since(timer))
-		cliutil.Wait(t, time.Second)
-	}
-}
-
 func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
@@ -53,7 +35,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 		sharderUrl := getSharderUrl(t)
 		var sharderIds []string
 		var beforeSharders climodel.NodeList
-		sharderIds, beforeSharders = waitForSharder(t, sharderUrl)
+		sharderIds, beforeSharders = waitForNSharder(t, sharderUrl, 1)
 
 		// ----------------------------------- w
 		time.Sleep(time.Second * 3)
@@ -75,6 +57,28 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 			t, startRound, endRound, sharderIds, beforeSharders.Nodes, afterSharders.Nodes, history,
 		)
 	})
+}
+
+func waitForNSharder(t *test.SystemTest, sharderUrl string, n int) ([]string, climodel.NodeList) {
+	var sharderIds []string
+	timer := time.Now()
+	for {
+		sharderIds = getSortedSharderIds(t, sharderUrl)
+		if len(sharderIds) > 0 {
+			count := 0
+			sharders := getNodes(t, sharderIds, sharderUrl)
+			for i := range sharders.Nodes {
+				if !sharders.Nodes[i].IsKilled {
+					count++
+					if count >= n {
+						return sharderIds, sharders
+					}
+				}
+			}
+		}
+		t.Logf("no registered sharders found, waiting for %v...", time.Since(timer))
+		cliutil.Wait(t, time.Second)
+	}
 }
 
 func balanceSharderRewards(
