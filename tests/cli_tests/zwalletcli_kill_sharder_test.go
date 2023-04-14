@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	climodel "github.com/0chain/system_test/internal/cli/model"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -40,11 +42,9 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 		require.True(t, strings.Contains(output[0], "unauthorized access - only the owner can access"), "")
 	})
 
-	t.RunSequentiallyWithTimeout("Killed sharder does not receive rewards", 200*time.Second, func(t *test.SystemTest) {
-		sharderIds := getSortedSharderIds(t, sharderUrl)
-		require.True(t, len(sharderIds) > 0, "no sharders found")
-
-		startSharders := getNodes(t, sharderIds, sharderUrl)
+	t.RunSequentiallyWithTimeout("Killed sharder does not receive rewards", 1000*time.Second, func(t *test.SystemTest) {
+		var startSharders climodel.NodeList
+		_, startSharders = waitForNSharder(t, sharderUrl, 2)
 		var sharderToKill string
 		for i := range startSharders.Nodes {
 			if !startSharders.Nodes[i].IsKilled {
