@@ -224,16 +224,6 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		// Pick a random blobber
 		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
 
-		// get min_stake
-		output, err = getStorageSCConfig(t, configPath, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
-
-		cfg, _ := keyValuePairStringToMap(output)
-		stakePoolMinLock, err := strconv.ParseInt(cfg["stakepool.min_lock"], 0, 64)
-		require.Nil(t, err)
-		stakePoolMinLockInSAS := stakePoolMinLock * TOKEN_UNIT
-
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
@@ -241,8 +231,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "Expected error when staking 0 tokens than in stake pool", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
-		require.Equal(t, fmt.Sprintf("Failed to lock tokens in stake pool: stake_pool_lock_failed:"+
-			" too small stake to lock: 0 < %v", stakePoolMinLockInSAS), output[0])
+		require.Equal(t, "Failed to lock tokens in stake pool: stake_pool_lock_failed: no stake to lock: 0", output[0])
 
 		// Wallet balance after staking tokens
 		output, err = getBalance(t, configPath)
