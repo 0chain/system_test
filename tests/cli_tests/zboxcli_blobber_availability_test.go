@@ -18,6 +18,10 @@ func TestBlobberAvailability(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("blobber is available switch controls blobber use for allocations", func(t *test.SystemTest) {
+		// register and faucet pour tokens
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		startBlobbers := getBlobbers(t)
 		var blobberToDeactivate *model.BlobberDetails
 		var activeBlobbers int
