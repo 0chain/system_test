@@ -31,8 +31,9 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 	}
 
 	t.RunSequentially("kill sharder by non-smartcontract owner should fail", func(t *test.SystemTest) {
-		sharderIds := getSortedSharderIds(t, sharderUrl)
-		require.True(t, len(sharderIds) > 0, "no sharders found")
+		var sharderIds []string
+		sharderIds, _ = waitForNSharder(t, sharderUrl, 1)
+		require.True(t, len(sharderIds) > 0, "no sharders found, should be impossible")
 
 		output, err := killSharder(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"id": sharderIds[0],
