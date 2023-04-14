@@ -66,7 +66,6 @@ func TestSpreadsheetMinerSharderKillProviderCase1(testSetup *testing.T) { // nol
 		displayMetricsMinerSharders(
 			t, endRound, afterMiners.Nodes, afterSharders.Nodes, history, sharderUrl,
 		)
-
 	})
 }
 
