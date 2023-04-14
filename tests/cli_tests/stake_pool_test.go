@@ -72,13 +72,13 @@ func TestStakePool(testSetup *testing.T) {
 			}
 
 			newRandomWalletName := "new_random_wallet_name_for_staking_tokens"
-
-			for i := 0.0; i < minRequiredTokensToMatchStakedCapacity/9+2; i++ {
-				_, err := executeFaucetWithTokens(t, configPath, 9)
-				require.Nil(t, err, "Error executing faucet with tokens", err)
-			}
 			_, err := registerWalletForName(t, configPath, newRandomWalletName)
 			require.Nil(t, err, "Error registering wallet", err)
+
+			for i := 0.0; i < minRequiredTokensToMatchStakedCapacity/9+2; i++ {
+				_, err := executeFaucetWithTokensForWallet(t, newRandomWalletName, configPath, 9)
+				require.Nil(t, err, "Error executing faucet with tokens", err)
+			}
 
 			_, err = stakeTokensForWallet(t, configPath, newRandomWalletName, createParams(map[string]interface{}{"blobber_id": blobber.Id, "tokens": minRequiredTokensToMatchStakedCapacity}), true)
 			require.Nil(t, err, "Error staking tokens", err)
