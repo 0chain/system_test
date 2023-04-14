@@ -28,7 +28,7 @@ func TestStakePool(testSetup *testing.T) {
 		var minStakedCapacityBlobber climodel.BlobberInfoDetailed
 
 		// set maxStakedCapacity to max uint64 value
-		maxStakedCapacity := uint64(18446744073709551614)
+		maxStakedCapacity := uint64(0)
 
 		for _, blobber := range blobbersList {
 			output, _ := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
@@ -49,6 +49,8 @@ func TestStakePool(testSetup *testing.T) {
 			}
 		}
 
+		fmt.Println("Max Staked Capacity : ", maxStakedCapacity)
+
 		for _, blobber := range blobbersList {
 			output, _ := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
 
@@ -61,7 +63,18 @@ func TestStakePool(testSetup *testing.T) {
 
 			minRequiredTokensToMatchStakedCapacity := (requiredStakedCapacity * float64(blInfo.Terms.WritePrice)) / GB
 
+			fmt.Println("minRequiredTokensToMatchStakedCapacity : ", minRequiredTokensToMatchStakedCapacity, " requiredStakedCapacity : ", requiredStakedCapacity, " stakedCapacity : ", stakedCapacity, " maxStakedCapacity : ", maxStakedCapacity, "blobberID : ", blobber.Id)
+
+			if minRequiredTokensToMatchStakedCapacity == 0 {
+				continue
+			}
+
 			newRandomWalletName := "new_random_wallet_name_for_staking_tokens"
+
+			for i := 0.0; i < minRequiredTokensToMatchStakedCapacity/9+2; i++ {
+				_, err := executeFaucetWithTokens(t, configPath, 9)
+				require.Nil(t, err, "Error executing faucet with tokens", err)
+			}
 			_, err := registerWalletForName(t, configPath, newRandomWalletName)
 			require.Nil(t, err, "Error registering wallet", err)
 
@@ -131,7 +144,7 @@ func TestStakePool(testSetup *testing.T) {
 
 		fmt.Println("Allocation Size : ", allocSize)
 
-		options := map[string]interface{}{"cost": "", "size": allocSize, "data": 3, "parity": 4}
+		options := map[string]interface{}{"cost": "", "size": allocSize, "data": len(blobbersList) / 2, "parity": len(blobbersList) - len(blobbersList)/2}
 		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -147,8 +160,8 @@ func TestStakePool(testSetup *testing.T) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": (allocationCost + 1) * 2,
-			"data":   3,
-			"parity": 4,
+			"data":   len(blobbersList) / 2,
+			"parity": len(blobbersList) - len(blobbersList)/2,
 			"lock":   allocationCost + 1,
 		})
 
