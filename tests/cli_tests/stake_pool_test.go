@@ -43,10 +43,31 @@ func TestStakePool(testSetup *testing.T) {
 			require.Greater(t, stakedCapacity, uint64(blobber.Allocated), "Staked capacity should be greater than allocated capacity")
 			stakedCapacity -= uint64(blobber.Allocated)
 
-			if stakedCapacity < maxStakedCapacity {
+			if stakedCapacity > maxStakedCapacity {
 				maxStakedCapacity = stakedCapacity
 				minStakedCapacityBlobber = blInfo
 			}
+		}
+
+		for _, blobber := range blobbersList {
+			output, _ := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
+
+			var blInfo climodel.BlobberInfoDetailed
+			err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
+			require.Nil(t, err, "error unmarshalling blobber info")
+
+			stakedCapacity := float64(blInfo.TotalStake)*GB/float64(blInfo.Terms.WritePrice) - float64(blInfo.Allocated)
+			requiredStakedCapacity := float64(maxStakedCapacity) - stakedCapacity
+
+			minRequiredTokensToMatchStakedCapacity := (requiredStakedCapacity * float64(blInfo.Terms.WritePrice)) / GB
+
+			newRandomWalletName := "new_random_wallet_name_for_staking_tokens"
+			_, err := registerWalletForName(t, configPath, newRandomWalletName)
+			require.Nil(t, err, "Error registering wallet", err)
+
+			_, err = stakeTokensForWallet(t, configPath, newRandomWalletName, createParams(map[string]interface{}{"blobber_id": blobber.Id, "tokens": minRequiredTokensToMatchStakedCapacity}), true)
+			require.Nil(t, err, "Error staking tokens", err)
+
 		}
 
 		// select any random blobber and check total offers
