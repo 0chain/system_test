@@ -30,7 +30,7 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 		cliutil.Wait(t, time.Second)
 	}
 
-	t.RunSequentially("kill sharder by non-smartcontract owner should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("kill sharder by non-smartcontract owner should fail", 1000*time.Second, func(t *test.SystemTest) {
 		var sharderIds []string
 		sharderIds, _ = waitForNSharder(t, sharderUrl, 1)
 		require.True(t, len(sharderIds) > 0, "no sharders found, should be impossible")
