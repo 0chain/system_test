@@ -73,11 +73,12 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		time.Sleep(1 * time.Minute)
 
-		result := getChallengeTimings(t, blobberList, []string{allocationId})
+		getChallengeTimings(t, blobberList, []string{allocationId})
 
-		fmt.Println("ProofGenTimes : ", result[0])
-		fmt.Println("TxnSubmissions : ", result[1])
-		fmt.Println("TxnVerifications : ", result[2])
+		//
+		//fmt.Println("ProofGenTimes : ", result[0])
+		//fmt.Println("TxnSubmissions : ", result[1])
+		//fmt.Println("TxnVerifications : ", result[2])
 
 		//proofGenTimes := result[0]
 		//txnSubmissions := result[1]
@@ -378,12 +379,8 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 					fmt.Println("Error while unmarshalling challenge timings : ", err)
 				}
 
-				fmt.Println(challengeTiming.ProofGenTime)
-
 				challengeTiming.ProofGenTime = challengeTiming.ProofGenTime / 1000
 				proofGenTime := common.Timestamp(challengeTiming.ProofGenTime)
-
-				fmt.Println("Proof Gen Time : ", proofGenTime)
 
 				proofGenTimes = append(proofGenTimes, challengeTiming.CompleteValidation-proofGenTime-challengeTiming.CreatedAtBlobber)
 				txnSubmissions = append(txnSubmissions, challengeTiming.TxnSubmission-challengeTiming.CompleteValidation)
