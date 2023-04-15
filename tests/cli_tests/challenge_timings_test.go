@@ -52,7 +52,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 			"parity": 1,
 			"expire": "5m",
 		})
-		fmt.Println("Allocation ID : ", allocationId)
 
 		// Uploading 10% of allocation
 
@@ -110,7 +109,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 			"parity": 1,
 			"expire": "5m",
 		})
-		fmt.Println("Allocation ID : ", allocationId)
 
 		// Uploading 10% of allocation
 
@@ -169,7 +167,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"parity": 1,
 				"expire": "5m",
 			})
-			fmt.Println("Allocation ID : ", allocationId)
 
 			allocationIDs = append(allocationIDs, allocationId)
 
@@ -232,7 +229,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"parity": 1,
 				"expire": "1h",
 			})
-			fmt.Println("Allocation ID : ", allocationId)
 
 			allocationIDs = append(allocationIDs, allocationId)
 
@@ -299,7 +295,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"parity": 1,
 				"expire": "1h",
 			})
-			fmt.Println("Allocation ID : ", allocationId)
 
 			allocationIDs = append(allocationIDs, allocationId)
 
