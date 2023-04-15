@@ -20,6 +20,46 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
+	t.Run("Create allocation for locking cost equal to minimum cost should work", func(t *test.SystemTest) {
+		_ = setupWallet(t, configPath)
+
+		options := map[string]interface{}{"cost": ""}
+		output, err := createNewAllocation(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		allocationCost, err := getAllocationCost(output[0])
+		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
+
+		options = map[string]interface{}{"lock": allocationCost}
+		output, err = createNewAllocation(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
+
+		allocationID, err := getAllocationID(output[0])
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("Create allocation for locking cost less than minimum cost should not work", func(t *test.SystemTest) {
+		_ = setupWallet(t, configPath)
+
+		options := map[string]interface{}{"cost": ""}
+		output, err := createNewAllocation(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+
+		allocationCost, err := getAllocationCost(output[0])
+		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
+
+		mustFailCost := allocationCost - 0.1
+		options = map[string]interface{}{"lock": mustFailCost}
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+	})
+
 	t.Run("Create allocation without providing any additional parameters Should Work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
