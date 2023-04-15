@@ -19,8 +19,12 @@ func TestBlobberAvailability(testSetup *testing.T) {
 
 	t.RunSequentially("blobber is available switch controls blobber use for allocations", func(t *test.SystemTest) {
 		// register and faucet pour tokens
-		_, err := registerWallet(t, configPath)
-		require.NoError(t, err)
+		output, err := registerWallet(t, configPath)
+		require.NoError(t, err, output)
+
+		// update blobber info use owner wallet, so need to faucet pour tokens
+		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
+		require.NoError(t, err, output)
 
 		startBlobbers := getBlobbers(t)
 		var blobberToDeactivate *model.BlobberDetails
@@ -38,7 +42,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		dataShards := 1
 		parityShards := activeBlobbers - dataShards
 
-		output, err := executeFaucetWithTokens(t, configPath, 9.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
