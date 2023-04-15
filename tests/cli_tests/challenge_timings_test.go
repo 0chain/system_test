@@ -96,8 +96,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 		//}
 	})
 
-	t.Skip()
-
 	t.RunSequentiallyWithTimeout("Case 2: 1 100mb allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		output, err := registerWallet(t, configPath)
@@ -151,8 +149,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}
 
 	})
-
-	t.Skip()
 
 	t.RunSequentiallyWithTimeout("Case 3: 10 100mb allocation, 10mb file each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 

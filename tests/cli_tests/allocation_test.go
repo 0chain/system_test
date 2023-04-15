@@ -401,20 +401,6 @@ func TestAllocation(testSetup *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
-		//remoteFilepath := remotepath + filepath.Base(filename)
-		//
-		//output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-		//	"allocation": allocationId,
-		//	"remotepath": remoteFilepath,
-		//	"localpath":  os.TempDir() + string(os.PathSeparator),
-		//}), true)
-		//require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-
-		//_, err = cancelAllocation(t, configPath, allocationId, true)
-		//if err != nil {
-		//	fmt.Println("Error cancelling allocation", err)
-		//}
-
 		// sleep for 10 minutes
 		time.Sleep(2 * time.Minute)
 
