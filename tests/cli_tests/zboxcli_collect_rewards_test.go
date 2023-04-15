@@ -22,6 +22,10 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 
 	t.Parallel()
 
+	// Create a folder to keep all the generated files to be uploaded
+	err := os.MkdirAll("tmp", os.ModePerm)
+	require.Nil(t, err)
+
 	t.Run("Test collect reward with valid pool and blobber id should pass", func(t *test.SystemTest) { // TODO slow
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
