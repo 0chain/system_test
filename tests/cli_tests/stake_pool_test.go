@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
@@ -38,7 +37,6 @@ func TestStakePool(testSetup *testing.T) {
 			require.Nil(t, err, "error unmarshalling blobber info")
 
 			stakedCapacity := uint64(float64(blInfo.TotalStake) * GB / float64(blInfo.Terms.WritePrice))
-			fmt.Println("Blobber ID : ", blobber.Id, " Staked Capacity : ", stakedCapacity, " Allocated : ", blInfo.Allocated, " Total Stake : ", blInfo.TotalStake)
 
 			require.Greater(t, stakedCapacity, uint64(blobber.Allocated), "Staked capacity should be greater than allocated capacity")
 			stakedCapacity -= uint64(blobber.Allocated)
@@ -48,42 +46,6 @@ func TestStakePool(testSetup *testing.T) {
 				minStakedCapacityBlobber = blInfo
 			}
 		}
-
-		fmt.Println("Max Staked Capacity : ", maxStakedCapacity)
-
-		//for _, blobber := range blobbersList {
-		//	output, _ := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
-		//
-		//	var blInfo climodel.BlobberInfoDetailed
-		//	err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
-		//	require.Nil(t, err, "error unmarshalling blobber info")
-		//
-		//	stakedCapacity := float64(blInfo.TotalStake)*GB/float64(blInfo.Terms.WritePrice) - float64(blInfo.Allocated)
-		//	requiredStakedCapacity := float64(maxStakedCapacity) - stakedCapacity
-		//
-		//	minRequiredTokensToMatchStakedCapacity := (requiredStakedCapacity * float64(blInfo.Terms.WritePrice)) / (GB * 1e10)
-		//
-		//	fmt.Println("minRequiredTokensToMatchStakedCapacity : ", minRequiredTokensToMatchStakedCapacity, " requiredStakedCapacity : ", requiredStakedCapacity, " stakedCapacity : ", stakedCapacity, " maxStakedCapacity : ", maxStakedCapacity, "blobberID : ", blobber.Id)
-		//
-		//	if minRequiredTokensToMatchStakedCapacity == 0 {
-		//		continue
-		//	} else if minRequiredTokensToMatchStakedCapacity <= 1 {
-		//		minRequiredTokensToMatchStakedCapacity = 1
-		//	}
-		//
-		//	newRandomWalletName := "new_random_wallet_name_for_staking_tokens"
-		//	_, err := registerWalletForName(t, configPath, newRandomWalletName)
-		//	require.Nil(t, err, "Error registering wallet", err)
-		//
-		//	for i := 0.0; i < minRequiredTokensToMatchStakedCapacity/9+2; i++ {
-		//		_, err := executeFaucetWithTokensForWallet(t, newRandomWalletName, configPath, 9)
-		//		require.Nil(t, err, "Error executing faucet with tokens", err)
-		//	}
-		//
-		//	_, err = stakeTokensForWallet(t, configPath, newRandomWalletName, createParams(map[string]interface{}{"blobber_id": blobber.Id, "tokens": minRequiredTokensToMatchStakedCapacity}), true)
-		//	require.Nil(t, err, "Error staking tokens", err)
-		//
-		//}
 
 		// select any random blobber and check total offers
 		blobber := minStakedCapacityBlobber
@@ -144,8 +106,6 @@ func TestStakePool(testSetup *testing.T) {
 		allocSize := maxStakedCapacity*3 + uint64(30*GB)
 		allocSize -= allocSize / uint64(1000)
 
-		fmt.Println("Allocation Size : ", allocSize)
-
 		options := map[string]interface{}{"cost": "", "size": allocSize, "data": len(blobbersList) / 2, "parity": len(blobbersList) - len(blobbersList)/2}
 		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -183,15 +143,6 @@ func TestStakePool(testSetup *testing.T) {
 			return
 		}
 
-		//// stake 1 more token to blobbers
-		//for _, blobber := range blobbersList {
-		//	_, err := executeFaucetWithTokensForWallet(t, newStakeWallet, configPath, 9)
-		//	require.Nil(t, err, "Error executing faucet with tokens", err)
-		//
-		//	_, err = stakeTokensForWallet(t, configPath, newStakeWallet, createParams(map[string]interface{}{"blobber_id": blobber.Id, "tokens": 1}), true)
-		//	require.Nil(t, err, "Error staking tokens", err)
-		//}
-
 		_, err = executeFaucetWithTokensForWallet(t, newStakeWallet, configPath, 9)
 		require.Nil(t, err, "Error executing faucet with tokens", err)
 
@@ -217,13 +168,6 @@ func TestStakePool(testSetup *testing.T) {
 
 		lenDelegates = lenDelegatesNew
 
-		//// Try to unstake tokens from the blobbers
-		//for _, blobber := range blobbersList {
-		//	_, err := unstakeTokensForWallet(t, configPath, newStakeWallet, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
-		//
-		//	require.Nil(t, err, "error should not be there")
-		//}
-
 		_, err = unstakeTokensForWallet(t, configPath, newStakeWallet, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
 
 		require.Nil(t, err, "error should not be there")
@@ -247,10 +191,6 @@ func TestStakePool(testSetup *testing.T) {
 
 		lenDelegates = lenDelegatesNew
 
-		//// Unstaking tokens from the blobbers
-		//for _, blobber := range blobbersList {
-		//	output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
-		//}
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
 
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
@@ -275,12 +215,6 @@ func TestStakePool(testSetup *testing.T) {
 		// Cancel the allocation
 		output, err = cancelAllocation(t, configPath, allocationId, true)
 		require.Nil(t, err, "error cancelling allocation")
-
-		//// Try to unstake tokens from the blobbers
-		//for _, blobber := range blobbersList {
-		//	_, err := unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
-		//	require.Nil(t, err, "error should not be there")
-		//}
 
 		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
 		require.Nil(t, err, "error should not be there")
