@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	configPath = "../zbox_config.yaml"
+	configPath = "./zbox_config.yaml"
 
 	KB               = 1024      // kilobyte
 	MB               = 1024 * KB // megabyte
