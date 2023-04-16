@@ -1,12 +1,15 @@
 package cli_tests
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -44,7 +47,18 @@ func TestSpreadsheetMinerSharderKillProviderCase1(testSetup *testing.T) { // nol
 
 		_ = waitForRound(t, killRound, sharderUrl, minerIds)
 
-		// todo put code im here to kill a miner and a sharder.
+		// kill a miner and a sharder.
+		output, err := killMiner(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
+			"id": minerIds[0],
+		}), true)
+		require.NoError(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		output, err = killSharder(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
+			"id": sharderIds[0],
+		}), true)
+		require.NoError(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		afterMiners := waitForRound(t, sSMNumberOfRounds, sharderUrl, minerIds)
 		afterSharders := getNodes(t, sharderIds, sharderUrl)
@@ -124,4 +138,26 @@ func SSMKPSCase1Setup(t *test.SystemTest, minerIds, sharderIds []string, sharder
 	//No validators
 	validators := getValidators(t)
 	require.Len(t, validators, 0, "should be no validators")
+}
+
+func killMiner(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
+	t.Log("kill miner...")
+	cmd := fmt.Sprintf("./zwallet mn-kill %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
+		params, wallet, cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
+func killSharder(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
+	t.Log("kill sharder...")
+	cmd := fmt.Sprintf("./zwallet sh-kill %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
+		params, wallet, cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
