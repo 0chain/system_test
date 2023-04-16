@@ -1,0 +1,14 @@
+{
+    "client_id": "b888ae3400b67a47362aad7d6263fcfeb6585fe696e8d182d3bb4f4a9d737bae",
+    "client_key": "e2075a6d93dd3544e14a185b03e7bf5fbf402fe498452b3e786ddb6b500be2095eaa42ef748ccd0e139e6cc041c19da4dffa06ecb9b37bed783e4bffd89b8295",
+    "keys": [
+        {
+            "public_key": "e2075a6d93dd3544e14a185b03e7bf5fbf402fe498452b3e786ddb6b500be2095eaa42ef748ccd0e139e6cc041c19da4dffa06ecb9b37bed783e4bffd89b8295",
+            "private_key": "0d3c9bf1844fb66cc98fd82c6a93d6ed0199aef8af3387cfdd7bc53f3e2aa602"
+        }
+    ],
+    "mnemonics": "manage envelope elephant bamboo inmate blast legend quality vocal cushion black party mad mixture coyote prepare visit surge pair elite treat place match blouse",
+    "version": "1.0",
+    "date_created": "1661370992",
+    "nonce": 0
+}
