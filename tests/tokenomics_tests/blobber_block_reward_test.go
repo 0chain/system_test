@@ -47,8 +47,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
 	readPrices := [][]float64{{0, 0.01}, {0, 0}}
-	writePrices := [][]float64{{0.1, 0.2}}
-	readData := [][]int{{1, 1}, {1, 3}}
+	writePrices := [][]float64{{0.1, 0.9}}
+	readData := [][]int{{1, 1}, {1, 9}}
 	totalData := 0.1 * GB
 	stakes := [][]float64{{1.0, 1.0, 1.0, 1.0}, {1.0, 2.0, 1.0, 2.0}}
 
