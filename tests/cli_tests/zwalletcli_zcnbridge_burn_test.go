@@ -75,6 +75,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Get ZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
+		t.Skip("Skip till runners are updated to newer ubuntu")
 		output, err := executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
