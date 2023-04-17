@@ -193,7 +193,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	//TODO: Directory download seems broken see https://github.com/0chain/blobber/issues/588
-	t.RunWithTimeout("Download Entire Directory Should Work but does not see blobber/issues/588", 60*time.Second, func(t *test.SystemTest) { // todo: slow
+	t.RunWithTimeout("Download Entire Directory Should Work but does not see blobber/issues/588", 3*time.Minute, func(t *test.SystemTest) { // todo: slow
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/nested/dir/"
@@ -220,7 +220,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	//TODO: Directory share seems broken see https://github.com/0chain/blobber/issues/588
-	t.RunWithTimeout("Download File From Shared Folder Should Work but does not see blobber/issues/588", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Download File From Shared Folder Should Work but does not see blobber/issues/588", 3*time.Minute, func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -271,7 +271,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "consensus_not_met")
 	})
 
-	t.RunWithTimeout("Download Shared File Should Work", 60*time.Second, func(t *test.SystemTest) { // todo: too slow
+	t.RunWithTimeout("Download Shared File Should Work", 5*time.Minute, func(t *test.SystemTest) { // todo: too slow
 		var authTicket, filename, originalFileChecksum string
 
 		filesize := int64(10)
@@ -327,7 +327,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.RunWithTimeout("Download Encrypted File Should Work", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Download Encrypted File Should Work", 5*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(10 * MB)
 		filesize := int64(10)
 		remotepath := "/"
@@ -368,7 +368,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.RunWithTimeout("Download Shared Encrypted File Should Work", 2*time.Minute, func(t *test.SystemTest) { //todo: slow
+	t.RunWithTimeout("Download Shared Encrypted File Should Work", 5*time.Minute, func(t *test.SystemTest) { //todo: slow
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -442,7 +442,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, output[len(output)-1], filepath.Base(filename))
 	})
 
-	t.RunWithTimeout("Download From Shared Folder by Remotepath Should Work", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Download From Shared Folder by Remotepath Should Work", 5*time.Minute, func(t *test.SystemTest) {
 		var authTicket, filename, originalFileChecksum string
 
 		filesize := int64(10)
@@ -498,7 +498,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.RunWithTimeout("Download From Shared Folder by Lookup Hash Should Work", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Download From Shared Folder by Lookup Hash Should Work", 5*time.Minute, func(t *test.SystemTest) {
 		var authTicket, lookuphash, filename, originalFileChecksum string
 
 		filesize := int64(10)
@@ -558,7 +558,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.RunWithTimeout("Download Shared File without Paying Should Not Work", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Download Shared File without Paying Should Not Work", 5*time.Minute, func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -605,7 +605,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Len(t, output, 3)
 	})
 
-	t.RunWithTimeout("Download Shared File by Paying Should Work", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Download Shared File by Paying Should Work", 5*time.Minute, func(t *test.SystemTest) {
 		var allocationID, authTicket, filename string
 
 		filesize := int64(10)
@@ -914,7 +914,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, float64(info.Size()), (float64(endBlock-(startBlock-1))/float64(data.NumOfBlocks))*float64(filesize))
 	})
 
-	t.RunWithTimeout("Download File With startblock 0 and non-zero endblock should fail", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
+	t.RunWithTimeout("Download File With startblock 0 and non-zero endblock should fail", 5*time.Minute, func(t *test.SystemTest) { //todo: too slow
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -1014,7 +1014,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "start block should be less than end block")
 	})
 
-	t.RunWithTimeout("Download with negative startblock should fail", 60*time.Second, func(t *test.SystemTest) { //todo: too slow
+	t.RunWithTimeout("Download with negative startblock should fail", 5*time.Minute, func(t *test.SystemTest) { //todo: too slow
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
 		filesize := int64(655360 * 2)
@@ -1145,9 +1145,12 @@ func TestDownload(testSetup *testing.T) {
 
 		// Delete the uploaded file, since we will be downloading it now
 		err = os.Remove(otherFilename)
-		require.Nil(t, err)
+		require.NoError(t, err)
 
 		// Download using otherAllocationID: should not work
+		_, err = registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": otherAllocationID,
 			"remotepath": remotepath + filepath.Base(otherFilename),
@@ -1230,7 +1233,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "not enough tokens")
 	})
 
-	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 120*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"

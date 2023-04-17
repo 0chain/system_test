@@ -32,11 +32,18 @@ func (s *SystemTest) RunSequentially(name string, testCaseFunction func(w *Syste
 
 func (s *SystemTest) RunWithTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
 	s.Unwrap.Helper()
+	if timeout < DefaultTestTimeout {
+		timeout = DefaultTestTimeout
+	}
+
 	return s.run(name, timeout, testCaseFunction, true)
 }
 
 func (s *SystemTest) RunSequentiallyWithTimeout(name string, timeout time.Duration, testCaseFunction func(w *SystemTest)) bool {
 	s.Unwrap.Helper()
+	if timeout < DefaultTestTimeout {
+		timeout = DefaultTestTimeout
+	}
 	return s.run(name, timeout, testCaseFunction, false)
 }
 

@@ -33,6 +33,10 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
+		// register wallet
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		cmd := fmt.Sprintf(
 			"./zbox alloc-cancel --silent "+
 				"--wallet %s --configDir ./config --config %s",
@@ -42,13 +46,15 @@ func TestCancelAllocation(testSetup *testing.T) {
 
 		output, err := cliutils.RunCommandWithoutRetry(cmd)
 		require.Error(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 4)
-		require.Equal(t, "Error: allocation flag is missing", output[len(output)-1])
+		require.Len(t, output, 1)
+		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
 
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
 		otherAllocationID := setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
 		// otherAllocationID should not be cancelable from this level
 		output, err := cancelAllocation(t, configPath, otherAllocationID, false)
 
@@ -58,17 +64,22 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		allocationID := "123abc"
 
 		output, err := cancelAllocation(t, configPath, allocationID, false)
 
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 3, "expected output length be at least 4", strings.Join(output, "\n"))
-		//FIXME: error is incorrect, should be error canceling allocation see https://github.com/0chain/zboxcli/issues/240
-		require.Equal(t, "Error creating allocation:alloc_cancel_failed: value not present", output[len(output)-1])
+		require.Equal(t, "Error creating allocation:alloc_cancel_failed: value not present", output[0])
 	})
 
 	t.Run("Cancel Expired Allocation Should Fail", func(t *test.SystemTest) {
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
+
+		// TODO: min expired time is 5m, otherwise allocation could not be created
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
 			"expire": "2s",
 		})

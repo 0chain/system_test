@@ -90,6 +90,9 @@ func TestKillBlobber(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("kill blobber by non-smartcontract owner should fail", func(t *test.SystemTest) {
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		startBlobbers := getBlobbers(t)
 		var blobberToKill string
 		for i := range startBlobbers {

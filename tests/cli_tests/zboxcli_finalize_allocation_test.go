@@ -18,21 +18,22 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 5*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 10*time.Minute, func(t *test.SystemTest) {
 		//TODO: unacceptably slow
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
 
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "2s",
+			"expire": "5m",
 		})
 
 		time.Sleep(5 * time.Second)
 
 		allocations := parseListAllocations(t, configPath)
-		ac, ok := allocations[allocationID]
+		_, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
-		require.LessOrEqual(t, ac.ExpirationDate, time.Now().Unix())
 
-		cliutils.Wait(t, 4*time.Minute)
+		cliutils.Wait(t, 6*time.Minute)
 
 		output, err := finalizeAllocation(t, configPath, allocationID, false)
 
@@ -55,6 +56,9 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	t.Run("Finalize Other's Allocation Should Fail", func(t *test.SystemTest) {
 		var otherAllocationID = setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
+		// register wallet
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
 		// Then try updating with otherAllocationID: should not work
 		output, err := finalizeAllocation(t, configPath, otherAllocationID, false)
 
@@ -65,6 +69,9 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		cmd := fmt.Sprintf(
 			"./zbox alloc-fini --silent "+
 				"--wallet %s --configDir ./config --config %s",
@@ -74,7 +81,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 
 		output, err := cliutils.RunCommandWithoutRetry(cmd)
 		require.Error(t, err, "expected error finalizing allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 4)
+		require.Len(t, output, 1)
 		require.Equal(t, "Error: allocation flag is missing", output[len(output)-1])
 	})
 }

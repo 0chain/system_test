@@ -26,6 +26,11 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
+	_, err = registerWalletForName(t, configPath, blobberOwnerWallet)
+	require.NoError(t, err)
+	_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 5)
+	require.NoError(t, err)
+
 	output, err = listValidators(t, configPath, createParams(map[string]interface{}{"json": ""}))
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1, strings.Join(output, "\n"))
