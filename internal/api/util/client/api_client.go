@@ -1054,7 +1054,7 @@ func (c *APIClient) GetStakePoolStat(t *test.SystemTest, providerID, providerTyp
 	return scRestGetStakePoolStat
 }
 
-func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) (*model.TransactionGetConfirmationResponse, int64) {
+func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) (txnData *model.TransactionGetConfirmationResponse, fee int64) {
 	collectRewardTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
