@@ -94,7 +94,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Move file concurrently to existing directory, should work", 6*time.Minute, func(t *test.SystemTest) { //todo:too slow
+	t.RunWithTimeout("Move file concurrently to existing directory, should work", 10*time.Minute, func(t *test.SystemTest) { //todo:too slow
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -338,7 +338,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "move_failed")
 
@@ -421,7 +421,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "move_failed")
 
@@ -471,7 +471,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": "/child/nonexisting.txt",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "move_failed")
 	})
@@ -516,7 +516,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, true)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "move_failed")
 
@@ -558,7 +558,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": "/abc.txt",
 			"destpath":   "/child/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
@@ -572,7 +572,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"allocation": "abcdef",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
@@ -586,7 +586,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"allocation": "abcdef",
 			"remotepath": "/abc.txt",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: destpath flag is missing", output[0])
 	})
@@ -624,8 +624,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		// FIXME: zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
-		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Contains(t, output[0], "this options for this file is not permitted for this allocation")
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{

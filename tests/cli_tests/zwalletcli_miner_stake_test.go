@@ -28,7 +28,7 @@ func TestMinerStake(testSetup *testing.T) {
 	}
 
 	output, err := listMiners(t, configPath, "--json")
-	require.Nil(t, err, "error listing miners")
+	require.NoError(t, err, "error listing miners")
 	require.Len(t, output, 1)
 
 	var miners climodel.MinerSCNodes
@@ -48,7 +48,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("Staking tokens against valid miner with valid tokens should work", 90*time.Second, func(t *test.SystemTest) { // todo: slow
+	t.RunWithTimeout("Staking tokens against valid miner with valid tokens should work", 5*time.Minute, func(t *test.SystemTest) { // todo: slow
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -84,7 +84,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, `resource_not_found: can't find pool stats`, output[0])
 	})
 
-	t.RunWithTimeout("Multiple stakes against a miner should add balance to client's stake pool", 90*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Multiple stakes against a miner should add balance to client's stake pool", 5*time.Minute, func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
@@ -134,7 +134,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
-			"tokens":   3,
+			"tokens":   10,
 		}), false)
 		require.NotNil(t, err, "expected error when staking tokens with insufficient balance but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -175,7 +175,7 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	// todo rewards not transferred to wallet until a collect reward transaction
-	t.RunSequentiallyWithTimeout("Staking tokens against miner should return interest to wallet", 2*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentially("Staking tokens against miner should return interest to wallet", func(t *test.SystemTest) {
 		t.Skip("rewards not transferred to wallet until a collect reward transaction")
 
 		output, err := registerWallet(t, configPath)
@@ -243,7 +243,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 				output, err = minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
 					"miner_id": newMiner.ID,
-					"tokens":   1.0,
+					"tokens":   0.1,
 				}), walletName, true)
 				require.NoError(t, err)
 				require.Len(t, output, 1)

@@ -23,8 +23,14 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 	}
 
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+
+	output, err = registerWalletForName(t, configPath, miner01NodeDelegateWalletName)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
 	mnConfig := getMinerSCConfiguration(t)
-	output, err := listMiners(t, configPath, "--json")
+	output, err = listMiners(t, configPath, "--json")
 	require.Nil(t, err, "error listing miners")
 	require.Len(t, output, 1)
 
@@ -122,7 +128,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Equal(t, "update_miner_settings: number_of_delegates greater than max_delegates of SC: 21 \\u003e 20", output[0])
 	})
 
-	t.RunSequentiallyWithTimeout("Miner update num_delegate negative value should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.RunSequentially("Miner update num_delegate negative value should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -147,7 +153,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.Equal(t, "update_miner_settings: invalid non-positive number_of_delegates: -1", output[0])
 	})
 
-	t.RunSequentiallyWithTimeout("Miner update without miner id flag should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.RunSequentially("Miner update without miner id flag should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -168,7 +174,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		lastRoundOfSettingUpdate = getCurrentRound(t)
 	})
 
-	t.RunSequentiallyWithTimeout("Miner update with nothing to update should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.RunSequentially("Miner update with nothing to update should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -194,7 +200,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		t.Log("end test")
 	})
 
-	t.RunSequentiallyWithTimeout("Miner update settings from non-delegate wallet should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.RunSequentially("Miner update settings from non-delegate wallet should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 

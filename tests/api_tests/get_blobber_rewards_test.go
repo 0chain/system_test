@@ -54,12 +54,12 @@ func TestBlobberRewards(testSetup *testing.T) {
 		walletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
 
-		apiClient.CollectRewards(t, sdkWallet, blobberID, 3, client.TxSuccessfulStatus)
+		_, fee := apiClient.CollectRewards(t, sdkWallet, blobberID, 3, client.TxSuccessfulStatus)
 
 		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
-		require.Equal(t, balanceAfter, balanceBefore+rewards)
+		require.Equal(t, balanceAfter, balanceBefore+rewards-fee)
 	})
 
 	t.RunSequentially("Check if the balance of the wallet has been changed without rewards being claimed, shouldn't work", func(t *test.SystemTest) {
@@ -104,7 +104,7 @@ func TestBlobberRewards(testSetup *testing.T) {
 		require.Equal(t, balanceAfter, balanceBefore)
 	})
 
-	t.RunSequentiallyWithTimeout("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", 60*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", 3*time.Minute, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 9.0, client.TxSuccessfulStatus)
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 9.0, client.TxSuccessfulStatus) // Needs more tokens
 
@@ -140,7 +140,7 @@ func TestBlobberRewards(testSetup *testing.T) {
 
 		var rewards int64
 
-		wait.PoolImmediately(t, time.Minute*20, func() bool {
+		wait.PoolImmediately(t, time.Minute*2, func() bool {
 			stakePoolInfo := apiClient.GetStakePoolStat(t, newBlobberID, "3")
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
@@ -153,7 +153,7 @@ func TestBlobberRewards(testSetup *testing.T) {
 			return rewards > 0
 		})
 
-		collecRewardTxn := apiClient.CollectRewards(t, sdkWallet, newBlobberID, 3, client.TxSuccessfulStatus)
+		collecRewardTxn, fee := apiClient.CollectRewards(t, sdkWallet, newBlobberID, 3, client.TxSuccessfulStatus)
 		formmattedTxnOutput := strings.ReplaceAll(collecRewardTxn.Transaction.TransactionOutput, `\"`, `"`)
 
 		collectRewardTxnOutput := model.RewardTransactionOutput{}
@@ -164,6 +164,6 @@ func TestBlobberRewards(testSetup *testing.T) {
 		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
-		require.Equal(t, balanceAfter, balanceBefore+collectRewardTxnOutput.Amount)
+		require.Equal(t, rewards, balanceAfter+fee-balanceBefore)
 	})
 }

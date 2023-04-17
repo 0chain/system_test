@@ -1,22 +1,19 @@
 package cli_tests
 
 import (
-	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
-	"net/http"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 
 	"github.com/0chain/system_test/internal/api/util/crypto"
 
@@ -28,10 +25,8 @@ import (
 )
 
 const (
-	chainID                     = "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe"
 	storageSmartContractAddress = `6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7`
 	minerSmartContractAddress   = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
-	txnTypeSmartContract        = 1000 // A smart contract transaction type
 
 	freeTokensIndividualLimit = 100.0
 	freeTokensTotalLimit      = 10000.0
@@ -58,8 +53,6 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	output, err = registerWalletForName(t, configPath, assigner)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-	// Open the wallet file themselves to get private key for signing data
-	ownerWallet := readWalletFile(t, "./config/"+scOwnerWallet+"_wallet.json")
 	assignerWallet := readWalletFile(t, "./config/"+assigner+"_wallet.json")
 
 	// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
@@ -82,16 +75,15 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", output[0], err)
 	require.NotEmpty(t, miners.Nodes, "No miners found: %v", strings.Join(output, "\n"))
 
-	freeAllocAssignerTxn := freeAllocationAssignerTxn(t, ownerWallet, assignerWallet)
-	err = sendTxn(miners, freeAllocAssignerTxn)
-	require.Nil(t, err, "Error sending txn to miners: %v", output[0], err)
-
-	output, err = verifyTransaction(t, configPath, freeAllocAssignerTxn.Hash)
-	require.Nil(t, err, "Could not verify commit transaction", strings.Join(output, "\n"))
-	require.Len(t, output, 3)
-	require.Equal(t, "Transaction verification success", output[0])
-	require.Equal(t, "TransactionStatus: 1", output[1])
-	require.Greater(t, len(output[2]), 0, output[2])
+	input := map[string]interface{}{
+		"name":  assignerWallet.ClientID,
+		"key":   assignerWallet.ClientKey,
+		"limit": freeTokensIndividualLimit,
+		"max":   freeTokensTotalLimit,
+	}
+	output, err = createFreeStorageAllocation(t, configPath, scOwnerWallet, createParams(input))
+	require.NoError(t, err)
+	t.Log(output)
 
 	t.RunSequentiallyWithTimeout("Create free storage from marker with accounting", 60*time.Second, func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
@@ -329,83 +321,11 @@ func readWalletFile(t *test.SystemTest, file string) *climodel.WalletFile {
 	return wallet
 }
 
-func sendTxn(miners climodel.NodeList, txn *climodel.Transaction) error {
-	var (
-		err error
-		wg  sync.WaitGroup
-	)
-
-	for i := range miners.Nodes {
-		wg.Add(1)
-		go func(node climodel.Node) {
-			defer wg.Done()
-			_, apiErr := apiPutTransaction(getNodeBaseURL(node.Host, node.Port), txn)
-			if apiErr != nil {
-				err = apiErr
-			}
-		}(miners.Nodes[i])
-	}
-	wg.Wait()
-
-	return err
-}
-
-func apiPutTransaction(minerBaseURL string, txn *climodel.Transaction) (*http.Response, error) {
-	txnData, err := json.Marshal(txn)
-	if err != nil {
-		return nil, err
-	}
-
-	return http.Post(minerBaseURL+"/v1/transaction/put", "application/json", bytes.NewBuffer(txnData))
-}
-
-func freeAllocationAssignerTxn(t *test.SystemTest, from, assigner *climodel.WalletFile) *climodel.Transaction {
-	txn := &climodel.Transaction{}
-	txn.Version = "1.0"
-	txn.ClientId = from.ClientID
-	txn.CreationDate = time.Now().Unix()
-	txn.ChainId = chainID
-	txn.PublicKey = from.ClientKey
-	txn.TransactionType = txnTypeSmartContract
-	txn.ToClientId = storageSmartContractAddress
-	txn.TransactionValue = 0
-	ret, err := getNonceForWallet(t, configPath, scOwnerWallet, true)
-	require.Nil(t, err, "error fetching minerNodeDelegate nonce")
-	nonceStr := strings.Split(ret[0], ":")[1]
-	nonce, err := strconv.ParseInt(strings.Trim(nonceStr, " "), 10, 64)
-	require.Nil(t, err, "error converting nonce to in")
-	txn.TransactionNonce = int(nonce) + 1
-
-	input := map[string]interface{}{
-		"name":             assigner.ClientID,
-		"public_key":       assigner.ClientKey,
-		"individual_limit": freeTokensIndividualLimit,
-		"total_limit":      freeTokensTotalLimit,
-	}
-
-	sn := climodel.TransactionData{Name: "add_free_storage_assigner", Input: input}
-	snBytes, err := json.Marshal(sn)
-	require.Nil(t, err, "error marshaling smart contract data")
-
-	txn.TransactionData = string(snBytes)
-
-	txn.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
-		txn.CreationDate,
-		txn.TransactionNonce,
-		txn.ClientId,
-		txn.ToClientId,
-		txn.TransactionValue,
-		crypto.Sha3256([]byte(txn.TransactionData)))))
-
-	hashToSign, err := hex.DecodeString(txn.Hash)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	keypair := crypto.GenerateKeys(t, from.Mnemonic)
-
-	txn.Signature = keypair.PrivateKey.Sign(string(hashToSign)).
-		SerializeToHexStr()
-
-	return txn
+func createFreeStorageAllocation(t *test.SystemTest, configFile, from, params string) ([]string, error) {
+	t.Logf("Creating new free storage allocation...")
+	return cliutils.RunCommand(t, fmt.Sprintf(
+		"./zbox add --silent %s --wallet %s --configDir ./config --config %s",
+		params,
+		from+"_wallet.json",
+		configFile), 3, time.Second*5)
 }

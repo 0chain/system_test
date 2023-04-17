@@ -25,6 +25,9 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	output, err := registerWallet(t, configPath)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
+	output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
 	output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1, strings.Join(output, "\n"))
@@ -61,6 +64,12 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": intToZCN(intialBlobberInfo.Terms.Write_price)}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
+
+	// init enough tokens to blobber owner wallet to issue txns
+	for i := 0; i < 3; i++ {
+		_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
+		require.NoError(t, err)
+	}
 
 	t.RunSequentially("update blobber capacity should work", func(t *test.SystemTest) {
 		// register wallet for normal user
@@ -166,7 +175,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 
 		output, err = updateBlobberInfo(t, configPath, "")
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 26)
+		require.Len(t, output, 27)
 		require.Equal(t, "Error: required flag(s) \"blobber_id\" not set", output[0])
 	})
 

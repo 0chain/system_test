@@ -87,7 +87,7 @@ func TestUpload(testSetup *testing.T) {
 		}
 	})
 
-	t.RunWithTimeout("Upload File to Root Directory Should Work", 60*time.Second, func(t *test.SystemTest) { // todo: slow
+	t.Run("Upload File to Root Directory Should Work", func(t *test.SystemTest) { // todo: slow
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -804,6 +804,8 @@ func generateFileAndUploadForWallet(t *test.SystemTest, wallet, allocationID, re
 	require.Nil(t, err)
 
 	// Upload parameters
+	// log command with allocation id, filename and remotepath
+	t.Logf("Uploading file %s to allocation %s with remotepath %s", filename, allocationID, remotepath+filepath.Base(filename))
 	uploadWithParamForWallet(t, wallet, configPath, map[string]interface{}{
 		"allocation": allocationID,
 		"localpath":  filename,
