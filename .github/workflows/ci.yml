@@ -90,7 +90,7 @@ jobs:
         run: |
           echo "master is NOT successful! was: [${{ env.BUILD_STATE }}]"
           exit 1
-        
+
   system-tests:
     name: "System Tests"
     runs-on: [ tests-suite ]
