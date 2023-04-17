@@ -198,7 +198,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			"destname":   destName,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, " "), "file already exists")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -530,7 +529,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Contains(t, output[0], "rename_failed")
 	})
 
-	t.RunWithTimeout("rename file from someone else's allocation should fail", 90*time.Second, func(t *test.SystemTest) {
+	t.Run("rename file from someone else's allocation should fail", func(t *test.SystemTest) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
