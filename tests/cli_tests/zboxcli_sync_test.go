@@ -221,7 +221,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		// FIXME after issue is solved
 		fixed := false
 		if !fixed {
-			//require.NotNil(t, err, "")
 			t.Log("FIXME", strings.Join(output, "\n"))
 		} else {
 			require.Nil(t, err, "Error in downloading the file", strings.Join(output, "\n"))
