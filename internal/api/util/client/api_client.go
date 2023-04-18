@@ -42,6 +42,7 @@ const (
 	BlobberGetStats              = "/_stats"
 	ClientPut                    = "/v1/client/put"
 	TransactionPut               = "/v1/transaction/put"
+	TransactionFeeGet            = "/v1/estimate_txn_fee"
 	TransactionGetConfirmation   = "/v1/transaction/get/confirmation"
 	ClientGetBalance             = "/v1/client/get/balance"
 	GetNetworkDetails            = "/network"
@@ -74,7 +75,7 @@ const (
 
 const (
 	TxType    = 1000
-	TxFee     = 0
+	TxFee     = 0.5 * 1e10
 	TxVersion = "1.0"
 	TxOutput  = ""
 )
@@ -338,6 +339,13 @@ func (c *APIClient) V1TransactionPut(t *test.SystemTest, internalTransactionPutR
 		Version:          TxVersion,
 	}
 
+	if internalTransactionPutRequest.TransactionData.Name == "pour" {
+		transactionPutRequest.TransactionFee = 0
+	} else {
+		fee := estimateTxnFee(t, c, &transactionPutRequest)
+		transactionPutRequest.TransactionFee = fee
+	}
+
 	if internalTransactionPutRequest.Value != nil {
 		transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
 	}
@@ -352,15 +360,13 @@ func (c *APIClient) V1TransactionPut(t *test.SystemTest, internalTransactionPutR
 
 	crypto.SignTransaction(t, &transactionPutRequest, internalTransactionPutRequest.Wallet.Keys)
 
-	urlBuilder := NewURLBuilder().SetPath(TransactionPut)
-
 	resp, err := c.executeForAllServiceProviders(
 		t,
-		urlBuilder,
+		NewURLBuilder().SetPath(TransactionPut),
 		&model.ExecutionRequest{
 			Body:               transactionPutRequest,
 			Dst:                &transactionPutResponse,
-			RequiredStatusCode: requiredStatusCode,
+			RequiredStatusCode: 200,
 		},
 		HttpPOSTMethod,
 		MinerServiceProvider)
@@ -368,6 +374,28 @@ func (c *APIClient) V1TransactionPut(t *test.SystemTest, internalTransactionPutR
 	transactionPutResponse.Request = transactionPutRequest
 
 	return transactionPutResponse, resp, err
+}
+
+func estimateTxnFee(t *test.SystemTest, c *APIClient, transactionPutRequest *model.TransactionPutRequest) int64 {
+	urlBuilder := NewURLBuilder().SetPath(TransactionFeeGet)
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Body:               transactionPutRequest,
+			RequiredStatusCode: 200,
+		},
+		HttpPOSTMethod,
+		MinerServiceProvider)
+
+	var fee = struct {
+		Fee int64 `json:"fee"`
+	}{}
+	require.Nil(t, err)
+
+	err = json.Unmarshal(resp.Body(), &fee)
+	require.NoError(t, err)
+	return fee.Fee
 }
 
 func (c *APIClient) V1TransactionGetConfirmation(t *test.SystemTest, transactionGetConfirmationRequest model.TransactionGetConfirmationRequest, requiredStatusCode int) (*model.TransactionGetConfirmationResponse, *resty.Response, error) { //nolint
@@ -763,13 +791,15 @@ func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requ
 func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
 
+	pourZCN := tokenomics.IntToZCN(5)
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
 			Wallet:          wallet,
 			ToClientID:      FaucetSmartContractAddress,
 			TransactionData: model.NewFaucetTransactionData(),
-			Value:           tokenomics.IntToZCN(tokens)},
+			Value:           pourZCN,
+		},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1792,7 +1822,7 @@ func (c *APIClient) GetStakePoolStat(t *test.SystemTest, providerID, providerTyp
 	return scRestGetStakePoolStat
 }
 
-func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) {
+func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) int64 {
 	collectRewardTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
@@ -1831,6 +1861,7 @@ func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, pro
 	})
 
 	wallet.IncNonce()
+	return collectRewardTransactionGetConfirmationResponse.Transaction.TransactionFee
 }
 
 func (c *APIClient) GetBlobber(t *test.SystemTest, blobberID string, requiredStatusCode int) *model.SCRestGetBlobberResponse {
