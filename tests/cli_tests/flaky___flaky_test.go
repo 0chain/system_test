@@ -22,7 +22,7 @@ import (
 func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Skip()
+	//t.Skip()
 	t.Parallel()
 
 	// FIXME: WRITEPOOL TOKEN ACCOUNTING
@@ -409,7 +409,7 @@ func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo
 	t := test.NewSystemTest(testSetup)
 
 	t.RunWithTimeout("File copy - Users should not be charged for moving a file ", 60*time.Second, func(t *test.SystemTest) { // see https://github.com/0chain/zboxcli/issues/334
-		t.Skip("Test calculations are flaky in  CLI") // FIXME - as per comment
+		//t.Skip("Test calculations are flaky in  CLI") // FIXME - as per comment
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 

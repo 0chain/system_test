@@ -1033,7 +1033,7 @@ func TestShareFile(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Share encrypted file using auth ticket - download accounting test - proxy re-encryption ", 3*time.Minute, func(t *test.SystemTest) {
-		t.Skip("skip till https://github.com/0chain/zboxcli/issues/334 is fixed")
+		//t.Skip("skip till https://github.com/0chain/zboxcli/issues/334 is fixed")
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
@@ -1148,7 +1148,7 @@ func TestShareFile(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Share unencrypted file using auth ticket - download accounting test", 3*time.Minute, func(t *test.SystemTest) {
-		t.Skip("skip till https://github.com/0chain/zboxcli/issues/334 is fixed")
+		//t.Skip("skip till https://github.com/0chain/zboxcli/issues/334 is fixed")
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 

@@ -19,7 +19,7 @@ import (
 
 func TestFileDownloadTokenMovement(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till https://github.com/0chain/zboxcli/issues/334 is fixed")
+	//t.Skip("skip till https://github.com/0chain/zboxcli/issues/334 is fixed")
 
 	t.Parallel()
 

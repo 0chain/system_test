@@ -258,7 +258,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Uploading local webcam feed to allocation should work", 60*time.Second, func(t *test.SystemTest) {
-		t.Skip("github runner has no any audio/camera device to test this feature yet")
+		//t.Skip("github runner has no any audio/camera device to test this feature yet")
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
@@ -326,7 +326,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Uploading local webcam feed to allocation with delay specified should work", 60*time.Second, func(t *test.SystemTest) {
-		t.Skip("github runner has no any audio/camera device to test this feature yet")
+		//t.Skip("github runner has no any audio/camera device to test this feature yet")
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
@@ -395,7 +395,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Upload local webcam feed with a different chunknumber must work", 60*time.Second, func(t *test.SystemTest) {
-		t.Skip("github runner has no any audio/camera device to test this feature yet")
+		//t.Skip("github runner has no any audio/camera device to test this feature yet")
 
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
