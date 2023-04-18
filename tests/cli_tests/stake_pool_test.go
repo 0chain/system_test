@@ -11,7 +11,6 @@ import (
 )
 
 func TestStakePool(testSetup *testing.T) {
-
 	t := test.NewSystemTest(testSetup)
 
 	_, err := registerWallet(t, configPath)
@@ -19,10 +18,9 @@ func TestStakePool(testSetup *testing.T) {
 
 	// get the list of blobbers
 	blobbersList := getBlobbersList(t)
-	require.Greater(testSetup, len(blobbersList), 0, "No blobbers found")
+	require.Greater(t, len(blobbersList), 0, "No blobbers found")
 
 	t.RunSequentiallyWithTimeout("total stake in a blobber can never be lesser than it's used capacity", 8*time.Minute, func(t *test.SystemTest) {
-
 		// select the blobber with min staked capacity
 		var minStakedCapacityBlobber climodel.BlobberInfoDetailed
 
@@ -30,7 +28,8 @@ func TestStakePool(testSetup *testing.T) {
 		maxStakedCapacity := uint64(18446744073709551615)
 
 		for _, blobber := range blobbersList {
-			output, _ := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
+			output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
+			require.Nil(t, err, "Error fetching blobber info", strings.Join(output, "\n"))
 
 			var blInfo climodel.BlobberInfoDetailed
 			err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
@@ -39,6 +38,7 @@ func TestStakePool(testSetup *testing.T) {
 			stakedCapacity := uint64(float64(blInfo.TotalStake) * GB / float64(blInfo.Terms.WritePrice))
 
 			require.Greater(t, stakedCapacity, uint64(blobber.Allocated), "Staked capacity should be greater than allocated capacity")
+
 			stakedCapacity -= uint64(blobber.Allocated)
 
 			if stakedCapacity < maxStakedCapacity {
@@ -49,7 +49,8 @@ func TestStakePool(testSetup *testing.T) {
 
 		// select any random blobber and check total offers
 		blobber := minStakedCapacityBlobber
-		output, _ := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
+		output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
+		require.Nil(t, err, "Error fetching blobber info", strings.Join(output, "\n"))
 
 		var blInfo climodel.BlobberInfoDetailed
 		err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
@@ -67,7 +68,7 @@ func TestStakePool(testSetup *testing.T) {
 		stakePool := climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
-		require.NotEmpty(t, stakePool)
+		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
 		delegates := stakePool.Delegate
 
@@ -92,7 +93,7 @@ func TestStakePool(testSetup *testing.T) {
 		stakePool = climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
-		require.NotEmpty(t, stakePool)
+		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
 		delegates = stakePool.Delegate
 		lenDelegatesNew := len(delegates)
@@ -102,12 +103,11 @@ func TestStakePool(testSetup *testing.T) {
 		lenDelegates = lenDelegatesNew
 
 		// create an allocation of capacity
-
 		allocSize := maxStakedCapacity*3 + uint64(30*GB)
 		allocSize -= allocSize / uint64(1000)
 
 		options := map[string]interface{}{"cost": "", "size": allocSize, "data": len(blobbersList) / 2, "parity": len(blobbersList) - len(blobbersList)/2}
-		output, err := createNewAllocation(t, configPath, createParams(options))
+		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -128,7 +128,8 @@ func TestStakePool(testSetup *testing.T) {
 		})
 
 		// check total offers new value and compare
-		output, _ = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
+		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
+		require.Nil(t, err, "Error fetching blobber info", strings.Join(output, "\n"))
 
 		err = json.Unmarshal([]byte(output[0]), &blInfo)
 		require.Nil(t, err, "error unmarshalling blobber info")
@@ -139,9 +140,7 @@ func TestStakePool(testSetup *testing.T) {
 		newStakeWallet := "new_stake_wallet"
 
 		_, err = registerWalletForName(t, configPath, newStakeWallet)
-		if err != nil {
-			return
-		}
+		require.Nil(t, err, "Error registering wallet", err)
 
 		_, err = executeFaucetWithTokensForWallet(t, newStakeWallet, configPath, 9)
 		require.Nil(t, err, "Error executing faucet with tokens", err)
@@ -159,7 +158,7 @@ func TestStakePool(testSetup *testing.T) {
 		stakePool = climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
-		require.NotEmpty(t, stakePool)
+		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
 		delegates = stakePool.Delegate
 		lenDelegatesNew = len(delegates)
@@ -169,7 +168,6 @@ func TestStakePool(testSetup *testing.T) {
 		lenDelegates = lenDelegatesNew
 
 		_, err = unstakeTokensForWallet(t, configPath, newStakeWallet, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
-
 		require.Nil(t, err, "error should not be there")
 
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
@@ -182,7 +180,7 @@ func TestStakePool(testSetup *testing.T) {
 		stakePool = climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
-		require.NotEmpty(t, stakePool)
+		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
 		delegates = stakePool.Delegate
 		lenDelegatesNew = len(delegates)
@@ -203,7 +201,7 @@ func TestStakePool(testSetup *testing.T) {
 		stakePool = climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
-		require.NotEmpty(t, stakePool)
+		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
 		delegates = stakePool.Delegate
 		lenDelegatesNew = len(delegates)
@@ -214,7 +212,7 @@ func TestStakePool(testSetup *testing.T) {
 
 		// Cancel the allocation
 		output, err = cancelAllocation(t, configPath, allocationId, true)
-		require.Nil(t, err, "error cancelling allocation")
+		require.Nil(t, err, "error canceling allocation")
 
 		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
 		require.Nil(t, err, "error should not be there")
@@ -229,7 +227,7 @@ func TestStakePool(testSetup *testing.T) {
 		stakePool = climodel.StakePoolInfo{}
 		err = json.Unmarshal([]byte(output[0]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
-		require.NotEmpty(t, stakePool)
+		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
 		delegates = stakePool.Delegate
 		lenDelegatesNew = len(delegates)

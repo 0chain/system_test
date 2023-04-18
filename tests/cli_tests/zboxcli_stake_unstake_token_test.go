@@ -282,8 +282,7 @@ func getTransaction(t *test.SystemTest, cliConfigFilename, params string) ([]str
 }
 
 func stakeTokens(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
-	output, err := stakeTokensForWallet(t, cliConfigFilename, escapedTestName(t), params, retry)
-	return output, err
+	return stakeTokensForWallet(t, cliConfigFilename, escapedTestName(t), params, retry)
 }
 
 func stakeTokensForWallet(t *test.SystemTest, cliConfigFilename, wallet, params string, retry bool) ([]string, error) {
@@ -302,8 +301,7 @@ func stakePoolInfo(t *test.SystemTest, cliConfigFilename, params string) ([]stri
 }
 
 func unstakeTokens(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	output, err := unstakeTokensForWallet(t, cliConfigFilename, escapedTestName(t), params)
-	return output, err
+	return unstakeTokensForWallet(t, cliConfigFilename, escapedTestName(t), params)
 }
 
 func unstakeTokensForWallet(t *test.SystemTest, cliConfigFilename, wallet, params string) ([]string, error) {
