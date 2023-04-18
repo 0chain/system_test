@@ -101,13 +101,6 @@ func registerWalletAndLockReadTokens(t *test.SystemTest, cliConfigFilename strin
 	return err
 }
 
-func registerWalletWithoutFaucet(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
-	t.Logf("Registering wallet...")
-
-	return cliutils.RunCommand(t, "./zbox register --silent "+
-		"--wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
-}
-
 func registerWallet(t *test.SystemTest, cliConfigFilename string, opt ...registerWalletOptionFunc) ([]string, error) {
 	return registerWalletForName(t, cliConfigFilename, escapedTestName(t), opt...)
 }
