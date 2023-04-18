@@ -2,12 +2,13 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/test"
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStakePool(testSetup *testing.T) {
