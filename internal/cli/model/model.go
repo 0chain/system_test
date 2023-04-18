@@ -775,7 +775,7 @@ var StorageIntSettings = []string{
 	"cost.pay_blobber_block_rewards",
 	"cost.challenge_request",
 	"cost.challenge_response",
-	"cost.generate_challenges",
+	"cost.generate_challenge",
 	"cost.add_validator",
 	"cost.update_validator_settings",
 	"cost.add_blobber",
