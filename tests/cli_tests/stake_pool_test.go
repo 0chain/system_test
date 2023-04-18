@@ -189,7 +189,8 @@ func TestStakePool(testSetup *testing.T) {
 
 		lenDelegates = lenDelegatesNew
 
-		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
+		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
+		require.Nil(t, err, "error should not be there")
 
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
@@ -211,7 +212,7 @@ func TestStakePool(testSetup *testing.T) {
 		lenDelegates = lenDelegatesNew
 
 		// Cancel the allocation
-		output, err = cancelAllocation(t, configPath, allocationId, true)
+		_, err = cancelAllocation(t, configPath, allocationId, true)
 		require.Nil(t, err, "error canceling allocation")
 
 		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
