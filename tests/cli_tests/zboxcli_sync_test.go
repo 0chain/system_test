@@ -94,7 +94,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Sync path with 1 file to empty allocation and download the file should work", 2*time.Minute, func(t *test.SystemTest) {
-		//_, err := registerWallet(t, configPath)
 		//require.NoError(t, err)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		createAllocationTestTeardown(t, allocationID)
@@ -152,7 +151,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		// FIXME after issue is solved
 		fixed := false
 		if !fixed {
-			//require.NotNil(t, err, "")
 			t.Log("FIXME", strings.Join(output, "\n"))
 		} else {
 			require.Nil(t, err, "Error in downloading the file", strings.Join(output, "\n"))
@@ -224,7 +222,6 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		// FIXME after issue is solved
 		fixed := false
 		if !fixed {
-			//require.NotNil(t, err, "")
 			t.Log("FIXME", strings.Join(output, "\n"))
 		} else {
 			require.Nil(t, err, "Error in downloading the file", strings.Join(output, "\n"))
