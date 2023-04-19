@@ -839,7 +839,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		// assert that no more blobber was added
 		require.Equal(t, len(alloc.Blobbers), len(updatedAlloc.Blobbers))
 	})
-
 	t.Run("Update allocation with add/replace blobber", func(t *test.SystemTest) {
 		// setup allocation and upload a file
 		allocSize := int64(2048)
@@ -947,9 +946,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
-
 	})
-
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
@@ -1132,7 +1129,6 @@ func executeFaucetWithTokensForWallet(t *test.SystemTest, wallet, cliConfigFilen
 
 // getBlobberNotPartOfAllocation returns a blobber not part of current allocation
 func getBlobberNotPartOfAllocation(t *test.SystemTest, allocationID string) (string, error) {
-
 	a, err := sdk.GetAllocation(allocationID)
 	require.Nil(t, err)
 
