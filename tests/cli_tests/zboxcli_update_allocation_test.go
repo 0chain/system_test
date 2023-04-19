@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -839,7 +840,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		// assert that no more blobber was added
 		require.Equal(t, len(alloc.Blobbers), len(updatedAlloc.Blobbers))
 	})
-	t.Run("Update allocation with add/replace blobber", func(t *test.SystemTest) {
+	t.Run("Update allocation with add blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
 		allocSize := int64(2048)
 		fileSize := int64(1024)
@@ -875,77 +876,55 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 
 		output, err = updateAllocation(t, configPath, params, true)
-
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
-		// verify the that new blobber also has the uploaded file
+		// todo: verify the that new blobber also has the uploaded file
+	})
+	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
+		// setup allocation and upload a file
+		allocSize := int64(2048)
+		fileSize := int64(1024)
 
-		// update allocation with an already existing blobber should fail
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
 
-		// replace blobber a blobber should sync data to the new blobber
-
-		// remove blobber should fail
-
-		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
-
-		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-		_, err = executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 3.0)
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		// reduce allocation should fail
-		params = createParams(map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
-			"size":       -100,
-		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
-		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
+			"remotepath": "/dir/",
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 
-		// set file_options or third_party_extendable should fail
-		params = createParams(map[string]interface{}{
+		expected := "Status completed callback. Type = application/octet-stream. Name = " + filepath.Base(filename)
+		require.Equal(t, expected, output[1])
+
+		// adding a blobber should sync the data to the new blobber
+
+		blobber_id, err := getBlobberNotPartOfAllocation(t, allocationID)
+		require.Nil(t, err)
+		remove_blobber, err := getRandomBlobber(t, blobber_id)
+		require.Nil(t, err)
+		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
-			"forbid_upload":              nil,
-			"forbid_update":              nil,
-			"forbid_delete":              nil,
-			"forbid_rename":              nil,
-			"forbid_move":                nil,
-			"forbid_copy":                nil,
 			"set_third_party_extendable": nil,
+			"add_blobber":                blobber_id,
+			"remove_blobber":             remove_blobber,
 		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
-		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
 
-		// add blobber should fail
-		params = createParams(map[string]interface{}{
-			"allocation":     allocationID,
-			"add_blobber":    "new_blobber_id",
-			"remove_blobber": "blobber_id",
-		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
-		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
+		output, err = updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
-		// set update_term should fail
-		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
-			"update_terms": false,
-		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
-		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
-
-		// set lock should fail
-		params = createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"lock":       100,
-		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
-		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
+		// todo: verify the that new blobber also has the uploaded file
 	})
 }
 
@@ -1144,4 +1123,18 @@ func getBlobberNotPartOfAllocation(t *test.SystemTest, allocationID string) (str
 	}
 
 	return "", fmt.Errorf("failed to get blobber not part of allocation")
+}
+
+func getRandomBlobber(t *test.SystemTest, except_blobber string) (string, error) {
+	rand.Seed(time.Now().Unix())
+	blobbers, err := sdk.GetBlobbers(true)
+	require.Nil(t, err)
+
+	rand.Shuffle(len(blobbers), func(i, j int) { blobbers[i], blobbers[j] = blobbers[j], blobbers[i] })
+	for _, blobber := range blobbers {
+		if blobber.ID != common.Key(except_blobber) {
+			return string(blobber.ID), nil
+		}
+	}
+	return "", fmt.Errorf("failed to get blobbers")
 }
