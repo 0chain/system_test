@@ -164,6 +164,6 @@ func TestBlobberRewards(testSetup *testing.T) {
 		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
-		require.Equal(t, rewards, balanceAfter+fee-balanceBefore)
+		require.Equal(t, balanceBefore-fee+collectRewardTxnOutput.Amount, balanceAfter)
 	})
 }
