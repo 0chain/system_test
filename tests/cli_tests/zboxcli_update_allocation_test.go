@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -400,8 +399,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
-			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			require.Len(t, output, 2)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 		}
 
 		// get allocation
@@ -603,8 +602,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		require.Len(t, output, 2)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 
 		// Forbid upload
 		params = createParams(map[string]interface{}{
@@ -859,10 +858,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := "Status completed callback. Type = application/octet-stream. Name = " + filepath.Base(filename)
-		require.Equal(t, expected, output[0])
 
 		// adding a blobber should sync the data to the new blobber
 
@@ -877,10 +872,13 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		require.Len(t, output, 2)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		remotefile := "/dir/"+filename
+		fref, err := sdk.GetFileRefFromBlobber(allocationID, blobber_id, remotefile)
+		require.Nil(t, err)
+		require.NotNil(t, fref) // not nil when the file exists
 
-		// todo: verify the that new blobber also has the uploaded file
 	})
 	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
@@ -901,10 +899,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := "Status completed callback. Type = application/octet-stream. Name = " + filepath.Base(filename)
-		require.Equal(t, expected, output[0])
 
 		// adding a blobber should sync the data to the new blobber
 
@@ -921,10 +915,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-
-		// todo: verify the that new blobber also has the uploaded file
+		require.Len(t, output, 2)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		remotefile := "/dir/"+filename
+		fref, err := sdk.GetFileRefFromBlobber(allocationID, blobber_id, remotefile)
+		require.Nil(t, err)
+		require.NotNil(t, fref) // not nil when the file exists
 	})
 }
 
