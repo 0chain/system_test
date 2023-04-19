@@ -874,11 +874,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
-		remotefile := "/dir/"+filename
+		remotefile := "/dir/" + filename
 		fref, err := sdk.GetFileRefFromBlobber(allocationID, blobber_id, remotefile)
 		require.Nil(t, err)
 		require.NotNil(t, fref) // not nil when the file exists
-
 	})
 	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
@@ -917,7 +916,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
-		remotefile := "/dir/"+filename
+		remotefile := "/dir/" + filename
 		fref, err := sdk.GetFileRefFromBlobber(allocationID, blobber_id, remotefile)
 		require.Nil(t, err)
 		require.NotNil(t, fref) // not nil when the file exists
@@ -1122,7 +1121,7 @@ func getBlobberNotPartOfAllocation(t *test.SystemTest, allocationID string) (str
 }
 
 func getRandomBlobber(t *test.SystemTest, except_blobber string) (string, error) {
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().Unix()) //nolint:gosec,revive
 	blobbers, err := sdk.GetBlobbers(true)
 	require.Nil(t, err)
 
