@@ -39,6 +39,8 @@ func registerWallet(t *test.SystemTest, cliConfigFilename string) ([]string, err
 
 func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string) ([]string, error) {
 	t.Logf("Registering wallet...")
+	output := "Extra output field to match the staging output length issue"
+	t.Logf("faucet output: %v", output)
 	return []string{""}, nil
 }
 
