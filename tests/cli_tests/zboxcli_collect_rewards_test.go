@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/internal/currency"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -22,7 +23,11 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("Test collect reward with valid pool and blobber id should pass", 90*time.Second, func(t *test.SystemTest) { // TODO slow
+	// Create a folder to keep all the generated files to be uploaded
+	err := os.MkdirAll("tmp", os.ModePerm)
+	require.Nil(t, err)
+
+	t.Run("Test collect reward with valid pool and blobber id should pass", func(t *test.SystemTest) { // TODO slow
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
@@ -31,28 +36,6 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
-		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		err = json.Unmarshal([]byte(output[0]), &blobbers)
-		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
-		require.True(t, len(blobbers) > 0, "No blobbers found in blobber list")
-
-		// Pick a random blobber
-		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
-
-		// Stake tokens against this blobber
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
-			"tokens":     5.0,
-		}), true)
-		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("tokens locked, txn hash: ([a-f0-9]{64})"), output[0])
-
-		balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
 
 		// Upload and download a file so blobber can accumulate rewards
 		allocSize := int64(2048)
@@ -63,9 +46,21 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 1,
-			"data":   5,
+			"data":   2,
 			"parity": 1,
 		})
+
+		alloc := getAllocation(t, allocationID)
+		blobberID := alloc.Blobbers[time.Now().Unix()%int64(len(alloc.Blobbers))].ID
+
+		// Stake tokens against this blobber
+		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+			"blobber_id": blobberID,
+			"tokens":     5.0,
+		}), true)
+		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("tokens locked, txn hash: ([a-f0-9]{64})"), output[0])
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
@@ -83,7 +78,7 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobber.Id,
+			"blobber_id": blobberID,
 			"json":       "",
 		}))
 		require.Nil(t, err, "error getting stake pool info")
@@ -101,17 +96,20 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 			}
 		}
 		require.Greater(t, rewards, int64(0))
+		t.Logf("reward tokens: %v", rewards)
 
+		balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
 			"provider_type": "blobber",
-			"provider_id":   blobber.Id,
+			"provider_id":   blobberID,
+			"fee":           "0.15",
 		}), true)
-		require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "transferred reward tokens", output[0])
+		require.NoError(t, err, output)
 
+		feeTxn, err := currency.ParseZCN(0.15)
+		require.NoError(t, err)
 		balanceAfter := getBalanceFromSharders(t, wallet.ClientID)
-		require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards) // greater or equal since more rewards can accumulate after we check stakepool
+		require.GreaterOrEqual(t, balanceAfter, balanceBefore-int64(feeTxn)+rewards)
 	})
 
 	t.Run("Test collect reward with invalid blobber id should fail", func(t *test.SystemTest) {
@@ -286,6 +284,7 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 				break
 			}
 		}
+		// TODO: fix me - rewards should be greater than 0
 		require.Greater(t, rewards, int64(0))
 
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
