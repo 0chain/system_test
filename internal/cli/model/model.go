@@ -758,7 +758,7 @@ var StorageCurrencySettigs = []string{
 	"free_allocation_settings.write_price_range.max",
 	"max_read_price",
 	"max_write_price",
-	"max_write_price",
+	"min_write_price",
 	"block_reward.block_reward",
 	"block_reward.qualifying_stake",
 }
@@ -790,7 +790,7 @@ var StorageIntSettings = []string{
 	"cost.pay_blobber_block_rewards",
 	"cost.challenge_request",
 	"cost.challenge_response",
-	"cost.generate_challenges",
+	"cost.generate_challenge",
 	"cost.add_validator",
 	"cost.update_validator_settings",
 	"cost.add_blobber",
