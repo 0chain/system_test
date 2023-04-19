@@ -22,6 +22,9 @@ func TestStakePool(testSetup *testing.T) {
 	require.Greater(t, len(blobbersList), 0, "No blobbers found")
 
 	t.RunSequentiallyWithTimeout("total stake in a blobber can never be lesser than it's used capacity", 8*time.Minute, func(t *test.SystemTest) {
+		_, err := registerWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", err)
+
 		// select the blobber with min staked capacity
 		var minStakedCapacityBlobber climodel.BlobberInfoDetailed
 
@@ -50,6 +53,7 @@ func TestStakePool(testSetup *testing.T) {
 
 		// select any random blobber and check total offers
 		blobber := minStakedCapacityBlobber
+
 		output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
 		require.Nil(t, err, "Error fetching blobber info", strings.Join(output, "\n"))
 
@@ -105,7 +109,7 @@ func TestStakePool(testSetup *testing.T) {
 
 		// create an allocation of capacity
 		allocSize := maxStakedCapacity*3 + uint64(30*GB)
-		allocSize -= allocSize / uint64(1000)
+		allocSize -= allocSize / uint64(1*MB)
 
 		options := map[string]interface{}{"cost": "", "size": allocSize, "data": len(blobbersList) / 2, "parity": len(blobbersList) - len(blobbersList)/2}
 		output, err = createNewAllocation(t, configPath, createParams(options))
