@@ -32,7 +32,10 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		// Lock 0.5 token for allocation
+		_, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), configPath, 9)
+		require.Nil(t, err)
+
+		// Lock tokens for allocation
 		allocParams := createParams(map[string]interface{}{
 			"lock":   "5",
 			"size":   1 * MB,
@@ -56,6 +59,9 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 	t.Run("Update Allocation by locking more tokens - Locked amount must be withdrawn from user wallet", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		_, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), configPath, 9)
+		require.Nil(t, err)
 
 		// get wallet balance
 		balance, err := getBalanceZCN(t, configPath)
