@@ -46,7 +46,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Could not update "+
 			"allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 
 		ac := getAllocation(t, allocationID)
 		require.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate,
@@ -68,7 +68,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Could not update allocation "+
 			"due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
@@ -93,7 +93,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
@@ -128,7 +128,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
@@ -150,7 +150,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
@@ -293,7 +293,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 			require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 			require.Len(t, output, 2)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 		})
 
 		// otherAllocationID should not be updatable from this level
@@ -308,7 +308,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 
 		// Then try updating with otherAllocationID: should not work
 		params = createParams(map[string]interface{}{
@@ -383,7 +383,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 2)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 		}
 
 		// get allocation
@@ -632,7 +632,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 
 		// get allocation
 		alloc := getAllocation(t, allocationID)
@@ -651,7 +651,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 
 		// get allocation
 		alloc := getAllocation(t, allocationID)
@@ -679,7 +679,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 
 		// get allocation
 		alloc := getAllocation(t, allocationID)
@@ -715,7 +715,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		} else {
 			require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 			require.Len(t, output, 2)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 		}
 
 		// get allocation
@@ -759,7 +759,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 
 		// get allocation
 		alloc := getAllocation(t, allocationID)
@@ -862,7 +862,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := "Status completed callback. Type = application/octet-stream. Name = " + filepath.Base(filename)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[0])
 
 		// adding a blobber should sync the data to the new blobber
 
@@ -904,7 +904,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := "Status completed callback. Type = application/octet-stream. Name = " + filepath.Base(filename)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[0])
 
 		// adding a blobber should sync the data to the new blobber
 
