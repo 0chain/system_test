@@ -24,9 +24,12 @@ func TestCancelAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Cancel allocation immediately should work", func(t *test.SystemTest) {
+		output, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
 		allocationID := setupAllocation(t, configPath)
 
-		output, err := cancelAllocation(t, configPath, allocationID, true)
+		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
