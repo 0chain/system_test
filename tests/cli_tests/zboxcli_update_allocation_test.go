@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -12,8 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/0chain/gosdk/core/common"
-	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/stretchr/testify/require"
@@ -417,8 +414,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
-			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			require.Len(t, output, 2)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 		}
 
 		// get allocation
@@ -859,15 +856,13 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		// adding a blobber should sync the data to the new blobber
-
-		blobber_id, err := getBlobberNotPartOfAllocation(t, allocationID)
+		blobberID, err := sdkClient.GetBlobberNotPartOfAllocation(t, allocationID)
 		require.Nil(t, err)
 
 		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
-			"add_blobber":                blobber_id,
+			"add_blobber":                blobberID,
 		})
 
 		output, err = updateAllocation(t, configPath, params, true)
@@ -875,9 +870,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Len(t, output, 2)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 		remotefile := "/dir/" + filename
-		fref, err := sdk.GetFileRefFromBlobber(allocationID, blobber_id, remotefile)
-		require.Nil(t, err)
-		require.NotNil(t, fref) // not nil when the file exists
+		sdkClient.VerifyFileRefFromBlobber(t, allocationID, blobberID, remotefile)
 	})
 	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
@@ -899,17 +892,15 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		// adding a blobber should sync the data to the new blobber
-
-		blobber_id, err := getBlobberNotPartOfAllocation(t, allocationID)
+		blobberID, err := sdkClient.GetBlobberNotPartOfAllocation(t, allocationID)
 		require.Nil(t, err)
-		remove_blobber, err := getRandomBlobber(t, blobber_id)
+		removeBlobber, err := sdkClient.GetRandomBlobber(t, blobberID)
 		require.Nil(t, err)
 		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
-			"add_blobber":                blobber_id,
-			"remove_blobber":             remove_blobber,
+			"add_blobber":                blobberID,
+			"remove_blobber":             removeBlobber,
 		})
 
 		output, err = updateAllocation(t, configPath, params, true)
@@ -917,9 +908,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Len(t, output, 2)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
 		remotefile := "/dir/" + filename
-		fref, err := sdk.GetFileRefFromBlobber(allocationID, blobber_id, remotefile)
-		require.Nil(t, err)
-		require.NotNil(t, fref) // not nil when the file exists
+		sdkClient.VerifyFileRefFromBlobber(t, allocationID, blobberID, remotefile)
 	})
 }
 
@@ -1099,37 +1088,4 @@ func executeFaucetWithTokensForWallet(t *test.SystemTest, wallet, cliConfigFilen
 		wallet,
 		cliConfigFilename,
 	), 3, time.Second*5)
-}
-
-// getBlobberNotPartOfAllocation returns a blobber not part of current allocation
-func getBlobberNotPartOfAllocation(t *test.SystemTest, allocationID string) (string, error) {
-	a, err := sdk.GetAllocation(allocationID)
-	require.Nil(t, err)
-
-	blobbers, err := sdk.GetBlobbers(true)
-	require.Nil(t, err)
-
-	for _, blobber := range blobbers {
-		for _, b := range a.BlobberDetails {
-			if blobber.ID != common.Key(b.BlobberID) {
-				return b.BlobberID, nil
-			}
-		}
-	}
-
-	return "", fmt.Errorf("failed to get blobber not part of allocation")
-}
-
-func getRandomBlobber(t *test.SystemTest, except_blobber string) (string, error) {
-	rand.Seed(time.Now().Unix()) //nolint:gosec,revive
-	blobbers, err := sdk.GetBlobbers(true)
-	require.Nil(t, err)
-
-	rand.Shuffle(len(blobbers), func(i, j int) { blobbers[i], blobbers[j] = blobbers[j], blobbers[i] })
-	for _, blobber := range blobbers {
-		if blobber.ID != common.Key(except_blobber) {
-			return string(blobber.ID), nil
-		}
-	}
-	return "", fmt.Errorf("failed to get blobbers")
 }
