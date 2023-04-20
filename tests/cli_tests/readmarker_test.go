@@ -37,7 +37,7 @@ func TestReadMarker(testSetup *testing.T) {
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 			"data":   3,
 			"parity": 1,
 		})
@@ -73,7 +73,7 @@ func TestReadMarker(testSetup *testing.T) {
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 			"data":   3,
 			"parity": 1,
 		})
@@ -125,7 +125,7 @@ func TestReadMarker(testSetup *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 				"data":   3,
 				"parity": 1,
 			})
@@ -191,7 +191,7 @@ func TestReadMarker(testSetup *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 				"data":   3,
 				"parity": 1,
 			})
@@ -261,7 +261,7 @@ func TestReadMarker(testSetup *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 				"data":   3,
 				"parity": 1,
 			})
@@ -317,7 +317,7 @@ func TestReadMarker(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 			"data":   3,
 			"parity": 1,
 		})
