@@ -401,6 +401,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"contract_Address",
 			"token_id",
 			"token_standard",
+			"tx_hash",
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -531,6 +532,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"contract_Address",
 			"token_id",
 			"token_standard",
+			"tx_hash",
 		)
 		errMssg := `{"error":"400: collectionID not valid"}`
 		require.NoError(t, err)
@@ -615,6 +617,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"contract_Address",
 			"token_id",
 			"token_standard",
+			"tx_hash",
 		)
 
 		require.NoError(t, err)
@@ -699,6 +702,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"contract_Address",
 			"token_id",
 			"token_standard",
+			"tx_hash",
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
