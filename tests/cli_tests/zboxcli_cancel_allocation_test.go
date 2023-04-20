@@ -79,7 +79,6 @@ func TestCancelAllocation(testSetup *testing.T) {
 		_, err := registerWallet(t, configPath)
 		require.NoError(t, err)
 
-		// TODO: min expired time is 5m, otherwise allocation could not be created
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
 			"expire": "2s",
 		})

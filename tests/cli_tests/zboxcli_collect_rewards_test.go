@@ -48,6 +48,7 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 			"tokens": 9,
 			"data":   5,
 			"parity": 1,
+			"expire": "30m",
 		})
 
 		alloc := getAllocation(t, allocationID)

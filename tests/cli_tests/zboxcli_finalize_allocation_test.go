@@ -23,19 +23,22 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 		_, err := registerWallet(t, configPath)
 		require.NoError(t, err)
 
+		output, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "5m",
+			"expire": "5s",
 		})
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(7 * time.Second)
 
 		allocations := parseListAllocations(t, configPath)
 		_, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
 
-		cliutils.Wait(t, 6*time.Minute)
+		cliutils.Wait(t, 3*time.Minute)
 
-		output, err := finalizeAllocation(t, configPath, allocationID, false)
+		output, err = finalizeAllocation(t, configPath, allocationID, true)
 
 		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
