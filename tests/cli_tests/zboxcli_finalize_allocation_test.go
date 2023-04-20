@@ -47,10 +47,12 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
+		output, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
 		allocationID := setupAllocation(t, configPath)
 
-		output, err := finalizeAllocation(t, configPath, allocationID, false)
-		// Error should not be nil since finalize is not working
+		output, err = finalizeAllocation(t, configPath, allocationID, false)
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet, or waiting a challenge completion", output[0])
