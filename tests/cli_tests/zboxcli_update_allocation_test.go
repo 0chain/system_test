@@ -273,35 +273,15 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Update Other's Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) { // todo: too slow
-		var otherAllocationID string
-
 		_, err := executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed")
 
 		myAllocationID := setupAllocation(t, configPath)
 
-		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
-			_, err := executeFaucetWithTokens(t, configPath, 10)
-			require.NoError(t, err, "faucet execution failed")
+		targetWalletName := escapedTestName(t) + "_TARGET"
+		output, err := registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
 
-			otherAllocationID = setupAllocation(t, configPath)
-
-			// Updating the otherAllocationID should work here
-			size := int64(2048)
-
-			params := createParams(map[string]interface{}{
-				"allocation": otherAllocationID,
-				"size":       size,
-			})
-			output, err := updateAllocation(t, configPath, params, true)
-
-			require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-		})
-
-		// otherAllocationID should not be updatable from this level
 		size := int64(2048)
 
 		// First try updating with myAllocationID: should work
@@ -309,7 +289,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"allocation": myAllocationID,
 			"size":       size,
 		})
-		output, err := updateAllocation(t, configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -317,10 +297,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Then try updating with otherAllocationID: should not work
 		params = createParams(map[string]interface{}{
-			"allocation": otherAllocationID,
+			"allocation": myAllocationID,
 			"size":       size,
 		})
-		output, err = updateAllocation(t, configPath, params, false)
+		output, err = updateAllocationWithWallet(t, targetWalletName, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
