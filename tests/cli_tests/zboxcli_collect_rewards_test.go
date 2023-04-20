@@ -46,7 +46,7 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
-			"data":   5,
+			"data":   4,
 			"parity": 1,
 			"expire": "30m",
 		})
@@ -241,11 +241,11 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 		filesize := 10 * MB
 		remotepath := "/"
 
-		// Use all 6 blobbers
+		// Use all blobbers
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
-			"data":   1,
+			"data":   4,
 			"parity": 1,
 			"expire": "30m",
 		})
