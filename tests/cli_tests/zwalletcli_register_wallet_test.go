@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 	"time"
 
@@ -112,9 +113,43 @@ func verifyTransaction(t *test.SystemTest, cliConfigFilename, txn string) ([]str
 		"_wallet.json"+" --hash "+txn+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
 
+func getBalanceZCN(t *test.SystemTest, cliConfigFilename string, walletName ...string) (float64, error) {
+	cliutils.Wait(t, 5*time.Second)
+	var (
+		output []string
+		err    error
+	)
+	if len(walletName) > 0 && walletName[0] != "" {
+		output, err = getBalanceForWalletJSON(t, cliConfigFilename, walletName[0])
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		output, err = getBalanceForWalletJSON(t, cliConfigFilename, escapedTestName(t))
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	var balance = struct {
+		ZCN string `json:"zcn"`
+	}{}
+
+	if err := json.Unmarshal([]byte(output[0]), &balance); err != nil {
+		return 0, err
+	}
+
+	return strconv.ParseFloat(balance.ZCN, 64)
+}
+
 func escapedTestName(t *test.SystemTest) string {
 	replacer := strings.NewReplacer("/", "-", "\"", "-", ":", "-", "(", "-",
 		")", "-", "<", "LESS_THAN", ">", "GREATER_THAN", "|", "-", "*", "-",
 		"?", "-")
 	return replacer.Replace(t.Name())
+}
+
+func getBalanceForWalletJSON(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
+	return cliutils.RunCommand(t, "./zwallet getbalance --silent --json "+
+		"--wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
