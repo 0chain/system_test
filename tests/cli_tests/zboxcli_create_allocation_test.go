@@ -283,8 +283,11 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Run("Create allocation with some forbidden file options flags should pass and show in allocation", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
-		_, err := executeFaucetWithTokens(t, configPath, 9)
-		require.Nil(t, err)
+
+		for i := 0; i < 2; i++ {
+			_, err := executeFaucetWithTokens(t, configPath, 9)
+			require.Nil(t, err)
+		}
 
 		// Forbid upload
 		options := map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_upload": nil}
