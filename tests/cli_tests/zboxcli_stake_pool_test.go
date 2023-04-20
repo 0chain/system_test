@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"math"
 	"strings"
 	"testing"
 	"time"
@@ -29,7 +30,7 @@ func TestStakePool(testSetup *testing.T) {
 		var minStakedCapacityBlobber climodel.BlobberInfoDetailed
 
 		// set maxStakedCapacity to max uint64 value
-		maxStakedCapacity := uint64(18446744073709551615)
+		maxStakedCapacity := uint64(math.MaxUint64)
 
 		for _, blobber := range blobbersList {
 			output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
@@ -103,7 +104,7 @@ func TestStakePool(testSetup *testing.T) {
 		delegates = stakePool.Delegate
 		lenDelegatesNew := len(delegates)
 
-		require.Equal(t, lenDelegatesNew, lenDelegates+1, "delegates should be greater")
+		require.Equal(t, lenDelegatesNew, lenDelegates+1, "Number of delegates should be greater")
 
 		lenDelegates = lenDelegatesNew
 
@@ -168,12 +169,12 @@ func TestStakePool(testSetup *testing.T) {
 		delegates = stakePool.Delegate
 		lenDelegatesNew = len(delegates)
 
-		require.Equal(t, lenDelegatesNew, lenDelegates+1, "delegates should be greater")
+		require.Equal(t, lenDelegatesNew, lenDelegates+1, "Number of delegates should be greater")
 
 		lenDelegates = lenDelegatesNew
 
 		_, err = unstakeTokensForWallet(t, configPath, newStakeWallet, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
-		require.Nil(t, err, "error should not be there")
+		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", blobber.Id)
 
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
@@ -190,12 +191,12 @@ func TestStakePool(testSetup *testing.T) {
 		delegates = stakePool.Delegate
 		lenDelegatesNew = len(delegates)
 
-		require.Equal(t, lenDelegatesNew+1, lenDelegates, "delegates should be greater")
+		require.Equal(t, lenDelegatesNew+1, lenDelegates, "Number of delegates should be greater")
 
 		lenDelegates = lenDelegatesNew
 
 		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
-		require.Nil(t, err, "error should not be there")
+		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", blobber.Id)
 
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
@@ -221,7 +222,7 @@ func TestStakePool(testSetup *testing.T) {
 		require.Nil(t, err, "error canceling allocation")
 
 		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id}))
-		require.Nil(t, err, "error should not be there")
+		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", blobber.Id)
 
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
@@ -238,6 +239,6 @@ func TestStakePool(testSetup *testing.T) {
 		delegates = stakePool.Delegate
 		lenDelegatesNew = len(delegates)
 
-		require.Equal(t, lenDelegatesNew+1, lenDelegates, "delegates should be greater")
+		require.Equal(t, lenDelegatesNew+1, lenDelegates, "Number of delegates should be greater")
 	})
 }
