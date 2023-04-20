@@ -192,6 +192,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update
 	t.Run("Update Nothing Should Fail", func(t *test.SystemTest) {
+		_, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed")
+
 		allocationID := setupAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
@@ -272,10 +275,16 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	t.RunWithTimeout("Update Other's Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) { // todo: too slow
 		var otherAllocationID string
 
+		_, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed")
+
 		myAllocationID := setupAllocation(t, configPath)
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
+			_, err := executeFaucetWithTokens(t, configPath, 10)
+			require.NoError(t, err, "faucet execution failed")
+
 			otherAllocationID = setupAllocation(t, configPath)
 
 			// Updating the otherAllocationID should work here
@@ -843,7 +852,7 @@ func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extra
 
 	for i := 0; i < 2; i++ {
 		_, err := executeFaucetWithTokens(t, configPath, 10)
-	require.NoError(t, err, "faucet execution failed")
+		require.NoError(t, err, "faucet execution failed")
 	}
 
 	allocations := parseListAllocations(t, cliConfigFilename)
