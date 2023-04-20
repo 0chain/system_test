@@ -43,13 +43,15 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		_ = initialiseTest(t, walletOwner, true)
 
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 0.5,
+			"lock":   5,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 
 		_, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"tokens": 0.5,
+			"tokens": 1,
 		}), true)
 		require.Nil(t, err, "error")
 
@@ -190,13 +192,15 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		_ = initialiseTest(t, walletOwner, true)
 
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 0.5,
+			"lock":   5,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		t.Log(output)
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 
 		_, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"tokens": 0.5,
+			"tokens": 1,
 		}), true)
 		require.Nil(t, err, "error")
 
@@ -343,13 +347,15 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		_ = initialiseTest(t, walletOwner, true)
 
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 0.5,
+			"lock":   5,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		t.Log(output)
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 
 		_, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"tokens": 0.5,
+			"tokens": 1,
 		}), true)
 		require.Nil(t, err, "error")
 

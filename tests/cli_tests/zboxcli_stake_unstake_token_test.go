@@ -226,8 +226,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "Expected error when staking 0 tokens than in stake pool", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
-		require.Equal(t, fmt.Sprintf("Failed to lock tokens in stake pool: stake_pool_lock_failed:"+
-			" too small stake to lock: 0 < %v", blobber.Stake_pool_settings.Min_stake), output[0])
+		require.Equal(t, "Failed to lock tokens in stake pool: stake_pool_lock_failed: no stake to lock: 0", output[0])
 
 		// Wallet balance after staking tokens
 		balance2, err := getBalanceZCN(t, configPath)

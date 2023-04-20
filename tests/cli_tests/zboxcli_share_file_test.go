@@ -457,12 +457,47 @@ func TestShareFile(testSetup *testing.T) {
 
 	t.RunWithTimeout("Share encrypted huge file using auth ticket - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		faucetTokens := 9.0
+
+		output, err := registerWalletForName(t, configPath, walletOwner)
+		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+		for i := 0; i < 3; i++ {
+			output, err = executeFaucetWithTokensForWallet(t, walletOwner, configPath, faucetTokens)
+			require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		}
+
+		allocParam := createParams(map[string]interface{}{
+			"lock":   24,
+			"size":   1024000,
+			"expire": "30m",
+			"parity": 1,
+			"data":   1,
+		})
+
+		output, err = createNewAllocationForWallet(t, walletOwner, configPath, allocParam)
+
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
+		require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
+
+		allocationID := strings.Fields(output[0])[2]
+
+		// locking tokens for read pool
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": 3,
+		})
+		output, err = readPoolLockWithWallet(t, walletOwner, configPath, readPoolParams, true)
+		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "locked", output[0])
 
 		// upload file
 		file := generateRandomTestFileName(t)
 		fileSize := int64(102400) // this is big enough to cause problem with download
-		err := createFileWithSize(file, fileSize)
+		err = createFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
 		uploadParams := map[string]interface{}{
@@ -471,7 +506,7 @@ func TestShareFile(testSetup *testing.T) {
 			"remotepath": file,
 			"encrypt":    "",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, true)
+		output, err = uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Contains(t, output[1], StatusCompletedCB)
@@ -1286,9 +1321,9 @@ func registerAndCreateAllocation(t *test.SystemTest, configPath, wallet string) 
 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 	allocParam := createParams(map[string]interface{}{
-		"lock":   0.5,
-		"size":   10485760,
-		"expire": "2h",
+		"lock":   2,
+		"size":   10000,
+		"expire": "30m",
 		"parity": 1,
 		"data":   1,
 	})

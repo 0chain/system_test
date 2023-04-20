@@ -645,14 +645,15 @@ func (c *APIClient) RegisterWalletForMnemonicWithoutAssertion(t *test.SystemTest
 
 // ExecuteFaucet provides basic assertions
 func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) {
-	c.ExecuteFaucetWithTokens(t, wallet, 1.0, requiredTransactionStatus)
+	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
+	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
 }
 
 // ExecuteFaucet provides basic assertions
 func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
 
-	pourZCN := tokenomics.IntToZCN(5)
+	pourZCN := tokenomics.IntToZCN(tokens)
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
@@ -781,7 +782,7 @@ func (c *APIClient) CreateAllocation(t *test.SystemTest,
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
-			Value:           tokenomics.IntToZCN(0.1),
+			Value:           tokenomics.IntToZCN(10.0),
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -1053,7 +1054,7 @@ func (c *APIClient) GetStakePoolStat(t *test.SystemTest, providerID, providerTyp
 	return scRestGetStakePoolStat
 }
 
-func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) int64 {
+func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) (txnData *model.TransactionGetConfirmationResponse, fee int64) {
 	collectRewardTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
@@ -1092,7 +1093,8 @@ func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, pro
 	})
 
 	wallet.IncNonce()
-	return collectRewardTransactionGetConfirmationResponse.Transaction.TransactionFee
+
+	return collectRewardTransactionGetConfirmationResponse, collectRewardTransactionGetConfirmationResponse.Transaction.TransactionFee
 }
 
 func (c *APIClient) GetBlobber(t *test.SystemTest, blobberID string, requiredStatusCode int) *model.SCRestGetBlobberResponse {
