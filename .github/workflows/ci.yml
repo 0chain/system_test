@@ -52,7 +52,7 @@ jobs:
   golangci:
     if: github.event_name == 'push'
     name: "lint"
-    runs-on: [ arc-runner ]
+    runs-on: [ tests-suite ]
     steps:
       - name: Install Packages
         run: |
