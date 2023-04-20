@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -12,6 +13,10 @@ import (
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+)
+
+const (
+	defaultInitFaucetTokens = 5.0
 )
 
 func registerWalletAndLockReadTokens(t *test.SystemTest, cliConfigFilename string) error {
@@ -40,8 +45,19 @@ func registerWallet(t *test.SystemTest, cliConfigFilename string) ([]string, err
 
 func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string) ([]string, error) {
 	t.Logf("Registering wallet...")
-	output := "Extra output field to match the staging output length issue"
+
+	output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet create-wallet --silent " +
+		"--wallet " + name + " --configDir ./config --config " + cliConfigFilename))
+	if err != nil {
+		return nil, err
+	}
+
+	output, err = executeFaucetWithTokensForWallet(t, name, cliConfigFilename, defaultInitFaucetTokens)
+	if err != nil {
+		return nil, err
+	}
 	t.Logf("faucet output: %v", output)
+
 	return []string{""}, nil
 }
 
@@ -77,6 +93,9 @@ func ensureZeroBalance(t *test.SystemTest, output []string, err error) {
 }
 
 func getBalanceForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
+	fmt.Println("./zwallet getbalance --silent " +
+		"--wallet " + wallet + "_wallet.json" + " --configDir ./config --config " + cliConfigFilename)
+
 	return cliutils.RunCommand(t, "./zwallet getbalance --silent "+
 		"--wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }
@@ -87,12 +106,17 @@ func getWallet(t *test.SystemTest, cliConfigFilename string) (*climodel.Wallet, 
 
 func getWalletForName(t *test.SystemTest, cliConfigFilename, name string) (*climodel.Wallet, error) {
 	t.Logf("Getting wallet...")
+
+	fmt.Println("name: ", name, " cliConfigFilename: ", cliConfigFilename)
+
 	output, err := cliutils.RunCommand(t, "./zbox getwallet --json --silent "+
 		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println("output: ", output)
 
 	require.Len(t, output, 1)
 

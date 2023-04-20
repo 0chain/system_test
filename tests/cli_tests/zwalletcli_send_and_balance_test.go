@@ -36,6 +36,8 @@ func TestSendAndBalance(testSetup *testing.T) {
 		output, err = registerWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
 
+		fmt.Println("output : ", output)
+
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
