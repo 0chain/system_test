@@ -12,6 +12,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	newStakeWallet = "newStakeWallet"
+)
+
 func TestStakePool(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
@@ -22,7 +26,7 @@ func TestStakePool(testSetup *testing.T) {
 	blobbersList := getBlobbersList(t)
 	require.Greater(t, len(blobbersList), 0, "No blobbers found")
 
-	t.RunSequentiallyWithTimeout("total stake in a blobber can never be lesser than it's used capacity", 8*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("total stake in a blobber can never be less than it's used capacity", 8*time.Minute, func(t *test.SystemTest) {
 		_, err := registerWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", err)
 
@@ -107,7 +111,6 @@ func TestStakePool(testSetup *testing.T) {
 
 		lenDelegates = lenDelegatesNew
 
-		// create an allocation of capacity
 		allocSize := maxStakedCapacity*3 + uint64(30*GB)
 		allocSize -= allocSize / uint64(1*MB)
 
@@ -141,8 +144,6 @@ func TestStakePool(testSetup *testing.T) {
 
 		totalOffersNew := blInfo.TotalOffers
 		require.Greater(t, totalOffersNew, totalOffers, "Total Offers should Increase")
-
-		newStakeWallet := "new_stake_wallet"
 
 		_, err = registerWalletForName(t, configPath, newStakeWallet)
 		require.Nil(t, err, "Error registering wallet", err)
