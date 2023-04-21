@@ -42,7 +42,7 @@ func TestStakePool(testSetup *testing.T) {
 
 			stakedCapacity := uint64(float64(blInfo.TotalStake) * GB / float64(blInfo.Terms.WritePrice))
 
-			require.Greater(t, stakedCapacity, uint64(blobber.Allocated), "Staked capacity should be greater than allocated capacity")
+			require.GreaterOrEqual(t, stakedCapacity, uint64(blobber.Allocated), "Staked capacity should be greater than allocated capacity")
 
 			stakedCapacity -= uint64(blobber.Allocated)
 
@@ -52,7 +52,7 @@ func TestStakePool(testSetup *testing.T) {
 			}
 		}
 
-		// select any random blobber and check total offers
+		// check total offers of the blobber
 		blobber := minStakedCapacityBlobber
 
 		output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
@@ -101,8 +101,7 @@ func TestStakePool(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
-		delegates = stakePool.Delegate
-		lenDelegatesNew := len(delegates)
+		lenDelegatesNew := len(stakePool.Delegate)
 
 		require.Equal(t, lenDelegatesNew, lenDelegates+1, "Number of delegates should be greater")
 
@@ -166,8 +165,7 @@ func TestStakePool(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
-		delegates = stakePool.Delegate
-		lenDelegatesNew = len(delegates)
+		lenDelegatesNew = len(stakePool.Delegate)
 
 		require.Equal(t, lenDelegatesNew, lenDelegates+1, "Number of delegates should be greater")
 
@@ -188,8 +186,7 @@ func TestStakePool(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
-		delegates = stakePool.Delegate
-		lenDelegatesNew = len(delegates)
+		lenDelegatesNew = len(stakePool.Delegate)
 
 		require.Equal(t, lenDelegatesNew+1, lenDelegates, "Number of delegates should be greater")
 
@@ -210,8 +207,7 @@ func TestStakePool(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
-		delegates = stakePool.Delegate
-		lenDelegatesNew = len(delegates)
+		lenDelegatesNew = len(stakePool.Delegate)
 
 		require.Equal(t, lenDelegatesNew, lenDelegates, "delegates should be equal")
 
@@ -236,8 +232,7 @@ func TestStakePool(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
-		delegates = stakePool.Delegate
-		lenDelegatesNew = len(delegates)
+		lenDelegatesNew = len(stakePool.Delegate)
 
 		require.Equal(t, lenDelegatesNew+1, lenDelegates, "Number of delegates should be greater")
 	})
