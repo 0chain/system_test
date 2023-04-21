@@ -112,7 +112,7 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentiallyWithTimeout("Getting MinerSC pools info for a different client id than wallet owner should work", 100*time.Second, func(t *test.SystemTest) { //TODO: slow
+	t.RunSequentially("Getting MinerSC pools info for a different client id than wallet owner should work", func(t *test.SystemTest) { //TODO: slow
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 

@@ -32,8 +32,8 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 
 		allocParam := createParams(map[string]interface{}{
 			"lock":   balance,
-			"size":   10485760,
-			"expire": "1h",
+			"size":   10000,
+			"expire": "10m",
 		})
 		output, err = createNewAllocation(t, configPath, allocParam)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -66,8 +66,8 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 
 		allocParam := createParams(map[string]interface{}{
 			"lock":   balance,
-			"size":   10485760,
-			"expire": "1h",
+			"size":   10000,
+			"expire": "10m",
 		})
 		output, err = createNewAllocation(t, configPath, allocParam)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
