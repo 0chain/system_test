@@ -46,8 +46,15 @@ func registerWallet(t *test.SystemTest, cliConfigFilename string) ([]string, err
 func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string) ([]string, error) {
 	t.Logf("Registering wallet...")
 
+	_, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("ls ./config/%s_wallet.json", name))
+	if err == nil {
+		t.Logf("Wallet already exists")
+		return []string{""}, nil
+	}
+
 	output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet create-wallet --silent " +
 		"--wallet " + name + " --configDir ./config --config " + cliConfigFilename))
+
 	if err != nil {
 		return nil, err
 	}
