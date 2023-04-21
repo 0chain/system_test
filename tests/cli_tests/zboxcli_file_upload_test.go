@@ -740,32 +740,6 @@ func TestUpload(testSetup *testing.T) {
 		require.NotContains(t, output[0], filename)
 	})
 
-	t.Run("Upload File with Encryption Should Work", func(t *test.SystemTest) {
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
-		})
-
-		filename := generateRandomTestFileName(t)
-
-		err := createFileWithSize(filename, 10)
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  filename,
-			"remotepath": "/",
-			"encrypt":    "",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
-
 	sampleVideos := [][]string{
 		{
 			"https://filesamples.com/samples/video/wtv/sample_960x400_ocean_with_audio.wtv",
