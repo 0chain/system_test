@@ -87,18 +87,6 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 		require.Equal(t, 500, resp.StatusCode())
 		require.Equal(t, `{"error":"Bucket name contains invalid characters"}`, resp.String())
 	})
-	// t.Run("GetObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
-	// 	queryParams := map[string]string{
-	// 		"accessKey":       AccessKey,
-	// 		"secretAccessKey": SecretAccessKey,
-	// 		"action":          "getObject",
-	// 		"bucketName":      "system-test",
-	// 		"objectName":      "test-file",
-	// 	}
-	// 	resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-	// 	require.Nil(t, err)
-	// 	require.Equal(t, 200, resp.StatusCode())
-	// })
 	t.RunSequentially("RemoveObject should return 200 all the parameter are correct", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
