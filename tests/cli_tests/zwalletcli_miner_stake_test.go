@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -208,7 +209,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Making more pools than allowed by num_delegates of miner node should fail", func(t *test.SystemTest) {
+	t.Run("Making more pools than allowed by max_delegates in minersc should fail", func(t *test.SystemTest) {
 		var newMiner climodel.Node // Choose a different miner so it has 0 pools
 		for _, newMiner = range miners.Nodes {
 			if newMiner.ID == miner02ID {
@@ -222,8 +223,16 @@ func TestMinerStake(testSetup *testing.T) {
 		output, err = executeFaucetWithTokens(t, configPath, 9.9)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
+		output, err = getMinerSCConfig(t, configPath, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
+
+		cfg, _ := keyValuePairStringToMap(output)
+		maxDelegates, err := strconv.ParseInt(cfg["max_delegates"], 10, 0)
+		require.Nil(t, err)
+
 		wg := &sync.WaitGroup{}
-		for i := 0; i < newMiner.Settings.MaxNumDelegates; i++ {
+		for i := 0; i < int(maxDelegates); i++ {
 			wg.Add(1)
 			go func(i int) {
 				defer wg.Done()
@@ -249,97 +258,23 @@ func TestMinerStake(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "expected error when making more pools than max_delegates but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: max_delegates reached: %d, no more stake pools allowed", newMiner.Settings.MaxNumDelegates), output[0])
+		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: max_delegates reached: %d, no more stake pools allowed", maxDelegates), output[0])
 	})
 
-	///todo: again, too slow for a failure case
-	t.Run("Staking more tokens than max_stake of miner node should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "error getting wallet")
-
-		max_stake, err := miner.Settings.MaxStake.Int64()
-		require.Nil(t, err)
-
-		maxStake := intToZCN(max_stake)
-
-		for i := 0; i < (int(maxStake)/9)+1; i++ {
-			_, err = executeFaucetWithTokens(t, configPath, 9.0)
-			require.Nil(t, err, "error executing faucet")
-		}
-
-		balance := getBalanceFromSharders(t, wallet.ClientID)
-		require.Greater(t, balance, max_stake)
-
-		tokens := intToZCN(max_stake) + 1
-
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"miner_id": miner.ID,
-			"tokens":   tokens,
-		}), false)
-		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too large stake to lock: %v \\u003e %v", 1010000000000, max_stake), output[0])
-	})
-
-	t.Run("Staking tokens less than min_stake of miner node should fail", func(t *test.SystemTest) {
+	t.Run("Staking 0 tokens should fail", func(t *test.SystemTest) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
-		_, err = minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":        miner01ID,
-			"min_stake": 2,
-		}), true)
-		require.NoError(t, err, output)
-
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner01ID,
-			"tokens":   1.0,
-		}), true)
+			"tokens":   0,
+		}), false)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too small stake to lock: %d \\u003c %d", 10000000000, 20000000000), output[0])
-	})
-
-	t.RunWithTimeout("Staking tokens more than max_stake of a miner node through multiple stakes should fail", 10*time.Minute, func(t *test.SystemTest) {
-		// Note: if max stake is 100, then we will need ot run faucet pour 10 times which could cause timeout
-		maxStakeSAS, err := miner.Settings.MaxStake.Int64()
-		require.NoError(t, err)
-
-		maxStake := intToZCN(maxStakeSAS)
-		t.Log("max stake:", maxStake)
-
-		for i := 0; i < (int(maxStake)/9)+1; i++ {
-			out, err := executeFaucetWithTokens(t, configPath, 9.0)
-			require.NoError(t, err, "error executing faucet")
-			t.Log("faucet output:", out)
-		}
-		t.Logf("finish faucet pour")
-		// get balance
-		balance, err := getBalanceZCN(t, configPath)
-		require.NoError(t, err)
-		require.GreaterOrEqual(t, balance, maxStake)
-		t.Log("balance: ", balance)
-
-		_, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"miner_id": miner.ID,
-			"tokens":   intToZCN(maxStakeSAS) / 2,
-		}), true)
-		require.Nil(t, err, "error staking tokens against a node")
-
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"miner_id": miner.ID,
-			"tokens":   intToZCN(maxStakeSAS)/2 + 1,
-		}), false)
-
-		require.NotNil(t, err, "expected error when staking more tokens than max_stake through multiple stakes but got output: ", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: too large stake to lock: %d \\u003e %d", maxStakeSAS+1e10, maxStakeSAS), output[0])
+		require.Equal(t, "stake_pool_lock_failed: no stake to lock: 0", output[0])
 	})
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
