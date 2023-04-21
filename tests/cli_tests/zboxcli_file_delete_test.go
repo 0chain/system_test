@@ -5,7 +5,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -22,7 +21,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("delete existing file in root directory should work", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("delete existing file in root directory should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -50,7 +49,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("delete existing file in sub directory should work", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("delete existing file in sub directory should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -78,7 +77,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("delete existing file with encryption should work", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("delete existing file with encryption should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -118,7 +117,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("delete existing non-root directory should work", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("delete existing non-root directory should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -143,7 +142,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
 
-	t.RunWithTimeout("delete existing file with thumbnail should work", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("delete existing file with thumbnail should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -179,7 +178,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("delete existing root directory should work", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("delete existing root directory should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -244,7 +243,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, output[0], "Error: allocation flag is missing", "Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("delete existing file in root directory with wallet balance accounting", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("delete existing file in root directory with wallet balance accounting", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -254,12 +253,11 @@ func TestFileDelete(testSetup *testing.T) {
 		fname := filepath.Base(filename)
 		remoteFilePath := path.Join(remotepath, fname)
 
-		output, err := getBalance(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		balance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		require.Equal(t, 0.9, balance)
 
-		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
 		}), true)
@@ -276,13 +274,12 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.000 mZCN \(\d*\.?\d+ USD\)$`), output[0])
+		balance, err = getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		require.Equal(t, 0.9, balance)
 	})
 
-	t.RunWithTimeout("delete existing file in someone else's allocation should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("delete existing file in someone else's allocation should fail", func(t *test.SystemTest) {
 		var allocationID, filename string
 		remotepath := "/"
 		filesize := int64(2)

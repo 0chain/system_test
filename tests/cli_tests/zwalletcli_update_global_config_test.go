@@ -32,7 +32,9 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		cfg := map[string]string{}
 		for _, o := range output {
 			configPair := strings.Split(o, "\t")
-			cfg[strings.TrimSpace(configPair[0])] = strings.TrimSpace(configPair[1])
+			if len(configPair) == 2 { // TODO: remove if after output is cleaned up
+				cfg[strings.TrimSpace(configPair[0])] = strings.TrimSpace(configPair[1])
+			}
 		}
 
 		require.Greater(t, len(cfg), 0, "Configuration map must include some items")
@@ -59,6 +61,8 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 				"values": oldValue,
 			}, true)
 		}()
+		_, err = registerWalletForName(t, configPath, scOwnerWallet)
+		require.NoError(t, err)
 
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
