@@ -401,6 +401,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"contract_Address",
 			"token_id",
 			"token_standard",
+			"tx_hash",
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -531,6 +532,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"contract_Address",
 			"token_id",
 			"token_standard",
+			"tx_hash",
 		)
 		errMssg := `{"error":"400: collectionID not valid"}`
 		require.NoError(t, err)
@@ -615,6 +617,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"contract_Address",
 			"token_id",
 			"token_standard",
+			"tx_hash",
 		)
 
 		require.NoError(t, err)
@@ -699,6 +702,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"contract_Address",
 			"token_id",
 			"token_standard",
+			"tx_hash",
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1186,6 +1190,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 func Test0Box(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
+
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	t.RunSequentially("Create a wallet with valid phone number should work", func(t *test.SystemTest) {
@@ -1469,6 +1474,7 @@ func Test0BoxFCM(testSetup *testing.T) {
 func Test0BoxWallet(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
+
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	t.RunSequentially("Get wallet keys should work with wallet present", func(t *test.SystemTest) {

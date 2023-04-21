@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/0chain/gosdk/core/common"
-	currency "github.com/0chain/system_test/internal/currency"
 )
 
 type Provider int
@@ -153,16 +152,13 @@ type ListFileResult struct {
 }
 
 type Terms struct {
-	Read_price         int64         `json:"read_price"`
-	Write_price        int64         `json:"write_price"`
-	Min_lock_demand    float64       `json:"min_lock_demand"`
-	Max_offer_duration time.Duration `json:"max_offer_duration"`
+	Read_price      int64   `json:"read_price"`
+	Write_price     int64   `json:"write_price"`
+	Min_lock_demand float64 `json:"min_lock_demand"`
 }
 
 type Settings struct {
 	Delegate_wallet string  `json:"delegate_wallet"`
-	Min_stake       int     `json:"min_stake"`
-	Max_stake       int     `json:"max_stake"`
 	Num_delegates   int     `json:"num_delegates"`
 	Service_charge  float64 `json:"service_charge"`
 }
@@ -281,10 +277,6 @@ type StakePoolDelegatePoolInfo struct {
 type StakePoolSettings struct {
 	// DelegateWallet for pool owner.
 	DelegateWallet string `json:"delegate_wallet"`
-	// MinStake allowed.
-	MinStake currency.Coin `json:"min_stake"`
-	// MaxStake allowed.
-	MaxStake currency.Coin `json:"max_stake"`
 	// MaxNumDelegates maximum allowed.
 	MaxNumDelegates int `json:"num_delegates"`
 	// ServiceCharge is blobber service charge.
@@ -385,6 +377,9 @@ type BlobberDetails struct {
 	LastHealthCheck   int64             `json:"last_health_check"`
 	PublicKey         string            `json:"-"`
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
+	IsKilled          bool              `json:"is_killed"`
+	IsShutdown        bool              `json:"is_shutdown"`
+	IsAvailable       bool              `json:"is_available"`
 }
 
 type Validator struct {
@@ -766,10 +761,6 @@ var StorageFloatSettings = []string{
 	"free_allocation_settings.read_pool_fraction",
 	"validator_reward",
 	"blobber_slash",
-	"challenge_rate_per_mb_min",
-	"block_reward.sharder_ratio",
-	"block_reward.miner_ratio",
-	"block_reward.blobber_ratio",
 	"block_reward.gamma.alpha",
 	"block_reward.gamma.a",
 	"block_reward.gamma.b",
@@ -791,7 +782,7 @@ var StorageCurrencySettigs = []string{
 	"free_allocation_settings.write_price_range.max",
 	"max_read_price",
 	"max_write_price",
-	"max_write_price",
+	"min_write_price",
 	"block_reward.block_reward",
 	"block_reward.qualifying_stake",
 }
@@ -803,9 +794,6 @@ var StorageIntSettings = []string{
 	"free_allocation_settings.parity_shards",
 	"free_allocation_settings.size",
 	"max_blobbers_per_allocation",
-	"failed_challenges_to_cancel",
-	"failed_challenges_to_revoke_min_lock",
-	"max_challenges_per_generation",
 	"validators_per_challenge",
 	"max_delegates",
 	"cost.update_settings",
@@ -823,7 +811,7 @@ var StorageIntSettings = []string{
 	"cost.pay_blobber_block_rewards",
 	"cost.challenge_request",
 	"cost.challenge_response",
-	"cost.generate_challenges",
+	"cost.generate_challenge",
 	"cost.add_validator",
 	"cost.update_validator_settings",
 	"cost.add_blobber",
@@ -847,11 +835,8 @@ var StorageBoolSettings = []string{
 }
 var StorageDurationSettings = []string{
 	"time_unit",
-	"min_offer_duration",
-	"min_alloc_duration",
 	"max_challenge_completion_time",
 	"stakepool.min_lock_period",
-	"free_allocation_settings.duration",
 	"health_check_period",
 }
 
