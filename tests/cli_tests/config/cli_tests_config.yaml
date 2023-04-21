@@ -1,4 +1,4 @@
 default_test_case_timeout: 3m
-s3_access_key: AKIA4MPQDEZ4ODBRWUOU
-s3_secret_key: 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
+s3_access_key: 
+s3_secret_key: 
 s3_bucket_name: cloud-mig
