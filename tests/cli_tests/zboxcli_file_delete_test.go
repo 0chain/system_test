@@ -255,7 +255,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 5.4, balance)
+		require.Equal(t, 0.9, balance)
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -276,7 +276,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 		balance, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 5.4, balance)
+		require.Equal(t, 0.9, balance)
 	})
 
 	t.Run("delete existing file in someone else's allocation should fail", func(t *test.SystemTest) {
