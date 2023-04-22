@@ -43,23 +43,23 @@ func registerWallet(t *test.SystemTest, cliConfigFilename string) ([]string, err
 	return registerWalletForName(t, cliConfigFilename, escapedTestName(t))
 }
 
-func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string) ([]string, error) {
+func registerWalletForName(t *test.SystemTest, cliConfigFilename, walletFileName string) ([]string, error) {
 	t.Logf("Registering wallet...")
 
-	_, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("ls ./config/%s_wallet.json", name))
+	_, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("ls ./config/%s_wallet.json", walletFileName))
 	if err == nil {
 		t.Logf("Wallet already exists")
 		return []string{""}, nil
 	}
 
 	output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf("./zwallet create-wallet --silent " +
-		"--wallet " + name + " --configDir ./config --config " + cliConfigFilename))
+		"--wallet " + fmt.Sprintf("%s_wallet.json", walletFileName) + " --configDir ./config --config " + cliConfigFilename))
 
 	if err != nil {
 		return nil, err
 	}
 
-	output, err = executeFaucetWithTokensForWallet(t, name, cliConfigFilename, defaultInitFaucetTokens)
+	output, err = executeFaucetWithTokensForWallet(t, walletFileName, cliConfigFilename, defaultInitFaucetTokens)
 	if err != nil {
 		return nil, err
 	}
