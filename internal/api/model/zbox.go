@@ -134,6 +134,14 @@ type ZboxNftCollection struct {
 	BatchSize              string `json:"batch_size"`
 }
 
+type ZboxNftCollectionById struct {
+	NftCollection ZboxNftCollection `json:"collections"`
+}
+type ZboxNftCollectionList struct {
+	ZboxNftCollection  []ZboxNftCollection `json:"collections"`
+	NftCollectionCount int                 `json:"total"`
+}
+
 type ZboxNft struct {
 	Id              int    `json:"id"`
 	AllocationId    string `json:"allocation_id"`
@@ -153,6 +161,7 @@ type ZboxNft struct {
 	ContractAddress string `json:"contract_address"`
 	TokenId         string `json:"token_id"`
 	TokenStandard   string `json:"token_standard"`
+	TxHash          string `json:"tx_hash"`
 	CreatedAtDate   string `json:"created_at_date"`
 	LastUpdate      string `json:"last_update"`
 }

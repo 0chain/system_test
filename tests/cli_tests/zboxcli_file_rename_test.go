@@ -24,7 +24,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 
 	t.Parallel()
 
-	t.Run("rename file", func(t *test.SystemTest) {
+	t.Run("rename file should work", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -162,7 +162,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}
 	})
 
-	t.Run("rename file to same filename (no change)", func(t *test.SystemTest) {
+	t.Run("rename file to same filename (no change) shouldn't work", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -196,10 +196,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destname":   destName,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
+		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -448,13 +446,14 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 4 * MB,
+			"lock":   "5",
+			"size":   4 * MB,
+			"expire": "1h",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -493,7 +492,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.RunWithTimeout("rename root path should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("rename root path should fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 
 		remotePath := "/"
@@ -507,7 +506,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"destname":   destName,
-		}, true)
+		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "invalid_operation: cannot rename root path", output[0])
@@ -531,7 +530,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Contains(t, output[0], "rename_failed")
 	})
 
-	t.RunWithTimeout("rename file from someone else's allocation should fail", 90*time.Second, func(t *test.SystemTest) {
+	t.Run("rename file from someone else's allocation should fail", func(t *test.SystemTest) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
@@ -652,13 +651,14 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 4 * MB,
+			"lock":   "5",
+			"size":   4 * MB,
+			"expire": "1h",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
