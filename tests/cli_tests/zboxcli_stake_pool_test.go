@@ -2,7 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"math"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -34,7 +34,7 @@ func TestStakePool(testSetup *testing.T) {
 		var minStakedCapacityBlobber climodel.BlobberInfoDetailed
 
 		// set maxStakedCapacity to max uint64 value
-		maxStakedCapacity := uint64(math.MaxUint64)
+		maxStakedCapacity := uint64(18446744073709551615)
 
 		for _, blobber := range blobbersList {
 			output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
@@ -55,6 +55,8 @@ func TestStakePool(testSetup *testing.T) {
 				minStakedCapacityBlobber = blInfo
 			}
 		}
+
+		fmt.Println("Min staked capacity: ", maxStakedCapacity)
 
 		// check total offers of the blobber
 		blobber := minStakedCapacityBlobber
