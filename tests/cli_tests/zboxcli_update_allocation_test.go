@@ -920,8 +920,14 @@ func getAllocationCost(str string) (float64, error) {
 		return 0.0, err
 	}
 
+	fmt.Println("allocationCostInOutput: ", allocationCostInOutput)
+
 	unit := strings.Fields(str)[6]
+
+	fmt.Println("unit: ", unit)
 	allocationCostInZCN := unitToZCN(allocationCostInOutput, unit)
+
+	fmt.Println("allocationCostInZCN: ", allocationCostInZCN)
 
 	return allocationCostInZCN, nil
 }
