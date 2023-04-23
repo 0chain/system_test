@@ -864,16 +864,17 @@ func TestUpload(testSetup *testing.T) {
 	}
 
 	for _, sampleVideo := range sampleVideos {
-		t.Run("Upload Video File With Web Streaming Should Work", func(t *test.SystemTest) {
+
+		videoLink := sampleVideo[0]
+		videoName := sampleVideo[1]
+		videoFormat := sampleVideo[2]
+
+		t.Run("Upload Video File "+videoFormat+" With Web Streaming Should Work", func(t *test.SystemTest) {
 			allocSize := int64(20 * 1024 * 1024)
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
 				"size":   allocSize,
 				"tokens": 1,
 			})
-			videoLink := sampleVideo[0]
-			videoName := sampleVideo[1]
-			videoFormat := sampleVideo[2]
-
 			output, err := cliutils.RunCommand(t, "wget "+videoLink+" -O "+videoName+"."+videoFormat, 3, 2*time.Second)
 			require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
 
