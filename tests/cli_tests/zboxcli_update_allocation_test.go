@@ -192,6 +192,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	// FIXME expiry or size should be required params - should not bother sharders with an empty update
 	t.Run("Update Nothing Should Fail", func(t *test.SystemTest) {
+		_, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed")
+
 		allocationID := setupAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
@@ -270,29 +273,15 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Update Other's Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) { // todo: too slow
-		var otherAllocationID string
+		_, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed")
 
 		myAllocationID := setupAllocation(t, configPath)
 
-		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
-		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
-			otherAllocationID = setupAllocation(t, configPath)
+		targetWalletName := escapedTestName(t) + "_TARGET"
+		output, err := registerWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
 
-			// Updating the otherAllocationID should work here
-			size := int64(2048)
-
-			params := createParams(map[string]interface{}{
-				"allocation": otherAllocationID,
-				"size":       size,
-			})
-			output, err := updateAllocation(t, configPath, params, true)
-
-			require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-		})
-
-		// otherAllocationID should not be updatable from this level
 		size := int64(2048)
 
 		// First try updating with myAllocationID: should work
@@ -300,7 +289,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"allocation": myAllocationID,
 			"size":       size,
 		})
-		output, err := updateAllocation(t, configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -308,10 +297,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		// Then try updating with otherAllocationID: should not work
 		params = createParams(map[string]interface{}{
-			"allocation": otherAllocationID,
+			"allocation": myAllocationID,
 			"size":       size,
 		})
-		output, err = updateAllocation(t, configPath, params, false)
+		output, err = updateAllocationWithWallet(t, targetWalletName, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
@@ -835,12 +824,16 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, alloc.FileOptions, updatedAlloc.FileOptions)
 		// assert that no more blobber was added
 		require.Equal(t, len(alloc.Blobbers), len(updatedAlloc.Blobbers))
-
 	})
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
 	allocationID := setupAllocation(t, cliConfigFilename, extraParams...)
+
+	for i := 0; i < 2; i++ {
+		_, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed")
+	}
 
 	allocations := parseListAllocations(t, cliConfigFilename)
 	allocation, ok := allocations[allocationID]
@@ -874,7 +867,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 2.0
 	// Then create new allocation
-	options := map[string]interface{}{"expire": "1h", "size": "10000", "lock": "0.5"}
+	options := map[string]interface{}{"expire": "1h", "size": "10000", "lock": "5"}
 
 	// Add additional parameters if available
 	// Overwrite with new parameters when available

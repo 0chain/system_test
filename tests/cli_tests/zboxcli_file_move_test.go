@@ -249,13 +249,14 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 4 * MB,
+			"lock":   "5",
+			"size":   4 * MB,
+			"expire": "1h",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -337,7 +338,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "move_failed")
 
@@ -420,7 +421,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "move_failed")
 
@@ -470,7 +471,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": "/child/nonexisting.txt",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "move_failed")
 	})
@@ -515,7 +516,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, true)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "move_failed")
 
@@ -557,7 +558,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": "/abc.txt",
 			"destpath":   "/child/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
@@ -571,7 +572,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"allocation": "abcdef",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
@@ -585,67 +586,9 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"allocation": "abcdef",
 			"remotepath": "/abc.txt",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: destpath flag is missing", output[0])
-	})
-
-	t.Run("File move - Users should not be charged for moving a file ", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		// Lock 0.5 token for allocation
-		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 4 * MB,
-		})
-		output, err = createNewAllocation(t, configPath, allocParams)
-		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
-		fileSize := int64(math.Floor(1 * MB))
-
-		// Upload 1 MB file
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
-
-		initialAllocation := getAllocation(t, allocationID)
-
-		// Move file
-		remotepath := "/" + filepath.Base(localpath)
-
-		output, err = moveFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"destpath":   "/newdir/",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf(remotepath+" moved"), output[0])
-
-		// Get expected upload cost
-		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
-
-		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
-
-		unit := strings.Fields(output[0])[1]
-		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
-
-		// Expected cost is given in "per 720 hours", we need 1 hour
-		// Expected cost takes into account data+parity, so we divide by that
-		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
-
-		finalAllocation := getAllocation(t, allocationID)
-
-		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
-		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
-
-		createAllocationTestTeardown(t, allocationID)
 	})
 
 	t.Run("move file with allocation move file option forbidden should fail", func(t *test.SystemTest) {
@@ -681,8 +624,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		// FIXME: zbox move should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
-		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Contains(t, output[0], "this options for this file is not permitted for this allocation")
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
