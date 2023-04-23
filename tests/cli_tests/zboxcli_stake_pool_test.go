@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"strings"
 	"testing"
@@ -31,7 +32,7 @@ func TestStakePool(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", err)
 
 		// select the blobber with min staked capacity
-		var minStakedCapacityBlobber climodel.BlobberInfoDetailed
+		var minStakedCapacityBlobber climodel.BlobberInfo
 
 		// set maxStakedCapacity to max uint64 value
 		maxStakedCapacity := uint64(math.MaxUint64)
@@ -40,7 +41,7 @@ func TestStakePool(testSetup *testing.T) {
 			output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
 			require.Nil(t, err, "Error fetching blobber info", strings.Join(output, "\n"))
 
-			var blInfo climodel.BlobberInfoDetailed
+			var blInfo climodel.BlobberInfo
 			err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
 			require.Nil(t, err, "error unmarshalling blobber info")
 
@@ -62,7 +63,7 @@ func TestStakePool(testSetup *testing.T) {
 		output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
 		require.Nil(t, err, "Error fetching blobber info", strings.Join(output, "\n"))
 
-		var blInfo climodel.BlobberInfoDetailed
+		var blInfo climodel.BlobberInfo
 		err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
 		require.Nil(t, err, "error unmarshalling blobber info")
 
@@ -119,10 +120,14 @@ func TestStakePool(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
+		fmt.Println("allocation cost", output)
+
 		allocationCost, err := getAllocationCost(output[0])
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
-		for i := float64(0); i <= (allocationCost/9+2)*2; i++ {
+		// Matching the wallet balance to allocationCost by executing faucet with tokens
+		// As max limit of faucet is 9 tokens we are executing faucet with 9 tokens multiple times till wallet balance is equal to allocationCost
+		for i := float64(0); i <= (allocationCost/9 + 2); i++ {
 			_, err = executeFaucetWithTokens(t, configPath, 9)
 			require.Nil(t, err, "Error executing faucet with tokens", err)
 		}

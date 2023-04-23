@@ -163,16 +163,6 @@ type Settings struct {
 	Service_charge  float64 `json:"service_charge"`
 }
 
-type BlobberInfo struct {
-	Id                  string   `json:"id"`
-	Url                 string   `json:"url"`
-	Capacity            int      `json:"capacity"`
-	Last_health_check   int      `json:"last_health_check"`
-	Allocated           int      `json:"allocated"`
-	Terms               Terms    `json:"terms"`
-	Stake_pool_settings Settings `json:"stake_pool_settings"`
-}
-
 type ChallengePoolInfo struct {
 	Id         string `json:"id"`
 	Balance    int64  `json:"balance"`
@@ -806,7 +796,7 @@ var StorageDurationSettings = []string{
 
 var StorageSettingCount = len(StorageDurationSettings) + len(StorageFloatSettings) + len(StorageIntSettings) + len(StorageKeySettings) + len(StorageBoolSettings)
 
-type BlobberInfoDetailed struct {
+type BlobberInfo struct {
 	Id    string `json:"id"`
 	Url   string `json:"url"`
 	Terms struct {

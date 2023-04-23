@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -137,6 +138,8 @@ func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string, o
 	}
 
 	output, err := executeFaucetWithTokensForWallet(t, name, cliConfigFilename, defaultInitFaucetTokens)
+	fmt.Println("faucet output: ", output)
+	fmt.Println("faucet err: ", err)
 	if err != nil {
 		return nil, err
 	}
