@@ -115,7 +115,12 @@ func TestStakePool(testSetup *testing.T) {
 		allocSize := maxStakedCapacity*3 + uint64(30*GB)
 		allocSize -= allocSize / uint64(1*MB)
 
+		fmt.Println("allocSize", allocSize)
+
 		options := map[string]interface{}{"cost": "", "size": allocSize, "data": len(blobbersList) / 2, "parity": len(blobbersList) - len(blobbersList)/2}
+
+		fmt.Println("options", options)
+
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
