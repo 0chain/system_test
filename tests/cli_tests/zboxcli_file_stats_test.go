@@ -400,7 +400,7 @@ func TestFileStats(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/"
