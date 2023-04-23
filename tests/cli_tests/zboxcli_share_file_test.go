@@ -1285,8 +1285,7 @@ func TestShareFile(testSetup *testing.T) {
 				finalReadPool.Balance >= int64(expectedRPBalance))
 	})
 
-	t.RunWithTimeout("deneme", 2*time.Minute, func(t *test.SystemTest) {
-		//Share unencrypted file privately should fail
+	t.RunWithTimeout("Share unencrypted file privately should fail", 2*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
 
