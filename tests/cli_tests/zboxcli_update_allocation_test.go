@@ -1002,6 +1002,12 @@ func executeFaucetWithTokens(t *test.SystemTest, cliConfigFilename string, token
 // Tokens greater than or equal to 10 are considered to be 1 token by the system.
 func executeFaucetWithTokensForWallet(t *test.SystemTest, wallet, cliConfigFilename string, tokens float64) ([]string, error) {
 	t.Logf("Executing faucet...")
+	fmt.Println(fmt.Sprintf("./zwallet faucet --methodName "+
+		"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
+		tokens,
+		wallet,
+		cliConfigFilename,
+	))
 	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet faucet --methodName "+
 		"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		tokens,

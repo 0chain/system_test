@@ -81,7 +81,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		"limit": freeTokensIndividualLimit,
 		"max":   freeTokensTotalLimit,
 	}
-	output, err = createFreeStorageAllocation(t, configPath, scOwnerWallet, createParams(input))
+	output, err = createFreeStorageAllocationForWallet(t, configPath, scOwnerWallet, createParams(input))
 	require.NoError(t, err)
 	t.Log(output)
 
@@ -321,7 +321,7 @@ func readWalletFile(t *test.SystemTest, file string) *climodel.WalletFile {
 	return wallet
 }
 
-func createFreeStorageAllocation(t *test.SystemTest, configFile, from, params string) ([]string, error) {
+func createFreeStorageAllocationForWallet(t *test.SystemTest, configFile, from, params string) ([]string, error) {
 	t.Logf("Creating new free storage allocation...")
 	return cliutils.RunCommand(t, fmt.Sprintf(
 		"./zbox add --silent %s --wallet %s --configDir ./config --config %s",

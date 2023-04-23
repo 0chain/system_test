@@ -61,7 +61,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		spBefore := getStakePoolInfo(t, blobberToKill)
-		output, err = killBlobber(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
+		output, err = killBlobberForWallet(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
 			"id": blobberToKill,
 		}), true)
 		require.NoError(t, err, strings.Join(output, "\n"))
@@ -106,7 +106,7 @@ func TestKillBlobber(testSetup *testing.T) {
 			}
 		}
 
-		output, err := killBlobber(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+		output, err := killBlobberForWallet(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"id": blobberToKill,
 		}), true)
 		require.Error(t, err, "kill blobber by non-smartcontract owner should fail")
@@ -115,7 +115,7 @@ func TestKillBlobber(testSetup *testing.T) {
 	})
 }
 
-func killBlobber(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
+func killBlobberForWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Log("kill blobber...")
 	cmd := fmt.Sprintf("./zbox kill-blobber %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		params, wallet, cliConfigFilename)
