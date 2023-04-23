@@ -57,6 +57,8 @@ func TestStakePool(testSetup *testing.T) {
 			}
 		}
 
+		fmt.Println("maxStakedCapacity", maxStakedCapacity)
+
 		// check total offers of the blobber
 		blobber := minStakedCapacityBlobber
 
@@ -115,9 +117,7 @@ func TestStakePool(testSetup *testing.T) {
 		allocSize := maxStakedCapacity*3 + uint64(30*GB)
 		allocSize -= allocSize / uint64(1*MB)
 
-		fmt.Println("allocSize", allocSize)
-
-		options := map[string]interface{}{"cost": "", "size": allocSize, "data": len(blobbersList) / 2, "parity": len(blobbersList) - len(blobbersList)/2}
+		options := map[string]interface{}{"cost": "", "size": allocSize, "data": len(blobbersList) / 2, "parity": len(blobbersList) - len(blobbersList)/2, "write_price": "0.1-0.2", "read_price": "0-0.1"}
 
 		fmt.Println("options", options)
 
