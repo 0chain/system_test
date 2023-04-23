@@ -285,9 +285,9 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "copy_failed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -430,9 +430,9 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "copy_failed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -480,9 +480,9 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": "/child/nonexisting.txt",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "copy_failed")
 	})
 
 	t.Run("copy file from someone else's allocation should fail", func(t *test.SystemTest) {
@@ -525,9 +525,9 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "consensus_not_met")
+		require.Contains(t, output[0], "copy_failed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -567,7 +567,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": "/abc.txt",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
@@ -581,7 +581,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"allocation": "abcdef",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
@@ -595,7 +595,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"allocation": "abcdef",
 			"remotepath": "/abc.txt",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: destpath flag is missing", output[0])
 	})
@@ -634,8 +634,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		// FIXME: zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
-		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "this options for this file is not permitted for this allocation")
 

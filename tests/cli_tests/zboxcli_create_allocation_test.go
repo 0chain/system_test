@@ -20,11 +20,31 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Create allocation without providing any additional parameters Should Work", func(t *test.SystemTest) {
+	t.Run("Create allocation for locking cost equal to the cost calculated should work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"lock": "0.5"}
+		options := map[string]interface{}{
+			"cost":        "",
+			"expire":      "5m",
+			"size":        "10000",
+			"read_price":  "0-1",
+			"write_price": "0-1",
+		}
 		output, err := createNewAllocation(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		allocationCost, err := getAllocationCost(output[0])
+		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
+
+		options = map[string]interface{}{
+			"lock":        allocationCost,
+			"expire":      "5m",
+			"size":        "10000",
+			"read_price":  "0-1",
+			"write_price": "0-1",
+		}
+		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
@@ -33,6 +53,29 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("Create allocation for locking cost less than minimum cost should not work", func(t *test.SystemTest) {
+		_ = setupWallet(t, configPath)
+
+		options := map[string]interface{}{
+			"cost":        "",
+			"read_price":  "0-1",
+			"write_price": "0-1",
+			"size":        10000,
+			"expire":      "30m",
+		}
+		output, err := createNewAllocation(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+
+		allocationCost, err := getAllocationCost(output[0])
+		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
+
+		mustFailCost := allocationCost - 0.1
+		options = map[string]interface{}{"lock": mustFailCost}
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.NotNil(t, err, strings.Join(output, "\n"))
 	})
 
 	t.Run("Create allocation with smallest expiry (5m) Should Work", func(t *test.SystemTest) {
@@ -240,8 +283,11 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Run("Create allocation with some forbidden file options flags should pass and show in allocation", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
-		_, err := executeFaucetWithTokens(t, configPath, 9)
-		require.Nil(t, err)
+
+		for i := 0; i < 2; i++ {
+			_, err := executeFaucetWithTokens(t, configPath, 9)
+			require.Nil(t, err)
+		}
 
 		// Forbid upload
 		options := map[string]interface{}{"lock": "0.5", "size": 1024, "expire": "1h", "forbid_upload": nil}

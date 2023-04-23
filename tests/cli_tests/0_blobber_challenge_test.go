@@ -53,7 +53,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Uploading a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		var blobbers []string
@@ -84,7 +84,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Downloading a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/dir/"
@@ -127,7 +127,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Moving a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/dir/"
@@ -170,7 +170,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Deleting a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/dir/"
@@ -212,7 +212,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Copying a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/dir/"
@@ -255,7 +255,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Updating a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/dir/"
@@ -302,7 +302,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Renaming a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/dir/"
