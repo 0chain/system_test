@@ -42,11 +42,11 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 		filesize := int64(256)
 		remotepath := "/"
 
-		// Use all 6 blobbers
+		// Use all blobbers
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
-			"data":   4,
+			"data":   3,
 			"parity": 1,
 			"expire": "30m",
 		})
