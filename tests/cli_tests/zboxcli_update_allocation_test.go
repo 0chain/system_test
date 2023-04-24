@@ -849,9 +849,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
+		remotePath := "/dir/" + filename
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": "/dir/",
+			"remotepath": remotePath,
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -869,8 +870,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
-		remotefile := "/dir/" + filename
-		sdkClient.VerifyFileRefFromBlobber(t, allocationID, blobberID, remotefile)
+		sdkClient.VerifyFileRefFromBlobber(t, allocationID, blobberID, remotePath)
 	})
 	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
@@ -885,9 +885,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
+		remotePath := "/dir/" + filename
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": "/dir/",
+			"remotepath": remotePath,
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -907,8 +908,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
-		remotefile := "/dir/" + filename
-		sdkClient.VerifyFileRefFromBlobber(t, allocationID, blobberID, remotefile)
+		sdkClient.VerifyFileRefFromBlobber(t, allocationID, blobberID, remotePath)
 	})
 }
 
