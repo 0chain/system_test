@@ -323,17 +323,3 @@ func getValidators(t *test.SystemTest) []climodel.Validator {
 
 	return validatorList
 }
-
-func getBlobbers(t *test.SystemTest) []climodel.Validator {
-	output, err := listValidators(t, configPath, createParams(map[string]interface{}{"json": ""}))
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 1, strings.Join(output, "\n"))
-
-	var blobberList []climodel.Validator
-	err = json.Unmarshal([]byte(output[0]), &blobberList)
-	require.Nil(t, err, strings.Join(output, "\n"))
-
-	return blobberList
-}
-
-//
