@@ -43,11 +43,13 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
+			"lock":   5,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -117,11 +119,13 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
+			"lock":   5,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -191,11 +195,13 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
+			"lock":   5,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -263,11 +269,13 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
+			"lock":   5,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -331,11 +339,13 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
+			"lock":   5,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -400,11 +410,13 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		output, err := registerWallet(t, configPath)
 		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock": 1,
+			"lock":   5,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)

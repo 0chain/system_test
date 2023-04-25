@@ -48,7 +48,9 @@ func TestKillBlobber(testSetup *testing.T) {
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
-			"lock":   3.0,
+			"lock":   5.0,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.NoError(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -81,7 +83,9 @@ func TestKillBlobber(testSetup *testing.T) {
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
-			"lock":   3.0,
+			"lock":   4.0,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.Error(t, err, "should fail to create allocation")
 		require.Len(t, output, 1)
@@ -90,6 +94,9 @@ func TestKillBlobber(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("kill blobber by non-smartcontract owner should fail", func(t *test.SystemTest) {
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		startBlobbers := getBlobbers(t)
 		var blobberToKill string
 		for i := range startBlobbers {

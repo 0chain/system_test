@@ -24,6 +24,7 @@ const minDuration = "min_duration"
 const minLock = "min_lock"
 
 func TestVestingPoolAdd(testSetup *testing.T) {
+	testSetup.Skip("Enable post mainnet when vesting sc is enabled")
 	t := test.NewSystemTest(testSetup)
 	t.Skip("turn on post mainnet")
 	t.Parallel()
@@ -606,6 +607,7 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 }
 
 func TestVestingPoolDelete(testSetup *testing.T) {
+	testSetup.Skip("Enable post mainnet when vesting sc is enabled")
 	t := test.NewSystemTest(testSetup)
 	t.Skip("turn on post mainnet")
 	// get current valid vesting configs
@@ -737,6 +739,7 @@ func vestingPoolDelete(t *test.SystemTest, cliConfigFilename, params string, ret
 }
 
 func TestVestingPoolInfo(testSetup *testing.T) {
+	testSetup.Skip("Enable post mainnet when vesting sc is enabled")
 	t := test.NewSystemTest(testSetup)
 	t.Skip("turn on post mainnet")
 
@@ -944,6 +947,7 @@ func TestVestingPoolInfo(testSetup *testing.T) {
 }
 
 func TestVestingPoolStop(testSetup *testing.T) {
+	testSetup.Skip("Enable post mainnet when vesting sc is enabled")
 	t := test.NewSystemTest(testSetup)
 	t.Skip("turn on post mainnet")
 
@@ -1187,6 +1191,7 @@ func TestVestingPoolStop(testSetup *testing.T) {
 }
 
 func TestVestingPoolTokenAccounting(testSetup *testing.T) {
+	testSetup.Skip("Enable post mainnet when vesting sc is enabled")
 	t := test.NewSystemTest(testSetup)
 	t.Skip("turn on post mainnet")
 
@@ -1384,6 +1389,7 @@ func TestVestingPoolTokenAccounting(testSetup *testing.T) {
 }
 
 func TestVestingPoolTrigger(testSetup *testing.T) {
+	testSetup.Skip("Enable post mainnet when vesting sc is enabled")
 	t := test.NewSystemTest(testSetup)
 	t.Skip("turn on post mainnet")
 
@@ -1575,6 +1581,7 @@ func TestVestingPoolTrigger(testSetup *testing.T) {
 }
 
 func TestVestingPoolUnlock(testSetup *testing.T) {
+	testSetup.Skip("Enable post mainnet when vesting sc is enabled")
 	t := test.NewSystemTest(testSetup)
 	t.Skip("turn on post mainnet")
 
@@ -1787,6 +1794,7 @@ func TestVestingPoolUnlock(testSetup *testing.T) {
 }
 
 func TestVestingPoolUpdateConfig(testSetup *testing.T) {
+	testSetup.Skip("Enable post mainnet when vesting sc is enabled")
 	t := test.NewSystemTest(testSetup)
 	t.Skip("turn on post mainnet")
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
@@ -2003,7 +2011,7 @@ func vestingPoolAddForWallet(t *test.SystemTest, cliConfigFilename, params strin
 	}
 }
 
-func configFromKeyValuePair(output []string) map[string]interface{} {
+func configFromKeyValuePair(output []string) map[string]interface{} { //nolint
 	config := make(map[string]interface{})
 	for _, keyValuePair := range output {
 		pair := strings.Split(keyValuePair, "\t")
@@ -2026,7 +2034,7 @@ func configFromKeyValuePair(output []string) map[string]interface{} {
 	return config
 }
 
-func getValidDuration(t *test.SystemTest, vpConfigMap map[string]interface{}) string {
+func getValidDuration(t *test.SystemTest, vpConfigMap map[string]interface{}) string { //nolint
 	var maxDurationInSeconds int64
 	if maxDurationString, ok := vpConfigMap[maxDuration].(string); ok {
 		maxDurationInSeconds = durationToSeconds(t, maxDurationString)

@@ -139,18 +139,14 @@ func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo //
 		require.True(t, transferred, "allocation was not transferred to new owner within time allotted")
 
 		// balance of old owner should be unchanged
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
-		require.Len(t, output, 1, "get balance - Unexpected output", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 500.00\d mZCN \(\d*\.?\d+ USD\)$`), output[0],
-			"get balance - Unexpected output", strings.Join(output, "\n"))
+		balance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		require.Equal(t, 4.4, balance)
 
 		// balance of new owner should be unchanged
-		output, err = getBalanceForWallet(t, configPath, newOwner)
-		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
-		require.Len(t, output, 1, "get balance - Unexpected output", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile(`Balance: 1.000 ZCN \(\d*\.?\d+ USD\)$`), output[0],
-			"get balance - Unexpected output", strings.Join(output, "\n"))
+		balance, err = getBalanceZCN(t, configPath, newOwner)
+		require.NoError(t, err)
+		require.Equal(t, 5.9, balance)
 
 		// write lock pool of old owner should remain locked
 		cliutils.Wait(t, 2*time.Minute)
