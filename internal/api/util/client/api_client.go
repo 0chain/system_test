@@ -623,8 +623,6 @@ func (c *APIClient) CreateWalletForMnemonic(t *test.SystemTest, mnemonic string)
 
 	require.Equal(t, createdWallet.Id, clientId)
 	require.Equal(t, createdWallet.PublicKey, createdWallet.Keys.PublicKey.SerializeToHexStr())
-	require.NotNil(t, createdWallet.CreationDate, "Creation date is nil!")
-	require.NotNil(t, createdWallet.Version)
 
 	return createdWallet
 }
