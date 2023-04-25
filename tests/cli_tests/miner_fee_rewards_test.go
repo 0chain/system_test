@@ -153,8 +153,9 @@ func checkMinerFeeAmounts(
 					"incorrect service charge %v for round %d"+
 						" service charge should be fees %d multiplied by service ratio %v."+
 						"length stake pools %d",
+					"round history %v",
 					recordedRoundRewards, round, fees, beforeMiners[i].Settings.ServiceCharge,
-					len(beforeMiners[i].StakePool.Pools))
+					len(beforeMiners[i].StakePool.Pools), roundHistory)
 			}
 		}
 		actualReward := afterMiners[i].Reward - beforeMiners[i].Reward
