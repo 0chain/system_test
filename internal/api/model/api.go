@@ -169,6 +169,18 @@ type TransactionEntity struct {
 	TransactionStatus int    `json:"transaction_status"`
 }
 
+type RewardTransactionOutput struct {
+	Id           int    `json:"ID"`
+	CreatedAt    string `json:"CreatedAt"`
+	UpdatedAt    string `json:"UpdatedAt"`
+	Amount       int64  `json:"amount"`
+	BlockNumber  int    `json:"block_number"`
+	ClientId     string `json:"client_id"`
+	PoolID       string `json:"pool_id,omitempty"`
+	ProviderType string `json:"provider_type"`
+	ProviderID   string `json:"provider_id"`
+}
+
 type TransactionPutResponse struct {
 	Request TransactionPutRequest
 	Async   bool              `json:"async"`
@@ -352,10 +364,9 @@ type SCRestGetBlobberResponse struct {
 }
 
 type Terms struct {
-	ReadPrice        int64         `json:"read_price"`
-	WritePrice       int64         `json:"write_price"`
-	MinLockDemand    float64       `json:"min_lock_demand"`
-	MaxOfferDuration time.Duration `json:"max_offer_duration"`
+	ReadPrice     int64   `json:"read_price"`
+	WritePrice    int64   `json:"write_price"`
+	MinLockDemand float64 `json:"min_lock_demand"`
 }
 
 type StakePoolSettings struct {

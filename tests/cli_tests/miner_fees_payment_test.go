@@ -19,6 +19,7 @@ import (
 
 func TestMinerFeesPayment(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("Skip till chain-side bugs are resolved")
 
 	t.Skip("Skipped till re-done")
 	mnconfig := getMinerSCConfiguration(t)
@@ -315,6 +316,9 @@ func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {
 }
 
 func getLatestFinalizedBlock(t *test.SystemTest) *climodel.LatestFinalizedBlock {
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+
 	sharders := getShardersList(t)
 	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
 	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)

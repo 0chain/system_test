@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/0chain/gosdk/core/common"
-	currency "github.com/0chain/system_test/internal/currency"
 )
 
 type Provider int
@@ -79,15 +78,14 @@ type Allocation struct {
 
 	ChallengeCompletionTime time.Duration `json:"challenge_completion_time"`
 
-	StartTime            int64    `json:"start_time"`
-	Finalized            bool     `json:"finalized,omitempty"`
-	Canceled             bool     `json:"canceled,omitempty"`
-	MovedToChallenge     int64    `json:"moved_to_challenge,omitempty"`
-	MovedBack            int64    `json:"moved_back,omitempty"`
-	MovedToValidators    int64    `json:"moved_to_validators,omitempty"`
-	Curators             []string `json:"curators"`
-	FileOptions          uint16   `json:"file_options"`
-	ThirdPartyExtendable bool     `json:"third_party_extendable"`
+	StartTime            int64  `json:"start_time"`
+	Finalized            bool   `json:"finalized,omitempty"`
+	Canceled             bool   `json:"canceled,omitempty"`
+	MovedToChallenge     int64  `json:"moved_to_challenge,omitempty"`
+	MovedBack            int64  `json:"moved_back,omitempty"`
+	MovedToValidators    int64  `json:"moved_to_validators,omitempty"`
+	FileOptions          uint16 `json:"file_options"`
+	ThirdPartyExtendable bool   `json:"third_party_extendable"`
 }
 
 type AllocationFile struct {
@@ -154,16 +152,13 @@ type ListFileResult struct {
 }
 
 type Terms struct {
-	Read_price         int64         `json:"read_price"`
-	Write_price        int64         `json:"write_price"`
-	Min_lock_demand    float64       `json:"min_lock_demand"`
-	Max_offer_duration time.Duration `json:"max_offer_duration"`
+	Read_price      int64   `json:"read_price"`
+	Write_price     int64   `json:"write_price"`
+	Min_lock_demand float64 `json:"min_lock_demand"`
 }
 
 type Settings struct {
 	Delegate_wallet string  `json:"delegate_wallet"`
-	Min_stake       int     `json:"min_stake"`
-	Max_stake       int     `json:"max_stake"`
 	Num_delegates   int     `json:"num_delegates"`
 	Service_charge  float64 `json:"service_charge"`
 }
@@ -282,10 +277,6 @@ type StakePoolDelegatePoolInfo struct {
 type StakePoolSettings struct {
 	// DelegateWallet for pool owner.
 	DelegateWallet string `json:"delegate_wallet"`
-	// MinStake allowed.
-	MinStake currency.Coin `json:"min_stake"`
-	// MaxStake allowed.
-	MaxStake currency.Coin `json:"max_stake"`
 	// MaxNumDelegates maximum allowed.
 	MaxNumDelegates int `json:"num_delegates"`
 	// ServiceCharge is blobber service charge.
@@ -378,6 +369,9 @@ type BlobberDetails struct {
 	LastHealthCheck   int64             `json:"last_health_check"`
 	PublicKey         string            `json:"-"`
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
+	IsKilled          bool              `json:"is_killed"`
+	IsShutdown        bool              `json:"is_shutdown"`
+	IsAvailable       bool              `json:"is_available"`
 }
 
 type Validator struct {
@@ -731,23 +725,19 @@ var StorageFloatSettings = []string{
 	"free_allocation_settings.read_pool_fraction",
 	"validator_reward",
 	"blobber_slash",
-	"challenge_rate_per_mb_min",
-	"block_reward.sharder_ratio",
-	"block_reward.miner_ratio",
-	"block_reward.blobber_ratio",
 	"block_reward.gamma.alpha",
 	"block_reward.gamma.a",
 	"block_reward.gamma.b",
 	"block_reward.zeta.i",
 	"block_reward.zeta.k",
 	"block_reward.zeta.mu",
+	"stakepool.kill_slash",
 }
 
 var StorageCurrencySettigs = []string{
 	"max_mint",
 	"readpool.min_lock",
 	"writepool.min_lock",
-	"stakepool.min_lock",
 	"max_total_free_allocation",
 	"max_individual_free_allocation",
 	"free_allocation_settings.read_price_range.min",
@@ -756,22 +746,18 @@ var StorageCurrencySettigs = []string{
 	"free_allocation_settings.write_price_range.max",
 	"max_read_price",
 	"max_write_price",
-	"max_write_price",
+	"min_write_price",
 	"block_reward.block_reward",
 	"block_reward.qualifying_stake",
 }
 
 var StorageIntSettings = []string{
-
 	"min_alloc_size",
 	"min_blobber_capacity",
 	"free_allocation_settings.data_shards",
 	"free_allocation_settings.parity_shards",
 	"free_allocation_settings.size",
 	"max_blobbers_per_allocation",
-	"failed_challenges_to_cancel",
-	"failed_challenges_to_revoke_min_lock",
-	"max_challenges_per_generation",
 	"validators_per_challenge",
 	"max_delegates",
 	"cost.update_settings",
@@ -784,15 +770,12 @@ var StorageIntSettings = []string{
 	"cost.add_free_storage_assigner",
 	"cost.free_allocation_request",
 	"cost.free_update_allocation",
-	"cost.add_curator",
-	"cost.remove_curator",
 	"cost.blobber_health_check",
 	"cost.update_blobber_settings",
 	"cost.pay_blobber_block_rewards",
-	"cost.curator_transfer_allocation",
 	"cost.challenge_request",
 	"cost.challenge_response",
-	"cost.generate_challenges",
+	"cost.generate_challenge",
 	"cost.add_validator",
 	"cost.update_validator_settings",
 	"cost.add_blobber",
@@ -806,17 +789,19 @@ var StorageIntSettings = []string{
 	"cost.stake_pool_pay_interests",
 	"cost.commit_settings_changes",
 	"cost.collect_reward",
+	"cost.kill_blobber",
+	"cost.kill_validator",
+	"cost.shutdown_blobber",
+	"cost.shutdown_validator",
 }
 var StorageBoolSettings = []string{
 	"challenge_enabled",
 }
 var StorageDurationSettings = []string{
 	"time_unit",
-	"min_offer_duration",
-	"min_alloc_duration",
 	"max_challenge_completion_time",
 	"stakepool.min_lock_period",
-	"free_allocation_settings.duration",
+	"health_check_period",
 }
 
 var StorageSettingCount = len(StorageDurationSettings) + len(StorageFloatSettings) + len(StorageIntSettings) + len(StorageKeySettings) + len(StorageBoolSettings)

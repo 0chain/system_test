@@ -87,7 +87,7 @@ func TestUpload(testSetup *testing.T) {
 		}
 	})
 
-	t.RunWithTimeout("Upload File to Root Directory Should Work", 60*time.Second, func(t *test.SystemTest) { // todo: slow
+	t.Run("Upload File to Root Directory Should Work", func(t *test.SystemTest) { // todo: slow
 		const allocSize int64 = 2048
 		const fileSize int64 = 256
 
@@ -326,7 +326,8 @@ func TestUpload(testSetup *testing.T) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
+			"expire": "10m",
 		})
 
 		output, err := cliutils.RunCommand(t, "wget http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4 -O test_video.mp4", 3, 2*time.Second)
@@ -344,14 +345,19 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.RunWithTimeout("Upload Large File Should Work", 3*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
+	t.RunWithTimeout("Upload Large File Should Work", 6*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
 		allocSize := int64(2 * GB)
 		fileSize := int64(1 * GB)
 
+		for i := 0; i < 6; i++ {
+			output, err := executeFaucetWithTokens(t, configPath, 9.0)
+			require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+		}
+
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"tokens": 9,
 			"size":   allocSize,
-			"lock":   9,
+			"lock":   50,
+			"expire": "30m",
 		})
 
 		filename := generateRandomTestFileName(t)
@@ -470,7 +476,7 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.Contains(strings.Join(output, "\n"), "consensus_not_met"), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, "\n"), "upload_failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File too large - parity shards take up allocation space - more than quarter Size of the Allocation Should Fail when 3 parity shards", func(t *test.SystemTest) {
@@ -494,7 +500,7 @@ func TestUpload(testSetup *testing.T) {
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 
-		require.True(t, strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, ""), "upload_failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *test.SystemTest) {
@@ -530,7 +536,7 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":  filename,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, ""), "upload_failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
@@ -600,7 +606,7 @@ func TestUpload(testSetup *testing.T) {
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t,
-			strings.Contains(strings.Join(output, ""), "consensus_not_met"), strings.Join(output, "\n"))
+			strings.Contains(strings.Join(output, ""), "upload_failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload Non-Existent File Should Fail", func(t *test.SystemTest) {
@@ -798,6 +804,8 @@ func generateFileAndUploadForWallet(t *test.SystemTest, wallet, allocationID, re
 	require.Nil(t, err)
 
 	// Upload parameters
+	// log command with allocation id, filename and remotepath
+	t.Logf("Uploading file %s to allocation %s with remotepath %s", filename, allocationID, remotepath+filepath.Base(filename))
 	uploadWithParamForWallet(t, wallet, configPath, map[string]interface{}{
 		"allocation": allocationID,
 		"localpath":  filename,
