@@ -1300,7 +1300,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)

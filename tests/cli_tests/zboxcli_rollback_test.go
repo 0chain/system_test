@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -19,7 +20,10 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 	t.RunSequentially("rollback allocation", func(t *test.SystemTest) {
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   4 * MB,
+			"tokens": 9,
+		})
 
 		filesize := int64(0.5 * MB)
 		remotepath := "/"
@@ -62,6 +66,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  "tmp/",
 		}), true)
+		log.Println(strings.Join(output, "\n"))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
