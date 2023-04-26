@@ -496,6 +496,9 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("No Parameter Should Fail", func(t *test.SystemTest) {
+		_, err := registerWallet(t, configPath)
+		require.NoError(t, err)
+
 		output, err := listFilesInAllocation(t, configPath, "", false)
 		require.NotNil(t, err,
 			"List files with no parameter failed due to error", err,
@@ -509,7 +512,7 @@ func TestListFileSystem(testSetup *testing.T) {
 			strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("List Files in Other's Allocation Should Fail", 90*time.Second, func(t *test.SystemTest) { //todo: too slow
+	t.Run("List Files in Other's Allocation Should Fail", func(t *test.SystemTest) { //todo: too slow
 		var otherAllocationID string
 		allocationID := setupAllocation(t, configPath)
 
