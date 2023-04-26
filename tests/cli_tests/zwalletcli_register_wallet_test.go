@@ -118,12 +118,6 @@ func withNoFaucetPour() registerWalletOptionFunc {
 	}
 }
 
-func withDebugLogs() registerWalletOptionFunc {
-	return func(o *registerWalletOption) {
-		o.debugLogs = true
-	}
-}
-
 func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string, opts ...registerWalletOptionFunc) ([]string, error) {
 	t.Logf("Registering wallet...")
 	regOpt := &registerWalletOption{}
