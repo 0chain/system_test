@@ -873,7 +873,8 @@ func TestUpload(testSetup *testing.T) {
 				"tokens": 9,
 				"expire": "10m",
 			})
-			output, err := cliutils.RunCommand(t, "wget "+videoLink+" -O "+videoName+"."+videoFormat, 3, 2*time.Second)
+			downloadVideo := "wget " + videoLink + " -O " + videoName + "." + videoFormat
+			output, err := cliutils.RunCommand(t, downloadVideo, 3, 2*time.Second)
 			require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
 
 			output, err = uploadFile(t, configPath, map[string]interface{}{
