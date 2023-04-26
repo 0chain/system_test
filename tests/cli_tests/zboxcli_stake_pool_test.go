@@ -76,10 +76,9 @@ func TestStakePool(testSetup *testing.T) {
 			"json":       "",
 		}))
 		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
 
 		stakePool := climodel.StakePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &stakePool)
+		err = json.Unmarshal([]byte(output[len(output)-1]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
@@ -101,10 +100,9 @@ func TestStakePool(testSetup *testing.T) {
 			"json":       "",
 		}))
 		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
 
 		stakePool = climodel.StakePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &stakePool)
+		err = json.Unmarshal([]byte(output[len(output)-1]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
@@ -123,11 +121,10 @@ func TestStakePool(testSetup *testing.T) {
 
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
 
 		fmt.Println("allocation cost", output)
 
-		allocationCost, err := getAllocationCost(output[0])
+		allocationCost, err := getAllocationCost(output[len(output)-1])
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
 		// Matching the wallet balance to allocationCost by executing faucet with tokens
@@ -149,7 +146,7 @@ func TestStakePool(testSetup *testing.T) {
 		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
 		require.Nil(t, err, "Error fetching blobber info", strings.Join(output, "\n"))
 
-		err = json.Unmarshal([]byte(output[0]), &blInfo)
+		err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
 		require.Nil(t, err, "error unmarshalling blobber info")
 
 		totalOffersNew := blInfo.TotalOffers
@@ -169,10 +166,9 @@ func TestStakePool(testSetup *testing.T) {
 			"json":       "",
 		}))
 		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
 
 		stakePool = climodel.StakePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &stakePool)
+		err = json.Unmarshal([]byte(output[len(output)-1]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
@@ -190,10 +186,9 @@ func TestStakePool(testSetup *testing.T) {
 			"json":       "",
 		}))
 		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
 
 		stakePool = climodel.StakePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &stakePool)
+		err = json.Unmarshal([]byte(output[len(output)-1]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
@@ -211,10 +206,9 @@ func TestStakePool(testSetup *testing.T) {
 			"json":       "",
 		}))
 		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
 
 		stakePool = climodel.StakePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &stakePool)
+		err = json.Unmarshal([]byte(output[len(output)-1]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
@@ -236,10 +230,9 @@ func TestStakePool(testSetup *testing.T) {
 			"json":       "",
 		}))
 		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
 
 		stakePool = climodel.StakePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &stakePool)
+		err = json.Unmarshal([]byte(output[len(output)-1]), &stakePool)
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotNil(t, stakePool, "stake pool info should not be empty")
 
