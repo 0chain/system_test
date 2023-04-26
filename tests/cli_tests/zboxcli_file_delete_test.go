@@ -220,7 +220,7 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete file by not supplying remotepath should fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
@@ -232,7 +232,7 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete file by not supplying allocation ID should fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{

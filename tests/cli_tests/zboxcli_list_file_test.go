@@ -329,8 +329,8 @@ func TestListFileSystem(testSetup *testing.T) {
 		})
 		fname := filepath.Base(filename)
 
-		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		// Just create a wallet so that we can work further
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
 		// Listing contents using auth-ticket: should work
@@ -381,8 +381,8 @@ func TestListFileSystem(testSetup *testing.T) {
 		})
 		fname := filepath.Base(filename)
 
-		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		// Just create a wallet so that we can work further
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
 		// Listing contents using auth-ticket: should work
@@ -441,8 +441,8 @@ func TestListFileSystem(testSetup *testing.T) {
 			require.NotEqual(t, "", lookupHash, "Lookup Hash: ", lookupHash)
 		})
 
-		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		// Just create a wallet so that we can work further
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
 		// Listing contents of allocationID: should work
@@ -496,7 +496,7 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("No Parameter Should Fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		output, err := listFilesInAllocation(t, configPath, "", false)

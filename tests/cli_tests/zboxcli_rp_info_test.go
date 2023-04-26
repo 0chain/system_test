@@ -19,8 +19,8 @@ func TestReadPoolInfo(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Read pool info testing with json parameter", 90*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		// Wallet balance before lock should be 5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
@@ -51,8 +51,8 @@ func TestReadPoolInfo(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Read pool info testing without json parameter", 90*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		// Wallet balance before lock should be 4.9 ZCN
 		balance, err := getBalanceZCN(t, configPath)

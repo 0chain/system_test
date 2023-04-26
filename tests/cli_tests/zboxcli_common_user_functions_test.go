@@ -29,8 +29,8 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Create Allocation - Locked amount must've been withdrawn from user wallet", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		_, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), configPath, 9)
 		require.Nil(t, err)
@@ -57,8 +57,8 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 	})
 
 	t.Run("Update Allocation by locking more tokens - Locked amount must be withdrawn from user wallet", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		_, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), configPath, 9)
 		require.Nil(t, err)

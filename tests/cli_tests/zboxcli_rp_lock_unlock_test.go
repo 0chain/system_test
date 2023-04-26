@@ -20,8 +20,8 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Locking read pool tokens moves tokens from wallet to read pool", 90*time.Second, func(t *test.SystemTest) { //TOOD: slow
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		// Wallet balance before lock should be 5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
@@ -61,8 +61,8 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock more read tokens than wallet balance", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		// Wallet balance before lock should be 5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
@@ -84,8 +84,8 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock negative read tokens", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		// Wallet balance before lock should be 5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
@@ -107,8 +107,8 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock zero read tokens", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		// Wallet balance before lock should be 5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
@@ -133,8 +133,8 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Missing tokens flag should result in error", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
