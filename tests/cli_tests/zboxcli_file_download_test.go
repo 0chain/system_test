@@ -1374,7 +1374,6 @@ func TestDownload(testSetup *testing.T) {
 		downloadedFileChecksum = generateChecksum(t, "tmp/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
-
 	})
 }
 

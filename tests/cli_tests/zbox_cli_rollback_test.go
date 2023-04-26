@@ -73,7 +73,6 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 
 		createAllocationTestTeardown(t, allocationID)
-
 	})
 
 }
