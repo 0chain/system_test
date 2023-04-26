@@ -1347,9 +1347,11 @@ func TestDownload(testSetup *testing.T) {
 		downloadedFileChecksum = generateChecksum(t, "tmp/"+filepath.Base(newFileName))
 		require.Equal(t, newFileChecksum, downloadedFileChecksum)
 
+		err = os.Remove("tmp/" + filepath.Base(newFileName))
+		require.Nil(t, err)
+
 		remotepath += filepath.Base(filename)
 		destpath := "/child/"
-
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,

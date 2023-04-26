@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -58,6 +57,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		output, err = rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 		}))
+		t.Log(strings.Join(output, "\n"))
 		require.NoError(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -66,7 +66,6 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  "tmp/",
 		}), true)
-		log.Println(strings.Join(output, "\n"))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
