@@ -1323,6 +1323,9 @@ func TestDownload(testSetup *testing.T) {
 
 		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
+		err = os.Remove("tmp/" + filepath.Base(filename))
+		require.Nil(t, err)
+
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 
 		newRemotePath := "/dir1/"
