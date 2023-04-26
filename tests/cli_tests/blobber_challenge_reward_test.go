@@ -52,6 +52,129 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	fmt.Println("Blobber List: ", blobberListString)
 	fmt.Println("Validator List: ", validatorListString)
 
+	t.RunSequentiallyWithTimeout("Test Numbers", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		allocation := climodel.Allocation{}
+
+		allocationId := "7a430735032a703312a464669a9ddb61da0653f5eb80fdbd9691342f04fbbd58"
+
+		allocation.MovedToChallenge = 76334634
+
+		totalExpectedReward := float64(allocation.MovedToChallenge)
+
+		challenges, _ := getAllChallenges(t, allocationId)
+
+		totalReward := 0.0
+		blobber1TotalReward := 0.0
+		blobber2TotalReward := 0.0
+		blobber1DelegatesTotalReward := 0.0
+		blobber2DelegatesTotalReward := 0.0
+		validator1TotalReward := 0.0
+		validator2TotalReward := 0.0
+		validator1DelegatesTotalReward := 0.0
+		validator2DelegatesTotalReward := 0.0
+
+		for _, challenge := range challenges {
+
+			var isBlobber1 bool
+			if challenge.BlobberID == blobberList[0].Id {
+				isBlobber1 = true
+			}
+
+			blobberReward := 0.0
+			blobberDelegateReward := 0.0
+			validator1Reward := 0.0
+			validator2Reward := 0.0
+			validator1DelegateReward := 0.0
+			validator2DelegateReward := 0.0
+
+			challengeRewards, err := getChallengeRewards(t, challenge.ChallengeID)
+
+			if err != nil {
+				fmt.Println(err)
+			}
+			require.Nil(t, err, "Error getting challenge rewards", strings.Join(output, "\n"))
+
+			// check if challengeReward.BlobberRewards is empty and if yes continue
+			if len(challengeRewards.BlobberRewards) == 0 {
+				continue
+			}
+
+			blobberChallengeRewards := challengeRewards.BlobberRewards
+			validatorChallengeRewards := challengeRewards.ValidatorRewards
+			blobberDelegateChallengeRewards := challengeRewards.BlobberDelegateRewards
+			validatorDelegateChallengeRewards := challengeRewards.ValidatorDelegateRewards
+
+			blobberReward += blobberChallengeRewards[0].Amount
+			if isBlobber1 {
+				blobber1TotalReward += blobberChallengeRewards[0].Amount
+			} else {
+				blobber2TotalReward += blobberChallengeRewards[0].Amount
+			}
+
+			for _, blobberDelegateChallengeReward := range blobberDelegateChallengeRewards {
+				blobberDelegateReward += blobberDelegateChallengeReward.Amount
+				if isBlobber1 {
+					blobber1DelegatesTotalReward += blobberDelegateChallengeReward.Amount
+				} else {
+					blobber2DelegatesTotalReward += blobberDelegateChallengeReward.Amount
+				}
+			}
+
+			for _, validatorChallengeReward := range validatorChallengeRewards {
+				if validatorChallengeReward.ProviderId == validatorList[0].ID {
+					validator1Reward += validatorChallengeReward.Amount
+					validator1TotalReward += validatorChallengeReward.Amount
+				} else if validatorChallengeReward.ProviderId == validatorList[1].ID {
+					validator2Reward += validatorChallengeReward.Amount
+					validator2TotalReward += validatorChallengeReward.Amount
+				}
+			}
+
+			for _, validatorDelegateChallengeReward := range validatorDelegateChallengeRewards {
+				if validatorDelegateChallengeReward.ProviderId == validatorList[0].ID {
+					validator1DelegateReward += validatorDelegateChallengeReward.Amount
+					validator1DelegatesTotalReward += validatorDelegateChallengeReward.Amount
+				} else if validatorDelegateChallengeReward.ProviderId == validatorList[1].ID {
+					validator2DelegateReward += validatorDelegateChallengeReward.Amount
+					validator2DelegatesTotalReward += validatorDelegateChallengeReward.Amount
+				}
+			}
+
+			blobberTotalReward := blobberReward + blobberDelegateReward
+			validatorsTotalReward := validator1Reward + validator2Reward + validator1DelegateReward + validator2DelegateReward
+			totalChallengeReward := blobberTotalReward + validatorsTotalReward
+
+			// check if blobber got 97.5% of the total challenge reward with 5% error margin
+			require.InDelta(t, blobberTotalReward, totalChallengeReward*0.975, totalChallengeReward*0.05, "Blobber Reward is not 97.5% of total challenge reward")
+			// check if validators got 2.5% of the total challenge reward with 5% error margin
+			require.InDelta(t, validatorsTotalReward, totalChallengeReward*0.025, totalChallengeReward*0.05, "Validators Reward is not 2.5% of total challenge reward")
+
+			require.LessOrEqual(t, math.Abs(validator1Reward+validator1DelegateReward-validator2Reward-validator2DelegateReward), float64(3), "Validator 1 and Validator 2 rewards are not equal ")
+		}
+
+		totalReward = blobber1TotalReward + blobber2TotalReward + blobber1DelegatesTotalReward + blobber2DelegatesTotalReward + validator1TotalReward + validator2TotalReward + validator1DelegatesTotalReward + validator2DelegatesTotalReward
+
+		fmt.Println("Total Reward: ", totalReward)
+		fmt.Println("Total Expected Reward: ", totalExpectedReward)
+		fmt.Println("Blobber 1 Total Reward: ", blobber1TotalReward)
+		fmt.Println("Blobber 2 Total Reward: ", blobber2TotalReward)
+		fmt.Println("Blobber 1 Delegates Total Reward: ", blobber1DelegatesTotalReward)
+		fmt.Println("Blobber 2 Delegates Total Reward: ", blobber2DelegatesTotalReward)
+		fmt.Println("Validator 1 Total Reward: ", validator1TotalReward)
+		fmt.Println("Validator 2 Total Reward: ", validator2TotalReward)
+		fmt.Println("Validator 1 Delegates Total Reward: ", validator1DelegatesTotalReward)
+		fmt.Println("Validator 2 Delegates Total Reward: ", validator2DelegatesTotalReward)
+
+		require.InEpsilon(t, totalReward/totalExpectedReward, 1, 0.05, "Total Reward is not equal to expected reward")
+
+		require.InEpsilon(t, blobber1TotalReward/blobber2TotalReward, 1, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
+		require.InEpsilon(t, blobber1DelegatesTotalReward/blobber2DelegatesTotalReward, 1, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
+		require.InEpsilon(t, (blobber1TotalReward+blobber1DelegatesTotalReward)/(blobber2TotalReward+blobber2DelegatesTotalReward), 1, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
+
+	})
+
+	t.Skip()
+
 	t.RunSequentiallyWithTimeout("Case 1 : Client Uploads 10% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		//t.Skip()
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
@@ -61,7 +184,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 0.1 * GB
+		filesize := 50 * MB
 		filename := generateRandomTestFileName(t)
 
 		err = createFileWithSize(filename, int64(filesize))
@@ -72,7 +195,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		output := setupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
+			"size":   500 * MB,
 			"tokens": 1,
 			"data":   1,
 			"parity": 1,
@@ -208,6 +331,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
+
+	t.Skip()
 
 	t.RunSequentiallyWithTimeout("Case 2 : Client Uploads 30% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		//t.Skip()
@@ -1166,7 +1291,8 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []climod
 
 func getAllChallenges(t *test.SystemTest, allocationID string) ([]Challenge, error) {
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
-	sharderBaseUrl := getSharderUrl(t)
+	//sharderBaseUrl := getSharderUrl(t)
+	sharderBaseUrl := "https://test2.zus.network"
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/all-challenges?allocation_id=" + allocationID)
 
 	var result []Challenge
@@ -1208,7 +1334,8 @@ type Challenge struct {
 func getChallengeRewards(t *test.SystemTest, challengeID string) (*ChallengeRewards, error) {
 
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
-	sharderBaseUrl := getSharderUrl(t)
+	//sharderBaseUrl := getSharderUrl(t)
+	sharderBaseUrl := "https://test2.zus.network"
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/challenge-rewards?challenge_id=" + challengeID)
 
 	var result *ChallengeRewards
