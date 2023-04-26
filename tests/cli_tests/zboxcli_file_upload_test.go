@@ -862,18 +862,16 @@ func TestUpload(testSetup *testing.T) {
 			"wmv",
 		},
 	}
-
 	for _, sampleVideo := range sampleVideos {
-
 		videoLink := sampleVideo[0]
 		videoName := sampleVideo[1]
 		videoFormat := sampleVideo[2]
-
-		t.Run("Upload Video File "+videoFormat+" With Web Streaming Should Work", func(t *test.SystemTest) {
-			allocSize := int64(20 * 1024 * 1024)
+		t.RunWithTimeout("Upload Video File "+videoFormat+" With Web Streaming Should Work", 2*time.Minute, func(t *test.SystemTest) {
+			allocSize := int64(400 * 1024 * 1024)
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
 				"size":   allocSize,
-				"tokens": 1,
+				"tokens": 9,
+				"expire": "10m",
 			})
 			output, err := cliutils.RunCommand(t, "wget "+videoLink+" -O "+videoName+"."+videoFormat, 3, 2*time.Second)
 			require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
@@ -886,7 +884,6 @@ func TestUpload(testSetup *testing.T) {
 			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2)
-
 			expected := "Status completed callback. Type = video/fmp4. Name = raw." + videoName + ".mp4"
 			require.Equal(t, expected, output[1])
 		})
