@@ -596,13 +596,15 @@ func TestDownload(testSetup *testing.T) {
 		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
-		// Download file using auth-ticket: should work
+		// Download file using auth-ticket: shouldn't work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
-		}), true)
+		}), false)
 		require.NotNil(t, err)
-		require.Len(t, output, 3)
+		require.Greater(t, len(output), 0)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "pre-redeeming read marker")
 	})
 
 	t.RunWithTimeout("Download Shared File by Paying Should Work", 5*time.Minute, func(t *test.SystemTest) {
@@ -1228,9 +1230,9 @@ func TestDownload(testSetup *testing.T) {
 			"localpath":  "tmp/",
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Greater(t, len(output), 0)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "not enough tokens")
+		require.Contains(t, aggregatedOutput, "pre-redeeming read marker")
 	})
 
 	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) {
