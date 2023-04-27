@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/0chain/errors v1.0.3
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/herumi/bls-go-binary v1.28.3-0.20230130082002-6902be28593e
+	github.com/herumi/bls-go-binary v1.30.4
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.15.0
@@ -26,7 +26,7 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 )
 
-require github.com/0chain/gosdk v1.8.16-0.20230427222547-3cc7ac66e28f
+require github.com/0chain/gosdk v1.8.16-0.20230427223119-74d03d597bd9
 
 require (
 	github.com/0chain/common v0.0.6-0.20230127095721-8df4d1d72565 // indirect
