@@ -19,6 +19,8 @@ import (
 
 func TestReadMarker(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("After downloading a file, return a readmarker for each blobber used in download")
+
 	t.Parallel()
 
 	const blobbersRequiredForDownload = 4 // download needs (data shards + 1) number of blobbers
@@ -29,8 +31,6 @@ func TestReadMarker(testSetup *testing.T) {
 
 	err = os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
-
-	t.SetSmokeTests("After downloading a file, return a readmarker for each blobber used in download")
 
 	t.Run("After downloading a file, return a readmarker for each blobber used in download", func(t *test.SystemTest) {
 		allocSize := int64(2048)

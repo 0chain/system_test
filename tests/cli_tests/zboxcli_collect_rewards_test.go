@@ -202,6 +202,7 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 
 func TestValidatorCollectRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Test collect reward with valid pool and validator id should pass")
 
 	t.Parallel()
 

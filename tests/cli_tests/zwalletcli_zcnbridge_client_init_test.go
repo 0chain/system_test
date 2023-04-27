@@ -115,6 +115,7 @@ func TestBridgeClientInit(testSetup *testing.T) {
 // cmd: bridge-owner-init
 func TestBridgeOwnerInit(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Init bridge owner config to default path and file")
 
 	t.Run("Init bridge owner config to default path and file", func(t *test.SystemTest) {
 		output, err := createWallet(t, configPath)
