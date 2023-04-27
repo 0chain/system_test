@@ -186,10 +186,10 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in write pool: write_pool_lock_failed: lock amount is greater than balance", output[0], strings.Join(output, "\n"))
 
-		// Wallet balance should remain same
+		// Wallet balance should remain same (- fee)
 		balance, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 3.5, balance)
+		require.Equal(t, 3.4, balance)
 	})
 
 	t.Run("Should not be able to lock negative write tokens", func(t *test.SystemTest) {
@@ -262,10 +262,10 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in write pool: write_pool_lock_failed: insufficient amount to lock", output[0], strings.Join(output, "\n"))
 
-		// Wallet balance should remain same
+		// Wallet balance should remain same (- fee)
 		balance, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 3.5, balance)
+		require.Equal(t, 3.4, balance)
 	})
 
 	t.Run("Missing tokens flag should result in error", func(t *test.SystemTest) {
