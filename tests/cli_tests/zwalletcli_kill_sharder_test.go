@@ -36,6 +36,9 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 		t.Skip("all sharders in the blockchain have been killed")
 	}
 
+	output, err = executeFaucetWithTokens(t, configPath, 10)
+	require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
 	t.RunSequentiallyWithTimeout("kill sharder by non-smartcontract owner should fail", 1000*time.Second, func(t *test.SystemTest) {
 		output, err = killSharder(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"id": sharderToKill,
