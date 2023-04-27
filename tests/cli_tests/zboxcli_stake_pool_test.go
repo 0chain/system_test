@@ -125,7 +125,7 @@ func TestStakePool(testSetup *testing.T) {
 		//fmt.Println("allocation cost", output)
 		//
 
-		allocationCost := sizeInGB(float64(allocSize))
+		allocationCost := sizeInGB(float64(allocSize)) * 3
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
 		// Matching the wallet balance to allocationCost by executing faucet with tokens
