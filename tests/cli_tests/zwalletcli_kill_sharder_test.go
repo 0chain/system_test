@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	climodel "github.com/0chain/system_test/internal/cli/model"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -17,26 +15,30 @@ import (
 
 func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
-	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 	sharderUrl := getSharderUrl(t)
-	// wait for a sharder to be registered
-	var sharderIds []string
-	for {
-		sharderIds = getSortedSharderIds(t, sharderUrl)
-		if len(sharderIds) > 0 {
+	startSharders := getNodeSlice(t, "getSharderList", sharderUrl)
+	if len(startSharders) == 0 {
+		t.Skip("no sharders found in blockchain")
+	}
+
+	var sharderToKill string
+	for i := range startSharders {
+		if !startSharders[i].IsKilled {
+			sharderToKill = startSharders[i].ID
 			break
 		}
-		cliutil.Wait(t, time.Second)
+	}
+	if sharderToKill == "" {
+		t.Skip("all sharders in the blockchain have been killed")
 	}
 
 	t.RunSequentiallyWithTimeout("kill sharder by non-smartcontract owner should fail", 1000*time.Second, func(t *test.SystemTest) {
-		var sharderIds []string
-		sharderIds, _ = waitForNSharder(t, sharderUrl, 1)
-		require.True(t, len(sharderIds) > 0, "no sharders found, should be impossible")
-
-		output, err := killSharder(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
-			"id": sharderIds[0],
+		output, err = killSharder(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+			"id": sharderToKill,
 		}), true)
 		require.Error(t, err, "kill sharder by non-smartcontract owner should fail")
 		require.Len(t, output, 1)
@@ -44,18 +46,7 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 	})
 
 	t.RunSequentiallyWithTimeout("Killed sharder does not receive rewards", 1000*time.Second, func(t *test.SystemTest) {
-		var startSharders climodel.NodeList
-		_, startSharders = waitForNSharder(t, sharderUrl, 2)
-		var sharderToKill string
-		for i := range startSharders.Nodes {
-			if !startSharders.Nodes[i].IsKilled {
-				sharderToKill = startSharders.Nodes[i].ID
-				break
-			}
-		}
-		require.True(t, len(sharderToKill) > 0, "no un-killed sharders found")
-
-		output, err := killSharder(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
+		output, err = killSharder(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
 			"id": sharderToKill,
 		}), true)
 		require.NoError(t, err, strings.Join(output, "\n"))
