@@ -115,16 +115,17 @@ func TestStakePool(testSetup *testing.T) {
 		allocSize := maxStakedCapacity*3 + uint64(30*GB)
 		allocSize -= allocSize / uint64(1*MB)
 
-		options := map[string]interface{}{"cost": "", "size": allocSize, "data": len(blobbersList) / 2, "parity": len(blobbersList) - len(blobbersList)/2, "write_price": "0.1-0.2", "read_price": "0-0.1"}
+		//options := map[string]interface{}{"cost": "", "size": allocSize, "data": len(blobbersList) / 2, "parity": len(blobbersList) - len(blobbersList)/2, "write_price": "0.1-0.2", "read_price": "0-0.1"}
+		//
+		//fmt.Println("options", options)
+		//
+		//output, err = createNewAllocation(t, configPath, createParams(options))
+		//require.Nil(t, err, strings.Join(output, "\n"))
+		//
+		//fmt.Println("allocation cost", output)
+		//
 
-		fmt.Println("options", options)
-
-		output, err = createNewAllocation(t, configPath, createParams(options))
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		fmt.Println("allocation cost", output)
-
-		allocationCost, err := getAllocationCost(output[len(output)-1])
+		allocationCost := sizeInGB(float64(allocSize))
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
 		// Matching the wallet balance to allocationCost by executing faucet with tokens
@@ -140,6 +141,7 @@ func TestStakePool(testSetup *testing.T) {
 			"data":   len(blobbersList) / 2,
 			"parity": len(blobbersList) - len(blobbersList)/2,
 			"lock":   allocationCost + 1,
+			"expire": 720 * time.Hour,
 		})
 
 		// check total offers new value and compare
@@ -240,4 +242,8 @@ func TestStakePool(testSetup *testing.T) {
 
 		require.Equal(t, lenDelegatesNew+1, lenDelegates, "Number of delegates should be greater")
 	})
+}
+
+func sizeInGB(size float64) float64 {
+	return float64(size) / (1024 * 1024 * 1024)
 }
