@@ -9,10 +9,11 @@ import (
 	"testing"
 	"time"
 
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -47,7 +48,7 @@ func TestSharderStake(testSetup *testing.T) {
 	)
 
 	t.RunSequentiallyWithTimeout("Staking tokens against valid sharder with valid tokens should work, unlocking should work", 80*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
+		output, err = registerWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
