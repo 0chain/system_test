@@ -1307,15 +1307,12 @@ func createWalletAndAllocation(t *test.SystemTest, configPath, wallet string) (s
 	faucetTokens := 3.0
 	// First create a wallet and run faucet command
 	// Output:
-	// 		[0]:"ZCN wallet created"
-	// 		[1]:"Creating related read pool for storage smart-contract..."
-	// 		[2]:"Read pool created successfully with txn: ${hash}"
-	// 		[3]:"Wallet registered"
+	// 		[0]:"No wallet in path  C:\Users\kisha\.zcn\unique found. Creating wallet..."
+	// 		[1]:"ZCN wallet created!!"
+	// 		[2]:"Execute faucet smart contract success with txn : ${hash}"
 	output, err := createWalletForName(t, configPath, wallet)
 	require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 	require.Len(t, output, 3, strings.Join(output, "\n"))
-	require.Regexp(t, "Read pool created successfully with txn: [a-f0-9]{64}", output[1], strings.Join(output, "\n"))
-	require.Equal(t, "Wallet registered", output[2], strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokensForWallet(t, wallet, configPath, faucetTokens)
 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))

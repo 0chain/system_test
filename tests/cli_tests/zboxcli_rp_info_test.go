@@ -25,7 +25,7 @@ func TestReadPoolInfo(testSetup *testing.T) {
 		// Wallet balance before lock should be 5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 4.9, balance)
+		require.Equal(t, 5.0, balance)
 
 		// Lock 1 token in read pool distributed amongst all blobbers
 		lockAmount := 1.0
@@ -54,10 +54,10 @@ func TestReadPoolInfo(testSetup *testing.T) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
-		// Wallet balance before lock should be 4.9 ZCN
+		// Wallet balance before lock should be 5.0 ZCN
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 4.9, balance)
+		require.Equal(t, 5.0, balance)
 
 		// Lock 1 token in read pool distributed amongst all blobbers
 		lockAmount := 1.0

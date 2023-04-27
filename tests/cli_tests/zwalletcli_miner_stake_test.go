@@ -261,7 +261,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Equal(t, fmt.Sprintf("stake_pool_lock_failed: max_delegates reached: %d, no more stake pools allowed", maxDelegates), output[0])
 	})
 
-	t.Run("Staking 0 tokens should fail", func(t *test.SystemTest) {
+	t.Run("Staking 0 tokens against miner should fail", func(t *test.SystemTest) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 

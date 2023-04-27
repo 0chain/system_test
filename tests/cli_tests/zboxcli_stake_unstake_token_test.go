@@ -191,7 +191,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		require.Less(t, balance2, balance) // pay txn fee
 	})
 
-	t.Run("Staking 0 tokens should fail", func(t *test.SystemTest) {
+	t.Run("Staking 0 tokens against blobber should fail", func(t *test.SystemTest) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 		t.Logf("output: %v", output)
