@@ -28,25 +28,24 @@ type StatusCallback struct {
 	success bool
 }
 
-func (cb *StatusCallback) Started(allocationId, filePath string, op int, totalBytes int) {
+func (cb *StatusCallback) Started(allocationId, filePath string, op, totalBytes int) {
 	cb.wg.Add(1)
 }
 
-func (cb *StatusCallback) InProgress(allocationId, filePath string, op int, completedBytes int, data []byte) {}
+func (cb *StatusCallback) InProgress(allocationId, filePath string, op, completedBytes int, data []byte) {
+}
 
 func (cb *StatusCallback) RepairCompleted(filesRepaired int) {}
 
-func (cb *StatusCallback) Completed(allocationId, filePath string, filename string, mimetype string, size int, op int) {
+func (cb *StatusCallback) Completed(allocationId, filePath, filename, mimetype string, size, op int) {
 	cb.success = true
 	cb.wg.Done()
 }
 
-func (cb *StatusCallback) Error(allocationID string, filePath string, op int, err error) {
+func (cb *StatusCallback) Error(allocationID, filePath string, op int, err error) {
 	cb.success = false
 	cb.wg.Done()
 }
-
-
 
 func NewSDKClient(blockWorker string) *SDKClient {
 	sdkClient := &SDKClient{
@@ -245,7 +244,7 @@ func (c *SDKClient) DownloadFile(t *test.SystemTest, allocationID, remotepath, l
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
 	require.NoError(t, err)
 
-	err = sdkAllocation.DownloadFile(localpath, "/" + remotepath, false, &StatusCallback{
+	err = sdkAllocation.DownloadFile(localpath, "/"+remotepath, false, &StatusCallback{
 		wg: &sync.WaitGroup{},
 	})
 	require.NoError(t, err)

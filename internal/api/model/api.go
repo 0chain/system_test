@@ -99,7 +99,7 @@ func (w *SdkWallet) ToCliModelWalletFile() *climodel.WalletFile {
 			PrivateKey: key.PrivateKey,
 		})
 	}
-	
+
 	return &climodel.WalletFile{
 		ClientID:    w.ClientID,
 		ClientKey:   w.ClientKey,
@@ -164,13 +164,13 @@ func NewUnlockWritePoolTransactionData(createWritePoolRequest CreateWritePoolReq
 
 func NewCreateReadPoolTransactionData() TransactionData {
 	return TransactionData{
-		Name:  "read_pool_lock",
+		Name: "read_pool_lock",
 	}
 }
 
 func NewUnlockReadPoolTransactionData() TransactionData {
 	return TransactionData{
-		Name:  "read_pool_unlock",
+		Name: "read_pool_unlock",
 	}
 }
 
@@ -201,7 +201,6 @@ func NewUnlockMinerStackPoolTransactionData(createStakePoolRequest CreateStakePo
 		Input: &createStakePoolRequest,
 	}
 }
-
 
 func NewFreeAllocationTransactionData(freeAllocationRequest *FreeAllocationRequest) TransactionData {
 	return TransactionData{
@@ -247,10 +246,10 @@ func NewBurnZcnTransactionData(burnZcnRequest *SCRestBurnZcnRequest) Transaction
 		Input: burnZcnRequest,
 	}
 }
+
 //----------------------------------------------------
 // End ZCN SC
 //----------------------------------------------------
-
 
 type InternalTransactionPutRequest struct {
 	TransactionData
@@ -348,7 +347,7 @@ type ClientGetBalanceResponse struct {
 	Txn     string `json:"txn"`
 	Round   int64  `json:"round"`
 	Balance int64  `json:"balance"`
-	Nonce  	int64  `json:"nonce"`
+	Nonce   int64  `json:"nonce"`
 }
 
 type SCStateGetRequest struct {
@@ -423,14 +422,14 @@ type SCRestGetAllocationBlobbersRequest struct {
 
 type FreeAllocationData struct {
 	RecipientPublicKey string `json:"recipient_public_key"`
-	Marker string `json:"marker"`
+	Marker             string `json:"marker"`
 }
 
 type SCRestGetClientBalanceResponse struct {
-	Txn    string `json:"txn"`
-	Round  int64  `json:"round"`
+	Txn     string `json:"txn"`
+	Round   int64  `json:"round"`
 	Balance int64  `json:"balance"`
-	Nonce	int64	`json:"nonce"`
+	Nonce   int64  `json:"nonce"`
 }
 
 type SCRestGetFreeAllocationBlobbersResponse struct {
@@ -514,10 +513,10 @@ type SimpleNodeResponse struct {
 	PublicKey                     string                `json:"public_key"`
 	ShortName                     string                `json:"short_name"`
 	BuildTag                      string                `json:"build_tag"`
-	TotalStaked                   int64         		`json:"total_stake"`
+	TotalStaked                   int64                 `json:"total_stake"`
 	Delete                        bool                  `json:"delete"`
-	NodeType                      string              	`json:"node_type,omitempty"`
-	LastHealthCheck               int64      			`json:"last_health_check"`
+	NodeType                      string                `json:"node_type,omitempty"`
+	LastHealthCheck               int64                 `json:"last_health_check"`
 	Status                        int                   `json:"-" msg:"-"`
 	LastSettingUpdateRound        int64                 `json:"last_setting_update_round"`
 	RoundServiceChargeLastUpdated int64                 `json:"round_service_charge_last_updated"`
@@ -526,7 +525,7 @@ type SimpleNodeResponse struct {
 type SCRestGetMinerSharderResponse struct {
 	SimpleNodeResponse `json:"simple_miner"`
 	StakePoolResponse  `json:"stake_pool"`
-	TotalReward int64 `json:"total_reward"`
+	TotalReward        int64 `json:"total_reward"`
 }
 
 type SCRestGetMinersShardersResponse struct {
@@ -534,21 +533,21 @@ type SCRestGetMinersShardersResponse struct {
 }
 
 type SCRestGetValidatorResponse struct {
-	ValidatorID     string           `json:"validator_id"`
-	BaseUrl         string           `json:"url"`
-	StakeTotal      int64    		 `json:"stake_total"`
-	UnstakeTotal    int64    		 `json:"unstake_total"`
-	PublicKey       string           `json:"public_key"`
-	LastHealthCheck int64 			 `json:"last_health_check"`
-	IsKilled        bool             `json:"is_killed"`
-	IsShutdown      bool             `json:"is_shutdown"`
+	ValidatorID     string `json:"validator_id"`
+	BaseUrl         string `json:"url"`
+	StakeTotal      int64  `json:"stake_total"`
+	UnstakeTotal    int64  `json:"unstake_total"`
+	PublicKey       string `json:"public_key"`
+	LastHealthCheck int64  `json:"last_health_check"`
+	IsKilled        bool   `json:"is_killed"`
+	IsShutdown      bool   `json:"is_shutdown"`
 
 	// StakePoolSettings
-	DelegateWallet string        `json:"delegate_wallet"`
-	MinStake       int64 		 `json:"min_stake"`
-	MaxStake       int64 		 `json:"max_stake"`
-	NumDelegates   int           `json:"num_delegates"`
-	ServiceCharge  float64       `json:"service_charge"`
+	DelegateWallet string  `json:"delegate_wallet"`
+	MinStake       int64   `json:"min_stake"`
+	MaxStake       int64   `json:"max_stake"`
+	NumDelegates   int     `json:"num_delegates"`
+	ServiceCharge  float64 `json:"service_charge"`
 
 	TotalServiceCharge       int64 `json:"total_service_charge"`
 	UncollectedServiceCharge int64 `json:"uncollected_service_charge"`
@@ -566,8 +565,8 @@ type SCRestGetBlobberResponse struct {
 	PublicKey         string            `json:"-"`
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 	TotalStake        int64             `json:"total_stake"`
-	SavedData		 int64             `json:"saved_data"`
-	ReadData		 int64			   `json:"read_data"`
+	SavedData         int64             `json:"saved_data"`
+	ReadData          int64             `json:"read_data"`
 }
 
 type SCRestGetBlobbersResponse struct {
@@ -598,15 +597,15 @@ type CreateStakePoolRequest struct {
 }
 
 type FreeStorageAssignerRequest struct {
-	Name string `json:"name,omitempty"`
-	PublicKey string `json:"public_key,omitempty"`
+	Name            string  `json:"name,omitempty"`
+	PublicKey       string  `json:"public_key,omitempty"`
 	IndividualLimit float64 `json:"individual_limit,omitempty"`
-	TotalLimit float64 `json:"total_limit,omitempty"`
+	TotalLimit      float64 `json:"total_limit,omitempty"`
 }
 
 type FreeAllocationRequest struct {
-	AllocationID string    `json:"allocation_id,omitempty"`
-	Marker   string `json:"marker,omitempty"`
+	AllocationID string `json:"allocation_id,omitempty"`
+	Marker       string `json:"marker,omitempty"`
 }
 
 type SCRestGetAllocationResponse struct {
@@ -887,11 +886,11 @@ type SCRestGetStakePoolStatResponse struct {
 }
 
 type SCRestGetUserStakePoolStatRequest struct {
-	ClientId    string
+	ClientId string
 }
 
 type SCRestGetUserStakePoolStatResponse struct {
-	Pools    map[string]*[]StakePoolDelegatePoolInfo `json:"pools"`
+	Pools map[string]*[]StakePoolDelegatePoolInfo `json:"pools"`
 }
 
 type StakePoolDelegatePoolInfo struct {
@@ -907,12 +906,11 @@ type StakePoolDelegatePoolInfo struct {
 	RoundCreated int64  `json:"round_created"`
 }
 
-
 type StakePoolResponse struct {
 	Pools    map[string]*DelegatePoolResponse `json:"pools"`
-	Reward   int64                    		  `json:"rewards"`
+	Reward   int64                            `json:"rewards"`
 	Settings StakePoolSettings                `json:"settings"`
-	Minter   int            				  `json:"minter"`
+	Minter   int                              `json:"minter"`
 }
 
 type DelegatePoolResponse struct {
@@ -921,12 +919,12 @@ type DelegatePoolResponse struct {
 }
 
 type DelegatePool struct {
-	Balance      int64     `json:"balance"`
-	Reward       int64     `json:"reward"`
-	Status       int 	   `json:"status"`
-	RoundCreated int64     `json:"round_created"` // used for cool down
-	DelegateID   string    `json:"delegate_id"`
-	StakedAt     int64     `json:"staked_at"`
+	Balance      int64  `json:"balance"`
+	Reward       int64  `json:"reward"`
+	Status       int    `json:"status"`
+	RoundCreated int64  `json:"round_created"` // used for cool down
+	DelegateID   string `json:"delegate_id"`
+	StakedAt     int64  `json:"staked_at"`
 }
 
 type FreeStorageMarker struct {
@@ -937,13 +935,13 @@ type FreeStorageMarker struct {
 	Signature  string  `json:"signature,omitempty"`
 }
 
-
 //----------------------------------------------
 // ZCN SC
 //----------------------------------------------
 type SCRestBurnZcnRequest struct {
 	EthereumAddress string `json:"ethereum_address"`
 }
+
 //----------------------------------------------
 // End ZCN SC
 //----------------------------------------------
