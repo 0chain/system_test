@@ -24,8 +24,8 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 
 	balance := 0.8 // 800.000 mZCN
 	t.Run("Challenge pool should be 0 before any write", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
@@ -58,8 +58,8 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 	})
 
 	t.Run("Total balance in blobber pool equals locked tokens", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))

@@ -52,8 +52,8 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	)
 
 	t.Run("Miner pool info after locking against miner should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -78,8 +78,8 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Miner pool info after locking against sharder should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -105,8 +105,8 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Miner/Sharder pool info for invalid node id should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
 			"id": "abcdefgh",

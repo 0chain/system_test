@@ -19,8 +19,8 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("Getting MinerSC Stake pools of a wallet before and after locking against a miner should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -66,8 +66,8 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Getting MinerSC Stake pools of a wallet before and after locking against a sharder should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -113,8 +113,8 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Getting MinerSC pools info for a different client id than wallet owner should work", func(t *test.SystemTest) { //TODO: slow
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error fetching wallet")
@@ -123,8 +123,8 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		targetWalletName := escapedTestName(t) + "_target"
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner01ID,

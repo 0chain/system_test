@@ -290,16 +290,16 @@ func confirmPoolPayments(
 }
 
 func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
-	output, err := registerWallet(t, configPath)
-	require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.NoError(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 	if funds {
 		output, err = executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	}
 
-	output, err = registerWalletForName(t, configPath, wallet)
-	require.NoError(t, err, "error registering target wallet", strings.Join(output, "\n"))
+	output, err = createWalletForName(t, configPath, wallet)
+	require.NoError(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 	targetWallet, err := getWalletForName(t, configPath, wallet)
 	require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))

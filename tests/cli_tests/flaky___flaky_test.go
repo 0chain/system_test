@@ -31,8 +31,8 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 		// and see that blobber's write pool balances are deduced again for the cost of uploading extra
 		// 0.5 MBs.
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -114,8 +114,8 @@ func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo //
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, newOwner)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "Unexpected faucet failure", strings.Join(output, "\n"))
@@ -196,8 +196,8 @@ func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo //
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
 
-		output, err = registerWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, newOwner)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, newOwner, configPath, 1)
 		require.Nil(t, err, "faucet execution failed for non-owner wallet", strings.Join(output, "\n"))
@@ -410,8 +410,8 @@ func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo
 
 	t.RunWithTimeout("File copy - Users should not be charged for moving a file ", 60*time.Second, func(t *test.SystemTest) { // see https://github.com/0chain/zboxcli/issues/334
 		t.Skip("Test calculations are flaky in  CLI") // FIXME - as per comment
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))

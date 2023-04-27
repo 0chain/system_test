@@ -47,7 +47,7 @@ func TestMain(m *testing.M) {
 	t := test.NewSystemTest(new(testing.T))
 
 	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
-	sdkWallet = apiClient.RegisterWalletForMnemonic(t, sdkWalletMnemonics)
+	sdkWallet = apiClient.CreateWalletForMnemonic(t, sdkWalletMnemonics)
 	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
 
 	os.Exit(m.Run())

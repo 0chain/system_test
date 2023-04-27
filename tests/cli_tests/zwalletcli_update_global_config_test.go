@@ -22,8 +22,8 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 	}
 
 	t.RunSequentially("Get Global Config Should Work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = getGlobalConfig(t, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -45,8 +45,8 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		newValue := "200"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		cfgBefore := getGlobalConfiguration(t, true)
 		oldValue := cfgBefore[configKey]
@@ -61,7 +61,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 				"values": oldValue,
 			}, true)
 		}()
-		_, err = registerWalletForName(t, configPath, scOwnerWallet)
+		_, err = createWalletForName(t, configPath, scOwnerWallet)
 		require.NoError(t, err)
 
 		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
@@ -92,8 +92,8 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		newValue2 := "210"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		cfgBefore := getGlobalConfiguration(t, true)
 		oldValue1 := cfgBefore[configKey1].(string)
@@ -137,8 +137,8 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update Global Config - Update immutable config must fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Failed to get wallet")
@@ -157,8 +157,8 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 
 	t.RunSequentially("Update Global Config - Update multiple config including 1 immutable config must fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Failed to get wallet")
@@ -194,8 +194,8 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 	// FIXME! Maybe this is better to fail the command from zwallet or gosdk in case of no parameters.
 	// Currently in this case transaction is getting executed, but nothing is getting updated.
 	t.RunSequentially("Update Global Config - update with suppliying no parameter must update nothing", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		cfgBefore := getGlobalConfiguration(t, true)
 
@@ -215,8 +215,8 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update Global Config - update with invalid key must fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		configKey := "invalid.key"
 		newValue := "120ms"
@@ -231,8 +231,8 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update Global Config - update with invalid value must fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		configKey := "server_chain.block.proposal.max_wait_time"
 		newValue := "abc"
@@ -250,8 +250,8 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		configKey := "server_chain.smart_contract.setting_update_period"
 		newValue := "215"
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = updateGlobalConfigWithWallet(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,

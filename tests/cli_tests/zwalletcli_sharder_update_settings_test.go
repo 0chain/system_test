@@ -219,8 +219,8 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder01ID,

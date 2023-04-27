@@ -25,7 +25,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 
 	t.RunWithTimeout("Downloader's readpool balance should reduce by download cost", 3*time.Minute, func(t *test.SystemTest) { //TODO: way too slow
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		file := generateRandomTestFileName(t)
 		remoteOwnerPath := "/" + filepath.Base(file)
@@ -44,7 +44,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
 
 		// locking 1 read tokens to readPool via wallet
-		registerWalletForNameAndLockReadTokens(t, configPath, walletOwner)
+		createWalletForNameAndLockReadTokens(t, configPath, walletOwner)
 
 		output, err = readPoolInfoWithWallet(t, walletOwner, configPath)
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))

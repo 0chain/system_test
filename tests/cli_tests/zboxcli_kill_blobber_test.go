@@ -23,8 +23,8 @@ func TestKillBlobber(testSetup *testing.T) {
 	// Killing a blobber should make it unavalable for any new allocations,
 	// and stake pools should be slashed by an amount given by the "stakepool.kill_slash" setting
 	t.RunSequentially("killed blobber is not available for allocations", func(t *test.SystemTest) {
-		output, err := registerWalletForName(t, configPath, scOwnerWallet)
-		require.NoError(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWalletForName(t, configPath, scOwnerWallet)
+		require.NoError(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -94,7 +94,7 @@ func TestKillBlobber(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("kill blobber by non-smartcontract owner should fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		startBlobbers := getBlobbers(t)

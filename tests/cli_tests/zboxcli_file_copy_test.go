@@ -488,8 +488,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	t.Run("copy file from someone else's allocation should fail", func(t *test.SystemTest) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
@@ -560,8 +560,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("copy file with no allocation param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"remotepath": "/abc.txt",
@@ -574,8 +574,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("copy file with no remotepath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
@@ -588,8 +588,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("copy file with no destpath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
