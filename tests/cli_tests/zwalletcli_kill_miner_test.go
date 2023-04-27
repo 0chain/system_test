@@ -15,23 +15,37 @@ import (
 
 func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
-	_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+
+	output, err := registerWallet(t, configPath)
+	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 	sharderUrl := getSharderUrl(t)
-	t.RunSequentiallyWithTimeout("Killed miner does not receive rewards", 200*time.Second, func(t *test.SystemTest) {
-		minerIds := getSortedMinerIds(t, sharderUrl)
-		require.True(t, len(minerIds) > 0, "no miners found")
+	startMiners := getNodeSlice(t, "getMinerList", sharderUrl)
+	if len(startMiners) == 0 {
+		t.Skip("no sharders found in blockchain")
+	}
 
-		startMiners := getNodes(t, minerIds, sharderUrl)
-		var minerToKill string
-		for i := range startMiners.Nodes {
-			if !startMiners.Nodes[i].IsKilled {
-				minerToKill = startMiners.Nodes[i].ID
-				break
-			}
+	var minerToKill string
+	for i := range startMiners {
+		if !startMiners[i].IsKilled {
+			minerToKill = startMiners[i].ID
+			break
 		}
-		require.True(t, len(minerToKill) > 0, "no un-killed miners found")
+	}
+	if minerToKill == "" {
+		t.Skip("all sharders in the blockchain have been killed")
+	}
 
+	t.RunSequentially("kill miner by non-smartcontract owner should fail", func(t *test.SystemTest) {
+		output, err := killMiner(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+			"id": minerToKill,
+		}), true)
+		require.Error(t, err, "kill miner by non-smartcontract owner should fail")
+		require.Len(t, output, 1)
+		require.True(t, strings.Contains(output[0], "unauthorized access - only the owner can access"), "")
+	})
+
+	t.RunSequentiallyWithTimeout("Killed miner does not receive rewards", 200*time.Second, func(t *test.SystemTest) {
 		output, err := killMiner(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
 			"id": minerToKill,
 		}), true)
@@ -52,17 +66,6 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 			"killed miner %s should not receive any more rewards", minerToKill)
 	})
 
-	t.RunSequentially("kill miner by non-smartcontract owner should fail", func(t *test.SystemTest) {
-		minerIds := getSortedMinerIds(t, sharderUrl)
-		require.True(t, len(minerIds) > 0, "no miners found")
-
-		output, err := killMiner(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
-			"id": minerIds[0],
-		}), true)
-		require.Error(t, err, "kill miner by non-smartcontract owner should fail")
-		require.Len(t, output, 1)
-		require.True(t, strings.Contains(output[0], "unauthorized access - only the owner can access"), "")
-	})
 }
 
 func killMiner(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
