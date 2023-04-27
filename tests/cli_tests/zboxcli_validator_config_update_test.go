@@ -23,10 +23,10 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
 	}
 
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-	_, err = registerWalletForName(t, configPath, blobberOwnerWallet)
+	_, err = createWalletForName(t, configPath, blobberOwnerWallet)
 	require.NoError(t, err)
 	_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 5)
 	require.NoError(t, err)
@@ -43,8 +43,8 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 	intialValidatorInfo := validatorList[0]
 
 	t.Cleanup(func() {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "num_delegates": intialValidatorInfo.NumDelegates}))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -54,8 +54,8 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update validator number of delegates should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		newNumberOfDelegates := 15
 
@@ -75,8 +75,8 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update validator service charge should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		newServiceCharge := 0.1
 
