@@ -2259,7 +2259,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
-				// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is cancelled. Check https://github.com/0chain/0chain/issues/2211
+				// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is canceled. Check https://github.com/0chain/0chain/issues/2211
 				cond := (allocatedStorageAfter == allocatedStorage) && (allocatedStorageAfter == int64(*latest))
 				allocatedStorage = allocatedStorageAfter
 
@@ -2385,7 +2385,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				usedStorageAfter := (*data)[0]
-				// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is cancelled. Check https://github.com/0chain/0chain/issues/2211
+				// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is canceled. Check https://github.com/0chain/0chain/issues/2211
 				cond := usedStorage == usedStorageAfter
 				usedStorage = usedStorageAfter
 
@@ -3678,7 +3678,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 				require.Equal(t, 200, resp.StatusCode())
 				require.Len(t, *data, 1)
 				afterValue := (*data)[0]
-				// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is cancelled. Check https://github.com/0chain/0chain/issues/2211
+				// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is canceled. Check https://github.com/0chain/0chain/issues/2211
 				cond := afterValue == allocated
 				if cond {
 					allocated = afterValue
@@ -3782,7 +3782,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 				require.Len(t, *data, 1)
 				afterValue := (*data)[0]
 
-				// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is cancelled. Check
+				// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is canceled. Check
 				cond := savedData == afterValue
 				if cond {
 					savedData = afterValue
