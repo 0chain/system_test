@@ -17,6 +17,7 @@ import (
 
 func TestBlobberConfigUpdate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("update blobber capacity should work")
 
 	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
@@ -71,7 +72,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.NoError(t, err)
 	}
 
-	t.RunSequentially("update blobber capacity should work", func(t *test.SystemTest) {
+	t.RunSequentially("u", func(t *test.SystemTest) {
 		// create wallet for normal user
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))

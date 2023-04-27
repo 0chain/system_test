@@ -15,6 +15,7 @@ import (
 
 func TestWritePoolLockUnlock(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Creating allocation should move tokens from wallet to write pool, write lock and unlock should work")
 
 	t.Parallel()
 

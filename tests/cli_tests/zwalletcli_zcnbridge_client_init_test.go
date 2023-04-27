@@ -31,54 +31,10 @@ const (
 	OptionKeyPassword      = "password"      // OptionKeyPassword bridge config filename
 )
 
-func PrepareBridgeClient(t *test.SystemTest) error {
-	_, err := prepareBridgeClientConfig(t)
-	if err != nil {
-		return err
-	}
-
-	_, err = prepareBridgeClientWallet(t)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Tests prerequisites
-func prepareBridgeClientConfig(t *test.SystemTest) ([]string, error) {
-	return runCreateBridgeClientTestConfig(
-		t,
-		"\"02289b9\"",
-		"0xD8c9156e782C68EE671C09b6b92de76C97948432",
-		"0x0c2aa005C6FF9F4B46Ae566D9bc61E33B482D8E6",
-		"0xbD2048E2348b8Eb597D356AF23EAfAa246F88375",
-		"https://goerli.infura.io/v3/773bfe30452f40f998e5d0f2f8a29888 ",
-		75,
-		300000,
-		0,
-		WithOption(OptionConfigFolder, configDir),
-		WithOption(OptionBridgeConfigFile, bridgeClientConfigFile),
-	)
-}
-
-// Use it to import account to the given home folder
-func prepareBridgeClientWallet(t *test.SystemTest) ([]string, error) {
-	cmd := fmt.Sprintf(
-		"./zwallet bridge-import-account --%s %s --%s %q --%s %s",
-		OptionConfigFolder, configDir,
-		OptionMnemonic, mnemonic,
-		OptionKeyPassword, password,
-	)
-
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
-
-	return cliutils.RunCommandWithoutRetry(cmd)
-}
-
 // cmd: bridge-client-init
 func TestBridgeClientInit(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Init bridge client config to default path and file")
 
 	t.RunSequentially("Init bridge client config to default path and file", func(t *test.SystemTest) {
 		output, err := createDefaultClientBridgeConfig(t)
@@ -259,32 +215,6 @@ func createDefaultClientBridgeConfig(t *test.SystemTest) ([]string, error) {
 		300000,
 		0,
 	)
-}
-
-func runCreateBridgeClientTestConfig(
-	t *test.SystemTest,
-	password, ethereumaddress, bridgeaddress, wzcnaddress, ethereumnodeurl string,
-	consensusthreshold float64,
-	gaslimit, value int64,
-	opts ...*Option,
-) ([]string, error) {
-	cmd := "./zwallet bridge-client-init" +
-		" --password " + password +
-		" --ethereumaddress " + ethereumaddress +
-		" --bridgeaddress " + bridgeaddress +
-		" --wzcnaddress " + wzcnaddress +
-		" --ethereumnodeurl " + ethereumnodeurl +
-		" --consensusthreshold " + fmt.Sprintf("%.4f", consensusthreshold) +
-		" --gaslimit " + strconv.FormatInt(gaslimit, 10) +
-		" --value " + strconv.FormatInt(value, 10)
-
-	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
-
-	for _, opt := range opts {
-		cmd = fmt.Sprintf(" %s --%s %s ", cmd, opt.name, opt.value)
-	}
-
-	return cliutils.RunCommandWithoutRetry(cmd)
 }
 
 func WithOption(name, value string) *Option {

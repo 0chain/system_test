@@ -18,6 +18,7 @@ import (
 func TestFileDelete(testSetup *testing.T) {
 	//todo: slow operations
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("delete existing file in root directory should work")
 
 	t.Parallel()
 

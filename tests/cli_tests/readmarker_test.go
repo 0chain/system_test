@@ -30,6 +30,8 @@ func TestReadMarker(testSetup *testing.T) {
 	err = os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
 
+	t.SetSmokeTests("After downloading a file, return a readmarker for each blobber used in download")
+
 	t.Run("After downloading a file, return a readmarker for each blobber used in download", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)

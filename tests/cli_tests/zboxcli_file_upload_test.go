@@ -22,6 +22,7 @@ import (
 
 func TestUpload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Upload File With half Size of the Allocation Should Work")
 
 	t.Parallel()
 

@@ -16,6 +16,8 @@ import (
 
 func TestAddBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Add new blobber to allocation, should work")
+
 	t.Parallel()
 
 	t.Run("Add new blobber to allocation, should work", func(t *test.SystemTest) {

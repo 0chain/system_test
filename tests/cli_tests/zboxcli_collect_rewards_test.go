@@ -20,6 +20,7 @@ import (
 
 func TestBlobberCollectRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Test collect reward with valid pool and blobber id should pass")
 
 	t.Parallel()
 
