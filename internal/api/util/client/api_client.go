@@ -25,11 +25,11 @@ import (
 const (
 	GetHashNodeRoot              = "/v1/hashnode/root/:allocation"
 	GetBlobbers                  = "/v1/screst/:sc_address/getblobbers"
-	GetMiners                  	 = "/v1/screst/:sc_address/getMinerList"
+	GetMiners                    = "/v1/screst/:sc_address/getMinerList"
 	GetSharders                  = "/v1/screst/:sc_address/getSharderList"
 	GetValidators                = "/v1/screst/:sc_address/validators"
 	GetStakePoolStat             = "/v1/screst/:sc_address/getStakePoolStat"
-	getUserStakePoolStat		 = "/v1/screst/:sc_address/getUserStakePoolStat"
+	getUserStakePoolStat         = "/v1/screst/:sc_address/getUserStakePoolStat"
 	GetAllocationBlobbers        = "/v1/screst/:sc_address/alloc_blobbers"
 	GetFreeAllocationBlobbers    = "/v1/screst/:sc_address/free_alloc_blobbers"
 	SCRestGetOpenChallenges      = "/v1/screst/:sc_address/openchallenges"
@@ -64,7 +64,7 @@ const (
 	MinerSmartContractAddress   = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
 	FaucetSmartContractAddress  = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3"
 	StorageSmartContractAddress = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
-	ZCNSmartContractAddess 		= "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712e0"
+	ZCNSmartContractAddess      = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712e0"
 )
 
 // Contains statuses of transactions
@@ -535,7 +535,7 @@ func (c *APIClient) V1SCRestGetFirstBlobbers(t *test.SystemTest, blobbersCount, 
 		HttpGETMethod,
 		SharderServiceProvider,
 	)
-	if (len(scRestGetBlobbersResponse.Nodes) < blobbersCount) {
+	if len(scRestGetBlobbersResponse.Nodes) < blobbersCount {
 		return nil, resp, errors.New("not enough blobbers")
 	}
 	return scRestGetBlobbersResponse.Nodes[:blobbersCount], resp, err
@@ -661,7 +661,7 @@ func (c *APIClient) V1SCRestGetFreeAllocationBlobbers(t *test.SystemTest, scRest
 		SharderServiceProvider,
 	)
 
-	res := model.SCRestGetFreeAllocationBlobbersResponse{ Blobbers: blobbers }
+	res := model.SCRestGetFreeAllocationBlobbersResponse{Blobbers: blobbers}
 	return &res, resp, err
 }
 
@@ -784,14 +784,15 @@ func (c *APIClient) RegisterWalletForMnemonicWithoutAssertion(t *test.SystemTest
 
 // ExecuteFaucet provides basic assertions
 func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) {
-	c.ExecuteFaucetWithTokens(t, wallet, 1.0, requiredTransactionStatus)
+	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
+	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
 }
 
 // ExecuteFaucet provides basic assertions
 func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
 
-	pourZCN := tokenomics.IntToZCN(5)
+	pourZCN := tokenomics.IntToZCN(tokens)
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
@@ -1025,10 +1026,10 @@ func (c *APIClient) UpdateAllocation(
 	updateAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
-			Wallet:     wallet,
-			ToClientID: StorageSmartContractAddress,
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewUpdateAllocationTransactionData(uar),
-			Value: tokenomics.IntToZCN(0.1),
+			Value:           tokenomics.IntToZCN(0.1),
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -1074,10 +1075,10 @@ func (c *APIClient) AddFreeStorageAssigner(
 			Wallet:     wallet,
 			ToClientID: StorageSmartContractAddress,
 			TransactionData: model.NewFreeStorageAssignerTransactionData(&model.FreeStorageAssignerRequest{
-				Name: wallet.Id,
-				PublicKey: wallet.PublicKey,
+				Name:            wallet.Id,
+				PublicKey:       wallet.PublicKey,
 				IndividualLimit: 10.0,
-				TotalLimit: 100.0,
+				TotalLimit:      100.0,
 			}),
 			Value: tokenomics.IntToZCN(0.1),
 		},
@@ -1126,7 +1127,7 @@ func (c *APIClient) MakeAllocationFree(
 			Wallet:     wallet,
 			ToClientID: StorageSmartContractAddress,
 			TransactionData: model.NewFreeAllocationTransactionData(&model.FreeAllocationRequest{
-				
+
 				AllocationID: allocationID,
 				Marker:       marker,
 			}),
@@ -1214,7 +1215,7 @@ func (c *APIClient) UpdateAllocationBlobbers(t *test.SystemTest, wallet *model.W
 }
 
 func (c *APIClient) CancelAllocation(
-	t *test.SystemTest, 
+	t *test.SystemTest,
 	wallet *model.Wallet,
 	allocationID string,
 	requiredTransactionStatus int,
@@ -1681,10 +1682,10 @@ func (c *APIClient) CreateReadPool(t *test.SystemTest, wallet *model.Wallet, tok
 	createReadPoolTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
-			Wallet:     wallet,
-			ToClientID: StorageSmartContractAddress,
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewCreateReadPoolTransactionData(),
-			Value: tokenomics.IntToZCN(tokens)},
+			Value:           tokenomics.IntToZCN(tokens)},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1725,10 +1726,10 @@ func (c *APIClient) UnlockReadPool(t *test.SystemTest, wallet *model.Wallet, req
 	unlockReadPoolTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
-			Wallet:     wallet,
-			ToClientID: StorageSmartContractAddress,
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewUnlockReadPoolTransactionData(),
-			Value: tokenomics.IntToZCN(0.1)},
+			Value:           tokenomics.IntToZCN(0.1)},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1822,7 +1823,7 @@ func (c *APIClient) GetStakePoolStat(t *test.SystemTest, providerID, providerTyp
 	return scRestGetStakePoolStat
 }
 
-func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) int64 {
+func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, providerID string, providerType, requiredTransactionStatus int) (txnData *model.TransactionGetConfirmationResponse, fee int64) {
 	collectRewardTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
@@ -1861,7 +1862,8 @@ func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, pro
 	})
 
 	wallet.IncNonce()
-	return collectRewardTransactionGetConfirmationResponse.Transaction.TransactionFee
+
+	return collectRewardTransactionGetConfirmationResponse, collectRewardTransactionGetConfirmationResponse.Transaction.TransactionFee
 }
 
 func (c *APIClient) GetBlobber(t *test.SystemTest, blobberID string, requiredStatusCode int) *model.SCRestGetBlobberResponse {
@@ -1963,22 +1965,21 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 	return blobberObjectTreePathResponse, resp, err
 }
 
-
 //----------------------------------------------------------
 // ZCN SC
 //----------------------------------------------------------
 
-func (c *APIClient) BurnZcn(t *test.SystemTest, wallet *model.Wallet, address string, amount float64, requiredTransactionStatus  int) string {
+func (c *APIClient) BurnZcn(t *test.SystemTest, wallet *model.Wallet, address string, amount float64, requiredTransactionStatus int) string {
 	t.Log("Burn ZCN")
 	burnZcnTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
-			Wallet:          wallet,
-			ToClientID:      ZCNSmartContractAddess,
+			Wallet:     wallet,
+			ToClientID: ZCNSmartContractAddess,
 			TransactionData: model.NewBurnZcnTransactionData(&model.SCRestBurnZcnRequest{
 				EthereumAddress: address,
 			}),
-			Value:           tokenomics.IntToZCN(amount),
+			Value: tokenomics.IntToZCN(amount),
 		},
 		requiredTransactionStatus)
 	require.Nil(t, err)
