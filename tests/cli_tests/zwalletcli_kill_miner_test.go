@@ -65,7 +65,6 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 		require.Equalf(t, minerAfterKill.TotalReward, minerAfterRewardTest.TotalReward,
 			"killed miner %s should not receive any more rewards", minerToKill)
 	})
-
 }
 
 func killMiner(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
