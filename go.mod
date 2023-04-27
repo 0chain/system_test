@@ -26,7 +26,7 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 )
 
-require github.com/0chain/gosdk v1.8.16-0.20230421202728-a85405662c7b
+require github.com/0chain/gosdk v1.8.16-0.20230427222547-3cc7ac66e28f
 
 require (
 	github.com/0chain/common v0.0.6-0.20230127095721-8df4d1d72565 // indirect
