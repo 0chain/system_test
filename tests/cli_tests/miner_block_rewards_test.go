@@ -42,7 +42,9 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
 	t.RunSequentiallyWithTimeout("Miner share of block rewards", 200*time.Second, func(t *test.SystemTest) {
-		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+		output, err := registerWallet(t, configPath)
+		require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
 		if !confirmDebugBuild(t) {
 			t.Skip("miner block rewards test skipped as it requires a debug event database")
 		}
