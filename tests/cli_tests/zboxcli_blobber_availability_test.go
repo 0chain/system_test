@@ -18,12 +18,12 @@ func TestBlobberAvailability(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("blobber is available switch controls blobber use for allocations", func(t *test.SystemTest) {
-		// register and faucet pour tokens
-		output, err := registerWallet(t, configPath)
+		// create and faucet pour tokens
+		output, err := createWallet(t, configPath)
 		require.NoError(t, err, output)
 
 		// update blobber info use owner wallet, so need to faucet pour tokens
-		output, err = registerWalletForName(t, configPath, blobberOwnerWallet)
+		output, err = createWalletForName(t, configPath, blobberOwnerWallet)
 		require.NoError(t, err, output)
 
 		startBlobbers := getBlobbers(t)

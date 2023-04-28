@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -21,22 +20,22 @@ const (
 	defaultInitFaucetTokens = 5.0
 )
 
-func TestRegisterWallet(testSetup *testing.T) {
+func TestCreateWallet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.Parallel()
 
-	t.Run("Register wallet outputs expected", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath, withNoFaucetPour())
+	t.Run("Create wallet outputs expected", func(t *test.SystemTest) {
+		output, err := createWallet(t, configPath, withNoFaucetPour())
 
-		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 3, len(output))
-		require.Equal(t, "Wallet registered", output[2])
+		require.Nil(t, err, "An error occurred creating a wallet", strings.Join(output, "\n"))
+		require.Len(t, output, 4, len(output))
+		require.Contains(t, output[2], "wallet saved in")
 	})
 
 	t.Run("Get wallet outputs expected", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "An error occurred creating a wallet", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 
@@ -47,7 +46,7 @@ func TestRegisterWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Balance call fails due to zero ZCN in wallet", func(t *test.SystemTest) {
-		_, _ = registerWallet(t, configPath, withNoFaucetPour())
+		_, _ = createWallet(t, configPath, withNoFaucetPour())
 
 		balance, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err)
@@ -55,8 +54,8 @@ func TestRegisterWallet(testSetup *testing.T) {
 	})
 
 	t.Run("Balance of 1 is returned after faucet execution", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "An error occurred registering a wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "An error occurred creating a wallet", strings.Join(output, "\n"))
 
 		balanceBefore, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err)
@@ -82,8 +81,8 @@ func TestRegisterWallet(testSetup *testing.T) {
 	})
 }
 
-func registerWalletAndLockReadTokens(t *test.SystemTest, cliConfigFilename string) error {
-	_, err := registerWalletForName(t, cliConfigFilename, escapedTestName(t))
+func createWalletAndLockReadTokens(t *test.SystemTest, cliConfigFilename string) error {
+	_, err := createWalletForName(t, cliConfigFilename, escapedTestName(t))
 	if err != nil {
 		return err
 	}
@@ -102,61 +101,48 @@ func registerWalletAndLockReadTokens(t *test.SystemTest, cliConfigFilename strin
 	return err
 }
 
-func registerWallet(t *test.SystemTest, cliConfigFilename string, opt ...registerWalletOptionFunc) ([]string, error) {
-	return registerWalletForName(t, cliConfigFilename, escapedTestName(t), opt...)
+func createWallet(t *test.SystemTest, cliConfigFilename string, opt ...createWalletOptionFunc) ([]string, error) {
+	return createWalletForName(t, cliConfigFilename, escapedTestName(t), opt...)
 }
 
-type registerWalletOption struct {
+type createWalletOption struct {
 	noPourAndReadPool bool
 	debugLogs         bool
 }
 
-type registerWalletOptionFunc func(*registerWalletOption)
+type createWalletOptionFunc func(*createWalletOption)
 
-func withNoFaucetPour() registerWalletOptionFunc {
-	return func(o *registerWalletOption) {
+func withNoFaucetPour() createWalletOptionFunc {
+	return func(o *createWalletOption) {
 		o.noPourAndReadPool = true
 	}
 }
 
-func withDebugLogs() registerWalletOptionFunc {
-	return func(o *registerWalletOption) {
-		o.debugLogs = true
-	}
-}
-
-func registerWalletForName(t *test.SystemTest, cliConfigFilename, name string, opts ...registerWalletOptionFunc) ([]string, error) {
-	t.Logf("Registering wallet...")
-	regOpt := &registerWalletOption{}
+func createWalletForName(t *test.SystemTest, cliConfigFilename, name string, opts ...createWalletOptionFunc) ([]string, error) {
+	t.Logf("creating wallet...")
+	regOpt := &createWalletOption{}
 	for _, opt := range opts {
 		opt(regOpt)
 	}
 
 	if regOpt.noPourAndReadPool {
-		return cliutils.RunCommand(t, "./zwallet register --silent "+
+		return cliutils.RunCommand(t, "./zwallet create-wallet --silent "+
+			"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	}
+
+	if regOpt.debugLogs {
+		return cliutils.RunCommand(t, "./zwallet create-wallet "+
 			"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 	}
 
 	output, err := executeFaucetWithTokensForWallet(t, name, cliConfigFilename, defaultInitFaucetTokens)
-	fmt.Println("faucet output: ", output)
-	fmt.Println("faucet err: ", err)
-	if err != nil {
-		return nil, err
-	}
 	t.Logf("faucet output: %v", output)
-
-	if regOpt.debugLogs {
-		return cliutils.RunCommand(t, "./zbox register "+
-			"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
-	}
-
-	return cliutils.RunCommand(t, "./zbox register --silent "+
-		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	return output, err
 }
 
-func registerWalletForNameAndLockReadTokens(t *test.SystemTest, cliConfigFilename, name string) {
+func createWalletForNameAndLockReadTokens(t *test.SystemTest, cliConfigFilename, name string) {
 	var tokens = 2.0
-	registerWalletWithTokens(t, cliConfigFilename, name, tokens)
+	createWalletWithTokens(t, cliConfigFilename, name, tokens)
 	readPoolParams := createParams(map[string]interface{}{
 		"tokens": tokens / 2,
 	})
@@ -164,9 +150,9 @@ func registerWalletForNameAndLockReadTokens(t *test.SystemTest, cliConfigFilenam
 	require.NoErrorf(t, err, "error occurred when locking read pool for %s", name)
 }
 
-func registerWalletWithTokens(t *test.SystemTest, cliConfigFilename, name string, tokens float64) {
-	_, err := registerWalletForName(t, cliConfigFilename, name)
-	require.NoErrorf(t, err, "register wallet %s", name)
+func createWalletWithTokens(t *test.SystemTest, cliConfigFilename, name string, tokens float64) {
+	_, err := createWalletForName(t, cliConfigFilename, name)
+	require.NoErrorf(t, err, "create wallet %s", name)
 	_, err = executeFaucetWithTokensForWallet(t, name, cliConfigFilename, tokens)
 	require.NoErrorf(t, err, "get tokens for wallet %s", name)
 }

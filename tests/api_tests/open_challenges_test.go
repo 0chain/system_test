@@ -16,7 +16,7 @@ func TestOpenChallenges(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Open Challenges API response should be successful decode given a valid request", func(t *test.SystemTest) {
-		wallet := apiClient.RegisterWallet(t)
+		wallet := apiClient.CreateWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
