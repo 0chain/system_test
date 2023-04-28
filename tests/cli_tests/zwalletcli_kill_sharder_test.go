@@ -36,10 +36,10 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 		t.Skip("all sharders in the blockchain have been killed")
 	}
 
-	output, err = executeFaucetWithTokens(t, configPath, 10)
-	require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
 	t.RunSequentially("kill sharder by non-smartcontract owner should fail", func(t *test.SystemTest) {
+		output, err = executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
 		output, err = killSharder(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"id": sharderToKill,
 		}), true)
@@ -49,6 +49,9 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 	})
 
 	t.RunSequentially("Killed sharder does not receive rewards", func(t *test.SystemTest) {
+		output, err = executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
 		output, err = killSharder(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
 			"id": sharderToKill,
 		}), true)
