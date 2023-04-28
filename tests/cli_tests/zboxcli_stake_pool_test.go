@@ -20,7 +20,7 @@ const (
 func TestStakePool(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	_, err := registerWallet(t, configPath)
+	_, err := createWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", err)
 
 	// get the list of blobbers
@@ -28,7 +28,7 @@ func TestStakePool(testSetup *testing.T) {
 	require.Greater(t, len(blobbersList), 0, "No blobbers found")
 
 	t.RunSequentiallyWithTimeout("total stake in a blobber can never be less than it's used capacity", 8*time.Minute, func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", err)
 
 		// select the blobber with min staked capacity
@@ -154,7 +154,7 @@ func TestStakePool(testSetup *testing.T) {
 		totalOffersNew := blInfo.TotalOffers
 		require.Greater(t, totalOffersNew, totalOffers, "Total Offers should Increase")
 
-		_, err = registerWalletForName(t, configPath, newStakeWallet)
+		_, err = createWalletForName(t, configPath, newStakeWallet)
 		require.Nil(t, err, "Error registering wallet", err)
 
 		_, err = executeFaucetWithTokensForWallet(t, newStakeWallet, configPath, 9)
