@@ -161,7 +161,7 @@ jobs:
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          authorizer_image: chain-fee-441ed63a
+          authorizer_image: staging
 
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@master
