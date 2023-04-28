@@ -22,7 +22,7 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 	sharderUrl := getSharderUrl(t)
 	startMiners := getNodeSlice(t, "getMinerList", sharderUrl)
 	if len(startMiners) == 0 {
-		t.Skip("no sharders found in blockchain")
+		t.Skip("no miners found in blockchain")
 	}
 
 	var minerToKill string
@@ -33,7 +33,7 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 		}
 	}
 	if minerToKill == "" {
-		t.Skip("all sharders in the blockchain have been killed")
+		t.Skip("all miners in the blockchain have been killed")
 	}
 
 	t.RunSequentially("kill miner by non-smartcontract owner should fail", func(t *test.SystemTest) {
