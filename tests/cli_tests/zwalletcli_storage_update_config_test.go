@@ -104,8 +104,8 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 
 	t.RunSequentially("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = updateStorageSCConfig(t, escapedTestName(t), map[string]string{
 			"max_read_price": "110",
@@ -117,8 +117,8 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 
 	t.RunSequentially("update with bad config key should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		badKey := "bad key"
 		value := "1"
@@ -140,12 +140,8 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 		badValue := "x"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
-
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			configKey: badValue,
