@@ -27,9 +27,14 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
 	t.RunSequentiallyWithTimeout("Miner share of fee rewards for transactions", 200*time.Second, func(t *test.SystemTest) {
-		walletId := initialiseTest(t, escapedTestName(t)+"_TARGET", true)
-		output, err := executeFaucetWithTokens(t, configPath, 10)
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		wallet, err := getWalletForName(t, configPath, escapedTestName(t)+"_TARGET")
+		require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
 		if !confirmDebugBuild(t) {
 			t.Skip("miner fee rewards test skipped as it requires a debug event database")
@@ -47,7 +52,7 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 		const numPaidTransactions = 3
 		const fee = 0.1
 		for i := 0; i < numPaidTransactions; i++ {
-			output, err := sendTokens(t, configPath, walletId, 0.5, escapedTestName(t), fee)
+			output, err := sendTokens(t, configPath, wallet.ClientID, 0.5, escapedTestName(t), fee)
 			require.NoError(t, err, "error sending tokens", strings.Join(output, "\n"))
 		}
 		time.Sleep(time.Second) // give time for last round to be saved
