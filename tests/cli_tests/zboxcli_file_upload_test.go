@@ -542,7 +542,7 @@ func TestUpload(testSetup *testing.T) {
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
 		fileSize := int64(256)
 
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
 		filename := generateRandomTestFileName(t)
@@ -656,7 +656,7 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload without any Parameter Should Fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
+		output, err := createWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		output, err = uploadFileWithoutRetry(t, configPath, nil)

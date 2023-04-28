@@ -737,6 +737,8 @@ var StorageFloatSettings = []string{
 
 var StorageCurrencySettigs = []string{
 	"max_mint",
+	"min_stake",
+	"max_stake",
 	"readpool.min_lock",
 	"writepool.min_lock",
 	"max_total_free_allocation",
