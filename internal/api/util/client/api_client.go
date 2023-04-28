@@ -608,39 +608,36 @@ func (c *APIClient) V1SharderGetSCState(t *test.SystemTest, scStateGetRequest mo
 	return scStateGetResponse, resp, err
 }
 
-func (c *APIClient) RegisterWallet(t *test.SystemTest) *model.Wallet {
+func (c *APIClient) CreateWallet(t *test.SystemTest) *model.Wallet {
 	mnemonic := crypto.GenerateMnemonics(t)
 
-	return c.RegisterWalletForMnemonic(t, mnemonic)
+	return c.CreateWalletForMnemonic(t, mnemonic)
 }
 
-func (c *APIClient) RegisterWalletForMnemonic(t *test.SystemTest, mnemonic string) *model.Wallet {
-	registeredWallet, httpResponse, err := c.RegisterWalletForMnemonicWithoutAssertion(t, mnemonic, HttpOkStatus)
+func (c *APIClient) CreateWalletForMnemonic(t *test.SystemTest, mnemonic string) *model.Wallet {
+	createdWallet, err := c.CreateWalletForMnemonicWithoutAssertion(t, mnemonic)
+	require.Nil(t, err)
 
-	publicKeyBytes, _ := hex.DecodeString(registeredWallet.Keys.PublicKey.SerializeToHexStr())
+	publicKeyBytes, _ := hex.DecodeString(createdWallet.Keys.PublicKey.SerializeToHexStr())
 	clientId := crypto.Sha3256(publicKeyBytes)
 
-	require.Nil(t, err, "Unexpected error [%s] occurred registering wallet with http response [%s]", err, httpResponse)
-	require.NotNil(t, registeredWallet, "Registered wallet was unexpectedly nil! with http response [%s]", httpResponse)
-	require.Equal(t, "200 OK", httpResponse.Status())
-	require.Equal(t, registeredWallet.Id, clientId)
-	require.Equal(t, registeredWallet.PublicKey, registeredWallet.Keys.PublicKey.SerializeToHexStr())
-	require.NotNil(t, registeredWallet.CreationDate, "Creation date is nil!")
-	require.NotNil(t, registeredWallet.Version)
+	require.Equal(t, createdWallet.Id, clientId)
+	require.Equal(t, createdWallet.PublicKey, createdWallet.Keys.PublicKey.SerializeToHexStr())
 
-	return registeredWallet
+	return createdWallet
 }
 
-func (c *APIClient) RegisterWalletForMnemonicWithoutAssertion(t *test.SystemTest, mnemonic string, expectedHttpStatus int) (*model.Wallet, *resty.Response, error) {
+func (c *APIClient) CreateWalletForMnemonicWithoutAssertion(t *test.SystemTest, mnemonic string) (*model.Wallet, error) {
 	keyPair := crypto.GenerateKeys(t, mnemonic)
-	publicKeyBytes, _ := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
+	publicKeyBytes, err := hex.DecodeString(keyPair.PublicKey.SerializeToHexStr())
+	if err != nil {
+		return nil, err
+	}
+
 	clientId := crypto.Sha3256(publicKeyBytes)
-	walletRequest := model.Wallet{Id: clientId, PublicKey: keyPair.PublicKey.SerializeToHexStr()}
+	createdWallet := model.Wallet{Id: clientId, PublicKey: keyPair.PublicKey.SerializeToHexStr(), Keys: keyPair}
 
-	registeredWallet, httpResponse, err := c.V1ClientPut(t, walletRequest, expectedHttpStatus)
-	registeredWallet.Keys = keyPair
-
-	return registeredWallet, httpResponse, err
+	return &createdWallet, err
 }
 
 // ExecuteFaucet provides basic assertions
