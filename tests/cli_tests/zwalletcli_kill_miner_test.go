@@ -48,7 +48,7 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 		require.True(t, strings.Contains(output[0], "unauthorized access - only the owner can access"), "")
 	})
 
-	t.RunSequentiallyWithTimeout("Killed miner does not receive rewards", 200*time.Second, func(t *test.SystemTest) {
+	t.RunSequentially("Killed miner does not receive rewards", func(t *test.SystemTest) {
 		output, err = executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
