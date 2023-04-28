@@ -16,8 +16,8 @@ import (
 func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 	sharderUrl := getSharderUrl(t)
 	startMiners := getNodeSlice(t, "getMinerList", sharderUrl)
