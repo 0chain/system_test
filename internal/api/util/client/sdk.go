@@ -79,7 +79,7 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
 		_ = os.RemoveAll(name)
 	}(tmpFile.Name())
 
-	const actualSize int64 = 256
+	const actualSize int64 = 1024
 
 	rawBuf := make([]byte, actualSize)
 	_, err = rand.Read(rawBuf)
