@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -213,7 +214,10 @@ func getWalletForName(t *test.SystemTest, cliConfigFilename, name string) (*clim
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println("getwallet output", output)
+	for i := range output {
+		fmt.Println(i, "getwallet output", output[i])
+	}
 	require.Len(t, output, 1)
 
 	var wallet *climodel.Wallet
