@@ -17,6 +17,9 @@ import (
 func TestRollbackAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	err := os.MkdirAll("tmp", os.ModePerm)
+	require.Nil(t, err)
+
 	t.RunSequentially("rollback allocation", func(t *test.SystemTest) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
