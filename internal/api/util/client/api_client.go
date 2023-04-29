@@ -777,6 +777,9 @@ func (c *APIClient) RegisterWalletForMnemonicWithoutAssertion(t *test.SystemTest
 	walletRequest := model.Wallet{Id: clientId, PublicKey: keyPair.PublicKey.SerializeToHexStr()}
 
 	registeredWallet, httpResponse, err := c.V1ClientPut(t, walletRequest, expectedHttpStatus)
+	if err != nil {
+		return registeredWallet, httpResponse, err
+	}
 	registeredWallet.Keys = keyPair
 
 	return registeredWallet, httpResponse, err
