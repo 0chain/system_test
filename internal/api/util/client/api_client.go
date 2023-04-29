@@ -779,7 +779,7 @@ func (c *APIClient) CreateAllocation(t *test.SystemTest,
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
-			Value:           tokenomics.IntToZCN(24.0),
+			Value:           tokenomics.IntToZCN(10.0),
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
