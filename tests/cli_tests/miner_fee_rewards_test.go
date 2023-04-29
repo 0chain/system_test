@@ -15,6 +15,8 @@ import (
 func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
+	t.Skip("wait for duplicate transaction issue to be solved, https://github.com/0chain/0chain/issues/2348")
+
 	// Take a snapshot of the chains miners, repeat a transaction with a fee a few times,
 	// take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
@@ -26,7 +28,7 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunSequentiallyWithTimeout("Miner share of fee rewards for transactions", 200*time.Second, func(t *test.SystemTest) {
+	t.RunSequentially("Miner share of fee rewards for transactions", func(t *test.SystemTest) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 

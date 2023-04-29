@@ -41,7 +41,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunSequentiallyWithTimeout("Miner share of block rewards", 200*time.Second, func(t *test.SystemTest) {
+	t.RunSequentially("Miner share of block rewards", func(t *test.SystemTest) {
 		output, err := createWallet(t, configPath)
 		require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
 

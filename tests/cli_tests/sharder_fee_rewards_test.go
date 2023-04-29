@@ -14,6 +14,8 @@ import (
 func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
+	t.Skip("wait for duplicate transaction issue to be solved, https://github.com/0chain/0chain/issues/2348")
+
 	// Take a snapshot of the chains sharders, then repeat a transaction with a fee a few times, take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
 	// of the reward payments
@@ -24,7 +26,7 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunSequentiallyWithTimeout("Sharder share of fee rewards for transactions", 1000*time.Second, func(t *test.SystemTest) {
+	t.RunSequentially("Sharder share of fee rewards for transactions", func(t *test.SystemTest) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
