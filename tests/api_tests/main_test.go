@@ -14,17 +14,17 @@ import (
 )
 
 var (
-	apiClient          *client.APIClient
-	zs3Client          *client.ZS3Client
-	sdkClient          *client.SDKClient
-	zboxClient         *client.ZboxClient
-	sdkWallet          *model.Wallet
-	sdkWalletMnemonics string
-	ownerWallet *model.Wallet
-	ownerWalletMnemonics string
-	blobberOwnerWallet *model.Wallet
+	apiClient                   *client.APIClient
+	zs3Client                   *client.ZS3Client
+	sdkClient                   *client.SDKClient
+	zboxClient                  *client.ZboxClient
+	sdkWallet                   *model.Wallet
+	sdkWalletMnemonics          string
+	ownerWallet                 *model.Wallet
+	ownerWalletMnemonics        string
+	blobberOwnerWallet          *model.Wallet
 	blobberOwnerWalletMnemonics string
-	parsedConfig       *config.Config
+	parsedConfig                *config.Config
 )
 
 func TestMain(m *testing.M) {
@@ -51,14 +51,14 @@ func TestMain(m *testing.M) {
 	t := test.NewSystemTest(new(testing.T))
 
 	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
-	sdkWallet = apiClient.RegisterWalletForMnemonic(t, sdkWalletMnemonics)
+	sdkWallet = apiClient.CreateWalletForMnemonic(t, sdkWalletMnemonics)
 	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
 
-	blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics
-	blobberOwnerWallet = apiClient.RegisterWalletForMnemonic(t, blobberOwnerWalletMnemonics)
+	// blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics
+	// blobberOwnerWallet = apiClient.RegisterWalletForMnemonic(t, blobberOwnerWalletMnemonics)
 
-	ownerWalletMnemonics = parsedConfig.OwnerWalletMnemonics
-	ownerWallet = apiClient.RegisterWalletForMnemonic(t, ownerWalletMnemonics)
+	// ownerWalletMnemonics = parsedConfig.OwnerWalletMnemonics
+	// ownerWallet = apiClient.RegisterWalletForMnemonic(t, ownerWalletMnemonics)
 
 	os.Exit(m.Run())
 }

@@ -420,7 +420,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 }
 
 func setupWallet(t *test.SystemTest, configPath string) []string {
-	output, err := registerWallet(t, configPath)
+	output, err := createWallet(t, configPath)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokens(t, configPath, 1)

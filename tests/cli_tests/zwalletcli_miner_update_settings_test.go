@@ -23,11 +23,11 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 	}
 
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
-	output, err = registerWalletForName(t, configPath, miner01NodeDelegateWalletName)
-	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+	output, err = createWalletForName(t, configPath, miner01NodeDelegateWalletName)
+	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 	mnConfig := getMinerSCConfiguration(t)
 	output, err = listMiners(t, configPath, "--json")
@@ -201,8 +201,8 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 	})
 
 	t.RunSequentially("Miner update settings from non-delegate wallet should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
