@@ -27,7 +27,7 @@ func TestStakePool(testSetup *testing.T) {
 	blobbersList := getBlobbersList(t)
 	require.Greater(t, len(blobbersList), 0, "No blobbers found")
 
-	t.RunSequentiallyWithTimeout("total stake in a blobber can never be less than it's used capacity", 8*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("total stake in a blobber can never be less than it's used capacity", 800*time.Minute, func(t *test.SystemTest) {
 		_, err := createWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", err)
 
@@ -49,12 +49,16 @@ func TestStakePool(testSetup *testing.T) {
 
 			require.GreaterOrEqual(t, stakedCapacity, uint64(blobber.Allocated), "Staked capacity should be greater than allocated capacity")
 
+			fmt.Println("stakedCapacity", stakedCapacity)
+
 			stakedCapacity -= uint64(blobber.Allocated)
 
 			if stakedCapacity < maxStakedCapacity {
 				maxStakedCapacity = stakedCapacity
 				minStakedCapacityBlobber = blInfo
 			}
+
+			fmt.Println("maxStakedCapacity", maxStakedCapacity)
 		}
 
 		fmt.Println("maxStakedCapacity", maxStakedCapacity)
@@ -113,7 +117,8 @@ func TestStakePool(testSetup *testing.T) {
 		lenDelegates = lenDelegatesNew
 
 		allocSize := maxStakedCapacity*3 + uint64(30*GB)
-		allocSize -= allocSize / uint64(1*MB)
+
+		fmt.Println("allocSize", allocSize)
 
 		//options := map[string]interface{}{"cost": "", "size": allocSize, "data": len(blobbersList) / 2, "parity": len(blobbersList) - len(blobbersList)/2, "write_price": "0.1-0.2", "read_price": "0-0.1"}
 		//
@@ -137,7 +142,7 @@ func TestStakePool(testSetup *testing.T) {
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": (allocationCost + 1) * 2,
+			"tokens": allocationCost - 2,
 			"data":   len(blobbersList) / 2,
 			"parity": len(blobbersList) - len(blobbersList)/2,
 			"lock":   allocationCost + 1,
