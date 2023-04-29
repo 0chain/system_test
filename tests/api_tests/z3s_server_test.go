@@ -17,7 +17,7 @@ func TestZs3Server(testSetup *testing.T) {
 	t.SetSmokeTests("Zs3 server should return 500 when the action doesn't exist")
 
 	t.Parallel()
-	//FIXME: we should never return a 500 to the end user
+	// FIXME: we should never return a 500 to the end user
 	t.Run("Zs3 server should return 500 when the action doesn't exist", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,

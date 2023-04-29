@@ -9,7 +9,7 @@ import (
 )
 
 var DefaultTestTimeout = 20 * time.Second
-var SmokeTestMode = true
+var SmokeTestMode = false
 
 type SystemTest struct {
 	Unwrap             *testing.T

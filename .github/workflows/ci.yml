@@ -19,12 +19,8 @@ on:
         description: '(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]'
         default: ''
         required: false
-      miner_image:
-        description: 'miner DOCKER IMAGE to deploy'
-        default: 'staging'
-        required: false
-      sharder_image:
-        description: 'sharder DOCKER IMAGE to deploy'
+      miner_sharder_image:
+        description: 'miner/sharder DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       blobber_image:
@@ -46,6 +42,10 @@ on:
       test_file_filter:
         description: 'Comma separated list of test files to run (eg. zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result'
         default: ''
+        required: false
+      run_smoke_tests:
+        description: 'Run subset of system tests (smoke tests)'
+        default: 'false'
         required: false
 
 jobs:
@@ -77,7 +77,7 @@ jobs:
     steps:
       - name: Check CI
         id: check-ci
-        uses: 0chain/actions/get-build-state@master
+        uses: 0chain/actions/get-build-state@feature/smoke-tests
         with:
           github_token: ${{ github.token }}
           repository: "0chain/system_test"
@@ -103,7 +103,7 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: "Set PR status as pending"
-        uses: 0chain/actions/set-pr-status@master
+        uses: 0chain/actions/set-pr-status@feature/smoke-tests
         if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
@@ -130,8 +130,8 @@ jobs:
           echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_cli_branch}}'))" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zwallet_cli_branch}}'))" >> $GITHUB_ENV
 
-          echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_image}}' ] && echo 'staging') || echo '${{github.event.inputs.miner_image}}'))" >> $GITHUB_ENV
-          echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_image}}' ] && echo 'staging') || echo '${{github.event.inputs.sharder_image}}'))" >> $GITHUB_ENV
+          echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_sharder_image}}' ] && echo 'staging') || echo '${{github.event.inputs.miner_sharder_image}}'))" >> $GITHUB_ENV
+          echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_sharder_image}}' ] && echo 'staging') || echo '${{github.event.inputs.miner_sharder_image}}'))" >> $GITHUB_ENV
           echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_image}}' ] && echo 'staging') || echo '${{github.event.inputs.blobber_image}}'))" >> $GITHUB_ENV
           echo "VALIDATOR_TAG=$(echo $(([ -z '${{github.event.inputs.validator_image}}' ] && echo 'staging') || echo '${{github.event.inputs.validator_image}}'))" >> $GITHUB_ENV
           echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_image}}'))" >> $GITHUB_ENV
@@ -144,7 +144,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain@master
+        uses: 0chain/actions/deploy-0chain@feature/smoke-tests
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
@@ -164,7 +164,7 @@ jobs:
           authorizer_image: chain-fee-441ed63a
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@master
+        uses: 0chain/actions/run-system-tests@feature/smoke-tests
         with:
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
@@ -178,10 +178,11 @@ jobs:
           run_tokenomics_system_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
 
       - name: "Set PR status as ${{ job.status }}"
         if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
-        uses: 0chain/actions/set-pr-status@master
+        uses: 0chain/actions/set-pr-status@feature/smoke-tests
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
           description: "System tests with default config ${{ job.status }}"

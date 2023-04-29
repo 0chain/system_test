@@ -24,7 +24,7 @@ func TestCreateBucket(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 
-	//FIXME - this should be 400 not 500
+	// FIXME - this should be 400 not 500
 	t.Run("CreateBucket should return 500 when one of more required parameters are missing", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,

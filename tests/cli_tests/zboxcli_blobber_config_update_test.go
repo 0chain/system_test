@@ -72,7 +72,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.NoError(t, err)
 	}
 
-	t.RunSequentially("u", func(t *test.SystemTest) {
+	t.RunSequentially("update blobber capacity should work", func(t *test.SystemTest) {
 		// create wallet for normal user
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
