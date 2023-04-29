@@ -44,7 +44,7 @@ on:
         default: ''
         required: false
       run_smoke_tests:
-        description: 'Run subset of system tests (smoke tests)'
+        description: 'Only run smoke tests (subset of system tests for fast feedback)'
         default: 'false'
         required: false
 
