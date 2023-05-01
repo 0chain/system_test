@@ -17,7 +17,7 @@ func TestUpdateBlobber(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Update blobber in allocation without correct delegated client, shouldn't work", func(t *test.SystemTest) {
-		wallet := apiClient.RegisterWallet(t)
+		wallet := apiClient.CreateWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)

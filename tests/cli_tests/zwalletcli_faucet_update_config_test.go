@@ -17,9 +17,9 @@ import (
 func TestFaucetUpdateConfig(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	// register SC owner wallet
-	output, err := registerWalletForName(t, configPath, scOwnerWallet)
-	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+	// create SC owner wallet
+	output, err := createWalletForName(t, configPath, scOwnerWallet)
+	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 	t.RunSequentially("should allow update of max_pour_amount", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
@@ -30,8 +30,8 @@ func TestFaucetUpdateConfig(testSetup *testing.T) {
 		newValue := "15"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = getFaucetSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -96,8 +96,8 @@ func TestFaucetUpdateConfig(testSetup *testing.T) {
 		newValue := "15"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = updateFaucetSCConfig(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,

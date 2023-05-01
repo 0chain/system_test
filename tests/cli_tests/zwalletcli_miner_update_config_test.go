@@ -22,8 +22,8 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		newValue := "0.1"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = updateMinerSCConfig(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
@@ -42,12 +42,12 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		configKey := "unknown_key"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		// create SC owner wallet
+		output, err = createWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
@@ -64,12 +64,12 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		}
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		// create SC owner wallet
+		output, err = createWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
@@ -85,12 +85,12 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		}
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-		// register SC owner wallet
-		output, err = registerWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		// create SC owner wallet
+		output, err = createWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "reward_rate",
