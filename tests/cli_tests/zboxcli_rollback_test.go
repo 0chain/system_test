@@ -98,13 +98,30 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		err := os.Remove(localFilePath)
 		require.Nil(t, err)
 
-		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+
+		actualSize, err := strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
+		require.Nil(t, err)
+		require.Equal(t, 0.5*MB, actualSize, "file size should be same as uploaded")
+
+		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf("%s deleted", remoteFilePath), output[0])
+
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		}), true)
+		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 
 		output, err = rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
