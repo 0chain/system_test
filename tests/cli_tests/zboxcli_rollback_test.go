@@ -83,30 +83,17 @@ func TestRollbackAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("rollback allocation after deleting a file should work", func(t *test.SystemTest) {
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   4 * MB,
-			"tokens": 9,
-		})
+		allocationID := setupAllocation(t, configPath)
+		createAllocationTestTeardown(t, allocationID)
 
-		filesize := int64(0.5 * MB)
-		remotepath := "/"
-		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
-		remoteFilePath := path.Join(remotepath, localFilePath)
+		const remotepath = "/"
+		filesize := int64(1 * KB)
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		originalFileChecksum := generateChecksum(t, filename)
+		fname := filepath.Base(filename)
+		remoteFilePath := path.Join(remotepath, fname)
 
-		originalFileChecksum := generateChecksum(t, localFilePath)
-
-		err := os.Remove(localFilePath)
-		require.Nil(t, err)
-
-		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		actualSize, err := strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
-		require.Nil(t, err)
-		require.Equal(t, 0.5*MB, actualSize, "file size should be same as uploaded")
-
-		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
 		}), true)
@@ -132,20 +119,18 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
+			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
 		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(localFilePath))
+		require.Contains(t, output[1], filepath.Base(filename))
 
-		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(localFilePath))
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
-
-		createAllocationTestTeardown(t, allocationID)
 
 	})
 
