@@ -54,11 +54,14 @@ func TestMain(m *testing.M) {
 	sdkWallet = apiClient.CreateWalletForMnemonic(t, sdkWalletMnemonics)
 	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
 
-	// blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics
-	// blobberOwnerWallet = apiClient.RegisterWalletForMnemonic(t, blobberOwnerWalletMnemonics)
+	blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics
+	blobberOwnerWallet = apiClient.CreateWalletForMnemonic(t, blobberOwnerWalletMnemonics)
 
-	// ownerWalletMnemonics = parsedConfig.OwnerWalletMnemonics
-	// ownerWallet = apiClient.RegisterWalletForMnemonic(t, ownerWalletMnemonics)
+	ownerWalletMnemonics = parsedConfig.OwnerWalletMnemonics
+	ownerWallet = apiClient.CreateWalletForMnemonic(t, ownerWalletMnemonics)
+
+	// blobberOwnerWallet = &model.Wallet{}
+	// ownerWallet = &model.Wallet{}
 
 	os.Exit(m.Run())
 }
