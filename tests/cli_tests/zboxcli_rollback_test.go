@@ -85,7 +85,10 @@ func TestRollbackAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("rollback allocation after deleting a file should work", func(t *test.SystemTest) {
-		allocationID := setupAllocation(t, configPath)
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1 * MB,
+			"tokens": 9,
+		})
 		createAllocationTestTeardown(t, allocationID)
 
 		const remotepath = "/"
