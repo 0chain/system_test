@@ -19,6 +19,7 @@ import (
 
 func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("copy file to existing directory")
 
 	t.Parallel()
 

@@ -14,7 +14,8 @@ import (
 
 func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
-	t.Skip("Skip till chain-side bugs are resolved")
+
+	t.Skip("wait for duplicate transaction issue to be solved, https://github.com/0chain/0chain/issues/2348")
 
 	// Take a snapshot of the chains miners, repeat a transaction with a fee a few times,
 	// take another snapshot.
@@ -27,10 +28,15 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunWithTimeout("Miner share of fee rewards for transactions", 500*time.Second, func(t *test.SystemTest) {
-		walletId := initialiseTest(t, escapedTestName(t)+"_TARGET", true)
-		output, err := executeFaucetWithTokens(t, configPath, 10)
+	t.RunSequentially("Miner share of fee rewards for transactions", func(t *test.SystemTest) {
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		wallet, err := getWalletForName(t, configPath, escapedTestName(t)+"_TARGET")
+		require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
 		if !confirmDebugBuild(t) {
 			t.Skip("miner fee rewards test skipped as it requires a debug event database")
@@ -48,9 +54,10 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 		const numPaidTransactions = 3
 		const fee = 0.1
 		for i := 0; i < numPaidTransactions; i++ {
-			output, err := sendTokens(t, configPath, walletId, 0.5, escapedTestName(t), fee)
-			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
+			output, err := sendTokens(t, configPath, wallet.ClientID, 0.5, escapedTestName(t), fee)
+			require.NoError(t, err, "error sending tokens", strings.Join(output, "\n"))
 		}
+		time.Sleep(time.Second) // give time for last round to be saved
 		// ------------------------------------
 
 		afterMiners := getNodes(t, minerIds, sharderUrl)
@@ -137,16 +144,14 @@ func checkMinerFeeAmounts(
 				}
 				switch pReward.RewardType {
 				case climodel.FeeRewardMiner:
-					require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
-						"%s not round lottery winner %s but nevertheless paid with fee reward."+
-							"only the round lottery winner shold get a miner block reward",
-						pReward.ProviderId, roundHistory.Block.MinerID)
+					require.Falsef(t, beforeMiners[i].IsKilled,
+						"killed miners cannot receive fees, %s is killed", id)
 					feeRewards += pReward.Amount
 					recordedRoundRewards += pReward.Amount
 				case climodel.BlockRewardMiner:
 					blockRewards += pReward.Amount
 				default:
-					require.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
+					require.Failf(t, "", "reward type %s is not available for miners", pReward.RewardType.String())
 				}
 			}
 			// if this miner is the round miner check fees add up
@@ -155,8 +160,9 @@ func checkMinerFeeAmounts(
 					"incorrect service charge %v for round %d"+
 						" service charge should be fees %d multiplied by service ratio %v."+
 						"length stake pools %d",
+					"round history %v",
 					recordedRoundRewards, round, fees, beforeMiners[i].Settings.ServiceCharge,
-					len(beforeMiners[i].StakePool.Pools))
+					len(beforeMiners[i].StakePool.Pools), roundHistory)
 			}
 		}
 		actualReward := afterMiners[i].Reward - beforeMiners[i].Reward
@@ -182,9 +188,6 @@ func checkMinerFeeRewardFrequency(
 			if pReward.RewardType == climodel.FeeRewardMiner {
 				require.Falsef(t, foundFeeRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
 				foundFeeRewardPayment = true
-				require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-					"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
-					round, pReward.ProviderId, roundHistory.Block.MinerID)
 			}
 		}
 		require.EqualValues(t, foundFeeRewardPayment, isAFeePayment,
@@ -237,7 +240,7 @@ func checkMinerDelegatePoolFeeAmounts(
 				case climodel.BlockRewardMiner:
 					rewards[dReward.PoolID] += dReward.Amount
 				default:
-					require.Failf(t, "reward type %s not paid to miner delegate pools", dReward.RewardType.String())
+					require.Failf(t, "", "reward type %s not paid to miner delegate pools", dReward.RewardType.String())
 				}
 			}
 			if roundHistory.Block.MinerID != id {

@@ -12,6 +12,7 @@ import (
 
 func TestGetBlobbersForNewAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Alloc blobbers API call should be successful given a valid request")
 
 	t.Parallel()
 

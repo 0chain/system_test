@@ -17,6 +17,7 @@ import (
 
 func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Getting MinerSC Stake pools of a wallet before and after locking against a miner should work")
 
 	t.RunSequentially("Getting MinerSC Stake pools of a wallet before and after locking against a miner should work", func(t *test.SystemTest) {
 		output, err := createWallet(t, configPath)
