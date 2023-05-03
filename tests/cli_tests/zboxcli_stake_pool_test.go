@@ -146,7 +146,7 @@ func TestStakePool(testSetup *testing.T) {
 			"data":   len(blobbersList) / 2,
 			"parity": len(blobbersList) - len(blobbersList)/2,
 			"lock":   allocationCost + 1,
-			"expire": 720 * time.Hour,
+			"expire": 5 * time.Minute,
 		})
 
 		// check total offers new value and compare
