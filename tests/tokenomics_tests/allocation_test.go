@@ -109,7 +109,7 @@ func TestAllocation(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Cancel, equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
-		t.Skip()
+		fmt.Println("Jayash : ")
 
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
