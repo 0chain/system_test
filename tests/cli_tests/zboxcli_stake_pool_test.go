@@ -140,14 +140,16 @@ func TestStakePool(testSetup *testing.T) {
 			require.Nil(t, err, "Error executing faucet with tokens", err)
 		}
 
-		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"size":   allocSize,
-			"tokens": allocationCost - 2,
 			"data":   len(blobbersList) / 2,
 			"parity": len(blobbersList) - len(blobbersList)/2,
 			"lock":   allocationCost + 1,
 			"expire": 5 * time.Minute,
-		})
+		}))
+		require.Nil(t, err, "Error creating new allocation", err)
+
+		allocationId, _ := getAllocationID(output[len(output)-1])
 
 		// check total offers new value and compare
 		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
