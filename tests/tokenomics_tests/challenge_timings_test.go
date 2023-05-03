@@ -19,7 +19,7 @@ import (
 func TestChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	output, err := utils.RegisterWallet(t, configPath)
+	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
@@ -42,7 +42,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Case 1: 1 10mb allocation, 1mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
-		output, err := utils.RegisterWallet(t, configPath)
+		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
@@ -99,7 +99,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Case 2: 1 100mb allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
-		output, err := utils.RegisterWallet(t, configPath)
+		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
@@ -154,7 +154,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		var allocationIDs []string
 
-		output, err := utils.RegisterWallet(t, configPath)
+		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// range of 10 allocations
@@ -216,7 +216,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		var allocationIDs []string
 
-		output, err := utils.RegisterWallet(t, configPath)
+		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// range of 10 allocations
@@ -280,7 +280,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		var allocationIDs []string
 
-		output, err := utils.RegisterWallet(t, configPath)
+		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 100)

@@ -88,7 +88,7 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 		}
 	}
 	// First create a wallet and run faucet command
-	output, err := RegisterWalletForName(t, cliConfigFilename, walletName)
+	output, err := CreateWalletForName(t, cliConfigFilename, walletName)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 	output, err = ExecuteFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
@@ -140,7 +140,7 @@ func generateChecksum(t *test.SystemTest, filePath string) string {
 }
 
 func setupWallet(t *test.SystemTest, configPath string) []string {
-	output, err := RegisterWallet(t, configPath)
+	output, err := CreateWallet(t, configPath)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
 	output, err = ExecuteFaucetWithTokens(t, configPath, 1)
@@ -523,7 +523,7 @@ func moveFileWithWallet(t *test.SystemTest, wallet, cliConfigFilename string, pa
 }
 
 func setupWalletWithCustomTokens(t *test.SystemTest, configPath string, tokens float64) []string {
-	output, err := RegisterWallet(t, configPath)
+	output, err := CreateWallet(t, configPath)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
 	ExecuteFaucetWithTokens(t, configPath, tokens)

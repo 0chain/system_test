@@ -24,7 +24,7 @@ func getNodeBaseURL(host string, port int) string {
 }
 
 func GetLatestFinalizedBlock(t *test.SystemTest) *climodel.LatestFinalizedBlock {
-	output, err := RegisterWallet(t, configPath)
+	output, err := CreateWallet(t, configPath)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 	sharders := getShardersList(t)

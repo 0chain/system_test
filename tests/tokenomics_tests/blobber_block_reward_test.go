@@ -25,7 +25,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 	fmt.Println("prevBlock", prevBlock)
 
-	output, err := utils.RegisterWallet(t, configPath)
+	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
@@ -64,7 +64,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 					t.RunSequentiallyWithTimeout(descriptions[idx], (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 						stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, stake, 1)
 
-						output, err := utils.RegisterWallet(t, configPath)
+						output, err := utils.CreateWallet(t, configPath)
 						require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 						// 1. Create an allocation with 1 data shard and 1 parity shard.

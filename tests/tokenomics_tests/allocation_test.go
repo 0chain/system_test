@@ -31,7 +31,7 @@ func TestAllocation(testSetup *testing.T) {
 
 	fmt.Println("prevBlock", prevBlock)
 
-	output, err := utils.RegisterWallet(t, configPath)
+	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
@@ -68,17 +68,17 @@ func TestAllocation(testSetup *testing.T) {
 	assigner := utils.EscapedTestName(t) + "_ASSIGNER"
 
 	// register SC owner wallet
-	output, err = utils.RegisterWalletForName(t, configPath, scOwnerWallet)
+	output, err = utils.CreateWalletForName(t, configPath, scOwnerWallet)
 	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
 
 	// register assigner wallet
-	output, err = utils.RegisterWalletForName(t, configPath, assigner)
+	output, err = utils.CreateWalletForName(t, configPath, assigner)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 	assignerWallet := utils.ReadWalletFile(t, "./config/"+assigner+"_wallet.json")
 
 	// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
-	output, err = utils.RegisterWallet(t, configPath)
+	output, err = utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 	output, err = utils.GetStorageSCConfig(t, configPath, true)
@@ -115,7 +115,7 @@ func TestAllocation(testSetup *testing.T) {
 			1, 1, 1, 1,
 		}, 1)
 
-		output, err := utils.RegisterWallet(t, configPath)
+		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
@@ -214,7 +214,7 @@ func TestAllocation(testSetup *testing.T) {
 		recipient := utils.EscapedTestName(t)
 
 		// register recipient wallet
-		output, err = utils.RegisterWalletForName(t, configPath, recipient)
+		output, err = utils.CreateWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := utils.GetWalletForName(t, configPath, recipient)
@@ -352,7 +352,7 @@ func TestAllocation(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		t.Skip()
-		output, err := utils.RegisterWallet(t, configPath)
+		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
@@ -384,7 +384,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		// register a new wallet
 		nonAllocationOwnerWallet := "newwallet"
-		output, err = utils.RegisterWalletForName(t, configPath, nonAllocationOwnerWallet)
+		output, err = utils.CreateWalletForName(t, configPath, nonAllocationOwnerWallet)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 		_, err = utils.ExecuteFaucetWithTokensForWallet(t, nonAllocationOwnerWallet, configPath, 9)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
@@ -435,7 +435,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		t.Skip()
 
-		output, err := utils.RegisterWallet(t, configPath)
+		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		allocSize := 1 * GB
@@ -536,7 +536,7 @@ func TestAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Replace Blobber", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		output, err := utils.RegisterWallet(t, configPath)
+		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		allocSize := 1 * GB
