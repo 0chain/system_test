@@ -116,7 +116,8 @@ func TestStakePool(testSetup *testing.T) {
 
 		lenDelegates = lenDelegatesNew
 
-		allocSize := maxStakedCapacity*3 + uint64(30*GB)
+		allocSize := maxStakedCapacity*uint64(len(blobbersList)/2) + uint64(30*GB)
+		allocSize -= allocSize / 1000
 
 		fmt.Println("allocSize", allocSize)
 
