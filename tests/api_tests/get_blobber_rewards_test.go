@@ -16,6 +16,7 @@ import (
 
 func TestBlobberRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work")
 
 	t.RunSequentially("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work", func(t *test.SystemTest) {
 		t.Skip("wait for reward fixes")

@@ -19,6 +19,7 @@ import (
 
 func TestRecentlyAddedRefs(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Recently Added Refs Should be listed")
 
 	t.Parallel()
 
@@ -151,8 +152,8 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		t1 := time.Now()
 		time.Sleep(time.Second * 30)

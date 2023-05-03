@@ -35,6 +35,7 @@ const (
 
 func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Create free storage from marker with accounting")
 
 	err := bls.Init(bls.CurveFp254BNb)
 	require.NoError(t, err, "Error initializing BLS")
@@ -45,19 +46,19 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 
 	assigner := escapedTestName(t) + "_ASSIGNER"
 
-	// register SC owner wallet
-	output, err := registerWalletForName(t, configPath, scOwnerWallet)
-	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+	// create SC owner wallet
+	output, err := createWalletForName(t, configPath, scOwnerWallet)
+	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-	// register assigner wallet
-	output, err = registerWalletForName(t, configPath, assigner)
-	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+	// create assigner wallet
+	output, err = createWalletForName(t, configPath, assigner)
+	require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 	assignerWallet := readWalletFile(t, "./config/"+assigner+"_wallet.json")
 
 	// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
-	output, err = registerWallet(t, configPath)
-	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+	output, err = createWallet(t, configPath)
+	require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 	output, err = getStorageSCConfig(t, configPath, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
@@ -88,9 +89,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Create free storage from marker with accounting", 60*time.Second, func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
-		// register recipient wallet
-		output, err = registerWalletForName(t, configPath, recipient)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create recipient wallet
+		output, err = createWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -145,9 +146,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create free storage with malformed marker should fail", func(t *test.SystemTest) {
-		// register recipient wallet
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create recipient wallet
+		output, err = createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		markerFile := "./config/" + escapedTestName(t) + "_MARKER.json"
 
@@ -163,9 +164,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create free storage with invalid marker contents should fail", func(t *test.SystemTest) {
-		// register recipient wallet
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create recipient wallet
+		output, err = createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		markerFile := "./config/" + escapedTestName(t) + "_MARKER.json"
 
@@ -183,9 +184,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t.RunSequentially("Create free storage with invalid marker signature should fail", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
-		// register recipient wallet
-		output, err = registerWalletForName(t, configPath, recipient)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create recipient wallet
+		output, err = createWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -218,16 +219,16 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t.RunSequentially("Create free storage with wrong recipient wallet should fail", func(t *test.SystemTest) {
 		recipientCorrect := escapedTestName(t) + "_RECIPIENT"
 
-		// register correct recipient wallet
-		output, err = registerWalletForName(t, configPath, recipientCorrect)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create correct recipient wallet
+		output, err = createWalletForName(t, configPath, recipientCorrect)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := getWalletForName(t, configPath, recipientCorrect)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
-		// register this wallet
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create this wallet
+		output, err = createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
@@ -265,9 +266,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t.RunSequentially("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
-		// register recipient wallet
-		output, err = registerWalletForName(t, configPath, recipient)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create recipient wallet
+		output, err = createWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
