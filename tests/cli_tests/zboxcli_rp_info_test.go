@@ -15,21 +15,18 @@ import (
 
 func TestReadPoolInfo(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Read pool info testing with json parameter")
 
 	t.Parallel()
 
 	t.RunWithTimeout("Read pool info testing with json parameter", 90*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.5)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		// Wallet balance before lock should be 1.5 ZCN
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		// Wallet balance before lock should be 5 ZCN
+		balance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		require.Equal(t, 5.0, balance)
 
 		// Lock 1 token in read pool distributed amongst all blobbers
 		lockAmount := 1.0
@@ -55,17 +52,13 @@ func TestReadPoolInfo(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Read pool info testing without json parameter", 90*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.5)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		// Wallet balance before lock should be 1.5 ZCN
-		output, err = getBalance(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile(`Balance: 1.500 ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		// Wallet balance before lock should be 5.0 ZCN
+		balance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		require.Equal(t, 5.0, balance)
 
 		// Lock 1 token in read pool distributed amongst all blobbers
 		lockAmount := 1.0

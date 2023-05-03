@@ -23,11 +23,12 @@ import (
 func TestShareFile(testSetup *testing.T) {
 	//TODO: all share operations take ~40s except for PRE which takes ~2mins 30s!
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Share to public a folder with no encrypted file using auth ticket with zero expiration")
 
 	t.Parallel()
-	t.RunWithTimeout("Share to public a folder with no encrypted file using auth ticket with zero expiration", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("Share to public a folder with no encrypted file using auth ticket with zero expiration", func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -50,7 +51,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation":         allocationID,
@@ -80,9 +81,9 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.RunWithTimeout("Share unencrypted file to public using auth ticket with zero expiration", 90*time.Second, func(t *test.SystemTest) {
+	t.Run("Share unencrypted file to public using auth ticket with zero expiration", func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -104,7 +105,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation":         allocationID,
@@ -133,9 +134,9 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.RunWithTimeout("Share unencrypted file to public using auth ticket", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Share unencrypted file to public using auth ticket", 4*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -157,7 +158,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -185,9 +186,9 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.RunWithTimeout("Shared encrypted file to public using auth ticket without encryptionkey flag should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Shared encrypted file to public using auth ticket without encryptionkey flag should fail", 5*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -210,7 +211,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -222,9 +223,9 @@ func TestShareFile(testSetup *testing.T) {
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Revoke auth ticket on publicly-shared unencrypted file should fail to download", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Revoke auth ticket on publicly-shared unencrypted file should fail to download", 4*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -246,8 +247,8 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -285,9 +286,9 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "share revoked")
 	})
 
-	t.RunWithTimeout("Expired auth ticket of a publicly-shared file should fail to download", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Expired auth ticket of a publicly-shared file should fail to download", 4*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -309,8 +310,8 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		shareParams := map[string]interface{}{
 			"allocation":         allocationID,
@@ -340,9 +341,9 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	t.RunWithTimeout("Share to public a folder with no encrypted file using auth ticket", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Share to public a folder with no encrypted file using auth ticket", 4*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -365,7 +366,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -394,9 +395,9 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.Run("Share encrypted file using auth ticket - proxy re-encryption", func(t *test.SystemTest) {
+	t.RunWithTimeout("Share encrypted file using auth ticket - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -419,7 +420,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -455,14 +456,49 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.RunWithTimeout("Share encrypted huge file using auth ticket - proxy re-encryption", 90*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Share encrypted huge file using auth ticket - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		faucetTokens := 9.0
+
+		output, err := createWalletForName(t, configPath, walletOwner)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+
+		for i := 0; i < 3; i++ {
+			output, err = executeFaucetWithTokensForWallet(t, walletOwner, configPath, faucetTokens)
+			require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		}
+
+		allocParam := createParams(map[string]interface{}{
+			"lock":   24,
+			"size":   1024000,
+			"expire": "30m",
+			"parity": 1,
+			"data":   1,
+		})
+
+		output, err = createNewAllocationForWallet(t, walletOwner, configPath, allocParam)
+
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
+		require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
+
+		allocationID := strings.Fields(output[0])[2]
+
+		// locking tokens for read pool
+		readPoolParams := createParams(map[string]interface{}{
+			"tokens": 3,
+		})
+		output, err = readPoolLockWithWallet(t, walletOwner, configPath, readPoolParams, true)
+		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "locked", output[0])
 
 		// upload file
 		file := generateRandomTestFileName(t)
 		fileSize := int64(102400) // this is big enough to cause problem with download
-		err := createFileWithSize(file, fileSize)
+		err = createFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
 		uploadParams := map[string]interface{}{
@@ -471,7 +507,7 @@ func TestShareFile(testSetup *testing.T) {
 			"remotepath": file,
 			"encrypt":    "",
 		}
-		output, err := uploadFile(t, configPath, uploadParams, true)
+		output, err = uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Contains(t, output[1], StatusCompletedCB)
@@ -480,7 +516,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -533,9 +569,9 @@ func TestShareFile(testSetup *testing.T) {
 		os.Remove(file) //nolint
 	})
 
-	t.RunWithTimeout("Revoke auth ticket of encrypted file - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Revoke auth ticket of encrypted file - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -558,8 +594,8 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -610,9 +646,9 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "share revoked")
 	})
 
-	t.RunWithTimeout("Expired auth ticket of an encrypted file should fail to download - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Expired auth ticket of an encrypted file should fail to download - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -635,8 +671,8 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -675,9 +711,9 @@ func TestShareFile(testSetup *testing.T) {
 			"share file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Auth ticket for wrong clientId should fail to download - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Auth ticket for wrong clientId should fail to download - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -700,7 +736,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -737,9 +773,9 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	t.RunWithTimeout("Auth ticket for wrong encryption public key should fail to download - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Auth ticket for wrong encryption public key should fail to download - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -762,7 +798,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -800,9 +836,9 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "Error cipher: message authentication failed")
 	})
 
-	t.RunWithTimeout("Share folder with encrypted file using auth ticket - proxy re-encryption", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Share folder with encrypted file using auth ticket - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -825,7 +861,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -862,9 +898,9 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.RunWithTimeout("Folder not shared should fail to download - proxy re-encryption", 90*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Folder not shared should fail to download - proxy re-encryption", 4*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -901,8 +937,8 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -938,15 +974,15 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	t.RunWithTimeout("Share non-existent file should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Share non-existent file should fail", 3*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err := registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -967,21 +1003,21 @@ func TestShareFile(testSetup *testing.T) {
 			"share file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Share someone else's allocation file should fail", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Share someone else's allocation file should fail", 3*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// sharer wallet operations
 		sharerWallet := escapedTestName(t) + "_sharer"
 
-		output, err := registerWalletForName(t, configPath, sharerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWalletForName(t, configPath, sharerWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_receiver"
 
-		output, err = registerWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1004,8 +1040,8 @@ func TestShareFile(testSetup *testing.T) {
 
 	t.Run("Share file with missing allocation should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		shareParams := map[string]interface{}{
 			"remotepath": "/blahblah.txt",
@@ -1019,8 +1055,8 @@ func TestShareFile(testSetup *testing.T) {
 
 	t.Run("Share file with missing remotepath should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		shareParams := map[string]interface{}{
 			"allocation": "dummy",
@@ -1035,7 +1071,7 @@ func TestShareFile(testSetup *testing.T) {
 	t.RunWithTimeout("Share encrypted file using auth ticket - download accounting test - proxy re-encryption ", 3*time.Minute, func(t *test.SystemTest) {
 		t.Skip("skip till https://github.com/0chain/zboxcli/issues/334 is fixed")
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		file := generateRandomTestFileName(t)
 		remoteOwnerPath := "/" + filepath.Base(file)
@@ -1058,7 +1094,7 @@ func TestShareFile(testSetup *testing.T) {
 		receiverWallet := escapedTestName(t) + "_second"
 
 		// locking 1 read tokens to readPool via wallet
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1150,7 +1186,7 @@ func TestShareFile(testSetup *testing.T) {
 	t.RunWithTimeout("Share unencrypted file using auth ticket - download accounting test", 3*time.Minute, func(t *test.SystemTest) {
 		t.Skip("skip till https://github.com/0chain/zboxcli/issues/334 is fixed")
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -1173,7 +1209,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -1268,27 +1304,24 @@ func shareFileWithWallet(t *test.SystemTest, wallet, cliConfigFilename string, p
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 }
 
-func registerAndCreateAllocation(t *test.SystemTest, configPath, wallet string) (string, *climodel.Wallet) {
+func createWalletAndAllocation(t *test.SystemTest, configPath, wallet string) (string, *climodel.Wallet) {
 	faucetTokens := 3.0
 	// First create a wallet and run faucet command
 	// Output:
-	// 		[0]:"ZCN wallet created"
-	// 		[1]:"Creating related read pool for storage smart-contract..."
-	// 		[2]:"Read pool created successfully"
-	// 		[3]:"Wallet registered"
-	output, err := registerWalletForName(t, configPath, wallet)
-	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-	require.Len(t, output, 4, strings.Join(output, "\n"))
-	require.Equal(t, "Read pool created successfully", output[2], strings.Join(output, "\n"))
-	require.Equal(t, "Wallet registered", output[3], strings.Join(output, "\n"))
+	// 		[0]:"No wallet in path  C:\Users\kisha\.zcn\unique found. Creating wallet..."
+	// 		[1]:"ZCN wallet created!!"
+	// 		[2]:"Execute faucet smart contract success with txn : ${hash}"
+	output, err := createWalletForName(t, configPath, wallet)
+	require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+	require.Len(t, output, 3, strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokensForWallet(t, wallet, configPath, faucetTokens)
 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 	allocParam := createParams(map[string]interface{}{
-		"lock":   0.5,
-		"size":   10485760,
-		"expire": "2h",
+		"lock":   2,
+		"size":   10000,
+		"expire": "30m",
 		"parity": 1,
 		"data":   1,
 	})

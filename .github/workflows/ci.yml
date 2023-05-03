@@ -19,12 +19,8 @@ on:
         description: '(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]'
         default: ''
         required: false
-      miner_image:
-        description: 'miner DOCKER IMAGE to deploy'
-        default: 'staging'
-        required: false
-      sharder_image:
-        description: 'sharder DOCKER IMAGE to deploy'
+      miner_sharder_image:
+        description: 'miner/sharder DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       blobber_image:
@@ -44,8 +40,12 @@ on:
         default: 'staging'
         required: false
       test_file_filter:
-        description: 'Comma separated list of test files to run (eg. zwalletcli_register_wallet_test.go, zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result'
+        description: 'Comma separated list of test files to run (eg. zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result'
         default: ''
+        required: false
+      run_smoke_tests:
+        description: 'Only run smoke tests (subset of system tests for fast feedback)'
+        default: 'false'
         required: false
 
 jobs:
@@ -90,7 +90,7 @@ jobs:
         run: |
           echo "master is NOT successful! was: [${{ env.BUILD_STATE }}]"
           exit 1
-        
+
   system-tests:
     name: "System Tests"
     runs-on: [ tests-suite ]
@@ -130,8 +130,8 @@ jobs:
           echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_cli_branch}}'))" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zwallet_cli_branch}}'))" >> $GITHUB_ENV
 
-          echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_image}}' ] && echo 'staging') || echo '${{github.event.inputs.miner_image}}'))" >> $GITHUB_ENV
-          echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.sharder_image}}' ] && echo 'staging') || echo '${{github.event.inputs.sharder_image}}'))" >> $GITHUB_ENV
+          echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_sharder_image}}' ] && echo 'staging') || echo '${{github.event.inputs.miner_sharder_image}}'))" >> $GITHUB_ENV
+          echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_sharder_image}}' ] && echo 'staging') || echo '${{github.event.inputs.miner_sharder_image}}'))" >> $GITHUB_ENV
           echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_image}}' ] && echo 'staging') || echo '${{github.event.inputs.blobber_image}}'))" >> $GITHUB_ENV
           echo "VALIDATOR_TAG=$(echo $(([ -z '${{github.event.inputs.validator_image}}' ] && echo 'staging') || echo '${{github.event.inputs.validator_image}}'))" >> $GITHUB_ENV
           echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_image}}'))" >> $GITHUB_ENV
@@ -163,6 +163,7 @@ jobs:
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+          authorizer_image: staging
 
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@add-graphnode
@@ -179,6 +180,7 @@ jobs:
           run_tokenomics_system_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
 
       - name: "Set PR status as ${{ job.status }}"
         if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}

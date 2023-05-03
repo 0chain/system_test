@@ -29,6 +29,7 @@ const (
 
 func TestEthRegisterAccount(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Register ethereum account in local key storage")
 
 	t.RunSequentially("Register ethereum account in local key storage", func(t *test.SystemTest) {
 		deleteDefaultAccountInStorage(t, address)
@@ -56,8 +57,8 @@ func TestEthRegisterAccount(testSetup *testing.T) {
 
 func importAccount(t *test.SystemTest, password, mnemonic string, retry bool) ([]string, error) {
 	t.Logf("Register ethereum account using mnemonic and protected with password...")
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-import-account --password %s --mnemonic \"%s\" --silent "+
 			"--configDir ./config --config %s --wallet %s --path %s",

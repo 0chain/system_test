@@ -13,19 +13,23 @@ import (
 
 func TestOwnerUpdate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("should allow update of owner: StorageSC")
 
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 	}
 
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 	newOwnerWallet, err := getWallet(t, configPath)
 	require.Nil(t, err, "error fetching wallet")
 
+	output, err = createWalletForName(t, configPath, scOwnerWallet)
+	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
 	newOwnerName := escapedTestName(t)
 
-	t.RunSequentiallyWithTimeout("should allow update of owner: StorageSC", 60*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("should allow update of owner: StorageSC", 2*time.Minute, func(t *test.SystemTest) {
 		ownerKey := "owner_id"
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
 
@@ -78,8 +82,8 @@ func TestOwnerUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("should allow update of owner: VestingSC", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		ownerKey := "owner_id"
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"
@@ -120,8 +124,8 @@ func TestOwnerUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("should allow update of owner: MinerSC", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		ownerKey := "owner_id"
 		oldOwner := "1746b06bb09f55ee01b33b5e2e055d6cc7a900cb57c0a3a5eaabb8a0e7745802"

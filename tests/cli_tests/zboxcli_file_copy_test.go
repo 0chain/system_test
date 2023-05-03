@@ -19,6 +19,7 @@ import (
 
 func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("copy file to existing directory")
 
 	t.Parallel()
 
@@ -285,7 +286,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "copy_failed")
 
@@ -430,7 +431,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "copy_failed")
 
@@ -480,7 +481,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": "/child/nonexisting.txt",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "copy_failed")
 	})
@@ -488,8 +489,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	t.Run("copy file from someone else's allocation should fail", func(t *test.SystemTest) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
@@ -525,7 +526,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "copy_failed")
 
@@ -560,42 +561,42 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("copy file with no allocation param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"remotepath": "/abc.txt",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
 
 	t.Run("copy file with no remotepath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
 			"destpath":   "/",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: remotepath flag is missing", output[0])
 	})
 
 	t.Run("copy file with no destpath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
 			"remotepath": "/abc.txt",
 		}, false)
-		require.Nil(t, err, strings.Join(output, "\n")) // FIXME zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: destpath flag is missing", output[0])
 	})
@@ -634,8 +635,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"remotepath": remotePath,
 			"destpath":   destpath,
 		}, false)
-		// FIXME: zbox copy should throw non-zero code see https://github.com/0chain/zboxcli/issues/251
-		require.Nil(t, err, strings.Join(output, "\n"))
+		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "this options for this file is not permitted for this allocation")
 

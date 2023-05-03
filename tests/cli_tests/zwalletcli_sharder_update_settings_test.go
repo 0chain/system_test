@@ -20,6 +20,8 @@ const sharderAccessDenied = "update_sharder_settings: access denied"
 
 func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic complexity 50 of func `
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Sharder update num_delegates by delegate wallet should work")
+
 	mnConfig := getMinerSCConfiguration(t)
 
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
@@ -69,59 +71,15 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		old_max_stake, err := oldSharderInfo.Settings.MaxStake.Int64()
-		require.Nil(t, err)
-		old_min_stake, err := oldSharderInfo.Settings.MinStake.Int64()
-		require.Nil(t, err)
 		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": oldSharderInfo.Settings.MaxNumDelegates,
-			"max_stake":     intToZCN(old_max_stake),
-			"min_stake":     intToZCN(old_min_stake),
 			"sharder":       "",
 		}), true)
 		require.Nil(t, err, "error reverting sharder settings after test")
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
-	})
-
-	t.RunSequentially("Sharder update min_stake by delegate wallet should work", func(t *test.SystemTest) {
-		currRound := getCurrentRound(t)
-
-		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
-				currRound = getCurrentRound(t)
-			}
-		}
-
-		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":        sharder01ID,
-			"min_stake": 1,
-			"sharder":   "",
-		}), true)
-
-		require.Nil(t, err, "error reverting sharder node settings after test")
-		require.Len(t, output, 2)
-		require.Equal(t, "settings updated", output[0])
-		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
-
-		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": sharder01ID,
-		}), true)
-		require.Nil(t, err, "error fetching sharder info")
-		require.Len(t, output, 1)
-
-		var sharderInfo climodel.Node
-		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
-		require.Nil(t, err, "error unmarshalling sharder info")
-		min_stake, err := sharderInfo.Settings.MinStake.Int64()
-		require.Nil(t, err)
-		require.Equal(t, 1, int(intToZCN(min_stake)))
 	})
 
 	t.RunSequentially("Sharder update num_delegates by delegate wallet should work", func(t *test.SystemTest) {
@@ -159,110 +117,6 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		require.Equal(t, 5, sharderInfo.Settings.MaxNumDelegates)
 	})
 
-	t.RunSequentially("Sharder update max_stake by delegate wallet should work", func(t *test.SystemTest) {
-		currRound := getCurrentRound(t)
-
-		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
-				currRound = getCurrentRound(t)
-			}
-		}
-
-		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":        sharder01ID,
-			"max_stake": 99,
-			"sharder":   "",
-		}), true)
-		require.Nil(t, err, "error updating max_stake in sharder node")
-		require.Len(t, output, 2)
-		require.Equal(t, "settings updated", output[0])
-		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
-
-		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": sharder01ID,
-		}), true)
-		require.Nil(t, err, "error fetching sharder info")
-		require.Len(t, output, 1)
-
-		var sharderInfo climodel.Node
-		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
-		require.Nil(t, err, "error unmarshalling sharder info")
-		max_stake, err := sharderInfo.Settings.MaxStake.Int64()
-		require.Nil(t, err)
-		require.Equal(t, 99, int(intToZCN(max_stake)))
-	})
-
-	t.RunSequentially("Sharder update multiple settings with delegate wallet should work", func(t *test.SystemTest) {
-		currRound := getCurrentRound(t)
-
-		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
-				currRound = getCurrentRound(t)
-			}
-		}
-
-		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":            sharder01ID,
-			"num_delegates": 8,
-			"min_stake":     2,
-			"max_stake":     98,
-			"sharder":       "",
-		}), true)
-		require.Nil(t, err, "error updating multiple settings in sharder node")
-		require.Len(t, output, 2)
-		require.Equal(t, "settings updated", output[0])
-		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
-
-		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": sharder01ID,
-		}), true)
-		require.Nil(t, err, "error fetching sharder info")
-		require.Len(t, output, 1)
-
-		var sharderInfo climodel.Node
-		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
-		require.Nil(t, err, "error unmarshalling sharder info")
-		require.Equal(t, 8, sharderInfo.Settings.MaxNumDelegates)
-		min_stake, err := sharderInfo.Settings.MinStake.Int64()
-		require.Nil(t, err)
-		require.Equal(t, 2, int(intToZCN(min_stake)))
-		max_stake, err := sharderInfo.Settings.MaxStake.Int64()
-		require.Nil(t, err)
-		require.Equal(t, 98, int(intToZCN(max_stake)))
-	})
-
-	t.RunSequentially("Sharder update with min_stake less than global min should fail", func(t *test.SystemTest) {
-		currRound := getCurrentRound(t)
-
-		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
-				currRound = getCurrentRound(t)
-			}
-		}
-
-		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":        sharder01ID,
-			"min_stake": mnConfig["min_stake"] - 1e-10,
-			"sharder":   "",
-		}), false)
-		require.NotNil(t, err, "expected error when updating min_stake less than global min_stake but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		const expected = "update_sharder_settings: invalid node request results in min_stake greater than max_stake: 18446744073709551615 \\u003e 980000000000"
-		require.Equal(t, expected, output[0], strings.Join(output, "\n"))
-	})
-
 	t.RunSequentially("Sharder update with num_delegates more than global max_delegates should fail", func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
 
@@ -283,104 +137,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}), false)
 		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		const expected = "update_sharder_settings: number_of_delegates greater than max_delegates of SC: 201 \\u003e 200"
-		require.Equal(t, expected, output[0])
-	})
-
-	t.RunSequentially("Sharder update max_stake more than global max_stake should fail", func(t *test.SystemTest) {
-		currRound := getCurrentRound(t)
-
-		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
-				currRound = getCurrentRound(t)
-			}
-		}
-
-		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":        sharder01ID,
-			"max_stake": mnConfig["max_stake"] + 1e-10,
-			"sharder":   "",
-		}), false)
-		require.NotNil(t, err, "expected error when updating max_store greater than max allowed but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		const expected = "update_sharder_settings: max_stake is greater than allowed by SC: 1000000000001 \\u003e 1000000000000"
-		require.Equal(t, expected, output[0])
-	})
-
-	t.RunSequentially("Sharder update min_stake greater than max_stake should fail", func(t *test.SystemTest) {
-		currRound := getCurrentRound(t)
-
-		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
-				currRound = getCurrentRound(t)
-			}
-		}
-
-		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":        sharder01ID,
-			"max_stake": 48,
-			"min_stake": 51,
-			"sharder":   "",
-		}), false)
-		require.NotNil(t, err, "expected error when trying to update min_stake greater than max stake but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		const expected = "update_sharder_settings: invalid node request results in min_stake greater than max_stake: 510000000000 \\u003e 480000000000"
-		require.Equal(t, expected, output[0])
-	})
-
-	t.RunSequentially("Sharder update min_stake negative value should fail", func(t *test.SystemTest) {
-		currRound := getCurrentRound(t)
-
-		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
-				currRound = getCurrentRound(t)
-			}
-		}
-
-		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":        sharder01ID,
-			"min_stake": -1,
-			"sharder":   "",
-		}), false)
-		require.NotNil(t, err, "expected error when updating negative min_stake but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		const expected = "update_sharder_settings: invalid node request results in min_stake greater than max_stake: 18446744063709551616 \\u003e 980000000000"
-		require.Equal(t, expected, output[0])
-	})
-
-	t.RunSequentially("Sharder update max_stake negative value should fail", func(t *test.SystemTest) {
-		currRound := getCurrentRound(t)
-
-		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
-				currRound = getCurrentRound(t)
-			}
-		}
-
-		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":        sharder01ID,
-			"max_stake": -1,
-			"sharder":   "",
-		}), false)
-		require.NotNil(t, err, "expected error when updating negative max_stake but got output:", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		const expected = "update_sharder_settings: max_stake is greater than allowed by SC: 18446744063709551616 \\u003e 1000000000000"
+		const expected = "update_sharder_settings: number_of_delegates greater than max_delegates of SC: 21 \\u003e 20"
 		require.Equal(t, expected, output[0])
 	})
 
@@ -464,8 +221,8 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder01ID,
