@@ -17,6 +17,7 @@ import (
 
 func TestCreateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Create allocation for locking cost equal to the cost calculated should work")
 
 	t.Parallel()
 
