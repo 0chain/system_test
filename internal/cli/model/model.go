@@ -630,6 +630,7 @@ const (
 	BlockRewardSharder
 	BlockRewardBlobber
 	FeeRewardMiner
+	FeeRewardAuthorizer
 	FeeRewardSharder
 	ValidationReward
 	FileDownloadReward
@@ -645,6 +646,7 @@ var rewardString = []string{
 	"block_reward_sharder",
 	"block_reward_blobber",
 	"fees miner",
+	"fees_authorizer",
 	"fees sharder",
 	"validation reward",
 	"file download reward",

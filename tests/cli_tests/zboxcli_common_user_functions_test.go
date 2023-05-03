@@ -25,6 +25,7 @@ const (
 
 func TestCommonUserFunctions(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Create Allocation - Locked amount must've been withdrawn from user wallet")
 
 	t.Parallel()
 

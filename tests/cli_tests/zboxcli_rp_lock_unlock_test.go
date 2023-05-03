@@ -16,6 +16,7 @@ import (
 
 func TestReadPoolLockUnlock(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Locking read pool tokens moves tokens from wallet to read pool")
 
 	t.Parallel()
 
