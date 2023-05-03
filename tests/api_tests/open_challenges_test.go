@@ -12,6 +12,7 @@ import (
 
 func TestOpenChallenges(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Open Challenges API response should be successful decode given a valid request")
 
 	t.Parallel()
 

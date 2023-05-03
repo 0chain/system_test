@@ -19,6 +19,7 @@ const (
 // todo: enable tests
 func TestBridgeMint(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Mint WZCN tokens")
 
 	t.Parallel()
 

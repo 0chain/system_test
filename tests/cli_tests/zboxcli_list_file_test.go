@@ -25,6 +25,7 @@ var reAuthToken = regexp.MustCompile(`^Auth token :(.*)$`)
 
 func TestListFileSystem(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("No Files in Allocation Should Work")
 
 	t.Parallel()
 

@@ -20,6 +20,7 @@ var settingUpdateSleepTime = time.Second * 60
 
 func TestStorageUpdateConfig(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("should allow update setting updates")
 
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")

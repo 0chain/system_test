@@ -89,6 +89,7 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 
 func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
+	t.SetRunAllTestsAsSmokeTest()
 
 	t.RunWithTimeout("transfer allocation accounting test", 6*time.Minute, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -240,6 +241,7 @@ func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo //
 
 func Test___FlakyFileDelete(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetRunAllTestsAsSmokeTest()
 
 	t.RunWithTimeout("Delete file concurrently in existing directory, should work", 6*time.Minute, func(t *test.SystemTest) { // TODO: slow
 		const allocSize int64 = 2048
@@ -303,6 +305,7 @@ func Test___FlakyFileDelete(testSetup *testing.T) {
 
 func Test___FlakyFileRename(testSetup *testing.T) { // nolint:gocyclo
 	t := test.NewSystemTest(testSetup)
+	t.SetRunAllTestsAsSmokeTest()
 
 	t.Parallel()
 
@@ -407,6 +410,7 @@ func Test___FlakyFileRename(testSetup *testing.T) { // nolint:gocyclo
 
 func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo
 	t := test.NewSystemTest(testSetup)
+	t.SetRunAllTestsAsSmokeTest()
 
 	t.RunWithTimeout("File copy - Users should not be charged for moving a file ", 60*time.Second, func(t *test.SystemTest) { // see https://github.com/0chain/zboxcli/issues/334
 		t.Skip("Test calculations are flaky in  CLI") // FIXME - as per comment

@@ -24,6 +24,7 @@ const MINER_SC_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743f
 
 func TestSendAndBalance(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Send with description")
 
 	t.Parallel()
 

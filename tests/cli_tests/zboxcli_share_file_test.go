@@ -23,6 +23,7 @@ import (
 func TestShareFile(testSetup *testing.T) {
 	//TODO: all share operations take ~40s except for PRE which takes ~2mins 30s!
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Share to public a folder with no encrypted file using auth ticket with zero expiration")
 
 	t.Parallel()
 	t.Run("Share to public a folder with no encrypted file using auth ticket with zero expiration", func(t *test.SystemTest) {

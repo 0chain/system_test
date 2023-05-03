@@ -16,6 +16,7 @@ import (
 
 func TestBlobberAvailability(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("blobber is available switch controls blobber use for allocations")
 
 	t.RunSequentially("blobber is available switch controls blobber use for allocations", func(t *test.SystemTest) {
 		// create and faucet pour tokens

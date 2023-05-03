@@ -15,6 +15,7 @@ import (
 
 func TestFinalizeAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Finalize Expired Allocation Should Work after challenge completion time + expiry")
 
 	t.Parallel()
 

@@ -14,6 +14,7 @@ import (
 
 func TestFileReferencePath(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Get file ref with allocation id, remote path should work")
 
 	t.RunSequentially("Get file ref with allocation id, remote path should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)

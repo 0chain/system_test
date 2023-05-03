@@ -18,6 +18,7 @@ import (
 
 func TestStakeUnstakeTokens(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Staked tokens should move from wallet to Provider's stake pool, unstaking should move tokens back to wallet")
 
 	t.Parallel()
 

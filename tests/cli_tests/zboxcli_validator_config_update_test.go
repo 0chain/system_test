@@ -17,6 +17,7 @@ import (
 
 func TestValidatorConfigUpdate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("update validator number of delegates should work")
 
 	// blobber delegate wallet and validator delegate wallet are same
 	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {

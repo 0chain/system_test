@@ -3,6 +3,7 @@ package tokenomics_tests
 import (
 	"log"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -27,6 +28,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
 	} else {
+		test.SmokeTestMode, _ = strconv.ParseBool(os.Getenv("SMOKE_TEST_MODE"))
 		test.DefaultTestTimeout = defaultTestTimeout
 		log.Printf("Default test case timeout is [%v]", test.DefaultTestTimeout)
 	}

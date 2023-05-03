@@ -15,6 +15,7 @@ import (
 
 func TestReadPoolInfo(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Read pool info testing with json parameter")
 
 	t.Parallel()
 

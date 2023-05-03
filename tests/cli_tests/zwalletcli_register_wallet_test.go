@@ -22,6 +22,7 @@ const (
 
 func TestCreateWallet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Create wallet outputs expected")
 
 	t.Parallel()
 

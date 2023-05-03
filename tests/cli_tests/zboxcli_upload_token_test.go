@@ -19,6 +19,7 @@ const tokenUnit float64 = 1e+10
 
 func TestFileUploadTokenMovement(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Challenge pool should be 0 before any write")
 
 	t.Parallel()
 

@@ -20,6 +20,7 @@ var (
 
 func TestCancelAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Cancel allocation immediately should work")
 
 	t.Parallel()
 

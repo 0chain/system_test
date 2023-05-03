@@ -19,6 +19,7 @@ import (
 
 func TestRecentlyAddedRefs(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Recently Added Refs Should be listed")
 
 	t.Parallel()
 

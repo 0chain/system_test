@@ -25,6 +25,7 @@ const StatusCompletedCB = "Status completed callback"
 func TestDownload(testSetup *testing.T) {
 	//todo: too mnay test cases are slow in here
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Download File from Root Directory Should Work")
 	t.Parallel()
 
 	// Create a folder to keep all the generated files to be uploaded

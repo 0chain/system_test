@@ -20,6 +20,7 @@ import (
 func TestFileUpdate(testSetup *testing.T) {
 	//todo: very slow executions observed
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("update file with thumbnail")
 
 	t.Parallel()
 

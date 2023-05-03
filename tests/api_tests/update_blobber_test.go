@@ -13,6 +13,7 @@ import (
 
 func TestUpdateBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Update blobber in allocation without correct delegated client, shouldn't work")
 
 	t.Parallel()
 

@@ -14,6 +14,7 @@ import (
 
 func TestHashnodeRoot(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Get hashnode root from blobber for an empty allocation should work")
 
 	t.RunSequentially("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)

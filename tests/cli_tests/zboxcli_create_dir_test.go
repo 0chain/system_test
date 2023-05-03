@@ -15,6 +15,7 @@ import (
 
 func TestCreateDir(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("create root dir")
 
 	t.Parallel()
 

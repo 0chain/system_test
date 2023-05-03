@@ -12,6 +12,8 @@ import (
 
 func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Lfmb node hash not modified, should return http 304 and empty body")
+
 	t.Parallel()
 
 	t.Run("Lfmb node hash not modified, should return http 304 and empty body", func(t *test.SystemTest) {

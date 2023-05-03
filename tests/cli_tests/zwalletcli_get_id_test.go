@@ -15,6 +15,7 @@ import (
 
 func TestGetId(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("get miner id should work")
 
 	t.Parallel()
 

@@ -22,6 +22,7 @@ import (
 func TestBlobberChallenge(testSetup *testing.T) {
 	// todo: all of these tests poll for up to 2mins30s - is this reasonable?
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Uploading a file greater than 1 MB should generate randomized challenges")
 
 	output, err := createWallet(t, configPath)
 	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))

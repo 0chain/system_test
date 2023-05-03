@@ -20,6 +20,7 @@ import (
 
 func TestSyncWithBlobbers(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Sync path with 1 file to empty allocation should work")
 
 	t.Parallel()
 
