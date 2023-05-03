@@ -19,6 +19,7 @@ import (
 
 func TestKillBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("killed blobber is not available for allocations")
 
 	// Killing a blobber should make it unavalable for any new allocations,
 	// and stake pools should be slashed by an amount given by the "stakepool.kill_slash" setting
