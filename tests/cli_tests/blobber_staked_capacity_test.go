@@ -131,8 +131,8 @@ func TestStakePool(testSetup *testing.T) {
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"size":   allocSize,
-			"data":   len(blobbersList) / 2,
-			"parity": len(blobbersList) - len(blobbersList)/2,
+			"data":   2,
+			"parity": 2,
 			"lock":   allocationCost + 1,
 			"expire": 5 * time.Minute,
 		}))
