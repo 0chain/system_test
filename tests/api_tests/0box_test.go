@@ -24,6 +24,8 @@ import (
 
 func Test0boxNftCollection(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("List NFT collection id with zero nft collection id  should work")
+
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	defaultBatchSize := 1
@@ -189,6 +191,8 @@ func Test0boxNftCollection(testSetup *testing.T) {
 
 func Test0boxNft(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Get NFT collection with zero nft collection should work")
+
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	defaultBatchSize := 1
@@ -802,6 +806,7 @@ func Test0boxNft(testSetup *testing.T) {
 func Test0Box_share_info(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Post ShareInfo with correct AuthTicket should work properly")
 
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
@@ -1219,6 +1224,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 func Test0Box(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Create a wallet with valid phone number should work")
 
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
@@ -1457,6 +1463,8 @@ func Test0Box(testSetup *testing.T) {
 
 func Test0BoxFCM(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Creating FCM Token with valid credentials should work")
+
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	teardownFCM(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
@@ -1506,6 +1514,7 @@ func Test0BoxFCM(testSetup *testing.T) {
 func Test0BoxWallet(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Get wallet keys should work with wallet present")
 
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
@@ -1819,6 +1828,8 @@ func Test0BoxWallet(testSetup *testing.T) {
 
 func TestDexState(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Create a DEX state with valid phone number should work")
+
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	postData := map[string]string{
