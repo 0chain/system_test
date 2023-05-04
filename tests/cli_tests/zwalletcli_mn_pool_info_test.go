@@ -15,6 +15,7 @@ import (
 
 func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Miner pool info after locking against miner should work")
 
 	t.Parallel()
 

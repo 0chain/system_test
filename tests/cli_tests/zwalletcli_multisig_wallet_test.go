@@ -15,6 +15,7 @@ import (
 
 func TestMultisigWallet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Wallet Creation should succeed when 0 < threshold <= num-signers")
 
 	t.Parallel()
 

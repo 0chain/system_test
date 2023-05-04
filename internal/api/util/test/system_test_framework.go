@@ -9,12 +9,19 @@ import (
 	"time"
 )
 
+<<<<<<< HEAD
 var DefaultTestTimeout = 40 * time.Second
+=======
+var DefaultTestTimeout = 20 * time.Second
+var SmokeTestMode = false
+>>>>>>> 3f329bf4c2dbbd1bbfbaa4ca16a2c97e74774350
 
 type SystemTest struct {
-	Unwrap       *testing.T
-	testComplete bool
-	childTest    bool
+	Unwrap             *testing.T
+	testComplete       bool
+	childTest          bool
+	runAllTestsAsSmoke bool
+	smokeTests         map[string]bool
 }
 
 func NewSystemTest(t *testing.T) *SystemTest {
@@ -52,6 +59,11 @@ func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w
 	s.Unwrap.Helper()
 	timeoutWrappedTestCase := func(testSetup *testing.T) {
 		t := &SystemTest{Unwrap: testSetup, testComplete: false, childTest: true}
+
+		if SmokeTestMode && !s.runAllTestsAsSmoke && !s.smokeTests[name] {
+			t.Skip("Test skipped as it is not a smoke test.")
+		}
+
 		testSetup.Helper()
 		defer handlePanic(t)
 
@@ -59,6 +71,10 @@ func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w
 		wg.Add(1)
 
 		t.Logf("Test case [%s] scheduled at [%s] ", name, time.Now().Format("01-02-2006 15:04:05"))
+
+		if SmokeTestMode && !s.runAllTestsAsSmoke && len(s.smokeTests) < 1 {
+			t.Fatal("No smoke tests were defined for this test file.")
+		}
 
 		testCaseChannel := make(chan struct{}, 1)
 
@@ -251,5 +267,16 @@ func (s *SystemTest) Parallel() {
 		s.Unwrap.Helper()
 		defer handleTestCaseExit()
 		s.Unwrap.Parallel()
+	}
+}
+
+func (s3 *SystemTest) SetRunAllTestsAsSmokeTest() {
+	s3.runAllTestsAsSmoke = true
+}
+
+func (s3 *SystemTest) SetSmokeTests(smokeTests ...string) {
+	s3.smokeTests = make(map[string]bool)
+	for _, v := range smokeTests {
+		s3.smokeTests[v] = true
 	}
 }

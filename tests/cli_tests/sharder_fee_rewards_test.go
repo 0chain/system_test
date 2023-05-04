@@ -13,7 +13,8 @@ import (
 
 func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
-	t.Skip("Skip till chain-side bugs are resolved")
+
+	t.Skip("wait for duplicate transaction issue to be solved, https://github.com/0chain/0chain/issues/2348")
 
 	// Take a snapshot of the chains sharders, then repeat a transaction with a fee a few times, take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
@@ -25,10 +26,15 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunWithTimeout("Sharder share of fee rewards for transactions", 500*time.Second, func(t *test.SystemTest) {
-		walletId := initialiseTest(t, escapedTestName(t)+"_TARGET", true)
-		output, err := executeFaucetWithTokens(t, configPath, 10)
+	t.RunSequentially("Sharder share of fee rewards for transactions", func(t *test.SystemTest) {
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		wallet, err := getWalletForName(t, configPath, escapedTestName(t)+"_TARGET")
+		require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
 		if !confirmDebugBuild(t) {
 			t.Skip("sharder fee rewards test skipped as it requires a debug event database")
@@ -38,18 +44,18 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		sharderUrl := getSharderUrl(t)
-		sharderIds := getSortedSharderIds(t, sharderUrl)
-		require.True(t, len(sharderIds) > 1, "this test needs at least two sharders")
-
-		beforeSharders := getNodes(t, sharderIds, sharderUrl)
+		var sharderIds []string
+		var beforeSharders climodel.NodeList
+		sharderIds, beforeSharders = waitForNSharder(t, sharderUrl, 1)
 
 		// ------------------------------------
 		const numPaidTransactions = 3
 		const fee = 0.1
 		for i := 0; i < numPaidTransactions; i++ {
-			output, err := sendTokens(t, configPath, walletId, 0.5, escapedTestName(t), fee)
-			require.Nil(t, err, "error sending tokens", strings.Join(output, "\n"))
+			output, err := sendTokens(t, configPath, wallet.ClientID, 0.5, escapedTestName(t), fee)
+			require.NoError(t, err, "error sending tokens", strings.Join(output, "\n"))
 		}
+		time.Sleep(time.Second) // give time for last round to be saved
 		// ------------------------------------
 
 		afterSharders := getNodes(t, sharderIds, sharderUrl)
@@ -161,13 +167,15 @@ func checkSharderFeeAmounts(
 				}
 				switch pReward.RewardType {
 				case climodel.FeeRewardSharder:
+					require.Falsef(t, beforeSharders[i].IsKilled,
+						"killed sharders cannot receive fees, %s is killed", id)
 					require.Greaterf(t, feesForSharder, int64(0), "fee reward with no fees, reward %v", pReward)
 					feeRewards += pReward.Amount
 					recordedRoundRewards += pReward.Amount
 				case climodel.BlockRewardSharder:
 					blockRewards += pReward.Amount
 				default:
-					require.Failf(t, "reward type %s is not available for sharders", pReward.RewardType.String())
+					require.Failf(t, "", "reward type %s is not available for sharders", pReward.RewardType.String())
 				}
 			}
 			// If sharder is one of the chosen sharders, check fee payment is correct
@@ -301,7 +309,7 @@ func checkSharderDelegatePoolFeeAmounts(
 					rewards[dReward.PoolID] += dReward.Amount
 				default:
 					require.Failf(t, "mismatched reward type",
-						"reward type %s not paid to sharder delegate pools", dReward.RewardType)
+						"", "reward type %s not paid to sharder delegate pools", dReward.RewardType)
 				}
 			}
 			if fees > 0 {
