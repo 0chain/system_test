@@ -99,7 +99,7 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 	require.Len(t, output, 1)
 
 	// Get the allocation ID and return it
-	allocationID, err := getAllocationID(output[0])
+	allocationID, err := GetAllocationID(output[0])
 	require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 	return allocationID
@@ -152,7 +152,7 @@ func setupWallet(t *test.SystemTest, configPath string) []string {
 	return output
 }
 
-func createNewAllocation(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
+func CreateNewAllocation(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	return CreateNewAllocationForWallet(t, EscapedTestName(t), cliConfigFilename, params)
 }
 
@@ -271,7 +271,7 @@ func listAllFilesInAllocation(t *test.SystemTest, cliConfigFilename, param strin
 	}
 }
 
-func getAllocationID(str string) (string, error) {
+func GetAllocationID(str string) (string, error) {
 	match := createAllocationRegex.FindStringSubmatch(str)
 	if len(match) < 2 {
 		return "", errors.New("allocation match not found")
