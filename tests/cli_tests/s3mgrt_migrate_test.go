@@ -17,7 +17,7 @@ func TestS3Migration(testSetup *testing.T) {
 		t.Skip("s3SecretKey or s3AccessKey was missing")
 	}
 
-	t.RunSequentiallyWithTimeout("Should migrate existing bucket successfully", 15*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Should migrate existing bucket successfully", 3*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(1 * GB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
