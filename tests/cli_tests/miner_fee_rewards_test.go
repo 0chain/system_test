@@ -15,8 +15,6 @@ import (
 func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	t.Skip("wait for duplicate transaction issue to be solved, https://github.com/0chain/0chain/issues/2348")
-
 	// Take a snapshot of the chains miners, repeat a transaction with a fee a few times,
 	// take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
@@ -28,55 +26,55 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunSequentially("Miner share of fee rewards for transactions", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+	//	t.RunSequentially("Miner share of fee rewards for transactions", func(t *test.SystemTest) {
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	output, err = executeFaucetWithTokens(t, configPath, 10)
+	require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		wallet, err := getWalletForName(t, configPath, escapedTestName(t)+"_TARGET")
-		require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
+	wallet, err := getWalletForName(t, configPath, escapedTestName(t)+"_TARGET")
+	require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
 
-		if !confirmDebugBuild(t) {
-			t.Skip("miner fee rewards test skipped as it requires a debug event database")
-		}
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	if !confirmDebugBuild(t) {
+		t.Skip("miner fee rewards test skipped as it requires a debug event database")
+	}
+	output, err = executeFaucetWithTokens(t, configPath, 10)
+	require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		sharderUrl := getSharderUrl(t)
-		minerIds := getSortedMinerIds(t, sharderUrl)
-		require.True(t, len(minerIds) > 0, "no miners found")
+	sharderUrl := getSharderUrl(t)
+	minerIds := getSortedMinerIds(t, sharderUrl)
+	require.True(t, len(minerIds) > 0, "no miners found")
 
-		beforeMiners := getNodes(t, minerIds, sharderUrl)
+	beforeMiners := getNodes(t, minerIds, sharderUrl)
 
-		// ------------------------------------
-		const numPaidTransactions = 3
-		const fee = 0.1
-		for i := 0; i < numPaidTransactions; i++ {
-			output, err := sendTokens(t, configPath, wallet.ClientID, 0.5, escapedTestName(t), fee)
-			require.NoError(t, err, "error sending tokens", strings.Join(output, "\n"))
-		}
-		time.Sleep(time.Second) // give time for last round to be saved
-		// ------------------------------------
+	// ------------------------------------
+	const numPaidTransactions = 3
+	const fee = 0.1
+	for i := 0; i < numPaidTransactions; i++ {
+		output, err := sendTokens(t, configPath, wallet.ClientID, 0.5, escapedTestName(t), fee)
+		require.NoError(t, err, "error sending tokens", strings.Join(output, "\n"))
+	}
+	time.Sleep(time.Second) // give time for last round to be saved
+	// ------------------------------------
 
-		afterMiners := getNodes(t, minerIds, sharderUrl)
+	afterMiners := getNodes(t, minerIds, sharderUrl)
 
-		// we add rewards at the end of the round, and they don't appear until the next round
+	// we add rewards at the end of the round, and they don't appear until the next round
 
-		startRound, endRound := getStartAndEndRounds(
-			t, beforeMiners.Nodes, afterMiners.Nodes, nil, nil,
-		)
+	startRound, endRound := getStartAndEndRounds(
+		t, beforeMiners.Nodes, afterMiners.Nodes, nil, nil,
+	)
 
-		time.Sleep(time.Second) // give time for last round to be saved
+	time.Sleep(time.Second) // give time for last round to be saved
 
-		history := cliutil.NewHistory(startRound, endRound)
-		history.Read(t, sharderUrl, true)
+	history := cliutil.NewHistory(startRound, endRound)
+	history.Read(t, sharderUrl, true)
 
-		balanceMinerIncome(
-			t, startRound, endRound, minerIds, beforeMiners.Nodes, afterMiners.Nodes, history,
-		)
-	})
+	balanceMinerIncome(
+		t, startRound, endRound, minerIds, beforeMiners.Nodes, afterMiners.Nodes, history,
+	)
+	//})
 }
 
 func balanceMinerIncome(
