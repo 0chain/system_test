@@ -884,10 +884,21 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 			options[k] = v
 		}
 	}
+	faucetTokens = 9.0
 	// First create a wallet and run faucet command
 	output, err := createWalletForName(t, cliConfigFilename, walletName)
 	require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
+	output, err = executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	output, err = executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	output, err = executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	output, err = executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	output, err = executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	output, err = executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
