@@ -20,6 +20,7 @@ import (
 
 func TestBlobberCollectRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Test collect reward with valid pool and blobber id should pass")
 
 	t.Parallel()
 
@@ -28,8 +29,8 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	require.Nil(t, err)
 
 	t.Run("Test collect reward with valid pool and blobber id should pass", func(t *test.SystemTest) { // TODO slow
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
@@ -42,11 +43,11 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 		filesize := int64(256)
 		remotepath := "/"
 
-		// Use all 6 blobbers
+		// Use all blobbers
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
-			"data":   4,
+			"data":   3,
 			"parity": 1,
 			"expire": "30m",
 		})
@@ -115,8 +116,8 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 
 	t.Run("Test collect reward with invalid blobber id should fail", func(t *test.SystemTest) {
 		t.Skip("piers")
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -152,8 +153,8 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 
 	t.Run("Test collect reward with invalid provider type should fail", func(t *test.SystemTest) {
 		t.Skip("piers")
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -189,8 +190,8 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 
 	t.Run("Test collect reward with no provider id or type should fail", func(t *test.SystemTest) {
 		t.Skip("piers")
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err)
@@ -201,12 +202,13 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 
 func TestValidatorCollectRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Test collect reward with valid pool and validator id should pass")
 
 	t.Parallel()
 
 	t.RunWithTimeout("Test collect reward with valid pool and validator id should pass", 600*time.Second, func(t *test.SystemTest) { // TODO slow
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
@@ -302,8 +304,8 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with invalid validator id should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -338,8 +340,8 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with invalid provider type should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -374,8 +376,8 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with no provider id or type should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err)
