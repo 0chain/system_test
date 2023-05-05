@@ -127,7 +127,7 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) (tmpFile
 	require.NoError(t, err)
 
 	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
-		fileMeta, buf, false, false)
+		fileMeta, buf, false, false, false)
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
 

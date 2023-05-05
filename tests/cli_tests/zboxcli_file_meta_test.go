@@ -19,6 +19,7 @@ import (
 
 func TestFileMetadata(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Get Folder Meta in Non-Empty Directory Should Work")
 
 	t.Parallel()
 

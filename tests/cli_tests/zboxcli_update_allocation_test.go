@@ -26,6 +26,7 @@ var (
 
 func TestUpdateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Update Expiry Should Work")
 
 	t.Parallel()
 

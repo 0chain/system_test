@@ -15,6 +15,7 @@ import (
 
 func TestRemoveBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Remove blobber in allocation, shouldn't work")
 
 	t.Parallel()
 

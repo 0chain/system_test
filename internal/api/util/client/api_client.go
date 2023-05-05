@@ -929,6 +929,7 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 			Value:           tokenomics.IntToZCN(lockValue),
 		},
 		HttpOkStatus)
+	t.Log("THe blobber requirements and blobber are %s", scRestGetAllocationBlobbersResponse)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, createAllocationTransactionPutResponse)

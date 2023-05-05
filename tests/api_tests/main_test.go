@@ -3,6 +3,7 @@ package api_tests
 import (
 	"log"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -45,6 +46,7 @@ func TestMain(m *testing.M) {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
 	} else {
 		test.DefaultTestTimeout = defaultTestTimeout
+		test.SmokeTestMode, _ = strconv.ParseBool(os.Getenv("SMOKE_TEST_MODE"))
 		log.Printf("Default test case timeout is [%v]", test.DefaultTestTimeout)
 	}
 
@@ -54,11 +56,14 @@ func TestMain(m *testing.M) {
 	sdkWallet = apiClient.CreateWalletForMnemonic(t, sdkWalletMnemonics)
 	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
 
-	// blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics
-	// blobberOwnerWallet = apiClient.RegisterWalletForMnemonic(t, blobberOwnerWalletMnemonics)
+	blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics
+	blobberOwnerWallet = apiClient.CreateWalletForMnemonic(t, blobberOwnerWalletMnemonics)
 
-	// ownerWalletMnemonics = parsedConfig.OwnerWalletMnemonics
-	// ownerWallet = apiClient.RegisterWalletForMnemonic(t, ownerWalletMnemonics)
+	ownerWalletMnemonics = parsedConfig.OwnerWalletMnemonics
+	ownerWallet = apiClient.CreateWalletForMnemonic(t, ownerWalletMnemonics)
+
+	// blobberOwnerWallet = &model.Wallet{}
+	// ownerWallet = &model.Wallet{}
 
 	os.Exit(m.Run())
 }

@@ -16,6 +16,7 @@ import (
 
 func TestFaucetUpdateConfig(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("should allow update of max_pour_amount")
 
 	// create SC owner wallet
 	output, err := createWalletForName(t, configPath, scOwnerWallet)

@@ -12,6 +12,7 @@ import (
 
 func TestCreateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Create allocation API call should be successful given a valid request")
 
 	t.Parallel()
 
