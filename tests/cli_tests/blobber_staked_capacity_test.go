@@ -165,7 +165,7 @@ func TestStakePool(testSetup *testing.T) {
 
 		totalOffersNew := blInfo.TotalOffers
 		fmt.Println("totalOffersNew", totalOffersNew, "totalOffers", totalOffers)
-		//require.Greater(t, totalOffersNew, totalOffers, "Total Offers should Increase")
+		require.Greater(t, totalOffersNew, totalOffers, "Total Offers should Increase")
 
 		_, err = createWalletForName(t, configPath, newStakeWallet)
 		require.Nil(t, err, "Error registering wallet", err)
