@@ -117,7 +117,7 @@ func TestStakePool(testSetup *testing.T) {
 		// This requires creating an allocation of capacity = available capacity of blobber which has minimum
 		// available capacity. For example, if 3 blobbers have 4 GB, 5 GB and 6 GB available,
 		// the max allocation they all can honor is of 4 GB.
-		allocSize := minAvailableCapacity + 20*GB - 100000
+		allocSize := minAvailableCapacity*2 + 20*GB - 200000
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"cost":        "",
 			"data":        2,
