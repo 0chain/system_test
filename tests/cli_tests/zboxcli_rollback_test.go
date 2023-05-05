@@ -23,7 +23,6 @@ func TestRollbackAllocation(testSetup *testing.T) {
 	require.Nil(t, err)
 
 	t.RunSequentially("rollback allocation after updating a file should work", func(t *test.SystemTest) {
-		t.Skip("Skipping")
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   4 * MB,
@@ -86,7 +85,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("rollback allocation after deleting a file should work", func(t *test.SystemTest) {
-		t.Skip("Skipping")
+
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * MB,
 			"tokens": 9,
@@ -99,7 +98,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		originalFileChecksum := generateChecksum(t, filename)
 		fname := filepath.Base(filename)
 		remoteFilePath := path.Join(remotepath, fname)
-
+		time.Sleep(1 * time.Second)
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteFilePath,
@@ -142,7 +141,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("rollback allocation after moving a file should work", func(t *test.SystemTest) {
-		t.Skip("Skipping")
+
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -277,7 +276,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
-
+		time.Sleep(1 * time.Second)
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
