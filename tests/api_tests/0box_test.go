@@ -2053,10 +2053,10 @@ func TestDexState(testSetup *testing.T) {
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	// Faucet the used wallets
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 100; i++ {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 	}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 100; i++ {
 		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
 	}
 	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
