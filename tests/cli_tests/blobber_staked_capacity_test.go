@@ -49,7 +49,7 @@ func TestStakePool(testSetup *testing.T) {
 
 			stakedCapacity := int64(float64(blInfo.TotalStake) * GB / float64(blInfo.Terms.WritePrice))
 
-			require.GreaterOrEqual(t, stakedCapacity, uint64(blobber.Allocated), "Staked capacity should be greater than allocated capacity")
+			require.GreaterOrEqual(t, stakedCapacity, blobber.Allocated, "Staked capacity should be greater than allocated capacity")
 
 			fmt.Println("stakedCapacity", stakedCapacity)
 
