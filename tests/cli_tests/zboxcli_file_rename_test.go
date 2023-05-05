@@ -657,7 +657,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock":   "5",
+			"lock":   "50",
 			"size":   4 * MB,
 			"expire": "1h",
 		})

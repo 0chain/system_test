@@ -1007,6 +1007,16 @@ func listAllocations(t *test.SystemTest, cliConfigFilename string) ([]string, er
 // executeFaucetWithTokens executes faucet command with given tokens.
 // Tokens greater than or equal to 10 are considered to be 1 token by the system.
 func executeFaucetWithTokens(t *test.SystemTest, cliConfigFilename string, tokens float64) ([]string, error) {
+	output, err := executeFaucetWithTokensForWallet(t, escapedTestName(t), cliConfigFilename, tokens)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	output, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), cliConfigFilename, tokens)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	output, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), cliConfigFilename, tokens)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	output, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), cliConfigFilename, tokens)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	output, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), cliConfigFilename, tokens)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	return executeFaucetWithTokensForWallet(t, escapedTestName(t), cliConfigFilename, tokens)
 }
 

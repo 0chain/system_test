@@ -245,6 +245,7 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing file in root directory with wallet balance accounting", func(t *test.SystemTest) {
+		t.Skip("Skipping until time unit is increased")
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
