@@ -117,7 +117,7 @@ func TestStakePool(testSetup *testing.T) {
 		// This requires creating an allocation of capacity = available capacity of blobber which has minimum
 		// available capacity. For example, if 3 blobbers have 4 GB, 5 GB and 6 GB available,
 		// the max allocation they all can honor is of 4 GB.
-		allocSize := minAvailableCapacity + 30*GB - 100000
+		allocSize := minAvailableCapacity + 20*GB - 100000
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"cost":        "",
 			"data":        2,
@@ -132,9 +132,11 @@ func TestStakePool(testSetup *testing.T) {
 		allocationCost, err := getAllocationCost(output[0])
 		require.Nil(t, err, "could not get allocation cost")
 
+		fmt.Println("allocationCost", allocationCost)
+
 		// Matching the wallet balance to allocationCost by executing faucet with tokens
 		// As max limit of faucet is 9 tokens we are executing faucet with 9 tokens multiple times till wallet balance is equal to allocationCost
-		for i := float64(0); i < (allocationCost/9)+1; i++ {
+		for i := float64(0); i <= (allocationCost/9)+1; i++ {
 			_, err = executeFaucetWithTokens(t, configPath, 9)
 			require.Nil(t, err, "Error executing faucet with tokens", err)
 		}
