@@ -53,6 +53,8 @@ github.com/0chain/errors v1.0.3/go.mod h1:xymD6nVgrbgttWwkpSCfLLEJbFO6iHGQwk/yeS
 github.com/0chain/gorocksdb v0.0.0-20220406081817-640f6b0a3abb h1:FOnCz8xXwqo6cJZpI83T9x/kmjbT0YdYqxzSHIVkMGs=
 github.com/0chain/gosdk v1.8.16-0.20230421202728-a85405662c7b h1:4m2rIdZEpFz3MFHmhOL5frxnjOwp7r5BTS7PHqZGS3U=
 github.com/0chain/gosdk v1.8.16-0.20230421202728-a85405662c7b/go.mod h1:M6w85eHWXn3v7yp4kdM+VrQG0ftuLpKlj/wsEzDOKho=
+github.com/0chain/gosdk v1.8.16-0.20230504143843-807fd7b5672c h1:H0MV1Ez21eMfHsHokbWqFm9UomGooDbDeCwIFSdAFf0=
+github.com/0chain/gosdk v1.8.16-0.20230504143843-807fd7b5672c/go.mod h1:z4IjdbQz1dhcM6wdKQWjUYmHoQw3k44QNatb+vdKFAA=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802 h1:1BDTz0u9nC3//pOCMdNH+CiXJVYJh5UQNCOBG7jbELc=
