@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"strings"
 	"testing"
@@ -35,10 +36,31 @@ func TestStakePool(testSetup *testing.T) {
 		minAvailableCapacity := int64(math.MaxInt64)
 
 		for _, blobber := range blobbersList {
-			if blobber.Capacity-blobber.Allocated < minAvailableCapacity {
-				minAvailableCapacity = blobber.Capacity - blobber.Allocated
-				minAvailableCapacityBlobber = blobber
+			if blobber.IsKilled || blobber.IsShutdown {
+				continue
 			}
+
+			output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": blobber.Id}))
+			require.Nil(t, err, "Error fetching blobber info", strings.Join(output, "\n"))
+
+			var blInfo climodel.BlobberInfo
+			err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
+			require.Nil(t, err, "error unmarshalling blobber info")
+
+			stakedCapacity := int64(float64(blInfo.TotalStake) * GB / float64(blInfo.Terms.WritePrice))
+
+			require.GreaterOrEqual(t, stakedCapacity, uint64(blobber.Allocated), "Staked capacity should be greater than allocated capacity")
+
+			fmt.Println("stakedCapacity", stakedCapacity)
+
+			stakedCapacity -= blobber.Allocated
+
+			if stakedCapacity < minAvailableCapacity {
+				minAvailableCapacity = stakedCapacity
+				minAvailableCapacityBlobber = blInfo
+			}
+
+			fmt.Println("minAvailableCapacity", minAvailableCapacity)
 		}
 
 		output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": minAvailableCapacityBlobber.Id}))
@@ -68,8 +90,13 @@ func TestStakePool(testSetup *testing.T) {
 		_, err = executeFaucetWithTokens(t, configPath, 9)
 		require.Nil(t, err, "Error executing faucet with tokens", err)
 
-		_, err = stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id, "tokens": 1}), true)
-		require.Nil(t, err, "Error staking tokens", err)
+		for _, blobber := range blobbersList {
+			if blobber.IsKilled || blobber.IsShutdown {
+				continue
+			}
+			_, err = stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id, "tokens": 1}), true)
+			require.Nil(t, err, "Error staking tokens", err)
+		}
 
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": minAvailableCapacityBlobber.Id,
@@ -90,15 +117,15 @@ func TestStakePool(testSetup *testing.T) {
 		// This requires creating an allocation of capacity = available capacity of blobber which has minimum
 		// available capacity. For example, if 3 blobbers have 4 GB, 5 GB and 6 GB available,
 		// the max allocation they all can honor is of 4 GB.
-		allocSize := minAvailableCapacity - 100000
+		allocSize := minAvailableCapacity + 30*GB - 100000
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"cost":        "",
-			"data":        len(blobbersList) / 2,
-			"parity":      len(blobbersList) - len(blobbersList)/2,
-			"expire":      "5s",
+			"data":        2,
+			"parity":      2,
+			"expire":      "5m",
 			"size":        allocSize,
-			"read_price":  "0-1",
-			"write_price": "0-1",
+			"read_price":  "0-0.1",
+			"write_price": "0-0.1",
 		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -115,11 +142,11 @@ func TestStakePool(testSetup *testing.T) {
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"size":        allocSize,
 			"data":        2,
-			"parity":      len(blobbersList) - 2,
+			"parity":      2,
 			"lock":        allocationCost + 1,
 			"expire":      "5m",
-			"read_price":  "0-1",
-			"write_price": "0-1",
+			"read_price":  "0-0.1",
+			"write_price": "0-0.1",
 		}))
 		require.Nil(t, err, "Error creating new allocation", err)
 
