@@ -170,7 +170,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
-
+		time.Sleep(1 * time.Second)
 		// move file
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
