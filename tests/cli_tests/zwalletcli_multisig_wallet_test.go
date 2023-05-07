@@ -110,14 +110,31 @@ func TestMultisigWallet(testSetup *testing.T) {
 
 func createMultiSigWallet(t *test.SystemTest, cliConfigFilename string, numSigners, threshold int, retry bool) ([]string, error) {
 	t.Logf("Creating multisig wallet...")
+	name := escapedTestName(t) + "_wallet.json"
 	cmd := fmt.Sprintf(
 		"./zwallet createmswallet --numsigners %d --threshold %d --silent --wallet %s --configDir ./config --config %s",
 		numSigners, threshold,
-		escapedTestName(t)+"_wallet.json",
+		name,
 		cliConfigFilename)
 	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+		output, err := cliutils.RunCommand(t, cmd, 3, time.Second*2)
+		if err != nil {
+			return output, err
+		}
+
+		o, err := executeFaucetWithTokensForWallet(t, name, cliConfigFilename, defaultInitFaucetTokens)
+		t.Logf("faucet output: %v", o)
+
+		return output, err
 	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
+		output, err := cliutils.RunCommandWithoutRetry(cmd)
+		if err != nil {
+			return output, err
+		}
+
+		o, _ := executeFaucetWithTokensForWallet(t, name, cliConfigFilename, defaultInitFaucetTokens)
+		t.Logf("faucet output: %v", o)
+
+		return output, err
 	}
 }
