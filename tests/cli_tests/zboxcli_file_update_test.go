@@ -20,6 +20,7 @@ import (
 func TestFileUpdate(testSetup *testing.T) {
 	//todo: very slow executions observed
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("update file with thumbnail")
 
 	t.Parallel()
 
@@ -63,8 +64,8 @@ func TestFileUpdate(testSetup *testing.T) {
 		// Logic: Upload a 1 MB file, get the write pool info. Update said file with another file
 		// of size 1 MB. Get write pool info and check nothing has been deducted.
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))

@@ -24,17 +24,18 @@ const MINER_SC_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743f
 
 func TestSendAndBalance(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Send with description")
 
 	t.Parallel()
 
 	t.Run("Send with description", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWallet)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
@@ -50,11 +51,11 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send with json flag", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWallet)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
@@ -76,11 +77,11 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Balance checks before and after ZCN sent", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWallet)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
@@ -88,7 +89,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		// Before send balance checks
 		srcBalanceBefore, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
-		require.Equal(t, 4.9, srcBalanceBefore)
+		require.Equal(t, 5.0, srcBalanceBefore)
 
 		_, err = getBalanceForWallet(t, configPath, targetWallet)
 		require.NoError(t, err)
@@ -106,7 +107,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		// After send balance checks
 		srcBalanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 3.89, srcBalanceAfter)
+		require.Equal(t, 3.99, srcBalanceAfter)
 
 		targetBalanceAfter, err := getBalanceZCN(t, configPath, targetWallet)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", targetWallet, strings.Join(output, "\n"))
@@ -114,8 +115,8 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send without description should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		output, err = cliutils.RunCommandWithoutRetry("./zwallet send --silent --tokens 1" +
 			" --to_client_id 7ec733204418d72b68e3579bdf55881b1528c676850976920de3f73e45d4fafa" +
@@ -131,11 +132,11 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt on zero ZCN wallet should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := registerWallet(t, configPath, withNoFaucetPour())
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath, withNoFaucetPour())
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWallet)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
@@ -150,8 +151,8 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send attempt to invalid address should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		invalidClientID := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabb" // more than 64 chars
 		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
@@ -167,11 +168,11 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send with zero token should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWallet)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
@@ -187,14 +188,14 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt to exceeding balance should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
-		output, err = registerWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWallet)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
@@ -212,11 +213,11 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt with negative token should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWallet)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
@@ -233,11 +234,11 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt with very long description should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
-		output, err = registerWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWallet)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
@@ -259,8 +260,8 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send attempt to self should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Get wallet failed", strings.Join(output, "\n"))

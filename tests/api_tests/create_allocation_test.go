@@ -12,11 +12,12 @@ import (
 
 func TestCreateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Create allocation API call should be successful given a valid request")
 
 	t.Parallel()
 
 	t.Run("Create allocation API call should be successful given a valid request", func(t *test.SystemTest) {
-		wallet := apiClient.RegisterWallet(t)
+		wallet := apiClient.CreateWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)

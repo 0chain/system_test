@@ -14,6 +14,7 @@ import (
 
 func TestRecoverWallet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Recover wallet valid mnemonic")
 
 	t.Parallel()
 

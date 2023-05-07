@@ -3,6 +3,7 @@ package api_tests
 import (
 	"log"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -41,13 +42,14 @@ func TestMain(m *testing.M) {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
 	} else {
 		test.DefaultTestTimeout = defaultTestTimeout
+		test.SmokeTestMode, _ = strconv.ParseBool(os.Getenv("SMOKE_TEST_MODE"))
 		log.Printf("Default test case timeout is [%v]", test.DefaultTestTimeout)
 	}
 
 	t := test.NewSystemTest(new(testing.T))
 
 	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
-	sdkWallet = apiClient.RegisterWalletForMnemonic(t, sdkWalletMnemonics)
+	sdkWallet = apiClient.CreateWalletForMnemonic(t, sdkWalletMnemonics)
 	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
 
 	os.Exit(m.Run())

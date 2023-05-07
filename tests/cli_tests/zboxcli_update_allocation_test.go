@@ -26,6 +26,7 @@ var (
 
 func TestUpdateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Update Expiry Should Work")
 
 	t.Parallel()
 
@@ -209,7 +210,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	// TODO is it normal to create read pool?
 	t.Run("Update Non-existent Allocation Should Fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		allocationID := "123abc"
@@ -279,8 +280,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		myAllocationID := setupAllocation(t, configPath)
 
 		targetWalletName := escapedTestName(t) + "_TARGET"
-		output, err := registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err := createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		size := int64(2048)
 
@@ -351,7 +352,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Update Allocation flags for forbid and allow file_options should succeed", 8*time.Minute, func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 		_, err = executeFaucetWithTokens(t, configPath, 9)
 		require.NoError(t, err)
@@ -672,8 +673,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		// expand allocation
 		params = createParams(map[string]interface{}{
@@ -709,8 +710,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 		_, err = executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 3.0)
 		require.Nil(t, err)
 
@@ -752,8 +753,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 		_, err = executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 3.0)
 		require.Nil(t, err)
 
@@ -884,8 +885,8 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 		}
 	}
 	// First create a wallet and run faucet command
-	output, err := registerWalletForName(t, cliConfigFilename, walletName)
-	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+	output, err := createWalletForName(t, cliConfigFilename, walletName)
+	require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))

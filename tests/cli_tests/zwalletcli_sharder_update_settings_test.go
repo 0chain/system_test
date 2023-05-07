@@ -20,6 +20,8 @@ const sharderAccessDenied = "update_sharder_settings: access denied"
 
 func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic complexity 50 of func `
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Sharder update num_delegates by delegate wallet should work")
+
 	mnConfig := getMinerSCConfiguration(t)
 
 	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
@@ -219,8 +221,8 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder01ID,

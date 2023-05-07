@@ -17,6 +17,7 @@ import (
 
 func TestCreateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Create allocation for locking cost equal to the cost calculated should work")
 
 	t.Parallel()
 
@@ -420,7 +421,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 }
 
 func setupWallet(t *test.SystemTest, configPath string) []string {
-	output, err := registerWallet(t, configPath)
+	output, err := createWallet(t, configPath)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokens(t, configPath, 1)

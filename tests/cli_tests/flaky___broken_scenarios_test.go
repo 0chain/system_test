@@ -332,8 +332,8 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 
 	// FIXME: WRITEPOOL TOKEN ACCOUNTING
 	t.Run("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
@@ -409,8 +409,8 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 
 	// FIXME: add param validation
 	// t.Run("Upload from local webcam feed with a negative chunksize should fail", func(t *test.SystemTest) {
-	// 	output, err := registerWallet(t, configPath)
-	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+	// 	output, err := createWallet(t, configPath)
+	// 	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
 	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -448,8 +448,8 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 	// t.Run("Upload from youtube feed with a negative chunksize should fail", func(t *test.SystemTest) {
 	//
 
-	// 	output, err := registerWallet(t, configPath)
-	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+	// 	output, err := createWallet(t, configPath)
+	// 	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
 	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -486,8 +486,8 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 
 	// FIXME: add param validation
 	// t.Run("Uploading youtube feed with negative delay should fail", func(t *test.SystemTest) {
-	// 	output, err := registerWallet(t, configPath)
-	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+	// 	output, err := createWallet(t, configPath)
+	// 	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
 	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -521,8 +521,8 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 
 	// FIXME: add param validation
 	// t.Run("Uploading local webcam feed with negative delay should fail", func(t *test.SystemTest) {
-	// 	output, err := registerWallet(t, configPath)
-	// 	require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+	// 	output, err := createWallet(t, configPath)
+	// 	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 	// 	output, err = executeFaucetWithTokens(t, configPath, 2.0)
 	// 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))

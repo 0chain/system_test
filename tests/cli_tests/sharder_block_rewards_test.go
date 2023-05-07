@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -13,7 +14,6 @@ import (
 
 func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
-	t.Skip("Skip till chain-side bugs are resolved")
 
 	// Take a snapshot of the chains sharders, then wait a few seconds, take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
@@ -27,17 +27,18 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunWithTimeout("Sharder share of block rewards", 500*time.Second, func(t *test.SystemTest) {
-		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+	t.RunSequentially("Sharder share of block rewards", func(t *test.SystemTest) {
+		output, err := createWallet(t, configPath)
+		require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
 		if !confirmDebugBuild(t) {
 			t.Skip("sharder block rewards test skipped as it requires a debug event database")
 		}
 
 		sharderUrl := getSharderUrl(t)
-		sharderIds := getSortedSharderIds(t, sharderUrl)
-		require.True(t, len(sharderIds) > 1, "this test needs at least two sharders")
-
-		beforeSharders := getNodes(t, sharderIds, sharderUrl)
+		var sharderIds []string
+		var beforeSharders climodel.NodeList
+		sharderIds, beforeSharders = waitForNSharder(t, sharderUrl, 1)
 
 		// ----------------------------------- w
 		time.Sleep(time.Second * 3)
@@ -136,6 +137,8 @@ func checkSharderBlockRewards(
 				}
 				switch pReward.RewardType {
 				case climodel.BlockRewardSharder:
+					require.Falsef(t, beforeSharders[i].IsKilled,
+						"killed sharders cannot receive rewards, %s is killed", id)
 					var expectedServiceCharge int64
 					payAllToSharder := len(beforeSharders[i].StakePool.Pools) == 0 || numSharderDelegatesRewarded == 0
 					if payAllToSharder {
@@ -148,7 +151,7 @@ func checkSharderBlockRewards(
 				case climodel.FeeRewardSharder:
 					rewards += pReward.Amount
 				default:
-					require.Failf(t, "reward type %s not available to sharders", pReward.RewardType.String())
+					require.Failf(t, "", "reward type %s not available to sharders", pReward.RewardType.String())
 				}
 			}
 		}
@@ -258,7 +261,7 @@ func balanceSharderDelegatePoolBlockRewards(
 				case climodel.FeeRewardSharder:
 					rewards[dReward.PoolID] += dReward.Amount
 				default:
-					require.Failf(t, "reward type %s not available to sharders stake pools;"+
+					require.Failf(t, "", "reward type %s not available to sharders stake pools;"+
 						" received by sharder %s on round %d", dReward.RewardType.String(), &dReward.PoolID, round)
 				}
 			}
@@ -276,4 +279,26 @@ func balanceSharderDelegatePoolBlockRewards(
 
 func getSortedSharderIds(t *test.SystemTest, sharderBaseURL string) []string {
 	return getSortedNodeIds(t, "getSharderList", sharderBaseURL)
+}
+
+func waitForNSharder(t *test.SystemTest, sharderUrl string, n int) ([]string, climodel.NodeList) {
+	var sharderIds []string
+	timer := time.Now()
+	for {
+		sharderIds = getSortedSharderIds(t, sharderUrl)
+		if len(sharderIds) > 0 {
+			count := 0
+			sharders := getNodes(t, sharderIds, sharderUrl)
+			for i := range sharders.Nodes {
+				if !sharders.Nodes[i].IsKilled {
+					count++
+					if count >= n {
+						return sharderIds, sharders
+					}
+				}
+			}
+		}
+		t.Logf("no registered sharders found, waiting for %v...", time.Since(timer))
+		cliutil.Wait(t, time.Second)
+	}
 }

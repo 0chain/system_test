@@ -20,6 +20,7 @@ var (
 
 func TestCancelAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Cancel allocation immediately should work")
 
 	t.Parallel()
 
@@ -36,8 +37,8 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
-		// register wallet
-		_, err := registerWallet(t, configPath)
+		// create wallet
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		cmd := fmt.Sprintf(
@@ -56,7 +57,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
 		otherAllocationID := setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 		// otherAllocationID should not be cancelable from this level
 		output, err := cancelAllocation(t, configPath, otherAllocationID, false)
@@ -67,7 +68,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		allocationID := "123abc"
@@ -79,7 +80,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Expired Allocation Should Fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{

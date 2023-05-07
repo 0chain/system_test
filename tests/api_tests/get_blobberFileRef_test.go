@@ -15,6 +15,7 @@ import (
 
 func TestBlobberFileRefs(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Get file ref with allocation id, remote path with reftype as regular or updated should work")
 
 	t.RunSequentially("Get file ref with allocation id, remote path with reftype as regular or updated should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)

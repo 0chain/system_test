@@ -15,12 +15,13 @@ import (
 
 func TestFinalizeAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Finalize Expired Allocation Should Work after challenge completion time + expiry")
 
 	t.Parallel()
 
 	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 10*time.Minute, func(t *test.SystemTest) {
 		//TODO: unacceptably slow
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		output, err := executeFaucetWithTokens(t, configPath, 10)
@@ -61,8 +62,8 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	t.Run("Finalize Other's Allocation Should Fail", func(t *test.SystemTest) {
 		var otherAllocationID = setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
-		// register wallet
-		_, err := registerWallet(t, configPath)
+		// create wallet
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 		// Then try updating with otherAllocationID: should not work
 		output, err := finalizeAllocation(t, configPath, otherAllocationID, false)
@@ -74,7 +75,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		cmd := fmt.Sprintf(

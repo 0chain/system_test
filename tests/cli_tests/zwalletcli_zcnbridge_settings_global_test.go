@@ -35,18 +35,19 @@ var (
 
 func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("should allow update of min_mint_amount")
 
 	if _, err := os.Stat("./config/" + zcnscOwner + "_wallet.json"); err != nil {
 		t.Skipf("SC owner wallet located at %s is missing", "./config/"+zcnscOwner+"_wallet.json")
 	}
 
 	// unused wallet, just added to avoid having the creating new wallet outputs
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-	// register SC owner wallet
-	output, err = registerWalletForName(t, configPath, zcnscOwner)
-	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+	// create SC owner wallet
+	output, err = createWalletForName(t, configPath, zcnscOwner)
+	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 	// get global config
 	output, err = getZCNBridgeGlobalSCConfig(t, configPath, true)

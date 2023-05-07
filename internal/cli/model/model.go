@@ -320,6 +320,7 @@ type SimpleNode struct {
 	TotalStake                    int64       `json:"total_stake"`
 	Stat                          interface{} `json:"stat"`
 	RoundServiceChargeLastUpdated int64       `json:"round_service_charge_last_updated"`
+	IsKilled                      bool        `json:"is_killed"`
 }
 
 type Sharder struct {
@@ -629,6 +630,7 @@ const (
 	BlockRewardSharder
 	BlockRewardBlobber
 	FeeRewardMiner
+	FeeRewardAuthorizer
 	FeeRewardSharder
 	ValidationReward
 	FileDownloadReward
@@ -644,6 +646,7 @@ var rewardString = []string{
 	"block_reward_sharder",
 	"block_reward_blobber",
 	"fees miner",
+	"fees_authorizer",
 	"fees sharder",
 	"validation reward",
 	"file download reward",
@@ -736,6 +739,8 @@ var StorageFloatSettings = []string{
 
 var StorageCurrencySettigs = []string{
 	"max_mint",
+	"min_stake",
+	"max_stake",
 	"readpool.min_lock",
 	"writepool.min_lock",
 	"max_total_free_allocation",

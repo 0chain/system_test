@@ -18,6 +18,7 @@ import (
 func TestFileDelete(testSetup *testing.T) {
 	//todo: slow operations
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("delete existing file in root directory should work")
 
 	t.Parallel()
 
@@ -220,7 +221,7 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete file by not supplying remotepath should fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
@@ -232,7 +233,7 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete file by not supplying allocation ID should fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
@@ -255,7 +256,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 0.9, balance)
+		require.Equal(t, 1.0, balance)
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -276,7 +277,7 @@ func TestFileDelete(testSetup *testing.T) {
 
 		balance, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 0.9, balance)
+		require.Equal(t, 1.0, balance)
 	})
 
 	t.Run("delete existing file in someone else's allocation should fail", func(t *test.SystemTest) {
