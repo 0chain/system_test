@@ -19,6 +19,7 @@ import (
 
 func TestBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Burning WZCN tokens on balance, should work")
 
 	t.Parallel()
 
