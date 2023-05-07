@@ -14,6 +14,12 @@ import (
 
 func TestHashnodeRoot(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	for i := 0; i < 40; i++ {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	}
+	for i := 0; i < 40; i++ {
+		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
+	}
 	t.SetSmokeTests("Get hashnode root from blobber for an empty allocation should work")
 
 	t.RunSequentially("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
