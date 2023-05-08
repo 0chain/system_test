@@ -112,6 +112,17 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
 	return filepath.Join("", filepath.Base(tmpFile.Name()))
 }
 
+func (c *SDKClient) GetFileList(t *test.SystemTest, allocationID, path string) *sdk.ListResult {
+
+	sdkAllocation, err := sdk.GetAllocation(allocationID)
+	require.NoError(t, err)
+
+	fileList, err := sdkAllocation.ListDir(path)
+	require.NoError(t, err)
+
+	return fileList
+}
+
 func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops []sdk.OperationRequest) {
 
 	defer func() {
@@ -130,6 +141,8 @@ func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops 
 }
 
 func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string) sdk.OperationRequest {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
 
 	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
@@ -183,6 +196,9 @@ func (c *SDKClient) AddRenameOperation(t *test.SystemTest, allocationID string, 
 
 func (c *SDKClient) AddUpdateOperation(t *test.SystemTest, allocationID string, remotePath, remoteName string) sdk.OperationRequest {
 
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
 	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
 		require.NoError(t, err)
@@ -214,4 +230,22 @@ func (c *SDKClient) AddUpdateOperation(t *test.SystemTest, allocationID string, 
 		Workdir:       homeDir,
 	}
 
+}
+
+func (c *SDKClient) AddMoveOperation(t *test.SystemTest, allocationID string, remotePath, destPath string) sdk.OperationRequest {
+
+	return sdk.OperationRequest{
+		OperationType: constants.FileOperationMove,
+		RemotePath:    remotePath,
+		DestPath:      destPath,
+	}
+}
+
+func (c *SDKClient) AddCopyOperation(t *test.SystemTest, allocationID string, remotePath, destPath string) sdk.OperationRequest {
+
+	return sdk.OperationRequest{
+		OperationType: constants.FileOperationCopy,
+		RemotePath:    remotePath,
+		DestPath:      destPath,
+	}
 }
