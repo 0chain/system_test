@@ -272,7 +272,6 @@ func TestMultiOperation(testSetup *testing.T) {
 		require.Equal(t, 5, len(listResult.Children), "files count mismatch expected %v actual %v", 5, len(listResult.Children))
 
 	})
-
 }
 
 func randName() string {

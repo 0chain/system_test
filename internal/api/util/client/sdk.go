@@ -229,7 +229,6 @@ func (c *SDKClient) AddUpdateOperation(t *test.SystemTest, allocationID string, 
 		FileMeta:      fileMeta,
 		Workdir:       homeDir,
 	}
-
 }
 
 func (c *SDKClient) AddMoveOperation(t *test.SystemTest, allocationID string, remotePath, destPath string) sdk.OperationRequest {
