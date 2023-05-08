@@ -130,7 +130,6 @@ func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops 
 }
 
 func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string) sdk.OperationRequest {
-
 	tmpFile, err := os.CreateTemp("", "*")
 	if err != nil {
 		require.NoError(t, err)
@@ -213,5 +212,4 @@ func (c *SDKClient) AddUpdateOperation(t *test.SystemTest, allocationID string, 
 		FileMeta:      fileMeta,
 		Workdir:       homeDir,
 	}
-
 }

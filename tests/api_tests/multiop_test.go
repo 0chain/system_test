@@ -170,7 +170,6 @@ func TestMultiOperation(testSetup *testing.T) {
 		t.Logf("Multi different operations took %v", end)
 
 	})
-
 }
 
 func randName() string {
