@@ -1,7 +1,8 @@
 package api_tests
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"path/filepath"
 	"testing"
 	"time"
@@ -15,9 +16,7 @@ import (
 
 func TestMultiOperation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	rand.Seed(time.Now().Unix())
 	t.RunSequentially("Multi upload operations should work", func(t *test.SystemTest) {
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -41,7 +40,6 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi delete operations should work", func(t *test.SystemTest) {
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -74,7 +72,6 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi update operations should work", func(t *test.SystemTest) {
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -107,7 +104,6 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi rename operations should work", func(t *test.SystemTest) {
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -140,7 +136,6 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi different operations should work", func(t *test.SystemTest) {
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -184,7 +179,6 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi move operations should work", func(t *test.SystemTest) {
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -229,7 +223,6 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi copy operations should work", func(t *test.SystemTest) {
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -281,7 +274,8 @@ func randName() string {
 	b := make([]rune, 10)
 
 	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+		ind, _ := rand.Int(rand.Reader, big.NewInt(int64(len(letterRunes))))
+		b[i] = letterRunes[ind.Int64()]
 	}
 
 	return string(b)
