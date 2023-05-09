@@ -99,7 +99,6 @@ func TestMultiOperation(testSetup *testing.T) {
 
 		listResult := sdkClient.GetFileList(t, allocationID, "/")
 		require.Equal(t, 10, len(listResult.Children), "files count mismatch expected %v actual %v", 10, len(listResult.Children))
-
 	})
 
 	t.RunSequentially("Multi rename operations should work", func(t *test.SystemTest) {
@@ -151,7 +150,6 @@ func TestMultiOperation(testSetup *testing.T) {
 		newOps := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-
 			switch i % 3 {
 			case 0:
 				op := sdkClient.AddDeleteOperation(t, allocationID, ops[i].FileMeta.RemotePath)
@@ -163,7 +161,6 @@ func TestMultiOperation(testSetup *testing.T) {
 				op := sdkClient.AddRenameOperation(t, allocationID, ops[i].FileMeta.RemotePath, randName())
 				newOps = append(newOps, op)
 			}
-
 		}
 
 		start := time.Now()
@@ -194,7 +191,6 @@ func TestMultiOperation(testSetup *testing.T) {
 
 		for i := 0; i < 10; i++ {
 			if i%2 == 0 {
-
 				newPath := "/new/" + filepath.Join("", filepath.Base(ops[i].FileMeta.Path))
 				op := sdkClient.AddMoveOperation(t, allocationID, ops[i].FileMeta.RemotePath, newPath)
 				newOps = append(newOps, op)
@@ -238,7 +234,6 @@ func TestMultiOperation(testSetup *testing.T) {
 
 		for i := 0; i < 10; i++ {
 			if i%2 == 0 {
-
 				newPath := "/new/" + filepath.Join("", filepath.Base(ops[i].FileMeta.Path))
 				op := sdkClient.AddCopyOperation(t, allocationID, ops[i].FileMeta.RemotePath, newPath)
 				newOps = append(newOps, op)
@@ -271,6 +266,5 @@ func randName() string {
 		ind, _ := rand.Int(rand.Reader, big.NewInt(int64(len(letterRunes))))
 		b[i] = letterRunes[ind.Int64()]
 	}
-
 	return string(b)
 }

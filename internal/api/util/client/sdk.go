@@ -182,7 +182,7 @@ func (c *SDKClient) AddDeleteOperation(t *test.SystemTest, allocationID, remoteP
 	}
 }
 
-func (c *SDKClient) AddRenameOperation(t *test.SystemTest, allocationID, remotePath string, newName string) sdk.OperationRequest {
+func (c *SDKClient) AddRenameOperation(t *test.SystemTest, allocationID, remotePath, newName string) sdk.OperationRequest {
 	return sdk.OperationRequest{
 		OperationType: constants.FileOperationRename,
 		RemotePath:    remotePath,
