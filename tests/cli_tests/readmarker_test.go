@@ -19,12 +19,14 @@ import (
 
 func TestReadMarker(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("After downloading a file, return a readmarker for each blobber used in download")
+
 	t.Parallel()
 
 	const blobbersRequiredForDownload = 4 // download needs (data shards + 1) number of blobbers
 
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 	sharderUrl := getSharderUrl(t)
 
 	err = os.MkdirAll("tmp", os.ModePerm)
@@ -37,7 +39,7 @@ func TestReadMarker(testSetup *testing.T) {
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 			"data":   3,
 			"parity": 1,
 		})
@@ -73,7 +75,7 @@ func TestReadMarker(testSetup *testing.T) {
 
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 			"data":   3,
 			"parity": 1,
 		})
@@ -125,7 +127,7 @@ func TestReadMarker(testSetup *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 				"data":   3,
 				"parity": 1,
 			})
@@ -152,8 +154,8 @@ func TestReadMarker(testSetup *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		// Just register a wallet so that we can work further
-		err := registerWalletAndLockReadTokens(t, configPath)
+		// Just create a wallet so that we can work further
+		err := createWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -179,9 +181,9 @@ func TestReadMarker(testSetup *testing.T) {
 		remotepath := "/"
 		var allocationID string
 
-		// register viewer wallet
+		// create viewer wallet
 		viewerWalletName := escapedTestName(t) + "_viewer"
-		registerWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
+		createWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
 
 		viewerWallet, err := getWalletForName(t, configPath, viewerWalletName)
 		require.Nil(t, err)
@@ -191,7 +193,7 @@ func TestReadMarker(testSetup *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 				"data":   3,
 				"parity": 1,
 			})
@@ -249,9 +251,9 @@ func TestReadMarker(testSetup *testing.T) {
 		remotepath := "/"
 		var allocationID string
 
-		// register viewer wallet
+		// create viewer wallet
 		viewerWalletName := escapedTestName(t) + "_viewer"
-		registerWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
+		createWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
 
 		viewerWallet, err := getWalletForName(t, configPath, viewerWalletName)
 		require.Nil(t, err)
@@ -261,7 +263,7 @@ func TestReadMarker(testSetup *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 				"data":   3,
 				"parity": 1,
 			})
@@ -317,7 +319,7 @@ func TestReadMarker(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 			"data":   3,
 			"parity": 1,
 		})

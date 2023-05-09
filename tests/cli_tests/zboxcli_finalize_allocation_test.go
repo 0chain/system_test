@@ -15,27 +15,31 @@ import (
 
 func TestFinalizeAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Finalize Expired Allocation Should Work after challenge completion time + expiry")
 
 	t.Parallel()
 
 	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 10*time.Minute, func(t *test.SystemTest) {
 		//TODO: unacceptably slow
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
+		output, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "5m",
+			"expire": "5s",
 		})
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(7 * time.Second)
 
 		allocations := parseListAllocations(t, configPath)
 		_, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
 
-		cliutils.Wait(t, 6*time.Minute)
+		cliutils.Wait(t, 3*time.Minute)
 
-		output, err := finalizeAllocation(t, configPath, allocationID, false)
+		output, err = finalizeAllocation(t, configPath, allocationID, true)
 
 		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
@@ -44,10 +48,12 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
+		output, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
 		allocationID := setupAllocation(t, configPath)
 
-		output, err := finalizeAllocation(t, configPath, allocationID, false)
-		// Error should not be nil since finalize is not working
+		output, err = finalizeAllocation(t, configPath, allocationID, false)
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet, or waiting a challenge completion", output[0])
@@ -56,8 +62,8 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	t.Run("Finalize Other's Allocation Should Fail", func(t *test.SystemTest) {
 		var otherAllocationID = setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
-		// register wallet
-		_, err := registerWallet(t, configPath)
+		// create wallet
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 		// Then try updating with otherAllocationID: should not work
 		output, err := finalizeAllocation(t, configPath, otherAllocationID, false)
@@ -69,7 +75,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		cmd := fmt.Sprintf(

@@ -20,21 +20,25 @@ var (
 
 func TestCancelAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Cancel allocation immediately should work")
 
 	t.Parallel()
 
 	t.Run("Cancel allocation immediately should work", func(t *test.SystemTest) {
+		output, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
 		allocationID := setupAllocation(t, configPath)
 
-		output, err := cancelAllocation(t, configPath, allocationID, true)
+		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
-		// register wallet
-		_, err := registerWallet(t, configPath)
+		// create wallet
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		cmd := fmt.Sprintf(
@@ -53,7 +57,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
 		otherAllocationID := setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 		// otherAllocationID should not be cancelable from this level
 		output, err := cancelAllocation(t, configPath, otherAllocationID, false)
@@ -64,7 +68,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		allocationID := "123abc"
@@ -76,10 +80,9 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Expired Allocation Should Fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
-		// TODO: min expired time is 5m, otherwise allocation could not be created
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
 			"expire": "2s",
 		})

@@ -28,13 +28,14 @@ const (
 	storageSmartContractAddress = `6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7`
 	minerSmartContractAddress   = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
 
-	freeTokensIndividualLimit = 10.0
-	freeTokensTotalLimit      = 100.0
+	freeTokensIndividualLimit = 100.0
+	freeTokensTotalLimit      = 10000.0
 	configKeyReadPoolFraction = "free_allocation_settings.read_pool_fraction"
 )
 
 func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Create free storage from marker with accounting")
 
 	err := bls.Init(bls.CurveFp254BNb)
 	require.NoError(t, err, "Error initializing BLS")
@@ -45,19 +46,19 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 
 	assigner := escapedTestName(t) + "_ASSIGNER"
 
-	// register SC owner wallet
-	output, err := registerWalletForName(t, configPath, scOwnerWallet)
-	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+	// create SC owner wallet
+	output, err := createWalletForName(t, configPath, scOwnerWallet)
+	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-	// register assigner wallet
-	output, err = registerWalletForName(t, configPath, assigner)
-	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+	// create assigner wallet
+	output, err = createWalletForName(t, configPath, assigner)
+	require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 	assignerWallet := readWalletFile(t, "./config/"+assigner+"_wallet.json")
 
 	// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
-	output, err = registerWallet(t, configPath)
-	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+	output, err = createWallet(t, configPath)
+	require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 	output, err = getStorageSCConfig(t, configPath, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
@@ -88,9 +89,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Create free storage from marker with accounting", 60*time.Second, func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
-		// register recipient wallet
-		output, err = registerWalletForName(t, configPath, recipient)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create recipient wallet
+		output, err = createWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -121,7 +122,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		err = os.WriteFile(markerFile, forFileBytes, 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationForWallet(t, recipient, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationForWallet(t, recipient, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+		}))
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
@@ -143,32 +146,36 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create free storage with malformed marker should fail", func(t *test.SystemTest) {
-		// register recipient wallet
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create recipient wallet
+		output, err = createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		markerFile := "./config/" + escapedTestName(t) + "_MARKER.json"
 
 		err = os.WriteFile(markerFile, []byte("bad marker json"), 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "unmarshalling markerinvalid character 'b' looking for beginning of value", output[0])
 	})
 
 	t.RunSequentially("Create free storage with invalid marker contents should fail", func(t *test.SystemTest) {
-		// register recipient wallet
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create recipient wallet
+		output, err = createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		markerFile := "./config/" + escapedTestName(t) + "_MARKER.json"
 
 		err = os.WriteFile(markerFile, []byte(`{"invalid_marker":true}`), 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker can be used only by its recipient", output[0])
@@ -177,9 +184,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t.RunSequentially("Create free storage with invalid marker signature should fail", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
-		// register recipient wallet
-		output, err = registerWalletForName(t, configPath, recipient)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create recipient wallet
+		output, err = createWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -201,7 +208,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		err = os.WriteFile(markerFile, forFileBytes, 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1)
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: encoding/hex: invalid byte: U+0073 's'", output[0])
@@ -210,16 +219,16 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t.RunSequentially("Create free storage with wrong recipient wallet should fail", func(t *test.SystemTest) {
 		recipientCorrect := escapedTestName(t) + "_RECIPIENT"
 
-		// register correct recipient wallet
-		output, err = registerWalletForName(t, configPath, recipientCorrect)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create correct recipient wallet
+		output, err = createWalletForName(t, configPath, recipientCorrect)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := getWalletForName(t, configPath, recipientCorrect)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
 
-		// register this wallet
-		output, err = registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create this wallet
+		output, err = createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
@@ -246,7 +255,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		err = os.WriteFile(markerFile, forFileBytes, 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, 1, len(output), strings.Join(output, "\n"))
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker can be used only by its recipient", output[0])
@@ -255,9 +266,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t.RunSequentially("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
-		// register recipient wallet
-		output, err = registerWalletForName(t, configPath, recipient)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		// create recipient wallet
+		output, err = createWalletForName(t, configPath, recipient)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -287,10 +298,12 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		err = os.WriteFile(markerFile, forFileBytes, 0600)
 		require.Nil(t, err, "Could not write file marker")
 
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{"free_storage": markerFile}))
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(map[string]interface{}{
+			"free_storage": markerFile,
+		}))
 		require.NotNil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1)
-		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: 110000000000 exceeded permitted free storage  100000000000", output[0])
+		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: 1010000000000 exceeded permitted free storage  1000000000000", output[0])
 	})
 }
 

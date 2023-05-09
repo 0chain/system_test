@@ -21,6 +21,7 @@ import (
 
 func TestFileStats(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("get file stats in root directory should work")
 
 	t.Parallel()
 
@@ -264,8 +265,8 @@ func TestFileStats(testSetup *testing.T) {
 			}
 		})
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering own wallet failed", err, strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating own wallet failed", err, strings.Join(output, "\n"))
 
 		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": otherAllocationID,
@@ -400,7 +401,7 @@ func TestFileStats(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/"

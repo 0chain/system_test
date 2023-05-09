@@ -11,11 +11,12 @@ import (
 
 func TestExecuteFaucet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Execute Faucet API call should be successful given a valid request")
 
 	t.Parallel()
 
 	t.Run("Execute Faucet API call should be successful given a valid request", func(t *test.SystemTest) {
-		wallet := apiClient.RegisterWallet(t)
+		wallet := apiClient.CreateWallet(t)
 
 		apiClient.ExecuteFaucetWithAssertions(t, wallet, client.TxSuccessfulStatus)
 

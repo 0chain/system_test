@@ -1,6 +1,8 @@
 package api_tests
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -14,6 +16,7 @@ import (
 
 func TestBlobberRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work")
 
 	t.RunSequentially("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work", func(t *test.SystemTest) {
 		t.Skip("wait for reward fixes")
@@ -52,7 +55,7 @@ func TestBlobberRewards(testSetup *testing.T) {
 		walletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
 
-		fee := apiClient.CollectRewards(t, sdkWallet, blobberID, 3, client.TxSuccessfulStatus)
+		_, fee := apiClient.CollectRewards(t, sdkWallet, blobberID, 3, client.TxSuccessfulStatus)
 
 		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
@@ -103,7 +106,8 @@ func TestBlobberRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", 3*time.Minute, func(t *test.SystemTest) {
-		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 2.0, client.TxSuccessfulStatus)
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 9.0, client.TxSuccessfulStatus)
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 9.0, client.TxSuccessfulStatus) // Needs more tokens
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
@@ -150,11 +154,17 @@ func TestBlobberRewards(testSetup *testing.T) {
 			return rewards > 0
 		})
 
-		fee := apiClient.CollectRewards(t, sdkWallet, newBlobberID, 3, client.TxSuccessfulStatus)
+		collecRewardTxn, fee := apiClient.CollectRewards(t, sdkWallet, newBlobberID, 3, client.TxSuccessfulStatus)
+		formmattedTxnOutput := strings.ReplaceAll(collecRewardTxn.Transaction.TransactionOutput, `\"`, `"`)
+
+		collectRewardTxnOutput := model.RewardTransactionOutput{}
+
+		err := json.Unmarshal([]byte(formmattedTxnOutput), &collectRewardTxnOutput)
+		require.Nil(t, err)
 
 		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
-		require.Equal(t, rewards, balanceAfter+fee-balanceBefore)
+		require.Equal(t, balanceBefore-fee+collectRewardTxnOutput.Amount, balanceAfter)
 	})
 }

@@ -22,6 +22,7 @@ import (
 
 func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("move file to existing directory")
 
 	t.Parallel()
 
@@ -246,16 +247,17 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("File move - Users should not be charged for moving a file ", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 4 * MB,
+			"lock":   "5",
+			"size":   4 * MB,
+			"expire": "1h",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -478,8 +480,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	t.Run("move file from someone else's allocation should fail", func(t *test.SystemTest) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err := registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
@@ -550,8 +552,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("move file with no allocation param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on move
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"remotepath": "/abc.txt",
@@ -564,8 +566,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("move file with no remotepath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on move
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
@@ -578,8 +580,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("move file with no destpath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on move
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
@@ -588,64 +590,6 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: destpath flag is missing", output[0])
-	})
-
-	t.Run("File move - Users should not be charged for moving a file ", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		// Lock 0.5 token for allocation
-		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 4 * MB,
-		})
-		output, err = createNewAllocation(t, configPath, allocParams)
-		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
-		fileSize := int64(math.Floor(1 * MB))
-
-		// Upload 1 MB file
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
-
-		initialAllocation := getAllocation(t, allocationID)
-
-		// Move file
-		remotepath := "/" + filepath.Base(localpath)
-
-		output, err = moveFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"destpath":   "/newdir/",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf(remotepath+" moved"), output[0])
-
-		// Get expected upload cost
-		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
-
-		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
-
-		unit := strings.Fields(output[0])[1]
-		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
-
-		// Expected cost is given in "per 720 hours", we need 1 hour
-		// Expected cost takes into account data+parity, so we divide by that
-		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
-
-		finalAllocation := getAllocation(t, allocationID)
-
-		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
-		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
-
-		createAllocationTestTeardown(t, allocationID)
 	})
 
 	t.Run("move file with allocation move file option forbidden should fail", func(t *test.SystemTest) {

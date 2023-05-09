@@ -20,6 +20,7 @@ import (
 func TestFileUpdate(testSetup *testing.T) {
 	//todo: very slow executions observed
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("update file with thumbnail")
 
 	t.Parallel()
 
@@ -27,7 +28,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 2,
+			"tokens": 9,
 		})
 
 		filesize := int64(0.5 * MB)
@@ -63,16 +64,17 @@ func TestFileUpdate(testSetup *testing.T) {
 		// Logic: Upload a 1 MB file, get the write pool info. Update said file with another file
 		// of size 1 MB. Get write pool info and check nothing has been deducted.
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 4 * MB,
+			"lock":   "5",
+			"size":   4 * MB,
+			"expire": "1h",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -119,7 +121,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 2,
+			"tokens": 9,
 		})
 
 		filesize := int64(0.5 * MB)
@@ -236,7 +238,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 2,
+			"tokens": 9,
 		})
 
 		filesize := int64(0.5 * MB)
@@ -280,7 +282,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 2,
+			"tokens": 9,
 		})
 
 		filesize := int64(0.5 * MB)
@@ -323,7 +325,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 2,
+			"tokens": 9,
 		})
 
 		filesize := int64(0.5 * MB)

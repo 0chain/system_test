@@ -25,17 +25,22 @@ const (
 
 func TestCommonUserFunctions(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Create Allocation - Locked amount must've been withdrawn from user wallet")
 
 	t.Parallel()
 
 	t.Run("Create Allocation - Locked amount must've been withdrawn from user wallet", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
-		// Lock 0.5 token for allocation
+		_, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), configPath, 9)
+		require.Nil(t, err)
+
+		// Lock tokens for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 1 * MB,
+			"lock":   "5",
+			"size":   1 * MB,
+			"expire": "1h",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -47,23 +52,27 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		// Wallet balance should decrease by locked amount
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 3.4, balance)
+		require.Equal(t, 8.0, balance) // lock - fee
 
 		createAllocationTestTeardown(t, allocationID)
 	})
 
 	t.Run("Update Allocation by locking more tokens - Locked amount must be withdrawn from user wallet", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+
+		_, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), configPath, 9)
+		require.Nil(t, err)
 
 		// get wallet balance
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
-		// Lock 0.5 token for allocation
+		// Lock 5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 1 * MB,
+			"lock":   "5",
+			"size":   1 * MB,
+			"expire": "5m",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -82,7 +91,7 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"expiry":     "30m",
-			"lock":       0.2,
+			"lock":       1,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation due to", strings.Join(output, "\n"))

@@ -25,6 +25,7 @@ const StatusCompletedCB = "Status completed callback"
 func TestDownload(testSetup *testing.T) {
 	//todo: too mnay test cases are slow in here
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Download File from Root Directory Should Work")
 	t.Parallel()
 
 	// Create a folder to keep all the generated files to be uploaded
@@ -39,7 +40,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -72,7 +73,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		fileNameOfFirstDirectory := generateFileAndUpload(t, allocationID, remoteFilePaths[0], filesize)
@@ -133,7 +134,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -166,7 +167,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -200,7 +201,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -230,7 +231,7 @@ func TestDownload(testSetup *testing.T) {
 		t.Run("Share Entire Folder from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 
@@ -255,8 +256,8 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		// Just create a wallet so that we can work further
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -281,7 +282,7 @@ func TestDownload(testSetup *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			originalFileChecksum = generateChecksum(t, filename)
@@ -307,8 +308,8 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		// Just register a wallet so that we can work further
-		err := registerWalletAndLockReadTokens(t, configPath)
+		// Just create a wallet so that we can work further
+		err := createWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -334,7 +335,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateRandomTestFileName(t)
@@ -375,9 +376,9 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 		var allocationID string
 
-		// register viewer wallet
+		// create viewer wallet
 		viewerWalletName := escapedTestName(t) + "_viewer"
-		registerWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
+		createWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
 
 		viewerWallet, err := getWalletForName(t, configPath, viewerWalletName)
 		require.Nil(t, err)
@@ -387,7 +388,7 @@ func TestDownload(testSetup *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 			})
 			filename = generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{
 				"encrypt": "",
@@ -452,7 +453,7 @@ func TestDownload(testSetup *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			originalFileChecksum = generateChecksum(t, filename)
@@ -477,8 +478,8 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		// Just register a wallet so that we can work further
-		err := registerWalletAndLockReadTokens(t, configPath)
+		// Just create a wallet so that we can work further
+		err := createWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -508,7 +509,7 @@ func TestDownload(testSetup *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			originalFileChecksum = generateChecksum(t, filename)
@@ -537,8 +538,8 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", lookuphash, "Lookup Hash: ", lookuphash)
 		})
 
-		// Just register a wallet so that we can work further
-		err := registerWalletAndLockReadTokens(t, configPath)
+		// Just create a wallet so that we can work further
+		err := createWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -568,7 +569,7 @@ func TestDownload(testSetup *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -592,17 +593,19 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		// Just create a wallet so that we can work further
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
-		// Download file using auth-ticket: should work
+		// Download file using auth-ticket: shouldn't work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
-		}), true)
+		}), false)
 		require.NotNil(t, err)
-		require.Len(t, output, 3)
+		require.Greater(t, len(output), 0)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "pre-redeeming read marker")
 	})
 
 	t.RunWithTimeout("Download Shared File by Paying Should Work", 5*time.Minute, func(t *test.SystemTest) {
@@ -615,7 +618,7 @@ func TestDownload(testSetup *testing.T) {
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocation(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
-				"tokens": 1,
+				"tokens": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -638,7 +641,7 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		err = registerWalletAndLockReadTokens(t, configPath)
+		err = createWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 		// Download file using auth-ticket: should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -659,7 +662,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		thumbnail := escapedTestName(t) + "thumbnail.png"
@@ -703,7 +706,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		thumbnail := escapedTestName(t) + "thumbnail.png"
@@ -748,7 +751,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -782,7 +785,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -835,7 +838,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -866,7 +869,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -922,7 +925,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -955,7 +958,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -989,7 +992,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -1022,7 +1025,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -1052,7 +1055,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -1084,7 +1087,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -1114,7 +1117,7 @@ func TestDownload(testSetup *testing.T) {
 	// Failure Scenarios
 
 	t.Run("Download File from Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
+		output, err := createWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -1148,7 +1151,7 @@ func TestDownload(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		// Download using otherAllocationID: should not work
-		_, err = registerWallet(t, configPath)
+		_, err = createWallet(t, configPath)
 		require.NoError(t, err)
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -1167,7 +1170,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10000,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -1182,7 +1185,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download without any Parameter Should Fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
+		output, err := createWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		output, err = downloadFile(t, configPath, "", false)
@@ -1195,7 +1198,7 @@ func TestDownload(testSetup *testing.T) {
 	t.Run("Download from Allocation without other Parameter Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10000,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -1228,9 +1231,9 @@ func TestDownload(testSetup *testing.T) {
 			"localpath":  "tmp/",
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Greater(t, len(output), 0)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "not enough tokens")
+		require.Contains(t, aggregatedOutput, "pre-redeeming read marker")
 	})
 
 	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) {
@@ -1240,7 +1243,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 			"expire": "30s",
 		})
 
@@ -1273,7 +1276,7 @@ func TestDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -1306,7 +1309,7 @@ func setupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, ex
 
 	// Lock half the tokens for read pool
 	readPoolParams := createParams(map[string]interface{}{
-		"tokens": tokens / 2,
+		"tokens": tokens / 3,
 	})
 	output, err := readPoolLock(t, cliConfigFilename, readPoolParams, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
