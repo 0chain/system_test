@@ -175,14 +175,14 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string) 
 	}
 }
 
-func (c *SDKClient) AddDeleteOperation(t *test.SystemTest, allocationID string, remotePath string) sdk.OperationRequest {
+func (c *SDKClient) AddDeleteOperation(t *test.SystemTest, allocationID, remotePath string) sdk.OperationRequest {
 	return sdk.OperationRequest{
 		OperationType: constants.FileOperationDelete,
 		RemotePath:    remotePath,
 	}
 }
 
-func (c *SDKClient) AddRenameOperation(t *test.SystemTest, allocationID string, remotePath string, newName string) sdk.OperationRequest {
+func (c *SDKClient) AddRenameOperation(t *test.SystemTest, allocationID, remotePath string, newName string) sdk.OperationRequest {
 	return sdk.OperationRequest{
 		OperationType: constants.FileOperationRename,
 		RemotePath:    remotePath,
@@ -190,7 +190,7 @@ func (c *SDKClient) AddRenameOperation(t *test.SystemTest, allocationID string, 
 	}
 }
 
-func (c *SDKClient) AddUpdateOperation(t *test.SystemTest, allocationID string, remotePath, remoteName string) sdk.OperationRequest {
+func (c *SDKClient) AddUpdateOperation(t *test.SystemTest, allocationID, remotePath, remoteName string) sdk.OperationRequest {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 

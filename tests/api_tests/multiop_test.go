@@ -68,7 +68,6 @@ func TestMultiOperation(testSetup *testing.T) {
 
 		listResult := sdkClient.GetFileList(t, allocationID, "/")
 		require.Equal(t, 0, len(listResult.Children), "files count mismatch expected 0 got %v", len(listResult.Children))
-
 	})
 
 	t.RunSequentially("Multi update operations should work", func(t *test.SystemTest) {
@@ -132,7 +131,6 @@ func TestMultiOperation(testSetup *testing.T) {
 
 		listResult := sdkClient.GetFileList(t, allocationID, "/")
 		require.Equal(t, 10, len(listResult.Children), "files count mismatch expected %v actual %v", 10, len(listResult.Children))
-
 	})
 
 	t.RunSequentially("Multi different operations should work", func(t *test.SystemTest) {
@@ -175,7 +173,6 @@ func TestMultiOperation(testSetup *testing.T) {
 
 		listResult := sdkClient.GetFileList(t, allocationID, "/")
 		require.Equal(t, 6, len(listResult.Children), "files count mismatch expected %v actual %v", 6, len(listResult.Children))
-
 	})
 
 	t.RunSequentially("Multi move operations should work", func(t *test.SystemTest) {
@@ -263,14 +260,11 @@ func TestMultiOperation(testSetup *testing.T) {
 		require.Equal(t, 5, len(listResult.Children), "files count mismatch expected %v actual %v", 5, len(listResult.Children))
 		listResult = sdkClient.GetFileList(t, allocationID, "/child")
 		require.Equal(t, 5, len(listResult.Children), "files count mismatch expected %v actual %v", 5, len(listResult.Children))
-
 	})
 }
 
 func randName() string {
-
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789")
-
 	b := make([]rune, 10)
 
 	for i := range b {
