@@ -13,6 +13,7 @@ import (
 	"github.com/0chain/gosdk/core/common"
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
+	"github.com/0chain/gosdk/zboxcore/zboxutil"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/crypto"
@@ -106,8 +107,13 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
 	homeDir, err := config.GetHomeDir()
 	require.NoError(t, err)
 
-	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
-		fileMeta, buf, false, false, false)
+	options := []sdk.ChunkedUploadOption{}
+	connectionId := zboxutil.NewConnectionId()
+	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir,
+		sdkAllocation, fileMeta, buf,
+		false, false, false, connectionId,
+		options...)
+
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
 
