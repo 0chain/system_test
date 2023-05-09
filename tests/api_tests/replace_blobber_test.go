@@ -22,8 +22,9 @@ func TestReplaceBlobber(testSetup *testing.T) {
 
 	t.Run("Replace blobber in allocation, should work", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-
+		for i := 0; i < 5; i++ {
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		}
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
@@ -54,7 +55,9 @@ func TestReplaceBlobber(testSetup *testing.T) {
 
 	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		for i := 0; i < 5; i++ {
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		}
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -82,8 +85,9 @@ func TestReplaceBlobber(testSetup *testing.T) {
 
 	t.Run("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-
+		for i := 0; i < 5; i++ {
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		}
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
@@ -113,8 +117,9 @@ func TestReplaceBlobber(testSetup *testing.T) {
 
 	t.Run("Check token accounting of a blobber replacing in allocation, should work", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-
+		for i := 0; i < 10; i++ {
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		}
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)

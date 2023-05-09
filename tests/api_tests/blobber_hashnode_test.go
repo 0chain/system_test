@@ -14,17 +14,13 @@ import (
 
 func TestHashnodeRoot(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	for i := 0; i < 40; i++ {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-	}
-	for i := 0; i < 40; i++ {
-		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
-	}
 	t.SetSmokeTests("Get hashnode root from blobber for an empty allocation should work")
 
 	t.RunSequentially("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		for i := 0; i < 5; i++ {
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		}
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -59,8 +55,9 @@ func TestHashnodeRoot(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
 		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-
+		for i := 0; i < 10; i++ {
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		}
 		allocationID := "badallocation"
 
 		blobberUrl := apiClient.HealthyServiceProviders.Blobbers[0]
@@ -84,8 +81,9 @@ func TestHashnodeRoot(testSetup *testing.T) {
 
 	t.RunSequentially("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-
+		for i := 0; i < 5; i++ {
+			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		}
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
