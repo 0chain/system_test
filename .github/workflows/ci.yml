@@ -73,7 +73,7 @@ jobs:
   ensure-master-is-green:
     if: github.ref != 'refs/heads/master'
     name: "Ensure master is green"
-    runs-on: self-hosted
+    runs-on: arc-runner
     steps:
       - name: Check CI
         id: check-ci
