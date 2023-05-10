@@ -27,7 +27,7 @@ func Test0S3Migration(testSetup *testing.T) {
 			"allocation": allocationID,
 		}))
 		println("output length: ", len(output))
-		println(output)
+		fmt.Printf("output: %v", output)
 		require.Nil(t, err, "Unexpected migration failure %s", strings.Join(output, "\n")) //FIXME: There should be an code of 1 on failure but it is always zero
 		require.Greater(t, len(output), 1, "No output was returned.")
 		require.Contains(t, "Migration successful", output[0])
@@ -37,6 +37,6 @@ func Test0S3Migration(testSetup *testing.T) {
 func migrateFromS3(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Migrating S3 bucket to Zus...")
 	return cliutils.RunCommandWithoutRetry(fmt.Sprintf(
-		"./s3mgrt migrate --silent --access-key %s --secret-key %s --bucket %s --wallet %s --configDir ./config --config %s %s",
-		s3AccessKey, s3SecretKey, s3bucketName, escapedTestName(t)+"_wallet.json", cliConfigFilename, params))
+		"./s3mgrt migrate --silent --access-key %s --secret-key %s --bucket %s --wallet %s --configDir ./config --config %s --network %s %s",
+		s3AccessKey, s3SecretKey, s3bucketName, escapedTestName(t)+"_wallet.json", cliConfigFilename, cliConfigFilename, params))
 }
