@@ -27,7 +27,6 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 		// Create a folder to keep all the generated files to be uploaded
 		err := os.MkdirAll("tmp", os.ModePerm)
 		require.Nil(t, err)
-
 	})
 
 	t.Run("Recently Added Refs Should be listed", func(t *test.SystemTest) { //todo: slow

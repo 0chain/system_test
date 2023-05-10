@@ -1,11 +1,12 @@
 package cli_tests
 
 import (
-	climodel "github.com/0chain/system_test/internal/cli/model"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	climodel "github.com/0chain/system_test/internal/cli/model"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
