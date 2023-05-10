@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"github.com/0chain/system_test/internal/api/model"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -12,7 +13,11 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("List allocation with zero allocation should work")
 
-	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+	var firebaseToken *model.FirebaseToken
+	t.TestSetup("Autenticate with firebase", func() {
+		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+	})
+
 	t.RunSequentially("List allocation with zero allocation should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
