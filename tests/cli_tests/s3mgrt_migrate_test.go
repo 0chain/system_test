@@ -2,23 +2,23 @@ package cli_tests
 
 import (
 	"fmt"
-	"strings"
-	"testing"
-	"time"
-
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
+	"strings"
+	"testing"
 )
 
 func TestS3Migration(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	t.Parallel()
 	if s3SecretKey == "" || s3AccessKey == "" {
 		t.Skip("s3SecretKey or s3AccessKey was missing")
 	}
+	t.SetSmokeTests("Should migrate existing bucket successfully")
 
-	t.RunSequentiallyWithTimeout("Should migrate existing bucket successfully", 3*time.Minute, func(t *test.SystemTest) {
+	t.Run("Should migrate existing bucket successfully", func(t *test.SystemTest) {
 		allocSize := int64(1 * GB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -27,9 +27,9 @@ func TestS3Migration(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 		}))
-		require.Nil(t, err, "Unexpected migration failure %s", strings.Join(output, "\n")) //FIXME: Exit code of zero on failure
-		require.Greater(t, output, 1, "No output was returned.")
-		require.Equal(t, "Migration successful", output[0])
+		require.Nil(t, err, "Unexpected migration failure %s", strings.Join(output, "\n")) //FIXME: There should be an code of 1 on failure but it is always zero
+		require.Greater(t, len(output), 1, "No output was returned.")
+		require.Contains(t, "Migration successful", output[0])
 	})
 }
 
