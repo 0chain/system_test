@@ -15,9 +15,10 @@ func Test0S3Migration(testSetup *testing.T) {
 	if s3SecretKey == "" || s3AccessKey == "" {
 		t.Skip("s3SecretKey or s3AccessKey was missing")
 	}
+	t.Parallel()
 	t.SetSmokeTests("Should migrate existing bucket successfully")
 
-	t.RunSequentially("Should migrate existing bucket successfully", func(t *test.SystemTest) {
+	t.Run("Should migrate existing bucket successfully", func(t *test.SystemTest) {
 		allocSize := int64(1 * GB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -28,9 +29,9 @@ func Test0S3Migration(testSetup *testing.T) {
 		}))
 		println("output length: ", len(output))
 		fmt.Printf("output: %v", output)
-		require.Nil(t, err, "Unexpected migration failure %s", strings.Join(output, "\n")) //FIXME: There should be an code of 1 on failure but it is always zero
-		require.Greater(t, len(output), 1, "No output was returned.")
-		require.Contains(t, "Migration successful", output[0])
+		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n")) //FIXME: There should be an code of 1 on failure but it is always zero
+		require.Equal(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
+		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 	})
 }
 
