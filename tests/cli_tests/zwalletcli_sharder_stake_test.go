@@ -20,28 +20,30 @@ func TestSharderStake(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Staking tokens against valid sharder with valid tokens should work, unlocking should work")
 
-	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
-	}
-
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
-
-	output, err = createWalletForName(t, configPath, sharder01NodeDelegateWalletName)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-	sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
-
-	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
-	require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
-
 	var sharder climodel.Sharder
-	for i, s := range sharders {
-		if s.ID != sharderNodeDelegateWallet.ClientID {
-			sharder = sharders[i]
-			break
+	t.TestSetup("get sharders", func() {
+		if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
+			t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 		}
-	}
+
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+
+		output, err = createWalletForName(t, configPath, sharder01NodeDelegateWalletName)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
+		sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
+
+		sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
+		require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
+
+		for i, s := range sharders {
+			if s.ID != sharderNodeDelegateWallet.ClientID {
+				sharder = sharders[i]
+				break
+			}
+		}
+	})
 
 	var (
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")

@@ -19,39 +19,42 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("update validator number of delegates should work")
 
-	// blobber delegate wallet and validator delegate wallet are same
-	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
-		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
-	}
+	var intialValidatorInfo climodel.Validator
+	t.TestSetup("Get validator config", func() {
+		// blobber delegate wallet and validator delegate wallet are same
+		if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
+			t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
+		}
 
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-	_, err = createWalletForName(t, configPath, blobberOwnerWallet)
-	require.NoError(t, err)
-	_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 5)
-	require.NoError(t, err)
-
-	output, err = listValidators(t, configPath, createParams(map[string]interface{}{"json": ""}))
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 1, strings.Join(output, "\n"))
-
-	var validatorList []climodel.Validator
-	err = json.Unmarshal([]byte(output[0]), &validatorList)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Greater(t, len(validatorList), 0, "validator list is empty")
-
-	intialValidatorInfo := validatorList[0]
-
-	t.Cleanup(func() {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "num_delegates": intialValidatorInfo.NumDelegates}))
-		require.Nil(t, err, strings.Join(output, "\n"))
+		_, err = createWalletForName(t, configPath, blobberOwnerWallet)
+		require.NoError(t, err)
+		_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 5)
+		require.NoError(t, err)
 
-		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "service_charge": intialValidatorInfo.ServiceCharge}))
+		output, err = listValidators(t, configPath, createParams(map[string]interface{}{"json": ""}))
 		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+
+		var validatorList []climodel.Validator
+		err = json.Unmarshal([]byte(output[0]), &validatorList)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Greater(t, len(validatorList), 0, "validator list is empty")
+
+		intialValidatorInfo = validatorList[0]
+
+		t.Cleanup(func() {
+			output, err := createWallet(t, configPath)
+			require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
+			output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "num_delegates": intialValidatorInfo.NumDelegates}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+
+			output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "service_charge": intialValidatorInfo.ServiceCharge}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		})
 	})
 
 	t.RunSequentially("update validator number of delegates should work", func(t *test.SystemTest) {
