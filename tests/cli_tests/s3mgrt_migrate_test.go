@@ -2,11 +2,12 @@ package cli_tests
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
-	"strings"
-	"testing"
 )
 
 func Test0S3Migration(testSetup *testing.T) {
@@ -27,8 +28,7 @@ func Test0S3Migration(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 		}))
-		println("output length: ", len(output))
-		fmt.Printf("output: %v", output)
+
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n")) //FIXME: There should be an code of 1 on failure but it is always zero
 		require.Equal(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
