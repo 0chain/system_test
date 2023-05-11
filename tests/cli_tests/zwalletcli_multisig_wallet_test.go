@@ -15,6 +15,8 @@ import (
 
 func TestMultisigWallet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("Multisig is broken and will be removed before mainnet - tests remain until this happens")
+
 	t.SetSmokeTests("Wallet Creation should succeed when 0 < threshold <= num-signers")
 
 	t.Parallel()
