@@ -58,7 +58,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		output, err = createWalletForName(t, configPath, assigner)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
-		assignerWallet := readWalletFile(t, "./config/"+assigner+"_wallet.json")
+		assignerWallet = readWalletFile(t, "./config/"+assigner+"_wallet.json")
 
 		// necessary cli call to generate wallet to avoid polluting logs of succeeding cli calls
 		output, err = createWallet(t, configPath)
