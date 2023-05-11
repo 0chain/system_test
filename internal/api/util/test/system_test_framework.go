@@ -74,7 +74,6 @@ func (s *SystemTest) testSetup(label string, timeout time.Duration, setupFunctio
 			s.Unwrap.Helper()
 			defer handlePanic(s)
 			go func() {
-				s.Unwrap.Helper()
 				defer wg.Done()
 				defer handlePanic(s)
 				s.Logf("Test setup [%s] start at [%s] ", label, time.Now().Format("01-02-2006 15:04:05"))
