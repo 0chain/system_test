@@ -96,7 +96,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		}))
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "tokens unlocked: 0, pool deleted", output[0])
+		require.Equal(t, "tokens unlocked: 10000000000, pool deleted", output[0])
 
 		// Wallet balance should increase by unlocked amount
 		output, err = getBalance(t, configPath)
