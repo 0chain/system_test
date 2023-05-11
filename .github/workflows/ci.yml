@@ -180,7 +180,7 @@ jobs:
           run_tokenomics_system_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          run_smoke_tests: true
 
       - name: "Set PR status as ${{ job.status }}"
         if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
