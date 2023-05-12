@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/0chain/gosdk/core/common"
 	"github.com/0chain/gosdk/constants"
+	"github.com/0chain/gosdk/core/common"
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/gosdk/zboxcore/zboxutil"
@@ -153,6 +153,8 @@ func (c *SDKClient) VerifyFileRefFromBlobber(t *test.SystemTest, allocationID, b
 	fref, err := sdk.GetFileRefFromBlobber(allocationID, blobberID, remoteFile)
 	require.Nil(t, err)
 	require.NotNil(t, fref) // not nil when the file exists
+}
+
 func (c *SDKClient) GetFileList(t *test.SystemTest, allocationID, path string) *sdk.ListResult {
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
 	require.NoError(t, err)
