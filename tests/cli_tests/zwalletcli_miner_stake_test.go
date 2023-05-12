@@ -20,32 +20,32 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
+
 func TestMinerStake(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Staking tokens against valid miner with valid tokens should work")
 
-	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
-	}
-
-	output, err := listMiners(t, configPath, "--json")
-	require.NoError(t, err, "error listing miners")
-	require.Len(t, output, 1)
-
-	var miners climodel.MinerSCNodes
-	err = json.Unmarshal([]byte(output[0]), &miners)
-	require.Nil(t, err, "error unmarshalling ls-miners json output")
-
 	var miner climodel.Node
-	for _, miner = range miners.Nodes {
-		if miner.ID == miner01ID {
-			break
+	var miners climodel.MinerSCNodes
+	t.TestSetup("Get miner details", func() {
+		if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
+			t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 		}
-	}
 
-	var (
-		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
-	)
+		output, err := listMiners(t, configPath, "--json")
+		require.NoError(t, err, "error listing miners")
+		require.Len(t, output, 1)
+
+		err = json.Unmarshal([]byte(output[0]), &miners)
+		require.Nil(t, err, "error unmarshalling ls-miners json output")
+
+		for _, miner = range miners.Nodes {
+			if miner.ID == miner01ID {
+				break
+			}
+		}
+	})
 
 	t.Parallel()
 
