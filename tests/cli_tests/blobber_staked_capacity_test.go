@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 	"strings"
 	"testing"
@@ -37,7 +36,6 @@ func TestStakePool(testSetup *testing.T) {
 
 		for _, blobber := range blobbersList {
 			if blobber.IsKilled || blobber.IsShutdown {
-				fmt.Println("Killed Blobber : ", blobber.Id)
 				continue
 			}
 
@@ -52,8 +50,6 @@ func TestStakePool(testSetup *testing.T) {
 
 			require.GreaterOrEqual(t, stakedCapacity, blobber.Allocated, "Staked capacity should be greater than allocated capacity")
 
-			fmt.Println("stakedCapacity", stakedCapacity)
-
 			stakedCapacity -= blobber.Allocated
 
 			if stakedCapacity < minAvailableCapacity {
@@ -61,7 +57,6 @@ func TestStakePool(testSetup *testing.T) {
 				minAvailableCapacityBlobber = blInfo
 			}
 
-			fmt.Println("minAvailableCapacity", minAvailableCapacity)
 		}
 
 		output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": minAvailableCapacityBlobber.Id}))
@@ -93,7 +88,6 @@ func TestStakePool(testSetup *testing.T) {
 
 		for _, blobber := range blobbersList {
 			if blobber.IsKilled || blobber.IsShutdown {
-				fmt.Println("Killed Blobber : ", blobber.Id)
 				continue
 			}
 			_, err = stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id, "tokens": 1}), true)
@@ -134,8 +128,6 @@ func TestStakePool(testSetup *testing.T) {
 		allocationCost, err := getAllocationCost(output[0])
 		require.Nil(t, err, "could not get allocation cost")
 
-		fmt.Println("allocationCost", allocationCost)
-
 		// Matching the wallet balance to allocationCost by executing faucet with tokens
 		// As max limit of faucet is 9 tokens we are executing faucet with 9 tokens multiple times till wallet balance is equal to allocationCost
 		for i := float64(0); i <= (allocationCost/9)+1; i++ {
@@ -164,7 +156,6 @@ func TestStakePool(testSetup *testing.T) {
 		require.Nil(t, err, "error unmarshalling blobber info")
 
 		totalOffersNew := blInfo.TotalOffers
-		fmt.Println("totalOffersNew", totalOffersNew, "totalOffers", totalOffers)
 		require.Greater(t, totalOffersNew, totalOffers, "Total Offers should Increase")
 
 		_, err = createWalletForName(t, configPath, newStakeWallet)
