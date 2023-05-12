@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/0chain/gosdk/core/common"
+	"github.com/0chain/gosdk/constants"
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/gosdk/zboxcore/zboxutil"
@@ -107,13 +108,8 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
 	homeDir, err := config.GetHomeDir()
 	require.NoError(t, err)
 
-	options := []sdk.ChunkedUploadOption{}
-	connectionId := zboxutil.NewConnectionId()
-	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir,
-		sdkAllocation, fileMeta, buf,
-		false, false, false, connectionId,
-		options...)
-
+	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
+		fileMeta, buf, false, false, false, zboxutil.NewConnectionId())
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
 
@@ -157,4 +153,132 @@ func (c *SDKClient) VerifyFileRefFromBlobber(t *test.SystemTest, allocationID, b
 	fref, err := sdk.GetFileRefFromBlobber(allocationID, blobberID, remoteFile)
 	require.Nil(t, err)
 	require.NotNil(t, fref) // not nil when the file exists
+func (c *SDKClient) GetFileList(t *test.SystemTest, allocationID, path string) *sdk.ListResult {
+	sdkAllocation, err := sdk.GetAllocation(allocationID)
+	require.NoError(t, err)
+
+	fileList, err := sdkAllocation.ListDir(path)
+	require.NoError(t, err)
+
+	return fileList
+}
+
+func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops []sdk.OperationRequest) {
+	defer func() {
+		for i := 0; i < len(ops); i++ {
+			if ops[i].OperationType == constants.FileOperationInsert || ops[i].OperationType == constants.FileOperationUpdate {
+				_ = os.RemoveAll(ops[i].FileMeta.Path)
+			}
+		}
+	}()
+
+	sdkAllocation, err := sdk.GetAllocation(allocationID)
+	require.NoError(t, err)
+
+	err = sdkAllocation.DoMultiOperation(ops)
+	require.NoError(t, err)
+}
+
+func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string) sdk.OperationRequest {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	tmpFile, err := os.CreateTemp("", "*")
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	const actualSize int64 = 1024
+
+	rawBuf := make([]byte, actualSize)
+	_, err = rand.Read(rawBuf)
+	if err != nil {
+		require.NoError(t, err)
+	} //nolint:gosec,revive
+
+	fileMeta := sdk.FileMeta{
+		Path:       tmpFile.Name(),
+		ActualSize: actualSize,
+		RemoteName: filepath.Base(tmpFile.Name()),
+		RemotePath: "/" + filepath.Join("", filepath.Base(tmpFile.Name())),
+	}
+
+	buf := bytes.NewBuffer(rawBuf)
+
+	homeDir, err := config.GetHomeDir()
+	require.NoError(t, err)
+
+	return sdk.OperationRequest{
+		OperationType: constants.FileOperationInsert,
+		FileReader:    buf,
+		FileMeta:      fileMeta,
+		Workdir:       homeDir,
+	}
+}
+
+func (c *SDKClient) AddDeleteOperation(t *test.SystemTest, allocationID, remotePath string) sdk.OperationRequest {
+	return sdk.OperationRequest{
+		OperationType: constants.FileOperationDelete,
+		RemotePath:    remotePath,
+	}
+}
+
+func (c *SDKClient) AddRenameOperation(t *test.SystemTest, allocationID, remotePath, newName string) sdk.OperationRequest {
+	return sdk.OperationRequest{
+		OperationType: constants.FileOperationRename,
+		RemotePath:    remotePath,
+		DestName:      "/" + filepath.Join("", newName),
+	}
+}
+
+func (c *SDKClient) AddUpdateOperation(t *test.SystemTest, allocationID, remotePath, remoteName string) sdk.OperationRequest {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	tmpFile, err := os.CreateTemp("", "*")
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	const actualSize int64 = 1024
+
+	rawBuf := make([]byte, actualSize)
+	_, err = rand.Read(rawBuf)
+	if err != nil {
+		require.NoError(t, err)
+	} //nolint:gosec,revive
+	fileMeta := sdk.FileMeta{
+		Path:       tmpFile.Name(),
+		ActualSize: actualSize,
+		RemotePath: remotePath,
+		RemoteName: remoteName,
+	}
+
+	buf := bytes.NewBuffer(rawBuf)
+
+	homeDir, err := config.GetHomeDir()
+	require.NoError(t, err)
+
+	return sdk.OperationRequest{
+		OperationType: constants.FileOperationUpdate,
+		FileReader:    buf,
+		FileMeta:      fileMeta,
+		Workdir:       homeDir,
+	}
+}
+
+func (c *SDKClient) AddMoveOperation(t *test.SystemTest, allocationID, remotePath, destPath string) sdk.OperationRequest {
+	return sdk.OperationRequest{
+		OperationType: constants.FileOperationMove,
+		RemotePath:    remotePath,
+		DestPath:      destPath,
+	}
+}
+
+func (c *SDKClient) AddCopyOperation(t *test.SystemTest, allocationID, remotePath, destPath string) sdk.OperationRequest {
+	return sdk.OperationRequest{
+		OperationType: constants.FileOperationCopy,
+		RemotePath:    remotePath,
+		DestPath:      destPath,
+	}
 }
