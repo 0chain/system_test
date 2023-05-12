@@ -271,7 +271,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		// Wait for write marker to be redeemed
-		time.Sleep(10 * time.Second)
+		time.Sleep(16 * time.Second)
 		initialAllocation := getAllocation(t, allocationID)
 
 		// Move file
