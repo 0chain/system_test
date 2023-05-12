@@ -56,7 +56,6 @@ func TestStakePool(testSetup *testing.T) {
 				minAvailableCapacity = stakedCapacity
 				minAvailableCapacityBlobber = blInfo
 			}
-
 		}
 
 		output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": minAvailableCapacityBlobber.Id}))
