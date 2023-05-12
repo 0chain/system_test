@@ -23,9 +23,11 @@ func TestFileMetadata(testSetup *testing.T) {
 
 	t.Parallel()
 
-	// Create a folder to keep all the generated files to be uploaded
-	err := os.MkdirAll("tmp", os.ModePerm)
-	require.Nil(t, err)
+	t.TestSetup("Create tmp dir", func() {
+		// Create a folder to keep all the generated files to be uploaded
+		err := os.MkdirAll("tmp", os.ModePerm)
+		require.Nil(t, err)
+	})
 
 	// Success Scenarios
 

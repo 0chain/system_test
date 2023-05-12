@@ -27,7 +27,7 @@ import (
 func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complexity 48
 	testSetup.Skip("Flaky")
 	t := test.NewSystemTest(testSetup)
-	KillFFMPEG()
+	t.TestSetup("Kill FFMPEG", KillFFMPEG)
 
 	defer KillFFMPEG()
 
