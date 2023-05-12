@@ -47,6 +47,10 @@ func setupConfig() {
 
 	parsedConfig := config.Parse(filepath.Join(".", path, "cli_tests_config.yaml"))
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
+	s3AccessKey = parsedConfig.S3AccessKey
+	s3SecretKey = parsedConfig.S3SecretKey
+	s3bucketName = parsedConfig.S3BucketName
+
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
 	} else {
@@ -86,6 +90,9 @@ var (
 
 	ethereumNodeURL string
 	ethereumAddress string
+	s3SecretKey     string
+	s3AccessKey     string
+	s3bucketName    string
 )
 
 var (
