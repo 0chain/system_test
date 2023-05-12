@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	sdkClient          *client.SDKClient
+	sdkClient *client.SDKClient
 )
 
 func setupDefaultConfig() {

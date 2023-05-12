@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
-	mrand "math/rand"
+	"math/big"
 	"os"
 	"path/filepath"
 	"sync"
-	"time"
 
 	"github.com/0chain/gosdk/constants"
 	"github.com/0chain/gosdk/core/common"
@@ -135,18 +134,32 @@ func (c *SDKClient) GetBlobberNotPartOfAllocation(t *test.SystemTest, allocation
 	return "", fmt.Errorf("failed to get blobber not part of allocation")
 }
 
+func generateRandomIndex(sliceLen int64) (*big.Int, error) {
+	// Generate a random index within the range of the slice
+	randomIndex, err := rand.Int(rand.Reader, big.NewInt(sliceLen))
+	if err != nil {
+		return nil, err
+	}
+	return randomIndex, nil
+}
+
 func (c *SDKClient) GetRandomBlobber(t *test.SystemTest, except_blobber string) (string, error) {
-	mrand.Seed(time.Now().Unix()) //nolint:gosec,revive
 	blobbers, err := sdk.GetBlobbers(true)
 	require.Nil(t, err)
 
-	mrand.Shuffle(len(blobbers), func(i, j int) { blobbers[i], blobbers[j] = blobbers[j], blobbers[i] })
-	for _, blobber := range blobbers {
-		if blobber.ID != common.Key(except_blobber) {
-			return string(blobber.ID), nil
+	var randomBlobber string
+	for range blobbers {
+		randomIndex, err := generateRandomIndex(int64(len(blobbers)))
+		require.Nil(t, err)
+
+		blobber := blobbers[randomIndex.Int64()].ID
+		if blobber != common.Key(except_blobber) {
+			randomBlobber = string(blobber)
+			break
 		}
 	}
-	return "", fmt.Errorf("failed to get blobbers")
+
+	return randomBlobber, fmt.Errorf("failed to get blobbers")
 }
 
 func (c *SDKClient) VerifyFileRefFromBlobber(t *test.SystemTest, allocationID, blobberID, remoteFile string) {
