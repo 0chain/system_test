@@ -152,9 +152,9 @@ type ListFileResult struct {
 }
 
 type Terms struct {
-	ReadPrice     int64   `json:"read_price"`
-	WritePrice    int64   `json:"write_price"`
-	MinLockDemand float64 `json:"min_lock_demand"`
+	Read_price      int64   `json:"read_price"`
+	Write_price     int64   `json:"write_price"`
+	Min_lock_demand float64 `json:"min_lock_demand"`
 }
 
 type Settings struct {
