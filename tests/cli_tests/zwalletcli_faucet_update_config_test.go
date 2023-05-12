@@ -18,9 +18,10 @@ func TestFaucetUpdateConfig(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("should allow update of max_pour_amount")
 
-	// create SC owner wallet
-	output, err := createWalletForName(t, configPath, scOwnerWallet)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+	t.TestSetup("create SC owner wallet", func() {
+		output, err := createWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+	})
 
 	t.RunSequentially("should allow update of max_pour_amount", func(t *test.SystemTest) {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
