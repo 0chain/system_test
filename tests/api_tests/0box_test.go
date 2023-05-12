@@ -20,7 +20,10 @@ func Test0boxNftCollection(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("List NFT collection id with zero nft collection id  should work")
 
-	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+	var firebaseToken *model.FirebaseToken
+	t.TestSetup("Autenticate with firebase", func() {
+		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+	})
 
 	defaultBatchSize := 1
 	defaultMaxMint := 1
