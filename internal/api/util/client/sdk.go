@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
+	"io"
 	"math/big"
 	"os"
 	"path/filepath"
@@ -116,12 +117,47 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
 }
 
 // getBlobberNotPartOfAllocation returns a blobber not part of current allocation
-func (c *SDKClient) GetBlobberNotPartOfAllocation(t *test.SystemTest, allocationID string) (string, error) {
+func (c *SDKClient) InitSDK(wallet string) error {
+	f, err := os.Open(wallet)
+	if err != nil {
+		return nil
+	}
+	clientBytes, err := io.ReadAll(f)
+	if err != nil {
+		return nil
+	}
+	walletJSON := string(clientBytes)
+
+	err = sdk.InitStorageSDK(
+		walletJSON,
+		c.blockWorker,
+		"",
+		crypto.BLS0Chain,
+		nil,
+		0,
+	)
+	return err
+}
+
+func (c *SDKClient) GetBlobberNotPartOfAllocation(t *test.SystemTest, walletname, allocationID string) (string, error) {
+	err := c.InitSDK(walletname)
+	if err != nil {
+		return "", err
+	}
+
 	a, err := sdk.GetAllocation(allocationID)
-	require.Nil(t, err)
+	if err != nil {
+		return "", err
+	}
+
+	if err != nil {
+		return "", nil
+	}
 
 	blobbers, err := sdk.GetBlobbers(true)
-	require.Nil(t, err)
+	if err != nil {
+		return "", err
+	}
 
 	for _, blobber := range blobbers {
 		for _, b := range a.BlobberDetails {
@@ -143,7 +179,11 @@ func generateRandomIndex(sliceLen int64) (*big.Int, error) {
 	return randomIndex, nil
 }
 
-func (c *SDKClient) GetRandomBlobber(t *test.SystemTest, except_blobber string) (string, error) {
+func (c *SDKClient) GetRandomBlobber(t *test.SystemTest, walletname, except_blobber string) (string, error) {
+	err := c.InitSDK(walletname)
+	if err != nil {
+		return "", err
+	}
 	blobbers, err := sdk.GetBlobbers(true)
 	require.Nil(t, err)
 
@@ -162,7 +202,10 @@ func (c *SDKClient) GetRandomBlobber(t *test.SystemTest, except_blobber string) 
 	return randomBlobber, fmt.Errorf("failed to get blobbers")
 }
 
-func (c *SDKClient) VerifyFileRefFromBlobber(t *test.SystemTest, allocationID, blobberID, remoteFile string) {
+func (c *SDKClient) VerifyFileRefFromBlobber(t *test.SystemTest, walletname, allocationID, blobberID, remoteFile string) {
+	err := c.InitSDK(walletname)
+	require.Nil(t, err)
+
 	fref, err := sdk.GetFileRefFromBlobber(allocationID, blobberID, remoteFile)
 	require.Nil(t, err)
 	require.NotNil(t, fref) // not nil when the file exists

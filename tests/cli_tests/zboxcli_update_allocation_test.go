@@ -847,7 +847,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		blobberID, err := sdkClient.GetBlobberNotPartOfAllocation(t, allocationID)
+		blobberID, err := sdkClient.GetBlobberNotPartOfAllocation(t, escapedTestName(t)+"_wallet.json", allocationID)
 		require.Nil(t, err)
 
 		params := createParams(map[string]interface{}{
@@ -860,7 +860,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
-		sdkClient.VerifyFileRefFromBlobber(t, allocationID, blobberID, remotePath)
+		sdkClient.VerifyFileRefFromBlobber(t, escapedTestName(t)+"_wallet.json", allocationID, blobberID, remotePath)
 	})
 	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
@@ -883,9 +883,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		blobberID, err := sdkClient.GetBlobberNotPartOfAllocation(t, allocationID)
+		blobberID, err := sdkClient.GetBlobberNotPartOfAllocation(t, escapedTestName(t)+"_wallet.json", allocationID)
 		require.Nil(t, err)
-		removeBlobber, err := sdkClient.GetRandomBlobber(t, blobberID)
+		removeBlobber, err := sdkClient.GetRandomBlobber(t, escapedTestName(t)+"_wallet.json", blobberID)
 		require.Nil(t, err)
 		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
@@ -898,7 +898,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
-		sdkClient.VerifyFileRefFromBlobber(t, allocationID, blobberID, remotePath)
+		sdkClient.VerifyFileRefFromBlobber(t, escapedTestName(t)+"_wallet.json", allocationID, blobberID, remotePath)
 	})
 }
 
