@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// This test is working fine in local
 func TestBlobberRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work")

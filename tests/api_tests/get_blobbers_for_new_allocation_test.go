@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// This test is working fine in local
 func TestGetBlobbersForNewAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Alloc blobbers API call should be successful given a valid request")

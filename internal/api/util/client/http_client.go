@@ -49,17 +49,17 @@ func (c *BaseHttpClient) executeForServiceProvider(t *test.SystemTest, url strin
 	case HttpDELETEMethod:
 		resp, err = c.HttpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetBody(executionRequest.Body).Delete(url)
 	}
-	
+
 	if err != nil {
 		t.Errorf("%s error : %w", url, err)
 		return nil, fmt.Errorf("%s: %w", url, ErrGetFromResource)
 	}
-	
+
 	body := resp.Body()
-	t.Logf("%s returned %s with status %s", url, string(body), resp.Status())
 	if executionRequest.Dst != nil {
 		err = json.Unmarshal(body, executionRequest.Dst)
 		if err != nil {
+			t.Logf("%s returned %s with status %s", url, string(body), resp.Status())
 			return resp, err
 		}
 	}

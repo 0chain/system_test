@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// this test is working fine is local
 func TestAddBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Add new blobber to allocation, should work")
@@ -22,7 +23,7 @@ func TestAddBlobber(testSetup *testing.T) {
 
 	t.Run("Add new blobber to allocation, should work", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		for i := 0; i < 20; i++ {
+		for i := 0; i < 2; i++ {
 			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 		}
 
@@ -51,7 +52,7 @@ func TestAddBlobber(testSetup *testing.T) {
 
 	t.Run("Add new blobber without provided blobber ID to allocation, shouldn't work", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 2; i++ {
 			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 		}
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -76,7 +77,7 @@ func TestAddBlobber(testSetup *testing.T) {
 
 	t.Run("Add new blobber with incorrect ID to allocation, shouldn't work", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 2; i++ {
 			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 		}
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -104,7 +105,7 @@ func TestAddBlobber(testSetup *testing.T) {
 
 	t.Run("Add blobber which already exists in allocation, shouldn't work", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 2; i++ {
 			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 		}
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
