@@ -1,5 +1,5 @@
 block_worker:  https://dev.zus.network/dns
-0box_url: https://0box.dev.zus.network
+0box_url: https://0box.dev.devnet-0chain.net
 0box_phone_number: +917696229925
 default_test_case_timeout: 45s
 blobber_owner_wallet_mnemonics: "economy day fan flower between rebuild valid bid catch bargain vivid hybrid room permit check manage mean twelve damage summer close churn boat either"

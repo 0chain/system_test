@@ -51,6 +51,50 @@ func (s *SystemTest) RunSequentiallyWithTimeout(name string, timeout time.Durati
 	return s.run(name, timeout, testCaseFunction, false)
 }
 
+func (s *SystemTest) TestSetup(label string, setupFunction func()) {
+	s.TestSetupWithTimeout(label, DefaultTestTimeout, setupFunction)
+}
+
+func (s *SystemTest) TestSetupWithTimeout(label string, timeout time.Duration, setupFunction func()) {
+	s.testSetup(label, timeout, setupFunction)
+}
+
+func (s *SystemTest) testSetup(label string, timeout time.Duration, setupFunction func()) {
+	s.Unwrap.Helper()
+	timeoutWrappedFunction := func() {
+		defer handlePanic(s)
+
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+
+		s.Logf("Test setup [%s] scheduled at [%s] ", label, time.Now().Format("01-02-2006 15:04:05"))
+
+		testSetupChannel := make(chan struct{}, 1)
+
+		go func() {
+			s.Unwrap.Helper()
+			defer handlePanic(s)
+			go func() {
+				defer wg.Done()
+				defer handlePanic(s)
+				s.Logf("Test setup [%s] start at [%s] ", label, time.Now().Format("01-02-2006 15:04:05"))
+				setupFunction()
+			}()
+			wg.Wait()
+			close(testSetupChannel)
+		}()
+
+		select {
+		case <-time.After(timeout):
+			s.Fatalf("Test setup [%s] timed out after [%s]", label, timeout)
+		case _ = <-testSetupChannel:
+		}
+
+		s.Logf("Test setup [%s] exit at [%s]", label, time.Now().Format("01-02-2006 15:04:05"))
+	}
+	timeoutWrappedFunction()
+}
+
 func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w *SystemTest), runInParallel bool) bool {
 	s.Unwrap.Helper()
 	timeoutWrappedTestCase := func(testSetup *testing.T) {
@@ -266,13 +310,13 @@ func (s *SystemTest) Parallel() {
 	}
 }
 
-func (s3 *SystemTest) SetRunAllTestsAsSmokeTest() {
-	s3.runAllTestsAsSmoke = true
+func (s *SystemTest) SetRunAllTestsAsSmokeTest() {
+	s.runAllTestsAsSmoke = true
 }
 
-func (s3 *SystemTest) SetSmokeTests(smokeTests ...string) {
-	s3.smokeTests = make(map[string]bool)
+func (s *SystemTest) SetSmokeTests(smokeTests ...string) {
+	s.smokeTests = make(map[string]bool)
 	for _, v := range smokeTests {
-		s3.smokeTests[v] = true
+		s.smokeTests[v] = true
 	}
 }

@@ -29,15 +29,19 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	t.Skip("turn on post mainnet")
 	t.Parallel()
 
-	// get current valid vesting configs
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+	var validDuration string
+	var vpConfigMap map[string]interface{}
+	t.TestSetup("Register wallet + get vesting SC config", func() {
+		// get current valid vesting configs
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
-	output, err = getVestingPoolSCConfig(t, configPath, true)
-	require.Nil(t, err, "error fetching vesting pool config", strings.Join(output, "\n"))
+		output, err = getVestingPoolSCConfig(t, configPath, true)
+		require.Nil(t, err, "error fetching vesting pool config", strings.Join(output, "\n"))
 
-	vpConfigMap := configFromKeyValuePair(output)
-	validDuration := getValidDuration(t, vpConfigMap)
+		vpConfigMap = configFromKeyValuePair(output)
+		validDuration = getValidDuration(t, vpConfigMap)
+	})
 
 	// VP-ADD cases
 	t.Run("Vesting pool with single destination, valid duration and valid tokens should work", func(t *test.SystemTest) {
