@@ -2049,30 +2049,30 @@ func TestDexState(testSetup *testing.T) {
 		require.Empty(t, dexState)
 	})
 }
-
+func PrintBalance(t *test.SystemTest, ownerWallet, blobberOwnerWallet, sdkWallet *model.Wallet) {
+	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
+	t.Logf("Owner balance: %v", ownerBalance)
+	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
+	t.Logf("Blobber owner balance: %v", blobberOwnerBalance)
+	sdkWalletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
+	t.Logf("Blobber owner balance: %v", sdkWalletBalance)
+}
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	// Faucet the used wallets
 	for i := 0; i < 50; i++ {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus) // 18 * 50 * 1e10
 	}
 	for i := 0; i < 50; i++ {
-		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
+		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus) // 18 * 50 * 1e10
 	}
 	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
 	t.Logf("Owner balance: %v", ownerBalance)
-	ownerWallet.Nonce = int(ownerBalance.Nonce)
-	for i := 0; i < 10; i++ {
-		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
-	}
 	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
 	t.Logf("Blobber owner balance: %v", blobberOwnerBalance)
+	PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
+	ownerWallet.Nonce = int(ownerBalance.Nonce)
 	blobberOwnerWallet.Nonce = int(blobberOwnerBalance.Nonce)
-
-	// Faucet the used wallets
-	for i := 0; i < 10; i++ {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-	}
 
 	// Stake 6 blobbers, each with 1 token
 	targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 6, client.HttpOkStatus)
@@ -2080,20 +2080,21 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	require.Equal(t, 200, resp.StatusCode())
 	require.Len(t, targetBlobbers, 6)
 	for _, blobber := range targetBlobbers {
-		confHash := apiClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, float64(1.0), client.TxSuccessfulStatus)
+		confHash := apiClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, float64(1.0), client.TxSuccessfulStatus) // 3zcn from sdkwallet
 		require.NotEmpty(t, confHash)
 	}
 
 	// Create the free allocation marker (ownerWallet -> sdkWallet)
 	apiClient.ExecuteFaucet(t, ownerWallet, client.TxSuccessfulStatus)
-	apiClient.AddFreeStorageAssigner(t, ownerWallet, client.TxSuccessfulStatus)
+	apiClient.AddFreeStorageAssigner(t, ownerWallet, client.TxSuccessfulStatus) //0.1 ZCN 1 ZCN = 1e10 from owner wallet
 	marker := config.CreateFreeStorageMarker(t, sdkWallet.ToSdkWallet(sdkWalletMnemonics), ownerWallet.ToSdkWallet(ownerWalletMnemonics))
 	t.Logf("Free allocation marker: %v", marker)
 
 	t.Run("test /v2/graph-write-price", func(t *test.SystemTest) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphWritePrice))
-
+		PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 		t.Run("test graph data", func(t *test.SystemTest) {
+			PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 			data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
@@ -2152,6 +2153,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalChallengePools))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
+			PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 			// Get initial total challenge pools
 			data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
@@ -2200,6 +2202,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		t.Run("test graph data", func(t *test.SystemTest) {
 			// Get initial total challenge pools
+			PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 			data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
@@ -2296,9 +2299,11 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	})
 
 	t.Run("test /v2/graph-used-storage", func(t *test.SystemTest) {
+
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphUsedStorage))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
+			PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 			// Get initial used storage
 			data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
@@ -2426,6 +2431,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalStaked))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
+			PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 			data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
@@ -2613,6 +2619,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalMinted))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
+
 			data, resp, err := zboxClient.GetGraphTotalMinted(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
