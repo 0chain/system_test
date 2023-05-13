@@ -235,7 +235,9 @@ func getMinStakedCapacityBlobber(t *test.SystemTest, blobberList []climodel.Blob
 	var minAvailableCapacityBlobber climodel.BlobberInfo
 	minAvailableCapacity := int64(math.MaxInt64)
 
-	for _, blobber := range blobberList {
+	for i := range blobberList {
+		blobber := blobberList[i]
+
 		if blobber.IsKilled || blobber.IsShutdown {
 			continue
 		}
