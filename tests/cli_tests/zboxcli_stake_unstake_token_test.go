@@ -18,12 +18,13 @@ import (
 
 func TestStakeUnstakeTokens(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Staked tokens should move from wallet to Provider's stake pool, unstaking should move tokens back to wallet")
 
 	t.Parallel()
 
 	t.Run("Staked tokens should move from wallet to Provider's stake pool, unstaking should move tokens back to wallet", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Error getting wallet", strings.Join(output, "\n"))
@@ -95,7 +96,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		}))
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "tokens unlocked: 0, pool deleted", output[0])
+		require.Equal(t, "tokens unlocked: 10000000000, pool deleted", output[0])
 
 		// Wallet balance should increase by unlocked amount
 		output, err = getBalance(t, configPath)
@@ -133,8 +134,8 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens without specifying amount of tokens to lock should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": "-",
@@ -145,8 +146,8 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens without specifying provider should generate corresponding error", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"tokens": 1.0,
@@ -157,8 +158,8 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking more tokens than in wallet should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		// Wallet balance before staking tokens
 		balance, err := getBalanceZCN(t, configPath)
@@ -191,9 +192,9 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		require.Less(t, balance2, balance) // pay txn fee
 	})
 
-	t.Run("Staking 0 tokens should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath, withDebugLogs())
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+	t.Run("Staking 0 tokens against blobber should fail", func(t *test.SystemTest) {
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 		t.Logf("output: %v", output)
 		txnHash := getTransactionHash(output, false)
 
@@ -235,8 +236,8 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking negative tokens should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		// Wallet balance before staking tokens
 		balance, err := getBalanceZCN(t, configPath)

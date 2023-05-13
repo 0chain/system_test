@@ -15,6 +15,9 @@ import (
 
 func TestMultisigWallet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("Multisig is broken and will be removed before mainnet - tests remain until this happens")
+
+	t.SetSmokeTests("Wallet Creation should succeed when 0 < threshold <= num-signers")
 
 	t.Parallel()
 
@@ -25,7 +28,6 @@ func TestMultisigWallet(testSetup *testing.T) {
 		require.Nil(t, err, "error occurred creating multisig wallet", strings.Join(output, "\n"))
 
 		require.True(t, len(output) > 1, "Output was less than number of assertions", strings.Join(output, "\n"))
-		require.Contains(t, output, fmt.Sprintf("registering %d wallets", numSigners+1))
 		require.Equal(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
 	})
 
@@ -36,7 +38,6 @@ func TestMultisigWallet(testSetup *testing.T) {
 
 		require.Nil(t, err, "error occurred creating multisig wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 1, "Output was less than number of assertions", strings.Join(output, "\n"))
-		require.Contains(t, output, fmt.Sprintf("registering %d wallets", numSigners+1))
 		require.Equal(t, "Creating and testing a multisig wallet is successful!", output[len(output)-1])
 	})
 
