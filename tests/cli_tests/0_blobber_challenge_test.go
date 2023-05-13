@@ -22,38 +22,44 @@ import (
 func TestBlobberChallenge(testSetup *testing.T) {
 	// todo: all of these tests poll for up to 2mins30s - is this reasonable?
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Uploading a file greater than 1 MB should generate randomized challenges")
 
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	var blobberList []climodel.BlobberInfo
+	var sharderBaseURLs []string
 
-	// Get sharder list.
-	output, err = getSharders(t, configPath)
-	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
-	require.Greater(t, len(output), 1)
-	require.Equal(t, "MagicBlock Sharders", output[0])
+	t.TestSetup("Get list of sharders and blobbers", func() {
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
-	var sharders map[string]*climodel.Sharder
-	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
-	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
-	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
+		// Get sharder list.
+		output, err = getSharders(t, configPath)
+		require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 1)
+		require.Equal(t, "MagicBlock Sharders", output[0])
 
-	// Get base URL for API calls.
-	sharderBaseURLs := getAllSharderBaseURLs(sharders)
-	require.Greater(t, len(sharderBaseURLs), 0, "No sharder URLs found.")
+		var sharders map[string]*climodel.Sharder
+		err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
+		require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
 
-	blobberList := []climodel.BlobberInfo{}
-	output, err = listBlobbers(t, configPath, "--json")
-	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-	require.Len(t, output, 1)
+		// Get base URL for API calls.
+		sharderBaseURLs = getAllSharderBaseURLs(sharders)
+		require.Greater(t, len(sharderBaseURLs), 0, "No sharder URLs found.")
 
-	err = json.Unmarshal([]byte(output[0]), &blobberList)
-	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
-	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
+		blobberList = []climodel.BlobberInfo{}
+		output, err = listBlobbers(t, configPath, "--json")
+		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		err = json.Unmarshal([]byte(output[0]), &blobberList)
+		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
+		require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
+	})
 
 	t.RunSequentiallyWithTimeout("Uploading a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		var blobbers []string
@@ -67,10 +73,10 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		filesize := 2 * MB
 		filename := generateRandomTestFileName(t)
 
-		err = createFileWithSize(filename, int64(filesize))
+		err := createFileWithSize(filename, int64(filesize))
 		require.Nil(t, err)
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
@@ -84,7 +90,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Downloading a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/dir/"
@@ -127,7 +133,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Moving a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/dir/"
@@ -170,7 +176,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Deleting a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/dir/"
@@ -212,7 +218,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Copying a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/dir/"
@@ -255,7 +261,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Updating a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/dir/"
@@ -302,7 +308,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Renaming a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 		})
 
 		remotepath := "/dir/"

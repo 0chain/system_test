@@ -19,14 +19,17 @@ import (
 
 func TestRecentlyAddedRefs(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Recently Added Refs Should be listed")
 
 	t.Parallel()
 
-	// Create a folder to keep all the generated files to be uploaded
-	err := os.MkdirAll("tmp", os.ModePerm)
-	require.Nil(t, err)
+	t.TestSetup("Create tmp dir", func() {
+		// Create a folder to keep all the generated files to be uploaded
+		err := os.MkdirAll("tmp", os.ModePerm)
+		require.Nil(t, err)
+	})
 
-	t.RunWithTimeout("Recently Added Refs Should be listed", 60*time.Second, func(t *test.SystemTest) { //todo: slow
+	t.Run("Recently Added Refs Should be listed", func(t *test.SystemTest) { //todo: slow
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -84,7 +87,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 		}
 	})
 
-	t.RunWithTimeout("Refs created 30 seconds ago should not be listed with in-date less than 30 seconds", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("Refs created 30 seconds ago should not be listed with in-date less than 30 seconds", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -127,7 +130,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 		require.Len(t, result.Refs, 0)
 	})
 
-	t.RunWithTimeout("Refs of someone else's allocation should return zero refs", 60*time.Second, func(t *test.SystemTest) { //todo: slow
+	t.Run("Refs of someone else's allocation should return zero refs", func(t *test.SystemTest) { //todo: slow
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
 		})
@@ -151,8 +154,8 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err = registerWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		t1 := time.Now()
 		time.Sleep(time.Second * 30)

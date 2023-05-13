@@ -19,12 +19,15 @@ import (
 
 func TestFileMetadata(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Get Folder Meta in Non-Empty Directory Should Work")
 
 	t.Parallel()
 
-	// Create a folder to keep all the generated files to be uploaded
-	err := os.MkdirAll("tmp", os.ModePerm)
-	require.Nil(t, err)
+	t.TestSetup("Create tmp dir", func() {
+		// Create a folder to keep all the generated files to be uploaded
+		err := os.MkdirAll("tmp", os.ModePerm)
+		require.Nil(t, err)
+	})
 
 	// Success Scenarios
 
@@ -138,8 +141,8 @@ func TestFileMetadata(testSetup *testing.T) {
 		})
 		fname := filepath.Base(filename)
 
-		// Just register a wallet so that we can work further
-		output, err := registerWallet(t, configPath)
+		// Just create a wallet so that we can work further
+		output, err := createWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		// Listing contents of allocationID: should work
@@ -260,7 +263,7 @@ func TestFileMetadata(testSetup *testing.T) {
 
 	// Failure Scenarios
 
-	t.RunWithTimeout("Get File Meta on Another Wallet File Should Fail", 60*time.Second, func(t *test.SystemTest) {
+	t.Run("Get File Meta on Another Wallet File Should Fail", func(t *test.SystemTest) {
 		var otherAllocationID, otherfile string
 		allocationID := setupAllocation(t, configPath)
 
@@ -370,6 +373,9 @@ func TestFileMetadata(testSetup *testing.T) {
 	})
 
 	t.Run("Get File Meta Without Parameter Should Fail", func(t *test.SystemTest) {
+		_, err := createWallet(t, configPath)
+		require.NoError(t, err)
+
 		output, err := getFileMeta(t, configPath, "", false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)

@@ -16,8 +16,17 @@ import (
 
 func TestBlobberAvailability(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("blobber is available switch controls blobber use for allocations")
 
 	t.RunSequentially("blobber is available switch controls blobber use for allocations", func(t *test.SystemTest) {
+		// create and faucet pour tokens
+		output, err := createWallet(t, configPath)
+		require.NoError(t, err, output)
+
+		// update blobber info use owner wallet, so need to faucet pour tokens
+		output, err = createWalletForName(t, configPath, blobberOwnerWallet)
+		require.NoError(t, err, output)
+
 		startBlobbers := getBlobbers(t)
 		var blobberToDeactivate *model.BlobberDetails
 		var activeBlobbers int
@@ -34,13 +43,15 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		dataShards := 1
 		parityShards := activeBlobbers - dataShards
 
-		output, err := executeFaucetWithTokens(t, configPath, 9.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   "3.0",
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.NoError(t, err, strings.Join(output, "\n"))
 		beforeAllocationId, err := getAllocationID(output[0])
@@ -61,6 +72,8 @@ func TestBlobberAvailability(testSetup *testing.T) {
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   "3.0",
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.Error(t, err, "create allocation should fail")
 		require.Len(t, output, 1)
@@ -79,6 +92,8 @@ func TestBlobberAvailability(testSetup *testing.T) {
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   "3.0",
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.NoError(t, err, strings.Join(output, "\n"))
 		afterAllocationId, err := getAllocationID(output[0])

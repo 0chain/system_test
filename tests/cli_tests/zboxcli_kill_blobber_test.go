@@ -19,12 +19,13 @@ import (
 
 func TestKillBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("killed blobber is not available for allocations")
 
 	// Killing a blobber should make it unavalable for any new allocations,
 	// and stake pools should be slashed by an amount given by the "stakepool.kill_slash" setting
 	t.RunSequentially("killed blobber is not available for allocations", func(t *test.SystemTest) {
-		output, err := registerWalletForName(t, configPath, scOwnerWallet)
-		require.NoError(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWalletForName(t, configPath, scOwnerWallet)
+		require.NoError(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -48,7 +49,9 @@ func TestKillBlobber(testSetup *testing.T) {
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
-			"lock":   3.0,
+			"lock":   5.0,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.NoError(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -81,7 +84,9 @@ func TestKillBlobber(testSetup *testing.T) {
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
-			"lock":   3.0,
+			"lock":   4.0,
+			"expire": "1h",
+			"size":   "10000",
 		}))
 		require.Error(t, err, "should fail to create allocation")
 		require.Len(t, output, 1)
@@ -90,6 +95,9 @@ func TestKillBlobber(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("kill blobber by non-smartcontract owner should fail", func(t *test.SystemTest) {
+		_, err := createWallet(t, configPath)
+		require.NoError(t, err)
+
 		startBlobbers := getBlobbers(t)
 		var blobberToKill string
 		for i := range startBlobbers {

@@ -20,19 +20,27 @@ var (
 
 func TestCancelAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Cancel allocation immediately should work")
 
 	t.Parallel()
 
 	t.Run("Cancel allocation immediately should work", func(t *test.SystemTest) {
+		output, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
 		allocationID := setupAllocation(t, configPath)
 
-		output, err := cancelAllocation(t, configPath, allocationID, true)
+		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
+		// create wallet
+		_, err := createWallet(t, configPath)
+		require.NoError(t, err)
+
 		cmd := fmt.Sprintf(
 			"./zbox alloc-cancel --silent "+
 				"--wallet %s --configDir ./config --config %s",
@@ -42,13 +50,15 @@ func TestCancelAllocation(testSetup *testing.T) {
 
 		output, err := cliutils.RunCommandWithoutRetry(cmd)
 		require.Error(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 4)
-		require.Equal(t, "Error: allocation flag is missing", output[len(output)-1])
+		require.Len(t, output, 1)
+		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
 
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
 		otherAllocationID := setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
+		_, err := createWallet(t, configPath)
+		require.NoError(t, err)
 		// otherAllocationID should not be cancelable from this level
 		output, err := cancelAllocation(t, configPath, otherAllocationID, false)
 
@@ -58,22 +68,26 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
+		_, err := createWallet(t, configPath)
+		require.NoError(t, err)
+
 		allocationID := "123abc"
 
 		output, err := cancelAllocation(t, configPath, allocationID, false)
 
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 3, "expected output length be at least 4", strings.Join(output, "\n"))
-		//FIXME: error is incorrect, should be error canceling allocation see https://github.com/0chain/zboxcli/issues/240
-		require.Equal(t, "Error creating allocation:alloc_cancel_failed: value not present", output[len(output)-1])
+		require.Equal(t, "Error creating allocation:alloc_cancel_failed: value not present", output[0])
 	})
 
-	t.Run("Cancel Expired Allocation Should Fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Cancel Expired Allocation Should Fail", 6*time.Minute, func(t *test.SystemTest) {
+		_, err := createWallet(t, configPath)
+		require.NoError(t, err)
+
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "2s",
+			"expire": "1m",
 		})
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(2 * time.Minute)
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)

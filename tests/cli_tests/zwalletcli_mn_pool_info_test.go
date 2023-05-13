@@ -15,45 +15,48 @@ import (
 
 func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Miner pool info after locking against miner should work")
 
 	t.Parallel()
 
-	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
-	}
-
-	sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
-
-	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
-	require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
-
 	var sharder climodel.Sharder
-	for _, sharder = range sharders {
-		if sharder.ID != sharderNodeDelegateWallet.ClientID {
-			break
-		}
-	}
-
-	if _, err := os.Stat("./config/" + miner02NodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner02NodeDelegateWalletName+"_wallet.json")
-	}
-
-	miners := getMinersListForWallet(t, miner02NodeDelegateWalletName)
-
 	var miner climodel.Node
-	for _, miner = range miners.Nodes {
-		if miner.ID == miner03ID {
-			break
+	t.TestSetup("get miners and sharders", func() {
+		if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
+			t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 		}
-	}
+
+		sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
+
+		sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
+		require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
+
+		for _, sharder = range sharders {
+			if sharder.ID != sharderNodeDelegateWallet.ClientID {
+				break
+			}
+		}
+
+		if _, err := os.Stat("./config/" + miner02NodeDelegateWalletName + "_wallet.json"); err != nil {
+			t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner02NodeDelegateWalletName+"_wallet.json")
+		}
+
+		miners := getMinersListForWallet(t, miner02NodeDelegateWalletName)
+
+		for _, miner = range miners.Nodes {
+			if miner.ID == miner03ID {
+				break
+			}
+		}
+	})
 
 	var (
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
 	)
 
 	t.Run("Miner pool info after locking against miner should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -78,8 +81,8 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Miner pool info after locking against sharder should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -105,8 +108,8 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Miner/Sharder pool info for invalid node id should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
 			"id": "abcdefgh",

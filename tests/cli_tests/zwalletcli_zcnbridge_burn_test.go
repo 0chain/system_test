@@ -19,6 +19,7 @@ import (
 
 func TestBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Burning WZCN tokens on balance, should work")
 
 	t.Parallel()
 
@@ -30,6 +31,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
+		t.Skip("Skip till runners are updated to newer ubuntu")
 		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
@@ -64,7 +66,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Burning ZCN tokens with available ZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
-		output, err := executeFaucetWithTokens(t, configPath, 1.0)
+		output, err := executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = burnZcn(t, "1", bridgeClientConfigFile, true)
@@ -74,7 +76,8 @@ func TestBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Get ZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
-		output, err := executeFaucetWithTokens(t, configPath, 1.0)
+		t.Skip("Skip till runners are updated to newer ubuntu")
+		output, err := executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = burnZcn(t, "1", bridgeClientConfigFile, true)
