@@ -45,7 +45,7 @@ func TestStakePool(testSetup *testing.T) {
 		require.Nil(t, err, "error counting delegates")
 
 		// stake 1 token on this blobber
-		stakeTokenToListOfBlobbers(t, blobbersList, 1)
+		stakeTokensToAllBlobbers(t, 1)
 
 		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates+1)
 
@@ -66,7 +66,7 @@ func TestStakePool(testSetup *testing.T) {
 		require.Greater(t, totalOffersNew, totalOffers, "Total Offers should Increase")
 
 		// Stake 1 token from new wallet
-		createWalletAndStakeTokensForWallet(t, minAvailableCapacityBlobber)
+		createWalletAndStakeTokensForWallet(t, &minAvailableCapacityBlobber)
 
 		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates+1)
 
@@ -193,7 +193,7 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 	return allocationId
 }
 
-func createWalletAndStakeTokensForWallet(t *test.SystemTest, blobber climodel.BlobberInfo) {
+func createWalletAndStakeTokensForWallet(t *test.SystemTest, blobber *climodel.BlobberInfo) {
 	// Stake 1 token from new wallet
 	_, err := createWalletForName(t, configPath, newStakeWallet)
 	require.Nil(t, err, "Error registering wallet", err)
@@ -214,7 +214,11 @@ func assertNumberOfDelegates(t *test.SystemTest, blobberId string, expectedDeleg
 	return lenDelegates
 }
 
-func stakeTokenToListOfBlobbers(t *test.SystemTest, blobbers []climodel.BlobberInfo, tokens int64) {
+func stakeTokensToAllBlobbers(t *test.SystemTest, tokens int64) {
+	// get the list of blobbers
+	blobbers := getBlobbersList(t)
+	require.Greater(t, len(blobbers), 0, "No blobbers found")
+
 	_, err := executeFaucetWithTokens(t, configPath, 9)
 	require.Nil(t, err, "Error executing faucet with tokens", err)
 
