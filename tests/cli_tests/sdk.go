@@ -121,5 +121,4 @@ func VerifyFileRefFromBlobber(walletname, allocationID, blobberID, remoteFile st
 		return nil, err
 	}
 	return sdk.GetFileRefFromBlobber(allocationID, blobberID, remoteFile)
-
 }

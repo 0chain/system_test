@@ -422,7 +422,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
-			require.Len(t, output, 1)
+			require.Len(t, output, 2)
 			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
