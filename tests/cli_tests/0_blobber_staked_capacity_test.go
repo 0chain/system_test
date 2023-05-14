@@ -90,7 +90,7 @@ func TestStakePool(testSetup *testing.T) {
 		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}))
 		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", minAvailableCapacityBlobber.Id)
 
-		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates-1)
+		assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates-1)
 	})
 }
 
