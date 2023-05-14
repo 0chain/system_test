@@ -218,7 +218,8 @@ func stakeTokenToListOfBlobbers(t *test.SystemTest, blobbers []climodel.BlobberI
 	_, err := executeFaucetWithTokens(t, configPath, 9)
 	require.Nil(t, err, "Error executing faucet with tokens", err)
 
-	for _, blobber := range blobbers {
+	for i := range blobbers {
+		blobber := blobbers[i]
 		if blobber.IsKilled || blobber.IsShutdown {
 			continue
 		}
