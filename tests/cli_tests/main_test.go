@@ -12,16 +12,11 @@ import (
 
 	"github.com/0chain/system_test/internal/api/util/tenderly"
 
-	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/spf13/viper"
-)
-
-var (
-	sdkClient *client.SDKClient
 )
 
 func setupDefaultConfig() {
@@ -166,15 +161,6 @@ func TestMain(m *testing.M) {
 	}
 
 	setupConfig()
-
-	configPath, ok := os.LookupEnv(config.ConfigPathEnv)
-	if !ok {
-		configPath = config.DefaultConfigPath
-		log.Printf("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
-	}
-
-	parsedConfig := config.Parse(configPath)
-	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 
 	tenderlyClient = tenderly.NewClient(ethereumNodeURL)
 
