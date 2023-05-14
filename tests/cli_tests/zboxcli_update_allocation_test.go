@@ -847,20 +847,24 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		blobberID, err := sdkClient.GetBlobberNotPartOfAllocation(t, escapedTestName(t)+"_wallet.json", allocationID)
+		walletFile := "./config/" + escapedTestName(t) + "_wallet.json"
+		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, allocationID)
 		require.Nil(t, err)
 
 		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 			"add_blobber":                blobberID,
+			// "expiry":                     "720h0m0s",
 		})
 
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
-		sdkClient.VerifyFileRefFromBlobber(t, escapedTestName(t)+"_wallet.json", allocationID, blobberID, remotePath)
+		fref, err := VerifyFileRefFromBlobber(walletFile, allocationID, blobberID, remotePath)
+		require.Nil(t, err)
+		require.NotNil(t, fref) // not nil when the file exists
 	})
 	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
@@ -883,22 +887,27 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		blobberID, err := sdkClient.GetBlobberNotPartOfAllocation(t, escapedTestName(t)+"_wallet.json", allocationID)
+		walletFile := "./config/" + escapedTestName(t) + "_wallet.json"
+
+		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, allocationID)
 		require.Nil(t, err)
-		removeBlobber, err := sdkClient.GetRandomBlobber(t, escapedTestName(t)+"_wallet.json", blobberID)
+		removeBlobber, err := GetRandomBlobber(walletFile, blobberID)
 		require.Nil(t, err)
 		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 			"add_blobber":                blobberID,
 			"remove_blobber":             removeBlobber,
+			// "expiry":                     "720h0m0s",
 		})
 
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
-		sdkClient.VerifyFileRefFromBlobber(t, escapedTestName(t)+"_wallet.json", allocationID, blobberID, remotePath)
+		fref, err := VerifyFileRefFromBlobber(walletFile, allocationID, blobberID, remotePath)
+		require.Nil(t, err)
+		require.NotNil(t, fref) // not nil when the file exists
 	})
 }
 

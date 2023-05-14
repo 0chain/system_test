@@ -3,15 +3,11 @@ package client
 import (
 	"bytes"
 	"crypto/rand"
-	"fmt"
-	"io"
-	"math/big"
 	"os"
 	"path/filepath"
 	"sync"
 
 	"github.com/0chain/gosdk/constants"
-	"github.com/0chain/gosdk/core/common"
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/gosdk/zboxcore/zboxutil"
@@ -114,101 +110,6 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) string {
 	require.Nil(t, chunkedUpload.Start())
 
 	return filepath.Join("", filepath.Base(tmpFile.Name()))
-}
-
-// getBlobberNotPartOfAllocation returns a blobber not part of current allocation
-func (c *SDKClient) InitSDK(wallet string) error {
-	f, err := os.Open(wallet)
-	if err != nil {
-		return nil
-	}
-	clientBytes, err := io.ReadAll(f)
-	if err != nil {
-		return nil
-	}
-	walletJSON := string(clientBytes)
-
-	err = sdk.InitStorageSDK(
-		walletJSON,
-		c.blockWorker,
-		"",
-		crypto.BLS0Chain,
-		nil,
-		0,
-	)
-	return err
-}
-
-func (c *SDKClient) GetBlobberNotPartOfAllocation(t *test.SystemTest, walletname, allocationID string) (string, error) {
-	err := c.InitSDK(walletname)
-	if err != nil {
-		return "", err
-	}
-
-	a, err := sdk.GetAllocation(allocationID)
-	if err != nil {
-		return "", err
-	}
-
-	if err != nil {
-		return "", nil
-	}
-
-	blobbers, err := sdk.GetBlobbers(true)
-	if err != nil {
-		return "", err
-	}
-
-	for _, blobber := range blobbers {
-		for _, b := range a.BlobberDetails {
-			if blobber.ID != common.Key(b.BlobberID) {
-				return b.BlobberID, nil
-			}
-		}
-	}
-
-	return "", fmt.Errorf("failed to get blobber not part of allocation")
-}
-
-func generateRandomIndex(sliceLen int64) (*big.Int, error) {
-	// Generate a random index within the range of the slice
-	randomIndex, err := rand.Int(rand.Reader, big.NewInt(sliceLen))
-	if err != nil {
-		return nil, err
-	}
-	return randomIndex, nil
-}
-
-func (c *SDKClient) GetRandomBlobber(t *test.SystemTest, walletname, except_blobber string) (string, error) {
-	err := c.InitSDK(walletname)
-	if err != nil {
-		return "", err
-	}
-	blobbers, err := sdk.GetBlobbers(true)
-	require.Nil(t, err)
-
-	var randomBlobber string
-	for range blobbers {
-		randomIndex, err := generateRandomIndex(int64(len(blobbers)))
-		require.Nil(t, err)
-
-		blobber := blobbers[randomIndex.Int64()].ID
-		if blobber != common.Key(except_blobber) {
-			randomBlobber = string(blobber)
-			break
-		}
-	}
-
-	return randomBlobber, fmt.Errorf("failed to get blobbers")
-}
-
-func (c *SDKClient) VerifyFileRefFromBlobber(t *test.SystemTest, walletname, allocationID, blobberID, remoteFile string) {
-	err := c.InitSDK(walletname)
-	require.Nil(t, err)
-
-	fref, err := sdk.GetFileRefFromBlobber(allocationID, blobberID, remoteFile)
-	require.Nil(t, err)
-	require.NotNil(t, fref) // not nil when the file exists
 }
 
 func (c *SDKClient) GetFileList(t *test.SystemTest, allocationID, path string) *sdk.ListResult {
