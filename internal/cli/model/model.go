@@ -164,13 +164,20 @@ type Settings struct {
 }
 
 type BlobberInfo struct {
-	Id                  string   `json:"id"`
-	Url                 string   `json:"url"`
-	Capacity            int      `json:"capacity"`
-	Last_health_check   int      `json:"last_health_check"`
-	Allocated           int      `json:"allocated"`
-	Terms               Terms    `json:"terms"`
-	Stake_pool_settings Settings `json:"stake_pool_settings"`
+	Id                       string            `json:"id"`
+	Url                      string            `json:"url"`
+	Terms                    Terms             `json:"terms"`
+	Capacity                 int64             `json:"capacity"`
+	Allocated                int64             `json:"allocated"`
+	LastHealthCheck          int64             `json:"last_health_check"`
+	StakePoolSettings        StakePoolSettings `json:"stake_pool_settings"`
+	TotalStake               int64             `json:"total_stake"`
+	UsedAllocation           int64             `json:"used_allocation"`
+	TotalOffers              int64             `json:"total_offers"`
+	TotalServiceCharge       int64             `json:"total_service_charge"`
+	UncollectedServiceCharge int64             `json:"uncollected_service_charge"`
+	IsKilled                 bool              `json:"is_killed"`
+	IsShutdown               bool              `json:"is_shutdown"`
 }
 
 type ChallengePoolInfo struct {
