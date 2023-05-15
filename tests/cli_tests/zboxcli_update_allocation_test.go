@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -847,8 +848,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		walletFile := "./config/" + escapedTestName(t) + "_wallet.json"
-		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, allocationID)
+		walletFile := filepath.Join("config", escapedTestName(t), "_wallet.json")
+		configFile := filepath.Join("config", configPath)
+		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
 		params := createParams(map[string]interface{}{
@@ -862,7 +864,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
-		fref, err := VerifyFileRefFromBlobber(walletFile, allocationID, blobberID, remotePath)
+		fref, err := VerifyFileRefFromBlobber(walletFile, configFile, allocationID, blobberID, remotePath)
 		require.Nil(t, err)
 		require.NotNil(t, fref) // not nil when the file exists
 	})
@@ -887,11 +889,12 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		walletFile := "./config/" + escapedTestName(t) + "_wallet.json"
+		walletFile := filepath.Join("config", escapedTestName(t), "_wallet.json")
+		configFile := filepath.Join("config", configPath)
 
-		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, allocationID)
+		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
-		removeBlobber, err := GetRandomBlobber(walletFile, blobberID)
+		removeBlobber, err := GetRandomBlobber(walletFile, configFile, blobberID)
 		require.Nil(t, err)
 		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
@@ -905,7 +908,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
-		fref, err := VerifyFileRefFromBlobber(walletFile, allocationID, blobberID, remotePath)
+		fref, err := VerifyFileRefFromBlobber(walletFile, configFile, allocationID, blobberID, remotePath)
 		require.Nil(t, err)
 		require.NotNil(t, fref) // not nil when the file exists
 	})

@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
-	"log"
 	"math/big"
 	"os"
 
@@ -16,7 +15,7 @@ import (
 )
 
 // getBlobberNotPartOfAllocation returns a blobber not part of current allocation
-func InitSDK(wallet string) error {
+func InitSDK(wallet, configFile string) error {
 	f, err := os.Open(wallet)
 	if err != nil {
 		return err
@@ -27,13 +26,7 @@ func InitSDK(wallet string) error {
 	}
 	walletJSON := string(clientBytes)
 
-	configPath, ok := os.LookupEnv(config.ConfigPathEnv)
-	if !ok {
-		configPath = config.DefaultConfigPath
-		log.Printf("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
-	}
-
-	parsedConfig := config.Parse(configPath)
+	parsedConfig := config.Parse(configFile)
 
 	err = sdk.InitStorageSDK(
 		walletJSON,
@@ -46,8 +39,8 @@ func InitSDK(wallet string) error {
 	return err
 }
 
-func GetBlobberNotPartOfAllocation(walletname, allocationID string) (string, error) {
-	err := InitSDK(walletname)
+func GetBlobberNotPartOfAllocation(walletname, configFile, allocationID string) (string, error) {
+	err := InitSDK(walletname, configFile)
 	if err != nil {
 		return "", err
 	}
@@ -85,8 +78,8 @@ func generateRandomIndex(sliceLen int64) (*big.Int, error) {
 	return randomIndex, nil
 }
 
-func GetRandomBlobber(walletname, except_blobber string) (string, error) {
-	err := InitSDK(walletname)
+func GetRandomBlobber(walletname, configFile, except_blobber string) (string, error) {
+	err := InitSDK(walletname, configFile)
 	if err != nil {
 		return "", err
 	}
@@ -115,8 +108,8 @@ func GetRandomBlobber(walletname, except_blobber string) (string, error) {
 	return "", fmt.Errorf("failed to get blobbers")
 }
 
-func VerifyFileRefFromBlobber(walletname, allocationID, blobberID, remoteFile string) (*fileref.FileRef, error) {
-	err := InitSDK(walletname)
+func VerifyFileRefFromBlobber(walletname, configFile, allocationID, blobberID, remoteFile string) (*fileref.FileRef, error) {
+	err := InitSDK(walletname, configFile)
 	if err != nil {
 		return nil, err
 	}
