@@ -29,7 +29,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		sdkClient.MultiOperation(t, allocationID, ops)
 
 		newOps := make([]sdk.OperationRequest, 0, 5)
-
+		time.Sleep(2 * time.Second)
 		for i := 0; i < 2; i++ {
 			op := sdkClient.AddUploadOperation(t, allocationID)
 			newOps = append(newOps, op)
@@ -66,7 +66,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		sdkClient.MultiOperation(t, allocationID, ops)
 
 		newOps := make([]sdk.OperationRequest, 0, 10)
-
+		time.Sleep(2 * time.Second)
 		for i := 0; i < 5; i++ {
 			op := sdkClient.AddDeleteOperation(t, allocationID, ops[i].FileMeta.RemotePath)
 			newOps = append(newOps, op)
@@ -93,7 +93,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
-
+		time.Sleep(2 * time.Second)
 		newOps := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
@@ -122,7 +122,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
-
+		time.Sleep(2 * time.Second)
 		newOps := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
