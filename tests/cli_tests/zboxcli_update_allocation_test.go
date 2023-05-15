@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -848,8 +849,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		walletFile := filepath.Join("config", escapedTestName(t), "_wallet.json")
-		configFile := filepath.Join("config", configPath)
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", escapedTestName(t), "_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
 		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
@@ -889,8 +891,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		walletFile := filepath.Join("config", escapedTestName(t), "_wallet.json")
-		configFile := filepath.Join("config", configPath)
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", escapedTestName(t), "_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
 
 		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
