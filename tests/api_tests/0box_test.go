@@ -2052,6 +2052,7 @@ func TestDexState(testSetup *testing.T) {
 		require.Empty(t, dexState)
 	})
 }
+
 func PrintBalance(t *test.SystemTest, ownerWallet, blobberOwnerWallet, sdkWallet *model.Wallet) {
 	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
 	t.Logf("Owner balance: %v", ownerBalance)
@@ -2060,6 +2061,7 @@ func PrintBalance(t *test.SystemTest, ownerWallet, blobberOwnerWallet, sdkWallet
 	sdkWalletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 	t.Logf("Blobber owner balance: %v", sdkWalletBalance)
 }
+
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	// Faucet the used wallets
@@ -4154,7 +4156,7 @@ func graphEndpointTestCases(endpoint model.ZboxGraphEndpoint) func(*test.SystemT
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "invalid data-points query param")
 
-		// should fail for invalid parameters (end - start < points + 1)
+		// should not fail for valid parameters (end - start = points)
 		_, resp, err = endpoint(t, &model.ZboxGraphRequest{From: "10000", To: "10010", DataPoints: "10"})
 		require.Error(t, err)
 		require.Equal(t, 400, resp.StatusCode())
