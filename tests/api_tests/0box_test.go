@@ -4157,10 +4157,10 @@ func graphEndpointTestCases(endpoint model.ZboxGraphEndpoint) func(*test.SystemT
 		require.Contains(t, resp.String(), "invalid data-points query param")
 
 		// should not fail for valid parameters (end - start = points)
-		_, resp, err = endpoint(t, &model.ZboxGraphRequest{From: "10000", To: "10010", DataPoints: "10"})
-		require.Error(t, err)
-		require.Equal(t, 400, resp.StatusCode())
-		require.Contains(t, resp.String(), "there must be at least one interval")
+		data, resp, err := endpoint(t, &model.ZboxGraphRequest{From: "10000", To: "10010", DataPoints: "10"})
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+		require.Equal(t, 10, len([]int64(*data)))
 
 		// should fail for invalid parameters (end < start)
 		_, resp, err = endpoint(t, &model.ZboxGraphRequest{From: "10000", To: "1000", DataPoints: "10"})
@@ -4169,7 +4169,7 @@ func graphEndpointTestCases(endpoint model.ZboxGraphEndpoint) func(*test.SystemT
 		require.Contains(t, resp.String(), "to 1000 less than from 10000")
 
 		// should succeed in case of 1 point
-		data, resp, err := endpoint(t, &model.ZboxGraphRequest{DataPoints: "1"})
+		data, resp, err = endpoint(t, &model.ZboxGraphRequest{DataPoints: "1"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Equal(t, 1, len([]int64(*data)))
