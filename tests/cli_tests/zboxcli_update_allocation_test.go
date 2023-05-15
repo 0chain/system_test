@@ -42,8 +42,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "Could not update "+
 			"allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		ac := getAllocation(t, allocationID)
 		require.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate,
@@ -64,8 +64,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "Could not update allocation "+
 			"due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
@@ -89,8 +89,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
@@ -124,8 +124,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
@@ -146,8 +146,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
@@ -293,8 +293,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err = updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		require.Len(t, output, 0)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// Then try updating with otherAllocationID: should not work
 		params = createParams(map[string]interface{}{
@@ -368,8 +368,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
-			require.Len(t, output, 2)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		// get allocation
@@ -386,8 +386,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
-			require.Len(t, output, 2)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		// get allocation
@@ -404,8 +404,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
-			require.Len(t, output, 2)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		// get allocation
@@ -422,7 +422,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
-			require.Len(t, output, 2)
+			require.Len(t, output, 1)
 			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
@@ -589,8 +589,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// Forbid upload
 		params = createParams(map[string]interface{}{
@@ -617,8 +617,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// get allocation
 		alloc := getAllocation(t, allocationID)
@@ -636,8 +636,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// get allocation
 		alloc := getAllocation(t, allocationID)
@@ -664,8 +664,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// get allocation
 		alloc := getAllocation(t, allocationID)
@@ -700,8 +700,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			require.Equal(t, output[0], "Error updating allocation:allocation_updating_failed: update allocation changes nothing")
 		} else {
 			require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-			require.Len(t, output, 2)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+			require.Len(t, output, 1)
+			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		// get allocation
@@ -744,8 +744,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// get allocation
 		alloc := getAllocation(t, allocationID)
