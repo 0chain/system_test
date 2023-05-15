@@ -3005,10 +3005,11 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.Equal(t, 400, resp.StatusCode())
 			require.Contains(t, resp.String(), "invalid data-points query param")
 
-			// should fail for invalid parameters (end - start < points + 1)
-			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "10000", To: "10010", DataPoints: "10"})
-			require.Equal(t, 400, resp.StatusCode())
-			require.Contains(t, resp.String(), "there must be at least one interval")
+			// should pass for valid parameters (end - start = points)
+			data, resp, _ := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "1000", To: "1010", DataPoints: "10"})
+			require.Equal(t, 200, resp.StatusCode())
+			require.Equal(t, 10, len([]int64(data.TotalChallenges)))
+			require.Equal(t, 10, len([]int64(data.SuccessfulChallenges)))
 
 			// should fail for invalid parameters (end < start)
 			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "10000", To: "1000", DataPoints: "10"})
