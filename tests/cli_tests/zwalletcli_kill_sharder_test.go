@@ -13,6 +13,10 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
+const (
+	minShardersForKillSharderTest = 2
+)
+
 func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
@@ -21,8 +25,8 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 
 	sharderUrl := getSharderUrl(t)
 	startSharders := getNodeSlice(t, "getSharderList", sharderUrl)
-	if len(startSharders) == 0 {
-		t.Skip("no sharders found in blockchain")
+	if len(startSharders) < minShardersForKillSharderTest {
+		t.Skipf("not enough sharders in blockchain, found %d need %d", len(startSharders), minShardersForKillSharderTest)
 	}
 
 	var sharderToKill string

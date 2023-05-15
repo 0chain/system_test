@@ -13,6 +13,10 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
+const (
+	minMinersForKillMinerTest = 2
+)
+
 func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
@@ -21,8 +25,8 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 
 	sharderUrl := getSharderUrl(t)
 	startMiners := getNodeSlice(t, "getMinerList", sharderUrl)
-	if len(startMiners) == 0 {
-		t.Skip("no miners found in blockchain")
+	if len(startMiners) < minMinersForKillMinerTest {
+		t.Skipf("not enough miners in blockchain, found %d need %d", len(startMiners), minMinersForKillMinerTest)
 	}
 
 	var minerToKill string
