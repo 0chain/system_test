@@ -4157,7 +4157,7 @@ func graphEndpointTestCases(endpoint model.ZboxGraphEndpoint) func(*test.SystemT
 		require.Contains(t, resp.String(), "invalid data-points query param")
 
 		// should not fail for valid parameters (end - start = points)
-		data, resp, err := endpoint(t, &model.ZboxGraphRequest{From: "10000", To: "10010", DataPoints: "10"})
+		data, resp, err := endpoint(t, &model.ZboxGraphRequest{From: "1000", To: "1010", DataPoints: "10"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Equal(t, 10, len([]int64(*data)))
