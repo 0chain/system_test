@@ -293,7 +293,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		output, err = updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 0)
+		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// Then try updating with otherAllocationID: should not work
