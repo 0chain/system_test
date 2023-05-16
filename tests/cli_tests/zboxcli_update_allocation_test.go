@@ -850,7 +850,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		wd, _ := os.Getwd()
-		walletFile := filepath.Join(wd, "config", escapedTestName(t), "_wallet.json")
+		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
 		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
@@ -892,7 +892,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		wd, _ := os.Getwd()
-		walletFile := filepath.Join(wd, "config", escapedTestName(t), "_wallet.json")
+		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
 
 		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
