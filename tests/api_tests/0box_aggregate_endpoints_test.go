@@ -49,7 +49,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	marker := config.CreateFreeStorageMarker(t, sdkWallet.ToSdkWallet(sdkWalletMnemonics), ownerWallet.ToSdkWallet(ownerWalletMnemonics))
 	t.Logf("Free allocation marker: %v", marker)
 
-	t.Run("test /v2/graph-write-price", func(t *test.SystemTest) {
+	t.RunWithTimeout("test /v2/graph-write-price", 5*time.Minute, func(t *test.SystemTest) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphWritePrice))
 		PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 		t.Run("test graph data", func(t *test.SystemTest) {
@@ -108,7 +108,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-total-challenge-pools", func(t *test.SystemTest) {
+	t.RunWithTimeout("test /v2/graph-total-challenge-pools", 5*time.Minute, func(t *test.SystemTest) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalChallengePools))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
@@ -156,7 +156,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-allocated-storage", func(t *test.SystemTest) {
+	t.RunWithTimeout("test /v2/graph-allocated-storage", 5*time.Minute, func(t *test.SystemTest) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphAllocatedStorage))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
@@ -257,7 +257,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-used-storage", func(t *test.SystemTest) {
+	t.RunWithTimeout("test /v2/graph-used-storage", 5*time.Minute, func(t *test.SystemTest) {
 
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphUsedStorage))
 
@@ -386,7 +386,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-total-staked", func(t *test.SystemTest) {
+	t.RunWithTimeout("test /v2/graph-total-staked", 5*time.Minute, func(t *test.SystemTest) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalStaked))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
@@ -574,7 +574,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-total-minted", func(t *test.SystemTest) {
+	t.RunWithTimeout("test /v2/graph-total-minted", 5*time.Minute, func(t *test.SystemTest) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalMinted))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
@@ -672,7 +672,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-total-locked", func(t *test.SystemTest) {
+	t.RunWithTimeout("test /v2/graph-total-locked", 5*time.Minute, func(t *test.SystemTest) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
@@ -944,7 +944,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-challenges", func(t *test.SystemTest) {
+	t.RunWithTimeout("test /v2/graph-challenges", 5*time.Minute, func(t *test.SystemTest) {
 		t.Run("endpoint parameters", func(t *test.SystemTest) {
 			// should fail for invalid parameters
 			_, resp, _ := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "AX", To: "20", DataPoints: "5"})
@@ -1058,7 +1058,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-token-supply", func(t *test.SystemTest) {
+	t.RunWithTimeout("test /v2/graph-token-supply", 5*time.Minute, func(t *test.SystemTest) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
