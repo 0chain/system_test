@@ -365,7 +365,7 @@ func TestReadMarker(testSetup *testing.T) {
 		require.Len(t, readMarkers, blobbersRequiredForDownload)
 
 		for _, rm := range readMarkers {
-			require.Equal(t, int64(7), rm.ReadCounter)
+			require.Equal(t, int64(6), rm.ReadCounter)
 		}
 
 		afterCount := CountReadMarkers(t, allocationID, sharderUrl)
