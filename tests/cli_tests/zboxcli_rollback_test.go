@@ -85,7 +85,6 @@ func TestRollbackAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("rollback allocation after deleting a file should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * MB,
 			"tokens": 9,
@@ -141,7 +140,6 @@ func TestRollbackAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("rollback allocation after moving a file should work", func(t *test.SystemTest) {
-
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -354,7 +352,6 @@ func TestRollbackAllocation(testSetup *testing.T) {
 }
 
 func rollbackAllocation(t *test.SystemTest, wallet, cliConfigFilename, params string) ([]string, error) {
-
 	t.Log("Rollback allocation")
 
 	cmd := fmt.Sprintf("./zbox rollback %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
