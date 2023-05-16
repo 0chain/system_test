@@ -849,6 +849,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
+		_, err = executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed")
+
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
@@ -890,6 +893,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
+
+		_, err = executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed")
 
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
