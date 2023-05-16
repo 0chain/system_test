@@ -21,8 +21,8 @@ func TestRollbackAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
-	t.RunSequentially("rollback allocation after updating a file should work", func(t *test.SystemTest) {
 
+	t.RunSequentially("rollback allocation after updating a file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   4 * MB,
 			"tokens": 9,
@@ -344,7 +344,6 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.True(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
 		require.False(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
-
 }
 
 func rollbackAllocation(t *test.SystemTest, wallet, cliConfigFilename, params string) ([]string, error) {
