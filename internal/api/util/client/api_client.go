@@ -644,8 +644,6 @@ func (c *APIClient) CreateWalletForMnemonicWithoutAssertion(t *test.SystemTest, 
 func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) {
 	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
 	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
-	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
-	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
 }
 
 // ExecuteFaucet provides basic assertions
@@ -781,7 +779,7 @@ func (c *APIClient) CreateAllocation(t *test.SystemTest,
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
-			Value:           tokenomics.IntToZCN(30.0),
+			Value:           tokenomics.IntToZCN(10.0),
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
