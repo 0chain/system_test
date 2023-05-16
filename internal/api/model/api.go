@@ -645,18 +645,17 @@ type SCRestGetStakePoolStatRequest struct {
 }
 
 type SCRestGetStakePoolStatResponse struct {
-	ID           string                      `json:"pool_id"`
-	Balance      int64                       `json:"balance"`
-	Unstake      int64                       `json:"unstake"`
-	Free         int64                       `json:"free"`
-	Capacity     int64                       `json:"capacity"`
-	WritePrice   int64                       `json:"write_price"`
-	OffersTotal  int64                       `json:"offers_total"`
-	UnstakeTotal int64                       `json:"unstake_total"`
-	Delegate     []StakePoolDelegatePoolInfo `json:"delegate"`
-	Penalty      int64                       `json:"penalty"`
-	Rewards      int64                       `json:"rewards"`
-	Settings     StakePoolSettings           `json:"settings"`
+	ID          string                      `json:"pool_id"`
+	Balance     int64                       `json:"balance"`
+	Unstake     int64                       `json:"unstake"`
+	Free        int64                       `json:"free"`
+	Capacity    int64                       `json:"capacity"`
+	WritePrice  int64                       `json:"write_price"`
+	OffersTotal int64                       `json:"offers_total"`
+	Delegate    []StakePoolDelegatePoolInfo `json:"delegate"`
+	Penalty     int64                       `json:"penalty"`
+	Rewards     int64                       `json:"rewards"`
+	Settings    StakePoolSettings           `json:"settings"`
 }
 
 type StakePoolDelegatePoolInfo struct {
