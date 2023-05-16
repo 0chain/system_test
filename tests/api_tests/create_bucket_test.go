@@ -13,7 +13,6 @@ func TestCreateBucket(testSetup *testing.T) {
 
 	t.Parallel()
 	t.Run("CreateBucket should return 200 when all the parameters are correct", func(t *test.SystemTest) {
-		t.Skip("Skipping until the changes are made to the server")
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -27,7 +26,6 @@ func TestCreateBucket(testSetup *testing.T) {
 
 	// FIXME - this should be 400 not 500
 	t.Run("CreateBucket should return 500 when one of more required parameters are missing", func(t *test.SystemTest) {
-		t.Skip("Skipping until the changes are made to the server")
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
