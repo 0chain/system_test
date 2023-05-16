@@ -10,7 +10,6 @@ import (
 func TestCreateBucket(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("CreateBucket should return 200 when all the parameters are correct")
-	t.Skip("Wait for Z3S fix")
 
 	t.Parallel()
 	t.Run("CreateBucket should return 200 when all the parameters are correct", func(t *test.SystemTest) {
