@@ -39,10 +39,6 @@ on:
         description: '0block DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
-      test_file_filter:
-        description: 'Comma separated list of test files to run (eg. zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result'
-        default: ''
-        required: false
       tokenomics_test_filter:
         description: 'Comma separated list of tokenomics test files to run (eg. tokenomics_test.go). If supplied, the PR will NOT be notified of the test result'
         default: ''
@@ -108,7 +104,7 @@ jobs:
 
       - name: "Set PR status as pending"
         uses: 0chain/actions/set-pr-status@master
-        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
+        if: steps.findPr.outputs.number && github.event.inputs.tokenomics_test_filter == ''
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
           description: "System tests running with default config..."
@@ -124,8 +120,9 @@ jobs:
           echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_cli_branch}})" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_cli_branch}})" >> $GITHUB_ENV
+          
+          echo "TEST_FILE_FILTER=" >> $GITHUB_ENV
 
-          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
           echo "TOKENOMICS_TEST_FILTER=$(echo $(([ -z '${{github.event.inputs.tokenomics_test_filter}}' ] && echo '') || echo '${{github.event.inputs.tokenomics_test_filter}}'))" >> $GITHUB_ENV
           
           
@@ -147,7 +144,7 @@ jobs:
           echo "EXPLORER_TAG=$(echo $(([ -z '${{github.event.inputs.explorer_image}}' ] && echo 'latest') || echo '${{github.event.inputs.explorer_image}}'))" >> $GITHUB_ENV
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_TEST_FILTER=$(echo $(([ -z '${{github.event.inputs.tokenomics_test_filter}}' ] && echo '') || echo '${{github.event.inputs.tokenomics_test_filter}}'))" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
@@ -185,7 +182,6 @@ jobs:
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
-          test_file_filter: ${{ env.TEST_FILE_FILTER }}
           tokenomics_test_filter: ${{ env.TOKENOMICS_TEST_FILTER }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
@@ -193,7 +189,7 @@ jobs:
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
 
       - name: "Set PR status as ${{ job.status }}"
-        if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
+        if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.tokenomics_test_filter == '' }}
         uses: 0chain/actions/set-pr-status@master
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
