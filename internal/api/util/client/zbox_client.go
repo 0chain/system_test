@@ -1249,6 +1249,28 @@ func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, phoneNumber
 	return ReferralCountOfUser, resp, err
 }
 
+func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, phoneNumber string) (model.ReferralRankOfUser, *resty.Response, error) {
+	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
+	var ReferralRankOfUser model.ReferralRankOfUser
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/referral/userrank/")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst: &ReferralRankOfUser,
+		Headers: map[string]string{
+			"X-App-Phone-Number": phoneNumber,
+			"X-CSRF-TOKEN":       csrfToken,
+			"X-APP-TYPE":         "bolt",
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return ReferralRankOfUser, resp, err
+}
+
 func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType string, refCode string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Posting wallet with referral code using 0box...")
 	var zboxWallet *model.ZboxWallet
