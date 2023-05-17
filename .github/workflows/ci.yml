@@ -107,7 +107,7 @@ jobs:
           
           echo "TEST_FILE_FILTER=false" >> $GITHUB_ENV
 
-          echo "TOKENOMICS_TEST_FILTER=$(echo $(([ -z '^\QTestAllocation\E$ ./...' ] && echo '') || echo '^\QTestAllocation\E$ ./...'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_TEST_FILTER=$(echo $(([ -z '^\QTestAllocation\E$' ] && echo '') || echo '^\QTestAllocation\E$ ./...'))" >> $GITHUB_ENV
           
           
 
