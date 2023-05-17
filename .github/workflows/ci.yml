@@ -107,7 +107,7 @@ jobs:
           
           echo "TEST_FILE_FILTER=false" >> $GITHUB_ENV
 
-          echo "TOKENOMICS_TEST_FILTER=$(echo $(([ -z '^\QTestAllocation\E$' ] && echo '') || echo '^\QTestAllocation\E$ ./...'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_TEST_FILTER=$(echo $(([ -z '^\QTestAllocation\E$' ] && echo '') || echo '^\QTestAllocation\E$'))" >> $GITHUB_ENV
           
           
 
@@ -128,7 +128,7 @@ jobs:
           echo "EXPLORER_TAG=$(echo $(([ -z '${{github.event.inputs.explorer_image}}' ] && echo 'latest') || echo '${{github.event.inputs.explorer_image}}'))" >> $GITHUB_ENV
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-          echo "TOKENOMICS_TEST_FILTER=$(echo $(([ -z '^\QTestAllocation\E$ ./...' ] && echo '') || echo '^\QTestAllocation\E$ ./...'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_TEST_FILTER=$(echo $(([ -z '^\QTestAllocation\E$' ] && echo '') || echo '^\QTestAllocation\E$'))" >> $GITHUB_ENV
 
 #      - name: "Deploy 0Chain"
 #        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
