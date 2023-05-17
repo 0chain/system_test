@@ -262,6 +262,15 @@ func (c *SDKClient) GetFileList(t *test.SystemTest, allocationID, path string) *
 	return fileList
 }
 
+func (c *SDKClient) Rollback(t *test.SystemTest, allocationID string) {
+	sdkAllocation, err := sdk.GetAllocation(allocationID)
+	require.NoError(t, err)
+
+	status, err := sdkAllocation.GetCurrentVersion()
+	require.NoError(t, err)
+	require.True(t, status)
+}
+
 func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops []sdk.OperationRequest) {
 	defer func() {
 		for i := 0; i < len(ops); i++ {

@@ -51,7 +51,7 @@ func TestCreateDir(testSetup *testing.T) {
 		require.Equal(t, dirname+" directory created", output[0])
 
 		dirname = "/parent/child"
-		output, err = createDir(t, configPath, allocID, "/parent/child", true)
+		output, err = createDir(t, configPath, allocID, dirname, true)
 		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, dirname+" directory created", output[0])
