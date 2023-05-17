@@ -110,7 +110,7 @@ func Test0S3Migration(testSetup *testing.T) {
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Error: open : no such file or directory", "Output was not as expected", strings.Join(output, "\n")) //FIXME error message could be better here
+		require.Contains(t, output[0], "Error: open : no such file or directory", "Output was not as expected", strings.Join(output, "\n")) // FIXME error message could be better here
 	})
 
 	t.Run("Should fail when allocation flag missing", func(t *test.SystemTest) {
