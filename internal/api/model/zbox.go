@@ -142,6 +142,16 @@ type ZboxNftCollectionList struct {
 	NftCollectionCount int                 `json:"total"`
 }
 
+type ReferralCodeOfUser struct {
+	ReferrerCode  string `json:"referral_code"`
+	ReferrerLink  string `json:"referral_link"`
+	ReferrerPhone string `json:"referer_mail"`
+}
+
+type ReferralCountOfUser struct {
+	ReferralCount int64 `json:"referral_count"`
+}
+
 type ZboxNft struct {
 	Id              int    `json:"id"`
 	AllocationId    string `json:"allocation_id"`

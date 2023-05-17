@@ -1204,3 +1204,82 @@ func (c *ZboxClient) GetNftCollectionById(t *test.SystemTest, idToken, csrfToken
 
 	return ZboxNftCollection, resp, err
 }
+
+func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, phoneNumber string) (model.ReferralCodeOfUser, *resty.Response, error) {
+	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
+	var ReferralCodeOfUser model.ReferralCodeOfUser
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/referral/code/")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst: &ReferralCodeOfUser,
+		Headers: map[string]string{
+			"X-App-Phone-Number": phoneNumber,
+			"X-CSRF-TOKEN":       csrfToken,
+			"X-APP-TYPE":         "bolt",
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return ReferralCodeOfUser, resp, err
+}
+
+func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, phoneNumber string) (model.ReferralCountOfUser, *resty.Response, error) {
+	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
+	var ReferralCountOfUser model.ReferralCountOfUser
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/referral/count/")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst: &ReferralCountOfUser,
+		Headers: map[string]string{
+			"X-App-Phone-Number": phoneNumber,
+			"X-CSRF-TOKEN":       csrfToken,
+			"X-APP-TYPE":         "bolt",
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return ReferralCountOfUser, resp, err
+}
+
+func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType string, refCode string) (*model.ZboxWallet, *resty.Response, error) {
+	t.Logf("Posting wallet with referral code using 0box...")
+	var zboxWallet *model.ZboxWallet
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/wallet")
+
+	formData := map[string]string{
+		"mnemonic":    mnemonic,
+		"name":        walletName,
+		"description": walletDescription,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &zboxWallet,
+		FormData: formData,
+		Headers: map[string]string{
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-App-Type":             appType,
+			"X-Ref-Code":             refCode,
+		},
+		RequiredStatusCode: 200,
+	}, HttpPOSTMethod)
+
+	return zboxWallet, resp, err
+}
