@@ -10,7 +10,7 @@ import (
 func TestCreateBucket(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("CreateBucket should return 200 when all the parameters are correct")
-
+	t.Skip("Skip until gosdk is merged")
 	t.Parallel()
 	t.Run("CreateBucket should return 200 when all the parameters are correct", func(t *test.SystemTest) {
 		queryParams := map[string]string{
