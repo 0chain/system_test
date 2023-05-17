@@ -62,8 +62,5 @@ func TestMain(m *testing.M) {
 	ownerWalletMnemonics = parsedConfig.OwnerWalletMnemonics
 	ownerWallet = apiClient.CreateWalletForMnemonic(t, ownerWalletMnemonics)
 
-	// blobberOwnerWallet = &model.Wallet{}
-	// ownerWallet = &model.Wallet{}
-
 	os.Exit(m.Run())
 }

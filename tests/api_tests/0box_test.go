@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
-	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -2046,15 +2045,6 @@ func TestDexState(testSetup *testing.T) {
 		require.Equal(t, 400, response.StatusCode())
 		require.Empty(t, dexState)
 	})
-}
-
-func PrintBalance(t *test.SystemTest, ownerWallet, blobberOwnerWallet, sdkWallet *model.Wallet) {
-	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
-	t.Logf("Owner balance: %v", ownerBalance)
-	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
-	t.Logf("Blobber owner balance: %v", blobberOwnerBalance)
-	sdkWalletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
-	t.Logf("Blobber owner balance: %v", sdkWalletBalance)
 }
 
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {

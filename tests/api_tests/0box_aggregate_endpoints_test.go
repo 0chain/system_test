@@ -2130,6 +2130,15 @@ func graphBlobberEndpointTestCases(endpoint model.ZboxGraphBlobberEndpoint, blob
 	}
 }
 
+func PrintBalance(t *test.SystemTest, ownerWallet, blobberOwnerWallet, sdkWallet *model.Wallet) {
+	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
+	t.Logf("Owner balance: %v", ownerBalance)
+	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
+	t.Logf("Blobber owner balance: %v", blobberOwnerBalance)
+	sdkWalletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
+	t.Logf("Blobber owner balance: %v", sdkWalletBalance)
+}
+
 func printBlobbers(t *test.SystemTest, tag string, blobbers []*model.SCRestGetBlobberResponse) {
 	t.Logf("%v: \n", tag)
 	for _, blobber := range blobbers {
