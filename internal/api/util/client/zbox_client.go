@@ -1285,14 +1285,17 @@ func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, wa
 		"name":        walletName,
 		"description": walletDescription,
 	}
+	X_APP_CLIENT_ID_R := "2de380c3ce18e0a62a14aa7a12e2aaaa591e8f145d507f8e8330510d4febae1f"
+	X_APP_CLIENT_KEY_R := "671da197a53b8783ea3ca96400faf4550af7edb4c6837b52b013a5b54b50011e9183f81022a6e35680934e6a9eb9913ddd5d0286e16b2a4a51c67ba1f95fc207"
+	X_APP_CLIENT_SIGNATURE_R := "1d644639f61b3a4323fbdaf718bfa26f4d2bfc69b5a77f5f667b4d4e69329b08"
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:      &zboxWallet,
 		FormData: formData,
 		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Client-ID":        X_APP_CLIENT_ID_R,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
