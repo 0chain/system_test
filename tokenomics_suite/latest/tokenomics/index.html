@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Subset of 0Chain System test suite [tokenomics_suite/eb4238ad] ran against [dev-4.devnet-0chain.net] at [2023-05-17_20.15.32]</title>
+    <title>Subset of 0Chain System test suite [tokenomics_suite/eb4238ad] ran against [dev-4.devnet-0chain.net] at [2023-05-17_20.21.05]</title>
     <style type="text/css">
         body {
             font-family: sans-serif;
@@ -234,20 +234,22 @@
 </head>
 <body>
 <div class="pageHeader">
-    <span class="projectTitle">Subset of 0Chain System test suite [tokenomics_suite/eb4238ad] ran against [dev-4.devnet-0chain.net] at [2023-05-17_20.15.32]</span>
+    <span class="projectTitle">Subset of 0Chain System test suite [tokenomics_suite/eb4238ad] ran against [dev-4.devnet-0chain.net] at [2023-05-17_20.21.05]</span>
     <div class="testStats">
-        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>0</strong>Duration: <strong>0s</strong>
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>1</strong>Duration: <strong>0s</strong>
         </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>0</strong>
         </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
-        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>1</strong>
         </span>
     </div>
     <span class="testGroupsTitle">Test Groups:</span>
-    <span class="testExecutionDate">May 17, 2023 20:15:33</span>
+    <span class="testExecutionDate">May 17, 2023 20:21:39</span>
 </div>
 <div class="testReportContainer">
     <div class="cardContainer">
         <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
             
         </div>
     </div>
@@ -452,7 +454,7 @@ window.GoTestReport = function (elements) {
 
     
 
-    const data =  null 
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestAllocation","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":10.01,"Output":["","    wallet.go:71: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [fork/exec ./zwallet: no such file or directory]. Output: []\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [fork/exec ./zwallet: no such file or directory]. Output: []\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [fork/exec ./zwallet: no such file or directory]. Command String: [./zwallet faucet --methodName pour --tokens 5.000000 --input {} --silent --wallet TestAllocation_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: []\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    wallet.go:88: faucet output: []\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner4/_work/system_test/system_test/tests/tokenomics_tests/miners.go:28\n","        \t            \t\t\t\t/root/actions-runner4/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:25\n","        \tError:      \tExpected nil, but got: \u0026fs.PathError{Op:\"fork/exec\", Path:\"./zwallet\", Err:0x2}\n","        \tTest:       \tTestAllocation\n","        \tMessages:   \tFailed to register wallet%!(EXTRA string=)\n","","","    wallet.go:71: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [fork/exec ./zwallet: no such file or directory]. Output: []\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [fork/exec ./zwallet: no such file or directory]. Output: []\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [fork/exec ./zwallet: no such file or directory]. Command String: [./zwallet faucet --methodName pour --tokens 5.000000 --input {} --silent --wallet TestAllocation_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: []\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    wallet.go:88: faucet output: []\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner4/_work/system_test/system_test/tests/tokenomics_tests/miners.go:28\n","        \t            \t\t\t\t/root/actions-runner4/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:25\n","        \tError:      \tExpected nil, but got: \u0026fs.PathError{Op:\"fork/exec\", Path:\"./zwallet\", Err:0x2}\n","        \tTest:       \tTestAllocation\n","        \tMessages:   \tFailed to register wallet%!(EXTRA string=)\n","","","    wallet.go:71: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [fork/exec ./zwallet: no such file or directory]. Output: []\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [fork/exec ./zwallet: no such file or directory]. Output: []\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [fork/exec ./zwallet: no such file or directory]. Command String: [./zwallet faucet --methodName pour --tokens 5.000000 --input {} --silent --wallet TestAllocation_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: []\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    wallet.go:88: faucet output: []\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner4/_work/system_test/system_test/tests/tokenomics_tests/miners.go:28\n","        \t            \t\t\t\t/root/actions-runner4/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:25\n","        \tError:      \tExpected nil, but got: \u0026fs.PathError{Op:\"fork/exec\", Path:\"./zwallet\", Err:0x2}\n","        \tTest:       \tTestAllocation\n","        \tMessages:   \tFailed to register wallet%!(EXTRA string=)\n",""],"Passed":false,"Skipped":false,"TestFileName":"allocation_test.go","TestFunctionDetail":{"Line":22,"Col":1}}]}]
 
     const report = window.GoTestReport({
                                          data: data,
