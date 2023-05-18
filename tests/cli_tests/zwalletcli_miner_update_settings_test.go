@@ -20,54 +20,59 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Miner update num_delegates by delegate wallet should work")
 
-	if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
-	}
-
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
-
-	output, err = createWalletForName(t, configPath, miner01NodeDelegateWalletName)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-	mnConfig := getMinerSCConfiguration(t)
-	output, err = listMiners(t, configPath, "--json")
-	require.Nil(t, err, "error listing miners")
-	require.Len(t, output, 1)
-
+	var cooldownPeriod int64
+	var lastRoundOfSettingUpdate int64
 	var miners climodel.MinerSCNodes
-	err = json.Unmarshal([]byte(output[0]), &miners)
-	require.Nil(t, err, "error unmarshalling ls-miners json output")
-
-	found := false
 	var miner climodel.Node
-	for _, miner = range miners.Nodes {
-		if miner.ID == miner01ID {
-			found = true
-			break
+	var mnConfig map[string]float64
+	t.TestSetup("Register wallet, get miner info", func() {
+		if _, err := os.Stat("./config/" + miner01NodeDelegateWalletName + "_wallet.json"); err != nil {
+			t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 		}
-	}
 
-	if !found {
-		t.Skip("Skipping update test settings as delegate wallet not found. Please the wallets on https://github.com/0chain/actions/blob/master/run-system-tests/action.yml match delegate wallets on rancher.")
-	}
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
-	// Revert miner settings after test is complete
-	t.Cleanup(func() {
-		t.Log("start revert")
-		output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":            miner.ID,
-			"num_delegates": miner.Settings.MaxNumDelegates,
-		}), true)
-		require.Nil(t, err, "error reverting miner settings after test")
-		require.Len(t, output, 2)
-		require.Equal(t, "settings updated", output[0])
-		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
-		t.Log("end revert")
+		output, err = createWalletForName(t, configPath, miner01NodeDelegateWalletName)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
+		mnConfig = getMinerSCConfiguration(t)
+		output, err = listMiners(t, configPath, "--json")
+		require.Nil(t, err, "error listing miners")
+		require.Len(t, output, 1)
+
+		err = json.Unmarshal([]byte(output[0]), &miners)
+		require.Nil(t, err, "error unmarshalling ls-miners json output")
+
+		found := false
+		for _, miner = range miners.Nodes {
+			if miner.ID == miner01ID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			t.Skip("Skipping update test settings as delegate wallet not found. Please the wallets on https://github.com/0chain/actions/blob/master/run-system-tests/action.yml match delegate wallets on rancher.")
+		}
+
+		// Revert miner settings after test is complete
+		t.Cleanup(func() {
+			t.Log("start revert")
+			output, err := minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
+				"id":            miner.ID,
+				"num_delegates": miner.Settings.MaxNumDelegates,
+			}), true)
+			require.Nil(t, err, "error reverting miner settings after test")
+			require.Len(t, output, 2)
+			require.Equal(t, "settings updated", output[0])
+			require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
+			t.Log("end revert")
+		})
+
+		cooldownPeriod = int64(mnConfig["cooldown_period"]) // Updating miner settings has a cooldown of this many rounds
+		lastRoundOfSettingUpdate = int64(0)
 	})
-
-	cooldownPeriod := int64(mnConfig["cooldown_period"]) // Updating miner settings has a cooldown of this many rounds
-	lastRoundOfSettingUpdate := int64(0)
 
 	t.RunSequentiallyWithTimeout("Miner update num_delegates by delegate wallet should work", 60*time.Second, func(t *test.SystemTest) {
 		currRound := getCurrentRound(t)
