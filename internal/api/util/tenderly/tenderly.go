@@ -64,3 +64,18 @@ func (c *Client) InitBalance(ethereumAddress string) error {
 	}
 	return nil
 }
+
+// GetBalance retrieves balance for the given ethereum address
+func (c *Client) GetBalance(ethereumAddress string) (int64, error) {
+	resp, err := c.client.Call(context.Background(), "eth_getBalance", []string{ethereumAddress, "latest"})
+	if err != nil {
+		return err
+	}
+	if resp.Error != nil {
+		return errors.New(resp.Error.Error())
+	}
+
+	var balanceReader big.Int
+	balanceReader.SetString(resp., 16)
+	return balanceReader.Int64()
+}
