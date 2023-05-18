@@ -12,21 +12,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// this test is working fine in local
-// sharder01 was not available for this test so it failed
 func TestHashnodeRoot(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Get hashnode root from blobber for an empty allocation should work")
 
 	t.RunSequentially("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
-
 		wallet := apiClient.CreateWallet(t)
-		for i := 0; i < 2; i++ {
-			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-		}
-		//OwnerBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		//t.Logf("owner balance: %v", OwnerBalance)
-		//PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
@@ -60,11 +53,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
 		wallet := apiClient.CreateWallet(t)
-		for i := 0; i < 2; i++ {
-			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-		}
-		OwnerBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		t.Logf("owner balance: %v", OwnerBalance)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		allocationID := "badallocation"
 
@@ -82,19 +71,14 @@ func TestHashnodeRoot(testSetup *testing.T) {
 		}
 
 		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
-		t.Logf("The rsponse is %v", restyResponse.String())
 		require.NotNil(t, err)
-		require.Equal(t, restyResponse.StatusCode(), 500)
+		require.Nil(t, restyResponse)
 		require.Nil(t, getBlobberResponse)
 	})
 
 	t.RunSequentially("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		for i := 0; i < 2; i++ {
-			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-		}
-		OwnerBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		t.Logf("owner balance: %v", OwnerBalance)
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -118,9 +102,8 @@ func TestHashnodeRoot(testSetup *testing.T) {
 		}
 
 		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
-		t.Logf("The rsponse is %v", restyResponse.String())
 		require.NotNil(t, err)
-		require.NotNil(t, restyResponse) // The rsponse is bad request: invalid signature badsign
+		require.Nil(t, restyResponse)
 		require.Nil(t, getBlobberResponse)
 	})
 
