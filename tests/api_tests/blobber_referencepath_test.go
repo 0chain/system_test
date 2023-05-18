@@ -12,15 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// This test is working fine in local
 func TestFileReferencePath(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	// for i := 0; i < 2; i++ {
-	// 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-	// }
-	// for i := 0; i < 2; i++ {
-	// 	apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
-	// }
 	t.SetSmokeTests("Get file ref with allocation id, remote path should work")
 
 	t.RunSequentially("Get file ref with allocation id, remote path should work", func(t *test.SystemTest) {

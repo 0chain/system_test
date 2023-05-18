@@ -13,15 +13,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// This test is working __________ in local
 func TestObjectTree(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Get object tree with allocation id, remote path should work")
 
 	t.RunSequentially("Get object tree with allocation id, remote path should work", func(t *test.SystemTest) {
-		for i := 0; i < 2; i++ {
-			apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-		}
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
@@ -55,9 +52,8 @@ func TestObjectTree(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref for empty allocation should work", func(t *test.SystemTest) {
-		for i := 0; i < 2; i++ {
-			apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-		}
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
@@ -87,9 +83,8 @@ func TestObjectTree(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: Why is this so slow?  (69s)
-		for i := 0; i < 2; i++ {
-			apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-		}
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
@@ -118,9 +113,8 @@ func TestObjectTree(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref with invalid sign should fail", func(t *test.SystemTest) {
-		for i := 0; i < 2; i++ {
-			apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-		}
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
@@ -146,9 +140,8 @@ func TestObjectTree(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref with invalid remotepath should fail", func(t *test.SystemTest) {
-		for i := 0; i < 2; i++ {
-			apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-		}
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)

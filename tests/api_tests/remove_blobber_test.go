@@ -15,21 +15,14 @@ import (
 
 func TestRemoveBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	for i := 0; i < 40; i++ {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-	}
-	for i := 0; i < 40; i++ {
-		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
-	}
 	t.SetSmokeTests("Remove blobber in allocation, shouldn't work")
 
 	t.Parallel()
 
 	t.Run("Remove blobber in allocation, shouldn't work", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		for i := 0; i < 10; i++ {
-			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-		}
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)

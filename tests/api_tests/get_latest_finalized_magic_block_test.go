@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// This test is working fine in local
 func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Lfmb node hash not modified, should return http 304 and empty body")

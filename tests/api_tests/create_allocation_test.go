@@ -10,7 +10,6 @@ import (
 	"github.com/0chain/system_test/internal/api/util/client"
 )
 
-// this test is working fine in local
 func TestCreateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Create allocation API call should be successful given a valid request")
@@ -19,9 +18,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Run("Create allocation API call should be successful given a valid request", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
-		for i := 0; i < 2; i++ {
-			apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
-		}
+		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)

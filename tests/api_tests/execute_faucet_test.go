@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// This test is working fine in local
 func TestExecuteFaucet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Execute Faucet API call should be successful given a valid request")

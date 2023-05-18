@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// This test is working fine in local
 func TestBlobberRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work")
@@ -33,7 +32,7 @@ func TestBlobberRewards(testSetup *testing.T) {
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID, "Blobber ID contains zero value")
 
-		apiClient.CreateStakePool(t, sdkWallet, 3, blobberID, float64(1.0), client.TxSuccessfulStatus)
+		apiClient.CreateStakePool(t, sdkWallet, 3, blobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
 		sdkClient.UploadFile(t, allocationID)
@@ -77,7 +76,7 @@ func TestBlobberRewards(testSetup *testing.T) {
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, blobberID, "Blobber ID contains zero value")
 
-		apiClient.CreateStakePool(t, sdkWallet, 3, blobberID, float64(1.0), client.TxSuccessfulStatus)
+		apiClient.CreateStakePool(t, sdkWallet, 3, blobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
 		sdkClient.UploadFile(t, allocationID)
@@ -132,7 +131,7 @@ func TestBlobberRewards(testSetup *testing.T) {
 		})
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore+1)
 
-		apiClient.CreateStakePool(t, sdkWallet, 3, newBlobberID, float64(1.0), client.TxSuccessfulStatus)
+		apiClient.CreateStakePool(t, sdkWallet, 3, newBlobberID, client.TxSuccessfulStatus)
 
 		// TODO: replace with native "Upload API" call
 		sdkClient.UploadFile(t, allocationID)

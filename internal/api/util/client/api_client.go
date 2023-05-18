@@ -1385,7 +1385,7 @@ func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRe
 }
 
 // CreateStakePoolWrapper does not provide deep test of used components
-func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID string, tokens float64, requiredTransactionStatus int) string {
+func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID string, requiredTransactionStatus int) string {
 	t.Log("Create stake pool...")
 
 	createStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
@@ -1398,7 +1398,7 @@ func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 					ProviderType: providerType,
 					ProviderID:   providerID,
 				}),
-			Value: tokenomics.IntToZCN(tokens)},
+			Value: tokenomics.IntToZCN(1.0)},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
