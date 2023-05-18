@@ -52,7 +52,7 @@ func TestAllocation(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
-	t.RunSequentiallyWithTimeout("Create + Upload + Cancel, equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Create + Upload + Cancel equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		fmt.Println("Jayash : ")
 
@@ -155,7 +155,7 @@ func TestAllocation(testSetup *testing.T) {
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
 
-	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade, equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		walletName := utils.EscapedTestName(t)
 
 		// register recipient wallet
