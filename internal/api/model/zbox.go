@@ -29,6 +29,10 @@ type ZboxWallet struct {
 	LastUpdate  string           `json:"last_update"`
 }
 
+type ZboxFreeStorage struct {
+	Marker     string `json:"marker"`
+	FundidngId int    `json:"funding_id"`
+}
 type ZboxResourceExist struct {
 	Exist *bool   `json:"exist"`
 	Error *string `json:"error"`
