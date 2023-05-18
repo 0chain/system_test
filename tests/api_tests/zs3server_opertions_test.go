@@ -57,7 +57,7 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 	t.RunSequentially("PutObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
-		//t.Skip("wait for the issue to get resolved : https://github.com/0chain/zs3server/issues/21")
+		// t.Skip("wait for the issue to get resolved : https://github.com/0chain/zs3server/issues/21")
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
