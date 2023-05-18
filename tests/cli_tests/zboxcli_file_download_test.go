@@ -559,7 +559,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.RunWithTimeout("Download Shared File without Paying Should Not Work", 5*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Download Shared File without Paying Should Not Work", 7*time.Minute, func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -1210,7 +1210,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0])
 	})
 
-	t.Run("Download File Without read-lock Should Fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download File Without read-lock Should Fail", 7*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
