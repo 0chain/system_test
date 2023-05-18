@@ -20,10 +20,10 @@ import (
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	// Faucet the used wallets
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 10; i++ {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus) // 18 * 50 * 1e10
 	}
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 10; i++ {
 		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
 	}
 
