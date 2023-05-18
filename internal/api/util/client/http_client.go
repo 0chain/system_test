@@ -51,7 +51,7 @@ func (c *BaseHttpClient) executeForServiceProvider(t *test.SystemTest, url strin
 	}
 
 	if err != nil {
-		t.Errorf("%s error : %w", url, err)
+		t.Errorf("%s error : %v", url, err)
 		return nil, fmt.Errorf("%s: %w", url, ErrGetFromResource)
 	}
 
