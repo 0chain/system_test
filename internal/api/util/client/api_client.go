@@ -787,7 +787,7 @@ func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requ
 
 // ExecuteFaucet provides basic assertions
 func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
-	//t.Log("Execute faucet...")
+	t.Log("Execute faucet...")
 
 	pourZCN := tokenomics.IntToZCN(tokens)
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
@@ -910,7 +910,7 @@ func (c *APIClient) CreateAllocation(t *test.SystemTest,
 	wallet *model.Wallet,
 	scRestGetAllocationBlobbersResponse *model.SCRestGetAllocationBlobbersResponse,
 	requiredTransactionStatus int) string {
-	return c.CreateAllocationWithLockValue(t, wallet, scRestGetAllocationBlobbersResponse, 0.1, requiredTransactionStatus)
+	return c.CreateAllocationWithLockValue(t, wallet, scRestGetAllocationBlobbersResponse, 10.0, requiredTransactionStatus)
 }
 
 func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
@@ -929,7 +929,6 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 			Value:           tokenomics.IntToZCN(lockValue),
 		},
 		HttpOkStatus)
-	t.Log("THe blobber requirements and blobber are %s", scRestGetAllocationBlobbersResponse)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, createAllocationTransactionPutResponse)

@@ -602,9 +602,8 @@ func (c *ZboxClient) GetGraphWritePrice(t *test.SystemTest, req *model.ZboxGraph
 	urlBuilder.queries.Set("to", req.To)
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
-
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &graphWritePrice,
+		Dst:                &graphWritePrice,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1176,7 +1175,7 @@ func (c *ZboxClient) GetGraphTotalChallengePools(t *test.SystemTest, req *model.
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &graphTotalChallengePools,
+		Dst:                &graphTotalChallengePools,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1211,8 +1210,6 @@ func (c *ZboxClient) GetAllNftCollectionId(t *test.SystemTest, idToken, csrfToke
 
 	return ZboxNftCollectionList, resp, err
 }
-
-
 
 func (c *ZboxClient) GetNftCollectionById(t *test.SystemTest, idToken, csrfToken, phoneNumber, collection_id string) (*model.ZboxNftCollectionById, *resty.Response, error) {
 	t.Logf("Getting All nft collection using collection Id for 0box...")
@@ -1258,7 +1255,7 @@ func (c *ZboxClient) GetGraphAllocatedStorage(t *test.SystemTest, req *model.Zbo
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &graphAllocatedStorage,
+		Dst:                &graphAllocatedStorage,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1279,7 +1276,7 @@ func (c *ZboxClient) GetGraphUsedStorage(t *test.SystemTest, req *model.ZboxGrap
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1300,7 +1297,7 @@ func (c *ZboxClient) GetGraphTotalStaked(t *test.SystemTest, req *model.ZboxGrap
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1321,7 +1318,7 @@ func (c *ZboxClient) GetGraphTotalMinted(t *test.SystemTest, req *model.ZboxGrap
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1342,13 +1339,12 @@ func (c *ZboxClient) GetGraphTotalLocked(t *test.SystemTest, req *model.ZboxGrap
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
 	return &data, resp, err
 }
-
 
 func (c *ZboxClient) GetGraphChallenges(t *test.SystemTest, req *model.ZboxGraphRequest) (*model.ZboxGraphChallengesResponse, *resty.Response, error) {
 	t.Logf("Getting graph challenges using 0box...")
@@ -1364,7 +1360,7 @@ func (c *ZboxClient) GetGraphChallenges(t *test.SystemTest, req *model.ZboxGraph
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1385,7 +1381,7 @@ func (c *ZboxClient) GetGraphTokenSupply(t *test.SystemTest, req *model.ZboxGrap
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1403,7 +1399,7 @@ func (c *ZboxClient) GetTotalMinted(t *test.SystemTest) (*model.ZboxTotalInt64Re
 	urlBuilder.SetPath("/v2/total-minted")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1421,7 +1417,7 @@ func (c *ZboxClient) GetTotalBlobberCapacity(t *test.SystemTest) (*model.ZboxTot
 	urlBuilder.SetPath("/v2/total-blobber-capacity")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1439,7 +1435,7 @@ func (c *ZboxClient) GetAverageWritePrice(t *test.SystemTest) (*model.ZboxTotalI
 	urlBuilder.SetPath("/v2/average-write-price")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1457,7 +1453,7 @@ func (c *ZboxClient) GetTotalStaked(t *test.SystemTest) (*model.ZboxTotalInt64Re
 	urlBuilder.SetPath("/v2/total-staked")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1475,7 +1471,7 @@ func (c *ZboxClient) GetTotalChallenges(t *test.SystemTest) (*model.ZboxTotalInt
 	urlBuilder.SetPath("/v2/total-total-challenges")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1493,7 +1489,7 @@ func (c *ZboxClient) GetSuccessfulChallenges(t *test.SystemTest) (*model.ZboxTot
 	urlBuilder.SetPath("/v2/total-successful-challenges")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1511,7 +1507,7 @@ func (c *ZboxClient) GetTotalAllocatedStorage(t *test.SystemTest) (*model.ZboxTo
 	urlBuilder.SetPath("/v2/total-allocated-storage")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1533,7 +1529,7 @@ func (c *ZboxClient) GetGraphBlobberChallengesPassed(t *test.SystemTest, blobber
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1555,7 +1551,7 @@ func (c *ZboxClient) GetGraphBlobberChallengesCompleted(t *test.SystemTest, blob
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1577,7 +1573,7 @@ func (c *ZboxClient) GetGraphBlobberChallengesOpen(t *test.SystemTest, blobberId
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1599,7 +1595,7 @@ func (c *ZboxClient) GetGraphBlobberInactiveRounds(t *test.SystemTest, blobberId
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1621,7 +1617,7 @@ func (c *ZboxClient) GetGraphBlobberWritePrice(t *test.SystemTest, blobberId str
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1643,7 +1639,7 @@ func (c *ZboxClient) GetGraphBlobberCapacity(t *test.SystemTest, blobberId strin
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1665,7 +1661,7 @@ func (c *ZboxClient) GetGraphBlobberAllocated(t *test.SystemTest, blobberId stri
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1687,7 +1683,7 @@ func (c *ZboxClient) GetGraphBlobberSavedData(t *test.SystemTest, blobberId stri
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1710,7 +1706,7 @@ func (c *ZboxClient) GetGraphBlobberReadData(t *test.SystemTest, blobberId strin
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1733,7 +1729,7 @@ func (c *ZboxClient) GetGraphBlobberOffersTotal(t *test.SystemTest, blobberId st
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1756,7 +1752,7 @@ func (c *ZboxClient) GetGraphBlobberUnstakeTotal(t *test.SystemTest, blobberId s
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1779,7 +1775,7 @@ func (c *ZboxClient) GetGraphBlobberTotalStake(t *test.SystemTest, blobberId str
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -1802,7 +1798,7 @@ func (c *ZboxClient) GetGraphBlobberTotalRewards(t *test.SystemTest, blobberId s
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &data,
+		Dst:                &data,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
