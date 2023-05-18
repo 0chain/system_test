@@ -104,8 +104,8 @@ type ZboxUserInfo struct {
 }
 
 type ZboxGraphRequest struct {
-	From string `json:"from"`
-	To   string `json:"to"`
+	From       string `json:"from"`
+	To         string `json:"to"`
 	DataPoints string `json:"data_points"`
 }
 
@@ -113,7 +113,7 @@ type ZboxGraphInt64Response []int64
 type ZboxTotalInt64Response int64
 
 type ZboxGraphChallengesResponse struct {
-	TotalChallenges ZboxGraphInt64Response `json:"total"`
+	TotalChallenges      ZboxGraphInt64Response `json:"total"`
 	SuccessfulChallenges ZboxGraphInt64Response `json:"successful"`
 }
 
