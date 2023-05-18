@@ -237,9 +237,9 @@ func NewUpdateBlobberTransactionData(scRestGetBlobberResponse *SCRestGetBlobberR
 	}
 }
 
-//----------------------------------------------------
+// ----------------------------------------------------
 // ZCN SC
-//----------------------------------------------------
+// ----------------------------------------------------
 func NewBurnZcnTransactionData(burnZcnRequest *SCRestBurnZcnRequest) TransactionData {
 	return TransactionData{
 		Name:  "burn",
@@ -935,9 +935,9 @@ type FreeStorageMarker struct {
 	Signature  string  `json:"signature,omitempty"`
 }
 
-//----------------------------------------------
+// ----------------------------------------------
 // ZCN SC
-//----------------------------------------------
+// ----------------------------------------------
 type SCRestBurnZcnRequest struct {
 	EthereumAddress string `json:"ethereum_address"`
 }

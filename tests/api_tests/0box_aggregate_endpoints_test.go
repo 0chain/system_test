@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+//nolint:gocyclo
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	// Faucet the used wallets
@@ -43,7 +44,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 	// Create the free allocation marker (ownerWallet -> sdkWallet)
 	apiClient.ExecuteFaucet(t, ownerWallet, client.TxSuccessfulStatus)
-	apiClient.AddFreeStorageAssigner(t, ownerWallet, client.TxSuccessfulStatus) //0.1 ZCN 1 ZCN = 1e10 from owner wallet
+	apiClient.AddFreeStorageAssigner(t, ownerWallet, client.TxSuccessfulStatus) // 0.1 ZCN 1 ZCN = 1e10 from owner wallet
 	marker := config.CreateFreeStorageMarker(t, sdkWallet.ToSdkWallet(sdkWalletMnemonics), ownerWallet.ToSdkWallet(ownerWalletMnemonics))
 	t.Logf("Free allocation marker: %v", marker)
 
@@ -243,7 +244,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is canceled. Check https://github.com/0chain/0chain/issues/2211
-				cond := (allocatedStorageAfter == allocatedStorage) && (allocatedStorageAfter == int64(*latest))
+				cond := (allocatedStorageAfter == allocatedStorage) && (allocatedStorageAfter == int64(*latest)) //nolint
 				allocatedStorage = allocatedStorageAfter
 
 				// get all blobbers
@@ -259,7 +260,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("test /v2/graph-used-storage", 5*time.Minute, func(t *test.SystemTest) {
-
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphUsedStorage))
 
 		t.Run("test graph data", func(t *test.SystemTest) {
@@ -1308,6 +1308,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			// confHash = apiClient.BurnZcn(t, sdkWallet, parsedConfig.EthereumAddress, float64(1.0), client.TxSuccessfulStatus)
 			// require.NotEmpty(t, confHash)
 
+			//nolint
 			// // Check decrease
 			// wait.PoolImmediately(t, 2 * time.Minute, func() bool {
 			// 	data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{ DataPoints: "1" })
@@ -1380,6 +1381,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	})
 }
 
+//nolint:gocyclo
 func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Skip("skip till fixed")
@@ -2038,7 +2040,6 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			})
 		})
 	})
-
 }
 
 func graphEndpointTestCases(endpoint model.ZboxGraphEndpoint) func(*test.SystemTest) {
@@ -2146,7 +2147,6 @@ func printBlobbers(t *test.SystemTest, tag string, blobbers []*model.SCRestGetBl
 		t.Logf("ReadPrice: %+v", blobber.Terms.ReadPrice)
 		t.Logf("WritePrice: %+v", blobber.Terms.WritePrice)
 		t.Logf("MinLockDemand: %+v", blobber.Terms.MinLockDemand)
-		//t.Logf("MaxOfferDuration: %+v", blobber.Terms.MaxOfferDuration)
 		t.Logf("Capacity: %+v", blobber.Capacity)
 		t.Logf("Allocated: %+v", blobber.Allocated)
 		t.Logf("LastHealthCheck: %+v", blobber.LastHealthCheck)
