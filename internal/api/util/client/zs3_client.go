@@ -49,14 +49,20 @@ func createForm(form map[string]string) (string, io.Reader, error) {
 			if err != nil {
 				return "", nil, err
 			}
-			defer file.Close()
+			defer file.Close() //nolint:gocritic
 			part, err := mp.CreateFormFile(key, val)
 			if err != nil {
 				return "", nil, err
 			}
-			io.Copy(part, file)
+			_, err = io.Copy(part, file)
+			if err != nil {
+				return "", nil, err
+			}
 		} else {
-			mp.WriteField(key, val)
+			err := mp.WriteField(key, val)
+			if err != nil {
+				return "", nil, err
+			}
 		}
 	}
 	return mp.FormDataContentType(), body, nil

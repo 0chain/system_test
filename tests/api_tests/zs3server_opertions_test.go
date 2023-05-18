@@ -72,7 +72,7 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 	t.RunSequentially("GetObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
-		//t.Skip("wait for the issue to get resolved : https://github.com/0chain/zs3server/issues/21")
+		// t.Skip("wait for the issue to get resolved : https://github.com/0chain/zs3server/issues/21")
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -138,7 +138,7 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("RemoveObject should not return error if object doen't exist", func(t *test.SystemTest) {
-		//t.Skip("wait for the issue to get resolved : https://github.com/0chain/zs3server/issues/22")
+		// t.Skip("wait for the issue to get resolved : https://github.com/0chain/zs3server/issues/22")
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
