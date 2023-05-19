@@ -73,6 +73,7 @@ func TestAllocation(testSetup *testing.T) {
 		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
 			"size":   allocSize,
 			"data":   1,
+			"lock":   2,
 			"parity": 1,
 			"expire": "5m",
 		}))
@@ -167,6 +168,7 @@ func TestAllocation(testSetup *testing.T) {
 		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
 			"size":   10 * MB,
 			"data":   1,
+			"lock":   2,
 			"parity": 1,
 			"expire": "5m",
 		}))
@@ -245,6 +247,7 @@ func TestAllocation(testSetup *testing.T) {
 		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
 			"size":   10 * MB,
 			"data":   1,
+			"lock":   2,
 			"parity": 1,
 			"expire": "5m",
 		}))
@@ -330,6 +333,7 @@ func TestAllocation(testSetup *testing.T) {
 		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
 			"size":   allocSize,
 			"data":   1,
+			"lock":   2,
 			"parity": 1,
 			"expire": "20m",
 		}))
@@ -434,6 +438,7 @@ func TestAllocation(testSetup *testing.T) {
 			"size":   allocSize,
 			"tokens": 9,
 			"data":   1,
+			"lock":   2,
 			"parity": 1,
 			"expire": "20m",
 		}))
