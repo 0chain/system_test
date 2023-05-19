@@ -107,7 +107,7 @@ jobs:
           
           echo "TEST_FILE_FILTER=false" >> $GITHUB_ENV
 
-          echo "TOKENOMICS_ALLOCATIONS_TESTS=$(echo $(([ -z '^TestAllocation$/^Create_\\\\+_Upload_\\\\+_Cancel,_equal_read_price_0\\.1$' ] && echo '') || echo '^TestAllocation$/^Create_\\\\+_Upload_\\\\+_Cancel,_equal_read_price_0\\.1$'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_ALLOCATIONS_TESTS=$(echo $(([ -z 'TestAllocation' ] && echo '') || echo 'TestAllocation'))" >> $GITHUB_ENV
           echo "TOKENOMICS_CHALLENGE_REWARD_TESTS=$(echo $(([ -z 'TestBlobberChallengeRewards' ] && echo '') || echo 'TestBlobberChallengeRewards'))" >> $GITHUB_ENV
           
 
@@ -128,7 +128,7 @@ jobs:
           echo "EXPLORER_TAG=$(echo $(([ -z '${{github.event.inputs.explorer_image}}' ] && echo 'latest') || echo '${{github.event.inputs.explorer_image}}'))" >> $GITHUB_ENV
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-          echo "TOKENOMICS_ALLOCATION_TESTS=$(echo $(([ -z '^TestAllocation$/^Create_\\\\+_Upload_\\\\+_Cancel,_equal_read_price_0\\.1$' ] && echo '') || echo '^TestAllocation$/^Create_\\\\+_Upload_\\\\+_Cancel,_equal_read_price_0\\.1$'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_ALLOCATION_TESTS=$(echo $(([ -z 'TestAllocation' ] && echo '') || echo 'TestAllocation'))" >> $GITHUB_ENV
           echo "TOKENOMICS_CHALLENGE_REWARD_TESTS=$(echo $(([ -z 'TestBlobberChallengeRewards' ] && echo '') || echo 'TestBlobberChallengeRewards'))" >> $GITHUB_ENV
           echo "TOKENOMICS_READ_REWARD_TESTS=$(echo $(([ -z 'TestBlobberReadReward' ] && echo '') || echo 'TestBlobberReadReward'))" >> $GITHUB_ENV
           echo "TOKENOMICS_SLASH_REWARD_TESTS=$(echo $(([ -z 'TestBlobberSlashPenalty' ] && echo '') || echo 'TestBlobberSlashPenalty'))" >> $GITHUB_ENV
