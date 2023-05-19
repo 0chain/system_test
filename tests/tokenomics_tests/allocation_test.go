@@ -82,6 +82,8 @@ func TestAllocation(testSetup *testing.T) {
 		allocationId, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
 
+		fmt.Println("allocationId", allocationId)
+
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
@@ -91,6 +93,8 @@ func TestAllocation(testSetup *testing.T) {
 		err = utils.CreateFileWithSize(filename, int64(filesize))
 		require.Nil(t, err)
 
+		fmt.Println("Uploading file ", filename)
+
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
 			// fetch the latest block in the chain
 			"allocation": allocationId,
@@ -98,6 +102,10 @@ func TestAllocation(testSetup *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
+
+		fmt.Println("Calling Cancel Allocation")
 
 		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
 		if err != nil {
