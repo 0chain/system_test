@@ -44,8 +44,6 @@ func TestBlobberReadReward(testSetup *testing.T) {
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
 	t.RunSequentiallyWithTimeout("download one time, equal from both blobbers", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
-
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
@@ -126,8 +124,6 @@ func TestBlobberReadReward(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("download several times and checking if downloading fails after allocation expiry", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
-
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)

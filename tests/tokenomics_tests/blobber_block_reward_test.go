@@ -52,7 +52,6 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	descriptions = append(descriptions, "Blobber Block Reward Test - 1")
 
 	t.RunSequentiallyWithTimeout("All conditions same", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 1}
 
@@ -154,7 +153,6 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Verify free reads", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{9, 9}
 
@@ -255,7 +253,6 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Verify write price diff changes", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
-		t.Skip()
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{9, 9}
 
@@ -355,7 +352,6 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Check read price ratio", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 1}
 
@@ -457,7 +453,6 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Verify stake ratio", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
 		stake := []float64{1.0, 3.0, 1.0, 3.0}
 		readData := []int{1, 1}
 
@@ -557,7 +552,6 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Check ratio with respect to total read data", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 9}
 
