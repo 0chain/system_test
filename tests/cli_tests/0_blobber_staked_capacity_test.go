@@ -122,6 +122,8 @@ func getMinStakedCapacityBlobber(t *test.SystemTest, blobberList []climodel.Blob
 			minAvailableCapacity = stakedCapacity
 			minAvailableCapacityBlobber = blInfo
 		}
+
+		t.Logf("blobber %s has staked capacity %d", blInfo.Id, stakedCapacity)
 	}
 
 	output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": minAvailableCapacityBlobber.Id}))
@@ -153,7 +155,10 @@ func countDelegates(t *test.SystemTest, blobberId string) (int, error) {
 }
 
 func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailableCapacity int64) string {
+
 	allocSize := minAvailableCapacity*2 + 20*GB - 200000
+
+	t.Logf("Creating allocation of size %d", allocSize)
 	output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 		"cost":        "",
 		"data":        2,
@@ -167,6 +172,8 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 	require.Len(t, output, 1)
 	allocationCost, err := getAllocationCost(output[0])
 	require.Nil(t, err, "could not get allocation cost")
+
+	t.Logf("Allocation cost is %d", allocationCost)
 
 	// Matching the wallet balance to allocationCost by executing faucet with tokens
 	// As max limit of faucet is 9 tokens we are executing faucet with 9 tokens multiple times till wallet balance is equal to allocationCost
