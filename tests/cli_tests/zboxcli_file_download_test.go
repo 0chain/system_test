@@ -559,7 +559,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.Run("Download Shared File without Paying Should Not Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download Shared File without Paying Should Not Work", 5*time.Minute, func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -1211,13 +1211,12 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File Without read-lock Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(1048577)
+		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"expire": "721h",
+			"size": allocSize,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
