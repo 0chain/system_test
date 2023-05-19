@@ -157,7 +157,7 @@ jobs:
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           authorizer_image: staging
 
-      - name: "Run System tests"
+      - name: "Run Allocation System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
           network: ${{ env.NETWORK_URL }}
@@ -199,7 +199,7 @@ jobs:
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           authorizer_image: staging
 
-      - name: "Run System tests"
+      - name: "Run Challenge Reward System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
           network: ${{ env.NETWORK_URL }}
@@ -241,7 +241,7 @@ jobs:
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           authorizer_image: staging
 
-      - name: "Run System tests"
+      - name: "Run Read Rewards System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
           network: ${{ env.NETWORK_URL }}
@@ -283,7 +283,7 @@ jobs:
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           authorizer_image: staging
 
-      - name: "Run System tests"
+      - name: "Run Slash Rewards System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
           network: ${{ env.NETWORK_URL }}
@@ -325,7 +325,7 @@ jobs:
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           authorizer_image: staging
 
-      - name: "Run System tests"
+      - name: "Run Challenge Timings System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
           network: ${{ env.NETWORK_URL }}
