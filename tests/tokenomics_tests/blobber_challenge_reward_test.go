@@ -1068,11 +1068,13 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 	for i := 0; i < numDelegates; i++ {
 		for _, blobber := range blobbers {
 			// add balance to delegate wallet
-			_, err := utils.ExecuteFaucetWithTokensForWallet(t, blobberDelegates[idx], configPath, tokens[tIdx])
+			_, err := utils.ExecuteFaucetWithTokensForWallet(t, blobberDelegates[idx], configPath, tokens[tIdx]+1)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
+
+			fmt.Println("Staking tokens for blobber: ", blobber.Id)
 
 			// stake tokens
 			_, err = utils.StakeTokensForWallet(t, configPath, blobberDelegates[idx], utils.CreateParams(map[string]interface{}{
@@ -1086,6 +1088,11 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 
 			idx++
 			tIdx++
+
+			if idx == 2 {
+				idx = 0
+				tIdx = 0
+			}
 		}
 	}
 
@@ -1094,7 +1101,7 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 	for i := 0; i < numDelegates; i++ {
 		for _, validator := range validators {
 			// add balance to delegate wallet
-			_, err := utils.ExecuteFaucetWithTokensForWallet(t, validatorDelegates[idx], configPath, tokens[tIdx])
+			_, err := utils.ExecuteFaucetWithTokensForWallet(t, validatorDelegates[idx], configPath, tokens[tIdx]+1)
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -1112,6 +1119,11 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 
 			idx++
 			tIdx++
+
+			if idx == 2 {
+				idx = 0
+				tIdx = 0
+			}
 		}
 	}
 }
