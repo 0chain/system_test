@@ -109,7 +109,6 @@ jobs:
 
           echo "TOKENOMICS_ALLOCATIONS_TESTS=$(echo $(([ -z '^TestAllocation$/^Create_\\\\+_Upload_\\\\+_Cancel,_equal_read_price_0\\.1$' ] && echo '') || echo '^TestAllocation$/^Create_\\\\+_Upload_\\\\+_Cancel,_equal_read_price_0\\.1$'))" >> $GITHUB_ENV
           echo "TOKENOMICS_CHALLENGE_REWARD_TESTS=$(echo $(([ -z '^TestAllocation$/^Create_\\\\+_Upload_\\\\+_Cancel,_equal_read_price_0\\.1$' ] && echo '') || echo '^TestAllocation$/^Create_\\\\+_Upload_\\\\+_Cancel,_equal_read_price_0\\.1$'))" >> $GITHUB_ENV
-          standup
           
 
       - name: "Config: Deploy new 0Chain network then run tests against it"
