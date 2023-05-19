@@ -56,12 +56,14 @@ func TestAllocation(testSetup *testing.T) {
 
 		fmt.Println("Jayash : ")
 
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
+
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
-
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
