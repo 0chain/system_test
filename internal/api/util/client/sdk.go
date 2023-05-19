@@ -250,3 +250,10 @@ func (c *SDKClient) AddCopyOperation(t *test.SystemTest, allocationID, remotePat
 		DestPath:      destPath,
 	}
 }
+
+func (c *SDKClient) AddCreateDirOperation(t *test.SystemTest, allocationID, remotePath string) sdk.OperationRequest {
+	return sdk.OperationRequest{
+		OperationType: constants.FileOperationCreateDir,
+		RemotePath:    remotePath,
+	}
+}
