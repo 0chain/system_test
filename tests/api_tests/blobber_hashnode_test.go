@@ -103,7 +103,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 
 		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
-		require.Nil(t, restyResponse)
+		require.Equal(t, "bad request: invalid signature badsign\n", string(restyResponse.Body()))
 		require.Nil(t, getBlobberResponse)
 	})
 
