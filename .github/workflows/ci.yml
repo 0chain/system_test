@@ -178,7 +178,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@master
+        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
@@ -220,7 +220,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@master
+        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
@@ -262,7 +262,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@master
+        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
@@ -304,7 +304,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@master
+        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
