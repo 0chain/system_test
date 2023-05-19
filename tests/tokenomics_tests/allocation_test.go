@@ -188,7 +188,7 @@ func TestAllocation(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 10 * MB
+		filesize := 2 * MB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -444,7 +444,6 @@ func TestAllocation(testSetup *testing.T) {
 		utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 9,
 			"data":   1,
 			"lock":   2,
 			"parity": 1,
