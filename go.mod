@@ -13,11 +13,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/ybbus/jsonrpc/v3 v3.1.1 // nolint
-<<<<<<< HEAD
-	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a
-=======
 	golang.org/x/crypto v0.6.0
->>>>>>> 09546dc2dad234e33db3fb35f6791e7bb3e27d71
 	gopkg.in/errgo.v2 v2.1.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/gorm v1.24.1

@@ -1,10 +1,10 @@
 bridge:
     Password: "\"02289b9\""
     EthereumAddress: 0xD8c9156e782C68EE671C09b6b92de76C97948432
-    AuthorizersAddress: 0xB132C20A02AD7C38d88805F0e3fFDdfb54224C58
-    BridgeAddress: 0x2405e40161ea6da91AE0e95061e7A8462b4D5eEa
-    WzcnAddress: 0x10140fbca3a468A1c35F132D75659eF0EB5d95DB
-    EthereumNodeURL: "https://rpc.tenderly.co/fork/e753f650-9968-4f58-af77-5f02ace53cdc"
+    AuthorizersAddress: 0xd5867B4a1F8e7BD91276b5C85a4EDC9D33400496
+    BridgeAddress: 0xf260c644Acfbfd87bdC77Fe32c8d6a56C9eec879
+    WzcnAddress: 0xC79aD1e07f790d0Cf6AA3D09FeC393A09DC53d64
+    EthereumNodeURL: "https://rpc.tenderly.co/fork/dd7e070c-a0ba-4479-ae80-31a352a92d12"
     GasLimit: 300000
     Value: 0
     ConsensusThreshold: 75
