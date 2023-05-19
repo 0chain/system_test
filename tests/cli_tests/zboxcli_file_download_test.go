@@ -559,7 +559,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.RunWithTimeout("Download Shared File without Paying Should Not Work", 7*time.Minute, func(t *test.SystemTest) {
+	t.Run("Download Shared File without Paying Should Not Work", func(t *test.SystemTest) {
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -1210,13 +1210,14 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0])
 	})
 
-	t.RunWithTimeout("Download File Without read-lock Should Fail", 7*time.Minute, func(t *test.SystemTest) {
-		allocSize := int64(2048)
+	t.Run("Download File Without read-lock Should Fail", func(t *test.SystemTest) {
+		allocSize := int64(1048577)
 		filesize := int64(256)
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
+			"size":   allocSize,
+			"expire": "721h",
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -1236,7 +1237,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "pre-redeeming read marker")
 	})
 
-	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 7*time.Minute, func(t *test.SystemTest) {
+	t.Run("Download File using Expired Allocation Should Fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
