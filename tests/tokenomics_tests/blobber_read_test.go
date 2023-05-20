@@ -57,7 +57,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 			"tokens": 1,
 			"data":   1,
 			"parity": 1,
-			"expire": "20m",
+			"expire": "10m",
 		})
 
 		remotepath := "/dir/"
@@ -137,7 +137,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 			"tokens": 1,
 			"data":   1,
 			"parity": 1,
-			"expire": "20m",
+			"expire": "15m",
 		})
 
 		remotepath := "/dir/"
@@ -203,8 +203,8 @@ func TestBlobberReadReward(testSetup *testing.T) {
 			prevBlock = curBlock
 		}
 
-		// Sleep for 20 minutes
-		time.Sleep(20 * time.Minute)
+		// Sleep for 10 minutes
+		time.Sleep(10 * time.Minute)
 
 		err = os.Remove(filename)
 		require.Nil(t, err)
