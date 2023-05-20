@@ -1153,7 +1153,6 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []climod
 			}))
 			if err != nil {
 				fmt.Println(err)
-				return
 			}
 
 			idx++
@@ -1171,7 +1170,6 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []climod
 			}))
 			if err != nil {
 				fmt.Println(err)
-				return
 			}
 
 			idx++

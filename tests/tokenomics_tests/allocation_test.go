@@ -185,6 +185,9 @@ func TestAllocation(testSetup *testing.T) {
 		allocationId, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
 
+		alloc := utils.GetAllocation(t, allocationId)
+		movedToChallengePool := alloc.MovedToChallenge
+
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
@@ -202,6 +205,10 @@ func TestAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
+		alloc = utils.GetAllocation(t, allocationId)
+		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should increase")
+		movedToChallengePool = alloc.MovedToChallenge
+
 		for _, intialBlobberInfo := range blobberDetailList {
 
 			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": utils.IntToZCN(intialBlobberInfo.Terms.Read_price + 1e9)}))
@@ -215,6 +222,9 @@ func TestAllocation(testSetup *testing.T) {
 			"size": 100 * MB,
 		}), true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
+
+		alloc = utils.GetAllocation(t, allocationId)
+		require.Equal(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
 
 		// sleep for 6 minutes
 		time.Sleep(6 * time.Minute)
@@ -243,6 +253,8 @@ func TestAllocation(testSetup *testing.T) {
 		rewards := getAllocationChallengeRewards(t, allocationId)
 
 		fmt.Println("rewards", rewards)
+
+		require.Equal(t, true, false)
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
@@ -287,12 +299,14 @@ func TestAllocation(testSetup *testing.T) {
 		_, err = utils.ExecuteFaucetWithTokensForWallet(t, nonAllocationOwnerWallet, configPath, 9)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
+		// Setting allocation to third party extendable
 		params := utils.CreateParams(map[string]interface{}{
 			"allocation":                 allocationId,
 			"set_third_party_extendable": nil,
 		})
 		output, err = utils.UpdateAllocation(t, configPath, params, true)
 
+		// Updating allocation with new wallet
 		_, err = utils.UpdateAllocationWithWallet(t, nonAllocationOwnerWallet, configPath, utils.CreateParams(map[string]interface{}{
 			"allocation": allocationId,
 			"size":       100 * MB,
@@ -441,7 +455,7 @@ func TestAllocation(testSetup *testing.T) {
 		allocSize := 1 * GB
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		utils.ExecuteFaucetWithTokens(t, configPath, 10)
+		utils.ExecuteFaucetWithTokens(t, configPath, 9)
 		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
 			"size":   allocSize,
 			"data":   1,
@@ -548,6 +562,8 @@ func getAllocationCancellationReward(t *test.SystemTest, startBlockNumber, endBl
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	sharderBaseUrl := utils.GetSharderUrl(t)
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/cancellation-rewards?start_block=" + startBlockNumber + "&end_block=" + endBlockNumber)
+
+	fmt.Println("URL : ", url)
 
 	resp, err := http.Get(url)
 	if err != nil {
