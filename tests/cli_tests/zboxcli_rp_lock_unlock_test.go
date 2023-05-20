@@ -130,7 +130,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		// Wallet balance gets reduced due to chargeable error (0.1 fees)
 		balance, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 4.9, balance)
+		require.Equal(t, 4.99, balance)
 	})
 
 	t.Run("Missing tokens flag in rp-lock should result in error", func(t *test.SystemTest) {

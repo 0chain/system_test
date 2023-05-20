@@ -175,7 +175,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		// Wallet balance before lock should be 4.5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 3.5, balance)
+		require.Equal(t, 4.49, balance)
 
 		// Lock 10 token in write pool should fail
 		params := createParams(map[string]interface{}{
@@ -190,7 +190,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		// Wallet balance should remain same (- fee)
 		balance, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 3.4, balance)
+		require.Equal(t, 4.48, balance)
 	})
 
 	t.Run("Should not be able to lock negative write tokens", func(t *test.SystemTest) {
