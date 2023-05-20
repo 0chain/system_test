@@ -170,7 +170,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 
 			time.Sleep(30 * time.Second)
 
-			downloadCost := sizeInGB(int64(filesize)) * math.Pow10(9) * 4
+			downloadCost := sizeInGB(int64(filesize)) * math.Pow10(8) * 4
 
 			curBlock := utils.GetLatestFinalizedBlock(t)
 
