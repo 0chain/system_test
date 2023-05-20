@@ -79,7 +79,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-		newCapacity := 99 * GB
+		newCapacity := 301 * GB
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": newCapacity}))
 		require.Nil(t, err, strings.Join(output, "\n"))
