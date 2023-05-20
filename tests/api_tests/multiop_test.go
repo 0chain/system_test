@@ -3,6 +3,7 @@ package api_tests
 import (
 	"crypto/rand"
 	"math/big"
+	"path"
 	"path/filepath"
 	"testing"
 	"time"
@@ -255,6 +256,33 @@ func TestMultiOperation(testSetup *testing.T) {
 		require.Equal(t, 5, len(listResult.Children), "files count mismatch expected %v actual %v", 5, len(listResult.Children))
 		listResult = sdkClient.GetFileList(t, allocationID, "/child")
 		require.Equal(t, 5, len(listResult.Children), "files count mismatch expected %v actual %v", 5, len(listResult.Children))
+	})
+
+	t.RunSequentially("Multi create dir operations should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		ops := make([]sdk.OperationRequest, 0, 10)
+		names := make([]string, 0, 10)
+		for i := 0; i < 10; i++ {
+			name := path.Join("/", randName())
+			op := sdkClient.AddCreateDirOperation(t, allocationID, name)
+			ops = append(ops, op)
+			names = append(names, name)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops)
+
+		newOps := make([]sdk.OperationRequest, 0, 10)
+
+		for i := 0; i < 10; i++ {
+			op := sdkClient.AddCreateDirOperation(t, allocationID, path.Join(names[i], randName()))
+			newOps = append(newOps, op)
+		}
+
+		sdkClient.MultiOperation(t, allocationID, newOps)
 	})
 }
 
