@@ -157,7 +157,7 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 	output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 		"cost":        "",
 		"data":        2,
-		"parity":      2,
+		"parity":      3,
 		"expire":      "5m",
 		"size":        allocSize,
 		"read_price":  "0-0.1",
@@ -179,7 +179,7 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 		"size":        allocSize,
 		"data":        2,
-		"parity":      2,
+		"parity":      3,
 		"lock":        allocationCost + 1,
 		"expire":      "5m",
 		"read_price":  "0-0.1",
