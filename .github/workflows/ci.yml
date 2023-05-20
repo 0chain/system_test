@@ -77,7 +77,7 @@ jobs:
     steps:
       - name: Check CI
         id: check-ci
-        uses: 0chain/actions/get-build-state@master
+        uses: 0chain/actions/get-build-state@authorizer_deployment_fix
         with:
           github_token: ${{ github.token }}
           repository: "0chain/system_test"
