@@ -107,9 +107,12 @@ jobs:
           
           echo "TEST_FILE_FILTER=false" >> $GITHUB_ENV
 
-          echo "TOKENOMICS_ALLOCATIONS_TESTS=$(echo $(([ -z 'TestAllocation' ] && echo '') || echo 'TestAllocation'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_ALLOCATION_TESTS=$(echo $(([ -z 'TestAllocation' ] && echo '') || echo 'TestAllocation'))" >> $GITHUB_ENV
           echo "TOKENOMICS_CHALLENGE_REWARD_TESTS=$(echo $(([ -z 'TestBlobberChallengeRewards' ] && echo '') || echo 'TestBlobberChallengeRewards'))" >> $GITHUB_ENV
-          
+          echo "TOKENOMICS_READ_REWARD_TESTS=$(echo $(([ -z 'TestBlobberReadReward' ] && echo '') || echo 'TestBlobberReadReward'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_SLASH_REWARD_TESTS=$(echo $(([ -z 'TestBlobberSlashPenalty' ] && echo '') || echo 'TestBlobberSlashPenalty'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_CHALLENGE_TIMINGS_TESTS=$(echo $(([ -z 'TestChallengeTimings' ] && echo '') || echo 'TestChallengeTimings'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_BLOCK_REWARD_TESTS=$(echo $(([ -z 'TestBlockRewardsForBlobbers' ] && echo '') || echo 'TestBlockRewardsForBlobbers'))" >> $GITHUB_ENV
 
       - name: "Config: Deploy new 0Chain network then run tests against it"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
@@ -133,6 +136,7 @@ jobs:
           echo "TOKENOMICS_READ_REWARD_TESTS=$(echo $(([ -z 'TestBlobberReadReward' ] && echo '') || echo 'TestBlobberReadReward'))" >> $GITHUB_ENV
           echo "TOKENOMICS_SLASH_REWARD_TESTS=$(echo $(([ -z 'TestBlobberSlashPenalty' ] && echo '') || echo 'TestBlobberSlashPenalty'))" >> $GITHUB_ENV
           echo "TOKENOMICS_CHALLENGE_TIMINGS_TESTS=$(echo $(([ -z 'TestChallengeTimings' ] && echo '') || echo 'TestChallengeTimings'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_BLOCK_REWARD_TESTS=$(echo $(([ -z 'TestBlockRewardsForBlobbers' ] && echo '') || echo 'TestBlockRewardsForBlobbers'))" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
