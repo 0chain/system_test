@@ -15,7 +15,6 @@ const (
 func TestZs3Server(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Zs3 server should return 500 when the action doesn't exist")
-	t.Skip("Skip until gosdk is merged")
 
 	t.Parallel()
 	// FIXME: we should never return a 500 to the end user
