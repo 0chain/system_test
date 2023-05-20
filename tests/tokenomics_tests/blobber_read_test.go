@@ -137,7 +137,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 			"tokens": 1,
 			"data":   1,
 			"parity": 1,
-			"expire": "15m",
+			"expire": "10m",
 		})
 
 		remotepath := "/dir/"
