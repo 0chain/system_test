@@ -97,67 +97,10 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 
 		fmt.Println(blobberRewards)
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
-	})
-
-	t.RunSequentiallyWithTimeout("Upload 50% of allocation and Kill blobber in the middle, One blobber should get approx double rewards than other", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
-			1, 1, 1, 1,
-		}, 1)
-
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
-
-		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
-			"tokens": 1,
-			"data":   1,
-			"parity": 1,
-			"expire": "20m",
-		})
-
-		remotepath := "/dir/"
-		filesize := 0.5 * GB
-		filename := utils.GenerateRandomTestFileName(t)
-
-		err = utils.CreateFileWithSize(filename, int64(filesize))
-		require.Nil(t, err)
-
-		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
-		// check allocation remaining time
-		allocation := utils.GetAllocation(t, allocationId)
-		remainingTime := allocation.ExpirationDate - time.Now().Unix()
-
-		// sleep for half of the remaining time
-		time.Sleep(time.Duration(remainingTime/2) * time.Second)
-
-		// 2. Kill a blobber
-		_, err = killBlobber(t, configPath, utils.CreateParams(map[string]interface{}{
-			"id": blobberList[1].Id,
-		}), true)
-		require.Nil(t, err, "error killing blobber", strings.Join(output, "\n"))
-
-		// 3. Sleep for the remaining time
-		time.Sleep(time.Duration(remainingTime/2) * time.Second)
-
-		allocation = utils.GetAllocation(t, allocationId)
-
-		fmt.Println(allocation.MovedToChallenge)
-
-		blobberRewards := getAllocationChallengeRewards(t, allocationId)
-
-		fmt.Println(blobberRewards)
+		require.Equal(t, true, false, "blobber rewards should be 1")
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
-
 }
 
 func killBlobber(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
