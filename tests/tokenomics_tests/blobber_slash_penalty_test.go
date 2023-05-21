@@ -97,6 +97,13 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 
 		fmt.Println(blobberRewards)
 
+		blobber1Reward := blobberRewards[blobberList[0].Id].(float64)
+		blobber2Reward := blobberRewards[blobberList[1].Id].(float64)
+
+		fmt.Println(blobber1Reward, blobber2Reward)
+
+		require.Greater(t, blobber1Reward/blobber2Reward, 1.5, "Killed blobber should get approx half the rewards than other")
+
 		require.Equal(t, true, false, "blobber rewards should be 1")
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
