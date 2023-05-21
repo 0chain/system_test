@@ -1736,29 +1736,6 @@ func (c *ZboxClient) GetGraphBlobberOffersTotal(t *test.SystemTest, blobberId st
 	return &data, resp, err
 }
 
-// GetGraphBlobberUnstakeTotal
-func (c *ZboxClient) GetGraphBlobberUnstakeTotal(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
-	t.Logf("Getting graph blobber unstake total using 0box...")
-	var data model.ZboxGraphInt64Response
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-
-	urlBuilder.SetPath("/v2/graph-blobber-unstake-total")
-	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
-	urlBuilder.queries.Set("data-points", req.DataPoints)
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &data,
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return &data, resp, err
-}
-
 // GetGraphBlobberStakeTotal
 func (c *ZboxClient) GetGraphBlobberTotalStake(t *test.SystemTest, blobberId string, req *model.ZboxGraphRequest) (*model.ZboxGraphInt64Response, *resty.Response, error) {
 	t.Logf("Getting graph blobber total stake using 0box...")

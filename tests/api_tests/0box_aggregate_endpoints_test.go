@@ -1928,8 +1928,6 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalStake, blobbers[0].ID))
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberUnstakeTotal, blobbers[0].ID))
-
 		t.Run("test graph data", func(t *test.SystemTest) {
 			targetBlobber := blobbers[0].ID
 			data, resp, err := apiClient.V1SCRestGetStakePoolStat(t, model.SCRestGetStakePoolStatRequest{
@@ -1939,7 +1937,6 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			t.Logf("SP for blobber %v: %+v", targetBlobber, data)
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
-			unstakeTotal := data.UnstakeTotal
 			stakeTotal := data.Balance
 
 			// Stake the blobber
@@ -1954,9 +1951,6 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 				require.Len(t, *data, 1)
 				afterValue := (*data)[0]
 				cond := afterValue > stakeTotal
-				if cond {
-					unstakeTotal = afterValue
-				}
 				return cond
 			})
 
@@ -1973,16 +1967,6 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 				afterValue := (*data)[0]
 				cond := afterValue < stakeTotal
 
-				data, resp, err = zboxClient.GetGraphBlobberUnstakeTotal(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
-				require.NoError(t, err)
-				require.Equal(t, 200, resp.StatusCode())
-				require.Len(t, *data, 1)
-				afterValue = (*data)[0]
-				cond = cond && afterValue > unstakeTotal
-				if cond {
-					stakeTotal = afterValue
-					unstakeTotal = afterValue
-				}
 				return cond
 			})
 		})
