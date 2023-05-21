@@ -214,6 +214,8 @@ func TestAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
+		time.Sleep(1 * time.Minute)
+
 		alloc = utils.GetAllocation(t, allocationId)
 		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should increase")
 		movedToChallengePool = alloc.MovedToChallenge
@@ -269,8 +271,6 @@ func TestAllocation(testSetup *testing.T) {
 		require.Equal(t, totalBlobberChallengereward, movedToChallengePool, "Total Blobber Challenge reward should be 0")
 
 		fmt.Println("rewards", rewards)
-
-		require.Equal(t, true, false)
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
