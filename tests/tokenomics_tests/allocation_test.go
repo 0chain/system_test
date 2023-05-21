@@ -234,7 +234,8 @@ func TestAllocation(testSetup *testing.T) {
 		}
 
 		_, err = utils.UpdateAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
-			"size": 100 * MB,
+			"allocation": allocationId,
+			"size":       100 * MB,
 		}), true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 
