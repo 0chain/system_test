@@ -104,8 +104,6 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 
 		require.Greater(t, blobber1Reward/blobber2Reward, 1.5, "Killed blobber should get approx half the rewards than other")
 
-		require.Equal(t, true, false, "blobber rewards should be 1")
-
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
 }
