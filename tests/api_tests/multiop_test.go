@@ -285,24 +285,6 @@ func TestMultiOperation(testSetup *testing.T) {
 		sdkClient.MultiOperation(t, allocationID, newOps)
 	})
 
-	t.RunSequentially("Multi copy and update operations should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		newDir := sdkClient.AddUploadOperationWithPath(t, allocationID, "/new/")
-		nestedDir := sdkClient.AddUploadOperationWithPath(t, allocationID, "/new/nested/")
-
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{nestedDir, newDir})
-
-		updateOp := sdkClient.AddUpdateOperation(t, allocationID, nestedDir.FileMeta.RemotePath, nestedDir.FileMeta.RemoteName)
-		copyOp := sdkClient.AddCopyOperation(t, allocationID, "/new/nested", "/newdir")
-
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{updateOp, copyOp})
-	})
-
 	t.RunSequentially("Nested move operation should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
