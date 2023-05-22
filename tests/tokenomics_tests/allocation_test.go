@@ -441,7 +441,7 @@ func TestAllocationAddOrReplaceBlobber(testSetup *testing.T) {
 			"data":   1,
 			"lock":   2,
 			"parity": 1,
-			"expire": "20m",
+			"expire": "10m",
 		}))
 		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
 
@@ -554,7 +554,7 @@ func TestAllocationAddOrReplaceBlobber(testSetup *testing.T) {
 			"data":   1,
 			"lock":   2,
 			"parity": 1,
-			"expire": "20m",
+			"expire": "10m",
 		}))
 		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
 
