@@ -254,18 +254,17 @@ type BlobberAllocation struct {
 }
 
 type StakePoolInfo struct {
-	ID           string                      `json:"pool_id"`      // pool ID
-	Balance      int64                       `json:"balance"`      // total balance
-	Unstake      int64                       `json:"unstake"`      // total unstake amount
-	Free         int64                       `json:"free"`         // free staked space
-	Capacity     int64                       `json:"capacity"`     // blobber bid
-	WritePrice   int64                       `json:"write_price"`  // its write price
-	OffersTotal  int64                       `json:"offers_total"` //
-	UnstakeTotal int64                       `json:"unstake_total"`
-	Delegate     []StakePoolDelegatePoolInfo `json:"delegate"`
-	Penalty      int64                       `json:"penalty"` // total for all
-	Rewards      int64                       `json:"rewards"`
-	Settings     StakePoolSettings           `json:"settings"`
+	ID          string                      `json:"pool_id"`      // pool ID
+	Balance     int64                       `json:"balance"`      // total balance
+	Unstake     int64                       `json:"unstake"`      // total unstake amount
+	Free        int64                       `json:"free"`         // free staked space
+	Capacity    int64                       `json:"capacity"`     // blobber bid
+	WritePrice  int64                       `json:"write_price"`  // its write price
+	OffersTotal int64                       `json:"offers_total"` //
+	Delegate    []StakePoolDelegatePoolInfo `json:"delegate"`
+	Penalty     int64                       `json:"penalty"` // total for all
+	Rewards     int64                       `json:"rewards"`
+	Settings    StakePoolSettings           `json:"settings"`
 }
 
 type StakePoolDelegatePoolInfo struct {
@@ -585,7 +584,7 @@ type Challenges struct {
 	AllocationID   string            `json:"allocation_id"`
 	AllocationRoot string            `json:"allocation_root"`
 	BlobberID      string            `json:"blobber_id"`
-	Responded      bool              `json:"responded"`
+	Responded      int64             `json:"responded"`
 }
 
 type Transaction struct {
