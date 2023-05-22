@@ -73,7 +73,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		allocationCost, err := getAllocationCost(output[0])
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
-		mustFailCost := allocationCost - 0.1
+		mustFailCost := allocationCost * 0.8
 		options = map[string]interface{}{"lock": mustFailCost}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
