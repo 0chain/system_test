@@ -452,7 +452,7 @@ func getNodeSlice(t *test.SystemTest, endpoint, sharderBaseURL string) []climode
 }
 
 func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []string {
-	nodeList := getNodeSlice(t, endpoint, endpoint)
+	nodeList := getNodeSlice(t, endpoint, sharderBaseURL)
 	var nodeIds []string
 	for i := range nodeList {
 		nodeIds = append(nodeIds, nodeList[i].ID)
