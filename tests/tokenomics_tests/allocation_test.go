@@ -386,7 +386,7 @@ func TestAllocation(testSetup *testing.T) {
 
 }
 
-func TestAllocationAddOrReplaceBlobber(testSetup *testing.T) {
+func TestAllocationsAddOrReplaceBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	prevBlock := utils.GetLatestFinalizedBlock(t)
