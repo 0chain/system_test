@@ -140,7 +140,7 @@ jobs:
           echo "TOKENOMICS_CHALLENGE_TIMINGS_TESTS=$(echo $(([ -z 'TestChallengeTimings' ] && echo '') || echo 'TestChallengeTimings'))" >> $GITHUB_ENV
           echo "TOKENOMICS_BLOCK_REWARD_TESTS=$(echo $(([ -z 'TestBlockRewardsForBlobbers' ] && echo '') || echo 'TestBlockRewardsForBlobbers'))" >> $GITHUB_ENV
 
-            - name: "Deploy 0Chain"
+      - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain-3b3v@feature/tokenomics_suite
         with:
