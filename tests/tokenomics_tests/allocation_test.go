@@ -384,6 +384,41 @@ func TestAllocation(testSetup *testing.T) {
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
 
+}
+
+func TestAllocationAddOrReplaceBlobber(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+
+	prevBlock := utils.GetLatestFinalizedBlock(t)
+
+	fmt.Println("prevBlock", prevBlock)
+
+	output, err := utils.CreateWallet(t, configPath)
+	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+	var blobberList []climodel.BlobberInfo
+	var blobberDetailList []climodel.BlobberDetails
+	output, err = utils.ListBlobbers(t, configPath, "--json")
+	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	err = json.Unmarshal([]byte(output[0]), &blobberList)
+	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
+	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
+
+	err = json.Unmarshal([]byte(output[0]), &blobberDetailList)
+	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
+	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
+
+	var validatorList []climodel.Validator
+	output, err = utils.ListValidators(t, configPath, "--json")
+	require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	err = json.Unmarshal([]byte(output[0]), &validatorList)
+	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
+	require.True(t, len(validatorList) > 0, "No validators found in validator list")
+
 	t.RunSequentiallyWithTimeout("Add Blobber to Increase Parity", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
