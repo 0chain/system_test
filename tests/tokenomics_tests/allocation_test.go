@@ -266,7 +266,7 @@ func TestAllocation(testSetup *testing.T) {
 		fmt.Println("passedChallenges", passedChallenges)
 		fmt.Println("failedChallenges", failedChallenges)
 
-		rewards := getAllocationChallengeRewards(t, allocationId)
+		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
 		totalBlobberChallengereward := 0
 		for _, v := range rewards {
@@ -372,7 +372,7 @@ func TestAllocation(testSetup *testing.T) {
 		fmt.Println("passedChallenges", passedChallenges)
 		fmt.Println("failedChallenges", failedChallenges)
 
-		rewards := getAllocationChallengeRewards(t, allocationId)
+		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
 		totalBlobberChallengereward := 0
 		for _, v := range rewards {
@@ -732,6 +732,46 @@ func getAllocationChallengeRewards(t *test.SystemTest, allocationID string) map[
 	blobberRewards := allocationChallengeRewards["blobber_rewards"].(map[string]interface{})
 
 	return blobberRewards
+}
+
+func getTotalAllocationChallengeRewards(t *test.SystemTest, allocationID string) map[string]interface{} {
+	sharderBaseUrl := utils.GetSharderUrl(t)
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=" + allocationID)
+
+	fmt.Println("URL : ", url)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		t.Fatalf("Error getting allocation challenge rewards: %v", err)
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			t.Fatalf("Error closing allocation challenge rewards: %v", err)
+		}
+	}(resp.Body)
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("Error reading allocation challenge rewards: %v", err)
+	}
+
+	var allocationChallengeRewards map[string]interface{}
+	err = json.Unmarshal(body, &allocationChallengeRewards)
+	if err != nil {
+		t.Fatalf("Error unmarshalling allocation challenge rewards: %v", err)
+	}
+
+	fmt.Println("allocationChallengeRewards", allocationChallengeRewards)
+
+	challengeRewards := allocationChallengeRewards["blobber_rewards"].(map[string]interface{})
+
+	for i, j := range allocationChallengeRewards["validator_rewards"].(map[string]interface{}) {
+		challengeRewards[i] = j
+	}
+
+	return challengeRewards
 }
 
 type AllocationCancellationRewards struct {
