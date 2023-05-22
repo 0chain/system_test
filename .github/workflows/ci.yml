@@ -108,7 +108,7 @@ jobs:
           echo "TEST_FILE_FILTER=false" >> $GITHUB_ENV
 
           echo "TOKENOMICS_ALLOCATION_TESTS=$(echo $(([ -z 'TestAllocation' ] && echo '') || echo 'TestAllocation'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_ALLOCATION_ADD_OR_REPLACE_BLOBBER_TESTS=$(echo $(([ -z 'TestAllocationAddOrReplaceBlobber' ] && echo '') || echo 'TestAllocationAddOrReplaceBlobber'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_ALLOCATION_ADD_OR_REPLACE_BLOBBER_TESTS=$(echo $(([ -z 'TestAddOrReplaceBlobberAllocationRewards' ] && echo '') || echo 'TestAddOrReplaceBlobberAllocationRewards'))" >> $GITHUB_ENV
           echo "TOKENOMICS_CHALLENGE_REWARD_TESTS=$(echo $(([ -z 'TestBlobberChallengeRewards' ] && echo '') || echo 'TestBlobberChallengeRewards'))" >> $GITHUB_ENV
           echo "TOKENOMICS_READ_REWARD_TESTS=$(echo $(([ -z 'TestBlobberReadReward' ] && echo '') || echo 'TestBlobberReadReward'))" >> $GITHUB_ENV
           echo "TOKENOMICS_SLASH_REWARD_TESTS=$(echo $(([ -z 'TestBlobberSlashPenalty' ] && echo '') || echo 'TestBlobberSlashPenalty'))" >> $GITHUB_ENV
@@ -133,7 +133,7 @@ jobs:
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "TOKENOMICS_ALLOCATION_TESTS=$(echo $(([ -z 'TestAllocation' ] && echo '') || echo 'TestAllocation'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_ALLOCATION_ADD_OR_REPLACE_BLOBBER_TESTS=$(echo $(([ -z 'TestAllocationAddOrReplaceBlobber' ] && echo '') || echo 'TestAllocationAddOrReplaceBlobber'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_ALLOCATION_ADD_OR_REPLACE_BLOBBER_TESTS=$(echo $(([ -z 'TestAddOrReplaceBlobberAllocationRewards' ] && echo '') || echo 'TestAddOrReplaceBlobberAllocationRewards'))" >> $GITHUB_ENV
           echo "TOKENOMICS_CHALLENGE_REWARD_TESTS=$(echo $(([ -z 'TestBlobberChallengeRewards' ] && echo '') || echo 'TestBlobberChallengeRewards'))" >> $GITHUB_ENV
           echo "TOKENOMICS_READ_REWARD_TESTS=$(echo $(([ -z 'TestBlobberReadReward' ] && echo '') || echo 'TestBlobberReadReward'))" >> $GITHUB_ENV
           echo "TOKENOMICS_SLASH_REWARD_TESTS=$(echo $(([ -z 'TestBlobberSlashPenalty' ] && echo '') || echo 'TestBlobberSlashPenalty'))" >> $GITHUB_ENV
