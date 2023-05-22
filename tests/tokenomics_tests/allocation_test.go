@@ -268,9 +268,9 @@ func TestAllocation(testSetup *testing.T) {
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
-		totalBlobberChallengereward := 0
+		totalBlobberChallengereward := int64(0)
 		for _, v := range rewards {
-			totalBlobberChallengereward += int(v.(float64))
+			totalBlobberChallengereward += int64(v.(float64))
 		}
 
 		require.Equal(t, totalBlobberChallengereward, movedToChallengePool, "Total Blobber Challenge reward should be 0")
@@ -374,9 +374,9 @@ func TestAllocation(testSetup *testing.T) {
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
-		totalBlobberChallengereward := 0
+		totalBlobberChallengereward := int64(0)
 		for _, v := range rewards {
-			totalBlobberChallengereward += int(v.(float64))
+			totalBlobberChallengereward += int64(v.(float64))
 		}
 
 		require.Equal(t, totalBlobberChallengereward, movedToChallengePool, "Total Blobber Challenge reward should be 0")
