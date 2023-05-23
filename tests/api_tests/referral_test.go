@@ -1,7 +1,6 @@
 package api_tests
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -9,14 +8,12 @@ import (
 )
 
 func Test0Box_referral(testSetup *testing.T) {
-
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Post referrals with correct CSRF should work properly")
 
 	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 	t.RunSequentially("Post referrals with correct CSRF should work properly", func(t *test.SystemTest) {
-
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
@@ -32,11 +29,9 @@ func Test0Box_referral(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxRferral)
 		require.Len(t, zboxRferral.ReferrerCode, 14)
-
 	})
 
 	t.RunSequentially("Rank referrals with correct CSRF should work properly", func(t *test.SystemTest) {
-
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
@@ -54,7 +49,6 @@ func Test0Box_referral(testSetup *testing.T) {
 		require.Equal(t, int64(0), zboxRferral.UserScore, "referral count should be 0 initially")
 		require.Equal(t, int64(1), zboxRferral.UserRank, "referral rank should be 1 initially")
 		require.Equal(t, zboxClient.DefaultPhoneNumber, zboxRferral.UserPhone, "phone should be same")
-
 	})
 
 	t.RunSequentially("GET referral count with correct CSRF should work properly before inserting referral", func(t *test.SystemTest) {
@@ -77,7 +71,6 @@ func Test0Box_referral(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create wallet for first time with the referral code should work", func(t *test.SystemTest) {
-
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
@@ -106,9 +99,7 @@ func Test0Box_referral(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-
 		require.NotNil(t, zboxRferral)
-
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
@@ -130,8 +121,6 @@ func Test0Box_referral(testSetup *testing.T) {
 			zboxRferral.ReferrerCode,
 		)
 
-		fmt.Println("value for token", firebaseToken.IdToken)
-
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
@@ -148,6 +137,5 @@ func Test0Box_referral(testSetup *testing.T) {
 		require.Equal(t, 200, responses.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxRferral)
 		require.Equal(t, int64(0), zboxRferrals.ReferralCount, "referral count should be 1 after inserting the referral")
-
 	})
 }
