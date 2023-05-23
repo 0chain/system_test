@@ -1285,6 +1285,47 @@ func TestShareFile(testSetup *testing.T) {
 			finalReadPool.Balance < initialReadPool.Balance &&
 				finalReadPool.Balance >= int64(expectedRPBalance))
 	})
+
+	t.RunWithTimeout("Share unencrypted file privately should fail", 2*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		// upload file
+		file := generateRandomTestFileName(t)
+		remoteOwnerPath := "/" + filepath.Base(file)
+		fileSize := int64(256)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		uploadParams := map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  file,
+			"remotepath": remoteOwnerPath,
+		}
+		output, err := uploadFile(t, configPath, uploadParams, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		// receiver wallet operations
+		receiverWallet := escapedTestName(t) + "_second"
+
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		clientId := walletReceiver.ClientID
+
+		shareParams := map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteOwnerPath,
+			"clientid":   clientId,
+		}
+		output, err = shareFile(t, configPath, shareParams)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, "invalid_private_share: private sharing is only available for encrypted file", output[0], strings.Join(output, "\n"))
+		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
+	})
 }
 
 func shareFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
