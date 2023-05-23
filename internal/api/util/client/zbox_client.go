@@ -1271,7 +1271,7 @@ func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, phoneNumber 
 	return ReferralRankOfUser, resp, err
 }
 
-func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType string, refCode string) (*model.ZboxWallet, *resty.Response, error) {
+func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, refCode string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Posting wallet with referral code using 0box...")
 	var zboxWallet *model.ZboxWallet
 
