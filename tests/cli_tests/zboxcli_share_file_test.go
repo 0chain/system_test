@@ -1288,7 +1288,7 @@ func TestShareFile(testSetup *testing.T) {
 
 	t.RunWithTimeout("Share unencrypted file privately should fail", 2*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		allocationID, _ := registerAndCreateAllocation(t, configPath, walletOwner)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		// upload file
 		file := generateRandomTestFileName(t)
@@ -1308,7 +1308,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		registerWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
