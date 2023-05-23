@@ -1205,7 +1205,7 @@ func (c *ZboxClient) GetNftCollectionById(t *test.SystemTest, idToken, csrfToken
 	return ZboxNftCollection, resp, err
 }
 
-func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, phoneNumber string) (model.ReferralCodeOfUser, *resty.Response, error) {
+func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralCodeOfUser, *resty.Response, error) {
 	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
 	var ReferralCodeOfUser model.ReferralCodeOfUser
 
@@ -1218,8 +1218,12 @@ func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, phoneNumber 
 		Dst: &ReferralCodeOfUser,
 		Headers: map[string]string{
 			"X-App-Phone-Number": phoneNumber,
+			"X-APP-TYPE":         "blimp",
+			"X-App-Client-ID":    X_APP_CLIENT_ID,
+			"X-App-Client-Key":   X_APP_CLIENT_KEY,
+			"X-App-Timestamp":    "1618213324",
+			"X-App-ID-TOKEN":     idToken,
 			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "bolt",
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -1227,7 +1231,7 @@ func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, phoneNumber 
 	return ReferralCodeOfUser, resp, err
 }
 
-func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, phoneNumber string) (model.ReferralCountOfUser, *resty.Response, error) {
+func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralCountOfUser, *resty.Response, error) {
 	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
 	var ReferralCountOfUser model.ReferralCountOfUser
 
@@ -1240,8 +1244,12 @@ func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, phoneNumber
 		Dst: &ReferralCountOfUser,
 		Headers: map[string]string{
 			"X-App-Phone-Number": phoneNumber,
+			"X-APP-TYPE":         "blimp",
+			"X-App-Client-ID":    X_APP_CLIENT_ID,
+			"X-App-Client-Key":   X_APP_CLIENT_KEY,
+			"X-App-Timestamp":    "1618213324",
+			"X-App-ID-TOKEN":     idToken,
 			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "bolt",
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -1249,7 +1257,7 @@ func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, phoneNumber
 	return ReferralCountOfUser, resp, err
 }
 
-func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, phoneNumber string) (model.ReferralRankOfUser, *resty.Response, error) {
+func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralRankOfUser, *resty.Response, error) {
 	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
 	var ReferralRankOfUser model.ReferralRankOfUser
 
@@ -1262,8 +1270,12 @@ func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, phoneNumber 
 		Dst: &ReferralRankOfUser,
 		Headers: map[string]string{
 			"X-App-Phone-Number": phoneNumber,
+			"X-APP-TYPE":         "blimp",
+			"X-App-Client-ID":    X_APP_CLIENT_ID,
+			"X-App-Client-Key":   X_APP_CLIENT_KEY,
+			"X-App-Timestamp":    "1618213324",
+			"X-App-ID-TOKEN":     idToken,
 			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "bolt",
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -1284,6 +1296,7 @@ func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, wa
 		"mnemonic":    mnemonic,
 		"name":        walletName,
 		"description": walletDescription,
+		"refcode":     refCode,
 	}
 	X_APP_CLIENT_ID_R := "2de380c3ce18e0a62a14aa7a12e2aaaa591e8f145d507f8e8330510d4febae1f"
 	X_APP_CLIENT_KEY_R := "671da197a53b8783ea3ca96400faf4550af7edb4c6837b52b013a5b54b50011e9183f81022a6e35680934e6a9eb9913ddd5d0286e16b2a4a51c67ba1f95fc207"
@@ -1301,7 +1314,6 @@ func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, wa
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Type":             appType,
-			"X-Ref-Code":             refCode,
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
