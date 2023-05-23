@@ -25,6 +25,7 @@ const StatusCompletedCB = "Status completed callback"
 func TestDownload(testSetup *testing.T) {
 	//todo: too mnay test cases are slow in here
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Download File from Root Directory Should Work")
 	t.Parallel()
 
 	// Create a folder to keep all the generated files to be uploaded
@@ -255,8 +256,8 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		// Just create a wallet so that we can work further
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -307,8 +308,8 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		// Just register a wallet so that we can work further
-		err := registerWalletAndLockReadTokens(t, configPath)
+		// Just create a wallet so that we can work further
+		err := createWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -375,9 +376,9 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 		var allocationID string
 
-		// register viewer wallet
+		// create viewer wallet
 		viewerWalletName := escapedTestName(t) + "_viewer"
-		registerWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
+		createWalletForNameAndLockReadTokens(t, configPath, viewerWalletName)
 
 		viewerWallet, err := getWalletForName(t, configPath, viewerWalletName)
 		require.Nil(t, err)
@@ -477,8 +478,8 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		// Just register a wallet so that we can work further
-		err := registerWalletAndLockReadTokens(t, configPath)
+		// Just create a wallet so that we can work further
+		err := createWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -537,8 +538,8 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", lookuphash, "Lookup Hash: ", lookuphash)
 		})
 
-		// Just register a wallet so that we can work further
-		err := registerWalletAndLockReadTokens(t, configPath)
+		// Just create a wallet so that we can work further
+		err := createWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 
 		// Download file using auth-ticket: should work
@@ -592,17 +593,19 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		// Just register a wallet so that we can work further
-		_, err := registerWallet(t, configPath)
+		// Just create a wallet so that we can work further
+		_, err := createWallet(t, configPath)
 		require.Nil(t, err)
 
-		// Download file using auth-ticket: should work
+		// Download file using auth-ticket: shouldn't work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"localpath":  "tmp/",
-		}), true)
+		}), false)
 		require.NotNil(t, err)
-		require.Len(t, output, 3)
+		require.Greater(t, len(output), 0)
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "pre-redeeming read marker")
 	})
 
 	t.RunWithTimeout("Download Shared File by Paying Should Work", 5*time.Minute, func(t *test.SystemTest) {
@@ -638,7 +641,7 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		err = registerWalletAndLockReadTokens(t, configPath)
+		err = createWalletAndLockReadTokens(t, configPath)
 		require.Nil(t, err)
 		// Download file using auth-ticket: should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -1114,7 +1117,7 @@ func TestDownload(testSetup *testing.T) {
 	// Failure Scenarios
 
 	t.Run("Download File from Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
+		output, err := createWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -1148,7 +1151,7 @@ func TestDownload(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		// Download using otherAllocationID: should not work
-		_, err = registerWallet(t, configPath)
+		_, err = createWallet(t, configPath)
 		require.NoError(t, err)
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -1182,7 +1185,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download without any Parameter Should Fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
+		output, err := createWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		output, err = downloadFile(t, configPath, "", false)
@@ -1228,12 +1231,12 @@ func TestDownload(testSetup *testing.T) {
 			"localpath":  "tmp/",
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Greater(t, len(output), 0)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "not enough tokens")
+		require.Contains(t, aggregatedOutput, "pre-redeeming read marker")
 	})
 
-	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) {
+	t.Run("Download File using Expired Allocation Should Fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
@@ -1241,7 +1244,7 @@ func TestDownload(testSetup *testing.T) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
-			"expire": "30s",
+			"expire": "1m",
 		})
 
 		t.Log("Time after creating the allocation ", time.Now())
@@ -1250,7 +1253,7 @@ func TestDownload(testSetup *testing.T) {
 
 		t.Log("Time after uploading the file ", time.Now())
 
-		time.Sleep(10 * time.Second)
+		time.Sleep(2 * time.Minute)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -1291,6 +1294,94 @@ func TestDownload(testSetup *testing.T) {
 			strings.TrimSuffix(os.TempDir(), "/")+"/"+filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[0])
+	})
+
+	t.Run("Download Moved File Should Work", func(t *test.SystemTest) {
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 9,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		originalFileChecksum := generateChecksum(t, filename)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		err = os.Remove("tmp/" + filepath.Base(filename))
+		require.Nil(t, err)
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
+
+		newRemotePath := "/dir1/"
+
+		newFileName := generateFileAndUpload(t, allocationID, newRemotePath, filesize)
+		newFileChecksum := generateChecksum(t, newFileName)
+
+		err = os.Remove(newFileName)
+		require.Nil(t, err)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": newRemotePath + filepath.Base(newFileName),
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(newFileName))
+
+		downloadedFileChecksum = generateChecksum(t, "tmp/"+filepath.Base(newFileName))
+		require.Equal(t, newFileChecksum, downloadedFileChecksum)
+
+		err = os.Remove("tmp/" + filepath.Base(newFileName))
+		require.Nil(t, err)
+
+		remotepath += filepath.Base(filename)
+		destpath := "/child/"
+		output, err = moveFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"destpath":   destpath,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf(remotepath+" moved"), output[0])
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": destpath + filepath.Base(filename),
+			"localpath":  "tmp/",
+		}), true)
+
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
+		downloadedFileChecksum = generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 }
 

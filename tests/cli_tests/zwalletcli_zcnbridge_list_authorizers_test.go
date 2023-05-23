@@ -14,6 +14,7 @@ import (
 
 func TestListAuthorizers(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("List authorizers should work")
 
 	t.Parallel()
 

@@ -14,9 +14,10 @@ import (
 
 func TestHashnodeRoot(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Get hashnode root from blobber for an empty allocation should work")
 
 	t.RunSequentially("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
-		wallet := apiClient.RegisterWallet(t)
+		wallet := apiClient.CreateWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -51,7 +52,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
-		wallet := apiClient.RegisterWallet(t)
+		wallet := apiClient.CreateWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		allocationID := "badallocation"
@@ -71,12 +72,12 @@ func TestHashnodeRoot(testSetup *testing.T) {
 
 		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
-		require.Nil(t, restyResponse)
+		require.Equal(t, "bad request: Invalid Allocation id. Allocation not found in blockchain.\n", string(restyResponse.Body()))
 		require.Nil(t, getBlobberResponse)
 	})
 
 	t.RunSequentially("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
-		wallet := apiClient.RegisterWallet(t)
+		wallet := apiClient.CreateWallet(t)
 		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -102,7 +103,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 
 		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
-		require.Nil(t, restyResponse)
+		require.Equal(t, "bad request: invalid signature badsign\n", string(restyResponse.Body()))
 		require.Nil(t, getBlobberResponse)
 	})
 

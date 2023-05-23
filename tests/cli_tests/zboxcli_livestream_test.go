@@ -29,7 +29,7 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	testSetup.Skip("Flaky")
 	t := test.NewSystemTest(testSetup)
 
-	KillFFMPEG()
+	t.TestSetup("Kill FFMPEG", KillFFMPEG)
 	defer KillFFMPEG()
 
 	// Success scenarios
@@ -40,8 +40,8 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 			t.Skipf("No live feed available right now")
 		}
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -116,8 +116,8 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 			t.Skipf("No live feed available right now")
 		}
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -192,8 +192,8 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 			t.Skipf("No live feed available right now")
 		}
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -266,8 +266,8 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Uploading local webcam feed to allocation should work", 60*time.Second, func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -336,8 +336,8 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Uploading local webcam feed to allocation with delay specified should work", 60*time.Second, func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
@@ -407,8 +407,8 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Upload local webcam feed with a different chunknumber must work", 60*time.Second, func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))

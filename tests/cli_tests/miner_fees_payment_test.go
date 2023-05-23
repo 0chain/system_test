@@ -22,23 +22,28 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 	t.Skip("Skip till chain-side bugs are resolved")
 
 	t.Skip("Skipped till re-done")
-	mnconfig := getMinerSCConfiguration(t)
-	minerShare := mnconfig["share_ratio"]
 
-	miners := getMinersList(t)
-	miner := getMinersDetail(t, miners.Nodes[0].SimpleNode.ID).SimpleNode
-	require.NotEmpty(t, miner)
+	var mnconfig map[string]float64
+	var minerShare float64
+	t.TestSetup("Get miner config", func() {
+		mnconfig = getMinerSCConfiguration(t)
+		minerShare = mnconfig["share_ratio"]
+
+		miners := getMinersList(t)
+		miner := getMinersDetail(t, miners.Nodes[0].SimpleNode.ID).SimpleNode
+		require.NotEmpty(t, miner)
+	})
 
 	t.RunSequentiallyWithTimeout("Send ZCN between wallets with Fee flag - Fee must be paid to miners", 60*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
 		targetWalletName := escapedTestName(t) + "_TARGET"
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
@@ -65,15 +70,15 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Vp-add with fee should pay fee to the miners", 60*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
 		targetWalletName := escapedTestName(t) + "_TARGET"
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error getting target wallet")
@@ -106,8 +111,8 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("rp-Lock and rp-unlock command with fee flag - fees must be paid to the miners", 60*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
@@ -166,8 +171,8 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("wp-lock and wp-unlock command with fee flag - fee must be paid to the miners", 60*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
@@ -224,8 +229,8 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("sp-lock and sp-unlock with fee flag - fees must be paid to the miners", 60*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
@@ -316,8 +321,8 @@ func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {
 }
 
 func getLatestFinalizedBlock(t *test.SystemTest) *climodel.LatestFinalizedBlock {
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 	sharders := getShardersList(t)
 	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]

@@ -29,27 +29,31 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	t.Skip("turn on post mainnet")
 	t.Parallel()
 
-	// get current valid vesting configs
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	var validDuration string
+	var vpConfigMap map[string]interface{}
+	t.TestSetup("Register wallet + get vesting SC config", func() {
+		// get current valid vesting configs
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
-	output, err = getVestingPoolSCConfig(t, configPath, true)
-	require.Nil(t, err, "error fetching vesting pool config", strings.Join(output, "\n"))
+		output, err = getVestingPoolSCConfig(t, configPath, true)
+		require.Nil(t, err, "error fetching vesting pool config", strings.Join(output, "\n"))
 
-	vpConfigMap := configFromKeyValuePair(output)
-	validDuration := getValidDuration(t, vpConfigMap)
+		vpConfigMap = configFromKeyValuePair(output)
+		validDuration = getValidDuration(t, vpConfigMap)
+	})
 
 	// VP-ADD cases
 	t.Run("Vesting pool with single destination, valid duration and valid tokens should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -67,15 +71,15 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with single destination and description should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -93,19 +97,19 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with multiple destinations should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWalletName2 := "targetWallet2" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName2)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -125,19 +129,19 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with multiple destinations and description should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWalletName2 := "targetWallet2" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName2)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -158,15 +162,15 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with locking insufficient tokens should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -183,15 +187,15 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with excess locked tokens should work and allow unlocking", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -218,15 +222,15 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with start time in future should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -256,22 +260,22 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with start time in future for multiple destination wallets should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
 
 		targetWalletName2 := "targetWallet2" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName2)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet2, err := getWalletForName(t, configPath, targetWalletName2)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -304,15 +308,15 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with start time in past should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -333,22 +337,22 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with start time in past for multiple destinations should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
 
 		targetWalletName2 := "targetWallet2" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName2)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet2, err := getWalletForName(t, configPath, targetWalletName2)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -369,8 +373,8 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with invalid destination should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
@@ -387,15 +391,15 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with one valid destination and one invalid destination should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -412,15 +416,15 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool for duration less than min duration should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -442,15 +446,15 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with duration greater than max duration should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -472,15 +476,15 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with lock less than min lock should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -501,15 +505,15 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with description greater than max description length should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -532,8 +536,8 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool with destinations greater than max destinations should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		var invalidDestinations int
 		if maxDestinationsAllowed, ok := vpConfigMap[maxDestinations].(int); ok {
@@ -547,8 +551,8 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 		var destinationString string
 		for i := 0; i < invalidDestinations; i++ {
 			targetWalletName := "targetWallet" + strconv.Itoa(i) + escapedTestName(t)
-			output, err = registerWalletForName(t, configPath, targetWalletName)
-			require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+			output, err = createWalletForName(t, configPath, targetWalletName)
+			require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 			targetWallets[i], err = getWalletForName(t, configPath, targetWalletName)
 			require.Nil(t, err, "error fetching destination wallet")
@@ -567,8 +571,8 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool add without destination flag should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
 			"lock":     0.1,
@@ -580,8 +584,8 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool add without duration flag should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
 			"lock": 0.1,
@@ -593,8 +597,8 @@ func TestVestingPoolAdd(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool add without lock flag should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = vestingPoolAdd(t, configPath, createParams(map[string]interface{}{
 			"d":        "abcdef123456abcdef123456abcdef123456abcdef123456abcdef123456abcd:0.1",
@@ -611,8 +615,8 @@ func TestVestingPoolDelete(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Skip("turn on post mainnet")
 	// get current valid vesting configs
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 	output, err = getVestingPoolSCConfig(t, configPath, true)
 	require.Nil(t, err, "error fetching vesting pool config", strings.Join(output, "\n"))
@@ -622,15 +626,15 @@ func TestVestingPoolDelete(testSetup *testing.T) {
 
 	// VP-DELETE cases
 	t.Run("Vesting pool delete should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -667,8 +671,8 @@ func TestVestingPoolDelete(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool delete with invalid pool_id should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = vestingPoolDelete(t, configPath, createParams(map[string]interface{}{
 			"pool_id": "invalidPoolId",
@@ -679,19 +683,19 @@ func TestVestingPoolDelete(testSetup *testing.T) {
 	})
 
 	t.Run("Deleting someone else's vesting pool should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		foreignWalletName := "foreignWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, foreignWalletName)
-		require.Nil(t, err, "error registering new wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, foreignWalletName)
+		require.Nil(t, err, "error creating new wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, foreignWalletName, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -717,8 +721,8 @@ func TestVestingPoolDelete(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool delete without pool id flag should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = vestingPoolDelete(t, configPath, createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "expected error using vp-delete without pool id")
@@ -744,8 +748,8 @@ func TestVestingPoolInfo(testSetup *testing.T) {
 	t.Skip("turn on post mainnet")
 
 	// get current valid vesting configs
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 	output, err = getVestingPoolSCConfig(t, configPath, true)
 	require.Nil(t, err, "error fetching vesting pool config", strings.Join(output, "\n"))
@@ -756,15 +760,15 @@ func TestVestingPoolInfo(testSetup *testing.T) {
 	// VP-INFO cases
 	// Feature to add: vp-info should have a json flag, it already has models in place in gosdk
 	t.Run("Vesting pool info with valid pool_id should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		clientWallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error fetching client wallet")
@@ -811,15 +815,15 @@ func TestVestingPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool info for pool with multiple destinations should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		clientWallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error fetching client wallet")
@@ -828,8 +832,8 @@ func TestVestingPoolInfo(testSetup *testing.T) {
 		require.Nil(t, err, "error fetching destination wallet")
 
 		targetWalletName2 := "targetWallet2" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName2)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet2, err := getWalletForName(t, configPath, targetWalletName2)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -883,19 +887,19 @@ func TestVestingPoolInfo(testSetup *testing.T) {
 
 	// FIXME: vp-info can show information of vp belonging to other wallets
 	t.Run("Vesting pool info for pool belonging to someone else's wallet must fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		foreignWalletName := "foreignWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, foreignWalletName)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, foreignWalletName)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, foreignWalletName, configPath, 1.0)
 		require.Nil(t, err, "error getting faucet tokens on foreign wallet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -920,8 +924,8 @@ func TestVestingPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool info with invalid pool_id should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
@@ -935,8 +939,8 @@ func TestVestingPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool info without pool id flag should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		// verify start time using vp-info
 		output, err = vestingPoolInfo(t, configPath, createParams(map[string]interface{}{}), false)
@@ -952,8 +956,8 @@ func TestVestingPoolStop(testSetup *testing.T) {
 	t.Skip("turn on post mainnet")
 
 	// get current valid vesting configs
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 	output, err = getVestingPoolSCConfig(t, configPath, true)
 	require.Nil(t, err, "error fetching vesting pool config", strings.Join(output, "\n"))
@@ -963,8 +967,8 @@ func TestVestingPoolStop(testSetup *testing.T) {
 
 	// VP-STOP cases
 	t.Run("Vesting pool stop for pool with one destination should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error fetching wallet", strings.Join(output, "\n"))
@@ -973,8 +977,8 @@ func TestVestingPoolStop(testSetup *testing.T) {
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1036,23 +1040,23 @@ func TestVestingPoolStop(testSetup *testing.T) {
 
 	// FIXME: this only stops last destination flag.
 	t.RunWithTimeout("Vesting pool stop for multiple destinations should work", 90*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWalletName2 := "targetWallet2" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName2)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWalletName3 := "targetWallet3" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName3)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName3)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1119,19 +1123,19 @@ func TestVestingPoolStop(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool stop for someone else's pool must fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		foreignWalletName := "foreignWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, foreignWalletName)
-		require.Nil(t, err, "error registering new wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, foreignWalletName)
+		require.Nil(t, err, "error creating new wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, foreignWalletName, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1159,12 +1163,12 @@ func TestVestingPoolStop(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool stop without pool id must fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1178,8 +1182,8 @@ func TestVestingPoolStop(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool stop without destination should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = vestingPoolStop(t, configPath, createParams(map[string]interface{}{
 			"pool_id": "dummypoolid",
@@ -1196,15 +1200,15 @@ func TestVestingPoolTokenAccounting(testSetup *testing.T) {
 	t.Skip("turn on post mainnet")
 
 	t.Run("Vesting pool with one destination should move some balance to pending which should be unlockable", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 3.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1271,22 +1275,22 @@ func TestVestingPoolTokenAccounting(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Vesting pool with multiple destinations should move some balance to pending which should be unlockable", 90*time.Second, func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 4.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
 
 		targetWalletName2 := "targetWallet2" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName2)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet2, err := getWalletForName(t, configPath, targetWalletName2)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1394,8 +1398,8 @@ func TestVestingPoolTrigger(testSetup *testing.T) {
 	t.Skip("turn on post mainnet")
 
 	// get current valid vesting configs
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 	output, err = getVestingPoolSCConfig(t, configPath, true)
 	require.Nil(t, err, "error fetching vesting pool config", strings.Join(output, "\n"))
@@ -1406,15 +1410,15 @@ func TestVestingPoolTrigger(testSetup *testing.T) {
 	// VP-TRIGGER cases
 	// FIXME: vp-trigger is not working, tokens still keep on being sent in a timely manner as opposed to being release all at once.
 	t.Run("Vesting pool trigger for one destination pool should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1457,19 +1461,19 @@ func TestVestingPoolTrigger(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool trigger for a pool with multiple destinations should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWalletName2 := "targetWallet2" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName2)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName2)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1520,19 +1524,19 @@ func TestVestingPoolTrigger(testSetup *testing.T) {
 	})
 
 	t.Run("Triggering someone else's pool must fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		foreignWalletName := "foreignWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, foreignWalletName)
-		require.Nil(t, err, "error registering new wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, foreignWalletName)
+		require.Nil(t, err, "error creating new wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, foreignWalletName, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1558,8 +1562,8 @@ func TestVestingPoolTrigger(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool trigger without pool id flag should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = vestingPoolTrigger(t, configPath, createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "expected error trigerring vesting pool without pool id")
@@ -1568,8 +1572,8 @@ func TestVestingPoolTrigger(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool trigger with invalid pool id should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = vestingPoolTrigger(t, configPath, createParams(map[string]interface{}{
 			"pool_id": "abcdef123456",
@@ -1586,8 +1590,8 @@ func TestVestingPoolUnlock(testSetup *testing.T) {
 	t.Skip("turn on post mainnet")
 
 	// get current valid vesting configs
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 	output, err = getVestingPoolSCConfig(t, configPath, true)
 	require.Nil(t, err, "error fetching vesting pool config", strings.Join(output, "\n"))
@@ -1597,15 +1601,15 @@ func TestVestingPoolUnlock(testSetup *testing.T) {
 
 	// VP-UNLOCK cases
 	t.Run("Vesting pool unlock with excess tokens in pool should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1645,15 +1649,15 @@ func TestVestingPoolUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool unlock by destination wallet should work", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1697,19 +1701,19 @@ func TestVestingPoolUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Unlocking someone else's vesting pool should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		foreignWalletName := "foreignWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, foreignWalletName)
-		require.Nil(t, err, "error registering new wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, foreignWalletName)
+		require.Nil(t, err, "error creating new wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokensForWallet(t, foreignWalletName, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1736,15 +1740,15 @@ func TestVestingPoolUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting pool unlock for one destination and no excess tokens in pool should fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = executeFaucetWithTokens(t, configPath, 1.0)
 		require.Nil(t, err, "error requesting tokens from faucet", strings.Join(output, "\n"))
 
 		targetWalletName := "targetWallet" + escapedTestName(t)
-		output, err = registerWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error registering target wallet", strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "error fetching destination wallet")
@@ -1771,8 +1775,8 @@ func TestVestingPoolUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting unlock without pool id must fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = vestingPoolUnlock(t, configPath, createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "error unlocking vesting pool tokens")
@@ -1781,8 +1785,8 @@ func TestVestingPoolUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Vesting unlock with invalid pool id must fail", func(t *test.SystemTest) {
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
 		output, err = vestingPoolUnlock(t, configPath, createParams(map[string]interface{}{
 			"pool_id": "abcdef123456",
@@ -1802,8 +1806,8 @@ func TestVestingPoolUpdateConfig(testSetup *testing.T) {
 	}
 
 	// unused wallet, just added to avoid having the creating new wallet outputs
-	output, err := registerWallet(t, configPath)
-	require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 	t.RunSequentially("should allow update of max_destinations", func(t *test.SystemTest) {
 		configKey := "max_destinations"
@@ -1868,8 +1872,8 @@ func TestVestingPoolUpdateConfig(testSetup *testing.T) {
 		newValue := "4"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = updateVestingPoolSCConfig(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
@@ -1902,8 +1906,8 @@ func TestVestingPoolUpdateConfig(testSetup *testing.T) {
 
 	t.RunSequentially("update with missing values param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := registerWallet(t, configPath)
-		require.Nil(t, err, "Failed to register wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		output, err = updateVestingPoolSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "max_destinations",

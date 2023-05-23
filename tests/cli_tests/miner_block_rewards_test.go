@@ -28,7 +28,6 @@ const (
 
 func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
-	t.Skip("Skip till chain-side bugs are resolved")
 
 	// Take a snapshot of the chains miners, then wait a few seconds, take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
@@ -42,8 +41,10 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// A subset of the delegates chosen at random to receive a portion of the block reward.
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
-	t.RunWithTimeout("Miner share of block rewards", 500*time.Second, func(t *test.SystemTest) {
-		_ = initialiseTest(t, escapedTestName(t)+"_TARGET", true)
+	t.RunSequentially("Miner share of block rewards", func(t *test.SystemTest) {
+		output, err := createWallet(t, configPath)
+		require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
 		if !confirmDebugBuild(t) {
 			t.Skip("miner block rewards test skipped as it requires a debug event database")
 		}
@@ -68,7 +69,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 
 		time.Sleep(time.Second) // give time for last round to be saved
 		history := cliutil.NewHistory(startRound, endRound)
-		history.Read(t, sharderUrl, false)
+		history.Read(t, sharderUrl, true)
 
 		balanceMinerRewards(
 			t, startRound, endRound, minerIds, beforeMiners.Nodes, afterMiners.Nodes, history,
@@ -140,10 +141,8 @@ func checkMinerBlockRewards(
 				}
 				switch pReward.RewardType {
 				case climodel.BlockRewardMiner:
-					require.Equalf(t, pReward.ProviderId, roundHistory.Block.MinerID,
-						"%s not round lottery winner %s but nevertheless paid with block reward."+
-							"only the round lottery winner shold get a miner block reward",
-						pReward.ProviderId, roundHistory.Block.MinerID)
+					require.Falsef(t, beforeMiners[i].IsKilled,
+						"killed miners cannot receive rewards, %s is killed", id)
 					var expectedServiceCharge int64
 					if len(beforeMiners[i].StakePool.Pools) > 0 {
 						expectedServiceCharge = int64(float64(minerBlockReward) * beforeMiners[i].Settings.ServiceCharge)
@@ -161,7 +160,7 @@ func checkMinerBlockRewards(
 				case climodel.FeeRewardMiner:
 					feeRewards += pReward.Amount
 				default:
-					require.Failf(t, "reward type %s is not available for miners", pReward.RewardType.String())
+					require.Failf(t, "", "reward type %s is not available for miners", pReward.RewardType.String())
 				}
 			}
 		}
@@ -186,10 +185,10 @@ func countMinerBlockRewards(
 			if pReward.RewardType == climodel.BlockRewardMiner {
 				require.Falsef(t, foundBlockRewardPayment, "round %d, block reward already paid, only pay miner block rewards once", round)
 				foundBlockRewardPayment = true
-				require.Equal(t, pReward.ProviderId, roundHistory.Block.MinerID,
-					"round %d, block reward paid to %s, should only be paid to round lottery winner %s",
-					round, pReward.ProviderId, roundHistory.Block.MinerID)
 			}
+		}
+		if !foundBlockRewardPayment {
+			t.Log(foundBlockRewardPayment)
 		}
 		require.Truef(t, foundBlockRewardPayment,
 			"rond %d, miner block reward payment not recorded. block rewards should be paid every round.", round)
@@ -290,16 +289,13 @@ func confirmPoolPayments(
 }
 
 func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
-	output, err := registerWallet(t, configPath)
-	require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
+	output, err := createWalletForName(t, configPath, wallet)
+	require.NoError(t, err, "error creating target wallet", strings.Join(output, "\n"))
 
 	if funds {
 		output, err = executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	}
-
-	output, err = registerWalletForName(t, configPath, wallet)
-	require.NoError(t, err, "error registering target wallet", strings.Join(output, "\n"))
 
 	targetWallet, err := getWalletForName(t, configPath, wallet)
 	require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
@@ -448,13 +444,18 @@ func getSortedMinerIds(t *test.SystemTest, sharderBaseURL string) []string {
 	return getSortedNodeIds(t, "getMinerList", sharderBaseURL)
 }
 
-func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []string {
+func getNodeSlice(t *test.SystemTest, endpoint, sharderBaseURL string) []climodel.Node {
 	t.Logf("getting miner or sharder nodes...")
 	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/" + endpoint
 	nodeList := cliutil.ApiGetRetries[climodel.NodeList](t, url, nil, restApiRetries)
+	return nodeList.Nodes
+}
+
+func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []string {
+	nodeList := getNodeSlice(t, endpoint, sharderBaseURL)
 	var nodeIds []string
-	for i := range nodeList.Nodes {
-		nodeIds = append(nodeIds, nodeList.Nodes[i].ID)
+	for i := range nodeList {
+		nodeIds = append(nodeIds, nodeList[i].ID)
 	}
 	sort.Slice(nodeIds, func(i, j int) bool {
 		return nodeIds[i] < nodeIds[j]

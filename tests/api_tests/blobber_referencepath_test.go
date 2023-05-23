@@ -14,6 +14,7 @@ import (
 
 func TestFileReferencePath(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Get file ref with allocation id, remote path should work")
 
 	t.RunSequentially("Get file ref with allocation id, remote path should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
@@ -25,7 +26,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath, _ := sdkClient.UploadFile(t, allocationID)
 		remoteFilePath = "/" + remoteFilePath
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
@@ -92,7 +93,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath, _ := sdkClient.UploadFile(t, allocationID)
 		remoteFilePath = "/" + remoteFilePath
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
@@ -122,7 +123,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath, _ := sdkClient.UploadFile(t, allocationID)
 		remoteFilePath = "/" + remoteFilePath
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)

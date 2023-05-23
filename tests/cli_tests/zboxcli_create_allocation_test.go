@@ -17,6 +17,7 @@ import (
 
 func TestCreateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Create allocation for locking cost equal to the cost calculated should work")
 
 	t.Parallel()
 
@@ -72,9 +73,28 @@ func TestCreateAllocation(testSetup *testing.T) {
 		allocationCost, err := getAllocationCost(output[0])
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
-		mustFailCost := allocationCost - 0.1
+		mustFailCost := allocationCost * 0.8
 		options = map[string]interface{}{"lock": mustFailCost}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+
+		require.Contains(t, output[len(output)-1], "not enough tokens to cover the allocatin cost")
+	})
+
+	t.Run("Create allocation for locking negative cost should not work", func(t *test.SystemTest) {
+		t.Skip("Skipping until https://github.com/0chain/0chain/issues/2431 is fixed")
+		_ = setupWallet(t, configPath)
+
+		options := map[string]interface{}{
+			"cost":        "",
+			"read_price":  "0-1",
+			"write_price": "0-1",
+			"size":        10000,
+			"expire":      "30m",
+		}
+		mustFailCost := -1
+		options = map[string]interface{}{"lock": mustFailCost}
+		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 	})
 
@@ -420,7 +440,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 }
 
 func setupWallet(t *test.SystemTest, configPath string) []string {
-	output, err := registerWallet(t, configPath)
+	output, err := createWallet(t, configPath)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
 	output, err = executeFaucetWithTokens(t, configPath, 1)

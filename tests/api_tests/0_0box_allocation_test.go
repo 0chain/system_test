@@ -3,6 +3,8 @@ package api_tests
 import (
 	"testing"
 
+	"github.com/0chain/system_test/internal/api/model"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 )
@@ -10,7 +12,13 @@ import (
 func Test0BoxAllocation(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
-	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+	t.SetSmokeTests("List allocation with zero allocation should work")
+
+	var firebaseToken *model.FirebaseToken
+	t.TestSetup("Autenticate with firebase", func() {
+		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+	})
+
 	t.RunSequentially("List allocation with zero allocation should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)

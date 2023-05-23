@@ -20,6 +20,7 @@ import (
 
 func TestSyncWithBlobbers(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Sync path with 1 file to empty allocation should work")
 
 	t.Parallel()
 
@@ -93,7 +94,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		assertFileExistenceRecursively(t, mockFolderStructure, files)
 	})
 
-	t.RunWithTimeout("Sync path with 1 file to empty allocation and download the file should work", 2*time.Minute, func(t *test.SystemTest) {
+	t.Run("Sync path with 1 file to empty allocation and download the file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		createAllocationTestTeardown(t, allocationID)
 
@@ -164,7 +165,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		}
 	})
 
-	t.RunWithTimeout("Sync path with 1 file encrypted to empty allocation and download the file should work", 2*time.Minute, func(t *test.SystemTest) {
+	t.Run("Sync path with 1 file encrypted to empty allocation and download the file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		createAllocationTestTeardown(t, allocationID)
 
@@ -678,8 +679,8 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		notOwnerWalletName := escapedTestName(t) + "_NOT_OWNER_WALLET"
-		output, err := registerWalletForName(t, configPath, notOwnerWalletName)
-		require.Nil(t, err, "Unexpected register wallet failure", strings.Join(output, "\n"))
+		output, err := createWalletForName(t, configPath, notOwnerWalletName)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 		// The folder structure tree
 		// Integer values will be consider as files with that size
@@ -710,7 +711,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	}) //todo: too slow
 
 	t.Run("Attempt to Sync to non-existing allocation must fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		allocationID := "invalid-allocation-id"

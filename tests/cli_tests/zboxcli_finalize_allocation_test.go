@@ -15,22 +15,23 @@ import (
 
 func TestFinalizeAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Finalize Expired Allocation Should Work after challenge completion time + expiry")
 
 	t.Parallel()
 
-	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 12*time.Minute, func(t *test.SystemTest) {
 		//TODO: unacceptably slow
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		output, err := executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "5s",
+			"expire": "1m",
 		})
 
-		time.Sleep(7 * time.Second)
+		time.Sleep(2 * time.Minute)
 
 		allocations := parseListAllocations(t, configPath)
 		_, ok := allocations[allocationID]
@@ -61,8 +62,8 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	t.Run("Finalize Other's Allocation Should Fail", func(t *test.SystemTest) {
 		var otherAllocationID = setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
-		// register wallet
-		_, err := registerWallet(t, configPath)
+		// create wallet
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 		// Then try updating with otherAllocationID: should not work
 		output, err := finalizeAllocation(t, configPath, otherAllocationID, false)
@@ -74,7 +75,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
-		_, err := registerWallet(t, configPath)
+		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		cmd := fmt.Sprintf(

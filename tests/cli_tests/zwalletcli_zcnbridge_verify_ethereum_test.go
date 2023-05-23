@@ -18,6 +18,7 @@ const (
 
 func TestBridgeVerify(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Verify ethereum transaction")
 
 	t.Parallel()
 
