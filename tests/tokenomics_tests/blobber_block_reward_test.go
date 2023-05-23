@@ -90,43 +90,33 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		remoteFilepath := remotepath + filepath.Base(filename)
+		for i := 0; i < readData[0]; i++ {
+			err = os.Remove(filename)
 
-		output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remoteFilepath,
-			"localpath":  os.TempDir() + string(os.PathSeparator),
-			"blobber_id": blobberList[0].Id,
-		}), true)
-		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+			remoteFilepath := remotepath + filepath.Base(filename)
 
-		//for i := 0; i < readData[0]; i++ {
-		//	err = os.Remove(filename)
-		//
-		//	remoteFilepath := remotepath + filepath.Base(filename)
-		//
-		//	output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-		//		"allocation": allocationId,
-		//		"remotepath": remoteFilepath,
-		//		"localpath":  os.TempDir() + string(os.PathSeparator),
-		//		"blobber_id": blobberList[0].Id,
-		//	}), true)
-		//	require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-		//}
-		//
-		//for i := 0; i < readData[1]; i++ {
-		//	err = os.Remove(filename)
-		//
-		//	remoteFilepath := remotepath + filepath.Base(filename)
-		//
-		//	output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-		//		"allocation": allocationId,
-		//		"remotepath": remoteFilepath,
-		//		"localpath":  os.TempDir() + string(os.PathSeparator),
-		//		"blobber_id": blobberList[1].Id,
-		//	}), true)
-		//	require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-		//}
+			output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+				"allocation": allocationId,
+				"remotepath": remoteFilepath,
+				"localpath":  os.TempDir() + string(os.PathSeparator),
+				"blobber_id": blobberList[0].Id,
+			}), true)
+			require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+		}
+
+		for i := 0; i < readData[1]; i++ {
+			err = os.Remove(filename)
+
+			remoteFilepath := remotepath + filepath.Base(filename)
+
+			output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+				"allocation": allocationId,
+				"remotepath": remoteFilepath,
+				"localpath":  os.TempDir() + string(os.PathSeparator),
+				"blobber_id": blobberList[1].Id,
+			}), true)
+			require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+		}
 
 		// Sleep for 10 minutes
 		time.Sleep(10 * time.Minute)
@@ -144,8 +134,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber1TotalRewards := float64(blobberBlockRewards[4])
 		blobber2TotalRewards := float64(blobberBlockRewards[5])
 
-		blobber1Weight := calculateWeight(1000000000, 100000000, totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
-		blobber2Weight := calculateWeight(1000000000, 100000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
+		blobber1Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
+		blobber2Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 		// print all values
 		fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
@@ -163,9 +153,18 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 	})
 
-	t.Skip()
-
 	t.RunSequentiallyWithTimeout("Verify free reads", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		// Updating blobber 2 read price
+		blobber2 := blobberList[1]
+		utils.ExecuteFaucetWithTokensForWallet(t, blobber2Wallet, configPath, 9)
+		output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber2.Id, "read_price": utils.IntToZCN(0)}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		blobber1 := blobberList[0]
+		utils.ExecuteFaucetWithTokensForWallet(t, blobber1Wallet, configPath, 9)
+		output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber1.Id, "read_price": utils.IntToZCN(0)}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{9, 9}
 
@@ -267,6 +266,18 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Verify write price diff changes", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
+		for count, blobber := range blobberList {
+			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 9)
+			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(1e9)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		}
+
+		for count, blobber := range blobberList {
+			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 9)
+			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(int64(math.Pow10(count)) * 1e9)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		}
+
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{9, 9}
 
@@ -347,8 +358,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber1TotalRewards := float64(blobberBlockRewards[4])
 		blobber2TotalRewards := float64(blobberBlockRewards[5])
 
-		blobber1Weight := calculateWeight(1000000000, 100000000, totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
-		blobber2Weight := calculateWeight(9000000000, 100000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
+		blobber1Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
+		blobber2Weight := calculateWeight(10000000000, 1000000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 		// print all values
 		fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
@@ -367,6 +378,18 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Check read price ratio", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		for count, blobber := range blobberList {
+			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 9)
+			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(int64(math.Pow10(count)) * 1e9)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		}
+
+		for count, blobber := range blobberList {
+			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 9)
+			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(1e9)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		}
+
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 1}
 
@@ -449,7 +472,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber1TotalRewards := float64(blobberBlockRewards[4])
 		blobber2TotalRewards := float64(blobberBlockRewards[5])
 
-		blobber1Weight := calculateWeight(1000000000, 100000000, totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
+		blobber1Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
 		blobber2Weight := calculateWeight(1000000000, 10000000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 		// print all values
@@ -469,6 +492,18 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Verify stake ratio", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		for count, blobber := range blobberList {
+			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 9)
+			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(1e9)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		}
+
+		for count, blobber := range blobberList {
+			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 9)
+			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(1e9)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		}
+
 		stake := []float64{1.0, 3.0, 1.0, 3.0}
 		readData := []int{1, 1}
 
@@ -549,8 +584,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber1TotalRewards := float64(blobberBlockRewards[4])
 		blobber2TotalRewards := float64(blobberBlockRewards[5])
 
-		blobber1Weight := calculateWeight(1000000000, 100000000, totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
-		blobber2Weight := calculateWeight(1000000000, 100000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
+		blobber1Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
+		blobber2Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 		// print all values
 		fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
@@ -569,6 +604,18 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Check ratio with respect to total read data", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		for count, blobber := range blobberList {
+			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 9)
+			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(1e9)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		}
+
+		for count, blobber := range blobberList {
+			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 9)
+			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(1e9)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		}
+
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 9}
 
@@ -651,8 +698,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber1TotalRewards := float64(blobberBlockRewards[4])
 		blobber2TotalRewards := float64(blobberBlockRewards[5])
 
-		blobber1Weight := calculateWeight(1000000000, 100000000, totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
-		blobber2Weight := calculateWeight(1000000000, 100000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
+		blobber1Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
+		blobber2Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 		// print all values
 		fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
