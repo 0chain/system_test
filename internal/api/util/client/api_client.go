@@ -25,8 +25,13 @@ import (
 const (
 	GetHashNodeRoot              = "/v1/hashnode/root/:allocation"
 	GetBlobbers                  = "/v1/screst/:sc_address/getblobbers"
+	GetMiners                    = "/v1/screst/:sc_address/getMinerList"
+	GetSharders                  = "/v1/screst/:sc_address/getSharderList"
+	GetValidators                = "/v1/screst/:sc_address/validators"
 	GetStakePoolStat             = "/v1/screst/:sc_address/getStakePoolStat"
+	getUserStakePoolStat         = "/v1/screst/:sc_address/getUserStakePoolStat"
 	GetAllocationBlobbers        = "/v1/screst/:sc_address/alloc_blobbers"
+	GetFreeAllocationBlobbers    = "/v1/screst/:sc_address/free_alloc_blobbers"
 	SCRestGetOpenChallenges      = "/v1/screst/:sc_address/openchallenges"
 	MinerGetStatus               = "/v1/miner/get/stats"
 	SharderGetStatus             = "/v1/sharder/get/stats"
@@ -56,8 +61,10 @@ const (
 
 // Contains all smart contract addreses used in the client
 const (
+	MinerSmartContractAddress   = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
 	FaucetSmartContractAddress  = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3"
 	StorageSmartContractAddress = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+	ZCNSmartContractAddess      = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712e0"
 )
 
 // Contains statuses of transactions
@@ -429,6 +436,111 @@ func (c *APIClient) V1ClientGetBalance(t *test.SystemTest, clientGetBalanceReque
 	return clientGetBalanceResponse, resp, err
 }
 
+func (c *APIClient) V1SCRestGetAllMiners(t *test.SystemTest, requiredStatusCode int) ([]*model.SCRestGetMinerSharderResponse, *resty.Response, error) {
+	var scRestGetMinersResponse *model.SCRestGetMinersShardersResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetMiners).
+		SetPathVariable("sc_address", MinerSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &scRestGetMinersResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider,
+	)
+	return scRestGetMinersResponse.Nodes, resp, err
+}
+
+func (c *APIClient) V1SCRestGetAllSharders(t *test.SystemTest, requiredStatusCode int) ([]*model.SCRestGetMinerSharderResponse, *resty.Response, error) {
+	var scRestGetShardersResponse *model.SCRestGetMinersShardersResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetSharders).
+		SetPathVariable("sc_address", MinerSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &scRestGetShardersResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider,
+	)
+	return scRestGetShardersResponse.Nodes, resp, err
+}
+
+func (c *APIClient) V1SCRestGetAllBlobbers(t *test.SystemTest, requiredStatusCode int) ([]*model.SCRestGetBlobberResponse, *resty.Response, error) {
+	var scRestGetBlobbersResponse *model.SCRestGetBlobbersResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetBlobbers).
+		SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &scRestGetBlobbersResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider,
+	)
+	return scRestGetBlobbersResponse.Nodes, resp, err
+}
+
+func (c *APIClient) V1SCRestGetAllValidators(t *test.SystemTest, requiredStatusCode int) ([]*model.SCRestGetValidatorResponse, *resty.Response, error) {
+	var scRestGetValidatorsResponse []*model.SCRestGetValidatorResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetValidators).
+		SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &scRestGetValidatorsResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider,
+	)
+	return scRestGetValidatorsResponse, resp, err
+}
+
+func (c *APIClient) V1SCRestGetFirstBlobbers(t *test.SystemTest, blobbersCount, requiredStatusCode int) ([]*model.SCRestGetBlobberResponse, *resty.Response, error) {
+	var scRestGetBlobbersResponse *model.SCRestGetBlobbersResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetBlobbers).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("active", "true").
+		AddParams("limit", "10")
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &scRestGetBlobbersResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider,
+	)
+	if len(scRestGetBlobbersResponse.Nodes) < blobbersCount {
+		return nil, resp, errors.New("not enough blobbers")
+	}
+	return scRestGetBlobbersResponse.Nodes[:blobbersCount], resp, err
+}
+
 func (c *APIClient) V1SCRestGetBlobber(t *test.SystemTest, scRestGetBlobberRequest model.SCRestGetBlobberRequest, requiredStatusCode int) (*model.SCRestGetBlobberResponse, *resty.Response, error) {
 	var scRestGetBlobberResponse *model.SCRestGetBlobberResponse
 
@@ -524,6 +636,33 @@ func (c *APIClient) V1SCRestGetAllocationBlobbers(t *test.SystemTest, scRestGetA
 	scRestGetAllocationBlobbersResponse.BlobberRequirements = scRestGetAllocationBlobbersRequest.BlobberRequirements
 
 	return scRestGetAllocationBlobbersResponse, resp, err
+}
+
+func (c *APIClient) V1SCRestGetFreeAllocationBlobbers(t *test.SystemTest, scRestGetFreeAllocationBlobbersRequest *model.FreeAllocationData, requiredStatusCode int) (*model.SCRestGetFreeAllocationBlobbersResponse, *resty.Response, error) { //nolint
+	data, err := json.Marshal(scRestGetFreeAllocationBlobbersRequest)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetFreeAllocationBlobbers).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("free_allocation_data", string(data))
+
+	var blobbers *[]string
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &blobbers,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider,
+	)
+
+	res := model.SCRestGetFreeAllocationBlobbersResponse{Blobbers: blobbers}
+	return &res, resp, err
 }
 
 func (c *APIClient) V1SCRestOpenChallenge(t *test.SystemTest, scRestOpenChallengeRequest model.SCRestOpenChallengeRequest, requiredStatusCode int) (*model.SCRestOpenChallengeResponse, *resty.Response, error) { //nolint
@@ -771,6 +910,14 @@ func (c *APIClient) CreateAllocation(t *test.SystemTest,
 	wallet *model.Wallet,
 	scRestGetAllocationBlobbersResponse *model.SCRestGetAllocationBlobbersResponse,
 	requiredTransactionStatus int) string {
+	return c.CreateAllocationWithLockValue(t, wallet, scRestGetAllocationBlobbersResponse, 10.0, requiredTransactionStatus)
+}
+
+func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
+	wallet *model.Wallet,
+	scRestGetAllocationBlobbersResponse *model.SCRestGetAllocationBlobbersResponse,
+	lockValue float64,
+	requiredTransactionStatus int) string {
 	t.Log("Create allocation...")
 
 	createAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
@@ -779,7 +926,7 @@ func (c *APIClient) CreateAllocation(t *test.SystemTest,
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
-			Value:           tokenomics.IntToZCN(10.0),
+			Value:           tokenomics.IntToZCN(lockValue),
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -814,6 +961,206 @@ func (c *APIClient) CreateAllocation(t *test.SystemTest,
 	wallet.IncNonce()
 
 	return createAllocationTransactionPutResponse.Entity.Hash
+}
+
+func (c *APIClient) CreateFreeAllocation(t *test.SystemTest,
+	wallet *model.Wallet,
+	scRestGetFreeAllocationBlobbersResponse *model.SCRestGetFreeAllocationBlobbersResponse,
+	requiredTransactionStatus int) string {
+	t.Log("Create free allocation...")
+
+	createAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewCreateFreeAllocationTransactionData(scRestGetFreeAllocationBlobbersResponse),
+			Value:           tokenomics.IntToZCN(0.1),
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createAllocationTransactionPutResponse)
+
+	var createAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		createAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: createAllocationTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if createAllocationTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return createAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return createAllocationTransactionPutResponse.Entity.Hash
+}
+
+func (c *APIClient) UpdateAllocation(
+	t *test.SystemTest,
+	wallet *model.Wallet,
+	allocationID string,
+	uar *model.UpdateAllocationRequest,
+	requiredTransactionStatus int) {
+	t.Log("Update allocation...")
+	uar.ID = allocationID
+	updateAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewUpdateAllocationTransactionData(uar),
+			Value:           tokenomics.IntToZCN(0.1),
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, updateAllocationTransactionPutResponse)
+	txnHash := updateAllocationTransactionPutResponse.Request.Hash
+
+	var updateAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		updateAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: txnHash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if updateAllocationTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return updateAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+}
+
+func (c *APIClient) AddFreeStorageAssigner(
+	t *test.SystemTest,
+	wallet *model.Wallet,
+	requiredTransactionStatus int) {
+	t.Log("Add free storage assigner...")
+	freeAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewFreeStorageAssignerTransactionData(&model.FreeStorageAssignerRequest{
+				Name:            wallet.Id,
+				PublicKey:       wallet.PublicKey,
+				IndividualLimit: 10.0,
+				TotalLimit:      100.0,
+			}),
+			Value: tokenomics.IntToZCN(0.1),
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, freeAllocationTransactionPutResponse)
+	txnHash := freeAllocationTransactionPutResponse.Request.Hash
+
+	var freeAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		freeAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: txnHash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if freeAllocationTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return freeAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+}
+
+func (c *APIClient) MakeAllocationFree(
+	t *test.SystemTest,
+	wallet *model.Wallet,
+	allocationID, marker string,
+	requiredTransactionStatus int) {
+	t.Log("Update allocation...")
+	freeAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewFreeAllocationTransactionData(&model.FreeAllocationRequest{
+
+				AllocationID: allocationID,
+				Marker:       marker,
+			}),
+			Value: tokenomics.IntToZCN(0.1),
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, freeAllocationTransactionPutResponse)
+	txnHash := freeAllocationTransactionPutResponse.Request.Hash
+
+	var freeAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		freeAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: txnHash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if freeAllocationTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return freeAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
 }
 
 func (c *APIClient) UpdateAllocationBlobbers(t *test.SystemTest, wallet *model.Wallet, newBlobberID, oldBlobberID, allocationID string, requiredTransactionStatus int) {
@@ -864,6 +1211,58 @@ func (c *APIClient) UpdateAllocationBlobbers(t *test.SystemTest, wallet *model.W
 	wallet.IncNonce()
 }
 
+func (c *APIClient) CancelAllocation(
+	t *test.SystemTest,
+	wallet *model.Wallet,
+	allocationID string,
+	requiredTransactionStatus int,
+) string {
+	t.Logf("Cancel allocation %v...", allocationID)
+
+	cancelAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewCancelAllocationTransactionData(&model.CancelAllocationRequest{
+				AllocationID: allocationID,
+			}),
+		},
+		HttpOkStatus,
+	)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, cancelAllocationTransactionPutResponse)
+
+	var cancelAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		cancelAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: cancelAllocationTransactionPutResponse.Request.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if cancelAllocationTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return cancelAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return cancelAllocationTransactionPutResponse.Request.Hash
+}
+
 func (c *APIClient) GetAllocationBlobbers(t *test.SystemTest, wallet *model.Wallet, blobberRequirements *model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
 	t.Log("Get allocation blobbers...")
 
@@ -879,6 +1278,26 @@ func (c *APIClient) GetAllocationBlobbers(t *test.SystemTest, wallet *model.Wall
 	require.NotNil(t, scRestGetAllocationBlobbersResponse)
 
 	return scRestGetAllocationBlobbersResponse
+}
+
+func (c *APIClient) GetFreeAllocationBlobbers(
+	t *test.SystemTest,
+	wallet *model.Wallet,
+	freeAllocData *model.FreeAllocationData,
+	requiredStatusCode int,
+) *model.SCRestGetFreeAllocationBlobbersResponse {
+	t.Log("Get free allocation blobbers...")
+
+	scRestGetFreeAllocationBlobbersResponse, resp, err := c.V1SCRestGetFreeAllocationBlobbers(
+		t,
+		freeAllocData,
+		requiredStatusCode,
+	)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, scRestGetFreeAllocationBlobbersResponse)
+
+	return scRestGetFreeAllocationBlobbersResponse
 }
 
 func (c *APIClient) GetAllocation(t *test.SystemTest, allocationID string, requiredStatusCode int) *model.SCRestGetAllocationResponse {
@@ -1013,6 +1432,335 @@ func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 	return createStakePoolTransactionGetConfirmationResponse.Hash
 }
 
+func (c *APIClient) UnlockStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID string, requiredTransactionStatus int) string {
+	t.Log("Unlock stake pool...")
+
+	unlockStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewUnlockStackPoolTransactionData(
+				model.CreateStakePoolRequest{
+					ProviderType: providerType,
+					ProviderID:   providerID,
+				}),
+			Value: tokenomics.IntToZCN(0.1)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, unlockStakePoolTransactionPutResponse)
+
+	var unlockStakePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		unlockStakePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: unlockStakePoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if unlockStakePoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return unlockStakePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return unlockStakePoolTransactionGetConfirmationResponse.Hash
+}
+
+// CreateMinerStakePool
+func (c *APIClient) CreateMinerStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID string, tokens float64, requiredTransactionStatus int) string {
+	t.Log("Create miner/sharder stake pool...")
+
+	createStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: MinerSmartContractAddress,
+			TransactionData: model.NewCreateMinerStackPoolTransactionData(
+				model.CreateStakePoolRequest{
+					ProviderType: providerType,
+					ProviderID:   providerID,
+				}),
+			Value: tokenomics.IntToZCN(tokens)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createStakePoolTransactionPutResponse)
+
+	var createStakePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		createStakePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: createStakePoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if createStakePoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return createStakePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return createStakePoolTransactionGetConfirmationResponse.Hash
+}
+
+func (c *APIClient) UnlockMinerStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID string, requiredTransactionStatus int) string {
+	t.Log("Unlock miner/sharder stake pool...")
+
+	unlockStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: MinerSmartContractAddress,
+			TransactionData: model.NewUnlockMinerStackPoolTransactionData(
+				model.CreateStakePoolRequest{
+					ProviderType: providerType,
+					ProviderID:   providerID,
+				}),
+			Value: tokenomics.IntToZCN(0.1)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, unlockStakePoolTransactionPutResponse)
+
+	var unlockStakePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		unlockStakePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: unlockStakePoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if unlockStakePoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return unlockStakePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return unlockStakePoolTransactionGetConfirmationResponse.Hash
+}
+
+// CreateWritePoolWrapper does not provide deep test of used components
+func (c *APIClient) CreateWritePool(t *test.SystemTest, wallet *model.Wallet, allocationId string, tokens float64, requiredTransactionStatus int) string {
+	t.Log("Create write pool...")
+
+	createWritePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewCreateWritePoolTransactionData(
+				model.CreateWritePoolRequest{
+					AllocationID: allocationId,
+				}),
+			Value: tokenomics.IntToZCN(tokens)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createWritePoolTransactionPutResponse)
+
+	var createWritePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		createWritePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: createWritePoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if createWritePoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return createWritePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return createWritePoolTransactionGetConfirmationResponse.Hash
+}
+
+func (c *APIClient) UnlockWritePool(t *test.SystemTest, wallet *model.Wallet, allocationId string, requiredTransactionStatus int) string {
+	t.Log("Unlock Write pool...")
+
+	unlockWritePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: StorageSmartContractAddress,
+			TransactionData: model.NewUnlockWritePoolTransactionData(
+				model.CreateWritePoolRequest{
+					AllocationID: allocationId,
+				}),
+			Value: tokenomics.IntToZCN(0.1)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, unlockWritePoolTransactionPutResponse)
+
+	var unlockWritePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		unlockWritePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: unlockWritePoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if unlockWritePoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return unlockWritePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return unlockWritePoolTransactionGetConfirmationResponse.Hash
+}
+
+// CreateReadPoolWrapper does not provide deep test of used components
+func (c *APIClient) CreateReadPool(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) string {
+	t.Log("Create Read pool...")
+
+	createReadPoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewCreateReadPoolTransactionData(),
+			Value:           tokenomics.IntToZCN(tokens)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, createReadPoolTransactionPutResponse)
+
+	var createReadPoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		createReadPoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: createReadPoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if createReadPoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return createReadPoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return createReadPoolTransactionGetConfirmationResponse.Hash
+}
+
+func (c *APIClient) UnlockReadPool(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) string {
+	t.Log("Unlock Read pool...")
+
+	unlockReadPoolTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewUnlockReadPoolTransactionData(),
+			Value:           tokenomics.IntToZCN(0.1)},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, unlockReadPoolTransactionPutResponse)
+
+	var unlockReadPoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		unlockReadPoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: unlockReadPoolTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if unlockReadPoolTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return unlockReadPoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+
+	return unlockReadPoolTransactionGetConfirmationResponse.Hash
+}
+
 func (c *APIClient) V1SCRestGetStakePoolStat(t *test.SystemTest, scRestGetStakePoolStatRequest model.SCRestGetStakePoolStatRequest, requiredStatusCode int) (*model.SCRestGetStakePoolStatResponse, *resty.Response, error) { //nolint
 	var scRestGetStakePoolStatResponse *model.SCRestGetStakePoolStatResponse
 
@@ -1033,6 +1781,27 @@ func (c *APIClient) V1SCRestGetStakePoolStat(t *test.SystemTest, scRestGetStakeP
 		SharderServiceProvider)
 
 	return scRestGetStakePoolStatResponse, resp, err
+}
+
+func (c *APIClient) V1SCRestGetUserStakePoolStat(t *test.SystemTest, scRestGetUserStakePoolStatRequest model.SCRestGetUserStakePoolStatRequest, requiredStatusCode int) (*model.SCRestGetUserStakePoolStatResponse, *resty.Response, error) { //nolint
+	var scRestGetUserStakePoolStatResponse *model.SCRestGetUserStakePoolStatResponse
+
+	urlBuilder := NewURLBuilder().
+		SetPath(getUserStakePoolStat).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("client_id", scRestGetUserStakePoolStatRequest.ClientId)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &scRestGetUserStakePoolStatResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return scRestGetUserStakePoolStatResponse, resp, err
 }
 
 func (c *APIClient) GetStakePoolStat(t *test.SystemTest, providerID, providerType string) *model.SCRestGetStakePoolStatResponse {
@@ -1191,4 +1960,53 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 		},
 		HttpGETMethod)
 	return blobberObjectTreePathResponse, resp, err
+}
+
+//----------------------------------------------------------
+// ZCN SC
+//----------------------------------------------------------
+
+func (c *APIClient) BurnZcn(t *test.SystemTest, wallet *model.Wallet, address string, amount float64, requiredTransactionStatus int) string {
+	t.Log("Burn ZCN")
+	burnZcnTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:     wallet,
+			ToClientID: ZCNSmartContractAddess,
+			TransactionData: model.NewBurnZcnTransactionData(&model.SCRestBurnZcnRequest{
+				EthereumAddress: address,
+			}),
+			Value: tokenomics.IntToZCN(amount),
+		},
+		requiredTransactionStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, burnZcnTransactionPutResponse)
+
+	var burnZcnTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		burnZcnTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: burnZcnTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if burnZcnTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return burnZcnTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+	return burnZcnTransactionGetConfirmationResponse.Hash
 }
