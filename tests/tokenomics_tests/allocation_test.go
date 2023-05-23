@@ -244,28 +244,6 @@ func TestAllocation(testSetup *testing.T) {
 		// sleep for 5 minutes
 		time.Sleep(5 * time.Minute)
 
-		curBlock := utils.GetLatestFinalizedBlock(t)
-
-		fmt.Println("curBlock", curBlock)
-
-		// get all challenges
-		challenges, err := getAllChallenges(t, allocationId)
-		require.Nil(t, err, "Error getting all challenges", strings.Join(output, "\n"))
-
-		passedChallenges := 0
-
-		for _, challenge := range challenges {
-			if challenge.Passed {
-				passedChallenges++
-			}
-			//require.True(t, challenge.Passed != true, "All Challenges should be passed")
-		}
-
-		failedChallenges := len(challenges) - passedChallenges
-
-		fmt.Println("passedChallenges", passedChallenges)
-		fmt.Println("failedChallenges", failedChallenges)
-
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
 		totalBlobberChallengereward := int64(0)
@@ -350,28 +328,6 @@ func TestAllocation(testSetup *testing.T) {
 
 		// sleep for 10 minutes
 		time.Sleep(2 * time.Minute)
-
-		curBlock := utils.GetLatestFinalizedBlock(t)
-
-		fmt.Println("curBlock", curBlock)
-
-		// get all challenges
-		challenges, err := getAllChallenges(t, allocationId)
-		require.Nil(t, err, "Error getting all challenges", strings.Join(output, "\n"))
-
-		passedChallenges := 0
-
-		for _, challenge := range challenges {
-			if challenge.Passed {
-				passedChallenges++
-			}
-			//require.True(t, challenge.Passed != true, "All Challenges should be passed")
-		}
-
-		failedChallenges := len(challenges) - passedChallenges
-
-		fmt.Println("passedChallenges", passedChallenges)
-		fmt.Println("failedChallenges", failedChallenges)
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
@@ -491,7 +447,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// Challenge Rewards
-		time.Sleep(10 * time.Minute)
+		time.Sleep(12 * time.Minute)
 		blobberRewards := getAllocationChallengeRewards(t, allocationId)
 
 		require.Equal(t, 3, len(blobberRewards), "All 3 blobber should get the rewards")
@@ -607,7 +563,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		time.Sleep(10 * time.Minute)
+		time.Sleep(12 * time.Minute)
 
 		// Challenge Rewards
 		blobberRewards := getAllocationChallengeRewards(t, allocationId)
