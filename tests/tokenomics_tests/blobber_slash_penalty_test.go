@@ -19,7 +19,7 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 
 	prevBlock := utils.GetLatestFinalizedBlock(t)
 
-	fmt.Println("prevBlock", prevBlock)
+	t.Log("prevBlock", prevBlock)
 
 	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -91,16 +91,16 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 
 		allocation = utils.GetAllocation(t, allocationId)
 
-		fmt.Println(allocation.MovedToChallenge)
+		t.Log(allocation.MovedToChallenge)
 
 		blobberRewards := getAllocationChallengeRewards(t, allocationId)
 
-		fmt.Println(blobberRewards)
+		t.Log(blobberRewards)
 
 		blobber1Reward := blobberRewards[blobberList[0].Id].(float64)
 		blobber2Reward := blobberRewards[blobberList[1].Id].(float64)
 
-		fmt.Println(blobber1Reward, blobber2Reward)
+		t.Log(blobber1Reward, blobber2Reward)
 
 		require.Greater(t, blobber1Reward/blobber2Reward, 1.5, "Killed blobber should get approx half the rewards than other")
 
@@ -113,7 +113,7 @@ func killBlobber(t *test.SystemTest, cliConfigFilename, params string, retry boo
 	cmd := fmt.Sprintf("./zbox kill-blobber %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		params, scOwnerWallet, cliConfigFilename)
 
-	fmt.Println(cmd)
+	t.Log(cmd)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 	} else {

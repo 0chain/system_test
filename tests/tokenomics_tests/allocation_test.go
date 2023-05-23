@@ -24,7 +24,7 @@ func TestAllocation(testSetup *testing.T) {
 
 	prevBlock := utils.GetLatestFinalizedBlock(t)
 
-	fmt.Println("prevBlock", prevBlock)
+	t.Log("prevBlock", prevBlock)
 
 	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -56,7 +56,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
 
-		fmt.Println("Jayash : ")
+		t.Log("Jayash : ")
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -84,7 +84,7 @@ func TestAllocation(testSetup *testing.T) {
 		allocationId, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
 
-		fmt.Println("allocationId", allocationId)
+		t.Log("allocationId", allocationId)
 
 		// Uploading 10% of allocation
 
@@ -95,7 +95,7 @@ func TestAllocation(testSetup *testing.T) {
 		err = utils.CreateFileWithSize(filename, int64(filesize))
 		require.Nil(t, err)
 
-		fmt.Println("Uploading file ", filename)
+		t.Log("Uploading file ", filename)
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
 			// fetch the latest block in the chain
@@ -107,11 +107,11 @@ func TestAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
-		fmt.Println("Calling Cancel Allocation")
+		t.Log("Calling Cancel Allocation")
 
 		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
 		if err != nil {
-			fmt.Println("Error cancelling allocation", err)
+			t.Log("Error cancelling allocation", err)
 		}
 
 		// sleep for 2 minutes
@@ -119,7 +119,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		curBlock := utils.GetLatestFinalizedBlock(t)
 
-		fmt.Println("curBlock", curBlock)
+		t.Log("curBlock", curBlock)
 
 		allocation := utils.GetAllocation(t, allocationId)
 
@@ -135,13 +135,13 @@ func TestAllocation(testSetup *testing.T) {
 			}
 			//require.True(t, challenge.Passed != true, "All Challenges should be passed")
 
-			fmt.Println(challenge.CreatedAt, allocation.ExpirationDate)
+			t.Log(challenge.CreatedAt, allocation.ExpirationDate)
 		}
 
 		failedChallenges := len(challenges) - passedChallenges
 
-		fmt.Println("passedChallenges", passedChallenges)
-		fmt.Println("failedChallenges", failedChallenges)
+		t.Log("passedChallenges", passedChallenges)
+		t.Log("failedChallenges", failedChallenges)
 
 		require.Equal(t, 0, passedChallenges, "All Challenges should fail")
 
@@ -156,10 +156,10 @@ func TestAllocation(testSetup *testing.T) {
 
 		totalExpectedCancellationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
 
-		fmt.Println("totalExpectedCancellationReward", totalExpectedCancellationReward)
+		t.Log("totalExpectedCancellationReward", totalExpectedCancellationReward)
 
-		fmt.Println("blobber1CancellationReward", blobber1CancellationReward)
-		fmt.Println("blobber2CancellationReward", blobber2CancellationReward)
+		t.Log("blobber1CancellationReward", blobber1CancellationReward)
+		t.Log("blobber2CancellationReward", blobber2CancellationReward)
 
 		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
 		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
@@ -253,7 +253,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		require.Equal(t, totalBlobberChallengereward, movedToChallengePool, "Total Blobber Challenge reward should be 0")
 
-		fmt.Println("rewards", rewards)
+		t.Log("rewards", rewards)
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
@@ -348,7 +348,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 	prevBlock := utils.GetLatestFinalizedBlock(t)
 
-	fmt.Println("prevBlock", prevBlock)
+	t.Log("prevBlock", prevBlock)
 
 	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -478,10 +478,10 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 		totalExpectedCancellationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
 
-		fmt.Println("totalExpectedCancellationReward", totalExpectedCancellationReward)
+		t.Log("totalExpectedCancellationReward", totalExpectedCancellationReward)
 
-		fmt.Println("blobber1CancellationReward", blobber1CancellationReward)
-		fmt.Println("blobber2CancellationReward", blobber2CancellationReward)
+		t.Log("blobber1CancellationReward", blobber1CancellationReward)
+		t.Log("blobber2CancellationReward", blobber2CancellationReward)
 
 		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
 		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
@@ -595,10 +595,10 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 		totalExpectedCancellationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
 
-		fmt.Println("totalExpectedCancellationReward", totalExpectedCancellationReward)
+		t.Log("totalExpectedCancellationReward", totalExpectedCancellationReward)
 
-		fmt.Println("blobber1CancellationReward", blobber1CancellationReward)
-		fmt.Println("blobber2CancellationReward", blobber2CancellationReward)
+		t.Log("blobber1CancellationReward", blobber1CancellationReward)
+		t.Log("blobber2CancellationReward", blobber2CancellationReward)
 
 		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
 		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
@@ -613,7 +613,7 @@ func getAllocationCancellationReward(t *test.SystemTest, startBlockNumber, endBl
 	sharderBaseUrl := utils.GetSharderUrl(t)
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/cancellation-rewards?start_block=" + startBlockNumber + "&end_block=" + endBlockNumber)
 
-	fmt.Println("URL : ", url)
+	t.Log("URL : ", url)
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -659,7 +659,7 @@ func getAllocationChallengeRewards(t *test.SystemTest, allocationID string) map[
 	sharderBaseUrl := utils.GetSharderUrl(t)
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=" + allocationID)
 
-	fmt.Println("URL : ", url)
+	t.Log("URL : ", url)
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -684,7 +684,7 @@ func getAllocationChallengeRewards(t *test.SystemTest, allocationID string) map[
 		t.Fatalf("Error unmarshalling allocation challenge rewards: %v", err)
 	}
 
-	fmt.Println("allocationChallengeRewards", allocationChallengeRewards)
+	t.Log("allocationChallengeRewards", allocationChallengeRewards)
 
 	blobberRewards := allocationChallengeRewards["blobber_rewards"].(map[string]interface{})
 
@@ -695,7 +695,7 @@ func getTotalAllocationChallengeRewards(t *test.SystemTest, allocationID string)
 	sharderBaseUrl := utils.GetSharderUrl(t)
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=" + allocationID)
 
-	fmt.Println("URL : ", url)
+	t.Log("URL : ", url)
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -720,7 +720,7 @@ func getTotalAllocationChallengeRewards(t *test.SystemTest, allocationID string)
 		t.Fatalf("Error unmarshalling allocation challenge rewards: %v", err)
 	}
 
-	fmt.Println("allocationChallengeRewards", allocationChallengeRewards)
+	t.Log("allocationChallengeRewards", allocationChallengeRewards)
 
 	challengeRewards := allocationChallengeRewards["blobber_rewards"].(map[string]interface{})
 

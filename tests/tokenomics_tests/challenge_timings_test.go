@@ -2,7 +2,6 @@ package tokenomics_tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/0chain/gosdk/core/common"
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
@@ -73,28 +72,27 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		time.Sleep(1 * time.Minute)
 
-		getChallengeTimings(t, blobberList, []string{allocationId})
+		result := getChallengeTimings(t, blobberList, []string{allocationId})
 
-		//
-		//fmt.Println("ProofGenTimes : ", result[0])
-		//fmt.Println("TxnSubmissions : ", result[1])
-		//fmt.Println("TxnVerifications : ", result[2])
+		t.Log("ProofGenTimes : ", result[0])
+		t.Log("TxnSubmissions : ", result[1])
+		t.Log("TxnVerifications : ", result[2])
 
-		//proofGenTimes := result[0]
-		//txnSubmissions := result[1]
-		//txnVerifications := result[2]
+		proofGenTimes := result[0]
+		txnSubmissions := result[1]
+		txnVerifications := result[2]
 
-		//for _, proofGenTime := range proofGenTimes {
-		//	require.True(t, proofGenTime < 1681327150, "Proof generation time is more than 2 seconds")
-		//}
-		//
-		//for _, txnSubmission := range txnSubmissions {
-		//	require.True(t, txnSubmission == 0, "Transaction submission time is more than 2 seconds")
-		//}
-		//
-		//for _, txnVerification := range txnVerifications {
-		//	require.True(t, txnVerification < 18446744072028224700, "Transaction verification time is more than 2 seconds")
-		//}
+		for _, proofGenTime := range proofGenTimes {
+			require.True(t, proofGenTime < 1681327150, "Proof generation time is more than 2 seconds")
+		}
+
+		for _, txnSubmission := range txnSubmissions {
+			require.True(t, txnSubmission == 0, "Transaction submission time is more than 2 seconds")
+		}
+
+		for _, txnVerification := range txnVerifications {
+			require.True(t, txnVerification < 18446744072028224700, "Transaction verification time is more than 2 seconds")
+		}
 	})
 
 	t.RunSequentiallyWithTimeout("Case 2: 1 100mb allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -365,7 +363,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 
 				resp, err := http.Get(url)
 				if err != nil {
-					fmt.Println("Error while getting challenge timings : ", err)
+					t.Log("Error while getting challenge timings : ", err)
 				}
 				defer resp.Body.Close()
 
@@ -374,7 +372,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 				var challengeTiming ChallengeTiming
 				err = json.Unmarshal(body, &challengeTiming)
 				if err != nil {
-					fmt.Println("Error while unmarshalling challenge timings : ", err)
+					t.Log("Error while unmarshalling challenge timings : ", err)
 				}
 
 				challengeTiming.ProofGenTime = challengeTiming.ProofGenTime / 1000
@@ -387,9 +385,9 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 		}
 	}
 
-	fmt.Println("Proof Gen Times : ", proofGenTimes)
-	fmt.Println("Txn Submissions : ", txnSubmissions)
-	fmt.Println("Txn Verifications : ", txnVerifications)
+	t.Log("Proof Gen Times : ", proofGenTimes)
+	t.Log("Txn Submissions : ", txnSubmissions)
+	t.Log("Txn Verifications : ", txnVerifications)
 
 	// max values from all the lists
 	var maxProofGenTime, maxTxnSubmission, maxTxnVerification common.Timestamp
@@ -412,9 +410,9 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 		}
 	}
 
-	fmt.Println("Max Proof Gen Time : ", maxProofGenTime)
-	fmt.Println("Max Txn Submission : ", maxTxnSubmission)
-	fmt.Println("Max Txn Verification : ", maxTxnVerification)
+	t.Log("Max Proof Gen Time : ", maxProofGenTime)
+	t.Log("Max Txn Submission : ", maxTxnSubmission)
+	t.Log("Max Txn Verification : ", maxTxnVerification)
 
 	var result [][]common.Timestamp
 	result = append(result, proofGenTimes)

@@ -23,7 +23,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 	prevBlock := utils.GetLatestFinalizedBlock(t)
 
-	fmt.Println("prevBlock", prevBlock)
+	t.Log("prevBlock", prevBlock)
 
 	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -73,7 +73,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		allocationId, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
 
-		fmt.Println("Allocation ID : ", allocationId)
+		t.Log("Allocation ID : ", allocationId)
 
 		remotepath := "/dir/"
 		filesize := totalData
@@ -138,12 +138,12 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber2Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 		// print all values
-		fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
-		fmt.Println("blobber2ProviderRewards", blobber2ProviderRewards)
-		fmt.Println("blobber1DelegateRewards", blobber1DelegateRewards)
-		fmt.Println("blobber2DelegateRewards", blobber2DelegateRewards)
-		fmt.Println("blobber1TotalRewards", blobber1TotalRewards)
-		fmt.Println("blobber2TotalRewards", blobber2TotalRewards)
+		t.Log("blobber1ProviderRewards", blobber1ProviderRewards)
+		t.Log("blobber2ProviderRewards", blobber2ProviderRewards)
+		t.Log("blobber1DelegateRewards", blobber1DelegateRewards)
+		t.Log("blobber2DelegateRewards", blobber2DelegateRewards)
+		t.Log("blobber1TotalRewards", blobber1TotalRewards)
+		t.Log("blobber2TotalRewards", blobber2TotalRewards)
 
 		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
@@ -249,12 +249,12 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber2Weight := calculateWeight(1000000000, 0, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 		// print all values
-		fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
-		fmt.Println("blobber2ProviderRewards", blobber2ProviderRewards)
-		fmt.Println("blobber1DelegateRewards", blobber1DelegateRewards)
-		fmt.Println("blobber2DelegateRewards", blobber2DelegateRewards)
-		fmt.Println("blobber1TotalRewards", blobber1TotalRewards)
-		fmt.Println("blobber2TotalRewards", blobber2TotalRewards)
+		t.Log("blobber1ProviderRewards", blobber1ProviderRewards)
+		t.Log("blobber2ProviderRewards", blobber2ProviderRewards)
+		t.Log("blobber1DelegateRewards", blobber1DelegateRewards)
+		t.Log("blobber2DelegateRewards", blobber2DelegateRewards)
+		t.Log("blobber1TotalRewards", blobber1TotalRewards)
+		t.Log("blobber2TotalRewards", blobber2TotalRewards)
 
 		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
@@ -362,12 +362,12 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber2Weight := calculateWeight(10000000000, 1000000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 		// print all values
-		fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
-		fmt.Println("blobber2ProviderRewards", blobber2ProviderRewards)
-		fmt.Println("blobber1DelegateRewards", blobber1DelegateRewards)
-		fmt.Println("blobber2DelegateRewards", blobber2DelegateRewards)
-		fmt.Println("blobber1TotalRewards", blobber1TotalRewards)
-		fmt.Println("blobber2TotalRewards", blobber2TotalRewards)
+		t.Log("blobber1ProviderRewards", blobber1ProviderRewards)
+		t.Log("blobber2ProviderRewards", blobber2ProviderRewards)
+		t.Log("blobber1DelegateRewards", blobber1DelegateRewards)
+		t.Log("blobber2DelegateRewards", blobber2DelegateRewards)
+		t.Log("blobber1TotalRewards", blobber1TotalRewards)
+		t.Log("blobber2TotalRewards", blobber2TotalRewards)
 
 		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
@@ -411,7 +411,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		allocationId, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
 
-		fmt.Println("Allocation ID : ", allocationId)
+		t.Log("Allocation ID : ", allocationId)
 
 		remotepath := "/dir/"
 		filesize := totalData
@@ -476,12 +476,12 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber2Weight := calculateWeight(1000000000, 10000000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 		// print all values
-		fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
-		fmt.Println("blobber2ProviderRewards", blobber2ProviderRewards)
-		fmt.Println("blobber1DelegateRewards", blobber1DelegateRewards)
-		fmt.Println("blobber2DelegateRewards", blobber2DelegateRewards)
-		fmt.Println("blobber1TotalRewards", blobber1TotalRewards)
-		fmt.Println("blobber2TotalRewards", blobber2TotalRewards)
+		t.Log("blobber1ProviderRewards", blobber1ProviderRewards)
+		t.Log("blobber2ProviderRewards", blobber2ProviderRewards)
+		t.Log("blobber1DelegateRewards", blobber1DelegateRewards)
+		t.Log("blobber2DelegateRewards", blobber2DelegateRewards)
+		t.Log("blobber1TotalRewards", blobber1TotalRewards)
+		t.Log("blobber2TotalRewards", blobber2TotalRewards)
 
 		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
@@ -588,12 +588,12 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber2Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 		// print all values
-		fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
-		fmt.Println("blobber2ProviderRewards", blobber2ProviderRewards)
-		fmt.Println("blobber1DelegateRewards", blobber1DelegateRewards)
-		fmt.Println("blobber2DelegateRewards", blobber2DelegateRewards)
-		fmt.Println("blobber1TotalRewards", blobber1TotalRewards)
-		fmt.Println("blobber2TotalRewards", blobber2TotalRewards)
+		t.Log("blobber1ProviderRewards", blobber1ProviderRewards)
+		t.Log("blobber2ProviderRewards", blobber2ProviderRewards)
+		t.Log("blobber1DelegateRewards", blobber1DelegateRewards)
+		t.Log("blobber2DelegateRewards", blobber2DelegateRewards)
+		t.Log("blobber1TotalRewards", blobber1TotalRewards)
+		t.Log("blobber2TotalRewards", blobber2TotalRewards)
 
 		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
@@ -637,7 +637,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		allocationId, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
 
-		fmt.Println("Allocation ID : ", allocationId)
+		t.Log("Allocation ID : ", allocationId)
 
 		remotepath := "/dir/"
 		filesize := totalData
@@ -702,12 +702,12 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber2Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 		// print all values
-		fmt.Println("blobber1ProviderRewards", blobber1ProviderRewards)
-		fmt.Println("blobber2ProviderRewards", blobber2ProviderRewards)
-		fmt.Println("blobber1DelegateRewards", blobber1DelegateRewards)
-		fmt.Println("blobber2DelegateRewards", blobber2DelegateRewards)
-		fmt.Println("blobber1TotalRewards", blobber1TotalRewards)
-		fmt.Println("blobber2TotalRewards", blobber2TotalRewards)
+		t.Log("blobber1ProviderRewards", blobber1ProviderRewards)
+		t.Log("blobber2ProviderRewards", blobber2ProviderRewards)
+		t.Log("blobber1DelegateRewards", blobber1DelegateRewards)
+		t.Log("blobber2DelegateRewards", blobber2DelegateRewards)
+		t.Log("blobber1TotalRewards", blobber1TotalRewards)
+		t.Log("blobber2TotalRewards", blobber2TotalRewards)
 
 		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
@@ -820,13 +820,6 @@ func calculateWeight(wp, rp, X, R, stakes, challenges float64) float64 {
 	gamma := getGamma(X, R)
 
 	return (zeta*gamma + 1) * stakes * challenges
-}
-
-func resetNetwork(readPrice, writePrice float64) {
-	fmt.Println("Read Price : ", readPrice)
-	fmt.Println("Write Price : ", writePrice)
-
-	time.Sleep(15 * time.Minute)
 }
 
 func countPassedChallengesForBlobberAndAllocation(t *test.SystemTest, allocationID, blobberID string) float64 {
