@@ -91,7 +91,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}
 
 		for _, txnVerification := range txnVerifications {
-			require.True(t, txnVerification < 18446744072028224700, "Transaction verification time is more than 2 seconds")
+			require.True(t, txnVerification < 184467440720, "Transaction verification time is more than 2 seconds")
 		}
 	})
 
