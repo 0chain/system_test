@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test0Box_referral(testSetup *testing.T) {
+func Test0BoxReferral(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Post referrals with correct CSRF should work properly")
 
