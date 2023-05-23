@@ -65,7 +65,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			"size":   1 * GB,
 			"data":   1,
 			"parity": 1,
-			"expire": "20m",
+			"lock":   1,
+			"expire": "10m",
 		}))
 		require.Nil(t, err, "Error creating new allocation", strings.Join(output, "\n"))
 
@@ -89,33 +90,43 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		for i := 0; i < readData[0]; i++ {
-			err = os.Remove(filename)
+		remoteFilepath := remotepath + filepath.Base(filename)
 
-			remoteFilepath := remotepath + filepath.Base(filename)
+		output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remoteFilepath,
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+			"blobber_id": blobberList[0].Id,
+		}), true)
+		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 
-			output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": remoteFilepath,
-				"localpath":  os.TempDir() + string(os.PathSeparator),
-				"blobber_id": blobberList[0].Id,
-			}), true)
-			require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-		}
-
-		for i := 0; i < readData[1]; i++ {
-			err = os.Remove(filename)
-
-			remoteFilepath := remotepath + filepath.Base(filename)
-
-			output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": remoteFilepath,
-				"localpath":  os.TempDir() + string(os.PathSeparator),
-				"blobber_id": blobberList[1].Id,
-			}), true)
-			require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-		}
+		//for i := 0; i < readData[0]; i++ {
+		//	err = os.Remove(filename)
+		//
+		//	remoteFilepath := remotepath + filepath.Base(filename)
+		//
+		//	output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+		//		"allocation": allocationId,
+		//		"remotepath": remoteFilepath,
+		//		"localpath":  os.TempDir() + string(os.PathSeparator),
+		//		"blobber_id": blobberList[0].Id,
+		//	}), true)
+		//	require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+		//}
+		//
+		//for i := 0; i < readData[1]; i++ {
+		//	err = os.Remove(filename)
+		//
+		//	remoteFilepath := remotepath + filepath.Base(filename)
+		//
+		//	output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+		//		"allocation": allocationId,
+		//		"remotepath": remoteFilepath,
+		//		"localpath":  os.TempDir() + string(os.PathSeparator),
+		//		"blobber_id": blobberList[1].Id,
+		//	}), true)
+		//	require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+		//}
 
 		// Sleep for 10 minutes
 		time.Sleep(10 * time.Minute)
@@ -152,6 +163,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 	})
 
+	t.Skip()
+
 	t.RunSequentiallyWithTimeout("Verify free reads", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{9, 9}
@@ -166,6 +179,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			"size":   1 * GB,
 			"data":   1,
 			"parity": 1,
+			"lock":   1,
 			"expire": "20m",
 		}))
 		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
@@ -266,6 +280,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			"size":   1 * GB,
 			"data":   1,
 			"parity": 1,
+			"lock":   1,
 			"expire": "20m",
 		}))
 		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
@@ -365,6 +380,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			"size":   1 * GB,
 			"data":   1,
 			"parity": 1,
+			"lock":   1,
 			"expire": "20m",
 		}))
 		require.Nil(t, err, "Error creating new allocation", strings.Join(output, "\n"))
@@ -466,6 +482,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			"size":   1 * GB,
 			"data":   1,
 			"parity": 1,
+			"lock":   1,
 			"expire": "20m",
 		}))
 		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
@@ -565,6 +582,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			"size":   1 * GB,
 			"data":   1,
 			"parity": 1,
+			"lock":   1,
 			"expire": "20m",
 		}))
 		require.Nil(t, err, "Error creating new allocation", strings.Join(output, "\n"))

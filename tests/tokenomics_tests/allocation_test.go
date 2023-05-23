@@ -124,9 +124,8 @@ func TestAllocation(testSetup *testing.T) {
 		allocation := utils.GetAllocation(t, allocationId)
 
 		// get all challenges
-		challenges, _ := getAllChallenges(t, allocationId)
-
-		fmt.Println(challenges)
+		challenges, err := getAllChallenges(t, allocationId)
+		require.Nil(t, err, "Error getting all challenges", strings.Join(output, "\n"))
 
 		passedChallenges := 0
 
@@ -250,7 +249,8 @@ func TestAllocation(testSetup *testing.T) {
 		fmt.Println("curBlock", curBlock)
 
 		// get all challenges
-		challenges, _ := getAllChallenges(t, allocationId)
+		challenges, err := getAllChallenges(t, allocationId)
+		require.Nil(t, err, "Error getting all challenges", strings.Join(output, "\n"))
 
 		passedChallenges := 0
 
@@ -356,7 +356,8 @@ func TestAllocation(testSetup *testing.T) {
 		fmt.Println("curBlock", curBlock)
 
 		// get all challenges
-		challenges, _ := getAllChallenges(t, allocationId)
+		challenges, err := getAllChallenges(t, allocationId)
+		require.Nil(t, err, "Error getting all challenges", strings.Join(output, "\n"))
 
 		passedChallenges := 0
 

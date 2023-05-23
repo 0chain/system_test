@@ -355,7 +355,8 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 	var txnVerifications []common.Timestamp
 
 	for _, allocationID := range allocationIDs {
-		challenges, _ := getAllChallenges(t, allocationID)
+		challenges, err := getAllChallenges(t, allocationID)
+		require.Nil(t, err, "Error getting all challenges")
 
 		for _, challenge := range challenges {
 
