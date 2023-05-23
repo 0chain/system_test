@@ -1292,6 +1292,7 @@ func TestShareFile(testSetup *testing.T) {
 
 		// upload file
 		file := generateRandomTestFileName(t)
+		remoteOwnerPath := "/" + filepath.Base(file)
 		fileSize := int64(256)
 		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
@@ -1299,7 +1300,7 @@ func TestShareFile(testSetup *testing.T) {
 		uploadParams := map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  file,
-			"remotepath": file,
+			"remotepath": remoteOwnerPath,
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -1317,12 +1318,12 @@ func TestShareFile(testSetup *testing.T) {
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": file,
+			"remotepath": remoteOwnerPath,
 			"clientid":   clientId,
 		}
 		output, err = shareFile(t, configPath, shareParams)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, "Sharing non-encrypted files privately disabled!", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "invalid_private_share: private sharing is only available for encrypted file", output[0], strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 	})
 }
