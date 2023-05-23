@@ -1,5 +1,12 @@
 package model
 
+import (
+	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/go-resty/resty/v2"
+)
+
+const GB = float64(1024 * 1024 * 1024)
+
 type FirebaseSession struct {
 	SessionInfo string `json:"sessionInfo"`
 }
@@ -94,6 +101,20 @@ type ZboxUserInfo struct {
 	CreatedAt       string    `json:"created_at"`
 	Avatar          ZboxImage `json:"avatar"`
 	BackgroundImage ZboxImage `json:"bg_img"`
+}
+
+type ZboxGraphRequest struct {
+	From       string `json:"from"`
+	To         string `json:"to"`
+	DataPoints string `json:"data_points"`
+}
+
+type ZboxGraphInt64Response []int64
+type ZboxTotalInt64Response int64
+
+type ZboxGraphChallengesResponse struct {
+	TotalChallenges      ZboxGraphInt64Response `json:"total"`
+	SuccessfulChallenges ZboxGraphInt64Response `json:"successful"`
 }
 
 type ZboxShareInfo struct {
@@ -196,3 +217,5 @@ type ZboxNftListByCollection struct {
 	NftList  []ZboxNft `json:"nfts_by_collection_id"`
 	NftCount int       `json:"total"`
 }
+type ZboxGraphEndpoint func(*test.SystemTest, *ZboxGraphRequest) (*ZboxGraphInt64Response, *resty.Response, error)
+type ZboxGraphBlobberEndpoint func(*test.SystemTest, string, *ZboxGraphRequest) (*ZboxGraphInt64Response, *resty.Response, error)

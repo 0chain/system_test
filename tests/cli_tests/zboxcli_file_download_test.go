@@ -1236,7 +1236,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "pre-redeeming read marker")
 	})
 
-	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 7*time.Minute, func(t *test.SystemTest) {
+	t.Run("Download File using Expired Allocation Should Fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
