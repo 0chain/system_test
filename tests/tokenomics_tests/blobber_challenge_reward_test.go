@@ -730,5 +730,5 @@ type ProviderAllocationRewards struct {
 	DelegateRewards map[string]int64 `json:"delegate_rewards"`
 	Amount          int64            `json:"amount"`
 	Total           int64            `json:"total"`
-	ProviderType    string           `json:"provider_type"`
+	ProviderType    int64            `json:"provider_type"`
 }
