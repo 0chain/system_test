@@ -74,7 +74,7 @@ func (c *ZS3Client) PutObject(t *test.SystemTest, queryParams, formData map[stri
 		t.Log(err)
 		return nil, err
 	}
-	resp, err := c.BaseHttpClient.HttpClient.R().SetBody(body).SetHeaders(map[string]string{"Content-Type": ct}).SetQueryParams(queryParams).Post(c.zs3ServerUrl)
+	resp, err := c.BaseHttpClient.HttpClient.R().SetBody(body).SetHeaders(map[string]string{"Content-Type": ct}).SetQueryParams(queryParams).Get(c.zs3ServerUrl)
 	if err != nil {
 		t.Log(err)
 		return nil, err
