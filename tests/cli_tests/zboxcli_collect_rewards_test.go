@@ -117,7 +117,6 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with invalid blobber id should fail", func(t *test.SystemTest) {
-		t.Skip("piers")
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
@@ -154,7 +153,6 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with invalid provider type should fail", func(t *test.SystemTest) {
-		t.Skip("piers")
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
@@ -191,7 +189,6 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with no provider id or type should fail", func(t *test.SystemTest) {
-		t.Skip("piers")
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
