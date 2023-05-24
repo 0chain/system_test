@@ -24,7 +24,6 @@ func TestBridgeMint(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Mint WZCN tokens", func(t *test.SystemTest) {
-		t.Skip("Skipping due to deployment issue")
 
 		output, err := mintWrappedZcnTokens(t, false)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
@@ -33,7 +32,6 @@ func TestBridgeMint(testSetup *testing.T) {
 	})
 
 	t.Run("Mint ZCN tokens", func(t *test.SystemTest) {
-		t.Skip("Skipping due to deployment issue")
 
 		output, err := mintZcnTokens(t, false)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
