@@ -61,13 +61,23 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
+			"action":          "createBucket",
+			"bucketName":      "system-test",
+		}
+		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
+		require.Nil(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+
+		queryParams = map[string]string{
+			"accessKey":       AccessKey,
+			"secretAccessKey": SecretAccessKey,
 			"action":          "putObject",
 			"bucketName":      "system-test",
 		}
 		formData := map[string]string{
-			"file": "@test-file",
+			"file": "@test-file.txt",
 		}
-		resp, err := zs3Client.PutObject(t, queryParams, formData)
+		resp, err = zs3Client.PutObject(t, queryParams, formData)
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
@@ -80,7 +90,7 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 			"bucketName":      "system-test",
 		}
 		formData := map[string]string{
-			"file": "@test-file",
+			"file": "@test-file.txt",
 		}
 		resp, err := zs3Client.PutObject(t, queryParams, formData)
 		require.Nil(t, err)
@@ -92,7 +102,7 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 			"bucketName":      "system-test",
 		}
 		formData = map[string]string{
-			"file": "@test-file",
+			"file": "@test-file.txt",
 		}
 		t.Logf(resp.String())
 		require.Nil(t, err)
@@ -107,7 +117,7 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 			"bucketName":      "This bucket doesnot exist",
 		}
 		formData := map[string]string{
-			"file": "@test-file",
+			"file": "@test-file.txt",
 		}
 		resp, err := zs3Client.PutObject(t, queryParams, formData)
 		require.Nil(t, err)
@@ -149,6 +159,6 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, resp.String(), `{"error":"The specified bucket does not exist"}`)
+		require.Equal(t, resp.String(), `{\"error\":\"The specified bucket does not exist\"}`)
 	})
 }
