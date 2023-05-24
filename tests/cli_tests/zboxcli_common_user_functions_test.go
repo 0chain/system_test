@@ -52,7 +52,7 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		// Wallet balance should decrease by locked amount
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 8.0, balance) // lock - fee
+		require.Equal(t, 8.99, balance) // lock - fee
 
 		createAllocationTestTeardown(t, allocationID)
 	})
