@@ -723,7 +723,7 @@ func getBlockRewards(t *test.SystemTest, startBlockNumber, endBlockNumber, blobb
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	sharderBaseUrl := utils.GetSharderUrl(t)
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/block-rewards?start_block_number=" + startBlockNumber + "&end_block_number=" + endBlockNumber)
-	var response map[string]interface{}
+	var response []int64
 
 	res, _ := http.Get(url)
 
@@ -733,58 +733,7 @@ func getBlockRewards(t *test.SystemTest, startBlockNumber, endBlockNumber, blobb
 		return nil
 	}
 
-	var result []int64
-
-	var blobber1TotalReward int64
-	blobber1TotalReward = 0
-	var blobber2TotalReward int64
-	blobber2TotalReward = 0
-
-	var blobber1ProviderReward int64
-	blobber1ProviderReward = 0
-	var blobber2ProviderReward int64
-	blobber2ProviderReward = 0
-
-	for _, providerReward := range response["provider_rewards"].([]interface{}) {
-		providerId := providerReward.(map[string]interface{})["provider_id"].(string)
-		amount := int64(providerReward.(map[string]interface{})["amount"].(float64))
-
-		if providerId == blobber1 {
-			blobber1TotalReward += amount
-			blobber1ProviderReward += amount
-		} else if providerId == blobber2 {
-			blobber2TotalReward += amount
-			blobber2ProviderReward += amount
-		}
-	}
-
-	var blobber1DelegateReward int64
-	blobber1DelegateReward = 0
-	var blobber2DelegateReward int64
-	blobber2DelegateReward = 0
-
-	for _, delegateRewards := range response["delegate_rewards"].([]interface{}) {
-		providerId := delegateRewards.(map[string]interface{})["provider_id"].(string)
-		amount := int64(delegateRewards.(map[string]interface{})["amount"].(float64))
-
-		if providerId == blobber1 {
-			blobber1TotalReward += amount
-			blobber1DelegateReward += amount
-		} else if providerId == blobber2 {
-			blobber2TotalReward += amount
-			blobber2DelegateReward += amount
-		}
-	}
-
-	result = append(result, blobber1ProviderReward)
-	result = append(result, blobber2ProviderReward)
-	result = append(result, blobber1DelegateReward)
-	result = append(result, blobber2DelegateReward)
-
-	result = append(result, blobber1TotalReward)
-	result = append(result, blobber2TotalReward)
-
-	return result
+	return response
 }
 
 func getZeta(wp, rp float64) float64 {
