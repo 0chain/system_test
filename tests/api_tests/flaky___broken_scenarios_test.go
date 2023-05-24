@@ -21,7 +21,6 @@ Tests in here are skipped until the feature has been fixed
 func Test___BrokenScenariosRegisterWallet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Skip()
 	t.Parallel()
 
 	t.Run("Register wallet API call should be successful, ignoring invalid creation date", func(t *test.SystemTest) {
