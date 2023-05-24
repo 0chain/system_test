@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -42,6 +41,11 @@ func TestAllocation(testSetup *testing.T) {
 	err = json.Unmarshal([]byte(output[0]), &blobberDetailList)
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
+
+	var blobberListString []string
+	for _, blobber := range blobberList {
+		blobberListString = append(blobberListString, blobber.Id)
+	}
 
 	var validatorList []climodel.Validator
 	output, err = utils.ListValidators(t, configPath, "--json")
@@ -146,7 +150,7 @@ func TestAllocation(testSetup *testing.T) {
 		require.Equal(t, 0, passedChallenges, "All Challenges should fail")
 
 		// Cancellation Rewards
-		allocCancellationRewards, err := getAllocationCancellationReward(t, strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList)
+		allocCancellationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
 		if err != nil {
 			return
 		}
@@ -367,6 +371,11 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
+	var blobberListString []string
+	for _, blobber := range blobberList {
+		blobberListString = append(blobberListString, blobber.Id)
+	}
+
 	var validatorList []climodel.Validator
 	output, err = utils.ListValidators(t, configPath, "--json")
 	require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
@@ -467,8 +476,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		}
 
 		// Cancellation Rewards
-		curBlock := utils.GetLatestFinalizedBlock(t)
-		allocCancellationRewards, err := getAllocationCancellationReward(t, strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList)
+		allocCancellationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
 		if err != nil {
 			return
 		}
@@ -584,8 +592,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		}
 
 		// Cancellation Rewards
-		curBlock := utils.GetLatestFinalizedBlock(t)
-		allocCancellationRewards, err := getAllocationCancellationReward(t, strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList)
+		allocCancellationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
 		if err != nil {
 			return
 		}
@@ -608,10 +615,10 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 }
 
-func getAllocationCancellationReward(t *test.SystemTest, startBlockNumber, endBlockNumber string, blobberList []climodel.BlobberInfo) ([]int64, error) {
+func getAllocationCancellationReward(t *test.SystemTest, allocationID string, blobberList []string) ([]int64, error) {
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	sharderBaseUrl := utils.GetSharderUrl(t)
-	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/cancellation-rewards?start_block=" + startBlockNumber + "&end_block=" + endBlockNumber)
+	url := fmt.Sprintf(sharderBaseUrl+"/v1/screst/"+StorageScAddress+"/cancellation-rewards?allocation_id=?", allocationID)
 
 	t.Log("URL : ", url)
 
@@ -627,32 +634,19 @@ func getAllocationCancellationReward(t *test.SystemTest, startBlockNumber, endBl
 		return nil, err
 	}
 
-	var allocationCancellationRewards AllocationCancellationRewards
+	var allocationCancellationRewards map[string]ProviderAllocationRewards
 	err = json.Unmarshal(body, &allocationCancellationRewards)
 	if err != nil {
 		return nil, err
 	}
 
-	blobber1TotalReward := int64(0)
-	blobber2TotalReward := int64(0)
+	var result []int64
 
-	for _, reward := range allocationCancellationRewards.DelegateRewards {
-		if reward.ProviderId == blobberList[0].Id {
-			blobber1TotalReward += int64(reward.Amount)
-		} else if reward.ProviderId == blobberList[1].Id {
-			blobber2TotalReward += int64(reward.Amount)
-		}
+	for _, blobber := range blobberList {
+		result = append(result, allocationCancellationRewards[blobber].Total)
 	}
 
-	for _, reward := range allocationCancellationRewards.ProviderRewards {
-		if reward.ProviderId == blobberList[0].Id {
-			blobber1TotalReward += int64(reward.Amount)
-		} else if reward.ProviderId == blobberList[1].Id {
-			blobber2TotalReward += int64(reward.Amount)
-		}
-	}
-
-	return []int64{blobber1TotalReward, blobber2TotalReward}, nil
+	return result, nil
 }
 
 func getAllocationChallengeRewards(t *test.SystemTest, allocationID string) map[string]interface{} {
@@ -729,30 +723,6 @@ func getTotalAllocationChallengeRewards(t *test.SystemTest, allocationID string)
 	}
 
 	return challengeRewards
-}
-
-type AllocationCancellationRewards struct {
-	DelegateRewards []struct {
-		ID          int       `json:"ID"`
-		CreatedAt   time.Time `json:"CreatedAt"`
-		UpdatedAt   time.Time `json:"UpdatedAt"`
-		Amount      int       `json:"amount"`
-		BlockNumber int       `json:"block_number"`
-		PoolId      string    `json:"pool_id"`
-		ProviderId  string    `json:"provider_id"`
-		RewardType  int       `json:"reward_type"`
-		ChallengeId string    `json:"challenge_id"`
-	} `json:"delegate_rewards"`
-	ProviderRewards []struct {
-		ID          int       `json:"ID"`
-		CreatedAt   time.Time `json:"CreatedAt"`
-		UpdatedAt   time.Time `json:"UpdatedAt"`
-		Amount      int       `json:"amount"`
-		BlockNumber int       `json:"block_number"`
-		ProviderId  string    `json:"provider_id"`
-		RewardType  int       `json:"reward_type"`
-		ChallengeId string    `json:"challenge_id"`
-	} `json:"provider_rewards"`
 }
 
 func contains(s []string, e string) bool {
