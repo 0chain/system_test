@@ -444,13 +444,18 @@ func getSortedMinerIds(t *test.SystemTest, sharderBaseURL string) []string {
 	return getSortedNodeIds(t, "getMinerList", sharderBaseURL)
 }
 
-func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []string {
+func getNodeSlice(t *test.SystemTest, endpoint, sharderBaseURL string) []climodel.Node {
 	t.Logf("getting miner or sharder nodes...")
 	url := sharderBaseURL + "/v1/screst/" + minerSmartContractAddress + "/" + endpoint
 	nodeList := cliutil.ApiGetRetries[climodel.NodeList](t, url, nil, restApiRetries)
+	return nodeList.Nodes
+}
+
+func getSortedNodeIds(t *test.SystemTest, endpoint, sharderBaseURL string) []string {
+	nodeList := getNodeSlice(t, endpoint, sharderBaseURL)
 	var nodeIds []string
-	for i := range nodeList.Nodes {
-		nodeIds = append(nodeIds, nodeList.Nodes[i].ID)
+	for i := range nodeList {
+		nodeIds = append(nodeIds, nodeList[i].ID)
 	}
 	sort.Slice(nodeIds, func(i, j int) bool {
 		return nodeIds[i] < nodeIds[j]
