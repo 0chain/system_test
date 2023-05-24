@@ -701,8 +701,8 @@ type Challenge struct {
 	ExpiredN       int              `json:"expired_n"`
 }
 
-func getAllAllocationChallengeRewards(t *test.SystemTest, allocationID string) (map[string]ProviderChallengeRewards, error) {
-	var result map[string]ProviderChallengeRewards
+func getAllAllocationChallengeRewards(t *test.SystemTest, allocationID string) (map[string]ProviderAllocationRewards, error) {
+	var result map[string]ProviderAllocationRewards
 
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	sharderBaseUrl := utils.GetSharderUrl(t)
@@ -728,8 +728,9 @@ func getAllAllocationChallengeRewards(t *test.SystemTest, allocationID string) (
 	return result, nil
 }
 
-type ProviderChallengeRewards struct {
+type ProviderAllocationRewards struct {
 	DelegateRewards map[string]int64 `json:"delegate_rewards"`
 	Amount          int64            `json:"amount"`
 	Total           int64            `json:"total"`
+	ProviderType    string           `json:"provider_type"`
 }
