@@ -40,10 +40,10 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "locked", output[0])
 
-		// Wallet balance should decrement from 5 to 3.9 (0.1 is fees) ZCN
+		// Wallet balance should decrement from 5 to 3.9 (0.01 is fees) ZCN
 		balance, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 3.9, balance)
+		require.Equal(t, 3.99, balance)
 
 		// Read pool balance should increment to 1
 		readPool := getReadPoolInfo(t)
@@ -55,10 +55,10 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 
 		require.Equal(t, "unlocked", output[0])
 
-		// Wallet balance should increment from 4 to 4.8 (0.1 fees for unlocking) ZCN
+		// Wallet balance should increment from 4 to 4.98 (0.01 fees for unlocking) ZCN
 		balance, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 4.8, balance)
+		require.Equal(t, 4.98, balance)
 	})
 
 	t.Run("Should not be able to lock more read tokens than wallet balance", func(t *test.SystemTest) {
@@ -81,7 +81,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		// Wallet balance reduced due to chargeable error (0.1 fees)
 		balance, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 4.9, balance)
+		require.Equal(t, 4.99, balance)
 	})
 
 	t.Run("Should not be able to lock negative read tokens", func(t *test.SystemTest) {
@@ -130,7 +130,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		// Wallet balance gets reduced due to chargeable error (0.1 fees)
 		balance, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 4.9, balance)
+		require.Equal(t, 4.99, balance)
 	})
 
 	t.Run("Missing tokens flag in rp-lock should result in error", func(t *test.SystemTest) {
