@@ -94,7 +94,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 
 		time.Sleep(30 * time.Second)
 
-		downloadCost := sizeInGB(int64(filesize)) * math.Pow10(8) * 4
+		downloadCost := sizeInGB(int64(filesize)) * math.Pow10(8) * 2
 
 		downloadRewards, err := getReadRewards(t, allocationId)
 		require.Nil(t, err, "error getting read rewards")
