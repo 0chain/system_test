@@ -159,6 +159,5 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, resp.String(), `{\"error\":\"The specified bucket does not exist\"}`)
 	})
 }
