@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.8.17-0.20230509132331-5a2445d814e0
+	github.com/0chain/gosdk v1.8.17-0.20230520105043-78179fd60e46
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.28.2
 	github.com/shopspring/decimal v1.3.1

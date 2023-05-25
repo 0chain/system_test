@@ -10,7 +10,6 @@ import (
 func TestListObjects(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("ListObjects should return 200 when all the parameters are correct")
-
 	t.Parallel()
 	t.Run("ListObjects should return 200 when all the parameters are correct", func(t *test.SystemTest) {
 		queryParams := map[string]string{
