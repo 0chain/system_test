@@ -28,16 +28,14 @@ func TestBlobberReadReward(testSetup *testing.T) {
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
+	err = json.Unmarshal([]byte(output[0]), &blobberList)
+	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
+	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
+
 	var blobberListString []string
 	for _, blobber := range blobberList {
 		blobberListString = append(blobberListString, blobber.Id)
 	}
-
-	t.Log("blobberListString", blobberListString)
-
-	err = json.Unmarshal([]byte(output[0]), &blobberList)
-	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
-	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
 	var validatorList []climodel.Validator
 	output, err = utils.ListValidators(t, configPath, "--json")
