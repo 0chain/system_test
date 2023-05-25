@@ -141,9 +141,9 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1TotalReward, blobber2TotalReward, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
 		require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
-
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
+
+	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 
 	t.RunSequentiallyWithTimeout("Client Uploads 30% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
@@ -220,8 +220,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
+	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
@@ -299,8 +299,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
+	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
@@ -408,8 +408,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, validator1Delegate1TotalReward, validator1Delegate2TotalReward, 0.05, "Validator 1 Delegate 1 and Validator 1 Delegate 2 rewards are not equal")
 		require.InEpsilon(t, validator2Delegate1TotalReward, validator2Delegate2TotalReward, 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not equal")
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
+	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
@@ -524,9 +524,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, validator1Delegate1TotalReward*2, validator1Delegate2TotalReward, 0.05, "Validator 1 Delegate 1 and Validator 1 Delegate 2 rewards are not equal")
 		require.InEpsilon(t, validator2Delegate1TotalReward*2, validator2Delegate2TotalReward, 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not equal")
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
-
+	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 }
 
 func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.BlobberInfo, validators []climodel.Validator, configPath string, tokens []float64, numDelegates int) {
