@@ -38,7 +38,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationList, response, err := zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		allocationList, response, err := zboxClient.CreateFreeStorage(t, zboxClient.DefaultMnemonic, walletName, description, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, "blimp")
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Len(t, allocationList, 0)
