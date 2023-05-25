@@ -7,10 +7,38 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// adding comment to run ppipeline again
-func TestZs3ServerOpertions(testSetup *testing.T) {
+const (
+	AccessKey       = "rootroot"
+	SecretAccessKey = "rootroot"
+)
+
+func TestZs3ServerOperations(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
+	// FIXME: we should never return a 500 to the end user
+	t.Run("Zs3 server should return 500 when the action doesn't exist", func(t *test.SystemTest) {
+		queryParams := map[string]string{
+			"accessKey":       AccessKey,
+			"secretAccessKey": SecretAccessKey,
+			"action":          "random-action",
+		}
+		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
+		require.Nil(t, err)
+		require.Equal(t, 500, resp.StatusCode())
+	})
+
+	t.Run("zs3 server should return 500 when the credentials aren't correct", func(t *test.SystemTest) {
+		queryParams := map[string]string{
+			"accessKey":       "wrong-access-key",
+			"secretAccessKey": SecretAccessKey,
+			"action":          "createBucket",
+			"bucketName":      "test",
+		}
+		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
+		require.Nil(t, err)
+		require.Equal(t, 500, resp.StatusCode())
+	})
+
 	t.RunSequentially("CreateBucket should return 200 when all the parameters are correct", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
@@ -22,7 +50,8 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
-	t.RunSequentially("CreateBucket should return error when bucket name already exist", func(t *test.SystemTest) {
+
+	t.RunSequentially("CreateBucket should not return error when bucket name already exist", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -56,8 +85,8 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
+
 	t.RunSequentially("PutObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
-		// t.Skip("wait for the issue to get resolved : https://github.com/0chain/zs3server/issues/21")
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -81,8 +110,8 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
+
 	t.RunSequentially("GetObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
-		// t.Skip("wait for the issue to get resolved : https://github.com/0chain/zs3server/issues/21")
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -109,7 +138,7 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 
-	t.RunSequentially("PutObjects should return error when buckcet name doesnot exist", func(t *test.SystemTest) {
+	t.RunSequentially("PutObjects should return error when buckcet name does not exist", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -124,6 +153,7 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 		require.Equal(t, 500, resp.StatusCode())
 		require.Equal(t, `{"error":"Bucket name contains invalid characters"}`, resp.String())
 	})
+
 	t.RunSequentially("RemoveObject should return 200 all the parameter are correct", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
@@ -148,7 +178,6 @@ func TestZs3ServerOpertions(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("RemoveObject should not return error if object doen't exist", func(t *test.SystemTest) {
-		// t.Skip("wait for the issue to get resolved : https://github.com/0chain/zs3server/issues/22")
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
