@@ -33,6 +33,8 @@ func TestBlobberReadReward(testSetup *testing.T) {
 		blobberListString = append(blobberListString, blobber.Id)
 	}
 
+	t.Log("blobberListString", blobberListString)
+
 	err = json.Unmarshal([]byte(output[0]), &blobberList)
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
