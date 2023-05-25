@@ -547,11 +547,6 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 	for i := 0; i < numDelegates; i++ {
 		for _, blobber := range blobbers {
 
-			if idx == 2 {
-				idx = 0
-				tIdx = 0
-			}
-
 			// add balance to delegate wallet
 			_, err := utils.ExecuteFaucetWithTokensForWallet(t, blobberDelegates[idx], configPath, tokens[tIdx]+1)
 			if err != nil {
@@ -581,11 +576,6 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 
 	for i := 0; i < numDelegates; i++ {
 		for _, validator := range validators {
-			if idx == 2 {
-				idx = 0
-				tIdx = 0
-			}
-
 			// add balance to delegate wallet
 			_, err := utils.ExecuteFaucetWithTokensForWallet(t, validatorDelegates[idx], configPath, tokens[tIdx]+1)
 			if err != nil {

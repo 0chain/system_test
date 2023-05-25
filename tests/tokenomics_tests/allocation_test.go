@@ -395,7 +395,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
-			1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1,
 		}, 1)
 
 		allocSize := 1 * GB
@@ -507,7 +507,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
-			1, 1, 1, 1,
+			1, 1, 1, 1, 1, 1,
 		}, 1)
 
 		allocSize := 1 * GB
