@@ -189,4 +189,38 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
+
+	// FIXME - this should be 400 not 500
+	t.Run("CreateBucket should return 500 when one of more required parameters are missing", func(t *test.SystemTest) {
+		queryParams := map[string]string{
+			"accessKey":       AccessKey,
+			"secretAccessKey": SecretAccessKey,
+			"action":          "createBucket",
+		}
+		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
+		require.Nil(t, err)
+		require.Equal(t, 500, resp.StatusCode())
+	})
+
+	t.Run("ListBuckets should return 500 when one of more required parameters are missing", func(t *test.SystemTest) {
+		queryParams := map[string]string{
+			"secretAccessKey": SecretAccessKey,
+			"action":          "listBucket",
+		}
+		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
+		require.Nil(t, err)
+		require.Equal(t, 500, resp.StatusCode())
+	})
+
+	t.Run("listObjects should return 500 when trying to list objects from un existing bucket", func(t *test.SystemTest) {
+		queryParams := map[string]string{
+			"accessKey":       AccessKey,
+			"secretAccessKey": SecretAccessKey,
+			"action":          "listObjects",
+			"bucketName":      "random-bucket",
+		}
+		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
+		require.Nil(t, err)
+		require.Equal(t, 500, resp.StatusCode())
+	})
 }
