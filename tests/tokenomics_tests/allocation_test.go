@@ -287,9 +287,6 @@ func TestAllocation(testSetup *testing.T) {
 		allocationId, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
 
-		alloc := utils.GetAllocation(t, allocationId)
-		movedToChallengePool := alloc.MovedToChallenge
-
 		// Uploading 10% of allocation
 		remotepath := "/dir/"
 		filesize := 2 * MB
@@ -305,6 +302,9 @@ func TestAllocation(testSetup *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		alloc := utils.GetAllocation(t, allocationId)
+		movedToChallengePool := alloc.MovedToChallenge
 
 		// register a new wallet
 		nonAllocationOwnerWallet := "newwallet"
@@ -330,8 +330,8 @@ func TestAllocation(testSetup *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
-		// sleep for 10 minutes
-		time.Sleep(2 * time.Minute)
+		// sleep for 5 minutes
+		time.Sleep(5 * time.Minute)
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
