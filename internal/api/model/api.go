@@ -5,9 +5,13 @@ import (
 	"io"
 	"time"
 
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"gorm.io/gorm"
 )
+
+const ZCNInt64 = int64(100000000)
+const ZCNFloat64 = float64(1e9)
 
 type HealthyServiceProviders struct {
 	Miners   []string `json:"miners"`
@@ -74,6 +78,38 @@ func (w *SdkWallet) String() (string, error) {
 	return string(out), nil
 }
 
+func (w *Wallet) ToSdkWallet(mnemonics string) *SdkWallet {
+	return &SdkWallet{
+		ClientID:  w.Id,
+		ClientKey: w.PublicKey,
+		Keys: []*SdkKeyPair{{
+			PrivateKey: w.Keys.PrivateKey.SerializeToHexStr(),
+			PublicKey:  w.Keys.PublicKey.SerializeToHexStr(),
+		}},
+		Mnemonics: mnemonics,
+		Version:   w.Version,
+	}
+}
+
+func (w *SdkWallet) ToCliModelWalletFile() *climodel.WalletFile {
+	keys := make([]climodel.KeyPair, 0, len(w.Keys))
+	for _, key := range w.Keys {
+		keys = append(keys, climodel.KeyPair{
+			PublicKey:  key.PublicKey,
+			PrivateKey: key.PrivateKey,
+		})
+	}
+
+	return &climodel.WalletFile{
+		ClientID:    w.ClientID,
+		ClientKey:   w.ClientKey,
+		Keys:        keys,
+		Mnemonic:    w.Mnemonics,
+		Version:     w.Version,
+		DateCreated: w.DateCreated,
+	}
+}
+
 type TransactionData struct {
 	Name  string      `json:"name"`
 	Input interface{} `json:"input"`
@@ -105,10 +141,78 @@ func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse *SCR
 	}
 }
 
+func NewCreateFreeAllocationTransactionData(scRestGetFreeAllocationBlobbersResponse *SCRestGetFreeAllocationBlobbersResponse) TransactionData {
+	return TransactionData{
+		Name:  "free_allocation_request",
+		Input: *scRestGetFreeAllocationBlobbersResponse,
+	}
+}
+
+func NewCreateWritePoolTransactionData(createWritePoolRequest CreateWritePoolRequest) TransactionData {
+	return TransactionData{
+		Name:  "write_pool_lock",
+		Input: &createWritePoolRequest,
+	}
+}
+
+func NewUnlockWritePoolTransactionData(createWritePoolRequest CreateWritePoolRequest) TransactionData {
+	return TransactionData{
+		Name:  "write_pool_unlock",
+		Input: &createWritePoolRequest,
+	}
+}
+
+func NewCreateReadPoolTransactionData() TransactionData {
+	return TransactionData{
+		Name: "read_pool_lock",
+	}
+}
+
+func NewUnlockReadPoolTransactionData() TransactionData {
+	return TransactionData{
+		Name: "read_pool_unlock",
+	}
+}
+
 func NewCreateStackPoolTransactionData(createStakePoolRequest CreateStakePoolRequest) TransactionData {
 	return TransactionData{
 		Name:  "stake_pool_lock",
 		Input: &createStakePoolRequest,
+	}
+}
+
+func NewUnlockStackPoolTransactionData(createStakePoolRequest CreateStakePoolRequest) TransactionData {
+	return TransactionData{
+		Name:  "stake_pool_unlock",
+		Input: &createStakePoolRequest,
+	}
+}
+
+func NewCreateMinerStackPoolTransactionData(createStakePoolRequest CreateStakePoolRequest) TransactionData {
+	return TransactionData{
+		Name:  "addToDelegatePool",
+		Input: &createStakePoolRequest,
+	}
+}
+
+func NewUnlockMinerStackPoolTransactionData(createStakePoolRequest CreateStakePoolRequest) TransactionData {
+	return TransactionData{
+		Name:  "deleteFromDelegatePool",
+		Input: &createStakePoolRequest,
+	}
+}
+
+func NewFreeAllocationTransactionData(freeAllocationRequest *FreeAllocationRequest) TransactionData {
+	return TransactionData{
+		Name:  "free_update_allocation",
+		Input: freeAllocationRequest,
+	}
+}
+
+func NewFreeStorageAssignerTransactionData(freeStorageAssignerRequest *FreeStorageAssignerRequest) TransactionData {
+	return TransactionData{
+		Name:  "add_free_storage_assigner",
+		Input: freeStorageAssignerRequest,
 	}
 }
 
@@ -119,12 +223,33 @@ func NewUpdateAllocationTransactionData(updateAllocationRequest *UpdateAllocatio
 	}
 }
 
+func NewCancelAllocationTransactionData(cancelAllocationRequest *CancelAllocationRequest) TransactionData {
+	return TransactionData{
+		Name:  "cancel_allocation",
+		Input: cancelAllocationRequest,
+	}
+}
+
 func NewUpdateBlobberTransactionData(scRestGetBlobberResponse *SCRestGetBlobberResponse) TransactionData {
 	return TransactionData{
 		Name:  "update_blobber_settings",
 		Input: scRestGetBlobberResponse,
 	}
 }
+
+// ----------------------------------------------------
+// ZCN SC
+// ----------------------------------------------------
+func NewBurnZcnTransactionData(burnZcnRequest *SCRestBurnZcnRequest) TransactionData {
+	return TransactionData{
+		Name:  "burn",
+		Input: burnZcnRequest,
+	}
+}
+
+//----------------------------------------------------
+// End ZCN SC
+//----------------------------------------------------
 
 type InternalTransactionPutRequest struct {
 	TransactionData
@@ -222,6 +347,7 @@ type ClientGetBalanceResponse struct {
 	Txn     string `json:"txn"`
 	Round   int64  `json:"round"`
 	Balance int64  `json:"balance"`
+	Nonce   int64  `json:"nonce"`
 }
 
 type SCStateGetRequest struct {
@@ -294,6 +420,23 @@ type SCRestGetAllocationBlobbersRequest struct {
 	ClientID, ClientKey string
 }
 
+type FreeAllocationData struct {
+	RecipientPublicKey string `json:"recipient_public_key"`
+	Marker             string `json:"marker"`
+}
+
+type SCRestGetClientBalanceResponse struct {
+	Txn     string `json:"txn"`
+	Round   int64  `json:"round"`
+	Balance int64  `json:"balance"`
+	Nonce   int64  `json:"nonce"`
+}
+
+type SCRestGetFreeAllocationBlobbersResponse struct {
+	FreeAllocationData
+	Blobbers *[]string `json:"blobbers"`
+}
+
 type BlobberRequirements struct {
 	DataShards      int64      `json:"data_shards"`
 	ParityShards    int64      `json:"parity_shards"`
@@ -325,6 +468,10 @@ type UpdateAllocationRequest struct {
 	FileOptions          uint16 `json:"file_options"`
 }
 
+type CancelAllocationRequest struct {
+	AllocationID string `json:"allocation_id"`
+}
+
 type SCRestGetBlobberRequest struct {
 	BlobberID string
 }
@@ -351,6 +498,63 @@ type BlobberGetHashnodeResponse struct {
 	Children   []*BlobberGetHashnodeResponse `json:"children,omitempty"`
 }
 
+type SimpleNodeGeolocation struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
+type SimpleNodeResponse struct {
+	ID                            string                `json:"id" validate:"hexadecimal,len=64"`
+	N2NHost                       string                `json:"n2n_host"`
+	Host                          string                `json:"host"`
+	Port                          int                   `json:"port"`
+	Geolocation                   SimpleNodeGeolocation `json:"geolocation"`
+	Path                          string                `json:"path"`
+	PublicKey                     string                `json:"public_key"`
+	ShortName                     string                `json:"short_name"`
+	BuildTag                      string                `json:"build_tag"`
+	TotalStaked                   int64                 `json:"total_stake"`
+	Delete                        bool                  `json:"delete"`
+	NodeType                      string                `json:"node_type,omitempty"`
+	LastHealthCheck               int64                 `json:"last_health_check"`
+	Status                        int                   `json:"-" msg:"-"`
+	LastSettingUpdateRound        int64                 `json:"last_setting_update_round"`
+	RoundServiceChargeLastUpdated int64                 `json:"round_service_charge_last_updated"`
+}
+
+type SCRestGetMinerSharderResponse struct {
+	SimpleNodeResponse `json:"simple_miner"`
+	StakePoolResponse  `json:"stake_pool"`
+	TotalReward        int64 `json:"total_reward"`
+}
+
+type SCRestGetMinersShardersResponse struct {
+	Nodes []*SCRestGetMinerSharderResponse `json:"Nodes"`
+}
+
+type SCRestGetValidatorResponse struct {
+	ValidatorID     string `json:"validator_id"`
+	BaseUrl         string `json:"url"`
+	StakeTotal      int64  `json:"stake_total"`
+	UnstakeTotal    int64  `json:"unstake_total"`
+	PublicKey       string `json:"public_key"`
+	LastHealthCheck int64  `json:"last_health_check"`
+	IsKilled        bool   `json:"is_killed"`
+	IsShutdown      bool   `json:"is_shutdown"`
+
+	// StakePoolSettings
+	DelegateWallet string  `json:"delegate_wallet"`
+	MinStake       int64   `json:"min_stake"`
+	MaxStake       int64   `json:"max_stake"`
+	NumDelegates   int     `json:"num_delegates"`
+	ServiceCharge  float64 `json:"service_charge"`
+
+	TotalServiceCharge       int64 `json:"total_service_charge"`
+	UncollectedServiceCharge int64 `json:"uncollected_service_charge"`
+}
+
+type SCRestGetValidatorsResponse []SCRestGetValidatorResponse
+
 type SCRestGetBlobberResponse struct {
 	ID                string            `json:"id"`
 	BaseURL           string            `json:"url"`
@@ -361,6 +565,12 @@ type SCRestGetBlobberResponse struct {
 	PublicKey         string            `json:"-"`
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 	TotalStake        int64             `json:"total_stake"`
+	SavedData         int64             `json:"saved_data"`
+	ReadData          int64             `json:"read_data"`
+}
+
+type SCRestGetBlobbersResponse struct {
+	Nodes []*SCRestGetBlobberResponse `json:"Nodes"`
 }
 
 type Terms struct {
@@ -377,9 +587,25 @@ type StakePoolSettings struct {
 	ServiceCharge  float64 `json:"service_charge"`
 }
 
+type CreateWritePoolRequest struct {
+	AllocationID string `json:"allocation_id,omitempty"`
+}
+
 type CreateStakePoolRequest struct {
 	ProviderType int    `json:"provider_type,omitempty"`
 	ProviderID   string `json:"provider_id,omitempty"`
+}
+
+type FreeStorageAssignerRequest struct {
+	Name            string  `json:"name,omitempty"`
+	PublicKey       string  `json:"public_key,omitempty"`
+	IndividualLimit float64 `json:"individual_limit,omitempty"`
+	TotalLimit      float64 `json:"total_limit,omitempty"`
+}
+
+type FreeAllocationRequest struct {
+	AllocationID string `json:"allocation_id,omitempty"`
+	Marker       string `json:"marker,omitempty"`
 }
 
 type SCRestGetAllocationResponse struct {
@@ -645,18 +871,25 @@ type SCRestGetStakePoolStatRequest struct {
 }
 
 type SCRestGetStakePoolStatResponse struct {
-	ID           string                      `json:"pool_id"`
-	Balance      int64                       `json:"balance"`
-	Unstake      int64                       `json:"unstake"`
-	Free         int64                       `json:"free"`
-	Capacity     int64                       `json:"capacity"`
-	WritePrice   int64                       `json:"write_price"`
-	OffersTotal  int64                       `json:"offers_total"`
-	UnstakeTotal int64                       `json:"unstake_total"`
-	Delegate     []StakePoolDelegatePoolInfo `json:"delegate"`
-	Penalty      int64                       `json:"penalty"`
-	Rewards      int64                       `json:"rewards"`
-	Settings     StakePoolSettings           `json:"settings"`
+	ID          string                      `json:"pool_id"`
+	Balance     int64                       `json:"balance"`
+	Unstake     int64                       `json:"unstake"`
+	Free        int64                       `json:"free"`
+	Capacity    int64                       `json:"capacity"`
+	WritePrice  int64                       `json:"write_price"`
+	OffersTotal int64                       `json:"offers_total"`
+	Delegate    []StakePoolDelegatePoolInfo `json:"delegate"`
+	Penalty     int64                       `json:"penalty"`
+	Rewards     int64                       `json:"rewards"`
+	Settings    StakePoolSettings           `json:"settings"`
+}
+
+type SCRestGetUserStakePoolStatRequest struct {
+	ClientId string
+}
+
+type SCRestGetUserStakePoolStatResponse struct {
+	Pools map[string]*[]StakePoolDelegatePoolInfo `json:"pools"`
 }
 
 type StakePoolDelegatePoolInfo struct {
@@ -671,3 +904,43 @@ type StakePoolDelegatePoolInfo struct {
 	Status       string `json:"status"`
 	RoundCreated int64  `json:"round_created"`
 }
+
+type StakePoolResponse struct {
+	Pools    map[string]*DelegatePoolResponse `json:"pools"`
+	Reward   int64                            `json:"rewards"`
+	Settings StakePoolSettings                `json:"settings"`
+	Minter   int                              `json:"minter"`
+}
+
+type DelegatePoolResponse struct {
+	DelegatePool
+	RoundPoolLastUpdated int64 `json:"round_pool_last_updated"`
+}
+
+type DelegatePool struct {
+	Balance      int64  `json:"balance"`
+	Reward       int64  `json:"reward"`
+	Status       int    `json:"status"`
+	RoundCreated int64  `json:"round_created"` // used for cool down
+	DelegateID   string `json:"delegate_id"`
+	StakedAt     int64  `json:"staked_at"`
+}
+
+type FreeStorageMarker struct {
+	Assigner   string  `json:"assigner,omitempty"`
+	Recipient  string  `json:"recipient"`
+	FreeTokens float64 `json:"free_tokens"`
+	Timestamp  int64   `json:"timestamp"`
+	Signature  string  `json:"signature,omitempty"`
+}
+
+// ----------------------------------------------
+// ZCN SC
+// ----------------------------------------------
+type SCRestBurnZcnRequest struct {
+	EthereumAddress string `json:"ethereum_address"`
+}
+
+//----------------------------------------------
+// End ZCN SC
+//----------------------------------------------
