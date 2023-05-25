@@ -136,11 +136,11 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		t.Log("Validator 1 Delegates Total Reward: ", validator1DelegatesTotalReward)
 		t.Log("Validator 2 Delegates Total Reward: ", validator2DelegatesTotalReward)
 
-		require.InEpsilon(t, totalReward/totalExpectedReward, 1, 0.05, "Total Reward is not equal to expected reward")
+		require.InEpsilon(t, totalReward, totalExpectedReward, 0.05, "Total Reward is not equal to expected reward")
 
-		require.InEpsilon(t, blobber1TotalReward/blobber2TotalReward, 1, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
-		require.InEpsilon(t, blobber1DelegatesTotalReward/blobber2DelegatesTotalReward, 1, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
-		require.InEpsilon(t, (blobber1TotalReward+blobber1DelegatesTotalReward)/(blobber2TotalReward+blobber2DelegatesTotalReward), 1, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
+		require.InEpsilon(t, blobber1TotalReward, blobber2TotalReward, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
+		require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
+		require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
@@ -214,11 +214,11 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		t.Log("Validator 1 Delegates Total Reward: ", validator1DelegatesTotalReward)
 		t.Log("Validator 2 Delegates Total Reward: ", validator2DelegatesTotalReward)
 
-		require.InEpsilon(t, totalReward/totalExpectedReward, 1, 0.05, "Total Reward is not equal to expected reward")
+		require.InEpsilon(t, totalReward, totalExpectedReward, 0.05, "Total Reward is not equal to expected reward")
 
-		require.InEpsilon(t, blobber1TotalReward/blobber2TotalReward, 1, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
-		require.InEpsilon(t, blobber1DelegatesTotalReward/blobber2DelegatesTotalReward, 1, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
-		require.InEpsilon(t, (blobber1TotalReward+blobber1DelegatesTotalReward)/(blobber2TotalReward+blobber2DelegatesTotalReward), 1, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
+		require.InEpsilon(t, blobber1TotalReward, blobber2TotalReward, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
+		require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
+		require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
@@ -293,11 +293,11 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		t.Log("Validator 1 Delegates Total Reward: ", validator1DelegatesTotalReward)
 		t.Log("Validator 2 Delegates Total Reward: ", validator2DelegatesTotalReward)
 
-		require.InEpsilon(t, totalReward/totalExpectedReward, 1, 0.05, "Total Reward is not equal to expected reward")
+		require.InEpsilon(t, totalReward, totalExpectedReward, 0.05, "Total Reward is not equal to expected reward")
 
-		require.InEpsilon(t, blobber1TotalReward/blobber2TotalReward, 1, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
-		require.InEpsilon(t, blobber1DelegatesTotalReward/blobber2DelegatesTotalReward, 1, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
-		require.InEpsilon(t, (blobber1TotalReward+blobber1DelegatesTotalReward)/(blobber2TotalReward+blobber2DelegatesTotalReward), 1, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
+		require.InEpsilon(t, blobber1TotalReward, blobber2TotalReward, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
+		require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
+		require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 
 		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 	})
