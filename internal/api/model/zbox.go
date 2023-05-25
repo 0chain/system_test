@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/go-resty/resty/v2"
+	resty "github.com/go-resty/resty/v2"
 )
 
 const GB = float64(1024 * 1024 * 1024)
