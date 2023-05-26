@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	climodel "github.com/0chain/system_test/internal/cli/model"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/stretchr/testify/require"
@@ -15,19 +17,24 @@ func TestOwnerUpdate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("should allow update of owner: StorageSC")
 
-	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-		t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
-	}
+	var newOwnerWallet *climodel.Wallet
+	var newOwnerName string
 
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-	newOwnerWallet, err := getWallet(t, configPath)
-	require.Nil(t, err, "error fetching wallet")
+	t.TestSetup("Create new owner wallet", func() {
+		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
+			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+		}
 
-	output, err = createWalletForName(t, configPath, scOwnerWallet)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		newOwnerWallet, err = getWallet(t, configPath)
+		require.Nil(t, err, "error fetching wallet")
 
-	newOwnerName := escapedTestName(t)
+		output, err = createWalletForName(t, configPath, scOwnerWallet)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
+		newOwnerName = escapedTestName(t)
+	})
 
 	t.RunSequentiallyWithTimeout("should allow update of owner: StorageSC", 2*time.Minute, func(t *test.SystemTest) {
 		ownerKey := "owner_id"
@@ -41,7 +48,7 @@ func TestOwnerUpdate(testSetup *testing.T) {
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 		})
 
-		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			ownerKey: newOwnerWallet.ClientID,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -178,7 +185,7 @@ func TestOwnerUpdate(testSetup *testing.T) {
 			require.Len(t, output, 2, strings.Join(output, "\n"))
 		})
 
-		output, err = updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateFaucetSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   ownerKey,
 			"values": newOwnerWallet.ClientID,
 		}, true)

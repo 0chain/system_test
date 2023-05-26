@@ -19,7 +19,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 12*time.Minute, func(t *test.SystemTest) {
 		//TODO: unacceptably slow
 		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
@@ -28,10 +28,10 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "5s",
+			"expire": "1m",
 		})
 
-		time.Sleep(7 * time.Second)
+		time.Sleep(2 * time.Minute)
 
 		allocations := parseListAllocations(t, configPath)
 		_, ok := allocations[allocationID]

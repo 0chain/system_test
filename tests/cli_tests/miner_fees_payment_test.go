@@ -22,12 +22,17 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 	t.Skip("Skip till chain-side bugs are resolved")
 
 	t.Skip("Skipped till re-done")
-	mnconfig := getMinerSCConfiguration(t)
-	minerShare := mnconfig["share_ratio"]
 
-	miners := getMinersList(t)
-	miner := getMinersDetail(t, miners.Nodes[0].SimpleNode.ID).SimpleNode
-	require.NotEmpty(t, miner)
+	var mnconfig map[string]float64
+	var minerShare float64
+	t.TestSetup("Get miner config", func() {
+		mnconfig = getMinerSCConfiguration(t)
+		minerShare = mnconfig["share_ratio"]
+
+		miners := getMinersList(t)
+		miner := getMinersDetail(t, miners.Nodes[0].SimpleNode.ID).SimpleNode
+		require.NotEmpty(t, miner)
+	})
 
 	t.RunSequentiallyWithTimeout("Send ZCN between wallets with Fee flag - Fee must be paid to miners", 60*time.Second, func(t *test.SystemTest) {
 		output, err := createWallet(t, configPath)

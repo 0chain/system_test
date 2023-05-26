@@ -79,15 +79,15 @@ func TestCancelAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error creating allocation:alloc_cancel_failed: value not present", output[0])
 	})
 
-	t.Run("Cancel Expired Allocation Should Fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Cancel Expired Allocation Should Fail", 6*time.Minute, func(t *test.SystemTest) {
 		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "2s",
+			"expire": "1m",
 		})
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(2 * time.Minute)
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)

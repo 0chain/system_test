@@ -4,8 +4,8 @@ import "time"
 
 func DefaultBlobberRequirements(id, publicKey string) BlobberRequirements {
 	return BlobberRequirements{
-		Size:           10000,
-		DataShards:     1,
+		Size:           120000,
+		DataShards:     3,
 		ParityShards:   1,
 		ExpirationDate: time.Now().Add(721 * time.Hour).Unix(),
 		ReadPriceRange: PriceRange{

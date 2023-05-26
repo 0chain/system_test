@@ -22,64 +22,70 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Sharder update num_delegates by delegate wallet should work")
 
-	mnConfig := getMinerSCConfiguration(t)
-
-	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
-	}
-
-	output, err := minerInfo(t, configPath, createParams(map[string]interface{}{
-		"id": sharder01ID,
-	}), true)
-	require.Nil(t, err, "error fetching sharder settings")
-	require.Len(t, output, 1)
-
-	var oldSharderInfo climodel.Node
-	err = json.Unmarshal([]byte(output[0]), &oldSharderInfo)
-	require.Nil(t, err, "error unmarhsalling mn-info json output")
-	require.NotEmpty(t, oldSharderInfo)
-
-	sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
-
-	found := false
+	var cooldownPeriod int64
+	var lastRoundOfSettingUpdate int64
 	var sharder climodel.Sharder
-	for _, sharder = range sharders {
-		if sharder.ID == sharder01ID {
-			found = true
-			break
+	var mnConfig map[string]float64
+
+	t.TestSetup("Get list of sharders", func() {
+		mnConfig = getMinerSCConfiguration(t)
+
+		if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
+			t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 		}
-	}
 
-	if !found {
-		t.Skip("Skipping update test settings as delegate wallet not found. Please the wallets on https://github.com/0chain/actions/blob/master/run-system-tests/action.yml match delegate wallets on rancher.")
-	}
+		output, err := minerInfo(t, configPath, createParams(map[string]interface{}{
+			"id": sharder01ID,
+		}), true)
+		require.Nil(t, err, "error fetching sharder settings")
+		require.Len(t, output, 1)
 
-	cooldownPeriod := int64(mnConfig["cooldown_period"]) // Updating miner settings has a cooldown of this many rounds
-	lastRoundOfSettingUpdate := int64(0)
+		var oldSharderInfo climodel.Node
+		err = json.Unmarshal([]byte(output[0]), &oldSharderInfo)
+		require.Nil(t, err, "error unmarhsalling mn-info json output")
+		require.NotEmpty(t, oldSharderInfo)
 
-	// revert sharder node settings after test
-	t.Cleanup(func() {
-		currRound := getCurrentRound(t)
+		sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
 
-		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
-				currRound = getCurrentRound(t)
+		found := false
+		for _, sharder = range sharders {
+			if sharder.ID == sharder01ID {
+				found = true
+				break
 			}
 		}
 
-		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":            sharder01ID,
-			"num_delegates": oldSharderInfo.Settings.MaxNumDelegates,
-			"sharder":       "",
-		}), true)
-		require.Nil(t, err, "error reverting sharder settings after test")
-		require.Len(t, output, 2)
-		require.Equal(t, "settings updated", output[0])
-		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
+		if !found {
+			t.Skip("Skipping update test settings as delegate wallet not found. Please the wallets on https://github.com/0chain/actions/blob/master/run-system-tests/action.yml match delegate wallets on rancher.")
+		}
+
+		cooldownPeriod = int64(mnConfig["cooldown_period"]) // Updating miner settings has a cooldown of this many rounds
+		lastRoundOfSettingUpdate = int64(0)
+
+		// revert sharder node settings after test
+		t.Cleanup(func() {
+			currRound := getCurrentRound(t)
+
+			if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
+				for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
+					// dummy transactions to increase round
+					for i := 0; i < 5; i++ {
+						_, _ = executeFaucetWithTokens(t, configPath, 2.0)
+					}
+					currRound = getCurrentRound(t)
+				}
+			}
+
+			output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
+				"id":            sharder01ID,
+				"num_delegates": oldSharderInfo.Settings.MaxNumDelegates,
+				"sharder":       "",
+			}), true)
+			require.Nil(t, err, "error reverting sharder settings after test")
+			require.Len(t, output, 2)
+			require.Equal(t, "settings updated", output[0])
+			require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
+		})
 	})
 
 	t.RunSequentially("Sharder update num_delegates by delegate wallet should work", func(t *test.SystemTest) {

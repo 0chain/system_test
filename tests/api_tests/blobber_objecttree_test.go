@@ -27,7 +27,7 @@ func TestObjectTree(testSetup *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath, _ := sdkClient.UploadFile(t, allocationID)
 		remoteFilePath = "/" + remoteFilePath
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
@@ -92,7 +92,7 @@ func TestObjectTree(testSetup *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath, _ := sdkClient.UploadFile(t, allocationID)
 		remoteFilePath = "/" + remoteFilePath
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
@@ -122,7 +122,7 @@ func TestObjectTree(testSetup *testing.T) {
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		// TODO: replace with native "Upload API" call
-		remoteFilePath := sdkClient.UploadFile(t, allocationID)
+		remoteFilePath, _ := sdkClient.UploadFile(t, allocationID)
 		remoteFilePath = "/" + remoteFilePath
 
 		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)

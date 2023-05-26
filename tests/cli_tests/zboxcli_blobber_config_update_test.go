@@ -19,65 +19,67 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("update blobber capacity should work")
 
-	if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
-		t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
-	}
-
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-	output, err = createWalletForName(t, configPath, blobberOwnerWallet)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-	output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 1, strings.Join(output, "\n"))
-
-	var blobberList []climodel.BlobberDetails
-	err = json.Unmarshal([]byte(output[0]), &blobberList)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Greater(t, len(blobberList), 0, "blobber list is empty")
-
-	intialBlobberInfo := blobberList[0]
-
-	t.Cleanup(func() {
+	var intialBlobberInfo climodel.BlobberDetails
+	t.TestSetup("Create wallet, execute faucet, get blobber details", func() {
+		if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
+			t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
+		}
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": intialBlobberInfo.Capacity}))
-		require.Nil(t, err, strings.Join(output, "\n"))
+		output, err = createWalletForName(t, configPath, blobberOwnerWallet)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}))
+		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
 		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "min_lock_demand": intialBlobberInfo.Terms.Min_lock_demand}))
+		var blobberList []climodel.BlobberDetails
+		err = json.Unmarshal([]byte(output[0]), &blobberList)
 		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Greater(t, len(blobberList), 0, "blobber list is empty")
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": intialBlobberInfo.StakePoolSettings.MaxNumDelegates}))
-		require.Nil(t, err, strings.Join(output, "\n"))
+		intialBlobberInfo = blobberList[0]
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "service_charge": intialBlobberInfo.StakePoolSettings.ServiceCharge}))
-		require.Nil(t, err, strings.Join(output, "\n"))
+		t.Cleanup(func() {
+			output, err := createWallet(t, configPath)
+			require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": intToZCN(intialBlobberInfo.Terms.Read_price)}))
-		require.Nil(t, err, strings.Join(output, "\n"))
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": intialBlobberInfo.Capacity}))
+			require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": intToZCN(intialBlobberInfo.Terms.Write_price)}))
-		require.Nil(t, err, strings.Join(output, "\n"))
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "min_lock_demand": intialBlobberInfo.Terms.Min_lock_demand}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": intialBlobberInfo.StakePoolSettings.MaxNumDelegates}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "service_charge": intialBlobberInfo.StakePoolSettings.ServiceCharge}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": intToZCN(intialBlobberInfo.Terms.Read_price)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": intToZCN(intialBlobberInfo.Terms.Write_price)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		})
+
+		// init enough tokens to blobber owner wallet to issue txns
+		for i := 0; i < 3; i++ {
+			_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
+			require.NoError(t, err)
+		}
 	})
-
-	// init enough tokens to blobber owner wallet to issue txns
-	for i := 0; i < 3; i++ {
-		_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
-		require.NoError(t, err)
-	}
 
 	t.RunSequentially("update blobber capacity should work", func(t *test.SystemTest) {
 		// create wallet for normal user
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-		newCapacity := 99 * GB
+		newCapacity := 301 * GB
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": newCapacity}))
 		require.Nil(t, err, strings.Join(output, "\n"))

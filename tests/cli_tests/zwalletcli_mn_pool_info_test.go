@@ -19,34 +19,36 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 
 	t.Parallel()
 
-	if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
-	}
-
-	sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
-
-	sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
-	require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
-
 	var sharder climodel.Sharder
-	for _, sharder = range sharders {
-		if sharder.ID != sharderNodeDelegateWallet.ClientID {
-			break
-		}
-	}
-
-	if _, err := os.Stat("./config/" + miner02NodeDelegateWalletName + "_wallet.json"); err != nil {
-		t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner02NodeDelegateWalletName+"_wallet.json")
-	}
-
-	miners := getMinersListForWallet(t, miner02NodeDelegateWalletName)
-
 	var miner climodel.Node
-	for _, miner = range miners.Nodes {
-		if miner.ID == miner03ID {
-			break
+	t.TestSetup("get miners and sharders", func() {
+		if _, err := os.Stat("./config/" + sharder01NodeDelegateWalletName + "_wallet.json"); err != nil {
+			t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 		}
-	}
+
+		sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
+
+		sharderNodeDelegateWallet, err := getWalletForName(t, configPath, sharder01NodeDelegateWalletName)
+		require.Nil(t, err, "error fetching sharderNodeDelegate wallet")
+
+		for _, sharder = range sharders {
+			if sharder.ID != sharderNodeDelegateWallet.ClientID {
+				break
+			}
+		}
+
+		if _, err := os.Stat("./config/" + miner02NodeDelegateWalletName + "_wallet.json"); err != nil {
+			t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner02NodeDelegateWalletName+"_wallet.json")
+		}
+
+		miners := getMinersListForWallet(t, miner02NodeDelegateWalletName)
+
+		for _, miner = range miners.Nodes {
+			if miner.ID == miner03ID {
+				break
+			}
+		}
+	})
 
 	var (
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
