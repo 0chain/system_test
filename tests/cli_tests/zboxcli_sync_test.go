@@ -94,7 +94,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		assertFileExistenceRecursively(t, mockFolderStructure, files)
 	})
 
-	t.RunWithTimeout("Sync path with 1 file to empty allocation and download the file should work", 2*time.Minute, func(t *test.SystemTest) {
+	t.Run("Sync path with 1 file to empty allocation and download the file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		createAllocationTestTeardown(t, allocationID)
 
@@ -165,7 +165,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		}
 	})
 
-	t.RunWithTimeout("Sync path with 1 file encrypted to empty allocation and download the file should work", 2*time.Minute, func(t *test.SystemTest) {
+	t.Run("Sync path with 1 file encrypted to empty allocation and download the file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		createAllocationTestTeardown(t, allocationID)
 

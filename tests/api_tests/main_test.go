@@ -15,13 +15,17 @@ import (
 )
 
 var (
-	apiClient          *client.APIClient
-	zs3Client          *client.ZS3Client
-	sdkClient          *client.SDKClient
-	zboxClient         *client.ZboxClient
-	sdkWallet          *model.Wallet
-	sdkWalletMnemonics string
-	parsedConfig       *config.Config
+	apiClient                   *client.APIClient
+	zs3Client                   *client.ZS3Client
+	sdkClient                   *client.SDKClient
+	zboxClient                  *client.ZboxClient
+	sdkWallet                   *model.Wallet
+	sdkWalletMnemonics          string
+	ownerWallet                 *model.Wallet
+	ownerWalletMnemonics        string
+	blobberOwnerWallet          *model.Wallet
+	blobberOwnerWalletMnemonics string
+	parsedConfig                *config.Config
 )
 
 func TestMain(m *testing.M) {
@@ -51,6 +55,12 @@ func TestMain(m *testing.M) {
 	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
 	sdkWallet = apiClient.CreateWalletForMnemonic(t, sdkWalletMnemonics)
 	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
+
+	blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics
+	blobberOwnerWallet = apiClient.CreateWalletForMnemonic(t, blobberOwnerWalletMnemonics)
+
+	ownerWalletMnemonics = parsedConfig.OwnerWalletMnemonics
+	ownerWallet = apiClient.CreateWalletForMnemonic(t, ownerWalletMnemonics)
 
 	os.Exit(m.Run())
 }

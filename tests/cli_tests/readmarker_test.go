@@ -25,12 +25,15 @@ func TestReadMarker(testSetup *testing.T) {
 
 	const blobbersRequiredForDownload = 4 // download needs (data shards + 1) number of blobbers
 
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
-	sharderUrl := getSharderUrl(t)
+	var sharderUrl string
+	t.TestSetup("Create wallet and temp directories, get sharder url", func() {
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		sharderUrl = getSharderUrl(t)
 
-	err = os.MkdirAll("tmp", os.ModePerm)
-	require.Nil(t, err)
+		err = os.MkdirAll("tmp", os.ModePerm)
+		require.Nil(t, err)
+	})
 
 	t.Run("After downloading a file, return a readmarker for each blobber used in download", func(t *test.SystemTest) {
 		allocSize := int64(2048)
@@ -362,7 +365,7 @@ func TestReadMarker(testSetup *testing.T) {
 		require.Len(t, readMarkers, blobbersRequiredForDownload)
 
 		for _, rm := range readMarkers {
-			require.Equal(t, rm.ReadCounter, int64(6))
+			require.Equal(t, int64(6), rm.ReadCounter)
 		}
 
 		afterCount := CountReadMarkers(t, allocationID, sharderUrl)

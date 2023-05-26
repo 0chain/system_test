@@ -467,6 +467,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		// Upload 1 MB file
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
+		// Wait for write marker to be redeemed
+		time.Sleep(16 * time.Second)
 		// Get initial write pool
 		initialAllocation := getAllocation(t, allocationID)
 
@@ -673,6 +675,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
 		// Get initial write pool
+		time.Sleep(16 * time.Second)
 		initialAllocation := getAllocation(t, allocationID)
 
 		// Rename file
