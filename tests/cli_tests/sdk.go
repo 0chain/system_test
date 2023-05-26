@@ -14,7 +14,6 @@ import (
 	"github.com/0chain/system_test/internal/api/util/crypto"
 )
 
-// getBlobberNotPartOfAllocation returns a blobber not part of current allocation
 func InitSDK(wallet, configFile string) error {
 	f, err := os.Open(wallet)
 	if err != nil {
@@ -39,6 +38,7 @@ func InitSDK(wallet, configFile string) error {
 	return err
 }
 
+// GetBlobberNotPartOfAllocation returns a blobber not part of current allocation
 func GetBlobberNotPartOfAllocation(walletname, configFile, allocationID string) (string, error) {
 	err := InitSDK(walletname, configFile)
 	if err != nil {

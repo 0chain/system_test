@@ -828,6 +828,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		// assert that no more blobber was added
 		require.Equal(t, len(alloc.Blobbers), len(updatedAlloc.Blobbers))
 	})
+
 	t.Run("Update allocation with add blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
 		allocSize := int64(2048)
