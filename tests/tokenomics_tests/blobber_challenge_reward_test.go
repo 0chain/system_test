@@ -76,7 +76,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 0.1 * GB
+		filesize := 0.3 * GB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -154,7 +154,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 0.3 * GB
+		filesize := 0.1 * GB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -409,7 +409,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, validator2Delegate1TotalReward, validator2Delegate2TotalReward, 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not equal")
 
 	})
-	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 2)
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
@@ -525,7 +525,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, validator2Delegate1TotalReward*2, validator2Delegate2TotalReward, 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not equal")
 
 	})
-	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 2)
 }
 
 func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.BlobberInfo, validators []climodel.Validator, configPath string, tokens []float64, numDelegates int) {
