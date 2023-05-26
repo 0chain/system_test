@@ -76,7 +76,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 0.3 * GB
+		filesize := 0.1 * GB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -154,7 +154,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 0.1 * GB
+		filesize := 0.3 * GB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
