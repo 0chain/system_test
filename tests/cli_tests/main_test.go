@@ -107,16 +107,6 @@ var tenderlyClient *tenderly.Client
 func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
 	configDir = os.Getenv("CONFIG_DIR")
-	bridgeClientConfigFile = os.Getenv("BRIDGE_CONFIG_FILE")
-	bridgeOwnerConfigFile = os.Getenv("BRIDGE_OWNER_CONFIG_FILE")
-
-	if bridgeClientConfigFile == "" {
-		bridgeClientConfigFile = DefaultConfigBridgeFileName
-	}
-
-	if bridgeOwnerConfigFile == "" {
-		bridgeOwnerConfigFile = DefaultConfigOwnerFileName
-	}
 
 	if configDir == "" {
 		configDir = getConfigDir()
