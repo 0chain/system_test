@@ -1236,7 +1236,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "pre-redeeming read marker")
 	})
 
-	t.RunWithTimeout("Download File using Expired Allocation Should Fail", 7*time.Minute, func(t *test.SystemTest) {
+	t.Run("Download File using Expired Allocation Should Fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
@@ -1294,6 +1294,94 @@ func TestDownload(testSetup *testing.T) {
 			strings.TrimSuffix(os.TempDir(), "/")+"/"+filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[0])
+	})
+
+	t.Run("Download Moved File Should Work", func(t *test.SystemTest) {
+		allocSize := int64(2048)
+		filesize := int64(256)
+		remotepath := "/"
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 9,
+		})
+
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		originalFileChecksum := generateChecksum(t, filename)
+
+		// Delete the uploaded file, since we will be downloading it now
+		err := os.Remove(filename)
+		require.Nil(t, err)
+
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		err = os.Remove("tmp/" + filepath.Base(filename))
+		require.Nil(t, err)
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
+
+		newRemotePath := "/dir1/"
+
+		newFileName := generateFileAndUpload(t, allocationID, newRemotePath, filesize)
+		newFileChecksum := generateChecksum(t, newFileName)
+
+		err = os.Remove(newFileName)
+		require.Nil(t, err)
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": newRemotePath + filepath.Base(newFileName),
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(newFileName))
+
+		downloadedFileChecksum = generateChecksum(t, "tmp/"+filepath.Base(newFileName))
+		require.Equal(t, newFileChecksum, downloadedFileChecksum)
+
+		err = os.Remove("tmp/" + filepath.Base(newFileName))
+		require.Nil(t, err)
+
+		remotepath += filepath.Base(filename)
+		destpath := "/child/"
+		output, err = moveFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"destpath":   destpath,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf(remotepath+" moved"), output[0])
+
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": destpath + filepath.Base(filename),
+			"localpath":  "tmp/",
+		}), true)
+
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
+		downloadedFileChecksum = generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 }
 
