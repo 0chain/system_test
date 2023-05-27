@@ -1,7 +1,6 @@
 package api_tests
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -17,7 +16,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 	})
 
-	t.RunSequentially("Get referrals with correct CSRF and private auth should work properly", func(t *test.SystemTest) {
+	t.RunSequentially("Get referral code with correct CSRF and private auth should work properly", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
@@ -53,7 +52,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxRferral)
 		require.Equal(t, int64(0), zboxRferral.UserScore, "referral count should be 0 initially")
-		require.Equal(t, int64(1), zboxRferral.UserRank, "referral rank should be 1 initially")
+		require.Equal(t, int64(0), zboxRferral.UserRank, "referral rank should be 0 initially")
 		require.Equal(t, zboxClient.DefaultPhoneNumber, zboxRferral.UserPhone, "phone should be same")
 	})
 
@@ -65,7 +64,6 @@ func Test0BoxReferral(testSetup *testing.T) {
 
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
-		fmt.Println("---->", firebaseToken.IdToken)
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
