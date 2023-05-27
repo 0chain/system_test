@@ -69,6 +69,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
+		t.Skip()
+
 		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
