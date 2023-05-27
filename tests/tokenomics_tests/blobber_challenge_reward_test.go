@@ -142,7 +142,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 	})
-
 	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 
 	t.RunSequentiallyWithTimeout("Client Uploads 30% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -550,10 +549,7 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 
 			// add balance to delegate wallet
 			_, err := utils.ExecuteFaucetWithTokensForWallet(t, blobberDelegates[idx], configPath, tokens[tIdx]+1)
-			if err != nil {
-				t.Log(err)
-				return
-			}
+			require.Nil(t, err, "Error executing faucet")
 
 			t.Log("Staking tokens for blobber: ", blobber.Id)
 
@@ -562,10 +558,7 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 				"blobber_id": blobber.Id,
 				"tokens":     tokens[tIdx],
 			}), true)
-			if err != nil {
-				t.Log(err)
-				return
-			}
+			require.Nil(t, err, "Error staking tokens")
 
 			idx++
 			tIdx++
@@ -579,20 +572,14 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 		for _, validator := range validators {
 			// add balance to delegate wallet
 			_, err := utils.ExecuteFaucetWithTokensForWallet(t, validatorDelegates[idx], configPath, tokens[tIdx]+1)
-			if err != nil {
-				t.Log(err)
-				return
-			}
+			require.Nil(t, err, "Error executing faucet")
 
 			// stake tokens
 			_, err = utils.StakeTokensForWallet(t, configPath, validatorDelegates[idx], utils.CreateParams(map[string]interface{}{
 				"validator_id": validator.ID,
 				"tokens":       tokens[tIdx],
 			}), true)
-			if err != nil {
-				t.Log(err)
-				return
-			}
+			require.Nil(t, err, "Error staking tokens")
 
 			idx++
 			tIdx++
@@ -601,7 +588,7 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 	}
 }
 
-func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.BlobberInfo, validators []climodel.Validator, configPath string, numDelegates int, options ...bool) {
+func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.BlobberInfo, validators []climodel.Validator, configPath string, numDelegates int) {
 	var blobberDelegates []string
 	var validatorDelegates []string
 
@@ -620,13 +607,12 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []climod
 	for i := 0; i < numDelegates; i++ {
 
 		for _, blobber := range blobbers {
+			t.Log("Unstaking tokens for blobber: ", blobber.Id)
 			// unstake tokens
 			_, err := utils.UnstakeTokensForWallet(t, configPath, blobberDelegates[idx], utils.CreateParams(map[string]interface{}{
 				"blobber_id": blobber.Id,
 			}))
-			if err != nil {
-				t.Log(err)
-			}
+			require.Nil(t, err, "Error unstaking tokens")
 
 			idx++
 		}
@@ -637,13 +623,12 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []climod
 	for i := 0; i < numDelegates; i++ {
 
 		for _, validator := range validators {
+			t.Log("Unstaking tokens for validator: ", validator.ID)
 			// unstake tokens
 			_, err := utils.UnstakeTokensForWallet(t, configPath, validatorDelegates[idx], utils.CreateParams(map[string]interface{}{
 				"validator_id": validator.ID,
 			}))
-			if err != nil {
-				t.Log(err)
-			}
+			require.Nil(t, err, "Error unstaking tokens")
 
 			idx++
 		}
