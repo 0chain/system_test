@@ -13,6 +13,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	X_APP_CLIENT_ID        = "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9"
+	X_APP_CLIENT_KEY       = "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96"
+	X_APP_CLIENT_SIGNATURE = "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a"
+)
+
 func Test0BoxFreeStorage(testSetup *testing.T) {
 	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
@@ -55,8 +61,11 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 
 		marker, markerResponse, err := UnmarshalMarkerData(storageMarker)
 		require.Nil(t, err)
-		require.Equal(t, marker.Assigner, zboxClient.DefaultRecieverId)
-		require.Equal(t, markerResponse.RecipientPublicKey, zboxClient.DefaultPhoneNumber)
+		require.Equal(t, X_APP_CLIENT_ID, marker.Recipient)
+		require.Equal(t, X_APP_CLIENT_SIGNATURE, marker.Signature)
+		require.Equal(t, marker.Assigner, "0chain")
+		require.Equal(t, markerResponse.RecipientPublicKey, X_APP_CLIENT_KEY)
+		require.Positive(t, marker.FreeTokens)
 	})
 
 	t.RunSequentially("Create FreeStorage should not work more than once", func(t *test.SystemTest) {
