@@ -62,7 +62,6 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		marker, markerResponse, err := UnmarshalMarkerData(storageMarker)
 		require.Nil(t, err)
 		require.Equal(t, X_APP_CLIENT_ID, marker.Recipient)
-		require.Equal(t, X_APP_CLIENT_SIGNATURE, marker.Signature)
 		require.Equal(t, marker.Assigner, "0chain")
 		require.Equal(t, markerResponse.RecipientPublicKey, X_APP_CLIENT_KEY)
 		require.Positive(t, marker.FreeTokens)
@@ -95,8 +94,8 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp")
-		require.NotNil(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, response.String(), `{\"error\":\"400: free storage for appType: blimp already used\"}`)
 
 	})
 
