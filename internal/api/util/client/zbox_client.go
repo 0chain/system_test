@@ -313,7 +313,7 @@ func (c *ZboxClient) CreateFreeStorage(t *test.SystemTest, mnemonic, walletName,
 			"X-App-Type":             appType,
 		},
 		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
+	}, HttpGETMethod)
 
 	return ZboxFreeStorage, resp, err
 }
