@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -46,43 +45,48 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		decodedBytes, err := base64.StdEncoding.DecodeString(storageMarker.Marker)
-		if err != nil {
-			fmt.Println("Error decoding string:", err)
-			return
-		}
-
-		// Converting bytes to string
-		decodedString := string(decodedBytes)
-		t.Logf("the decoded stringg is %v ", decodedString)
-		// Printing the decoded string
-		fmt.Println("Decoded string:", decodedString)
-
-		// Removing whitespace
-
-		// Unmarshaling into struct
-		var markerResponse model.ZboxFreeStorageMarkerResponse
-		err = json.Unmarshal([]byte(decodedString), &markerResponse)
-		if err != nil {
-			fmt.Println("Error unmarshaling JSON:", err)
-			return
-		}
-		decodedBytes, err = base64.StdEncoding.DecodeString(markerResponse.Marker)
-		if err != nil {
-			fmt.Println("Error decoding string:", err)
-			return
-		}
-
-		// Converting bytes to string
-		decodedString = string(decodedBytes)
-		var marker model.ZboxFreeStorageMarker
-		err = json.Unmarshal([]byte(decodedString), &marker)
-		if err != nil {
-			fmt.Println("Error unmarshaling JSON:", err)
-			return
-		}
+		marker, markerResponse := UnmarshalData(storageMarker)
+		require.Equal(t, marker.Assigner, zboxClient.DefaultRecieverId)
+		require.Equal(t, markerResponse.RecipientPublicKey, zboxClient.DefaultPhoneNumber)
 	})
 }
-func removeWhitespace(s string) string {
-	return strings.ReplaceAll(s, " ", "")
+
+func UnmarshalData(storage *model.ZboxFreeStorage) (model.ZboxFreeStorageMarker, model.ZboxFreeStorageMarkerResponse) {
+	decodedBytes, err := base64.StdEncoding.DecodeString(storageMarker.Marker)
+	if err != nil {
+		fmt.Println("Error decoding string:", err)
+		return
+	}
+
+	// Converting bytes to string
+	decodedString := string(decodedBytes)
+	t.Logf("the decoded stringg is %v ", decodedString)
+	// Printing the decoded string
+	fmt.Println("Decoded string:", decodedString)
+
+	// Removing whitespace
+
+	// Unmarshaling into struct
+	var markerResponse model.ZboxFreeStorageMarkerResponse
+	err = json.Unmarshal([]byte(decodedString), &markerResponse)
+	if err != nil {
+		fmt.Println("Error unmarshaling JSON:", err)
+		return model.ZboxFreeStorageMarker{}, model.ZboxFreeStorageMarkerResponse{}
+	}
+	decodedBytes, err = base64.StdEncoding.DecodeString(markerResponse.Marker)
+	if err != nil {
+		fmt.Println("Error decoding string:", err)
+		return model.ZboxFreeStorageMarker{}, model.ZboxFreeStorageMarkerResponse{}
+	}
+
+	// Converting bytes to string
+	decodedString = string(decodedBytes)
+	var marker model.ZboxFreeStorageMarker
+	err = json.Unmarshal([]byte(decodedString), &marker)
+	if err != nil {
+		fmt.Println("Error unmarshaling JSON:", err)
+		return model.ZboxFreeStorageMarker{}, model.ZboxFreeStorageMarkerResponse{}
+	}
+	return marker, markerResponse
+
 }
