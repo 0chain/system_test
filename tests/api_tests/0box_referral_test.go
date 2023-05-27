@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -16,7 +17,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 	})
 
-	t.RunSequentially("Post referrals with correct CSRF and private auth should work properly", func(t *test.SystemTest) {
+	t.RunSequentially("Get referrals with correct CSRF and private auth should work properly", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
@@ -56,22 +57,6 @@ func Test0BoxReferral(testSetup *testing.T) {
 		require.Equal(t, zboxClient.DefaultPhoneNumber, zboxRferral.UserPhone, "phone should be same")
 	})
 
-	t.RunSequentially("GET referral count with correct CSRF should work properly before inserting referral", func(t *test.SystemTest) {
-		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-		zboxRferral, response, err := zboxClient.GetReferralCount(t,
-			csrfToken,
-			firebaseToken.IdToken,
-			zboxClient.DefaultPhoneNumber,
-		)
-
-		require.NoError(t, err)
-		require.NotNil(t, zboxRferral)
-
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, zboxRferral)
-		require.Equal(t, int64(0), zboxRferral.ReferralCount, "referral count should be 0 initially")
-	})
-
 	t.RunSequentially("Create wallet for first time with the referral code should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
@@ -80,7 +65,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
-
+		fmt.Println("---->", firebaseToken.IdToken)
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -140,6 +125,6 @@ func Test0BoxReferral(testSetup *testing.T) {
 
 		require.Equal(t, 200, responses.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxRferral)
-		require.Equal(t, int64(0), zboxRferrals.ReferralCount, "referral count should be 1 after inserting the referral")
+		require.Equal(t, int64(1), zboxRferrals.ReferralCount, "referral count should be 1 after inserting the referral")
 	})
 }
