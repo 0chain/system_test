@@ -69,8 +69,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
-		t.Skip()
-
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
@@ -640,35 +638,6 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []string
 			idx++
 		}
 	}
-}
-
-func getAllChallenges(t *test.SystemTest, allocationID string) ([]Challenge, error) {
-	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
-	sharderBaseUrl := utils.GetSharderUrl(t)
-	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/all-challenges?allocation_id=" + allocationID)
-
-	t.Log("Allocation challenge list url: ", url)
-
-	var result []Challenge
-
-	res, _ := http.Get(url)
-
-	t.Log("Allocation challenge res body ", res.Body)
-
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-		}
-	}(res.Body)
-
-	body, _ := io.ReadAll(res.Body)
-
-	err := json.Unmarshal(body, &result)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
 }
 
 type Challenge struct {

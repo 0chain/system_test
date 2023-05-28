@@ -782,16 +782,19 @@ func calculateWeight(wp, rp, X, R, stakes, challenges float64) float64 {
 }
 
 func countPassedChallengesForBlobberAndAllocation(t *test.SystemTest, allocationID, blobberID string) float64 {
-	challenges, _ := getAllChallenges(t, allocationID)
 
-	var passedChallenges float64
-	passedChallenges = 0
+	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+	sharderBaseUrl := utils.GetSharderUrl(t)
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/passed-challenges?allocation_id=" + allocationID)
+	var response map[string]int
 
-	for _, challenge := range challenges {
-		if challenge.Passed && challenge.BlobberID == blobberID {
-			passedChallenges++
-		}
+	res, _ := http.Get(url)
+
+	// decode and save the res body to response
+	err := json.NewDecoder(res.Body).Decode(&response)
+	if err != nil {
+		return 0
 	}
 
-	return passedChallenges
+	return float64(response[blobberID])
 }

@@ -132,27 +132,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		allocation := utils.GetAllocation(t, allocationId)
 
-		// get all challenges
-		challenges, err := getAllChallenges(t, allocationId)
-		require.Nil(t, err, "Error getting all challenges", strings.Join(output, "\n"))
-
-		passedChallenges := 0
-
-		for _, challenge := range challenges {
-			if challenge.Passed {
-				passedChallenges++
-			}
-			//require.True(t, challenge.Passed != true, "All Challenges should be passed")
-
-			t.Log(challenge.CreatedAt, allocation.ExpirationDate)
-		}
-
-		failedChallenges := len(challenges) - passedChallenges
-
-		t.Log("passedChallenges", passedChallenges)
-		t.Log("failedChallenges", failedChallenges)
-
-		require.Equal(t, 0, passedChallenges, "All Challenges should fail")
+		require.Equal(t, 0, allocation.Stats.SuccessChallenges, "All Challenges should fail")
 
 		// Cancellation Rewards
 		allocCancellationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)

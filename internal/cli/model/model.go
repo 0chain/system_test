@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/0chain/system_test/internal/api/model"
 	"time"
 
 	"github.com/0chain/gosdk/core/common"
@@ -62,6 +63,8 @@ type Allocation struct {
 	// Stats          *AllocationStats          `json:"stats"`
 	TimeUnit    time.Duration `json:"time_unit"`
 	IsImmutable bool          `json:"is_immutable"`
+
+	Stats model.AllocationStats `json:"stats"`
 
 	WritePool int64 `json:"write_pool"`
 
