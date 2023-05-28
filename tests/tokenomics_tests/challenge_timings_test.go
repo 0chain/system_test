@@ -2,6 +2,7 @@ package tokenomics_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/0chain/gosdk/core/common"
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
@@ -444,4 +445,33 @@ type ChallengeTiming struct {
 	Cancelled common.Timestamp `json:"cancelled"`
 	// Expiration is when challenge is marked as expired by blobber.
 	Expiration common.Timestamp `json:"expiration"`
+}
+
+func getAllChallenges(t *test.SystemTest, allocationID string) ([]Challenge, error) {
+	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+	sharderBaseUrl := utils.GetSharderUrl(t)
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/all-challenges?allocation_id=" + allocationID)
+
+	t.Log("Allocation challenge list url: ", url)
+
+	var result []Challenge
+
+	res, _ := http.Get(url)
+
+	t.Log("Allocation challenge res body ", res.Body)
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+		}
+	}(res.Body)
+
+	body, _ := io.ReadAll(res.Body)
+
+	err := json.Unmarshal(body, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
