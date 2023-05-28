@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/0chain/system_test/internal/api/model"
+	"github.com/0chain/gosdk/zboxcore/sdk"
 	"time"
 
 	"github.com/0chain/gosdk/core/common"
@@ -64,7 +64,7 @@ type Allocation struct {
 	TimeUnit    time.Duration `json:"time_unit"`
 	IsImmutable bool          `json:"is_immutable"`
 
-	Stats model.AllocationStats `json:"stats"`
+	Stats sdk.AllocationStats `json:"stats"`
 
 	WritePool int64 `json:"write_pool"`
 
