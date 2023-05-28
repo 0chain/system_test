@@ -56,6 +56,11 @@ func TestAllocation(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
+	var validatorListString []string
+	for _, validator := range validatorList {
+		validatorListString = append(validatorListString, validator.ID)
+	}
+
 	t.RunSequentiallyWithTimeout("Create + Upload + Cancel equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
@@ -67,7 +72,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -168,7 +173,7 @@ func TestAllocation(testSetup *testing.T) {
 		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
 		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -179,7 +184,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -259,7 +264,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		t.Log("rewards", rewards)
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -270,7 +275,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -342,7 +347,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		require.Equal(t, totalBlobberChallengereward, movedToChallengePool, "Total Blobber Challenge reward should be 0")
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 }
@@ -385,6 +390,11 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
+	var validatorListString []string
+	for _, validator := range validatorList {
+		validatorListString = append(validatorListString, validator.ID)
+	}
+
 	t.RunSequentiallyWithTimeout("Add Blobber to Increase Parity", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
@@ -394,7 +404,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1, 1, 1,
 		}, 1)
 
@@ -494,7 +504,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
 		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 	t.RunSequentiallyWithTimeout("Replace Blobber", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -506,7 +516,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1, 1, 1,
 		}, 1)
 
@@ -610,7 +620,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
 		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 }

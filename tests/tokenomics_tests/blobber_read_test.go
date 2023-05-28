@@ -46,11 +46,16 @@ func TestBlobberReadReward(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
+	var validatorListString []string
+	for _, validator := range validatorList {
+		validatorListString = append(validatorListString, validator.ID)
+	}
+
 	blobber1 := blobberListString[0]
 	blobber2 := blobberListString[1]
 
 	t.RunSequentiallyWithTimeout("download one time, equal from both blobbers", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -123,11 +128,11 @@ func TestBlobberReadReward(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1DelegatesDownloadRewards, blobber2DelegatesDownloadRewards, 0.05, "Blobber 1 delegate 1 and Blobber 2 delegate 1 download rewards are not equal")
 		require.InEpsilon(t, blobber1TotalDownloadRewards, blobber2TotalDownloadRewards, 0.05, "Blobber 1 total download rewards and Blobber 2 total download rewards are not equal")
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 	t.RunSequentiallyWithTimeout("download several times and checking if downloading fails after allocation expiry", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -219,7 +224,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 		}), true)
 		require.NotNil(t, err, "File should not be downloaded from expired allocation", strings.Join(output, "\n"))
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 }

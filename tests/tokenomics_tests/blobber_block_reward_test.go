@@ -37,6 +37,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
+	var blobberListString []string
+	for _, blobber := range blobberList {
+		blobberListString = append(blobberListString, blobber.Id)
+	}
+
 	var validatorList []climodel.Validator
 	output, err = utils.ListValidators(t, configPath, "--json")
 	require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
@@ -45,6 +50,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	err = json.Unmarshal([]byte(output[0]), &validatorList)
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
+
+	var validatorListString []string
+	for _, validator := range validatorList {
+		validatorListString = append(validatorListString, validator.ID)
+	}
 
 	totalData := 0.1 * GB
 
@@ -55,7 +65,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 1}
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, stake, 1)
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, stake, 1)
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -149,7 +159,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
 
@@ -168,7 +178,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{9, 9}
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, stake, 1)
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, stake, 1)
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -260,7 +270,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
 
@@ -281,7 +291,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{9, 9}
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, stake, 1)
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, stake, 1)
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -373,7 +383,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
 
@@ -393,7 +403,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 1}
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, stake, 1)
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, stake, 1)
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -487,7 +497,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
 
@@ -507,7 +517,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		stake := []float64{1.0, 3.0, 1.0, 3.0}
 		readData := []int{1, 1}
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, stake, 1)
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, stake, 1)
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -599,7 +609,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
 
@@ -619,7 +629,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 9}
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, stake, 1)
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, stake, 1)
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -713,7 +723,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
 

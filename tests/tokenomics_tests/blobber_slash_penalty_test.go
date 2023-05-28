@@ -33,6 +33,11 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
+	var blobberListString []string
+	for _, blobber := range blobberList {
+		blobberListString = append(blobberListString, blobber.Id)
+	}
+
 	var validatorList []climodel.Validator
 	output, err = utils.ListValidators(t, configPath, "--json")
 	require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
@@ -42,8 +47,13 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
+	var validatorListString []string
+	for _, validator := range validatorList {
+		validatorListString = append(validatorListString, validator.ID)
+	}
+
 	t.RunSequentiallyWithTimeout("Upload 10% of allocation and Kill blobber in the middle, One blobber should get approx double rewards than other", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -104,7 +114,7 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 
 		require.Greater(t, blobber1Reward/blobber2Reward, 1.5, "Killed blobber should get approx half the rewards than other")
 
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 }
 

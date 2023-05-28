@@ -71,7 +71,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		t.Skip()
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -143,12 +143,13 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1TotalReward, blobber2TotalReward, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
 		require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
+
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 30% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		//unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
@@ -221,13 +222,15 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
+		unstakeTokensForBlobbersAndValidators(t, blobberListString, validatorListString, configPath, 1)
 
 		// Staking Tokens to all blobbers and validators
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 2, 1, 2,
 		}, 1)
 
@@ -300,12 +303,13 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 		require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 1)
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1, 1, 1, 1, 1,
 		}, 2)
 
@@ -409,10 +413,11 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, validator1Delegate1TotalReward, validator1Delegate2TotalReward, 0.05, "Validator 1 Delegate 1 and Validator 1 Delegate 2 rewards are not equal")
 		require.InEpsilon(t, validator2Delegate1TotalReward, validator2Delegate2TotalReward, 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not equal")
 
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 2)
+
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, 2)
 
 		// Delegate Wallets
 		b1D1Wallet, _ := utils.GetWalletForName(t, configPath, blobber1Delegate1Wallet)
@@ -421,7 +426,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		v1D2Wallet, _ := utils.GetWalletForName(t, configPath, validator1Delegate2Wallet)
 		v2D1Wallet, _ := utils.GetWalletForName(t, configPath, validator2Delegate1Wallet)
 
-		stakeTokensToBlobbersAndValidators(t, blobberList, validatorList, configPath, []float64{
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1, 2, 2, 2, 2,
 		}, 2)
 
@@ -525,10 +530,11 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, validator1Delegate1TotalReward*2, validator1Delegate2TotalReward, 0.05, "Validator 1 Delegate 1 and Validator 1 Delegate 2 rewards are not equal")
 		require.InEpsilon(t, validator2Delegate1TotalReward*2, validator2Delegate2TotalReward, 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not equal")
 
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 2)
 	})
 }
 
-func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.BlobberInfo, validators []climodel.Validator, configPath string, tokens []float64, numDelegates int) {
+func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []string, validators []string, configPath string, tokens []float64, numDelegates int) {
 	var blobberDelegates []string
 	var validatorDelegates []string
 
@@ -552,11 +558,11 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 			_, err := utils.ExecuteFaucetWithTokensForWallet(t, blobberDelegates[idx], configPath, tokens[tIdx]+1)
 			require.Nil(t, err, "Error executing faucet")
 
-			t.Log("Staking tokens for blobber: ", blobber.Id)
+			t.Log("Staking tokens for blobber: ", blobber)
 
 			// stake tokens
 			_, err = utils.StakeTokensForWallet(t, configPath, blobberDelegates[idx], utils.CreateParams(map[string]interface{}{
-				"blobber_id": blobber.Id,
+				"blobber_id": blobber,
 				"tokens":     tokens[tIdx],
 			}), true)
 			require.Nil(t, err, "Error staking tokens")
@@ -577,7 +583,7 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 
 			// stake tokens
 			_, err = utils.StakeTokensForWallet(t, configPath, validatorDelegates[idx], utils.CreateParams(map[string]interface{}{
-				"validator_id": validator.ID,
+				"validator_id": validator,
 				"tokens":       tokens[tIdx],
 			}), true)
 			require.Nil(t, err, "Error staking tokens")
@@ -589,7 +595,7 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.
 	}
 }
 
-func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []climodel.BlobberInfo, validators []climodel.Validator, configPath string, numDelegates int) {
+func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []string, validators []string, configPath string, numDelegates int) {
 	var blobberDelegates []string
 	var validatorDelegates []string
 
@@ -608,10 +614,10 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []climod
 	for i := 0; i < numDelegates; i++ {
 
 		for _, blobber := range blobbers {
-			t.Log("Unstaking tokens for blobber: ", blobber.Id)
+			t.Log("Unstaking tokens for blobber: ", blobber)
 			// unstake tokens
 			_, err := utils.UnstakeTokensForWallet(t, configPath, blobberDelegates[idx], utils.CreateParams(map[string]interface{}{
-				"blobber_id": blobber.Id,
+				"blobber_id": blobber,
 			}))
 			require.Nil(t, err, "Error unstaking tokens")
 
@@ -624,10 +630,10 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []climod
 	for i := 0; i < numDelegates; i++ {
 
 		for _, validator := range validators {
-			t.Log("Unstaking tokens for validator: ", validator.ID)
+			t.Log("Unstaking tokens for validator: ", validator)
 			// unstake tokens
 			_, err := utils.UnstakeTokensForWallet(t, configPath, validatorDelegates[idx], utils.CreateParams(map[string]interface{}{
-				"validator_id": validator.ID,
+				"validator_id": validator,
 			}))
 			require.Nil(t, err, "Error unstaking tokens")
 
@@ -711,4 +717,16 @@ type ProviderAllocationRewards struct {
 	Amount          int64            `json:"amount"`
 	Total           int64            `json:"total"`
 	ProviderType    int64            `json:"provider_type"`
+}
+
+func tearDownRewardsTests(t *test.SystemTest, blobberList []string, validatorList []string, configPath string, allocationID string, numDelegates int) {
+	allocation := utils.GetAllocation(t, allocationID)
+
+	// check if allocation is finalized
+	if !allocation.Finalized {
+		_, err := utils.CancelAllocation(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error canceling allocation")
+	}
+
+	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, numDelegates)
 }
