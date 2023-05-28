@@ -95,7 +95,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 			"blimp")
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, response.String(), `{\"error\":\"400: free storage for appType: blimp already used\"}`)
+		require.Equal(t, response.String(), `{"error":"400: free storage for appType: blimp already used"}`)
 
 	})
 
