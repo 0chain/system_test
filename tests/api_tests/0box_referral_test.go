@@ -3,6 +3,7 @@ package api_tests
 import (
 	"testing"
 
+	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 )
@@ -11,6 +12,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Post referrals with correct CSRF should work properly")
 
+	var firebaseToken *model.FirebaseToken
 	t.TestSetup("Autenticate with firebase", func() {
 		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 	})
