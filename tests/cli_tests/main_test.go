@@ -67,7 +67,7 @@ func setupConfig() {
 	}
 
 	ethereumNodeURL = viper.GetString("ethereum_node_url")
-	ethereumAddress = viper.GetString("ethereum_address")
+	ethereumAddress = viper.GetString("bridge.ethereum_address")
 }
 
 const (
@@ -96,10 +96,8 @@ var (
 )
 
 var (
-	configPath             string
-	configDir              string
-	bridgeClientConfigFile string
-	bridgeOwnerConfigFile  string
+	configPath string
+	configDir  string
 )
 
 var tenderlyClient *tenderly.Client

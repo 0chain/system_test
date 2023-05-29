@@ -4,6 +4,7 @@ package tenderly
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/ybbus/jsonrpc/v3"
 )
@@ -32,6 +33,7 @@ func (c *Client) CreateSnapshot() (string, error) {
 		return "", err
 	}
 	if resp.Error != nil {
+		fmt.Println("HERE")
 		return "", errors.New(resp.Error.Error())
 	}
 	result, ok := resp.Result.(string)
@@ -48,6 +50,7 @@ func (c *Client) Revert(snapshotHash string) error {
 		return err
 	}
 	if resp.Error != nil {
+		fmt.Println("HERE!")
 		return errors.New(resp.Error.Error())
 	}
 	return nil
