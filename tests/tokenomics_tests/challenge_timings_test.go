@@ -94,6 +94,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		for _, txnVerification := range txnVerifications {
 			require.True(t, txnVerification < 184467440720, "Transaction verification time is more than 2 seconds")
 		}
+
+		require.Equal(t, false, true)
 	})
 
 	t.RunSequentiallyWithTimeout("Case 2: 1 100mb allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -151,6 +153,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
 		}
 
+		require.Equal(t, false, true)
 	})
 
 	t.RunSequentiallyWithTimeout("Case 3: 10 100mb allocation, 10mb file each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -217,6 +220,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
 		}
 
+		require.Equal(t, false, true)
 	})
 
 	t.RunSequentiallyWithTimeout("Case 4: 10 1gb allocation, 100mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -283,6 +287,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
 		}
 
+		require.Equal(t, false, true)
 	})
 
 	t.RunSequentiallyWithTimeout("Case 5: 10 10gb allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -352,6 +357,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
 		}
 
+		require.Equal(t, false, true)
 	})
 
 }
