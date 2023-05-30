@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/go-resty/resty/v2"
+	resty "github.com/go-resty/resty/v2"
 )
 
 const GB = float64(1024 * 1024 * 1024)
@@ -161,6 +161,22 @@ type ZboxNftCollectionById struct {
 type ZboxNftCollectionList struct {
 	ZboxNftCollection  []ZboxNftCollection `json:"collections"`
 	NftCollectionCount int                 `json:"total"`
+}
+
+type ReferralCodeOfUser struct {
+	ReferrerCode  string `json:"referral_code"`
+	ReferrerLink  string `json:"referral_link"`
+	ReferrerPhone string `json:"referer_mail"`
+}
+
+type ReferralCountOfUser struct {
+	ReferralCount int64 `json:"referral_count"`
+}
+
+type ReferralRankOfUser struct {
+	UserRank  int64  `json:"rank"`
+	UserScore int64  `json:"score"`
+	UserPhone string `json:"phone"`
 }
 
 type ZboxNft struct {
