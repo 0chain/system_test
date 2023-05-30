@@ -135,6 +135,10 @@ func TestChallengeTimings(testSetup *testing.T) {
 		txnSubmissions := result[1]
 		txnVerifications := result[2]
 
+		t.Log("proofGenTimes", proofGenTimes)
+		t.Log("txnSubmissions", txnSubmissions)
+		t.Log("txnVerifications", txnVerifications)
+
 		for _, proofGenTime := range proofGenTimes {
 			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
 		}
@@ -196,6 +200,10 @@ func TestChallengeTimings(testSetup *testing.T) {
 		proofGenTimes := result[0]
 		txnSubmissions := result[1]
 		txnVerifications := result[2]
+
+		t.Log("proofGenTimes", proofGenTimes)
+		t.Log("txnSubmissions", txnSubmissions)
+		t.Log("txnVerifications", txnVerifications)
 
 		for _, proofGenTime := range proofGenTimes {
 			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
@@ -259,6 +267,10 @@ func TestChallengeTimings(testSetup *testing.T) {
 		txnSubmissions := result[1]
 		txnVerifications := result[2]
 
+		t.Log("proofGenTimes", proofGenTimes)
+		t.Log("txnSubmissions", txnSubmissions)
+		t.Log("txnVerifications", txnVerifications)
+
 		for _, proofGenTime := range proofGenTimes {
 			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
 		}
@@ -272,8 +284,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}
 
 	})
-
-	t.Skip()
 
 	t.RunSequentiallyWithTimeout("Case 5: 10 10gb allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
@@ -325,6 +335,10 @@ func TestChallengeTimings(testSetup *testing.T) {
 		proofGenTimes := result[0]
 		txnSubmissions := result[1]
 		txnVerifications := result[2]
+
+		t.Log("proofGenTimes", proofGenTimes)
+		t.Log("txnSubmissions", txnSubmissions)
+		t.Log("txnVerifications", txnVerifications)
 
 		for _, proofGenTime := range proofGenTimes {
 			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
