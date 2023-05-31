@@ -318,6 +318,38 @@ func (c *ZboxClient) CreateFreeStorage(t *test.SystemTest, mnemonic, walletName,
 	return ZboxFreeStorage, resp, err
 }
 
+func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, csrfToken, phoneNumber, appType string) (*model.ZboxFundingResponse, *resty.Response, error) {
+	t.Logf("Checking status of funding using funding id")
+	var zboxFundingResponse *model.ZboxFundingResponse
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/zbox/fund")
+
+	queryParams := map[string]string{
+		"id" : fundingId,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &zboxFundingResponse,
+		QueryParams: queryParams,
+		Headers: map[string]string{
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-App-Type":             appType,
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return zboxFundingResponse, resp, err
+}
+
 func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Posting wallet using 0box...")
 	var zboxWallet *model.ZboxWallet

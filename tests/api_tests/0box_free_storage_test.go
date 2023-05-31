@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"gopkg.in/errgo.v2/errors"
 
+	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
 )
 
@@ -121,7 +124,7 @@ func UnmarshalMarkerData(storage *model.ZboxFreeStorage) (model.ZboxFreeStorageM
 		fmt.Println("Error decoding string:", err)
 		return model.ZboxFreeStorageMarker{}, model.ZboxFreeStorageMarkerResponse{}, errors.New("error decoding marker")
 	}
-	decodedString = string(decodedBytes)
+	decodedString = string(decodedBytes) // nolint
 	var marker model.ZboxFreeStorageMarker
 	err = json.Unmarshal([]byte(decodedString), &marker)
 	if err != nil {
@@ -130,4 +133,31 @@ func UnmarshalMarkerData(storage *model.ZboxFreeStorage) (model.ZboxFreeStorageM
 	}
 	return marker, markerResponse, nil
 
+}
+
+func (z *client.ZboxClient)checkStatus(t *test.SystemTest, fundingId, idToken, csrfToek, appType string)(bool){
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		var zboxFundingResponse  model.ZboxFundingResponse ;
+		zboxFundingResponse, resp, err := z.CheckFundingStatus(
+			t,
+			fundingId,
+			idToken,
+			csrfToken,
+			z.DefaultPhoneNumber,
+			appType,
+			)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if zboxFundingResponse == model.ZboxFundingResponse{} {
+			return false
+		}
+
+		return zboxFundingResponse.Funded == "true"
+	})
 }

@@ -37,6 +37,13 @@ type ZboxWallet struct {
 	LastUpdate  string           `json:"last_update"`
 }
 
+type ZboxFundingResponse struct{
+	Id  string `json:"id"`
+	Amount string `json:"amount"`
+	Description string `json:"description"`
+	Funded string `json:"funded"`
+	TransactionStatus string `json:"tx_done"`
+}
 type ZboxFreeStorage struct {
 	Marker     string `json:"marker"`
 	FundidngId int    `json:"funding_id"`
