@@ -34,7 +34,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		var blobberToKill string
 		var activeBlobbers int
 		for i := range startBlobbers {
-			if !startBlobbers[i].IsKilled && !startBlobbers[i].IsShutdown && startBlobbers[i].IsAvailable {
+			if !startBlobbers[i].IsKilled && !startBlobbers[i].IsShutdown && !startBlobbers[i].NotAvailable {
 				activeBlobbers++
 				if !startBlobbers[i].IsKilled && blobberToKill == "" {
 					blobberToKill = startBlobbers[i].ID

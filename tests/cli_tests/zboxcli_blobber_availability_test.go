@@ -31,7 +31,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		var blobberToDeactivate *model.BlobberDetails
 		var activeBlobbers int
 		for i := range startBlobbers {
-			if startBlobbers[i].IsAvailable && !startBlobbers[i].IsKilled && !startBlobbers[i].IsShutdown {
+			if !startBlobbers[i].NotAvailable && !startBlobbers[i].IsKilled && !startBlobbers[i].IsShutdown {
 				activeBlobbers++
 				if blobberToDeactivate == nil {
 					blobberToDeactivate = &startBlobbers[i]
@@ -64,7 +64,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		betweenBlobbers := getBlobbers(t)
 		for i := range betweenBlobbers {
 			if betweenBlobbers[i].ID == blobberToDeactivate.ID {
-				require.Falsef(t, betweenBlobbers[i].IsAvailable, "blobber %s should be deactivated", blobberToDeactivate.ID)
+				require.Falsef(t, !betweenBlobbers[i].NotAvailable, "blobber %s should be deactivated", blobberToDeactivate.ID)
 			}
 		}
 
@@ -84,7 +84,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		afterBlobbers := getBlobbers(t)
 		for i := range betweenBlobbers {
 			if afterBlobbers[i].ID == blobberToDeactivate.ID {
-				require.Truef(t, afterBlobbers[i].IsAvailable, "blobber %s should be activated", blobberToDeactivate.ID)
+				require.Truef(t, !afterBlobbers[i].NotAvailable, "blobber %s should be activated", blobberToDeactivate.ID)
 			}
 		}
 
