@@ -23,7 +23,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
+	t.Run("Burning WZCN tokens on balance, should work", func(t *test.SystemTest) {
 		output, err := burnEth(t, "1", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
@@ -65,7 +65,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.NotContains(t, output[len(output)-1], "Transaction completed successfully:")
 	})
 
-	t.RunWithTimeout("Burning ZCN tokens with available ZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
+	t.Run("Burning ZCN tokens with available ZCN tokens on balance, should work", func(t *test.SystemTest) {
 		output, err := executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
