@@ -1783,7 +1783,7 @@ func (c *ZboxClient) GetGraphBlobberTotalRewards(t *test.SystemTest, blobberId s
 }
 
 func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralCodeOfUser, *resty.Response, error) {
-	t.Logf("Getting referral code...", phoneNumber)
+	t.Log("Getting referral code...")
 	var ReferralCodeOfUser model.ReferralCodeOfUser
 
 	urlBuilder := NewURLBuilder()
@@ -1809,7 +1809,7 @@ func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, idToken, pho
 }
 
 func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralCountOfUser, *resty.Response, error) {
-	t.Logf("Getting referral count...", phoneNumber)
+	t.Log("Getting referral count...")
 	var ReferralCountOfUser model.ReferralCountOfUser
 
 	urlBuilder := NewURLBuilder()
@@ -1835,7 +1835,7 @@ func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, idToken, ph
 }
 
 func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralRankOfUser, *resty.Response, error) {
-	t.Logf("Getting referral rank...", phoneNumber)
+	t.Log("Getting referral rank...")
 	var ReferralRankOfUser model.ReferralRankOfUser
 
 	urlBuilder := NewURLBuilder()
