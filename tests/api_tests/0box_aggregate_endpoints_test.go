@@ -2035,6 +2035,14 @@ func graphEndpointTestCases(endpoint model.ZboxGraphEndpoint) func(*test.SystemT
 
 		_, resp, err = endpoint(t, &model.ZboxGraphRequest{From: "10", To: "20", DataPoints: "AX"})
 		require.Error(t, err)
+		// Faucet the used wallets
+		for i := 0; i < 10; i++ {
+			apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus) // 18 * 50 * 1e10
+		}
+		for i := 0; i < 10; i++ {
+			apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
+		}
+
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "invalid data-points query param")
 
