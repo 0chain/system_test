@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/0chain/gosdk/core/common"
 	"github.com/0chain/gosdk/zboxcore/fileref"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/util/config"
@@ -78,14 +77,22 @@ func generateRandomIndex(sliceLen int64) (*big.Int, error) {
 	return randomIndex, nil
 }
 
-func GetRandomBlobber(walletname, configFile, except_blobber string) (string, error) {
+// GetRandomBlobber gets a random blobber from allocation
+func GetRandomBlobber(walletname, configFile, allocationID, except_blobber string) (string, error) {
 	err := InitSDK(walletname, configFile)
 	if err != nil {
 		return "", err
 	}
-	blobbers, err := sdk.GetBlobbers(true)
+
+	a, err := sdk.GetAllocation(allocationID)
 	if err != nil {
 		return "", err
+	}
+
+	blobbers := []string{}
+
+	for _, blobber := range a.BlobberDetails {
+		blobbers = append(blobbers, blobber.BlobberID)
 	}
 
 	var randomBlobber string
@@ -95,8 +102,8 @@ func GetRandomBlobber(walletname, configFile, except_blobber string) (string, er
 			return "", err
 		}
 
-		blobber := blobbers[randomIndex.Int64()].ID
-		if blobber != common.Key(except_blobber) {
+		blobber := blobbers[randomIndex.Int64()]
+		if blobber != except_blobber {
 			randomBlobber = string(blobber)
 			break
 		}
