@@ -11,7 +11,6 @@ import (
 	resty "github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
 )
-
 const (
 	X_APP_CLIENT_ID        = "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9"
 	X_APP_CLIENT_KEY       = "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96"
@@ -330,12 +329,13 @@ func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, 
 	urlBuilder.SetPath("/v2/zbox/fund")
 
 	queryParams := map[string]string{
-		"id" : fundingId,
+		"ID" : fundingId,
 	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+	url := fmt.Sprintf("%s/%s", urlBuilder.String(), fundingId)
+	resp, err := c.executeForServiceProvider(t, url, model.ExecutionRequest{
 		Dst:      &zboxFundingResponse,
 		QueryParams: queryParams,
+		FormData: queryParams,
 		Headers: map[string]string{
 			"X-App-Client-ID":        X_APP_CLIENT_ID,
 			"X-App-Client-Key":       X_APP_CLIENT_KEY,

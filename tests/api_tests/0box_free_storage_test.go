@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -65,8 +66,8 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		require.Equal(t, marker.Assigner, "0chain")
 		require.Equal(t, markerResponse.RecipientPublicKey, X_APP_CLIENT_KEY)
 		require.Positive(t, marker.FreeTokens)
-
-		res := zboxClient.CheckStatus(t, storageMarker.FundidngId,firebaseToken.IdToken, csrfToken, "blimp")
+		fundingId := strconv.Itoa(storageMarker.FundidngId)
+		res := zboxClient.CheckStatus(t, fundingId,firebaseToken.IdToken, csrfToken, "blimp")
 		require.Equal(t, res, true)
 	})
 
