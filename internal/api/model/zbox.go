@@ -46,7 +46,7 @@ type ZboxFundingResponse struct{
 }
 type ZboxFreeStorage struct {
 	Marker     string `json:"marker"`
-	FundidngId int    `json:"funding_id"`
+	FundidngId string    `json:"funding_id"`
 }
 type ZboxFreeStorageMarker struct {
 	Assigner   string           `json:"assigner"`

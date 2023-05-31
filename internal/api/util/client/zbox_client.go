@@ -3,9 +3,11 @@ package client
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/internal/api/util/wait"
 	resty "github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -1846,4 +1848,32 @@ func (c *ZboxClient) GetGraphBlobberTotalRewards(t *test.SystemTest, blobberId s
 	}, HttpGETMethod)
 
 	return &data, resp, err
+}
+
+func (z *ZboxClient)CheckStatus(t *test.SystemTest, fundingId, idToken, csrfToken, appType string)(bool){
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		var zboxFundingResponse  *model.ZboxFundingResponse ;
+		zboxFundingResponse, resp, err := z.CheckFundingStatus(
+			t,
+			fundingId,
+			idToken,
+			csrfToken,
+			z.DefaultPhoneNumber,
+			appType,
+			)
+		if err != nil {
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+		emptyResponse := &model.ZboxFundingResponse{}
+		if zboxFundingResponse ==  emptyResponse{
+			return false
+		}
+
+		return zboxFundingResponse.Funded == "true"
+	})
+	return false
 }

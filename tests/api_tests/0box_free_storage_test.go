@@ -5,14 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"gopkg.in/errgo.v2/errors"
 
-	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
 )
 
@@ -68,6 +65,9 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		require.Equal(t, marker.Assigner, "0chain")
 		require.Equal(t, markerResponse.RecipientPublicKey, X_APP_CLIENT_KEY)
 		require.Positive(t, marker.FreeTokens)
+
+		res := zboxClient.CheckStatus(t, storageMarker.FundidngId,firebaseToken.IdToken, csrfToken, "blimp")
+		require.Equal(t, res, true)
 	})
 
 	t.RunSequentially("Create FreeStorage should not work more than once", func(t *test.SystemTest) {
@@ -99,6 +99,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 			"blimp")
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, response.String(), `{"error":"400: free storage for appType: blimp already used"}`)
+
 
 	})
 
@@ -133,31 +134,4 @@ func UnmarshalMarkerData(storage *model.ZboxFreeStorage) (model.ZboxFreeStorageM
 	}
 	return marker, markerResponse, nil
 
-}
-
-func (z *client.ZboxClient)checkStatus(t *test.SystemTest, fundingId, idToken, csrfToek, appType string)(bool){
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		var zboxFundingResponse  model.ZboxFundingResponse ;
-		zboxFundingResponse, resp, err := z.CheckFundingStatus(
-			t,
-			fundingId,
-			idToken,
-			csrfToken,
-			z.DefaultPhoneNumber,
-			appType,
-			)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if zboxFundingResponse == model.ZboxFundingResponse{} {
-			return false
-		}
-
-		return zboxFundingResponse.Funded == "true"
-	})
 }
