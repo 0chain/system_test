@@ -1875,5 +1875,22 @@ func (z *ZboxClient)CheckStatus(t *test.SystemTest, fundingId, idToken, csrfToke
 
 		return zboxFundingResponse.Funded == "true"
 	})
+	zboxFundingResponse, resp, err := z.CheckFundingStatus(
+	t,
+	fundingId,
+	idToken,
+	csrfToken,
+	z.DefaultPhoneNumber,
+	appType,
+	)
+	if(err != nil){
+		return false
+	}
+	if(resp.StatusCode() != 200){
+		return false
+	}
+	if(zboxFundingResponse.Funded == "true"){
+		return true
+	}
 	return false
 }
