@@ -41,7 +41,7 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Upload and download a file so blobber can accumulate rewards
-		allocSize := int64(2048)
+		allocSize := int64(1 * GB)
 		filesize := int64(256)
 		remotepath := "/"
 
