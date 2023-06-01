@@ -14,7 +14,7 @@ func TestGetBlobbersForNewAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Alloc blobbers API call should be successful given a valid request")
 
-	t.Parallel()
+	//t.Parallel()
 
 	t.Run("Alloc blobbers API call should be successful given a valid request", func(t *test.SystemTest) {
 		wallet := apiClient.CreateWallet(t)
@@ -32,7 +32,7 @@ func TestGetBlobbersForNewAllocation(testSetup *testing.T) {
 
 		wallet := apiClient.CreateWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &model.BlobberRequirements{}, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &model.BlobberRequirements{}, client.HttpBadRequestStatus)
 
 		require.NotNil(t, allocationBlobbers.Blobbers)
 	})
