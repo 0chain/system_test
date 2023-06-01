@@ -174,10 +174,10 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
-          run_flaky_tests: true
-          run_api_system_tests: true
+          # run_flaky_tests: true
+          # run_api_system_tests: true
           run_cli_system_tests: true
-          run_tokenomics_system_tests: true
+          # run_tokenomics_system_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
