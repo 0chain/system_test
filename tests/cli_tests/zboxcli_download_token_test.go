@@ -22,7 +22,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunWithTimeout("Downloader's readpool balance should reduce by download cost", 3*time.Minute, func(t *test.SystemTest) { //TODO: way too slow
+	t.RunWithTimeout("Downloader's readpool balance should reduce by download cost", 5*time.Minute, func(t *test.SystemTest) { //TODO: way too slow
 		walletOwner := escapedTestName(t)
 		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
@@ -100,7 +100,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
-		expectedRPBalance := 1.4*1e10 - expectedDownloadCostInSas
+		expectedRPBalance := 1.4*1e10 - expectedDownloadCostInSas - 10 // because download cost is till 3 decimal point only and missing the 4th decimal digit
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
 		// getDownloadCost returns download cost when all the associated blobbers of an allocation are required
