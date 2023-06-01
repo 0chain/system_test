@@ -24,7 +24,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
-		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
+		output, err := burnEth(t, "1", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
@@ -122,10 +122,9 @@ func isEthereumAddress(src string) bool {
 func burnZcn(t *test.SystemTest, amount string, retry bool) ([]string, error) {
 	t.Logf("Burning ZCN tokens that will be minted for WZCN tokens...")
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-burn-zcn --token %s --path %s --bridge_config %s --wallet %s --configDir ./config --config %s",
+		"./zwallet bridge-burn-zcn --token %s --path %s --wallet %s --configDir ./config --config %s",
 		amount,
 		configDir,
-		bridgeClientConfigFile,
 		escapedTestName(t)+"_wallet.json",
 		configPath,
 	)

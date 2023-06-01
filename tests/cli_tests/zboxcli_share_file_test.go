@@ -1359,8 +1359,8 @@ func createWalletAndAllocation(t *test.SystemTest, configPath, wallet string) (s
 
 	allocParam := createParams(map[string]interface{}{
 		"lock":   2,
-		"size":   10000,
-		"expire": "30m",
+		"size":   1024 * 1024 * 1024,
+		"expire": "10m",
 		"parity": 1,
 		"data":   1,
 	})
