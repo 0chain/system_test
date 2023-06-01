@@ -3,7 +3,6 @@ package api_tests
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"testing"
 
@@ -103,7 +102,6 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 
 
 	})
-
 }
 
 func UnmarshalMarkerData(storage *model.ZboxFreeStorage) (model.ZboxFreeStorageMarker, model.ZboxFreeStorageMarkerResponse, error) {
@@ -117,20 +115,17 @@ func UnmarshalMarkerData(storage *model.ZboxFreeStorage) (model.ZboxFreeStorageM
 	var markerResponse model.ZboxFreeStorageMarkerResponse
 	err = json.Unmarshal([]byte(decodedString), &markerResponse)
 	if err != nil {
-		fmt.Println("Error unmarshaling JSON:", err)
 		return model.ZboxFreeStorageMarker{}, model.ZboxFreeStorageMarkerResponse{}, errors.New("error unmarshaling storage response")
 	}
 
 	decodedBytes, err = base64.StdEncoding.DecodeString(markerResponse.Marker)
 	if err != nil {
-		fmt.Println("Error decoding string:", err)
 		return model.ZboxFreeStorageMarker{}, model.ZboxFreeStorageMarkerResponse{}, errors.New("error decoding marker")
 	}
 	decodedString = string(decodedBytes) // nolint
 	var marker model.ZboxFreeStorageMarker
 	err = json.Unmarshal([]byte(decodedString), &marker)
 	if err != nil {
-		fmt.Println("Error unmarshaling JSON:", err)
 		return model.ZboxFreeStorageMarker{}, model.ZboxFreeStorageMarkerResponse{}, errors.New("error unmarshling marker")
 	}
 	return marker, markerResponse, nil
