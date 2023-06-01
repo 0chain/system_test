@@ -28,7 +28,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 
 		file := generateRandomTestFileName(t)
 		remoteOwnerPath := "/" + filepath.Base(file)
-		fileSize := int64(10240) // must upload bigger file to ensure has noticeable cost
+		fileSize := int64(10 * MB) // must upload bigger file to ensure has noticeable cost
 		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
