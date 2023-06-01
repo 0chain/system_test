@@ -59,4 +59,4 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
 
-replace github.com/herumi/bls-go-binary => github.com/cnlangzi/bls-go-binary v1.30.6
+replace github.com/herumi/bls-go-binary => github.com/cnlangzi/bls-go-binary v1.30.7
