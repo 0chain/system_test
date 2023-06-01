@@ -54,6 +54,10 @@ func TestStakePool(testSetup *testing.T) {
 		// available capacity. For example, if 3 blobbers have 4 GB, 5 GB and 6 GB available,
 		// the max allocation they all can honor is of 4 GB.
 		allocationId := createAllocationOfMaxSizeBlobbersCanHonour(t, minAvailableCapacity)
+		t.Cleanup(func() {
+			// Cancel the allocation irrespective of test result
+			_, _ = cancelAllocation(t, configPath, allocationId, true)
+		})
 
 		// check total offers new value and compare
 		output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": minAvailableCapacityBlobber.Id}))
@@ -156,7 +160,7 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 	allocSize := minAvailableCapacity*2 + 20*GB - 200000
 	output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 		"cost":        "",
-		"data":        2,
+		"data":        3,
 		"parity":      3,
 		"expire":      "5m",
 		"size":        allocSize,
@@ -178,7 +182,7 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 	// Create an allocation of maximum size that all blobbers can honor.
 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 		"size":        allocSize,
-		"data":        2,
+		"data":        3,
 		"parity":      3,
 		"lock":        allocationCost + 1,
 		"expire":      "5m",
