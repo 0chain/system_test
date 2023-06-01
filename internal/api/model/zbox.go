@@ -38,11 +38,11 @@ type ZboxWallet struct {
 }
 
 type ZboxFundingResponse struct{
-	Id  string `json:"id"`
-	Amount string `json:"amount"`
+	Id  int `json:"id"`
+	Amount int `json:"amount"`
 	Description string `json:"description"`
-	Funded string `json:"funded"`
-	TransactionStatus string `json:"tx_done"`
+	Funded bool `json:"funded"`
+	TransactionStatus bool `json:"tx_done"`
 }
 type ZboxFreeStorage struct {
 	Marker     string `json:"marker"`

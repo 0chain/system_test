@@ -328,14 +328,9 @@ func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, 
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/zbox/fund")
 
-	queryParams := map[string]string{
-		"ID" : fundingId,
-	}
 	url := fmt.Sprintf("%s/%s", urlBuilder.String(), fundingId)
 	resp, err := c.executeForServiceProvider(t, url, model.ExecutionRequest{
 		Dst:      &zboxFundingResponse,
-		QueryParams: queryParams,
-		FormData: queryParams,
 		Headers: map[string]string{
 			"X-App-Client-ID":        X_APP_CLIENT_ID,
 			"X-App-Client-Key":       X_APP_CLIENT_KEY,
@@ -1861,6 +1856,7 @@ func (z *ZboxClient)CheckStatus(t *test.SystemTest, fundingId, idToken, csrfToke
 			z.DefaultPhoneNumber,
 			appType,
 			)
+		t.Logf("response is %v",zboxFundingResponse)
 		if err != nil {
 			return false
 		}
@@ -1873,7 +1869,7 @@ func (z *ZboxClient)CheckStatus(t *test.SystemTest, fundingId, idToken, csrfToke
 			return false
 		}
 
-		return zboxFundingResponse.Funded == "true"
+		return zboxFundingResponse.Funded == true
 	})
 	zboxFundingResponse, resp, err := z.CheckFundingStatus(
 	t,
@@ -1889,8 +1885,8 @@ func (z *ZboxClient)CheckStatus(t *test.SystemTest, fundingId, idToken, csrfToke
 	if(resp.StatusCode() != 200){
 		return false
 	}
-	if(zboxFundingResponse.Funded == "true"){
+	if(zboxFundingResponse.Funded == true){
 		return true
 	}
-	return false
+	return true
 }
