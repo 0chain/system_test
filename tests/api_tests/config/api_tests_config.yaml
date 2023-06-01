@@ -1,5 +1,5 @@
-block_worker:  https://demo.zus.network/dns
-0box_url: https://0box.demo.zus.network
+block_worker:  https://dev.zus.network/dns
+0box_url: https://0box.dev.devnet-0chain.net
 0box_phone_number: +917696229925
 default_test_case_timeout: 45s
 zs3_server_url: https://dev.0chain.net/zs3server/
