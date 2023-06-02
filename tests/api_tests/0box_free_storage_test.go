@@ -65,6 +65,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		require.Equal(t, marker.Assigner, "0chain")
 		require.Equal(t, markerResponse.RecipientPublicKey, X_APP_CLIENT_KEY)
 		require.Positive(t, marker.FreeTokens)
+
 		fundingId := strconv.Itoa(storageMarker.FundidngId)
 		res := zboxClient.CheckStatus(t, fundingId, firebaseToken.IdToken, csrfToken, "blimp")
 		require.Equal(t, res, true)

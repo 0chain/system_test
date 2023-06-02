@@ -1966,11 +1966,13 @@ func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, wa
 func (z *ZboxClient) CheckStatus(t *test.SystemTest, fundingId, idToken, csrfToken, appType string) bool {
 	wait.PoolImmediately(t, time.Minute*2, func() bool {
 		var zboxFundingResponse *model.ZboxFundingResponse
+		csrfToken, _, _ := z.CreateCSRFToken(t, z.DefaultPhoneNumber)
+
 		zboxFundingResponse, resp, err := z.CheckFundingStatus(
 			t,
 			fundingId,
 			idToken,
-			csrfToken,
+			csrfToken.CSRFToken,
 			z.DefaultPhoneNumber,
 			appType,
 		)
