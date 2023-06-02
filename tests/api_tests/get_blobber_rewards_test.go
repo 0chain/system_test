@@ -2,7 +2,6 @@ package api_tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -55,22 +54,13 @@ func TestBlobberRewards(testSetup *testing.T) {
 		walletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
 
-		fmt.Println("Balance before: ", balanceBefore)
-
 		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceBefore = walletBalance.Balance
-
-		fmt.Println("Balance before: ", balanceBefore)
 
 		_, fee := apiClient.CollectRewards(t, sdkWallet, blobberID, 3, client.TxSuccessfulStatus)
 
 		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
-
-		fmt.Println("rewards: ", rewards)
-		fmt.Println("fee: ", fee)
-		fmt.Println("balanceBefore: ", balanceBefore)
-		fmt.Println("balanceAfter: ", balanceAfter)
 
 		require.Equal(t, balanceAfter, balanceBefore+rewards-fee)
 	})
