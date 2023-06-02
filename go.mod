@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.8.17-0.20230601111147-cc59c7de5c99
+	github.com/0chain/gosdk v1.8.17-0.20230602003209-0b80eaad9845
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.30.4
 	github.com/shopspring/decimal v1.3.1
@@ -59,4 +59,4 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
 
-replace github.com/herumi/bls-go-binary => github.com/cnlangzi/bls-go-binary v1.30.6
+replace github.com/herumi/bls-go-binary => github.com/cnlangzi/bls-go-binary v1.30.7
