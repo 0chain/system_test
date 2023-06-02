@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"gopkg.in/errgo.v2/errors"
@@ -29,7 +30,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 	})
 
-	t.RunSequentially("Create FreeStorage should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Create FreeStorage should work", 3*time.Minute, func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
