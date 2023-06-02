@@ -66,7 +66,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		require.Equal(t, markerResponse.RecipientPublicKey, X_APP_CLIENT_KEY)
 		require.Positive(t, marker.FreeTokens)
 		fundingId := strconv.Itoa(storageMarker.FundidngId)
-		res := zboxClient.CheckStatus(t, fundingId,firebaseToken.IdToken, csrfToken, "blimp")
+		res := zboxClient.CheckStatus(t, fundingId, firebaseToken.IdToken, csrfToken, "blimp")
 		require.Equal(t, res, true)
 	})
 
@@ -89,7 +89,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		_, response, err = zboxClient.CreateFreeStorage(t,
+		_, response, _ = zboxClient.CreateFreeStorage(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -99,8 +99,6 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 			"blimp")
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, response.String(), `{"error":"400: free storage for appType: blimp already used"}`)
-
-
 	})
 }
 
@@ -129,5 +127,4 @@ func UnmarshalMarkerData(storage *model.ZboxFreeStorage) (model.ZboxFreeStorageM
 		return model.ZboxFreeStorageMarker{}, model.ZboxFreeStorageMarkerResponse{}, errors.New("error unmarshling marker")
 	}
 	return marker, markerResponse, nil
-
 }

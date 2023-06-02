@@ -11,6 +11,7 @@ import (
 	resty "github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
 )
+
 const (
 	X_APP_CLIENT_ID        = "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9"
 	X_APP_CLIENT_KEY       = "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96"
@@ -330,7 +331,7 @@ func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, 
 
 	url := fmt.Sprintf("%s/%s", urlBuilder.String(), fundingId)
 	resp, err := c.executeForServiceProvider(t, url, model.ExecutionRequest{
-		Dst:      &zboxFundingResponse,
+		Dst: &zboxFundingResponse,
 		Headers: map[string]string{
 			"X-App-Client-ID":        X_APP_CLIENT_ID,
 			"X-App-Client-Key":       X_APP_CLIENT_KEY,
@@ -1962,9 +1963,9 @@ func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, wa
 	return zboxWallet, resp, err
 }
 
-func (z *ZboxClient)CheckStatus(t *test.SystemTest, fundingId, idToken, csrfToken, appType string)(bool){
+func (z *ZboxClient) CheckStatus(t *test.SystemTest, fundingId, idToken, csrfToken, appType string) bool {
 	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		var zboxFundingResponse  *model.ZboxFundingResponse ;
+		var zboxFundingResponse *model.ZboxFundingResponse
 		zboxFundingResponse, resp, err := z.CheckFundingStatus(
 			t,
 			fundingId,
@@ -1972,8 +1973,8 @@ func (z *ZboxClient)CheckStatus(t *test.SystemTest, fundingId, idToken, csrfToke
 			csrfToken,
 			z.DefaultPhoneNumber,
 			appType,
-			)
-		t.Logf("response is %v",zboxFundingResponse)
+		)
+		t.Logf("response is %v", zboxFundingResponse)
 		if err != nil {
 			return false
 		}
@@ -1982,27 +1983,27 @@ func (z *ZboxClient)CheckStatus(t *test.SystemTest, fundingId, idToken, csrfToke
 			return false
 		}
 		emptyResponse := &model.ZboxFundingResponse{}
-		if zboxFundingResponse ==  emptyResponse{
+		if zboxFundingResponse == emptyResponse {
 			return false
 		}
 
 		return zboxFundingResponse.Funded == true
 	})
 	zboxFundingResponse, resp, err := z.CheckFundingStatus(
-	t,
-	fundingId,
-	idToken,
-	csrfToken,
-	z.DefaultPhoneNumber,
-	appType,
+		t,
+		fundingId,
+		idToken,
+		csrfToken,
+		z.DefaultPhoneNumber,
+		appType,
 	)
-	if(err != nil){
+	if err != nil {
 		return false
 	}
-	if(resp.StatusCode() != 200){
+	if resp.StatusCode() != 200 {
 		return false
 	}
-	if(zboxFundingResponse.Funded == true){
+	if zboxFundingResponse.Funded == true {
 		return true
 	}
 	return true
