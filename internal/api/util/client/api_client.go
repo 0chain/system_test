@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -277,8 +276,6 @@ func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder
 	if notExpectedExecutionResponseCounter > expectedExecutionResponseCounter {
 		return nil, ErrExecutionConsensus
 	}
-
-	fmt.Println("Here")
 
 	return resp, selectMostFrequentError(respErrors)
 }
@@ -924,8 +921,6 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 	requiredTransactionStatus int) string {
 	t.Log("Create allocation...")
 
-	//scRestGetAllocationBlobbersResponse.Size = 1024 * 1024 * 1024
-
 	createAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
@@ -938,18 +933,6 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, createAllocationTransactionPutResponse)
-
-	//printJson, _ := json.Marshal(createAllocationTransactionPutResponse)
-	//// add indentation
-	//var out bytes.Buffer
-	//err = json.Indent(&out, printJson, "", "\t")
-	//if err != nil {
-	//	fmt.Println("error formatting json", err)
-	//} else {
-	//	printJson = out.Bytes()
-	//}
-	//
-	//fmt.Println(string(printJson))
 
 	var createAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
@@ -1835,12 +1818,6 @@ func (c *APIClient) GetStakePoolStat(t *test.SystemTest, providerID, providerTyp
 			ProviderType: providerType,
 		},
 		HttpOkStatus)
-
-	printJson, _ := json.Marshal(scRestGetStakePoolStat)
-	// add indentation
-	var prettyJson bytes.Buffer
-	json.Indent(&prettyJson, printJson, "", "\t")
-
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 
