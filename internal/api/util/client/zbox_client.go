@@ -3,11 +3,9 @@ package client
 import (
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/0chain/system_test/internal/api/util/wait"
 	resty "github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -1961,52 +1959,4 @@ func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, wa
 	}, HttpPOSTMethod)
 
 	return zboxWallet, resp, err
-}
-
-func (z *ZboxClient) CheckStatus(t *test.SystemTest, fundingId, idToken, csrfToken, appType string) bool {
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		var zboxFundingResponse *model.ZboxFundingResponse
-		csrfToken, _, _ := z.CreateCSRFToken(t, z.DefaultPhoneNumber)
-
-		zboxFundingResponse, resp, err := z.CheckFundingStatus(
-			t,
-			fundingId,
-			idToken,
-			csrfToken.CSRFToken,
-			z.DefaultPhoneNumber,
-			appType,
-		)
-		t.Logf("response is %v", zboxFundingResponse)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-		emptyResponse := &model.ZboxFundingResponse{}
-		if zboxFundingResponse == emptyResponse {
-			return false
-		}
-
-		return zboxFundingResponse.Funded == true
-	})
-	zboxFundingResponse, resp, err := z.CheckFundingStatus(
-		t,
-		fundingId,
-		idToken,
-		csrfToken,
-		z.DefaultPhoneNumber,
-		appType,
-	)
-	if err != nil {
-		return false
-	}
-	if resp.StatusCode() != 200 {
-		return false
-	}
-	if zboxFundingResponse.Funded == true {
-		return true
-	}
-	return true
 }

@@ -68,8 +68,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		require.Positive(t, marker.FreeTokens)
 
 		fundingId := strconv.Itoa(storageMarker.FundidngId)
-		res := zboxClient.CheckStatus(t, fundingId, firebaseToken.IdToken, csrfToken, "blimp")
-		require.Equal(t, res, true)
+		require.Equal(t, fundingId, 1)
 	})
 
 	t.RunSequentially("Create FreeStorage should not work more than once", func(t *test.SystemTest) {
