@@ -68,7 +68,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		require.Positive(t, marker.FreeTokens)
 
 		fundingId := strconv.Itoa(storageMarker.FundidngId)
-		require.Equal(t, fundingId, 1)
+		require.Equal(t, "1", fundingId)
 	})
 
 	t.RunSequentially("Create FreeStorage should not work more than once", func(t *test.SystemTest) {
