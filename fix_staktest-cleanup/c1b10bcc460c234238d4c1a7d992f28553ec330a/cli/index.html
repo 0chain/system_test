@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subset of 0Chain System test suite [fix_staktest-cleanup/c1b10bcc] ran against [dev-1.devnet-0chain.net] at [2023-06-03_16.15.08]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">Subset of 0Chain System test suite [fix_staktest-cleanup/c1b10bcc] ran against [dev-1.devnet-0chain.net] at [2023-06-03_16.15.08]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>2</strong>Duration: <strong>2ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>0</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>2</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">June 3, 2023 16:38:18</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup failed " id="1"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStakePool","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":466.92,"Output":["","    system_test_framework.go:70: Test setup [register wallet and get blobbers] scheduled at [06-03-2023 16:15:12] \n","    system_test_framework.go:80: Test setup [register wallet and get blobbers] start at [06-03-2023 16:15:12] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestStakePool_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  97fa10b637d67a63689153f6f1eb0af19241766ab08a4f6232c9f6b809a3e5a4]\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [register wallet and get blobbers] exit at [06-03-2023 16:15:16]\n","","","    system_test_framework.go:70: Test setup [register wallet and get blobbers] scheduled at [06-03-2023 16:22:57] \n","    system_test_framework.go:80: Test setup [register wallet and get blobbers] start at [06-03-2023 16:22:57] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestStakePool_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  29862c0626ba787659e9d82b22fe2257c29aee36db71b2d8a640020606b16766]\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [register wallet and get blobbers] exit at [06-03-2023 16:23:00]\n","","","    system_test_framework.go:70: Test setup [register wallet and get blobbers] scheduled at [06-03-2023 16:30:31] \n","    system_test_framework.go:80: Test setup [register wallet and get blobbers] start at [06-03-2023 16:30:31] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestStakePool_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  92bd6b239c97319db36e3d9568a41fd0d0c831e10a474f201c9a9c077f84e0ed]\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [register wallet and get blobbers] exit at [06-03-2023 16:30:35]\n",""],"Passed":false,"Skipped":false,"TestFileName":"0_blobber_staked_capacity_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestStakePool/Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":462.77,"Output":["","    0_blobber_staked_capacity_test.go:33: Test case [Total stake in a blobber can never be less than it's used capacity] scheduled at [06-03-2023 16:15:16] \n","    system_test_framework.go:149: Test case [Total stake in a blobber can never be less than it's used capacity] start at [06-03-2023 16:15:16] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestStakePool-Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  2110691052ebb66fcc45deb86e294965b7e15f000fe4c5fc9f37d1b16a723360]\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [invalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [invalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet faucet --methodName pour --tokens 9.000000 --input {} --silent --wallet TestStakePool-Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [invalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:53.427076 wallet_base.go:310: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:53.452350 transaction_base.go:139: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:53.452588 transaction.go:265: New transaction interface\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:53.460257 wallet_base.go:270: Minimum miners used for submit :2\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:53.460474 transaction_base.go:351: Submitting smart contract transaction to https://dev-1.devnet-0chain.net/miner02 with JSON {\n","    utils.go:77: \u001b[31m\"hash\": \"f62453c558e0f268c84c50689f1a9875dcad38cb8142a283b82e3aebe2ed8910\",\n","    utils.go:77: \u001b[31m\"version\": \"1.0\",\n","    utils.go:77: \u001b[31m\"client_id\": \"c11d7fb703b7b6bf19716ba3e5dc271469edf1365fc0761cf1f519b396dd9f40\",\n","    utils.go:77: \u001b[31m\"public_key\": \"60d520d2a85b892daf81447fb428f02635d1bea53a39091dab382457e1c94f0a2b1ff1cb95cff98c3a0c2b645e4db5ffde48db4f519a8bf0bce4d657f2bed722\",\n","    utils.go:77: \u001b[31m\"to_client_id\": \"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\n","    utils.go:77: \u001b[31m\"transaction_data\": \"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":\\\"{}\\\"}\",\n","    utils.go:77: \u001b[31m\"transaction_value\": 90000000000,\n","    utils.go:77: \u001b[31m\"signature\": \"a7af273d94b0541ee4e7ab77af714874f71beb91010b34dcb21a1eeb5fecab9f\",\n","    utils.go:77: \u001b[31m\"creation_date\": 1685809373,\n","    utils.go:77: \u001b[31m\"transaction_type\": 1000,\n","    utils.go:77: \u001b[31m\"transaction_fee\": 0,\n","    utils.go:77: \u001b[31m\"transaction_nonce\": 122,\n","    utils.go:77: \u001b[31m\"txn_output_hash\": \"\",\n","    utils.go:77: \u001b[31m\"transaction_status\": 0\n","    utils.go:77: \u001b[31m}\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:53.460835 transaction_base.go:351: Submitting smart contract transaction to https://dev-1.devnet-0chain.net/miner03 with JSON {\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:22:53.464145 transaction_base.go:381: finish txn submitting, https://dev-1.devnet-0chain.net/miner03/v1/transaction/put, Status: 200 OK, output:{\"async\":true,\"entity\":{\"hash\":\"f62453c558e0f268c84c50689f1a9875dcad38cb8142a283b82e3aebe2ed8910\",\"version\":\"1.0\",\"client_id\":\"c11d7fb703b7b6bf19716ba3e5dc271469edf1365fc0761cf1f519b396dd9f40\",\"public_key\":\"60d520d2a85b892daf81447fb428f02635d1bea53a39091dab382457e1c94f0a2b1ff1cb95cff98c3a0c2b645e4db5ffde48db4f519a8bf0bce4d657f2bed722\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":\\\"{}\\\"}\",\"transaction_value\":90000000000,\"signature\":\"a7af273d94b0541ee4e7ab77af714874f71beb91010b34dcb21a1eeb5fecab9f\",\"creation_date\":1685809373,\"transaction_fee\":0,\"transaction_nonce\":122,\"transaction_type\":1000,\"txn_output_hash\":\"\",\"transaction_status\":0}}\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:53.464310 transaction_query.go:131: zcn: check health https://dev-1.devnet-0chain.net/sharder01/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:53.464331 transaction_query.go:131: zcn: check health https://dev-1.devnet-0chain.net/sharder02/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:22:53.473120 transaction_query.go:360: GEThttps://dev-1.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=f62453c558e0f268c84c50689f1a9875dcad38cb8142a283b82e3aebe2ed8910\u0026content=lfb\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:22:53.474577 transaction_query.go:370: {\"error\":{\"Offset\":0},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1685809372,\"hash\":\"226d5c532a3212724b5281f28ec56112b7265da27e25398f7272a37e4aaa6d03\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":5372,\"round_random_seed\":-708305885284704028,\"state_changes_count\":14,\"merkle_tree_root\":\"cad670be3f69f149e2bf179b200b04e98d5b3f5bc25401043593d1e0f883c61f\",\"state_hash\":\"UY6pRuy1341oxZcf3IpwDxi8L8iNdAywokbAPSi4qEM=\",\"receipt_merkle_tree_root\":\"319a1dab4f196d160de779ca24cb044c6c6705a686def4c125112d62acffa364\",\"num_txns\":3}}\n","    utils.go:77: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2023/06/03 16:22:53.474623 transaction_query.go:496: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:53.474705 transaction.go:988: zcn: transaction not confirmed now: 1685809373, LFB creation time:1685809372\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:56.476841 transaction_query.go:131: zcn: check health https://dev-1.devnet-0chain.net/sharder02/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:56.476853 transaction_query.go:131: zcn: check health https://dev-1.devnet-0chain.net/sharder01/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:22:56.478518 transaction_query.go:360: GEThttps://dev-1.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=f62453c558e0f268c84c50689f1a9875dcad38cb8142a283b82e3aebe2ed8910\u0026content=lfb\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:22:56.480282 transaction_query.go:370: {\"confirmation\":{\"version\":\"1.0\",\"hash\":\"f62453c558e0f268c84c50689f1a9875dcad38cb8142a283b82e3aebe2ed8910\",\"block_hash\":\"fbdd3748ab255cb02786ee898a0ecea6e5298352fd3153cb3f1a3ea755429ffe\",\"previous_block_hash\":\"67f3af00c068d1fe38bc9bead23a66634c00e70bc073a4a495cf9170874a9465\",\"txn\":{\"hash\":\"f62453c558e0f268c84c50689f1a9875dcad38cb8142a283b82e3aebe2ed8910\",\"version\":\"1.0\",\"client_id\":\"c11d7fb703b7b6bf19716ba3e5dc271469edf1365fc0761cf1f519b396dd9f40\",\"public_key\":\"60d520d2a85b892daf81447fb428f02635d1bea53a39091dab382457e1c94f0a2b1ff1cb95cff98c3a0c2b645e4db5ffde48db4f519a8bf0bce4d657f2bed722\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":\\\"{}\\\"}\",\"transaction_value\":90000000000,\"signature\":\"a7af273d94b0541ee4e7ab77af714874f71beb91010b34dcb21a1eeb5fecab9f\"",",\"creation_date\":1685809373,\"transaction_fee\":0,\"transaction_nonce\":122,\"transaction_type\":1000,\"transaction_output\":\"invalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)\",\"txn_output_hash\":\"335933b3a2d0dd6e94f936ea3bdca1cea331275d75e4c61592437e8f881b086d\",\"transaction_status\":2},\"creation_date\":1685809373,\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":5379,\"transaction_status\":2,\"round_random_seed\":-8078848825443815587,\"state_changes_count\":15,\"merkle_tree_root\":\"35a64c5c680c45e0f0587bfad2ce2873a26c230e6a1340119fc7d51607fe6940\",\"merkle_tree_path\":{\"nodes\":[\"833fd569e260fb8549a3f7d0aa32db60dd49a1e268ca44fca6db517423f739cf\",\"beaebffe26094169643807bbc887f457a23ec48d4be8d34f486a0c74a56abdc6\"],\"leaf_index\":0},\"receipt_merkle_tree_root\":\"9bbceb5c9bc587b2335102cf014e3701e80ba0ae93cb1d18403c97f91cd8ff2f\",\"receipt_merkle_tree_path\":{\"nodes\":[\"a7ffc6f8bf1ed76651c14756a061d662f580ff","4de43b49fa82d80a4b80f8434a\",\"db5d4c756620d1925922fbbe62375181bdafb98795a8199e214b8d5f1c004d22\"],\"leaf_index\":0}},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1685809375,\"hash\":\"ff80ed9c992c475fc1c7b1dfb4dcdc404ba5228f1de22b84fb96d7470192ddc4\",\"miner_id\":\"c6f4b8ce5da386b278ba8c4e6cf98b24b32d15bc675b4d12c95e082079c91937\",\"round\":5385,\"round_random_seed\":-1196079603824248054,\"state_changes_count\":13,\"merkle_tree_root\":\"1d323410ffda084409272d3b515184c9814c296e1ca6abe1956f764a056c1a7f\",\"state_hash\":\"ZxVDoOGQWqr3n+8erVSCJnMJPeLNLTNpF2XEzqb9/6g=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:22:56.480969 transaction_base.go:708: Confirmation round: 5379\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:56.481203 transaction_base.go:562: Query from https://dev-1.devnet-0chain.net/sharder01/v1/block/get?round=5380\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:56.481231 transaction_base.go:562: Query from https://dev-1.devnet-0chain.net/sharder02/v1/block/get?round=5380\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:22:56.482634 transaction_base.go:661: https://dev-1.devnet-0chain.net/sharder02/v1/block/get?round=5380\u0026content=header200 OK\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:56.482728 transaction_base.go:562: Query from https://dev-1.devnet-0chain.net/sharder01/v1/block/get?round=5381\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:22:56.482759 transaction_base.go:562: Query from https://dev-1.devnet-0chain.net/sharder02/v1/block/get?round=5381\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:22:56.483992 transaction_base.go:661: https://dev-1.devnet-0chain.net/sharder01/v1/block/get?round=5381\u0026content=header200 OK\n","    utils.go:77: \u001b[31minvalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/0_blobber_staked_capacity_test.go:179\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/0_blobber_staked_capacity_test.go:56\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000012510), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestStakePool/Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity\n","        \tMessages:   \tError executing faucet with tokens%!(EXTRA *exec.ExitError=exit status 1)\n","    0_blobber_staked_capacity_test.go:33: Test case [Total stake in a blobber can never be less than it's used capacity] exit at [06-03-2023 16:22:56]\n","","","    0_blobber_staked_capacity_test.go:33: Test case [Total stake in a blobber can never be less than it's used capacity] scheduled at [06-03-2023 16:23:00] \n","    system_test_framework.go:149: Test case [Total stake in a blobber can never be less than it's used capacity] start at [06-03-2023 16:23:00] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestStakePool-Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  4ce9ff05ec53a21dace46ed960542e88a452164d319ec6b181ddf57aa072dc90]\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [invalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [invalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet faucet --methodName pour --tokens 9.000000 --input {} --silent --wallet TestStakePool-Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [invalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:30:28.458705 wallet_base.go:310: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:30:28.483863 transaction_base.go:139: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:30:28.484044 transaction.go:265: New transaction interface\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:30:28.486158 wallet_base.go:270: Minimum miners used for submit :2\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:30:28.486387 transaction_base.go:351: Submitting smart contract transaction to https://dev-1.devnet-0chain.net/miner01 with JSON {\n","    utils.go:77: \u001b[31m\"hash\": \"4b61eedaf6f3544324ebf59f1d7f4523deb6799532b7a696dcbc96e88c203483\",\n","    utils.go:77: \u001b[31m\"version\": \"1.0\",\n","    utils.go:77: \u001b[31m\"client_id\": \"8b4fba5ac9ae0482501c4adcef5069e75f4ba858c2282182fdb2d82d8900b82b\",\n","    utils.go:77: \u001b[31m\"public_key\": \"3218f70b6978961c6940ee175ec439be617dc73cdea623c65556055a7e4362017744f77532e7e33fff703e19faffb021109aa7f500af825f5656da0a7539bd93\",\n","    utils.go:77: \u001b[31m\"to_client_id\": \"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\n","    utils.go:77: \u001b[31m\"transaction_data\": \"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":\\\"{}\\\"}\",\n","    utils.go:77: \u001b[31m\"transaction_value\": 90000000000,\n","    utils.go:77: \u001b[31m\"signature\": \"71186b5bf5dc35dc5c9045988cb6279fae11d0299b40f3c4a564aace3cf00c08\",\n","    utils.go:77: \u001b[31m\"creation_date\": 1685809828,\n","    utils.go:77: \u001b[31m\"transaction_type\": 1000,\n","    utils.go:77: \u001b[31m\"transaction_fee\": 0,\n","    utils.go:77: \u001b[31m\"transaction_nonce\": 122,\n","    utils.go:77: \u001b[31m\"txn_output_hash\": \"\",\n","    utils.go:77: \u001b[31m\"transaction_status\": 0\n","    utils.go:77: \u001b[31m}\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:30:28.486470 transaction_base.go:351: Submitting smart contract transaction to https://dev-1.devnet-0chain.net/miner03 with JSON {\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:30:28.490694 transaction_base.go:381: finish txn submitting, https://dev-1.devnet-0chain.net/miner03/v1/transaction/put, Status: 200 OK, output:{\"async\":true,\"entity\":{\"hash\":\"4b61eedaf6f3544324ebf59f1d7f4523deb6799532b7a696dcbc96e88c203483\",\"version\":\"1.0\",\"client_id\":\"8b4fba5ac9ae0482501c4adcef5069e75f4ba858c2282182fdb2d82d8900b82b\",\"public_key\":\"3218f70b6978961c6940ee175ec439be617dc73cdea623c65556055a7e4362017744f77532e7e33fff703e19faffb021109aa7f500af825f5656da0a7539bd93\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":\\\"{}\\\"}\",\"transaction_value\":90000000000,\"signature\":\"71186b5bf5dc35dc5c9045988cb6279fae11d0299b40f3c4a564aace3cf00c08\",\"creation_date\":1685809828,\"transaction_fee\":0,\"transaction_nonce\":122,\"transaction_type\":1000,\"txn_output_hash\":\"\",\"transaction_status\":0}}\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:30:28.490800 transaction_query.go:131: zcn: check health https://dev-1.devnet-0chain.net/sharder02/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:30:28.490826 transaction_query.go:131: zcn: check health https://dev-1.devnet-0chain.net/sharder01/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:30:30.504434 transaction_query.go:360: GEThttps://dev-1.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=4b61eedaf6f3544324ebf59f1d7f4523deb6799532b7a696dcbc96e88c203483\u0026content=lfb\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:30:30.507143 transaction_query.go:370: {\"confirmation\":{\"version\":\"1.0\",\"hash\":\"4b61eedaf6f3544324ebf59f1d7f4523deb6799532b7a696dcbc96e88c203483\",\"block_hash\":\"c3e0fabcce3190b26cc933208f017eb8cfeec4f6d491d0d77f844de3bf28b3a6\",\"previous_block_hash\":\"212c5beb9dfbfcaa2ee288659220a583bf910c0c711e3df02b0e08d718aede5e\",\"txn\":{\"hash\":\"4b61eedaf6f3544324ebf59f1d7f4523deb6799532b7a696dcbc96e88c203483\",\"version\":\"1.0\",\"client_id\":\"8b4fba5ac9ae0482501c4adcef5069e75f4ba858c2282182fdb2d82d8900b82b\",\"public_key\":\"3218f70b6978961c6940ee175ec439be617dc73cdea623c65556055a7e4362017744f77532e7e33fff703e19faffb021109aa7f500af825f5656da0a7539bd93\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":\\\"{}\\\"}\",\"transaction_value\":90000000000,\"signature\":\"71186b5bf5dc35dc5c9045988cb6279fae11d0299b40f3c4a564aace3cf00c08\"",",\"creation_date\":1685809828,\"transaction_fee\":0,\"transaction_nonce\":122,\"transaction_type\":1000,\"transaction_output\":\"invalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)\",\"txn_output_hash\":\"335933b3a2d0dd6e94f936ea3bdca1cea331275d75e4c61592437e8f881b086d\",\"transaction_status\":2},\"creation_date\":1685809828,\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":7456,\"transaction_status\":2,\"round_random_seed\":-1732805075261913056,\"state_changes_count\":24,\"merkle_tree_root\":\"0de93a8ec5669d957ea3807817e7f021ee8e36acb8ef094bacb9b59243dbb12c\",\"merkle_tree_path\":{\"nodes\":[\"5fbc8453e25842b05ef6064e71c4b201c1f61f28f42401dbe9f489fe06b295af\",\"d972897c3d6160788a80ec6763c39c9abb36d2dada354ec6b92ec56c88480cc4\",\"98e21f67e37eefeb394ddcc0a2406d689e43d2d707eaaf6bd8469547e5f45a2b\"],\"leaf_index\":1},\"receipt_merkle_tree_root\":\"6ccb51bd1cb58b29bb1e828651be26d16390835bf4e193ffdf007135c1298c9c\",\"receipt_","merkle_tree_path\":{\"nodes\":[\"1ef4e83f1cbb57fb2e5b3e2003e7773a8f64dafd3cf79044ed63d77fff45a5b2\",\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"9d12ea745f03257d4b1d6cc53ea2075d18e47f03c9f80c134cb8082253abc07f\"],\"leaf_index\":1}},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1685809829,\"hash\":\"37cbf9b04bba2e572a7c074b6fc2715b87ae528df9d36de4ecd12927cc68c76d\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":7461,\"round_random_seed\":-3080535410895427621,\"state_changes_count\":14,\"merkle_tree_root\":\"770260be026ca998d5d8170296c3073eac8e53798351bac6121d504c64793fed\",\"state_hash\":\"3vUQ5KbfH9AO5f3cXpO9unJ4XMCWSrQ+AyNuMBocLDk=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:30:30.507395 transaction_base.go:708: Confirmation round: 7456\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:30:30.507432 transaction_base.go:562: Query from https://dev-1.devnet-0chain.net/sharder01/v1/block/get?round=7457\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:30:30.507447 transaction_base.go:562: Query from https://dev-1.devnet-0chain.net/sharder02/v1/block/get?round=7457\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:30:30.512334 transaction_base.go:661: https://dev-1.devnet-0chain.net/sharder01/v1/block/get?round=7457\u0026content=header200 OK\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:30:30.512457 transaction_base.go:562: Query from https://dev-1.devnet-0chain.net/sharder01/v1/block/get?round=7458\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:30:30.512496 transaction_base.go:562: Query from https://dev-1.devnet-0chain.net/sharder02/v1/block/get?round=7458\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:30:30.513522 transaction_base.go:661: https://dev-1.devnet-0chain.net/sharder01/v1/block/get?round=7458\u0026content=header200 OK\n","    utils.go:77: \u001b[31minvalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/0_blobber_staked_capacity_test.go:179\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/0_blobber_staked_capacity_test.go:56\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000b09d8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestStakePool/Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity\n","        \tMessages:   \tError executing faucet with tokens%!(EXTRA *exec.ExitError=exit status 1)\n","    0_blobber_staked_capacity_test.go:33: Test case [Total stake in a blobber can never be less than it's used capacity] exit at [06-03-2023 16:30:30]\n","","","    0_blobber_staked_capacity_test.go:33: Test case [Total stake in a blobber can never be less than it's used capacity] scheduled at [06-03-2023 16:30:35] \n","    system_test_framework.go:149: Test case [Total stake in a blobber can never be less than it's used capacity] start at [06-03-2023 16:30:35] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestStakePool-Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  b6fc4f37693ff04d51a37638b9e864219ec43aaf31ec92b18bb9e4530e196ae5]\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    zboxcli_update_allocation_test.go:1005: Executing faucet...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [invalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [invalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet faucet --methodName pour --tokens 9.000000 --input {} --silent --wallet TestStakePool-Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [invalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:14.323967 wallet_base.go:310: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:14.348082 transaction_base.go:139: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:14.348268 transaction.go:265: New transaction interface\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:14.350093 wallet_base.go:270: Minimum miners used for submit :2\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:14.350281 transaction_base.go:351: Submitting smart contract transaction to https://dev-1.devnet-0chain.net/miner02 with JSON {\n","    utils.go:77: \u001b[31m\"hash\": \"705dc82edaf0680469f36b486fb84653ceec56517cbfb8675ecdd0714ae50a76\",\n","    utils.go:77: \u001b[31m\"version\": \"1.0\",\n","    utils.go:77: \u001b[31m\"client_id\": \"d6c3881ff0b35c45fa6a08ae5b89f8bb5fa6776781625290c40ea0cf3883cb4a\",\n","    utils.go:77: \u001b[31m\"public_key\": \"e0c8a48df07f68c52fba51632f7fce87bf786d778b4e19927ac67bfaac7a100a91d1e70746bdcc0505f1a9a9aa9606e910b29026ff0fbfba194bb007cb6c4291\",\n","    utils.go:77: \u001b[31m\"to_client_id\": \"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\n","    utils.go:77: \u001b[31m\"transaction_data\": \"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":\\\"{}\\\"}\",\n","    utils.go:77: \u001b[31m\"transaction_value\": 90000000000,\n","    utils.go:77: \u001b[31m\"signature\": \"c79aa74b127fa4ed03c08b8d0a06316a9ed166742beccb44ff2a358347af1388\",\n","    utils.go:77: \u001b[31m\"creation_date\": 1685810294,\n","    utils.go:77: \u001b[31m\"transaction_type\": 1000,\n","    utils.go:77: \u001b[31m\"transaction_fee\": 0,\n","    utils.go:77: \u001b[31m\"transaction_nonce\": 122,\n","    utils.go:77: \u001b[31m\"txn_output_hash\": \"\",\n","    utils.go:77: \u001b[31m\"transaction_status\": 0\n","    utils.go:77: \u001b[31m}\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:14.350521 transaction_base.go:351: Submitting smart contract transaction to https://dev-1.devnet-0chain.net/miner01 with JSON {\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:38:14.355949 transaction_base.go:381: finish txn submitting, https://dev-1.devnet-0chain.net/miner01/v1/transaction/put, Status: 200 OK, output:{\"async\":true,\"entity\":{\"hash\":\"705dc82edaf0680469f36b486fb84653ceec56517cbfb8675ecdd0714ae50a76\",\"version\":\"1.0\",\"client_id\":\"d6c3881ff0b35c45fa6a08ae5b89f8bb5fa6776781625290c40ea0cf3883cb4a\",\"public_key\":\"e0c8a48df07f68c52fba51632f7fce87bf786d778b4e19927ac67bfaac7a100a91d1e70746bdcc0505f1a9a9aa9606e910b29026ff0fbfba194bb007cb6c4291\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":\\\"{}\\\"}\",\"transaction_value\":90000000000,\"signature\":\"c79aa74b127fa4ed03c08b8d0a06316a9ed166742beccb44ff2a358347af1388\",\"creation_date\":1685810294,\"transaction_fee\":0,\"transaction_nonce\":122,\"transaction_type\":1000,\"txn_output_hash\":\"\",\"transaction_status\":0}}\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:14.356149 transaction_query.go:131: zcn: check health https://dev-1.devnet-0chain.net/sharder01/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:14.356206 transaction_query.go:131: zcn: check health https://dev-1.devnet-0chain.net/sharder02/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:38:15.369808 transaction_query.go:360: GEThttps://dev-1.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=705dc82edaf0680469f36b486fb84653ceec56517cbfb8675ecdd0714ae50a76\u0026content=lfb\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:38:15.371535 transaction_query.go:370: {\"error\":{\"Offset\":0},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1685810294,\"hash\":\"8b38b05d154c8c89449fdd5fada6791d93c9f4c46ffb99d566a9f70e77832f17\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":9591,\"round_random_seed\":-5743842673211979153,\"state_changes_count\":14,\"merkle_tree_root\":\"9bae700b1962f3bdb90fed49369a3a8c8603addba3c25932d48296bc9a1c0c7a\",\"state_hash\":\"7y3HqdaVRpEDdtaWAhWG+3mHswJpxKNU/BuJTyLqf8E=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:77: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2023/06/03 16:38:15.371590 transaction_query.go:496: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:15.371680 transaction.go:988: zcn: transaction not confirmed now: 1685810295, LFB creation time:1685810294\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:18.373825 transaction_query.go:131: zcn: check health https://dev-1.devnet-0chain.net/sharder02/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:18.373846 transaction_query.go:131: zcn: check health https://dev-1.devnet-0chain.net/sharder01/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:38:18.375376 transaction_query.go:360: GEThttps://dev-1.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=705dc82edaf0680469f36b486fb84653ceec56517cbfb8675ecdd0714ae50a76\u0026content=lfb\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:38:18.377489 transaction_query.go:370: {\"confirmation\":{\"version\":\"1.0\",\"hash\":\"705dc82edaf0680469f36b486fb84653ceec56517cbfb8675ecdd0714ae50a76\",\"block_hash\":\"47e05b884dae07c79136e2bb1b63f7c902e78f2678909e7d6b1131c0d078cf7c\",\"previous_block_hash\":\"79935fdf6778cb87158c8cde7bf3aefdbc027b076ea5e867fcb11e442f34e403\",\"txn\":{\"hash\":\"705dc82edaf0680469f36b486fb84653ceec56517cbfb8675ecdd0714ae50a76\",\"version\":\"1.0\",\"client_id\":\"d6c3881ff0b35c45fa6a08ae5b89f8bb5fa6776781625290c40ea0cf3883cb4a\",\"public_key\":\"e0c8a48df07f68c52fba51632f7fce87bf786d778b4e19927ac67bfaac7a100a91d1e70746bdcc0505f1a9a9aa9606e910b29026ff0fbfba194bb007cb6c4291\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"pour\\\",\\\"input\\\":\\\"{}\\\"}\",\"transaction_value\":90000000000,\"signature\":\"c79aa74b127fa4ed03c08b8d0a06316a9ed166742beccb44ff2a358347af1388\"",",\"creation_date\":1685810294,\"transaction_fee\":0,\"transaction_nonce\":122,\"transaction_type\":1000,\"transaction_output\":\"invalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)\",\"txn_output_hash\":\"335933b3a2d0dd6e94f936ea3bdca1cea331275d75e4c61592437e8f881b086d\",\"transaction_status\":2},\"creation_date\":1685810294,\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":9594,\"transaction_status\":2,\"round_random_seed\":2729293312496973955,\"state_changes_count\":18,\"merkle_tree_root\":\"3fc7b6f339fe09b8ebeafcc926358f0cec1e6bcec4572176a4f3688718fb841c\",\"merkle_tree_path\":{\"nodes\":[\"e498d8ce52cf965e1c952c91aa8305e8007b71e619492d788e5910507105a8de\",\"71edb7780e6d07836156a3e10b2bab3be578c3e7195fbafd45b78adb5b422237\"],\"leaf_index\":0},\"receipt_merkle_tree_root\":\"8bc99ff9de6d9d7b49e87d70272ea58beb196e2174dbf6c1dfd90e02d1bb3b83\",\"receipt_merkle_tree_path\":{\"nodes\":[\"a7ffc6f8bf1ed76651c14756a061d662f580ff4","de43b49fa82d80a4b80f8434a\",\"851ca37489c34dca0d2c951de0b2d481d59889d2c1d060e0effbd788614f2a3c\"],\"leaf_index\":0}},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1685810297,\"hash\":\"7b3c94c4dac94aa838a2017e8d93295fbb7cfa569cf7499b00908a55e7bbbfe6\",\"miner_id\":\"c6f4b8ce5da386b278ba8c4e6cf98b24b32d15bc675b4d12c95e082079c91937\",\"round\":9604,\"round_random_seed\":3118308219724444517,\"state_changes_count\":13,\"merkle_tree_root\":\"4f6c563078e94317db47e0db7f024c82952533529cb9c97b6fc5932dab6e3add\",\"state_hash\":\"DWVh3SOjmjSiXHMQVSToZnPJph0NjAqKzVxGoXV82rQ=\",\"receipt_merkle_tree_root\":\"319a1dab4f196d160de779ca24cb044c6c6705a686def4c125112d62acffa364\",\"num_txns\":3}}\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:38:18.377766 transaction_base.go:708: Confirmation round: 9594\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:18.377806 transaction_base.go:562: Query from https://dev-1.devnet-0chain.net/sharder02/v1/block/get?round=9595\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:18.377834 transaction_base.go:562: Query from https://dev-1.devnet-0chain.net/sharder01/v1/block/get?round=9595\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:38:18.379770 transaction_base.go:661: https://dev-1.devnet-0chain.net/sharder01/v1/block/get?round=9595\u0026content=header200 OK\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:18.379894 transaction_base.go:562: Query from https://dev-1.devnet-0chain.net/sharder01/v1/block/get?round=9596\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/03 16:38:18.379914 transaction_base.go:562: Query from https://dev-1.devnet-0chain.net/sharder02/v1/block/get?round=9596\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/03 16:38:18.382106 transaction_base.go:661: https://dev-1.devnet-0chain.net/sharder02/v1/block/get?round=9596\u0026content=header200 OK\n","    utils.go:77: \u001b[31minvalid_request: amount asked to be poured (90000000000) plus previous amounts (10040000000000) exceeds allowed periodic limit (10000000000000/3h0m0shr)\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/0_blobber_staked_capacity_test.go:179\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/0_blobber_staked_capacity_test.go:56\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0004b29c0), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestStakePool/Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity\n","        \tMessages:   \tError executing faucet with tokens%!(EXTRA *exec.ExitError=exit status 1)\n","    0_blobber_staked_capacity_test.go:33: Test case [Total stake in a blobber can never be less than it's used capacity] exit at [06-03-2023 16:38:18]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
