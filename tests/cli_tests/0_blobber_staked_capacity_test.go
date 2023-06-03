@@ -157,7 +157,7 @@ func countDelegates(t *test.SystemTest, blobberId string) (int, error) {
 }
 
 func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailableCapacity int64) string {
-	allocSize := minAvailableCapacity*3 - 200000
+	allocSize := minAvailableCapacity*4
 	output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 		"cost":        "",
 		"data":        3,
