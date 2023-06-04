@@ -157,6 +157,9 @@ jobs:
           zdns_image: ${{ env.ZDNS_TAG }}
           explorer_image: staging
           zsearch_image: staging
+          zs3_client: pr-65-e083107f
+          zs3_logsearchapi: pr-65-e083107f
+          zs3_minio: pr-65-e083107f
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
