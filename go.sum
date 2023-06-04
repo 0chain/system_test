@@ -44,6 +44,8 @@ github.com/0chain/gosdk v1.8.17-0.20230526133621-6b55653da5ff h1:0kcwkENb1sW5V1t
 github.com/0chain/gosdk v1.8.17-0.20230526133621-6b55653da5ff/go.mod h1:H2HxqU0yc9dgBP7idim7Nbk9Vwc8tBTnJZnS4D5uA10=
 github.com/0chain/gosdk v1.8.17-0.20230531073615-baba147663c4 h1:35S/pbqiMEGqveO8S+amsYIQifCjOM7i7tSKW7xyWxM=
 github.com/0chain/gosdk v1.8.17-0.20230531073615-baba147663c4/go.mod h1:kkL++gHtfbTQwVIxk3uVkViVbEnzhasUOSHrKyKprFU=
+github.com/0chain/gosdk v1.8.17-0.20230603051005-021b46e3f52d h1:x7l4az0Gi0iRia5BvnVAB5cQVBo+fCUOVT7Z1p1sySY=
+github.com/0chain/gosdk v1.8.17-0.20230603051005-021b46e3f52d/go.mod h1:IN4Tejoe8O4ktC6bJWVvPhj3r0frMYviShjGINo41KY=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
@@ -140,6 +142,8 @@ github.com/hashicorp/hcl v1.0.0 h1:0Anlzjpi4vEasTeNFn2mLJgTSwt0+6sfsiTG8qcWGx4=
 github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T20WEQ=
 github.com/herumi/bls-go-binary v1.28.2 h1:F0AezsC0M1a9aZjk7g0l2hMb1F56Xtpfku97pDndNZE=
 github.com/herumi/bls-go-binary v1.28.2/go.mod h1:O4Vp1AfR4raRGwFeQpr9X/PQtncEicMoOe6BQt1oX0Y=
+github.com/herumi/bls-go-binary v1.30.4 h1:djGiorPb4lFVRF/lsyB+EHVGVlcE7CYRmJKu72Vdpnk=
+github.com/herumi/bls-go-binary v1.30.4/go.mod h1:O4Vp1AfR4raRGwFeQpr9X/PQtncEicMoOe6BQt1oX0Y=
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
