@@ -58,3 +58,5 @@ require (
 	golang.org/x/text v0.7.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
+
+replace github.com/herumi/bls-go-binary => github.com/cnlangzi/bls-go-binary v1.30.7
