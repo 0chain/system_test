@@ -426,7 +426,6 @@ func (c *SDKClient) AddUploadOperationWithPath(t *test.SystemTest, allocationID,
 		FileMeta:      fileMeta,
 		Workdir:       homeDir,
 	}
-
 }
 
 func (c *SDKClient) AddCreateDirOperation(t *test.SystemTest, allocationID, remotePath string) sdk.OperationRequest {
