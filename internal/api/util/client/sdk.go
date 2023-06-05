@@ -321,6 +321,7 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string) 
 		FileReader:    buf,
 		FileMeta:      fileMeta,
 		Workdir:       homeDir,
+		RemotePath:    fileMeta.RemotePath,
 	}
 }
 
