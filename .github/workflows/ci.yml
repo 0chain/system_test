@@ -103,7 +103,7 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: "Set PR status as pending"
-        uses: 0chain/actions/set-pr-status@master
+        uses: 0chain/actions/set-pr-status@unskip-zs3server
         if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
@@ -167,7 +167,7 @@ jobs:
           authorizer_image: staging
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@master
+        uses: 0chain/actions/run-system-tests@unskip-zs3server
         with:
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
@@ -187,7 +187,7 @@ jobs:
 
       - name: "Set PR status as ${{ job.status }}"
         if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
-        uses: 0chain/actions/set-pr-status@master
+        uses: 0chain/actions/set-pr-status@unskip-zs3server
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
           description: "System tests with default config ${{ job.status }}"
