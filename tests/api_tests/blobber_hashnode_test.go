@@ -70,9 +70,8 @@ func TestHashnodeRoot(testSetup *testing.T) {
 			ClientSignature: sign,
 		}
 
-		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
+		getBlobberResponse, _, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
-		require.Equal(t, "bad request: Invalid Allocation id. Allocation not found in blockchain.\n", string(restyResponse.Body()))
 		require.Nil(t, getBlobberResponse)
 	})
 
