@@ -830,6 +830,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update allocation with add blobber should succeed", func(t *test.SystemTest) {
+		t.Skip("skip till https://github.com/0chain/gosdk/issues/1024 is fixed")
 		// setup allocation and upload a file
 		allocSize := int64(2048)
 		fileSize := int64(1024)
@@ -879,6 +880,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
+		t.Skip("skip till https://github.com/0chain/gosdk/issues/1024 is fixed")
 		// setup allocation and upload a file
 		allocSize := int64(2048)
 		fileSize := int64(1024)
