@@ -8,7 +8,7 @@ import (
 	"github.com/ybbus/jsonrpc/v3"
 )
 
-const InitialBalance = "0x56BC75E2D63100000" // 100 ethers in hex
+const InitialBalance = "0x8AC7230489E8000000" // 100 ethers in hex
 
 // Client represents Ethereum client, which
 // uses Tenderly fork node to perform snapshots

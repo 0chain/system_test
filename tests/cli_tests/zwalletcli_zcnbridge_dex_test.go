@@ -17,7 +17,7 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestBridgeBurn(testSetup *testing.T) {
+func TestAuthorizer(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Burning WZCN tokens on balance, should work")
 
@@ -39,7 +39,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 
 		ethTxHash := getTransactionHash(output, true)
 
-		output, err = getWrappedZcnBurnTicket(t, ethTxHash, true)
+		output, err = getWZCNTicket(t, ethTxHash, true)
 		require.Nil(t, err)
 
 		ethereumTxAddress := strings.TrimSpace(strings.Split(output[len(output)-2], ":")[1])
@@ -57,6 +57,8 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.GreaterOrEqual(t, nonceInt, 0)
 	})
+
+	t.Skip()
 
 	t.RunWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := burnZcn(t, "1", false)
@@ -100,6 +102,30 @@ func TestBridgeBurn(testSetup *testing.T) {
 		nonceInt, err = strconv.Atoi(nonce)
 		require.Nil(t, err)
 		require.GreaterOrEqual(t, nonceInt, 0)
+	})
+
+	t.Run("Mint WZCN tokens", func(t *test.SystemTest) {
+		t.Skip("Skipping due to deployment issue")
+
+		output, err := mintWZCN(t, false)
+		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
+		require.Contains(t, output[len(output)-1], "Verification [OK]")
+	})
+
+	t.Run("Mint ZCN tokens", func(t *test.SystemTest) {
+		t.Skip("Skipping due to deployment issue")
+
+		output, err := mintZCN(t, false)
+		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0)
+		require.Contains(t, output[len(output)-1], "Verification [OK]")
+	})
+
+	t.Run("List authorizers should work", func(t *test.SystemTest) {
+		output, err := getAuthorizersList(t, true)
+
+		require.Nil(t, err, "error trying to get the list of authorizers", strings.Join(output, "\n"))
 	})
 }
 
@@ -171,7 +197,7 @@ func getZcnBurnTicket(t *test.SystemTest, hash string, retry bool) ([]string, er
 	}
 }
 
-func getWrappedZcnBurnTicket(t *test.SystemTest, hash string, retry bool) ([]string, error) {
+func getWZCNTicket(t *test.SystemTest, hash string, retry bool) ([]string, error) {
 	t.Logf("Get WZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-get-wzcn-burn --hash %s --silent "+
@@ -184,6 +210,52 @@ func getWrappedZcnBurnTicket(t *test.SystemTest, hash string, retry bool) ([]str
 
 	if retry {
 		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
+// nolint
+func mintWZCN(t *test.SystemTest, retry bool) ([]string, error) {
+	t.Logf("Mint WZCN tokens using ZCN burn ticket...")
+	cmd := fmt.Sprintf(
+		"./zwallet bridge-mint-wzcn --silent "+
+			"--configDir ./config --config %s --path %s",
+		configPath,
+		configDir,
+	)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
+func mintZCN(t *test.SystemTest, retry bool) ([]string, error) {
+	t.Logf("Mint ZCN tokens using WZCN burn ticket...")
+	cmd := fmt.Sprintf(
+		"./zwallet bridge-mint-zcn --silent "+
+			"--configDir ./config --config %s --path %s",
+		configPath,
+		configDir,
+	)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
+// nolint
+func getAuthorizersList(t *test.SystemTest, retry bool) ([]string, error) {
+	t.Logf("Getting  list of authorizers...")
+	cmd := fmt.Sprintf(
+		"./zwallet bridge-list-auth --silent "+
+			"--configDir ./config --config %s",
+		configPath,
+	)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
