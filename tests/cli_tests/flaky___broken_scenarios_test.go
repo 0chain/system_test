@@ -225,6 +225,7 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 
 	// FIXME based on zbox documents, exclude path switch expected to exclude a REMOTE path in allocation from being updated by sync. see <tbd>
 	t.Run("Sync path to non-empty allocation - exclude a path should work", func(t *test.SystemTest) {
+
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		createAllocationTestTeardown(t, allocationID)
 
@@ -244,7 +245,7 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 			excludedFolderName: map[string]interface{}{
 				excludedFileName: 16 * KB,
 			},
-			"abc.txt": 32 * KB,
+			"decdisdbejdkcdqo3udewd.txt": 32 * KB,
 		}
 
 		// Create files and folders based on defined structure recursively
@@ -252,7 +253,21 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 		require.Nil(t, err, "Error in creating mock folders: ", err, rootLocalFolder)
 		defer os.RemoveAll(rootLocalFolder)
 
-		output, err := syncFolder(t, configPath, map[string]interface{}{
+		output, err := getDifferences(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"localpath":   rootLocalFolder,
+			"excludepath": excludedFolderName,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var differences []climodel.FileDiff
+		err = json.Unmarshal([]byte(output[0]), &differences)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		require.Len(t, differences, 2, "Since we added a file and we updated 2 files (1 excluded) we expect 2 differences but we got %v", len(differences))
+
+		output, err = syncFolder(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  rootLocalFolder,
 		}, true)
@@ -286,7 +301,7 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 		require.Nil(t, err, "Cannot change the file size")
 		err = createFileWithSize(filepath.Join(rootLocalFolder, includedFolderName, includedFileName), 128*KB)
 		require.Nil(t, err, "Cannot change the file size")
-		err = createFileWithSize(filepath.Join(rootLocalFolder, "abc.txt"), 128*KB)
+		err = createFileWithSize(filepath.Join(rootLocalFolder, "decdisdbejdkcdqo3udewd.txt"), 128*KB)
 		require.Nil(t, err, "Cannot change the file size")
 
 		output, err = getDifferences(t, configPath, map[string]interface{}{
@@ -297,7 +312,6 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		var differences []climodel.FileDiff
 		err = json.Unmarshal([]byte(output[0]), &differences)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
 

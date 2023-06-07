@@ -19,6 +19,7 @@ func TestListAuthorizers(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("List authorizers should work", func(t *test.SystemTest) {
+		t.Skip("Skip till runners are updated to newer ubuntu")
 		output, err := getAuthorizersList(t, true)
 
 		require.Nil(t, err, "error trying to get the list of authorizers", strings.Join(output, "\n"))
