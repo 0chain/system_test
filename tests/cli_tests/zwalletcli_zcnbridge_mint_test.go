@@ -19,6 +19,7 @@ const (
 // todo: enable tests
 func TestBridgeMint(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("skip till authorizers are re-enabled")
 	t.SetSmokeTests("Mint WZCN tokens")
 
 	t.Parallel()
