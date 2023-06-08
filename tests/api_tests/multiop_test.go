@@ -298,8 +298,11 @@ func TestMultiOperation(testSetup *testing.T) {
 
 		newPath := "/child"
 		moveOp := sdkClient.AddMoveOperation(t, allocationID, filepath.Dir(nestedDir.FileMeta.RemotePath), newPath)
-
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{moveOp})
+		listResult := sdkClient.GetFileList(t, allocationID, "/child/")
+		require.Equal(t, 1, len(listResult.Children), "files count mismatch expected %v actual %v", 1, len(listResult.Children))
+		listResult = sdkClient.GetFileList(t, allocationID, "/new/")
+		require.Equal(t, 0, len(listResult.Children), "files count mismatch expected %v actual %v", 0, len(listResult.Children))
 	})
 
 	t.RunSequentially("Nested copy operation should work", func(t *test.SystemTest) {
@@ -315,8 +318,10 @@ func TestMultiOperation(testSetup *testing.T) {
 
 		newPath := "/child"
 		copyOp := sdkClient.AddCopyOperation(t, allocationID, filepath.Dir(nestedDir.FileMeta.RemotePath), newPath)
-
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{copyOp})
+
+		listResult := sdkClient.GetFileList(t, allocationID, "/child/")
+		require.Equal(t, 1, len(listResult.Children), "files count mismatch expected %v actual %v", 1, len(listResult.Children))
 	})
 }
 
