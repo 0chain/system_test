@@ -157,7 +157,7 @@ jobs:
           zdns_image: ${{ env.ZDNS_TAG }}
           explorer_image: staging
           zsearch_image: staging
-          s3_migration_cli_branch: pr-65-ef5b4525
+          s3_migration_cli_branch: pr-65
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
