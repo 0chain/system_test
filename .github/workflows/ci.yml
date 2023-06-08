@@ -157,7 +157,6 @@ jobs:
           zdns_image: ${{ env.ZDNS_TAG }}
           explorer_image: staging
           zsearch_image: staging
-          s3_migration_cli_branch: pr-65
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -175,6 +174,7 @@ jobs:
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
+          s3_migration_cli_branch: pr-65
           archive_results: true
           run_flaky_tests: true
           run_api_system_tests: false
