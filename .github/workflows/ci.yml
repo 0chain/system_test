@@ -150,17 +150,17 @@ jobs:
           teardown_condition: "TESTS_PASSED"
           miner_image: ${{ env.MINER_TAG }}
           sharder_image: ${{ env.SHARDER_TAG }}
-          blobber_image: ${{ env.BLOBBER_TAG }}
-          validator_image: ${{ env.VALIDATOR_TAG }}
-          zs3_client: pr-40
-          zs3_logsearchapi: pr-40
-          zs3_minio: pr-40
-          zbox_image: ${{ env.ZBOX_TAG }}
+          blobber_image: pr-1100
+          validator_image: pr-1100
+          zs3_client: pr-40-56a45c02
+          zs3_logsearchapi: pr-40-56a45c02
+          zs3_minio: pr-40-56a45c02
+          zbox_image: pr-669
           zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
           explorer_image: staging
           zsearch_image: staging
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
+          zbox_cli_branch: fix/allocation
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
@@ -181,7 +181,7 @@ jobs:
           archive_results: true
           run_flaky_tests: true
           run_api_system_tests: true
-          run_cli_system_tests: false
+          run_cli_system_tests: true
           run_tokenomics_system_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
