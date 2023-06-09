@@ -831,7 +831,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	t.Run("Update allocation with add blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
-		allocSize := int64(1 * GB)
+		allocSize := int64(2048)
 		fileSize := int64(1024)
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -867,8 +867,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		params := createParams(map[string]interface{}{
-			"allocation":  allocationID,
-			"add_blobber": blobberID,
+			"allocation":                 allocationID,
+			"set_third_party_extendable": nil,
+			"add_blobber":                blobberID,
 		})
 
 		output, err = updateAllocation(t, configPath, params, true)
@@ -881,7 +882,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
-		t.Skip("skip till https://github.com/0chain/gosdk/issues/1024 is fixed")
 		// setup allocation and upload a file
 		allocSize := int64(2048)
 		fileSize := int64(1024)
@@ -889,6 +889,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
+			"data":   1,
+			"parity": 1,
+			"expire": "10m",
 		})
 
 		// faucet tokens
@@ -974,7 +977,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 2.0
 	// Then create new allocation
-	options := map[string]interface{}{"expire": "10m", "size": "100000", "lock": "5"}
+	options := map[string]interface{}{"expire": "1h", "size": "10000", "lock": "5"}
 
 	// Add additional parameters if available
 	// Overwrite with new parameters when available
