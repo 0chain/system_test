@@ -9,7 +9,7 @@ on:
     inputs:
       zbox_cli_branch:
         description: '0Box CLI (branch or commit SHA) which the tests will use'
-        default: 'staging'
+        default: 'fix/allocation'
         required: true
       zwallet_cli_branch:
         description: '0Wallet CLI (branch or commit SHA) which the tests will use'
@@ -25,15 +25,15 @@ on:
         required: false
       blobber_image:
         description: 'blobber DOCKER IMAGE to deploy'
-        default: 'staging'
+        default: 'pr-1100'
         required: false
       validator_image:
         description: 'validator DOCKER IMAGE to deploy'
-        default: 'staging'
+        default: 'pr-1100'
         required: false
       zbox_image:
         description: '0box DOCKER IMAGE to deploy'
-        default: 'staging'
+        default: 'pr-669'
         required: false
       zblock_image:
         description: '0block DOCKER IMAGE to deploy'
@@ -152,6 +152,9 @@ jobs:
           sharder_image: ${{ env.SHARDER_TAG }}
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
+          zs3_client: pr-40
+          zs3_logsearchapi: pr-40
+          zs3_minio: pr-40
           zbox_image: ${{ env.ZBOX_TAG }}
           zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
@@ -174,9 +177,6 @@ jobs:
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
-          zs3_client: pr-40
-          zs3_logsearchapi: pr-40
-          zs3_minio: pr-40
           s3_migration_cli_branch: fix/allocation
           archive_results: true
           run_flaky_tests: true
