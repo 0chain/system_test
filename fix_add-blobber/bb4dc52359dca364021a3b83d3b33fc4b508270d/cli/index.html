@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subset of 0Chain System test suite [fix_add-blobber/bb4dc523] ran against [dev-6.devnet-0chain.net] at [2023-06-09_19.46.59]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">Subset of 0Chain System test suite [fix_add-blobber/bb4dc523] ran against [dev-6.devnet-0chain.net] at [2023-06-09_19.46.59]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>24</strong>Duration: <strong>2ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>21</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>3</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">June 9, 2023 19:59:56</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+                <div class="testResultGroup  " id="17"></div>
+            
+                <div class="testResultGroup  " id="18"></div>
+            
+                <div class="testResultGroup  " id="19"></div>
+            
+                <div class="testResultGroup  " id="20"></div>
+            
+                <div class="testResultGroup failed " id="21"></div>
+            
+                <div class="testResultGroup failed " id="22"></div>
+            
+                <div class="testResultGroup  " id="23"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  d729ad84b0c5c14a111102622fcae0f130d31c8960494613b25a2cdd4529e9d3]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","","","","","","","","","","","","","","","","",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_update_allocation_test.go","TestFunctionDetail":{"Line":29,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_All_Negative_Parameters_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.64,"Output":["","    zboxcli_update_allocation_test.go:140: Test case [Update All Negative Parameters Should Work] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update All Negative Parameters Should Work] start at [06-09-2023 19:47:36] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_All_Negative_Parameters_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  5eaa047b5d03ca35e4270d2bf01ee134bcb8af1a80950206cd0221ce30b279cb]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:140: Test case [Update All Negative Parameters Should Work] exit at [06-09-2023 19:48:09]\n","--- PASS: TestUpdateAllocation/Update_All_Negative_Parameters_Should_Work (32.64s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_All_Parameters_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.54,"Output":["","    zboxcli_update_allocation_test.go:80: Test case [Update All Parameters Should Work] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update All Parameters Should Work] start at [06-09-2023 19:47:41] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_All_Parameters_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  4339b98eb482cdfeb72bf7474bc7022409731ea52a23c0d4c5bd19eea086dab6]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:80: Test case [Update All Parameters Should Work] exit at [06-09-2023 19:48:14]\n","--- PASS: TestUpdateAllocation/Update_All_Parameters_Should_Work (32.54s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Allocation_flags_for_forbid_and_allow_file_options_should_succeed","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":79.13,"Output":["","    zboxcli_update_allocation_test.go:356: Test case [Update Allocation flags for forbid and allow file_options should succeed] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Allocation flags for forbid and allow file_options should succeed] start at [06-09-2023 19:47:01] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_Allocation_flags_for_forbid_and_allow_file_options_should_succeed_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  88ee51b7c206f9475872a3a14d2fbe7422842fc3bbc4b8523cdd6cc1c83a04ad]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  182a0518856d7eae577d5be0714061ad22b0f758ae2f9a1b6f170c6ee94ca9ec]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:386: forbidden delete\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:404: forbidden update\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:422: forbidden move\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:436: forbidden copy\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:454: forbidden rename\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:472: allow upload\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","0box-sdk: [DEBUG]  2023/06/09 19:47:50.132841 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner03\",\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:491: allow delete\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:509: allow update\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:527: allow move\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:545: allow copy\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:563: allow rename\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:356: Test case [Update Allocation flags for forbid and allow file_options should succeed] exit at [06-09-2023 19:48:21]\n","--- PASS: TestUpdateAllocation/Update_Allocation_flags_for_forbid_and_allow_file_options_should_succeed (79.13s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Expired_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":452.7,"Output":["","    zboxcli_update_allocation_test.go:230: Test case [Update Expired Allocation Should Fail] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Expired Allocation Should Fail] start at [06-09-2023 19:47:36] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_Expired_Allocation_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  0bb3aa02fa9d7731462babd177c404a508f2d8de2a281e15c90410f1621ab493]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","0box-sdk: [DEBUG]  2023/06/09 19:47:51.136904 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner03\",\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","0box-sdk: [DEBUG]  2023/06/09 19:47:51.176673 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner03\",\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:230: Test case [Update Expired Allocation Should Fail] exit at [06-09-2023 19:55:09]\n","--- PASS: TestUpdateAllocation/Update_Expired_Allocation_Should_Fail (452.70s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Expiry_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.61,"Output":["","    zboxcli_update_allocation_test.go:35: Test case [Update Expiry Should Work] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Expiry Should Work] start at [06-09-2023 19:47:01] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_Expiry_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  1ed7e642507c880113ef1eb302d625b97e84a021fa9b85e6690ab0eab4c3f245]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:35: Test case [Update Expiry Should Work] exit at [06-09-2023 19:47:29]\n","--- PASS: TestUpdateAllocation/Update_Expiry_Should_Work (27.61s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Mistake_Expiry_Parameter_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.28,"Output":["","    zboxcli_update_allocation_test.go:314: Test case [Update Mistake Expiry Parameter Should Fail] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Mistake Expiry Parameter Should Fail] start at [06-09-2023 19:47:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_Mistake_Expiry_Parameter_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  1fb1a3d7eae3605a02b4d8030407a290241ef2819994fb0d060fe054fd85c519]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:314: Test case [Update Mistake Expiry Parameter Should Fail] exit at [06-09-2023 19:47:40]\n","--- PASS: TestUpdateAllocation/Update_Mistake_Expiry_Parameter_Should_Fail (11.28s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Mistake_Size_Parameter_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.25,"Output":["","    zboxcli_update_allocation_test.go:335: Test case [Update Mistake Size Parameter Should Fail] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Mistake Size Parameter Should Fail] start at [06-09-2023 19:47:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_Mistake_Size_Parameter_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  241cee19bdcef7af125e7064e2145868d1c207494624d9d5b340635e191f4350]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:335: Test case [Update Mistake Size Parameter Should Fail] exit at [06-09-2023 19:47:41]\n","--- PASS: TestUpdateAllocation/Update_Mistake_Size_Parameter_Should_Fail (12.25s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Negative_Expiry_Should_Not_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":46.81,"Output":["","    zboxcli_update_allocation_test.go:104: Test case [Update Negative Expiry Should Not Work] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Negative Expiry Should Not Work] start at [06-09-2023 19:47:34] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_Negative_Expiry_Should_Not_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  affb100d04a57d9335c5fac2fc27f304cebb715412b37691c19a0fd48d297e83]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error updating allocation:allocation_updating_failed: duration of an allocation cannot be reduced]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error updating allocation:allocation_updating_failed: duration of an allocation cannot be reduced]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox updateallocation --allocation 5b4ecc99b380e12613b33a059fb3a05a239ece280c40c021c0e3632656889469 --expiry \"-30m\" --silent --wallet TestUpdateAllocation-Update_Negative_Expiry_Should_Not_Work_wallet.json --configDir ./config --config ./zbox_config.yaml --lock 0.2] Output: [Error updating allocation:allocation_updating_failed: duration of an allocation cannot be reduced]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/09 19:48:16.307806 wallet_base.go:310: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:48:16.307868 sdk.go:78: ******* Storage SDK Version: v1.8.16-38-g5ea0bf75 *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/09 19:48:16.333055 transaction_base.go:139: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/06/09 19:48:16.343791 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\",\"https://dev-6.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:48:16.357269 sdk.go:1431: executing transaction 'update_allocation_request' with hash d729757423e8794a28b5d652fad9ed284a528f3524029616c62e1538b0dd3eb0\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:48:16.357303 sdk.go:1432: estimated txn fee: 100000000\n","    utils.go:77: \u001b[31mError updating allocation:allocation_updating_failed: duration of an allocation cannot be reduced\n","    zboxcli_update_allocation_test.go:104: Test case [Update Negative Expiry Should Not Work] exit at [06-09-2023 19:48:21]\n","--- PASS: TestUpdateAllocation/Update_Negative_Expiry_Should_Not_Work (46.81s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Negative_Size_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":33.65,"Output":["","    zboxcli_update_allocation_test.go:118: Test case [Update Negative Size Should Work] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Negative Size Should Work] start at [06-09-2023 19:47:41] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_Negative_Size_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  61624a0a3c4dd03fe260e31de9cbe23fa68a76d970d031439b07ac8ec2ac038c]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:118: Test case [Update Negative Size Should Work] exit at [06-09-2023 19:48:15]\n","--- PASS: TestUpdateAllocation/Update_Negative_Size_Should_Work (33.65s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Non-existent_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.13,"Output":["","    zboxcli_update_allocation_test.go:214: Test case [Update Non-existent Allocation Should Fail] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Non-existent Allocation Should Fail] start at [06-09-2023 19:47:40] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_Non-existent_Allocation_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  21f490431b5d87f5a45c31682d7fe54fed12e02d6cffb978ce5b795b202c4633]\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:214: Test case [Update Non-existent Allocation Should Fail] exit at [06-09-2023 19:47:43]\n","--- PASS: TestUpdateAllocation/Update_Non-existent_Allocation_Should_Fail (3.13s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Nothing_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.44,"Output":["","    zboxcli_update_allocation_test.go:197: Test case [Update Nothing Should Fail] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Nothing Should Fail] start at [06-09-2023 19:47:43] \n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  ea2d4221305e6737cf0f1e2b2230873cef6eeb6e1249fff1f62b79e38db3f1f9]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:197: Test case [Update Nothing Should Fail] exit at [06-09-2023 19:48:05]\n","--- PASS: TestUpdateAllocation/Update_Nothing_Should_Fail (21.44s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Other's_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.59,"Output":["","    zboxcli_update_allocation_test.go:278: Test case [Update Other's Allocation Should Fail] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Other's Allocation Should Fail] start at [06-09-2023 19:47:01] \n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  52954757da90c88020bdbd81d10feae7df892cccd8debf60d06e896292680ab2]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_Other's_Allocation_Should_Fail_TARGET_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  f7357937630e68bf612562a4bbe74dcee03a74731e9a53518666e1bbfdb86ec4]\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:278: Test case [Update Other's Allocation Should Fail] exit at [06-09-2023 19:47:29]\n","--- PASS: TestUpdateAllocation/Update_Other's_Allocation_Should_Fail (27.59s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Size_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":33.62,"Output":["","    zboxcli_update_allocation_test.go:57: Test case [Update Size Should Work] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Size Should Work] start at [06-09-2023 19:47:56] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_Size_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3f681a6374564094b581a0e72d0fb867972a62bd2fde9698a9cb710510709a9f]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:57: Test case [Update Size Should Work] exit at [06-09-2023 19:48:29]\n","--- PASS: TestUpdateAllocation/Update_Size_Should_Work (33.62s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Size_To_Less_Than_1024_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.58,"Output":["","    zboxcli_update_allocation_test.go:261: Test case [Update Size To Less Than 1024 Should Fail] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Size To Less Than 1024 Should Fail] start at [06-09-2023 19:47:31] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_Size_To_Less_Than_1024_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  a5dee6a93baf94176e2a489ef32063f7b1ec0b6a7ce6dbea53514308c4384155]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:261: Test case [Update Size To Less Than 1024 Should Fail] exit at [06-09-2023 19:47:59]\n","--- PASS: TestUpdateAllocation/Update_Size_To_Less_Than_1024_Should_Fail (27.58s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_Size_to_less_than_occupied_size_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":34.96,"Output":["","    zboxcli_update_allocation_test.go:162: Test case [Update Size to less than occupied size should fail] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update Size to less than occupied size should fail] start at [06-09-2023 19:47:01] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_Size_to_less_than_occupied_size_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  289c62106465b6e17b1cd6d18e72375c3ec78f28ba66235171d11b2c76ffa7a9]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_file_upload_test.go:917: Uploading file...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:162: Test case [Update Size to less than occupied size should fail] exit at [06-09-2023 19:47:36]\n","--- PASS: TestUpdateAllocation/Update_Size_to_less_than_occupied_size_should_fail (34.96s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_allocation_any_other_action_than_expand_by_third_party_regardless_of_third_party_extendable_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":61.3,"Output":["","    zboxcli_update_allocation_test.go:739: Test case [Update allocation any other action than expand by third party regardless of third_party_extendable should fail] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update allocation any other action than expand by third party regardless of third_party_extendable should fail] start at [06-09-2023 19:47:01] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_any_other_action_than_expand_by_third_party_regardless_of_third_party_extendable_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  0e0f89f8de5c84d4b47c8915f7ab51449c81c631e6bb9f80cabc8c1b119302e2]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_any_other_action_than_expand_by_third_party_regardless_of_third_party_extendable_should_fail_NON_OWNER_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  f5a917e0dff62740f412a7a6ad8b97251f33d2bb2e6aeb2b5c48ee312d3da2b1]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:739: Test case [Update allocation any other action than expand by third party regardless of third_party_extendable should fail] exit at [06-09-2023 19:48:03]\n","--- PASS: TestUpdateAllocation/Update_allocation_any_other_action_than_expand_by_third_party_regardless_of_third_party_extendable_should_fail (61.30s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_allocation_expand_by_third_party_if_third_party_extendable_=_false_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":56.15,"Output":["","    zboxcli_update_allocation_test.go:659: Test case [Update allocation expand by third party if third_party_extendable = false should fail] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update allocation expand by third party if third_party_extendable = false should fail] start at [06-09-2023 19:47:01] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_expand_by_third_party_if_third_party_extendable_=_false_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3e04c1dfa411dfbeee5d8ddd1f1e947256f8a6b2a8a1ba9fa3f7c4ea952f1a42]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_expand_by_third_party_if_third_party_extendable_=_false_should_fail_NON_OWNER_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  8572dc4b4067d1737c0f4e22097e274eb26e7c68ffadbed389a07ec223ae76fa]\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error updating allocation:allocation_updating_failed: only owner can update the allocation]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error updating allocation:allocation_updating_failed: only owner can update the allocation]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox updateallocation --allocation becca004f6467a2230818249158bc6eafbc0475568ad52ebff0406163638d7fa --size 2 --silent --wallet TestUpdateAllocation-Update_allocation_expand_by_third_party_if_third_party_extendable_=_false_should_fail_NON_OWNER_wallet.json --configDir ./config --config ./zbox_config.yaml --lock 0.2] Output: [Error updating allocation:allocation_updating_failed: only owner can update the allocation]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/09 19:47:52.937203 wallet_base.go:310: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:47:52.937265 sdk.go:78: ******* Storage SDK Version: v1.8.16-38-g5ea0bf75 *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/09 19:47:52.961980 transaction_base.go:139: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/06/09 19:47:52.970323 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner03\",\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:47:53.001444 sdk.go:1431: executing transaction 'update_allocation_request' with hash 54c78fe0dafb88259a96f326a0328e760da33441d2ae3f4695505d154eb7a55e\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:47:53.001476 sdk.go:1432: estimated txn fee: 100000000\n","    utils.go:77: \u001b[31mError updating allocation:allocation_updating_failed: only owner can update the allocation\n","    zboxcli_update_allocation_test.go:659: Test case [Update allocation expand by third party if third_party_extendable = false should fail] exit at [06-09-2023 19:47:58]\n","--- PASS: TestUpdateAllocation/Update_allocation_expand_by_third_party_if_third_party_extendable_=_false_should_fail (56.15s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_allocation_expand_by_third_party_if_third_party_extendable_=_true_should_succeed","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":39.9,"Output":["","    zboxcli_update_allocation_test.go:692: Test case [Update allocation expand by third party if third_party_extendable = true should succeed] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update allocation expand by third party if third_party_extendable = true should succeed] start at [06-09-2023 19:47:01] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_expand_by_third_party_if_third_party_extendable_=_true_should_succeed_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  67766252587c49dab0e7883bed795bffd32ac2ccc9485a289dbd80b71e487f35]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_expand_by_third_party_if_third_party_extendable_=_true_should_succeed_NON_OWNER_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  6eb45960aec03cc6824ae3f6ff58766f1cbe89120ec18f70c2a31376871c4c4c]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:692: Test case [Update allocation expand by third party if third_party_extendable = true should succeed] exit at [06-09-2023 19:47:41]\n","--- PASS: TestUpdateAllocation/Update_allocation_expand_by_third_party_if_third_party_extendable_=_true_should_succeed (39.90s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_allocation_set_third_party_extendable_flag_should_fail_if_third_party_extendable_is_already_true","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":32.7,"Output":["","    zboxcli_update_allocation_test.go:630: Test case [Update allocation set_third_party_extendable flag should fail if third_party_extendable is already true] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update allocation set_third_party_extendable flag should fail if third_party_extendable is already true] start at [06-09-2023 19:47:01] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_set_third_party_extendable_flag_should_fail_if_third_party_extendable_is_already_true_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  1d35867d850c34b4897e780a5ea19e861db1d18c5ba6800039421638cb08b949]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_update_allocation_test.go:630: Test case [Update allocation set_third_party_extendable flag should fail if third_party_extendable is already true] exit at [06-09-2023 19:47:34]\n","--- PASS: TestUpdateAllocation/Update_allocation_set_third_party_extendable_flag_should_fail_if_third_party_extendable_is_already_true (32.70s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_allocation_set_third_party_extendable_flag_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":29.62,"Output":["","    zboxcli_update_allocation_test.go:611: Test case [Update allocation set_third_party_extendable flag should work] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update allocation set_third_party_extendable flag should work] start at [06-09-2023 19:47:01] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_set_third_party_extendable_flag_should_work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  ee4d79cc9309c4a5940e62a697d08ef19c25d3ac8d176e57aff35c4122af6529]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1095: Listing allocations...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    zboxcli_update_allocation_test.go:611: Test case [Update allocation set_third_party_extendable flag should work] exit at [06-09-2023 19:47:31]\n","--- PASS: TestUpdateAllocation/Update_allocation_set_third_party_extendable_flag_should_work (29.62s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_allocation_with_add_blobber_should_succeed","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":59.58,"Output":["","    zboxcli_update_allocation_test.go:832: Test case [Update allocation with add blobber should succeed] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update allocation with add blobber should succeed] start at [06-09-2023 19:47:01] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_with_add_blobber_should_succeed_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  f8924e94d62d64c2697e674bf229c988ae149cc88fde99bf8ccd84257d3af64e]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_file_upload_test.go:917: Uploading file...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/zboxcli_update_allocation_test.go:877\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1598\n","        \tError:      \t\"[Allocation updated with txId : 67843e35693f1d6f02a4ddab94397dde53ec4aa2e731f49eda24c1279be85c51 0 / 1024    0.00% 1024 / 1024  100.00% 0s Status completed callback. Type = . Name = 7ZYbk1sGgk_test.txt Repair file completed, Total files repaired:  0]\" should have 3 item(s), but has 4\n","        \tTest:       \tTestUpdateAllocation/Update_allocation_with_add_blobber_should_succeed\n","    zboxcli_update_allocation_test.go:832: Test case [Update allocation with add blobber should succeed] exit at [06-09-2023 19:47:56]\n","","","    zboxcli_update_allocation_test.go:832: Test case [Update allocation with add blobber should succeed] scheduled at [06-09-2023 19:55:10] \n","","","    system_test_framework.go:149: Test case [Update allocation with add blobber should succeed] start at [06-09-2023 19:55:10] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_with_add_blobber_should_succeed_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  a6e9066aeb8a213c6cd4834a872f18bb883c288bd26acb8d3b60b9b0c581e8a5]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_file_upload_test.go:917: Uploading file...\n","0box-sdk: [DEBUG]  2023/06/09 19:56:03.772159 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner03\",\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/zboxcli_update_allocation_test.go:877\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1598\n","        \tError:      \t\"[Allocation updated with txId : e69ffe396f35567bdc19667028e4fc76eb5667713fa09119d07c3d3a735210dc 0 / 1024    0.00% 1024 / 1024  100.00% 0s Status completed callback. Type = . Name = 2e1KV-EMyR_test.txt Repair file completed, Total files repaired:  0]\" should have 3 item(s), but has 4\n","        \tTest:       \tTestUpdateAllocation/Update_allocation_with_add_blobber_should_succeed\n","    zboxcli_update_allocation_test.go:832: Test case [Update allocation with add blobber should succeed] exit at [06-09-2023 19:56:10]\n","","","    zboxcli_update_allocation_test.go:832: Test case [Update allocation with add blobber should succeed] scheduled at [06-09-2023 19:57:37] \n","","","    system_test_framework.go:149: Test case [Update allocation with add blobber should succeed] start at [06-09-2023 19:57:37] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_with_add_blobber_should_succeed_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  c1b53f9960ffbc248c57c7b9c88100c6d2dd41da89a222ca8724850a2a541537]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_file_upload_test.go:917: Uploading file...\n","0box-sdk: [DEBUG]  2023/06/09 19:58:31.183804 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner03\",\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/zboxcli_update_allocation_test.go:877\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1598\n","        \tError:      \t\"[Allocation updated with txId : ed5e3bd280545a1b61c5764d60c96941f472b99db504217b20066c11815c4b44 0 / 1024    0.00% 1024 / 1024  100.00% 0s Status completed callback. Type = . Name = 6jnk-GR3Lf_test.txt Repair file completed, Total files repaired:  0]\" should have 3 item(s), but has 4\n","        \tTest:       \tTestUpdateAllocation/Update_allocation_with_add_blobber_should_succeed\n","    zboxcli_update_allocation_test.go:832: Test case [Update allocation with add blobber should succeed] exit at [06-09-2023 19:58:37]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Update_allocation_with_replace_blobber_should_succeed","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":77.83,"Output":["","    zboxcli_update_allocation_test.go:884: Test case [Update allocation with replace blobber should succeed] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Update allocation with replace blobber should succeed] start at [06-09-2023 19:47:01] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_with_replace_blobber_should_succeed_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  e537f71f2ccac72fe24c7bdb3bff3fc25601a9e74bae6334940d4505b35fb5d6]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_file_upload_test.go:917: Uploading file...\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Allocation updated with txId : 0c9722d9c2b9a1902352e3a067626deba07d5177109e7b2ddca0475802d982b9 -\u003cNEWLINE\u003e- Repair file completed, Total files repaired:  0]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error updating allocation:allocation_updating_failed: cannot add blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, already in allocation]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox updateallocation --add_blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d --remove_blobber 48592ae54bcd3f6e4f36f6e94b95247afb1addcf4704a87967f6e5f25bcb625e --set_third_party_extendable --allocation 09ef9e9fbc7eb9ea43395e6fd09d19ec4254147991a1d42d8604b4ac3d2f2e3f --silent --wallet TestUpdateAllocation-Update_allocation_with_replace_blobber_should_succeed_wallet.json --configDir ./config --config ./zbox_config.yaml --lock 0.2] Output: [Error updating allocation:allocation_updating_failed: cannot add blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, already in allocation]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/09 19:48:10.519349 wallet_base.go:310: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:48:10.519577 sdk.go:78: ******* Storage SDK Version: v1.8.16-38-g5ea0bf75 *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/09 19:48:10.549031 transaction_base.go:139: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/06/09 19:48:10.556177 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\",\"https://dev-6.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:48:10.565282 allocation.go:1985: Updating allocation\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:48:10.572664 sdk.go:1431: executing transaction 'update_allocation_request' with hash b2126d2d451c801d4e3ddc85e7296170c0da76ddf3e3f0afaea73df1cf571edf\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:48:10.572692 sdk.go:1432: estimated txn fee: 100000000\n","    utils.go:77: \u001b[31mError updating allocation:allocation_updating_failed: cannot add blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, already in allocation\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/zboxcli_update_allocation_test.go:931\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000013800), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestUpdateAllocation/Update_allocation_with_replace_blobber_should_succeed\n","        \tMessages:   \terror updating allocation%!(EXTRA string=Error updating allocation:allocation_updating_failed: cannot add blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, already in allocation)\n","    zboxcli_update_allocation_test.go:884: Test case [Update allocation with replace blobber should succeed] exit at [06-09-2023 19:48:15]\n","","","    zboxcli_update_allocation_test.go:884: Test case [Update allocation with replace blobber should succeed] scheduled at [06-09-2023 19:56:10] \n","","","    system_test_framework.go:149: Test case [Update allocation with replace blobber should succeed] start at [06-09-2023 19:56:10] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_with_replace_blobber_should_succeed_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  2162f80fc3c2ada37c3ec428c548f42d2f678d9a9ab15cc259260c86c8b36a2e]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_file_upload_test.go:917: Uploading file...\n","0box-sdk: [DEBUG]  2023/06/09 19:57:11.457757 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\",\"https://dev-6.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","0box-sdk: [DEBUG]  2023/06/09 19:57:11.479962 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\",\"https://dev-6.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Allocation updated with txId : 3d920ff1ded5037c15d52604b8ebd03e38c7b98702719d6ff623b0d7aec462f4 -\u003cNEWLINE\u003e- Repair file completed, Total files repaired:  0]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error updating allocation:allocation_updating_failed: cannot add blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, already in allocation]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox updateallocation --set_third_party_extendable --allocation 4c67784b28d31fe8f30e45f75d0b4b690a61faa189aad2587e3584ed615a6077 --add_blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d --remove_blobber 45d0de870ee7cd36f83fd633c9989b9e640f0b386c639aa6c178923f3e968fc1 --silent --wallet TestUpdateAllocation-Update_allocation_with_replace_blobber_should_succeed_wallet.json --configDir ./config --config ./zbox_config.yaml --lock 0.2] Output: [Error updating allocation:allocation_updating_failed: cannot add blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, already in allocation]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/09 19:57:31.843063 wallet_base.go:310: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:57:31.843292 sdk.go:78: ******* Storage SDK Version: v1.8.16-38-g5ea0bf75 *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/09 19:57:31.866276 transaction_base.go:139: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/06/09 19:57:31.876320 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\",\"https://dev-6.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:57:31.884234 allocation.go:1985: Updating allocation\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:57:31.900206 sdk.go:1431: executing transaction 'update_allocation_request' with hash ed1a964fcc0c92f1895365466ab5c302731cf939d99e05f50407b2dd03d9f2b3\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:57:31.900227 sdk.go:1432: estimated txn fee: 100000000\n","    utils.go:77: \u001b[31mError updating allocation:allocation_updating_failed: cannot add blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, already in allocation\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/zboxcli_update_allocation_test.go:931\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000012360), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestUpdateAllocation/Update_allocation_with_replace_blobber_should_succeed\n","        \tMessages:   \terror updating allocation%!(EXTRA string=Error updating allocation:allocation_updating_failed: cannot add blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, already in allocation)\n","    zboxcli_update_allocation_test.go:884: Test case [Update allocation with replace blobber should succeed] exit at [06-09-2023 19:57:36]\n","","","    zboxcli_update_allocation_test.go:884: Test case [Update allocation with replace blobber should succeed] scheduled at [06-09-2023 19:58:38] \n","","","    system_test_framework.go:149: Test case [Update allocation with replace blobber should succeed] start at [06-09-2023 19:58:38] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpdateAllocation-Update_allocation_with_replace_blobber_should_succeed_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  acf5eceb41cbc514fd2bf903c53097a34c0badad69b52e2c8804203e84180880]\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_download_token_test.go:132: Locking read tokens...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_update_allocation_test.go:1114: Executing faucet...\n","    zboxcli_file_upload_test.go:917: Uploading file...\n","0box-sdk: [DEBUG]  2023/06/09 19:59:30.682602 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\",\"https://dev-6.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","0box-sdk: [DEBUG]  2023/06/09 19:59:30.717480 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner02\",\"https://dev-6.devnet-0chain.net/miner01\",\"https://dev-6.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","    zboxcli_update_allocation_test.go:1078: Updating allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Allocation updated with txId : 1978306eccff5afe124a884b65e4e0230dd276aa4371bd300d9d1289c9f8d2a2 -\u003cNEWLINE\u003e- Repair file completed, Total files repaired:  0]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error updating allocation:allocation_updating_failed: cannot add blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, already in allocation]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox updateallocation --add_blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d --remove_blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 --set_third_party_extendable --allocation 24d580ab4eb41aa34ac1e5b494ea2572658232955f735aa31f38e41e7627ee6e --silent --wallet TestUpdateAllocation-Update_allocation_with_replace_blobber_should_succeed_wallet.json --configDir ./config --config ./zbox_config.yaml --lock 0.2] Output: [Error updating allocation:allocation_updating_failed: cannot add blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, already in allocation]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/09 19:59:51.082788 wallet_base.go:310: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:59:51.082852 sdk.go:78: ******* Storage SDK Version: v1.8.16-38-g5ea0bf75 *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/09 19:59:51.107138 transaction_base.go:139: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/06/09 19:59:51.126006 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-6.devnet-0chain.net/miner01\",\"https://dev-6.devnet-0chain.net/miner03\",\"https://dev-6.devnet-0chain.net/miner02\"],\"sharders\":[\"https://dev-6.devnet-0chain.net/sharder02\",\"https://dev-6.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:59:51.137507 allocation.go:1985: Updating allocation\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:59:51.156569 sdk.go:1431: executing transaction 'update_allocation_request' with hash 33b995e1c2acc29b52e6d77db3727a89e331e004eeed2f6b9fa4f7447734110a\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/09 19:59:51.156601 sdk.go:1432: estimated txn fee: 100000000\n","    utils.go:77: \u001b[31mError updating allocation:allocation_updating_failed: cannot add blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, already in allocation\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/zboxcli_update_allocation_test.go:931\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0001924b0), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestUpdateAllocation/Update_allocation_with_replace_blobber_should_succeed\n","        \tMessages:   \terror updating allocation%!(EXTRA string=Error updating allocation:allocation_updating_failed: cannot add blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, already in allocation)\n","    zboxcli_update_allocation_test.go:884: Test case [Update allocation with replace blobber should succeed] exit at [06-09-2023 19:59:56]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpdateAllocation/Updating_same_file_options_twice_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":34.76,"Output":["","    zboxcli_update_allocation_test.go:581: Test case [Updating same file options twice should fail] scheduled at [06-09-2023 19:47:01] \n","","","    system_test_framework.go:149: Test case [Updating same file options twice should fail] start at [06-09-2023 19:47:01] \n","    zboxcli_update_allocation_test.go:581: Test case [Updating same file options twice should fail] exit at [06-09-2023 19:47:36]\n","--- PASS: TestUpdateAllocation/Updating_same_file_options_twice_should_fail (34.76s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
