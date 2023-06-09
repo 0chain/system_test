@@ -19,6 +19,7 @@ import (
 
 func TestBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("skip till authorizers are re-enabled")
 	t.SetSmokeTests("Burning WZCN tokens on balance, should work")
 
 	t.Parallel()

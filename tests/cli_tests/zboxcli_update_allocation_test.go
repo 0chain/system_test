@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -825,6 +827,109 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, alloc.FileOptions, updatedAlloc.FileOptions)
 		// assert that no more blobber was added
 		require.Equal(t, len(alloc.Blobbers), len(updatedAlloc.Blobbers))
+	})
+
+	t.Run("Update allocation with add blobber should succeed", func(t *test.SystemTest) {
+		t.Skip("skip till https://github.com/0chain/gosdk/issues/1024 is fixed")
+		// setup allocation and upload a file
+		allocSize := int64(2048)
+		fileSize := int64(1024)
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 9,
+		})
+
+		// faucet tokens
+		for i := 0; i < 10; i++ {
+			_, err := executeFaucetWithTokens(t, configPath, 10)
+			require.NoError(t, err, "faucet execution failed")
+		}
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		remotePath := "/dir/" + filename
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
+		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
+		require.Nil(t, err)
+
+		params := createParams(map[string]interface{}{
+			"allocation":                 allocationID,
+			"set_third_party_extendable": nil,
+			"add_blobber":                blobberID,
+		})
+
+		output, err = updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		fref, err := VerifyFileRefFromBlobber(walletFile, configFile, allocationID, blobberID, remotePath)
+		require.Nil(t, err)
+		require.NotNil(t, fref) // not nil when the file exists
+	})
+
+	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
+		t.Skip("skip till https://github.com/0chain/gosdk/issues/1024 is fixed")
+		// setup allocation and upload a file
+		allocSize := int64(2048)
+		fileSize := int64(1024)
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 9,
+		})
+
+		// faucet tokens
+		for i := 0; i < 10; i++ {
+			_, err := executeFaucetWithTokens(t, configPath, 10)
+			require.NoError(t, err, "faucet execution failed")
+		}
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		remotePath := "/dir/" + filename
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
+
+		addBlobber, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
+		require.Nil(t, err)
+		removeBlobber, err := GetRandomBlobber(walletFile, configFile, allocationID, addBlobber)
+		require.Nil(t, err)
+		params := createParams(map[string]interface{}{
+			"allocation":                 allocationID,
+			"set_third_party_extendable": nil,
+			"add_blobber":                addBlobber,
+			"remove_blobber":             removeBlobber,
+		})
+
+		output, err = updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 3)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		fref, err := VerifyFileRefFromBlobber(walletFile, configFile, allocationID, addBlobber, remotePath)
+		require.Nil(t, err)
+		require.NotNil(t, fref) // not nil when the file exists
 	})
 }
 

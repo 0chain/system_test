@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/0chain/gosdk/core/common"
 	"github.com/0chain/system_test/internal/api/util/test"
 	resty "github.com/go-resty/resty/v2"
 )
@@ -36,6 +37,28 @@ type ZboxWallet struct {
 	LastUpdate  string           `json:"last_update"`
 }
 
+type ZboxFundingResponse struct {
+	Id                int    `json:"id"`
+	Amount            int    `json:"amount"`
+	Description       string `json:"description"`
+	Funded            bool   `json:"funded"`
+	TransactionStatus bool   `json:"tx_done"`
+}
+type ZboxFreeStorage struct {
+	Marker     string `json:"marker"`
+	FundidngId int    `json:"funding_id"`
+}
+type ZboxFreeStorageMarker struct {
+	Assigner   string           `json:"assigner"`
+	Recipient  string           `json:"recipient"`
+	FreeTokens float64          `json:"free_tokens"`
+	Timestamp  common.Timestamp `json:"timestamp"`
+	Signature  string           `json:"signature"`
+}
+type ZboxFreeStorageMarkerResponse struct {
+	Marker             string `json:"marker"`
+	RecipientPublicKey string `json:"recipient_public_key"`
+}
 type ZboxResourceExist struct {
 	Exist *bool   `json:"exist"`
 	Error *string `json:"error"`
