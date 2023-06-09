@@ -219,6 +219,9 @@ func getAllocation(t *test.SystemTest, allocationID string) (allocation climodel
 	output, err := getAllocationWithRetry(t, configPath, allocationID, 1)
 	require.Nil(t, err, "error fetching allocation")
 	require.Greater(t, len(output), 0, "gettting allocation - output is empty unexpectedly")
+
+	fmt.Println(output)
+
 	err = json.Unmarshal([]byte(output[0]), &allocation)
 	require.Nil(t, err, "error unmarshalling allocation json")
 	return
