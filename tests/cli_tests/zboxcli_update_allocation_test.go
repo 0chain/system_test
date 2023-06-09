@@ -830,7 +830,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update allocation with add blobber should succeed", func(t *test.SystemTest) {
-		t.Skip("skip till https://github.com/0chain/gosdk/issues/1024 is fixed")
 		// setup allocation and upload a file
 		allocSize := int64(2048)
 		fileSize := int64(1024)
@@ -1079,6 +1078,11 @@ func updateAllocationWithWallet(t *test.SystemTest, wallet, cliConfigFilename, p
 		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
+
+	fmt.Println(cmd)
+
+	retry = false
+
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 	} else {

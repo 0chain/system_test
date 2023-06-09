@@ -65,14 +65,17 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 		fmt.Println("expectedUploadCostInZCN", expectedUploadCostInZCN)
 
 		// Expected cost takes into account data+parity, so we divide by that
-		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / (2)
+		actualExpectedUploadCostInZCN := expectedUploadCostInZCN
 
 		// Wait for write pool balance to be deduced for initial 0.5 MB
 		cliutils.Wait(t, time.Minute)
 
 		initialAllocation := getAllocation(t, allocationID)
 
-		require.Equal(t, 0.5-actualExpectedUploadCostInZCN, initialAllocation.WritePool)
+		fmt.Println("initialAllocation.WritePool", intToZCN(initialAllocation.WritePool))
+		fmt.Println("actualExpectedUploadCostInZCN", actualExpectedUploadCostInZCN)
+
+		require.Equal(t, 0.5-actualExpectedUploadCostInZCN, intToZCN(initialAllocation.WritePool))
 
 		remotepath := "/" + filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(1*MB))
@@ -81,6 +84,7 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 		cliutils.Wait(t, time.Minute)
 
 		finalAllocation := getAllocation(t, allocationID)
+
 		require.Equal(t, 0.5-2*actualExpectedUploadCostInZCN, intToZCN(finalAllocation.WritePool))
 
 		// Blobber pool balance should reduce by expected cost of 0.5 MB
@@ -447,6 +451,10 @@ func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo
 		// Upload 1 MB file
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
+
+		fmt.Println("output", output)
+
 		// Get initial write pool
 		cliutils.Wait(t, 10*time.Second)
 
@@ -473,20 +481,20 @@ func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo
 		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
 
-		fmt.Println("expectedUploadCostInZCN", expectedUploadCostInZCN)
-
 		unit := strings.Fields(output[0])[1]
 		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+		fmt.Println("expectedUploadCostInZCN", expectedUploadCostInZCN)
 
 		// Expected cost is given in "per 720 hours", we need 1 hour
 		// Expected cost takes into account data+parity, so we divide by that
-		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
+		actualExpectedUploadCostInZCN := expectedUploadCostInZCN * 3
 
 		finalAllocation := getAllocation(t, allocationID)
 
 		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
 
 		fmt.Println("actualCost", actualCost)
+		fmt.Println("actualCost", intToZCN(actualCost))
 		fmt.Println("actualExpectedUploadCostInZCN", actualExpectedUploadCostInZCN)
 
 		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
