@@ -9,7 +9,7 @@ on:
     inputs:
       zbox_cli_branch:
         description: '0Box CLI (branch or commit SHA) which the tests will use'
-        default: 'fix/allocation'
+        default: 'staging'
         required: true
       zwallet_cli_branch:
         description: '0Wallet CLI (branch or commit SHA) which the tests will use'
@@ -25,15 +25,15 @@ on:
         required: false
       blobber_image:
         description: 'blobber DOCKER IMAGE to deploy'
-        default: 'pr-1100'
+        default: 'staging'
         required: false
       validator_image:
         description: 'validator DOCKER IMAGE to deploy'
-        default: 'pr-1100'
+        default: 'staging'
         required: false
       zbox_image:
         description: '0box DOCKER IMAGE to deploy'
-        default: 'pr-669'
+        default: 'staging'
         required: false
       zblock_image:
         description: '0block DOCKER IMAGE to deploy'
@@ -150,17 +150,17 @@ jobs:
           teardown_condition: "TESTS_PASSED"
           miner_image: ${{ env.MINER_TAG }}
           sharder_image: ${{ env.SHARDER_TAG }}
-          blobber_image: pr-1100
-          validator_image: pr-1100
+          blobber_image: ${{ env.BLOBBER_TAG }}
+          validator_image: ${{ env.VALIDATOR_TAG }}
+          zbox_image: ${{ env.ZBOX_TAG }}
           zs3_client: pr-40-56a45c02
           zs3_logsearchapi: pr-40-56a45c02
           zs3_minio: pr-40-56a45c02
-          zbox_image: pr-669
           zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
           explorer_image: staging
           zsearch_image: staging
-          zbox_cli_branch: fix/allocation
+          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
