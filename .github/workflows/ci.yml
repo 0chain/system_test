@@ -153,9 +153,9 @@ jobs:
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
           zbox_image: ${{ env.ZBOX_TAG }}
-          zs3_client: pr-40-56a45c02
-          zs3_logsearchapi: pr-40-56a45c02
-          zs3_minio: pr-40-56a45c02
+          zs3_client: pr-40-856c6f1c
+          zs3_logsearchapi: pr-40-856c6f1c
+          zs3_minio: pr-40-856c6f1c
           zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
           explorer_image: staging
