@@ -143,7 +143,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"bucket":     s3bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
-			"skip": 0,
+			"skip": 1,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -163,7 +163,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"bucket":     s3bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
-			"skip": 0,
+			"skip": 2,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
