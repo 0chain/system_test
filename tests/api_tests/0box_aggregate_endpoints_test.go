@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"strconv"
@@ -19,13 +20,12 @@ import (
 //nolint:gocyclo
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-
-	t.Skip()
 	// Faucet the used wallets
 	for i := 0; i < 10; i++ {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus) // 18 * 50 * 1e10
 	}
 	for i := 0; i < 10; i++ {
+		apiClient.PrintJsonString("Faucet blobber owner wallet", blobberOwnerWallet)
 		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
 	}
 
@@ -101,6 +101,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 				diff := priceAfterStaking - expectedAWP
 				t.Logf("priceBeforeStaking: %d, priceAfterStaking: %d, expectedAWP: %d, diff: %d", priceBeforeStaking, priceAfterStaking, expectedAWP, diff)
+
+				fmt.Println("Here")
+
 				return priceAfterStaking != priceBeforeStaking && diff >= -roundingError && diff <= roundingError && priceAfterStaking == int64(*latest)
 			})
 
@@ -2025,6 +2028,8 @@ func graphEndpointTestCases(endpoint model.ZboxGraphEndpoint) func(*test.SystemT
 	return func(t *test.SystemTest) {
 		// should fail for invalid parameters
 		_, resp, err := endpoint(t, &model.ZboxGraphRequest{From: "AX", To: "20", DataPoints: "5"})
+
+		fmt.Println(resp)
 		require.Error(t, err)
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "invalid from param")

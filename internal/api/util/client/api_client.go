@@ -261,6 +261,7 @@ func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder
 
 		newResp, err := c.executeForServiceProvider(t, formattedURL, *executionRequest, method)
 		if err != nil {
+			fmt.Println("Printing Errors : ", err.Error())
 			respErrors = append(respErrors, err)
 			continue
 		}
@@ -786,6 +787,15 @@ func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requ
 	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
 }
 
+// print json string
+func (c *APIClient) PrintJsonString(s string, ip interface{}) {
+	b, err := json.MarshalIndent(ip, "", "  ")
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	fmt.Print(s, " : ", string(b))
+}
+
 // ExecuteFaucet provides basic assertions
 func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
@@ -800,6 +810,13 @@ func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wa
 			Value:           pourZCN,
 		},
 		HttpOkStatus)
+
+	//PrintJsonString("faucetTransactionPutResponse", faucetTransactionPutResponse)
+	//PrintJsonString("resp", resp)
+	//if err != nil {
+	//	PrintJsonString("err", err.Error())
+	//}
+
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, faucetTransactionPutResponse)
