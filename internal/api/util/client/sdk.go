@@ -321,6 +321,7 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string) 
 		FileReader:    buf,
 		FileMeta:      fileMeta,
 		Workdir:       homeDir,
+		RemotePath:    fileMeta.RemotePath,
 	}
 }
 
@@ -388,6 +389,43 @@ func (c *SDKClient) AddCopyOperation(t *test.SystemTest, allocationID, remotePat
 		OperationType: constants.FileOperationCopy,
 		RemotePath:    remotePath,
 		DestPath:      destPath,
+	}
+}
+
+func (c *SDKClient) AddUploadOperationWithPath(t *test.SystemTest, allocationID, remotePath string) sdk.OperationRequest {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	tmpFile, err := os.CreateTemp("", "*")
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	const actualSize int64 = 1024
+
+	rawBuf := make([]byte, actualSize)
+	_, err = rand.Read(rawBuf)
+	if err != nil {
+		require.NoError(t, err)
+	} //nolint:gosec,revive
+
+	fileMeta := sdk.FileMeta{
+		Path:       tmpFile.Name(),
+		ActualSize: actualSize,
+		RemoteName: filepath.Base(tmpFile.Name()),
+		RemotePath: remotePath + filepath.Join("", filepath.Base(tmpFile.Name())),
+	}
+
+	buf := bytes.NewBuffer(rawBuf)
+
+	homeDir, err := config.GetHomeDir()
+	require.NoError(t, err)
+
+	return sdk.OperationRequest{
+		OperationType: constants.FileOperationInsert,
+		FileReader:    buf,
+		FileMeta:      fileMeta,
+		Workdir:       homeDir,
 	}
 }
 
