@@ -153,9 +153,6 @@ jobs:
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
           zbox_image: ${{ env.ZBOX_TAG }}
-          zs3_client: pr-40-fb06fd07
-          zs3_logsearchapi: pr-40-fb06fd07
-          zs3_minio: pr-40-fb06fd07
           zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
           explorer_image: staging
@@ -177,7 +174,6 @@ jobs:
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
-          s3_migration_cli_branch: fix/allocation
           archive_results: true
           run_flaky_tests: true
           run_api_system_tests: true
