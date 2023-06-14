@@ -1,11 +1,18 @@
 package cli_tests
 
 import (
+	"encoding/json"
+	"fmt"
+	"math"
+	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/sha3"
 )
 
 /*
@@ -169,6 +176,42 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
+
+		remotepath := "/"
+		filesize := int64(555)
+		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		fname := filepath.Base(filename)
+		remoteFilePath := path.Join(remotepath, fname)
+
+		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteFilePath,
+			"json":       "",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var stats map[string]climodel.FileStats
+
+		err = json.Unmarshal([]byte(output[0]), &stats)
+		require.Nil(t, err)
+
+		for _, data := range stats {
+			require.Equal(t, fname, data.Name)
+			require.Equal(t, remoteFilePath, data.Path)
+			require.Equal(t, fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath))), data.PathHash)
+			require.Equal(t, int64(0), data.NumOfBlockDownloads)
+			require.Equal(t, int64(1), data.NumOfUpdates)
+			require.Equal(t, float64(data.NumOfBlocks), math.Ceil(float64(data.Size)/float64(chunksize)))
+			if data.WriteMarkerTxn == "" {
+				require.Equal(t, false, data.BlockchainAware)
+			} else {
+				require.Equal(t, true, data.BlockchainAware)
+			}
+
+			// FIXME: POSSIBLE BUG: key name and blobberID in value should be same but this is not consistent for every run and happening randomly
+			// require.Equal(t, blobberID, data.BlobberID, "key name and blobberID in value should be same")
+		}
 	})
 
 
