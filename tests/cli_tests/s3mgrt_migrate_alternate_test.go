@@ -231,6 +231,48 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
+	t.Run("Should migrate successfully and delete the s3 bucket file", func(t *test.SystemTest) {
+		allocSize := int64(50 * MB)
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
+			"access-key": s3AccessKey,
+			"secret-key": s3SecretKey,
+			"bucket":     s3bucketName,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"allocation": allocationID,
+			"skip": 2,
+			"delete-source" : true,
+		}))
+
+		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
+		require.Equal(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
+		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
+
+		remotepath := "/"
+		fileKey = fileKey + "_copy"
+		// add dupl prefix
+		remoteFilePath := path.Join(remotepath, fileKey)
+		
+		fileStat, err := getFileStats(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteFilePath,
+			"json":       "",
+		}), true)
+		require.Nil(t, err, strings.Join(fileStat, "\n"))
+		require.Len(t, output, 1)
+	
+		var stats map[string]climodel.FileStats
+	
+		err = json.Unmarshal([]byte(fileStat[0]), &stats)
+		require.Nil(t, err)
+		require.Equal(t, len(stats), 0)
+		
+		
+	})
+
 
 }
 
