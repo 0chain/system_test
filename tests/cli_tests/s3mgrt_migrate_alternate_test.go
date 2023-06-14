@@ -47,7 +47,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 	}
 
 	// Specify the bucket name and file key
-	bucketName := "This bucket is created as a part of s3 migration test alternate flow"
+	bucketName := "dummybucketfortestsmigration"
 	fileKey := t.Name() + ".txt"
 
 	// Read file contents
@@ -65,9 +65,10 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 	}
 
 	//t.Parallel()
-	t.SetSmokeTests("Should migrate existing bucket successfully")
+	// t.SetSmokeTests("Should migrate existing bucket successfully")
 
 	t.Run("Should migrate existing bucket to specified path successfully with encryption on", func(t *test.SystemTest) {
+		t.Logf("here")
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -79,7 +80,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"bucket":     s3bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
-			//"migarate-to": "/root2",
 			"encrypt": "true",
 		}))
 
