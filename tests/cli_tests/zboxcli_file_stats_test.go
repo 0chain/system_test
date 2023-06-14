@@ -485,7 +485,7 @@ func TestFileStats(testSetup *testing.T) {
 				require.Equal(t, true, data.BlockchainAware)
 			}
 		}
-		require.Equal(t, 1, skippedBlobber)
+		require.Equal(t, 2, skippedBlobber)
 	})
 }
 
