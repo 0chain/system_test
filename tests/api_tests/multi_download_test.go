@@ -19,14 +19,13 @@ func TestMultiDownload(testSetup *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.Size = 1024 * 1000 * 20
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID, 1024*1000)
+			op := sdkClient.AddUploadOperation(t, allocationID)
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -51,7 +50,7 @@ func TestMultiDownload(testSetup *testing.T) {
 		for _, file := range files {
 			sz, err := file.Info()
 			require.NoError(t, err, "error getting file info")
-			require.Equal(t, int64(1024*1000), sz.Size(), "file size mismatch expected %v actual %v", 1024*1000, sz.Size())
+			require.Equal(t, int64(1024), sz.Size(), "file size mismatch expected %v actual %v", 1024, sz.Size())
 		}
 	})
 }
