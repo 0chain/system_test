@@ -281,7 +281,7 @@ func TestShareFile(testSetup *testing.T) {
 		})
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, true)
 		require.NotNil(t, err, "Expected error to be present but was not.", strings.Join(output, "\n"))
-		require.Len(t, output, 5)
+		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "share revoked")
 	})
@@ -641,7 +641,7 @@ func TestShareFile(testSetup *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 5)
+		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "share revoked")
 	})
