@@ -33,9 +33,10 @@ func TestFileMetadata(testSetup *testing.T) {
 
 	t.Run("Get Folder Meta in Non-Empty Directory Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
+		filesize := int64(4)
 
 		// Upload a sample file
-		generateFileAndUpload(t, allocationID, "/", 4)
+		generateFileAndUpload(t, allocationID, "/", filesize)
 
 		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -52,7 +53,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "d", meta.Type)
 		require.Equal(t, "/", meta.Path)
 		require.Equal(t, "/", meta.Name)
-		require.Equal(t, int64(0), meta.Size)
+		require.Equal(t, filesize, meta.Size)
 	})
 
 	t.Run("Get File Meta in Root Directory Should Work", func(t *test.SystemTest) {
@@ -267,13 +268,13 @@ func TestFileMetadata(testSetup *testing.T) {
 		var otherAllocationID, otherfile string
 		allocationID := setupAllocation(t, configPath)
 
-		filesize := int64(10)
+		filesize := int64(1)
 		remotepath := "/"
 
 		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
 			otherAllocationID = setupAllocation(t, configPath)
 
-			otherfile = generateFileAndUpload(t, otherAllocationID, remotepath, 1)
+			otherfile = generateFileAndUpload(t, otherAllocationID, remotepath, filesize)
 
 			// Listing contents of otherAllocationID: should work
 			output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
@@ -291,7 +292,7 @@ func TestFileMetadata(testSetup *testing.T) {
 			require.Equal(t, "d", meta.Type)
 			require.Equal(t, remotepath, meta.Path)
 			require.Equal(t, remotepath, meta.Name)
-			require.Equal(t, int64(0), meta.Size)
+			require.Equal(t, filesize, meta.Size)
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
