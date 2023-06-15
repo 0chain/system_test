@@ -13,6 +13,8 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/coredns/coredns/plugin/pkg/log"
+	"github.com/google/martian/v3/log"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
 )
@@ -44,23 +46,26 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 	// Specify the bucket name and file key
 	bucketName := "dummybucketfortestsmigration"
 	fileKey := t.Name() + ".txt"
-
-	// Read file contents
-	fileContents := []byte("Hello, World!")
-
-	// Upload the file to S3
-	_, err := S3Client.PutObject(&s3.PutObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(fileKey),
-		Body:   bytes.NewReader(fileContents),
+	setupTest(t, bucketName, fileKey)
+	
+	t.Cleanup(func() {
+		input := &s3.DeleteBucketInput{
+			Bucket: aws.String(bucketName),
+		}
+	
+		// Delete the bucket
+		_, err := S3Client.DeleteBucket(input)
+		if err != nil {
+			log.Info("Failed to delete bucket:", err)
+			return
+		}
+	
+		log.Info("Bucket", bucketName, "deleted successfully!")
 	})
-	if err != nil {
-		fmt.Println("Failed to create file in S3:", err)
-		t.Skip("S3 Bucket operatiion is not working properly")
-	}
 
-	//t.Parallel()
-	// t.SetSmokeTests("Should migrate existing bucket successfully")
+
+	// t.Parallel()
+	t.SetSmokeTests("Should migrate existing bucket successfully")
 
 	t.Run("Should migrate existing bucket to specified path successfully with encryption on", func(t *test.SystemTest) {
 		t.Logf("here")
@@ -363,4 +368,21 @@ func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string)(
 		}
 	}
 	return true	
+}
+
+func setupTest(t *test.SystemTest, bucketName, fileKey string) {
+	// Read file contents
+	fileContents := []byte("Hello, World!")
+
+	// Upload the file to S3
+	_, err := S3Client.PutObject(&s3.PutObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(fileKey),
+		Body:   bytes.NewReader(fileContents),
+	})
+	if err != nil {
+		fmt.Println("Failed to create file in S3:", err)
+		t.Skip("S3 Bucket operatiion is not working properly")
+	}
+
 }
