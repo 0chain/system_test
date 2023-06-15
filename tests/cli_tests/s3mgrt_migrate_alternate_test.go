@@ -18,25 +18,20 @@ import (
 )
 
 /*
-Let's list down the cases
-delete source is not covered let's check
---dup_suffix
-how to verify --encrypt option I think you need to see the code
---migrate to how to create that remote path
+
 -- how to verify older than, just create older than 10 min file
 -- resume  what do you mean by previous state
 -- retry count , how to verify it, don't you think that retry would be one in ideal case so how to increase the retry count for testing purpose
--- skip can be tested
--- but what is duplicate
--- what is this wd
 */
-//concurrency cann't be tested
-//dellete source can be tested
-// skip can be tested and there would be three cases for this case0, 1, 2, but how to check duplicate file
-//migrate to can be tested also if somehow skip is tested
-// encrption need to figure out
-// --dup-suffix this can also be tested
-// newer than , prefix and older than can also be tested
+// i think working dir wd can be tested with concurrency
+
+//delete source done
+// skip done
+// migrate to done
+// encrption done
+// --dup-suffix done
+// newer than , prefix and older than , concurrency, resume , retry count I will test in next pr
+
 const chunksize = 64 * 1024
 
 func Test0S3MigrationAlternate(testSetup *testing.T) {
@@ -74,26 +69,26 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
+		remotepath := "/root2"
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
 			"bucket":     s3bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
-			"encrypt": "true",
+			"migrate-to": remotepath,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
-		remotepath := "/"
-		fileKey = fileKey + "encrypt"
 		remoteFilePath := path.Join(remotepath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID)
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
+	// what would be the case if one copy already exist  ?
 	t.Run("Should migrate as copy bucket successfully ", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -125,9 +120,10 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
-		fileKey = fileKey + "_copy"
-		remoteFilePath := path.Join(remotepath, fileKey)
-		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID)
+		parts := strings.Split(fileKey, ".")
+		fileKey_modified := parts[0]+ "_modified." + parts[1]
+		remoteFilePath := path.Join(remotepath, fileKey_modified)
+		uploadStats := checkStats(t, remoteFilePath, fileKey_modified, allocationID)
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
@@ -152,12 +148,15 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
-		fileKey = fileKey + "_encrypt"
-		remoteFilePath := path.Join(remotepath, fileKey)
-		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID)
+		// check if _encrypt is correct extension for encrypted file
+		parts := strings.Split(fileKey, ".")
+		fileKey_modified := parts[0]+ "_encrypted." + parts[1]
+		remoteFilePath := path.Join(remotepath, fileKey_modified)
+		uploadStats := checkStats(t, remoteFilePath, fileKey_modified, allocationID)
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
+	// done
 	t.Run("Should migrate existing bucket successfully with skip 0  and replace existing", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -183,7 +182,8 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	t.Run("Should skip migration with skip flag == 1", func(t *test.SystemTest) {
+	// done
+	t.Run("Should skip migration with skip flag == 1 and migartion should be skipped", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -204,6 +204,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 	})
 
+	// done
 	t.Run("Should migrate successfully with duplication files  with skip flag == 2", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -224,14 +225,15 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
-		fileKey = fileKey + "_copy"
-		// add dupl prefix
-		remoteFilePath := path.Join(remotepath, fileKey)
-		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID)
+		parts := strings.Split(fileKey, ".")
+		fileKey_modified := parts[0]+ "_copy." + parts[1]
+		remoteFilePath := path.Join(remotepath, fileKey_modified)
+		uploadStats := checkStats(t, remoteFilePath, fileKey_modified, allocationID)
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	t.Run("Should migrate successfully and delete the s3 bucket file", func(t *test.SystemTest) {
+	// done
+	t.Run("Should migrate successfully with duplication files  with skip flag == 2 and dup-suffix", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -244,6 +246,35 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"skip": 2,
+			"dup-suffix" : "_modified",
+		}))
+
+		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
+		require.Equal(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
+		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
+
+		remotepath := "/"
+		parts := strings.Split(fileKey, ".")
+		fileKey_modified := parts[0]+ "_modified." + parts[1]
+		remoteFilePath := path.Join(remotepath, fileKey_modified)
+		uploadStats := checkStats(t, remoteFilePath, fileKey_modified, allocationID)
+		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+	})
+
+	// done
+	t.Run("Should migrate successfully and delete the s3 bucket file", func(t *test.SystemTest) {
+		allocSize := int64(50 * MB)
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
+			"access-key": s3AccessKey,
+			"secret-key": s3SecretKey,
+			"bucket":     s3bucketName,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"allocation": allocationID,
+			"skip": 0,
 			"delete-source" : true,
 		}))
 
@@ -252,24 +283,31 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
-		fileKey = fileKey + "_copy"
-		// add dupl prefix
 		remoteFilePath := path.Join(remotepath, fileKey)
-		
-		fileStat, err := getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remoteFilePath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, strings.Join(fileStat, "\n"))
-		require.Len(t, output, 1)
+		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID)
+		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+
+		input := &s3.ListObjectsV2Input{
+			Bucket: aws.String(bucketName),
+		}
 	
-		var stats map[string]climodel.FileStats
+		// Retrieve the list of objects in the bucket
+		result, err := S3Client.ListObjectsV2(input)
+		if err != nil {
+			fmt.Println("Failed to list objects:", err)
+			return
+		}
 	
-		err = json.Unmarshal([]byte(fileStat[0]), &stats)
-		require.Nil(t, err)
-		require.Equal(t, len(stats), 0)
-		
+		// Iterate over the objects to check if the file exists
+		fileExists := false
+		for _, obj := range result.Contents {
+			if *obj.Key == fileKey {
+				fileExists = true
+				break
+			}
+		}
+	
+		require.Equal(t, fileExists, false, "file is not deleted from source")
 		
 	})
 
@@ -290,6 +328,10 @@ func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string)(
 
 	err = json.Unmarshal([]byte(output[0]), &stats)
 	require.Nil(t, err)
+	
+	if(len(stats) == 0){
+		return false;
+	} 
 
 	for _, data := range stats {
 		if(fname != data.Name){
