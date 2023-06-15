@@ -31,7 +31,7 @@ type StatusCallback struct {
 }
 
 func (cb *StatusCallback) Started(allocationId, filePath string, op, totalBytes int) {
-	cb.wg.Add(1)
+
 }
 
 func (cb *StatusCallback) InProgress(allocationId, filePath string, op, completedBytes int, data []byte) {
@@ -245,10 +245,20 @@ func (c *SDKClient) DownloadFile(t *test.SystemTest, allocationID, remotepath, l
 
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
 	require.NoError(t, err)
-
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
 	err = sdkAllocation.DownloadFile(localpath, "/"+remotepath, false, &StatusCallback{
-		wg: &sync.WaitGroup{},
-	})
+		wg: wg,
+	}, true)
+	require.NoError(t, err)
+	wg.Wait()
+}
+
+func (c *SDKClient) DownloadFileWithParam(t *test.SystemTest, alloc *sdk.Allocation, remotepath, localpath string, wg *sync.WaitGroup, isFinal bool) {
+	wg.Add(1)
+	err := alloc.DownloadFile(localpath, remotepath, false, &StatusCallback{
+		wg: wg,
+	}, isFinal)
 	require.NoError(t, err)
 }
 
@@ -287,7 +297,7 @@ func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops 
 	require.NoError(t, err)
 }
 
-func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string) sdk.OperationRequest {
+func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string, opts ...int64) sdk.OperationRequest {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
@@ -296,7 +306,10 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string) 
 		require.NoError(t, err)
 	}
 
-	const actualSize int64 = 1024
+	var actualSize int64 = 1024
+	if len(opts) > 0 {
+		actualSize = opts[0]
+	}
 
 	rawBuf := make([]byte, actualSize)
 	_, err = rand.Read(rawBuf)
