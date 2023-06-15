@@ -171,14 +171,6 @@ func TestMain(m *testing.M) {
 	// Create an S3 client
 	S3Client = s3.New(sess)
 
-	// Create the bucket
-	// bucketName := "dummybucketfortestsmigration"
-	// _, err = S3Client.CreateBucket(&s3.CreateBucketInput{
-	// 	Bucket: aws.String(bucketName),
-	// })
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
 	snapshotHash, err := tenderlyClient.CreateSnapshot()
 	if err != nil {
 		log.Fatalln(err)
