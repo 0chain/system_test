@@ -64,7 +64,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 
 		require.Error(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error creating allocation:alloc_cancel_failed: only owner can cancel an allocation", output[len(output)-1])
+		require.Equal(t, "Error canceling allocation:alloc_cancel_failed: only owner can cancel an allocation", output[len(output)-1])
 	})
 
 	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
@@ -76,7 +76,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 		output, err := cancelAllocation(t, configPath, allocationID, false)
 
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
-		require.Equal(t, "Error creating allocation:alloc_cancel_failed: value not present", output[0])
+		require.Equal(t, "Error canceling allocation:alloc_cancel_failed: value not present", output[0])
 	})
 
 	t.RunWithTimeout("Cancel Expired Allocation Should Fail", 6*time.Minute, func(t *test.SystemTest) {
@@ -98,7 +98,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 
-		require.Equal(t, "Error creating allocation:alloc_cancel_failed: trying to cancel expired allocation", output[0])
+		require.Equal(t, "Error canceling allocation:alloc_cancel_failed: trying to cancel expired allocation", output[0])
 	})
 }
 
