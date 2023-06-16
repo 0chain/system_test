@@ -770,6 +770,7 @@ var StorageIntSettings = []string{
 	"free_allocation_settings.size",
 	"max_blobbers_per_allocation",
 	"validators_per_challenge",
+	"num_validators_rewarded",
 	"max_delegates",
 	"cost.update_settings",
 	"cost.read_redeem",
