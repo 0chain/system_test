@@ -731,6 +731,7 @@ var StorageKeySettings = []string{
 
 var StorageFloatSettings = []string{
 	"cancellation_charge",
+	"min_lock_demand",
 	"free_allocation_settings.read_pool_fraction",
 	"validator_reward",
 	"blobber_slash",
