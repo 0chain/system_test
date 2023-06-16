@@ -568,6 +568,60 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
 	})
 
+	t.RunSequentially("Should pass concurrency flag is set to 20", func(t *test.SystemTest) {
+		allocSize := int64(50 * MB)
+		_ = setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+		awsCredPath := ""
+		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
+			"bucket":     s3bucketName,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"aws-cred-path" : awsCredPath,
+			"concurrency" : 20,
+		}))
+
+		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+	})
+
+	t.RunSequentially("Should pass retry flag is set to 4", func(t *test.SystemTest) {
+		allocSize := int64(50 * MB)
+		_ = setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+		awsCredPath := ""
+		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
+			"bucket":     s3bucketName,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"aws-cred-path" : awsCredPath,
+			"retry" : 4,
+		}))
+
+		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+	})
+
+	t.RunSequentially("Should pass when working dir is set to current dir", func(t *test.SystemTest) {
+		allocSize := int64(50 * MB)
+		_ = setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+		awsCredPath := ""
+		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
+			"bucket":     s3bucketName,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"aws-cred-path" : awsCredPath,
+			"wd": "/",
+		}))
+
+		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+	})
+
 
 }
 
