@@ -58,6 +58,7 @@ type Allocation struct {
 	Owner          string    `json:"owner_id"`
 	OwnerPublicKey string    `json:"owner_public_key"`
 	Payer          string    `json:"payer_id"`
+	MinLockDemand  int64     `json:"min_lock_demand"`
 	Blobbers       []Blobber `json:"blobbers"`
 	// Stats          *AllocationStats          `json:"stats"`
 	TimeUnit    time.Duration `json:"time_unit"`
@@ -152,9 +153,8 @@ type ListFileResult struct {
 }
 
 type Terms struct {
-	Read_price      int64   `json:"read_price"`
-	Write_price     int64   `json:"write_price"`
-	Min_lock_demand float64 `json:"min_lock_demand"`
+	Read_price  int64 `json:"read_price"`
+	Write_price int64 `json:"write_price"`
 }
 
 type Settings struct {
