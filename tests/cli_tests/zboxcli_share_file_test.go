@@ -281,9 +281,9 @@ func TestShareFile(testSetup *testing.T) {
 		})
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, true)
 		require.NotNil(t, err, "Expected error to be present but was not.", strings.Join(output, "\n"))
-		require.Len(t, output, 5)
+		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "share revoked")
+		require.Contains(t, aggregatedOutput, "consensus_not_met")
 	})
 
 	t.RunWithTimeout("Expired auth ticket of a publicly-shared file should fail to download", 4*time.Minute, func(t *test.SystemTest) {
@@ -641,9 +641,9 @@ func TestShareFile(testSetup *testing.T) {
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 5)
+		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "share revoked")
+		require.Contains(t, aggregatedOutput, "consensus_not_met")
 	})
 
 	t.RunWithTimeout("Expired auth ticket of an encrypted file should fail to download - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
