@@ -26,8 +26,9 @@ type SDKClient struct {
 }
 
 type StatusCallback struct {
-	wg      *sync.WaitGroup
-	success bool
+	wg       *sync.WaitGroup
+	isRepair bool
+	success  bool
 }
 
 func (cb *StatusCallback) Started(allocationId, filePath string, op, totalBytes int) {
@@ -37,11 +38,16 @@ func (cb *StatusCallback) Started(allocationId, filePath string, op, totalBytes 
 func (cb *StatusCallback) InProgress(allocationId, filePath string, op, completedBytes int, data []byte) {
 }
 
-func (cb *StatusCallback) RepairCompleted(filesRepaired int) {}
-
-func (cb *StatusCallback) Completed(allocationId, filePath, filename, mimetype string, size, op int) {
+func (cb *StatusCallback) RepairCompleted(filesRepaired int) {
 	cb.success = true
 	cb.wg.Done()
+}
+
+func (cb *StatusCallback) Completed(allocationId, filePath, filename, mimetype string, size, op int) {
+	if !cb.isRepair {
+		cb.success = true
+		cb.wg.Done()
+	}
 }
 
 func (cb *StatusCallback) Error(allocationID, filePath string, op int, err error) {
@@ -447,4 +453,21 @@ func (c *SDKClient) AddCreateDirOperation(t *test.SystemTest, allocationID, remo
 		OperationType: constants.FileOperationCreateDir,
 		RemotePath:    remotePath,
 	}
+}
+
+func (c *SDKClient) RepairAllocation(t *test.SystemTest, allocationID string) {
+
+	sdkAllocation, err := sdk.GetAllocation(allocationID)
+	require.NoError(t, err)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	statusBar := &StatusCallback{
+		wg:       wg,
+		isRepair: true,
+	}
+	err = sdkAllocation.RepairAlloc(statusBar)
+	require.NoError(t, err)
+	wg.Wait()
+	require.True(t, statusBar.success)
 }
