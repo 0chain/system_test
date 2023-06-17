@@ -871,7 +871,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Len(t, output, 4)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		fref, err := VerifyFileRefFromBlobber(walletFile, configFile, allocationID, blobberID, remotePath)
 		require.Nil(t, err)
@@ -923,8 +923,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[1])
+		require.Len(t, output, 4)
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		fref, err := VerifyFileRefFromBlobber(walletFile, configFile, allocationID, addBlobber, remotePath)
 		require.Nil(t, err)
 		require.NotNil(t, fref) // not nil when the file exists
@@ -971,7 +971,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 2.0
 	// Then create new allocation
-	options := map[string]interface{}{"expire": "1h", "size": "10000", "lock": "5"}
+	options := map[string]interface{}{"expire": "755h", "size": "10000", "lock": "5"}
 
 	// Add additional parameters if available
 	// Overwrite with new parameters when available
