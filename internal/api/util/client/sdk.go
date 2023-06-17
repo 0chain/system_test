@@ -456,7 +456,6 @@ func (c *SDKClient) AddCreateDirOperation(t *test.SystemTest, allocationID, remo
 }
 
 func (c *SDKClient) RepairAllocation(t *test.SystemTest, allocationID string) {
-
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
 	require.NoError(t, err)
 
