@@ -24,7 +24,7 @@ import (
 var (
 	createAllocationRegex = regexp.MustCompile(`^Allocation created: (.+)$`)
 	updateAllocationRegex = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
-	repairCompletednRegex = regexp.MustCompile("Repair file completed, Total files repaired:  1")
+	repairCompletednRegex = regexp.MustCompile(`Repair file completed, Total files repaired: {2}1`)
 )
 
 func TestUpdateAllocation(testSetup *testing.T) {
