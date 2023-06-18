@@ -24,6 +24,7 @@ import (
 var (
 	createAllocationRegex = regexp.MustCompile(`^Allocation created: (.+)$`)
 	updateAllocationRegex = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
+	repairCompletednRegex = regexp.MustCompile("Repair file completed, Total files repaired:  1")
 )
 
 func TestUpdateAllocation(testSetup *testing.T) {
@@ -831,7 +832,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	t.Run("Update allocation with add blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
-		allocSize := int64(2048)
+		allocSize := int64(4096)
 		fileSize := int64(1024)
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -840,16 +841,14 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 
 		// faucet tokens
-		for i := 0; i < 10; i++ {
-			_, err := executeFaucetWithTokens(t, configPath, 10)
-			require.NoError(t, err, "faucet execution failed")
-		}
+		_, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed")
 
 		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
+		err = createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		remotePath := "/dir/" + filename
+		remotePath := "/dir" + filename
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
@@ -871,8 +870,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 4)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
 		fref, err := VerifyFileRefFromBlobber(walletFile, configFile, allocationID, blobberID, remotePath)
 		require.Nil(t, err)
 		require.NotNil(t, fref) // not nil when the file exists
@@ -880,7 +879,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
-		allocSize := int64(2048)
+		allocSize := int64(4096)
 		fileSize := int64(1024)
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -889,16 +888,14 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 
 		// faucet tokens
-		for i := 0; i < 10; i++ {
-			_, err := executeFaucetWithTokens(t, configPath, 10)
-			require.NoError(t, err, "faucet execution failed")
-		}
+		_, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed")
 
 		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
+		err = createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		remotePath := "/dir/" + filename
+		remotePath := "/dir" + filename
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
@@ -923,8 +920,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 4)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
 		fref, err := VerifyFileRefFromBlobber(walletFile, configFile, allocationID, addBlobber, remotePath)
 		require.Nil(t, err)
 		require.NotNil(t, fref) // not nil when the file exists
