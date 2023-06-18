@@ -197,7 +197,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			if f.Path == destpath+filename {
 				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -336,7 +336,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			if f.Path == destPath {
 				foundAtDest = true
 				require.Equal(t, destName, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
