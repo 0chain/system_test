@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/base64"
+	"log"
 	"math"
 	"os"
 	"path/filepath"
@@ -254,7 +255,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		isEncrypted := strings.Split(output[2], "|")[7]
+		isEncrypted := strings.Split(output[2], "|")[8]
 		require.Equal(t, "NO", strings.TrimSpace(isEncrypted))
 
 		// update with encrypted file
@@ -272,7 +273,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		isEncrypted = strings.Split(output[2], "|")[7]
+		isEncrypted = strings.Split(output[2], "|")[8]
 		require.Equal(t, "YES", strings.TrimSpace(isEncrypted))
 
 		createAllocationTestTeardown(t, allocationID)
@@ -298,7 +299,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		isEncrypted := strings.Split(output[2], "|")[7]
+		isEncrypted := strings.Split(output[2], "|")[8]
 		require.Equal(t, "YES", strings.TrimSpace(isEncrypted))
 
 		// update with encrypted file
@@ -315,7 +316,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		yes := strings.Split(output[2], "|")[7]
+		yes := strings.Split(output[2], "|")[8]
 		require.Equal(t, "NO", strings.TrimSpace(yes))
 
 		createAllocationTestTeardown(t, allocationID)
@@ -334,10 +335,12 @@ func TestFileUpdate(testSetup *testing.T) {
 
 		params := createParams(map[string]interface{}{"allocation": allocationID, "remotepath": "/"})
 		output, err := listFilesInAllocation(t, configPath, params, true)
+		log.Println("OUTPUT ===>", output)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		isEncrypted := strings.Split(output[2], "|")[7]
+		isEncrypted := strings.Split(output[2], "|")[8]
+		log.Println("IS ENCRYPTED ===>", isEncrypted)
 		require.Equal(t, "YES", strings.TrimSpace(isEncrypted))
 		filename := strings.Split(output[2], "|")[1]
 		require.Equal(t, filepath.Base(localFilePath), strings.TrimSpace(filename))
@@ -361,7 +364,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		yes := strings.Split(output[2], "|")[7]
+		yes := strings.Split(output[2], "|")[8]
 		require.Equal(t, "YES", strings.Trim(yes, " "))
 		filename = strings.Split(output[2], "|")[1]
 		require.Equal(t, filepath.Base(localFilePath), strings.TrimSpace(filename))
