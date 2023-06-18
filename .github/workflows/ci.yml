@@ -39,6 +39,10 @@ on:
         description: '0block DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
+      test_file_filter:
+        description: 'Comma separated list of test files to run (eg. zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result'
+        default: ''
+        required: false
       run_smoke_tests:
         description: 'Only run smoke tests (subset of system tests for fast feedback)'
         default: 'false'
@@ -90,7 +94,7 @@ jobs:
   system-tests:
     name: "System Tests"
     runs-on: [ tests-suite ]
-    timeout-minutes: 20000
+    timeout-minutes: 120
     steps:
       - name: "Get current PR"
         uses: jwalton/gh-find-current-pr@v1
@@ -98,22 +102,26 @@ jobs:
         with:
           github-token: ${{ github.token }}
 
+      - name: "Set PR status as pending"
+        uses: 0chain/actions/set-pr-status@master
+        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
+        with:
+          pr_number: ${{ steps.findPr.outputs.pr }}
+          description: "System tests running with default config..."
+          state: "pending"
+          repository: ${{ github.repository }}
+          status_name: "0Chain System Tests"
+          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          github_token: ${{ github.token }}
+
       - name: "Config: Run tests against existing 0Chain network"
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
         run: |
           echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_cli_branch}})" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_cli_branch}})" >> $GITHUB_ENV
-          
-          echo "TEST_FILE_FILTER=false" >> $GITHUB_ENV
 
-          echo "TOKENOMICS_ALLOCATION_TESTS=$(echo $(([ -z 'TestAllocation' ] && echo '') || echo 'TestAllocation'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_ALLOCATION_ADD_OR_REPLACE_BLOBBER_TESTS=$(echo $(([ -z 'TestAddOrReplaceBlobberAllocationRewards' ] && echo '') || echo 'TestAddOrReplaceBlobberAllocationRewards'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_CHALLENGE_REWARD_TESTS=$(echo $(([ -z 'TestBlobberChallengeRewards' ] && echo '') || echo 'TestBlobberChallengeRewards'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_READ_REWARD_TESTS=$(echo $(([ -z 'TestBlobberReadReward' ] && echo '') || echo 'TestBlobberReadReward'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_SLASH_REWARD_TESTS=$(echo $(([ -z 'TestBlobberSlashPenalty' ] && echo '') || echo 'TestBlobberSlashPenalty'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_CHALLENGE_TIMINGS_TESTS=$(echo $(([ -z 'TestChallengeTimings' ] && echo '') || echo 'TestChallengeTimings'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_BLOCK_REWARD_TESTS=$(echo $(([ -z 'TestBlockRewardsForBlobbers' ] && echo '') || echo 'TestBlockRewardsForBlobbers'))" >> $GITHUB_ENV
+          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
 
       - name: "Config: Deploy new 0Chain network then run tests against it"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
@@ -132,19 +140,11 @@ jobs:
           echo "EXPLORER_TAG=$(echo $(([ -z '${{github.event.inputs.explorer_image}}' ] && echo 'latest') || echo '${{github.event.inputs.explorer_image}}'))" >> $GITHUB_ENV
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-          echo "TOKENOMICS_ALLOCATION_TESTS=$(echo $(([ -z 'TestAllocation' ] && echo '') || echo 'TestAllocation'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_ALLOCATION_ADD_OR_REPLACE_BLOBBER_TESTS=$(echo $(([ -z 'TestAddOrReplaceBlobberAllocationRewards' ] && echo '') || echo 'TestAddOrReplaceBlobberAllocationRewards'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_CHALLENGE_REWARD_TESTS=$(echo $(([ -z 'TestBlobberChallengeRewards' ] && echo '') || echo 'TestBlobberChallengeRewards'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_READ_REWARD_TESTS=$(echo $(([ -z 'TestBlobberReadReward' ] && echo '') || echo 'TestBlobberReadReward'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_SLASH_REWARD_TESTS=$(echo $(([ -z 'TestBlobberSlashPenalty' ] && echo '') || echo 'TestBlobberSlashPenalty'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_CHALLENGE_TIMINGS_TESTS=$(echo $(([ -z 'TestChallengeTimings' ] && echo '') || echo 'TestChallengeTimings'))" >> $GITHUB_ENV
-          echo "TOKENOMICS_BLOCK_REWARD_TESTS=$(echo $(([ -z 'TestBlockRewardsForBlobbers' ] && echo '') || echo 'TestBlockRewardsForBlobbers'))" >> $GITHUB_ENV
-
-
+          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
+        uses: 0chain/actions/deploy-0chain@master
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
@@ -166,8 +166,8 @@ jobs:
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           authorizer_image: staging
 
-      - name: "Run Challenge Reward System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
+      - name: "Run System tests"
+        uses: 0chain/actions/run-system-tests@master
         with:
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
@@ -176,273 +176,17 @@ jobs:
           deploy_report_page: true
           archive_results: true
           run_flaky_tests: true
-          run_api_system_tests: false
-          run_cli_system_tests: false
+          run_api_system_tests: true
+          run_cli_system_tests: true
           run_tokenomics_system_tests: true
-          tokenomics_test_filter: ${{ env.TOKENOMICS_CHALLENGE_REWARD_TESTS }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          run_smoke_tests: ${{ inputs.run_smoke_tests }}
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-
-      - name: "Deploy 0Chain"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
-        with:
-          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-          teardown_condition: "TESTS_PASSED"
-          miner_image: ${{ env.MINER_TAG }}
-          sharder_image: ${{ env.SHARDER_TAG }}
-          blobber_image: ${{ env.BLOBBER_TAG }}
-          validator_image: ${{ env.VALIDATOR_TAG }}
-          zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
-          zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zsearch_image: staging
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
-          authorizer_image: staging
-
-      - name: "Run Block Rewards System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
-        with:
-          network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-          deploy_report_page: true
-          archive_results: true
-          run_flaky_tests: true
-          run_api_system_tests: false
-          run_cli_system_tests: false
-          run_tokenomics_system_tests: true
-          tokenomics_test_filter: ${{ env.TOKENOMICS_BLOCK_REWARD_TESTS }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          run_smoke_tests: ${{ inputs.run_smoke_tests }}
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-
-
-      - name: "Deploy 0Chain"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain@feature/tokenomics_suite
-        with:
-          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-          teardown_condition: "TESTS_PASSED"
-          miner_image: ${{ env.MINER_TAG }}
-          sharder_image: ${{ env.SHARDER_TAG }}
-          blobber_image: ${{ env.BLOBBER_TAG }}
-          validator_image: ${{ env.VALIDATOR_TAG }}
-          zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
-          zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zsearch_image: staging
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
-          authorizer_image: staging
-
-      - name: "Run Challenge Timings System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
-        with:
-          network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-          deploy_report_page: true
-          archive_results: true
-          run_flaky_tests: true
-          run_api_system_tests: false
-          run_cli_system_tests: false
-          run_tokenomics_system_tests: true
-          tokenomics_test_filter: ${{ env.TOKENOMICS_CHALLENGE_TIMINGS_TESTS }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          run_smoke_tests: ${{ inputs.run_smoke_tests }}
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-
-      - name: "Deploy 0Chain"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
-        with:
-          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-          teardown_condition: "TESTS_PASSED"
-          miner_image: ${{ env.MINER_TAG }}
-          sharder_image: ${{ env.SHARDER_TAG }}
-          blobber_image: ${{ env.BLOBBER_TAG }}
-          validator_image: ${{ env.VALIDATOR_TAG }}
-          zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
-          zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zsearch_image: staging
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
-          authorizer_image: staging
-
-      - name: "Run Slash Rewards System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
-        with:
-          network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-          deploy_report_page: true
-          archive_results: true
-          run_flaky_tests: true
-          run_api_system_tests: false
-          run_cli_system_tests: false
-          run_tokenomics_system_tests: true
-          tokenomics_test_filter: ${{ env.TOKENOMICS_SLASH_REWARD_TESTS }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          run_smoke_tests: ${{ inputs.run_smoke_tests }}
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-
-
-      - name: "Deploy 0Chain"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
-        with:
-          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-          teardown_condition: "TESTS_PASSED"
-          miner_image: ${{ env.MINER_TAG }}
-          sharder_image: ${{ env.SHARDER_TAG }}
-          blobber_image: ${{ env.BLOBBER_TAG }}
-          validator_image: ${{ env.VALIDATOR_TAG }}
-          zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
-          zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zsearch_image: staging
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
-          authorizer_image: staging
-
-      - name: "Run Allocation System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
-        with:
-          network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-          deploy_report_page: true
-          archive_results: true
-          run_flaky_tests: true
-          run_api_system_tests: false
-          run_cli_system_tests: false
-          run_tokenomics_system_tests: true
-          tokenomics_test_filter: ${{ env.TOKENOMICS_ALLOCATION_TESTS }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          run_smoke_tests: ${{ inputs.run_smoke_tests }}
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-
-
-      - name: "Deploy 0Chain"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
-        with:
-          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-          teardown_condition: "TESTS_PASSED"
-          miner_image: ${{ env.MINER_TAG }}
-          sharder_image: ${{ env.SHARDER_TAG }}
-          blobber_image: ${{ env.BLOBBER_TAG }}
-          validator_image: ${{ env.VALIDATOR_TAG }}
-          zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
-          zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zsearch_image: staging
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
-          authorizer_image: staging
-
-      - name: "Run Read Rewards System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
-        with:
-          network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-          deploy_report_page: true
-          archive_results: true
-          run_flaky_tests: true
-          run_api_system_tests: false
-          run_cli_system_tests: false
-          run_tokenomics_system_tests: true
-          tokenomics_test_filter: ${{ env.TOKENOMICS_READ_REWARD_TESTS }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          run_smoke_tests: ${{ inputs.run_smoke_tests }}
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-
-
-      - name: "Deploy 0Chain"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-3b3v@feature/tokenomics_suite
-        with:
-          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-          teardown_condition: "TESTS_PASSED"
-          miner_image: ${{ env.MINER_TAG }}
-          sharder_image: ${{ env.SHARDER_TAG }}
-          blobber_image: ${{ env.BLOBBER_TAG }}
-          validator_image: ${{ env.VALIDATOR_TAG }}
-          zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
-          zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zsearch_image: staging
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
-          authorizer_image: staging
-
-      - name: "Run Allocation Add Or Replace Blobber System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
-        with:
-          network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-          deploy_report_page: true
-          archive_results: true
-          run_flaky_tests: true
-          run_api_system_tests: false
-          run_cli_system_tests: false
-          run_tokenomics_system_tests: true
-          tokenomics_test_filter: ${{ env.TOKENOMICS_ALLOCATION_ADD_OR_REPLACE_BLOBBER_TESTS }}
+          test_file_filter: ${{ env.TEST_FILE_FILTER }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
 
       - name: "Set PR status as ${{ job.status }}"
-        if: ${{ (success() || failure()) && steps.findPr.outputs.number }}
+        if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
         uses: 0chain/actions/set-pr-status@master
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
