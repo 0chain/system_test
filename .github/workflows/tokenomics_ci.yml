@@ -151,8 +151,8 @@ jobs:
           teardown_condition: "TESTS_PASSED"
           miner_image: ${{ env.MINER_TAG }}
           sharder_image: ${{ env.SHARDER_TAG }}
-          blobber_image: ${{ env.BLOBBER_TAG }}
-          validator_image: ${{ env.VALIDATOR_TAG }}
+          blobber_image: pr-1107
+          validator_image: pr-1107
           zbox_image: ${{ env.ZBOX_TAG }}
           zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
