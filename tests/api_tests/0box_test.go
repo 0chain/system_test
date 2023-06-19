@@ -1948,7 +1948,7 @@ func TestDexState(testSetup *testing.T) {
 
 		dexState, response, err := zboxClient.GetDexState(t, firebaseToken.IdToken, csrfToken, "123456789")
 		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode())
+		require.Equal(t, 401, response.StatusCode())
 		require.Empty(t, dexState)
 	})
 
@@ -1957,7 +1957,7 @@ func TestDexState(testSetup *testing.T) {
 
 		dexState, response, err := zboxClient.GetDexState(t, firebaseToken.IdToken, csrfToken, "123456789")
 		require.NoError(t, err)
-		require.Equal(t, 401, response.StatusCode())
+		require.Equal(t, 400, response.StatusCode())
 		require.Empty(t, dexState)
 	})
 
