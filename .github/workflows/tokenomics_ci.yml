@@ -1,4 +1,4 @@
-name: "0Chain System Tests"
+name: "Zus Tokenomics System Tests"
 run-name: "System tests [${{ github.ref_name }}] - [${{ github.event.head_commit.message }}]"
 concurrency:
   group: "system-tests-${{ github.ref }}-${{ github.event_name }}"
