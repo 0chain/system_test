@@ -77,7 +77,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			"blimp",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 401, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	t.RunSequentially("List allocation with existing allocation should work", func(t *test.SystemTest) {
