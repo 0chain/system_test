@@ -98,7 +98,7 @@ func TestAllocation(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 2 * MB
+		filesize := 512 * KB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -192,7 +192,7 @@ func TestAllocation(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 2 * MB
+		filesize := 512 * KB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -274,7 +274,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		// Uploading 10% of allocation
 		remotepath := "/dir/"
-		filesize := 2 * MB
+		filesize := 512 * KB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
