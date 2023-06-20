@@ -1494,7 +1494,7 @@ func Test0BoxFCM(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		_, response, err := zboxClient.UpdateFCMToken(t, firebaseToken.IdToken, csrfToken, "+917696229926")
 		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 401, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	t.RunSequentially("Deleting FCM Token should work", func(t *test.SystemTest) {
@@ -1863,7 +1863,7 @@ func TestDexState(testSetup *testing.T) {
 			"123456789",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode())
+		require.Equal(t, 401, response.StatusCode())
 		require.Empty(t, dexState)
 	})
 
@@ -1889,7 +1889,7 @@ func TestDexState(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode())
+		require.Equal(t, 401, response.StatusCode())
 		require.Empty(t, dexState)
 	})
 
@@ -1947,7 +1947,7 @@ func TestDexState(testSetup *testing.T) {
 
 		dexState, response, err := zboxClient.GetDexState(t, firebaseToken.IdToken, csrfToken, "123456789")
 		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode())
+		require.Equal(t, 401, response.StatusCode())
 		require.Empty(t, dexState)
 	})
 
@@ -2011,7 +2011,7 @@ func TestDexState(testSetup *testing.T) {
 			"123456789",
 		)
 		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode())
+		require.Equal(t, 401, response.StatusCode())
 		require.Empty(t, dexState)
 	})
 
