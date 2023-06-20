@@ -21,7 +21,6 @@ import (
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Skip()
 	// Faucet the used wallets
 	for i := 0; i < 10; i++ {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus) // 18 * 50 * 1e10
