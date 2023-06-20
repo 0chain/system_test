@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain System test suite [fix_herumi/ecff54e8] ran against [dev-3.devnet-0chain.net] at [2023-06-20_06.51.01]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain System test suite [fix_herumi/ecff54e8] ran against [dev-3.devnet-0chain.net] at [2023-06-20_06.51.01]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>9</strong>Duration: <strong>1ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>9</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">June 20, 2023 07:51:39</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillBlobber","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":66.59,"Output":["","--- PASS: TestKillBlobber (66.59s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_kill_blobber_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillBlobber/kill_blobber_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":28.52,"Output":["","    zboxcli_kill_blobber_test.go:97: Test case [kill blobber by non-smartcontract owner should fail] scheduled at [06-20-2023 07:49:49] \n","    system_test_framework.go:149: Test case [kill blobber by non-smartcontract owner should fail] start at [06-20-2023 07:49:49] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1110: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestKillBlobber-kill_blobber_by_non-smartcontract_owner_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  ee0154a96ada2b029c44b88898b7bd4df35e56f6d0fcf1a7b97dc92735786292]\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    zboxcli_kill_blobber_test.go:120: kill blobber...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [failed to kill blobber ff6424d80c49e57b7c2f0621b726f55efc6ca9ce327bdff89ef364adb8278b22kill_blobber_failed: kill_blobber_failed: unauthorized access - only the owner can access]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [failed to kill blobber ff6424d80c49e57b7c2f0621b726f55efc6ca9ce327bdff89ef364adb8278b22kill_blobber_failed: kill_blobber_failed: unauthorized access - only the owner can access]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox kill-blobber --id ff6424d80c49e57b7c2f0621b726f55efc6ca9ce327bdff89ef364adb8278b22 --silent --wallet TestKillBlobber-kill_blobber_by_non-smartcontract_owner_should_fail_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [failed to kill blobber ff6424d80c49e57b7c2f0621b726f55efc6ca9ce327bdff89ef364adb8278b22kill_blobber_failed: kill_blobber_failed: unauthorized access - only the owner can access]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:12.745815 wallet_base.go:310: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/20 07:50:12.745885 sdk.go:78: ******* Storage SDK Version: v1.8.16-38-g5ea0bf75 *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:12.769565 transaction_base.go:139: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/06/20 07:50:12.779998 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\",\"https://dev-3.devnet-0chain.net/miner02\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder01\",\"https://dev-3.devnet-0chain.net/sharder02\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/20 07:50:12.799350 sdk.go:1431: executing transaction 'kill_blobber' with hash c77503d5b689e954a5df2e04f084ed1c69153fbed8cc8b07d213f6e744dff406\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/20 07:50:12.799375 sdk.go:1432: estimated txn fee: 100000000\n","    utils.go:77: \u001b[31mfailed to kill blobber ff6424d80c49e57b7c2f0621b726f55efc6ca9ce327bdff89ef364adb8278b22kill_blobber_failed: kill_blobber_failed: unauthorized access - only the owner can access\n","    zboxcli_kill_blobber_test.go:97: Test case [kill blobber by non-smartcontract owner should fail] exit at [06-20-2023 07:50:17]\n","--- PASS: TestKillBlobber/kill_blobber_by_non-smartcontract_owner_should_fail (28.52s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillBlobber/killed_blobber_is_not_available_for_allocations","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":38.06,"Output":["","    zboxcli_kill_blobber_test.go:26: Test case [killed blobber is not available for allocations] scheduled at [06-20-2023 07:49:11] \n","    system_test_framework.go:149: Test case [killed blobber is not available for allocations] start at [06-20-2023 07:49:11] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1110: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  b3bc9214e814176e41f79fb3135e28663f460609c2dde45f9e5841d443a615f4]\n","    zboxcli_update_allocation_test.go:1110: Executing faucet...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_kill_blobber_test.go:120: kill blobber...\n","    utils.go:138: Waiting 1s...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_blobber_config_update_test.go:301: Requesting blobber info...\n","    utils.go:138: Waiting 5s...\n","    zwalletcli_storage_update_config_test.go:257: Retrieving storage config...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: not enough blobbers to honor the allocation]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: not enough blobbers to honor the allocation]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox newallocation --size 10000 --data 1 --parity 5 --lock 4 --expire 1h --silent --wallet TestKillBlobber-killed_blobber_is_not_available_for_allocations_wallet.json --configDir ./config --config ./zbox_config.yaml --allocationFileName TestKillBlobber-killed_blobber_is_not_available_for_allocations_allocation.txt] Output: [Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: not enough blobbers to honor the allocation]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:49:44.193377 wallet_base.go:310: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/06/20 07:49:44.193456 sdk.go:78: ******* Storage SDK Version: v1.8.16-38-g5ea0bf75 *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:49:44.213103 transaction_base.go:139: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/06/20 07:49:44.223142 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-3.devnet-0chain.net/miner02\",\"https://dev-3.devnet-0chain.net/miner01\",\"https://dev-3.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-3.devnet-0chain.net/sharder02\",\"https://dev-3.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31mError creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: not enough blobbers to honor the allocation\n","    zboxcli_kill_blobber_test.go:26: Test case [killed blobber is not available for allocations] exit at [06-20-2023 07:49:44]\n","--- PASS: TestKillBlobber/killed_blobber_is_not_available_for_allocations (38.06s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillMiner","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":39.77,"Output":["","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1110: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestKillMiner_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  bcd048fd1e112e254c3fe01b9ff14f9805ed1744959ade3d4776984876dae147]\n","    miner_block_rewards_test.go:421: getting sharder url...\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    miner_block_rewards_test.go:448: getting miner or sharder nodes...\n","--- PASS: TestKillMiner (39.77s)",""],"Passed":true,"Skipped":false,"TestFileName":"zzzwalletcli_kill_miner_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillMiner/Killed_miner_does_not_receive_rewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.26,"Output":["","    zzzwalletcli_kill_miner_test.go:55: Test case [Killed miner does not receive rewards] scheduled at [06-20-2023 07:51:22] \n","    system_test_framework.go:149: Test case [Killed miner does not receive rewards] start at [06-20-2023 07:51:22] \n","    zboxcli_update_allocation_test.go:1110: Executing faucet...\n","    zzzwalletcli_kill_miner_test.go:81: kill miner...\n","    utils.go:138: Waiting 1s...\n","    miner_block_rewards_test.go:439: getting a miner or sharder node...\n","    utils.go:138: Waiting 10s...\n","    miner_block_rewards_test.go:439: getting a miner or sharder node...\n","    zzzwalletcli_kill_miner_test.go:55: Test case [Killed miner does not receive rewards] exit at [06-20-2023 07:51:39]\n","--- PASS: TestKillMiner/Killed_miner_does_not_receive_rewards (17.26s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillMiner/kill_miner_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":19.37,"Output":["","    zzzwalletcli_kill_miner_test.go:43: Test case [kill miner by non-smartcontract owner should fail] scheduled at [06-20-2023 07:51:02] \n","    system_test_framework.go:149: Test case [kill miner by non-smartcontract owner should fail] start at [06-20-2023 07:51:02] \n","    zboxcli_update_allocation_test.go:1110: Executing faucet...\n","    zzzwalletcli_kill_miner_test.go:81: kill miner...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [kill_miner_failed: only the owner can kill a provider: unauthorized access - only the owner can access]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [kill_miner_failed: only the owner can kill a provider: unauthorized access - only the owner can access]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet mn-kill --id 3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c --silent --wallet TestKillMiner-kill_miner_by_non-smartcontract_owner_should_fail_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [kill_miner_failed: only the owner can kill a provider: unauthorized access - only the owner can access]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:19.089199 wallet_base.go:310: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:19.113540 transaction_base.go:139: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:19.113733 transaction.go:265: New transaction interface\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:19.118461 wallet_base.go:270: Minimum miners used for submit :2\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:19.118529 transaction_base.go:351: Submitting smart contract transaction to https://dev-3.devnet-0chain.net/miner02 with JSON {\n","    utils.go:77: \u001b[31m\"hash\": \"690474bb333c4b711274324987d715e0003a4151c7993f0a71f56d35411c5944\",\n","    utils.go:77: \u001b[31m\"version\": \"1.0\",\n","    utils.go:77: \u001b[31m\"client_id\": \"724b46d34cc87198d8259212ef37882fc7217a373b5fce2bdaebfbc282c5945f\",\n","    utils.go:77: \u001b[31m\"public_key\": \"0d490385a8ab211fcfe7224521fb2f4c594f2e370990b16a76ce01e385bb4a184d5cd4a52867837f56ff2fb091a60fc9e60d4a2c8f67b2367a2c5e81a227060a\",\n","    utils.go:77: \u001b[31m\"to_client_id\": \"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9\",\n","    utils.go:77: \u001b[31m\"transaction_data\": \"{\\\"name\\\":\\\"kill_miner\\\",\\\"input\\\":{\\\"provider_id\\\":\\\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\\\",\\\"provider_type\\\":1}}\",\n","    utils.go:77: \u001b[31m\"transaction_value\": 0,\n","    utils.go:77: \u001b[31m\"signature\": \"8a9c4f334facbb94185ea10f6235f434a102332411e7fdcf0ec05cbc92840720\",\n","    utils.go:77: \u001b[31m\"creation_date\": 1687247479,\n","    utils.go:77: \u001b[31m\"transaction_type\": 1000,\n","    utils.go:77: \u001b[31m\"transaction_fee\": 100000000,\n","    utils.go:77: \u001b[31m\"transaction_nonce\": 5,\n","    utils.go:77: \u001b[31m\"txn_output_hash\": \"\",\n","    utils.go:77: \u001b[31m\"transaction_status\": 0\n","    utils.go:77: \u001b[31m}\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:19.118540 transaction_base.go:351: Submitting smart contract transaction to https://dev-3.devnet-0chain.net/miner01 with JSON {\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:51:19.122016 transaction_base.go:390: finish txn submitting, https://dev-3.devnet-0chain.net/miner01/v1/transaction/put, Status: 200 OK, output:{\"async\":true,\"entity\":{\"hash\":\"690474bb333c4b711274324987d715e0003a4151c7993f0a71f56d35411c5944\",\"version\":\"1.0\",\"client_id\":\"724b46d34cc87198d8259212ef37882fc7217a373b5fce2bdaebfbc282c5945f\",\"public_key\":\"0d490385a8ab211fcfe7224521fb2f4c594f2e370990b16a76ce01e385bb4a184d5cd4a52867837f56ff2fb091a60fc9e60d4a2c8f67b2367a2c5e81a227060a\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"kill_miner\\\",\\\"input\\\":{\\\"provider_id\\\":\\\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\\\",\\\"provider_type\\\":1}}\",\"transaction_value\":0,\"signature\":\"8a9c4f334facbb94185ea10f6235f434a102332411e7fdcf0ec05cbc92840720\",\"creation_date\":1687247479,\"transaction_fee\":100000000,\"t","ransaction_nonce\":5,\"transaction_type\":1000,\"txn_output_hash\":\"\",\"transaction_status\":0}}\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:19.122124 transaction_query.go:131: zcn: check health https://dev-3.devnet-0chain.net/sharder02/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:19.122139 transaction_query.go:131: zcn: check health https://dev-3.devnet-0chain.net/sharder01/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:51:19.132581 transaction_query.go:360: GEThttps://dev-3.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=690474bb333c4b711274324987d715e0003a4151c7993f0a71f56d35411c5944\u0026content=lfb\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:51:19.137547 transaction_query.go:370: {\"error\":{\"Offset\":0},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1687247478,\"hash\":\"7ee09b81847d09f73738165d4f3f82099e6896a00d4e319b0c6d474ff44bc94e\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":19324,\"round_random_seed\":352922565137976204,\"state_changes_count\":37,\"merkle_tree_root\":\"24201820e8cdae6d86e1038db10887193217d8c764d52c85ca3d46a28426fd35\",\"state_hash\":\"5wQRWitie5WL0C3pWVDlggU8GuU9MUa4plyYsVesSSw=\",\"receipt_merkle_tree_root\":\"319a1dab4f196d160de779ca24cb044c6c6705a686def4c125112d62acffa364\",\"num_txns\":3}}\n","    utils.go:77: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2023/06/20 07:51:19.137603 transaction_query.go:496: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:19.137890 transaction.go:988: zcn: transaction not confirmed now: 1687247479, LFB creation time:1687247478\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:22.138214 transaction_query.go:131: zcn: check health https://dev-3.devnet-0chain.net/sharder01/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:22.138215 transaction_query.go:131: zcn: check health https://dev-3.devnet-0chain.net/sharder02/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:51:22.139557 transaction_query.go:360: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=690474bb333c4b711274324987d715e0003a4151c7993f0a71f56d35411c5944\u0026content=lfb\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:51:22.140820 transaction_query.go:370: {\"confirmation\":{\"version\":\"1.0\",\"hash\":\"690474bb333c4b711274324987d715e0003a4151c7993f0a71f56d35411c5944\",\"block_hash\":\"e49fbb99b9f74909579b0910f491ce5caf36f32fee93933e245fbcf9be2725a6\",\"previous_block_hash\":\"d625b74e5e2b7b0185b64bfb04926c13694e502f1d616933b61e0444b0308b12\",\"txn\":{\"hash\":\"690474bb333c4b711274324987d715e0003a4151c7993f0a71f56d35411c5944\",\"version\":\"1.0\",\"client_id\":\"724b46d34cc87198d8259212ef37882fc7217a373b5fce2bdaebfbc282c5945f\",\"public_key\":\"0d490385a8ab211fcfe7224521fb2f4c594f2e370990b16a76ce01e385bb4a184d5cd4a52867837f56ff2fb091a60fc9e60d4a2c8f67b2367a2c5e81a227060a\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"kill_miner\\\",\\\"input\\\":{\\\"provider_id\\\":\\\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\\\",\\\"provider_type\\\":1}}\",\"tra","nsaction_value\":0,\"signature\":\"8a9c4f334facbb94185ea10f6235f434a102332411e7fdcf0ec05cbc92840720\",\"creation_date\":1687247479,\"transaction_fee\":100000000,\"transaction_nonce\":5,\"transaction_type\":1000,\"transaction_output\":\"kill_miner_failed: only the owner can kill a provider: unauthorized access - only the owner can access\",\"txn_output_hash\":\"ba858aee92b1309fa56487e8498f2c9aae446b156134b6cff81939cd97b7d78c\",\"transaction_status\":2},\"creation_date\":1687247479,\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":19330,\"transaction_status\":2,\"round_random_seed\":6813862857845184585,\"state_changes_count\":50,\"merkle_tree_root\":\"404e816d9f2b6ffe609678d444a4ca9db9326003a1191c678f792f7ad82e0252\",\"merkle_tree_path\":{\"nodes\":[\"94f3baa5ceb155f66ae8b523636c3125a3a2fc1e76b2d6e1301075307b74ebe8\",\"d63482b3a52dd1a1eaf955217e3604e34ae7302a29d2f949becb639cf4c3f57a\"],\"leaf_index\":0},\"receipt_merkle_tree_root\":\"e64f269af20db6e58f9eb0e300fc3bee7b8acd4092eefc31f3e299976409dd10\",\"receipt_merkle_tree_pat","h\":{\"nodes\":[\"a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a\",\"851ca37489c34dca0d2c951de0b2d481d59889d2c1d060e0effbd788614f2a3c\"],\"leaf_index\":0}},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1687247481,\"hash\":\"3fd0680238dcc63708896a73311eef446f4359a19a272fb77ead76da632c75f8\",\"miner_id\":\"3ec9a42db3355f33c35750ce589ed717c08787997b7f34a7f1f9fb0a03f2b17c\",\"round\":19338,\"round_random_seed\":-3231449586662587043,\"state_changes_count\":40,\"merkle_tree_root\":\"222391053966553de362abc2522bcf2b1dff8083bed4882fe72544764bdf92dd\",\"state_hash\":\"xxluDN95PjbORSipd4T0N0G/jBRkQXV0/Ex/Z9lL19M=\",\"receipt_merkle_tree_root\":\"319a1dab4f196d160de779ca24cb044c6c6705a686def4c125112d62acffa364\",\"num_txns\":3}}\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:51:22.141062 transaction_base.go:717: Confirmation round: 19330\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:22.141100 transaction_base.go:571: Query from https://dev-3.devnet-0chain.net/sharder02/v1/block/get?round=19331\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:22.141125 transaction_base.go:571: Query from https://dev-3.devnet-0chain.net/sharder01/v1/block/get?round=19331\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:51:22.142192 transaction_base.go:670: https://dev-3.devnet-0chain.net/sharder01/v1/block/get?round=19331\u0026content=header200 OK\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:22.142280 transaction_base.go:571: Query from https://dev-3.devnet-0chain.net/sharder01/v1/block/get?round=19332\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:51:22.142284 transaction_base.go:571: Query from https://dev-3.devnet-0chain.net/sharder02/v1/block/get?round=19332\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:51:22.143211 transaction_base.go:670: https://dev-3.devnet-0chain.net/sharder01/v1/block/get?round=19332\u0026content=header200 OK\n","    utils.go:77: \u001b[31mkill_miner_failed: only the owner can kill a provider: unauthorized access - only the owner can access\n","    zzzwalletcli_kill_miner_test.go:43: Test case [kill miner by non-smartcontract owner should fail] exit at [06-20-2023 07:51:22]\n","--- PASS: TestKillMiner/kill_miner_by_non-smartcontract_owner_should_fail (19.37s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillSharder","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":41.82,"Output":["","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1110: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestKillSharder_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  6c414ff7ef88912b16e41a4ed0edb49f75d41ae17392c49935af457666ac230b]\n","    miner_block_rewards_test.go:421: getting sharder url...\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    miner_block_rewards_test.go:448: getting miner or sharder nodes...\n","--- PASS: TestKillSharder (41.82s)",""],"Passed":true,"Skipped":false,"TestFileName":"zzwalletcli_kill_sharder_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillSharder/Killed_sharder_does_not_receive_rewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":17.3,"Output":["","    zzwalletcli_kill_sharder_test.go:55: Test case [Killed sharder does not receive rewards] scheduled at [06-20-2023 07:50:42] \n","    system_test_framework.go:149: Test case [Killed sharder does not receive rewards] start at [06-20-2023 07:50:42] \n","    zboxcli_update_allocation_test.go:1110: Executing faucet...\n","    zzwalletcli_kill_sharder_test.go:81: kill sharder...\n","    utils.go:138: Waiting 1s...\n","    miner_block_rewards_test.go:439: getting a miner or sharder node...\n","    utils.go:138: Waiting 10s...\n","    miner_block_rewards_test.go:439: getting a miner or sharder node...\n","    zzwalletcli_kill_sharder_test.go:55: Test case [Killed sharder does not receive rewards] exit at [06-20-2023 07:50:59]\n","--- PASS: TestKillSharder/Killed_sharder_does_not_receive_rewards (17.30s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillSharder/kill_sharder_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.38,"Output":["","    zzwalletcli_kill_sharder_test.go:43: Test case [kill sharder by non-smartcontract owner should fail] scheduled at [06-20-2023 07:50:20] \n","    system_test_framework.go:149: Test case [kill sharder by non-smartcontract owner should fail] start at [06-20-2023 07:50:20] \n","    zboxcli_update_allocation_test.go:1110: Executing faucet...\n","    zzwalletcli_kill_sharder_test.go:81: kill sharder...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [kill_sharder_failed: only the owner can kill a provider: unauthorized access - only the owner can access]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [kill_sharder_failed: only the owner can kill a provider: unauthorized access - only the owner can access]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zwallet sh-kill --id 30001a01a888584772b7fee13934021ab8557e0ed471c0a3a454e9164180aef1 --silent --wallet TestKillSharder-kill_sharder_by_non-smartcontract_owner_should_fail_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [kill_sharder_failed: only the owner can kill a provider: unauthorized access - only the owner can access]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:39.276728 wallet_base.go:310: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:39.302135 transaction_base.go:139: ******* Wallet SDK Version:v1.8.16-38-g5ea0bf75 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:39.302384 transaction.go:265: New transaction interface\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:39.306640 wallet_base.go:270: Minimum miners used for submit :2\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:39.306712 transaction_base.go:351: Submitting smart contract transaction to https://dev-3.devnet-0chain.net/miner01 with JSON {\n","    utils.go:77: \u001b[31m\"hash\": \"bfe38084d1595b138b61ec8b0d13ef82dbf02fe3108a899f395948b5e965fd09\",\n","    utils.go:77: \u001b[31m\"version\": \"1.0\",\n","    utils.go:77: \u001b[31m\"client_id\": \"fa64ab9354b4a35ed25aca7c5588bacd93cc7a6fe94669923235bd8b6a009a72\",\n","    utils.go:77: \u001b[31m\"public_key\": \"ae6787dc9b2c3fa0ada98d441a2bf16f17522e7ddbfd500231b4fd7d18fe9b0e0f3efe929ecadeb2f157041d8ad7a0be5eff9a34bf1610f0ca39223ab804679f\",\n","    utils.go:77: \u001b[31m\"to_client_id\": \"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9\",\n","    utils.go:77: \u001b[31m\"transaction_data\": \"{\\\"name\\\":\\\"kill_sharder\\\",\\\"input\\\":{\\\"provider_id\\\":\\\"30001a01a888584772b7fee13934021ab8557e0ed471c0a3a454e9164180aef1\\\",\\\"provider_type\\\":2}}\",\n","    utils.go:77: \u001b[31m\"transaction_value\": 0,\n","    utils.go:77: \u001b[31m\"signature\": \"b3d92476900c92def702ecc5bb6fce2094eab5da795d7191d0e62f3f1f86cf1e\",\n","    utils.go:77: \u001b[31m\"creation_date\": 1687247439,\n","    utils.go:77: \u001b[31m\"transaction_type\": 1000,\n","    utils.go:77: \u001b[31m\"transaction_fee\": 100000000,\n","    utils.go:77: \u001b[31m\"transaction_nonce\": 5,\n","    utils.go:77: \u001b[31m\"txn_output_hash\": \"\",\n","    utils.go:77: \u001b[31m\"transaction_status\": 0\n","    utils.go:77: \u001b[31m}\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:39.306736 transaction_base.go:351: Submitting smart contract transaction to https://dev-3.devnet-0chain.net/miner03 with JSON {\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:50:39.310406 transaction_base.go:390: finish txn submitting, https://dev-3.devnet-0chain.net/miner03/v1/transaction/put, Status: 200 OK, output:{\"async\":true,\"entity\":{\"hash\":\"bfe38084d1595b138b61ec8b0d13ef82dbf02fe3108a899f395948b5e965fd09\",\"version\":\"1.0\",\"client_id\":\"fa64ab9354b4a35ed25aca7c5588bacd93cc7a6fe94669923235bd8b6a009a72\",\"public_key\":\"ae6787dc9b2c3fa0ada98d441a2bf16f17522e7ddbfd500231b4fd7d18fe9b0e0f3efe929ecadeb2f157041d8ad7a0be5eff9a34bf1610f0ca39223ab804679f\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"kill_sharder\\\",\\\"input\\\":{\\\"provider_id\\\":\\\"30001a01a888584772b7fee13934021ab8557e0ed471c0a3a454e9164180aef1\\\",\\\"provider_type\\\":2}}\",\"transaction_value\":0,\"signature\":\"b3d92476900c92def702ecc5bb6fce2094eab5da795d7191d0e62f3f1f86cf1e\",\"creation_date\":1687247439,\"transaction_fee\":100000000,","\"transaction_nonce\":5,\"transaction_type\":1000,\"txn_output_hash\":\"\",\"transaction_status\":0}}\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:39.310509 transaction_query.go:131: zcn: check health https://dev-3.devnet-0chain.net/sharder02/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:39.310521 transaction_query.go:131: zcn: check health https://dev-3.devnet-0chain.net/sharder01/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:50:39.317787 transaction_query.go:360: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=bfe38084d1595b138b61ec8b0d13ef82dbf02fe3108a899f395948b5e965fd09\u0026content=lfb\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:50:39.319199 transaction_query.go:370: {\"error\":{\"Offset\":0},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1687247438,\"hash\":\"421140f4e9ed81b7e4df1d577d71a6408da7c40343d75c0b213068c5dd2f22ea\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":19143,\"round_random_seed\":-6884275788463419692,\"state_changes_count\":49,\"merkle_tree_root\":\"46516a0aa6698efd33270232b8fe2f07eeb65900f30048ed0bcc7915597de464\",\"state_hash\":\"x1didJSGEiLYV6bOaDaUaiNY5g0a/f2aeOI+7VMrX/Q=\",\"receipt_merkle_tree_root\":\"6fde9e9cf243936b9ff20e926dc4cfeddb3f784502d1d4e7b6506199324caec4\",\"num_txns\":3}}\n","    utils.go:77: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2023/06/20 07:50:39.319775 transaction_query.go:496: txn confirmation parse header errortxn confirmation not found.\u001b[0m\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:39.320095 transaction.go:988: zcn: transaction not confirmed now: 1687247439, LFB creation time:1687247438\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:42.321467 transaction_query.go:131: zcn: check health https://dev-3.devnet-0chain.net/sharder02/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:42.321504 transaction_query.go:131: zcn: check health https://dev-3.devnet-0chain.net/sharder01/v1/healthcheck\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:50:42.326588 transaction_query.go:360: GEThttps://dev-3.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=bfe38084d1595b138b61ec8b0d13ef82dbf02fe3108a899f395948b5e965fd09\u0026content=lfb\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:50:42.333572 transaction_query.go:370: {\"confirmation\":{\"version\":\"1.0\",\"hash\":\"bfe38084d1595b138b61ec8b0d13ef82dbf02fe3108a899f395948b5e965fd09\",\"block_hash\":\"dc958ed33efcd372995d393b34df6737ac9d40e91b9016379555e24a35badccc\",\"previous_block_hash\":\"74817277405d5ffde6e2c66cf7d15821a8ebf068d23e9ce8375549a5a1ba9094\",\"txn\":{\"hash\":\"bfe38084d1595b138b61ec8b0d13ef82dbf02fe3108a899f395948b5e965fd09\",\"version\":\"1.0\",\"client_id\":\"fa64ab9354b4a35ed25aca7c5588bacd93cc7a6fe94669923235bd8b6a009a72\",\"public_key\":\"ae6787dc9b2c3fa0ada98d441a2bf16f17522e7ddbfd500231b4fd7d18fe9b0e0f3efe929ecadeb2f157041d8ad7a0be5eff9a34bf1610f0ca39223ab804679f\",\"to_client_id\":\"6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9\",\"chain_id\":\"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe\",\"transaction_data\":\"{\\\"name\\\":\\\"kill_sharder\\\",\\\"input\\\":{\\\"provider_id\\\":\\\"30001a01a888584772b7fee13934021ab8557e0ed471c0a3a454e9164180aef1\\\",\\\"provider_type\\\":2}}\",\"t","ransaction_value\":0,\"signature\":\"b3d92476900c92def702ecc5bb6fce2094eab5da795d7191d0e62f3f1f86cf1e\",\"creation_date\":1687247439,\"transaction_fee\":100000000,\"transaction_nonce\":5,\"transaction_type\":1000,\"transaction_output\":\"kill_sharder_failed: only the owner can kill a provider: unauthorized access - only the owner can access\",\"txn_output_hash\":\"d7398cd0f8a4e14f14bc5f05efb9f6a37f83fafcb087bfc6a4ea51443b73f8bf\",\"transaction_status\":2},\"creation_date\":1687247439,\"miner_id\":\"c6f4b8ce5da386b278ba8c4e6cf98b24b32d15bc675b4d12c95e082079c91937\",\"round\":19149,\"transaction_status\":2,\"round_random_seed\":4116688910200696407,\"state_changes_count\":94,\"merkle_tree_root\":\"1609657e72c55950c1b2f95c7b1a32bf090c5d827a4070291316af69778c40c6\",\"merkle_tree_path\":{\"nodes\":[\"81e507f1eb8d02779f657c8a8a0c62036484b9be2dbb56f28823e877b2e52e77\",\"d9050f5b94495e45197028746060c7776906bb7c2f24a32bac848a43a19df60c\",\"c598e176a7beab9a4a9898852d8a9547a694bf782cbd316708a6c4af713428f4\"],\"leaf_index\":0},\"receipt_merkle_tree_root\":\"d38ff09ecad95c66408","4210400408206c5ccda4f7eca46330e2187f54315a759\",\"receipt_merkle_tree_path\":{\"nodes\":[\"80babbf947fcb8c2e107de71519522b4c0ec7b43771cda55793bcb7dbdad9738\",\"4df9ea58c3704929276709615e9ebbf2dd0aff53a31a5b0d95609f7cdc773ff2\",\"3986142727692a068f88c51cc7844f24c5c1a47d9c17de1a32a603f77d7b6eda\"],\"leaf_index\":0}},\"latest_finalized_block\":{\"version\":\"1.0\",\"creation_date\":1687247441,\"hash\":\"195b9996776ad98956dad35583808642e64d20f60aaa1c7bf41b91dac9c4496b\",\"miner_id\":\"73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949\",\"round\":19157,\"round_random_seed\":-7437214709313414798,\"state_changes_count\":37,\"merkle_tree_root\":\"e280a882bd75ccd1ac775ec0bbc3d1a9aff1486f16bf326f539871af0a3a905a\",\"state_hash\":\"XX4KPuPkzBQICgCT8dFgP4FL6Fr0FAOgYSvr9/yY818=\",\"receipt_merkle_tree_root\":\"958beb669158ace6e88ceb39363f8b32fcb011c8f2a84a0889f1382d33673347\",\"num_txns\":2}}\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:50:42.334142 transaction_base.go:717: Confirmation round: 19149\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:42.334185 transaction_base.go:571: Query from https://dev-3.devnet-0chain.net/sharder01/v1/block/get?round=19150\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:42.334193 transaction_base.go:571: Query from https://dev-3.devnet-0chain.net/sharder02/v1/block/get?round=19150\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:50:42.336206 transaction_base.go:670: https://dev-3.devnet-0chain.net/sharder02/v1/block/get?round=19150\u0026content=header200 OK\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:42.336277 transaction_base.go:571: Query from https://dev-3.devnet-0chain.net/sharder01/v1/block/get?round=19151\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/06/20 07:50:42.336297 transaction_base.go:571: Query from https://dev-3.devnet-0chain.net/sharder02/v1/block/get?round=19151\u0026content=header\n","    utils.go:77: \u001b[31m0chain-core-sdk [DEBUG]  2023/06/20 07:50:42.337612 transaction_base.go:670: https://dev-3.devnet-0chain.net/sharder02/v1/block/get?round=19151\u0026content=header200 OK\n","    utils.go:77: \u001b[31mkill_sharder_failed: only the owner can kill a provider: unauthorized access - only the owner can access\n","    zzwalletcli_kill_sharder_test.go:43: Test case [kill sharder by non-smartcontract owner should fail] exit at [06-20-2023 07:50:42]\n","--- PASS: TestKillSharder/kill_sharder_by_non-smartcontract_owner_should_fail (21.38s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
