@@ -2133,7 +2133,6 @@ func printBlobbers(t *test.SystemTest, tag string, blobbers []*model.SCRestGetBl
 		t.Logf("URL: %s", blobber.BaseURL)
 		t.Logf("ReadPrice: %+v", blobber.Terms.ReadPrice)
 		t.Logf("WritePrice: %+v", blobber.Terms.WritePrice)
-		t.Logf("MinLockDemand: %+v", blobber.Terms.MinLockDemand)
 		t.Logf("Capacity: %+v", blobber.Capacity)
 		t.Logf("Allocated: %+v", blobber.Allocated)
 		t.Logf("LastHealthCheck: %+v", blobber.LastHealthCheck)
