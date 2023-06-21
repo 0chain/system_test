@@ -9,6 +9,7 @@ import (
 
 	"github.com/0chain/gosdk/constants"
 	"github.com/0chain/gosdk/core/conf"
+	"github.com/0chain/gosdk/zboxcore/blockchain"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/gosdk/zboxcore/zboxutil"
 	"github.com/0chain/system_test/internal/api/model"
@@ -30,6 +31,8 @@ type StatusCallback struct {
 	isRepair bool
 	success  bool
 }
+
+type MultiOperationOption func(alloc *sdk.Allocation)
 
 func (cb *StatusCallback) Started(allocationId, filePath string, op, totalBytes int) {
 
@@ -287,7 +290,7 @@ func (c *SDKClient) Rollback(t *test.SystemTest, allocationID string) {
 	require.True(t, status)
 }
 
-func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops []sdk.OperationRequest) {
+func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops []sdk.OperationRequest, multiOps ...MultiOperationOption) {
 	defer func() {
 		for i := 0; i < len(ops); i++ {
 			if ops[i].OperationType == constants.FileOperationInsert || ops[i].OperationType == constants.FileOperationUpdate {
@@ -298,6 +301,10 @@ func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops 
 
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
 	require.NoError(t, err)
+
+	for _, opt := range multiOps {
+		opt(sdkAllocation)
+	}
 
 	err = sdkAllocation.DoMultiOperation(ops)
 	require.NoError(t, err)
@@ -469,4 +476,11 @@ func (c *SDKClient) RepairAllocation(t *test.SystemTest, allocationID string) {
 	require.NoError(t, err)
 	wg.Wait()
 	require.True(t, statusBar.success)
+}
+
+func WithRepair(blobbers []*blockchain.StorageNode) MultiOperationOption {
+	return func(alloc *sdk.Allocation) {
+		alloc.SetConsensusThreshold()
+		alloc.Blobbers = blobbers
+	}
 }

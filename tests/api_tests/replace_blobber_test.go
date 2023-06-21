@@ -8,7 +8,6 @@ import (
 
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
-
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/0chain/system_test/internal/api/util/wait"
@@ -173,7 +172,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		// check for repair
-		_, req, _, err := alloc.RepairRequired("/")
+		_, _, req, _, err := alloc.RepairRequired("/")
 		require.Nil(t, err)
 		require.True(t, req)
 
