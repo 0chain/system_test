@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
@@ -29,7 +30,8 @@ func getShardersListForWallet(t *test.SystemTest, wallet string) map[string]clim
 	require.True(t, found, "MagicBlock Sharders not found in getShardersForWallet output")
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0)
-	require.Equal(t, "MagicBlock Sharders", output[0])
+	fmt.Println(output)
+	require.Equal(t, "MagicBlock Sharders", output[len(output)-1])
 
 	var sharders map[string]climodel.Sharder
 	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
@@ -45,7 +47,8 @@ func GetSharderUrl(t *test.SystemTest) string {
 	output, err := getSharders(t, configPath)
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 1)
-	require.Equal(t, "MagicBlock Sharders", output[len(output)-1])
+	fmt.Println(output)
+	require.Equal(t, "MagicBlock Sharders", output[0])
 
 	var sharders map[string]climodel.Sharder
 	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)

@@ -108,15 +108,29 @@ func TestAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
+		alloc := utils.GetAllocation(t, allocationId)
+		movedToChallengePool := alloc.MovedToChallenge
+
 		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
 		require.Nil(t, err, "Error cancelling allocation", strings.Join(output, "\n"))
 
 		// sleep for 2 minutes
 		time.Sleep(2 * time.Minute)
 
-		//allocation := utils.GetAllocation(t, allocationId)
+		alloc = utils.GetAllocation(t, allocationId)
+		require.Equal(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
 
-		//require.Equal(t, 0, allocation.Stats.SuccessChallenges, "All Challenges should fail")
+		// sleep for 5 minutes
+		time.Sleep(6 * time.Minute)
+
+		rewards := getTotalAllocationChallengeRewards(t, allocationId)
+
+		totalBlobberChallengereward := int64(0)
+		for _, v := range rewards {
+			totalBlobberChallengereward += int64(v.(float64))
+		}
+
+		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should be 0")
 
 		// Cancellation Rewards
 		allocCancellationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
@@ -215,7 +229,7 @@ func TestAllocation(testSetup *testing.T) {
 		require.Equal(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
 
 		// sleep for 5 minutes
-		time.Sleep(5 * time.Minute)
+		time.Sleep(6 * time.Minute)
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
@@ -224,7 +238,7 @@ func TestAllocation(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.Equal(t, totalBlobberChallengereward, movedToChallengePool, "Total Blobber Challenge reward should be 0")
+		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should be 0")
 
 		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
@@ -307,7 +321,7 @@ func TestAllocation(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.Equal(t, totalBlobberChallengereward, movedToChallengePool, "Total Blobber Challenge reward should be 0")
+		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should be equal to MovedToChallenge")
 
 		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
