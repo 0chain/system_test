@@ -45,7 +45,7 @@ func GetSharderUrl(t *test.SystemTest) string {
 	output, err := getSharders(t, configPath)
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 1)
-	require.Equal(t, "MagicBlock Sharders", output[0])
+	require.Equal(t, "MagicBlock Sharders", output[len(output)-1])
 
 	var sharders map[string]climodel.Sharder
 	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)

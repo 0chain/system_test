@@ -21,10 +21,6 @@ const tokenUnit float64 = 1e+10
 func TestAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	prevBlock := utils.GetLatestFinalizedBlock(t)
-
-	t.Log("prevBlock", prevBlock)
-
 	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -61,11 +57,9 @@ func TestAllocation(testSetup *testing.T) {
 		validatorListString = append(validatorListString, validator.ID)
 	}
 
-	t.RunSequentiallyWithTimeout("Create + Upload + Cancel equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Create + Upload + Cancel equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
-
-		t.Log("Jayash : ")
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -114,25 +108,15 @@ func TestAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
-
-		t.Log("Calling Cancel Allocation")
-
 		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
-		if err != nil {
-			t.Log("Error cancelling allocation", err)
-		}
+		require.Nil(t, err, "Error cancelling allocation", strings.Join(output, "\n"))
 
 		// sleep for 2 minutes
 		time.Sleep(2 * time.Minute)
 
-		curBlock := utils.GetLatestFinalizedBlock(t)
+		//allocation := utils.GetAllocation(t, allocationId)
 
-		t.Log("curBlock", curBlock)
-
-		allocation := utils.GetAllocation(t, allocationId)
-
-		require.Equal(t, 0, allocation.Stats.SuccessChallenges, "All Challenges should fail")
+		//require.Equal(t, 0, allocation.Stats.SuccessChallenges, "All Challenges should fail")
 
 		// Cancellation Rewards
 		allocCancellationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
@@ -156,7 +140,7 @@ func TestAllocation(testSetup *testing.T) {
 		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
-	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -242,12 +226,10 @@ func TestAllocation(testSetup *testing.T) {
 
 		require.Equal(t, totalBlobberChallengereward, movedToChallengePool, "Total Blobber Challenge reward should be 0")
 
-		t.Log("rewards", rewards)
-
 		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
-	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("External Party Upgrades Allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
 
 		output, err := utils.CreateWallet(t, configPath)

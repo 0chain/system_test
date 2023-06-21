@@ -178,16 +178,10 @@ func createNewAllocationWithoutRetry(t *test.SystemTest, cliConfigFilename, para
 		EscapedTestName(t)+"_allocation.txt"))
 }
 
-func createAllocationTestTeardown(t *test.SystemTest, allocationID string) {
-	t.Cleanup(func() {
-		_, _ = CancelAllocation(t, configPath, allocationID, false)
-	})
-}
-
 func CancelAllocation(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
 	t.Logf("Canceling allocation...")
 	cmd := fmt.Sprintf(
-		"./zbox alloc-cancel --allocation %s --silent "+
+		"./zbox alloc-cancel --allocation %s "+
 			"--wallet %s --configDir ./config --config %s",
 		allocationID,
 		EscapedTestName(t)+"_wallet.json",
