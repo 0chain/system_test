@@ -3,6 +3,7 @@ package api_tests
 import (
 	"crypto/rand"
 	"math/big"
+	"path"
 	"path/filepath"
 	"testing"
 	"time"
@@ -16,204 +17,204 @@ import (
 
 func TestMultiOperation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	// t.RunSequentially("Multi upload operations should work", func(t *test.SystemTest) {
-	// 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.RunSequentially("Multi upload operations should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-	// 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	// 	allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-	// 	allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-	// 	ops := make([]sdk.OperationRequest, 0, 10)
+		ops := make([]sdk.OperationRequest, 0, 10)
 
-	// 	for i := 0; i < 10; i++ {
-	// 		op := sdkClient.AddUploadOperation(t, allocationID)
-	// 		ops = append(ops, op)
-	// 	}
-	// 	start := time.Now()
-	// 	sdkClient.MultiOperation(t, allocationID, ops)
+		for i := 0; i < 10; i++ {
+			op := sdkClient.AddUploadOperation(t, allocationID)
+			ops = append(ops, op)
+		}
+		start := time.Now()
+		sdkClient.MultiOperation(t, allocationID, ops)
 
-	// 	end := time.Since(start)
-	// 	t.Logf("Multi upload operations took %v", end)
+		end := time.Since(start)
+		t.Logf("Multi upload operations took %v", end)
 
-	// 	listResult := sdkClient.GetFileList(t, allocationID, "/")
-	// 	require.Equal(t, 10, len(listResult.Children), "files count mismatch expected %v actual %v", 10, len(listResult.Children))
-	// })
+		listResult := sdkClient.GetFileList(t, allocationID, "/")
+		require.Equal(t, 10, len(listResult.Children), "files count mismatch expected %v actual %v", 10, len(listResult.Children))
+	})
 
-	// t.RunSequentially("Multi delete operations should work", func(t *test.SystemTest) {
-	// 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.RunSequentially("Multi delete operations should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-	// 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	// 	allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-	// 	allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-	// 	ops := make([]sdk.OperationRequest, 0, 10)
+		ops := make([]sdk.OperationRequest, 0, 10)
 
-	// 	for i := 0; i < 10; i++ {
-	// 		op := sdkClient.AddUploadOperation(t, allocationID)
-	// 		ops = append(ops, op)
-	// 	}
-	// 	sdkClient.MultiOperation(t, allocationID, ops)
+		for i := 0; i < 10; i++ {
+			op := sdkClient.AddUploadOperation(t, allocationID)
+			ops = append(ops, op)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops)
 
-	// 	newOps := make([]sdk.OperationRequest, 0, 10)
+		newOps := make([]sdk.OperationRequest, 0, 10)
 
-	// 	for i := 0; i < 10; i++ {
-	// 		op := sdkClient.AddDeleteOperation(t, allocationID, ops[i].FileMeta.RemotePath)
-	// 		newOps = append(newOps, op)
-	// 	}
+		for i := 0; i < 10; i++ {
+			op := sdkClient.AddDeleteOperation(t, allocationID, ops[i].FileMeta.RemotePath)
+			newOps = append(newOps, op)
+		}
 
-	// 	start := time.Now()
-	// 	sdkClient.MultiOperation(t, allocationID, newOps)
-	// 	end := time.Since(start)
-	// 	t.Logf("Multi delete operations took %v", end)
+		start := time.Now()
+		sdkClient.MultiOperation(t, allocationID, newOps)
+		end := time.Since(start)
+		t.Logf("Multi delete operations took %v", end)
 
-	// 	listResult := sdkClient.GetFileList(t, allocationID, "/")
-	// 	require.Equal(t, 0, len(listResult.Children), "files count mismatch expected 0 got %v", len(listResult.Children))
-	// })
+		listResult := sdkClient.GetFileList(t, allocationID, "/")
+		require.Equal(t, 0, len(listResult.Children), "files count mismatch expected 0 got %v", len(listResult.Children))
+	})
 
-	// t.RunSequentially("Multi update operations should work", func(t *test.SystemTest) {
-	// 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.RunSequentially("Multi update operations should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-	// 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	// 	allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-	// 	allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-	// 	ops := make([]sdk.OperationRequest, 0, 10)
+		ops := make([]sdk.OperationRequest, 0, 10)
 
-	// 	for i := 0; i < 10; i++ {
-	// 		op := sdkClient.AddUploadOperation(t, allocationID)
-	// 		ops = append(ops, op)
-	// 	}
-	// 	sdkClient.MultiOperation(t, allocationID, ops)
+		for i := 0; i < 10; i++ {
+			op := sdkClient.AddUploadOperation(t, allocationID)
+			ops = append(ops, op)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops)
 
-	// 	newOps := make([]sdk.OperationRequest, 0, 10)
+		newOps := make([]sdk.OperationRequest, 0, 10)
 
-	// 	for i := 0; i < 10; i++ {
-	// 		op := sdkClient.AddUpdateOperation(t, allocationID, ops[i].FileMeta.RemotePath, ops[i].FileMeta.RemoteName)
-	// 		newOps = append(newOps, op)
-	// 	}
+		for i := 0; i < 10; i++ {
+			op := sdkClient.AddUpdateOperation(t, allocationID, ops[i].FileMeta.RemotePath, ops[i].FileMeta.RemoteName)
+			newOps = append(newOps, op)
+		}
 
-	// 	start := time.Now()
-	// 	sdkClient.MultiOperation(t, allocationID, newOps)
-	// 	end := time.Since(start)
-	// 	t.Logf("Multi update operations took %v", end)
+		start := time.Now()
+		sdkClient.MultiOperation(t, allocationID, newOps)
+		end := time.Since(start)
+		t.Logf("Multi update operations took %v", end)
 
-	// 	listResult := sdkClient.GetFileList(t, allocationID, "/")
-	// 	require.Equal(t, 10, len(listResult.Children), "files count mismatch expected %v actual %v", 10, len(listResult.Children))
-	// })
+		listResult := sdkClient.GetFileList(t, allocationID, "/")
+		require.Equal(t, 10, len(listResult.Children), "files count mismatch expected %v actual %v", 10, len(listResult.Children))
+	})
 
-	// t.RunSequentially("Multi rename operations should work", func(t *test.SystemTest) {
-	// 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.RunSequentially("Multi rename operations should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-	// 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	// 	allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-	// 	allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-	// 	ops := make([]sdk.OperationRequest, 0, 10)
+		ops := make([]sdk.OperationRequest, 0, 10)
 
-	// 	for i := 0; i < 10; i++ {
-	// 		op := sdkClient.AddUploadOperation(t, allocationID)
-	// 		ops = append(ops, op)
-	// 	}
-	// 	sdkClient.MultiOperation(t, allocationID, ops)
+		for i := 0; i < 10; i++ {
+			op := sdkClient.AddUploadOperation(t, allocationID)
+			ops = append(ops, op)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops)
 
-	// 	newOps := make([]sdk.OperationRequest, 0, 10)
+		newOps := make([]sdk.OperationRequest, 0, 10)
 
-	// 	for i := 0; i < 10; i++ {
-	// 		op := sdkClient.AddRenameOperation(t, allocationID, ops[i].FileMeta.RemotePath, randName())
-	// 		newOps = append(newOps, op)
-	// 	}
+		for i := 0; i < 10; i++ {
+			op := sdkClient.AddRenameOperation(t, allocationID, ops[i].FileMeta.RemotePath, randName())
+			newOps = append(newOps, op)
+		}
 
-	// 	start := time.Now()
-	// 	sdkClient.MultiOperation(t, allocationID, newOps)
-	// 	end := time.Since(start)
-	// 	t.Logf("Multi rename operations took %v", end)
+		start := time.Now()
+		sdkClient.MultiOperation(t, allocationID, newOps)
+		end := time.Since(start)
+		t.Logf("Multi rename operations took %v", end)
 
-	// 	listResult := sdkClient.GetFileList(t, allocationID, "/")
-	// 	require.Equal(t, 10, len(listResult.Children), "files count mismatch expected %v actual %v", 10, len(listResult.Children))
-	// })
+		listResult := sdkClient.GetFileList(t, allocationID, "/")
+		require.Equal(t, 10, len(listResult.Children), "files count mismatch expected %v actual %v", 10, len(listResult.Children))
+	})
 
-	// t.RunSequentially("Multi different operations should work", func(t *test.SystemTest) {
-	// 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.RunSequentially("Multi different operations should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-	// 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	// 	allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-	// 	allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-	// 	ops := make([]sdk.OperationRequest, 0, 10)
+		ops := make([]sdk.OperationRequest, 0, 10)
 
-	// 	for i := 0; i < 10; i++ {
-	// 		op := sdkClient.AddUploadOperation(t, allocationID)
-	// 		ops = append(ops, op)
-	// 	}
-	// 	sdkClient.MultiOperation(t, allocationID, ops)
+		for i := 0; i < 10; i++ {
+			op := sdkClient.AddUploadOperation(t, allocationID)
+			ops = append(ops, op)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops)
 
-	// 	newOps := make([]sdk.OperationRequest, 0, 10)
+		newOps := make([]sdk.OperationRequest, 0, 10)
 
-	// 	for i := 0; i < 10; i++ {
-	// 		switch i % 3 {
-	// 		case 0:
-	// 			op := sdkClient.AddDeleteOperation(t, allocationID, ops[i].FileMeta.RemotePath)
-	// 			newOps = append(newOps, op)
-	// 		case 1:
-	// 			op := sdkClient.AddUpdateOperation(t, allocationID, ops[i].FileMeta.RemotePath, ops[i].FileMeta.RemoteName)
-	// 			newOps = append(newOps, op)
-	// 		case 2:
-	// 			op := sdkClient.AddRenameOperation(t, allocationID, ops[i].FileMeta.RemotePath, randName())
-	// 			newOps = append(newOps, op)
-	// 		}
-	// 	}
+		for i := 0; i < 10; i++ {
+			switch i % 3 {
+			case 0:
+				op := sdkClient.AddDeleteOperation(t, allocationID, ops[i].FileMeta.RemotePath)
+				newOps = append(newOps, op)
+			case 1:
+				op := sdkClient.AddUpdateOperation(t, allocationID, ops[i].FileMeta.RemotePath, ops[i].FileMeta.RemoteName)
+				newOps = append(newOps, op)
+			case 2:
+				op := sdkClient.AddRenameOperation(t, allocationID, ops[i].FileMeta.RemotePath, randName())
+				newOps = append(newOps, op)
+			}
+		}
 
-	// 	start := time.Now()
-	// 	sdkClient.MultiOperation(t, allocationID, newOps)
-	// 	end := time.Since(start)
-	// 	t.Logf("Multi different operations took %v", end)
+		start := time.Now()
+		sdkClient.MultiOperation(t, allocationID, newOps)
+		end := time.Since(start)
+		t.Logf("Multi different operations took %v", end)
 
-	// 	listResult := sdkClient.GetFileList(t, allocationID, "/")
-	// 	require.Equal(t, 6, len(listResult.Children), "files count mismatch expected %v actual %v", 6, len(listResult.Children))
-	// })
+		listResult := sdkClient.GetFileList(t, allocationID, "/")
+		require.Equal(t, 6, len(listResult.Children), "files count mismatch expected %v actual %v", 6, len(listResult.Children))
+	})
 
-	// t.RunSequentially("Multi move operations should work", func(t *test.SystemTest) {
-	// 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.RunSequentially("Multi move operations should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-	// 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	// 	allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-	// 	allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-	// 	ops := make([]sdk.OperationRequest, 0, 10)
+		ops := make([]sdk.OperationRequest, 0, 10)
 
-	// 	for i := 0; i < 10; i++ {
-	// 		op := sdkClient.AddUploadOperation(t, allocationID)
-	// 		ops = append(ops, op)
-	// 	}
-	// 	sdkClient.MultiOperation(t, allocationID, ops)
+		for i := 0; i < 10; i++ {
+			op := sdkClient.AddUploadOperation(t, allocationID)
+			ops = append(ops, op)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops)
 
-	// 	newOps := make([]sdk.OperationRequest, 0, 10)
+		newOps := make([]sdk.OperationRequest, 0, 10)
 
-	// 	for i := 0; i < 10; i++ {
-	// 		if i%2 == 0 {
-	// 			newPath := "/new/" + filepath.Join("", filepath.Base(ops[i].FileMeta.Path))
-	// 			op := sdkClient.AddMoveOperation(t, allocationID, ops[i].FileMeta.RemotePath, newPath)
-	// 			newOps = append(newOps, op)
-	// 		} else {
-	// 			newPath := "/child/" + filepath.Join("", filepath.Base(ops[i].FileMeta.Path))
-	// 			op := sdkClient.AddMoveOperation(t, allocationID, ops[i].FileMeta.RemotePath, newPath)
-	// 			newOps = append(newOps, op)
-	// 		}
-	// 	}
+		for i := 0; i < 10; i++ {
+			if i%2 == 0 {
+				newPath := "/new/" + filepath.Join("", filepath.Base(ops[i].FileMeta.Path))
+				op := sdkClient.AddMoveOperation(t, allocationID, ops[i].FileMeta.RemotePath, newPath)
+				newOps = append(newOps, op)
+			} else {
+				newPath := "/child/" + filepath.Join("", filepath.Base(ops[i].FileMeta.Path))
+				op := sdkClient.AddMoveOperation(t, allocationID, ops[i].FileMeta.RemotePath, newPath)
+				newOps = append(newOps, op)
+			}
+		}
 
-	// 	start := time.Now()
-	// 	sdkClient.MultiOperation(t, allocationID, newOps)
-	// 	end := time.Since(start)
-	// 	t.Logf("Multi move operations took %v", end)
+		start := time.Now()
+		sdkClient.MultiOperation(t, allocationID, newOps)
+		end := time.Since(start)
+		t.Logf("Multi move operations took %v", end)
 
-	// 	listResult := sdkClient.GetFileList(t, allocationID, "/")
-	// 	require.Equal(t, 2, len(listResult.Children), "files count mismatch expected %v actual %v", 2, len(listResult.Children))
+		listResult := sdkClient.GetFileList(t, allocationID, "/")
+		require.Equal(t, 2, len(listResult.Children), "files count mismatch expected %v actual %v", 2, len(listResult.Children))
 
-	// 	listResult = sdkClient.GetFileList(t, allocationID, "/new")
-	// 	require.Equal(t, 5, len(listResult.Children), "files count mismatch expected %v actual %v", 5, len(listResult.Children))
-	// 	listResult = sdkClient.GetFileList(t, allocationID, "/child")
-	// 	require.Equal(t, 5, len(listResult.Children), "files count mismatch expected %v actual %v", 5, len(listResult.Children))
-	// })
+		listResult = sdkClient.GetFileList(t, allocationID, "/new")
+		require.Equal(t, 5, len(listResult.Children), "files count mismatch expected %v actual %v", 5, len(listResult.Children))
+		listResult = sdkClient.GetFileList(t, allocationID, "/child")
+		require.Equal(t, 5, len(listResult.Children), "files count mismatch expected %v actual %v", 5, len(listResult.Children))
+	})
 
 	t.RunSequentially("Multi copy operations should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
@@ -257,71 +258,71 @@ func TestMultiOperation(testSetup *testing.T) {
 		require.Equal(t, 5, len(listResult.Children), "files count mismatch expected %v actual %v", 5, len(listResult.Children))
 	})
 
-	// t.RunSequentially("Multi create dir operations should work", func(t *test.SystemTest) {
-	// 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.RunSequentially("Multi create dir operations should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-	// 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	// 	allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-	// 	allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-	// 	ops := make([]sdk.OperationRequest, 0, 10)
-	// 	names := make([]string, 0, 10)
-	// 	for i := 0; i < 10; i++ {
-	// 		name := path.Join("/", randName())
-	// 		op := sdkClient.AddCreateDirOperation(t, allocationID, name)
-	// 		ops = append(ops, op)
-	// 		names = append(names, name)
-	// 	}
-	// 	sdkClient.MultiOperation(t, allocationID, ops)
+		ops := make([]sdk.OperationRequest, 0, 10)
+		names := make([]string, 0, 10)
+		for i := 0; i < 10; i++ {
+			name := path.Join("/", randName())
+			op := sdkClient.AddCreateDirOperation(t, allocationID, name)
+			ops = append(ops, op)
+			names = append(names, name)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops)
 
-	// 	newOps := make([]sdk.OperationRequest, 0, 10)
+		newOps := make([]sdk.OperationRequest, 0, 10)
 
-	// 	for i := 0; i < 10; i++ {
-	// 		op := sdkClient.AddCreateDirOperation(t, allocationID, path.Join(names[i], randName()))
-	// 		newOps = append(newOps, op)
-	// 	}
+		for i := 0; i < 10; i++ {
+			op := sdkClient.AddCreateDirOperation(t, allocationID, path.Join(names[i], randName()))
+			newOps = append(newOps, op)
+		}
 
-	// 	sdkClient.MultiOperation(t, allocationID, newOps)
-	// })
+		sdkClient.MultiOperation(t, allocationID, newOps)
+	})
 
-	// t.RunSequentially("Nested move operation should work", func(t *test.SystemTest) {
-	// 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.RunSequentially("Nested move operation should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-	// 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	// 	allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-	// 	allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-	// 	nestedDir := sdkClient.AddUploadOperationWithPath(t, allocationID, "/new/nested/")
+		nestedDir := sdkClient.AddUploadOperationWithPath(t, allocationID, "/new/nested/")
 
-	// 	sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{nestedDir})
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{nestedDir})
 
-	// 	newPath := "/child"
-	// 	moveOp := sdkClient.AddMoveOperation(t, allocationID, filepath.Dir(nestedDir.FileMeta.RemotePath), newPath)
-	// 	sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{moveOp})
-	// 	listResult := sdkClient.GetFileList(t, allocationID, "/child/")
-	// 	require.Equal(t, 1, len(listResult.Children), "files count mismatch expected %v actual %v", 1, len(listResult.Children))
-	// 	listResult = sdkClient.GetFileList(t, allocationID, "/new/")
-	// 	require.Equal(t, 0, len(listResult.Children), "files count mismatch expected %v actual %v", 0, len(listResult.Children))
-	// })
+		newPath := "/child"
+		moveOp := sdkClient.AddMoveOperation(t, allocationID, filepath.Dir(nestedDir.FileMeta.RemotePath), newPath)
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{moveOp})
+		listResult := sdkClient.GetFileList(t, allocationID, "/child/")
+		require.Equal(t, 1, len(listResult.Children), "files count mismatch expected %v actual %v", 1, len(listResult.Children))
+		listResult = sdkClient.GetFileList(t, allocationID, "/new/")
+		require.Equal(t, 0, len(listResult.Children), "files count mismatch expected %v actual %v", 0, len(listResult.Children))
+	})
 
-	// t.RunSequentially("Nested copy operation should work", func(t *test.SystemTest) {
-	// 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.RunSequentially("Nested copy operation should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-	// 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	// 	allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-	// 	allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-	// 	nestedDir := sdkClient.AddUploadOperationWithPath(t, allocationID, "/new/nested/")
+		nestedDir := sdkClient.AddUploadOperationWithPath(t, allocationID, "/new/nested/")
 
-	// 	sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{nestedDir})
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{nestedDir})
 
-	// 	newPath := "/child"
-	// 	copyOp := sdkClient.AddCopyOperation(t, allocationID, filepath.Dir(nestedDir.FileMeta.RemotePath), newPath)
-	// 	sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{copyOp})
+		newPath := "/child"
+		copyOp := sdkClient.AddCopyOperation(t, allocationID, filepath.Dir(nestedDir.FileMeta.RemotePath), newPath)
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{copyOp})
 
-	// 	listResult := sdkClient.GetFileList(t, allocationID, "/child/")
-	// 	require.Equal(t, 1, len(listResult.Children), "files count mismatch expected %v actual %v", 1, len(listResult.Children))
-	// })
+		listResult := sdkClient.GetFileList(t, allocationID, "/child/")
+		require.Equal(t, 1, len(listResult.Children), "files count mismatch expected %v actual %v", 1, len(listResult.Children))
+	})
 }
 
 func randName() string {

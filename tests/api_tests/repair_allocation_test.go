@@ -34,7 +34,6 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after multiple uploads should work", func(t *test.SystemTest) {
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
