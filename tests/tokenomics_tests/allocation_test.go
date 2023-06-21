@@ -59,12 +59,8 @@ func TestAllocation(testSetup *testing.T) {
 
 	t.RunWithTimeout("Create + Upload + Cancel equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
-		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
-
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
@@ -92,7 +88,7 @@ func TestAllocation(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 512 * KB
+		filesize := 2 * MB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -107,6 +103,8 @@ func TestAllocation(testSetup *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		time.Sleep(1 * time.Minute)
 
 		alloc := utils.GetAllocation(t, allocationId)
 		movedToChallengePool := alloc.MovedToChallenge
@@ -155,22 +153,14 @@ func TestAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
-
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
 
-		walletName := utils.EscapedTestName(t)
-
-		// register recipient wallet
-		output, err = utils.CreateWalletForName(t, configPath, walletName)
-		require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
 		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
 			"size":   10 * MB,
@@ -190,7 +180,7 @@ func TestAllocation(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 512 * KB
+		filesize := 2 * MB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -244,12 +234,9 @@ func TestAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("External Party Upgrades Allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
@@ -270,7 +257,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		// Uploading 10% of allocation
 		remotepath := "/dir/"
-		filesize := 512 * KB
+		filesize := 2 * MB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -283,6 +270,8 @@ func TestAllocation(testSetup *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		time.Sleep(30 * time.Second)
 
 		alloc := utils.GetAllocation(t, allocationId)
 		movedToChallengePool := alloc.MovedToChallenge
