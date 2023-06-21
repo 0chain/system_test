@@ -149,7 +149,7 @@ func TestAllocation(testSetup *testing.T) {
 		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
 		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
 
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 	t.RunWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -230,7 +230,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should be 0")
 
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 	t.RunWithTimeout("External Party Upgrades Allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -312,7 +312,7 @@ func TestAllocation(testSetup *testing.T) {
 
 		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should be equal to MovedToChallenge")
 
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 }
