@@ -16,6 +16,7 @@ import (
 	"time"
 )
 
+// 1687440537
 func TestChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
@@ -40,7 +41,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
-	t.RunSequentiallyWithTimeout("Case 1: 1 10mb allocation, 1mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 1: 1 10mb allocation, 1mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -98,7 +99,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.Equal(t, false, true)
 	})
 
-	t.RunSequentiallyWithTimeout("Case 2: 1 100mb allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 2: 1 100mb allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -156,7 +157,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.Equal(t, false, true)
 	})
 
-	t.RunSequentiallyWithTimeout("Case 3: 10 100mb allocation, 10mb file each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 3: 10 100mb allocation, 10mb file each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		var allocationIDs []string
 
@@ -223,7 +224,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.Equal(t, false, true)
 	})
 
-	t.RunSequentiallyWithTimeout("Case 4: 10 1gb allocation, 100mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 4: 10 1gb allocation, 100mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		var allocationIDs []string
 
@@ -290,7 +291,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.Equal(t, false, true)
 	})
 
-	t.RunSequentiallyWithTimeout("Case 5: 10 10gb allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 5: 10 10gb allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		var allocationIDs []string
 
@@ -382,6 +383,8 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 			for _, blobberUrl := range blobberUrls {
 				url := blobberUrl + "/challenge-timings-by-challengeId?challenge_id=" + challenge.ChallengeID
 
+				//fmt.Println(url)
+
 				resp, err := http.Get(url)
 				if err != nil {
 					t.Log("Error while getting challenge timings : ", err)
@@ -399,9 +402,9 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 				challengeTiming.ProofGenTime = challengeTiming.ProofGenTime / 1000
 				proofGenTime := common.Timestamp(challengeTiming.ProofGenTime)
 
-				proofGenTimes = append(proofGenTimes, challengeTiming.CompleteValidation-proofGenTime-challengeTiming.CreatedAtBlobber)
-				txnSubmissions = append(txnSubmissions, challengeTiming.TxnSubmission-challengeTiming.CompleteValidation)
-				txnVerifications = append(txnVerifications, challengeTiming.TxnVerification-challengeTiming.TxnSubmission)
+				proofGenTimes = append(proofGenTimes, proofGenTime)
+				txnSubmissions = append(txnSubmissions, challengeTiming.TxnSubmission)
+				txnVerifications = append(txnVerifications, challengeTiming.TxnVerification)
 			}
 		}
 	}
@@ -507,8 +510,6 @@ func getAllChallenges(t *test.SystemTest, allocationID string) ([]Challenge, err
 	var result []Challenge
 
 	res, _ := http.Get(url)
-
-	t.Log("Allocation challenge res body ", res.Body)
 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
