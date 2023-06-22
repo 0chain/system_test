@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.8.17-0.20230621212234-c29cfe7b0f00
+	github.com/0chain/gosdk v1.8.17-0.20230622151429-55beea05d8ec
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
@@ -58,5 +58,3 @@ require (
 	golang.org/x/text v0.7.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
-
-replace github.com/0chain/gosdk => ../gosdk
