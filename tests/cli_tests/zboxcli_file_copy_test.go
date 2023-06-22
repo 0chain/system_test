@@ -157,7 +157,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		var files []climodel.AllocationFile
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
-		require.Len(t, files, 3)
+		require.Len(t, files, 5)
 
 		var foundAtSource, foundAtDest int
 		for _, f := range files {
