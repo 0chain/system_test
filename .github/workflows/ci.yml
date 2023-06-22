@@ -165,6 +165,9 @@ jobs:
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           authorizer_image: staging
+          zs3_client: pr-44-528e92cd
+          zs3_logsearchapi: pr-44-528e92cd
+          zs3_minio: pr-44-528e92cd
 
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@master
