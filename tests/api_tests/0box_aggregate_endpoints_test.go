@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"fmt"
+	"github.com/0chain/gosdk/zcncore"
 	"os"
 	"path"
 	"strconv"
@@ -27,6 +28,10 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	}
 	for i := 0; i < 10; i++ {
 		apiClient.PrintJsonString("Faucet blobber owner wallet", blobberOwnerWallet)
+		nonce, _ := zcncore.GetWalletNonce(blobberOwnerWallet.Id)
+		fmt.Println("nonce", nonce)
+		fmt.Println("wallet nonce", blobberOwnerWallet.Nonce)
+		blobberOwnerWallet.Nonce = 1
 		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
 	}
 
@@ -55,9 +60,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.Logf("Free allocation marker: %v", marker)
 
 	t.RunWithTimeout("test /v2/graph-write-price", 5*time.Minute, func(t *test.SystemTest) {
-		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphWritePrice))
+		t.RunWithTimeout("endpoint parameters", 5*time.Minute, graphEndpointTestCases(zboxClient.GetGraphWritePrice))
 		PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
-		t.Run("test graph data", func(t *test.SystemTest) {
+		t.RunWithTimeout("test graph data", 5*time.Minute, func(t *test.SystemTest) {
 			PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 			data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)

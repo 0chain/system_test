@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/0chain/gosdk/zcncore"
 	"log"
 	"net/http"
 	"strings"
@@ -784,6 +785,7 @@ func (c *APIClient) CreateWalletForMnemonicWithoutAssertion(t *test.SystemTest, 
 
 // ExecuteFaucet provides basic assertions
 func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) {
+
 	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
 	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
 }
@@ -800,6 +802,10 @@ func (c *APIClient) PrintJsonString(s string, ip interface{}) {
 // ExecuteFaucet provides basic assertions
 func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
+
+	nonce, _ := zcncore.GetWalletNonce(wallet.Id)
+	fmt.Println("nonce", nonce)
+	fmt.Println("wallet nonce", wallet.Nonce)
 
 	pourZCN := tokenomics.IntToZCN(tokens)
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
