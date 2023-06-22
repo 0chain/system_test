@@ -35,8 +35,8 @@ on:
         description: '0box DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
-      zblock_image:
-        description: '0block DOCKER IMAGE to deploy'
+      zs3server_image:
+        description: 'zs3server DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
       test_file_filter:
@@ -135,7 +135,7 @@ jobs:
           echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_image}}' ] && echo 'staging') || echo '${{github.event.inputs.blobber_image}}'))" >> $GITHUB_ENV
           echo "VALIDATOR_TAG=$(echo $(([ -z '${{github.event.inputs.validator_image}}' ] && echo 'staging') || echo '${{github.event.inputs.validator_image}}'))" >> $GITHUB_ENV
           echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_image}}'))" >> $GITHUB_ENV
-          echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zblock_image}}'))" >> $GITHUB_ENV
+          echo "ZS3SERVER_TAG=$(echo $(([ -z '${{github.event.inputs.zs3server_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zs3server_image}}'))" >> $GITHUB_ENV
           echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zdns_image}}'))" >> $GITHUB_ENV
           echo "EXPLORER_TAG=$(echo $(([ -z '${{github.event.inputs.explorer_image}}' ] && echo 'latest') || echo '${{github.event.inputs.explorer_image}}'))" >> $GITHUB_ENV
 
@@ -153,7 +153,9 @@ jobs:
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
           zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
+          zs3_client: ${{ env.ZS3SERVER_TAG }}
+          zs3_logsearchapi: ${{ env.ZS3SERVER_TAG }}
+          zs3_minio: ${{ env.ZS3SERVER_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
           explorer_image: staging
           zsearch_image: staging
@@ -165,9 +167,6 @@ jobs:
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           authorizer_image: staging
-          zs3_client: pr-44-528e92cd
-          zs3_logsearchapi: pr-44-528e92cd
-          zs3_minio: pr-44-528e92cd
 
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@master
