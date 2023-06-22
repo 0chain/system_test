@@ -46,7 +46,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 	// Specify the bucket name and file key
 	bucketName := "dummybucketfortestsmigration"
 	fileKey := "sdfg" + ".txt"
-	t.TestSetup("Autenticate with firebase", func() {
+	t.TestSetup("Setup s3 bucket with relevant file", func() {
 		// Read file contents
 		fileContents := []byte("Hello, World!")
 
@@ -70,14 +70,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
-		// fileKey_modified := "abc" + ".txt"
-		// fileContents := []byte("Hello, World!")
-		// _, err := S3Client.PutObject(&s3.PutObjectInput{
-		// 	Bucket: aws.String(bucketName),
-		// 	Key:    aws.String(fileKey_modified),
-		// 	Body:   bytes.NewReader(fileContents),
-		// })
-		// require.Nil(t, err)
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
@@ -95,11 +87,11 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remoteFilePath := path.Join(remotepath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, remotepath)
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
- 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID)
+ 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	error
+	// error
 	t.RunSequentially("Should migrate existing bucket to specified path successfully with encryption on", func(t *test.SystemTest) {
 		t.Logf("here")
 		allocSize := int64(50 * MB)
@@ -114,7 +106,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"bucket":     bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
-			//"migrate-to": remotepath,
+			"migrate-to": remotepath,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -125,11 +117,11 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remoteFilePath = path.Join(remoteFilePath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, "/")
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
-		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID)
+		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	what would be the case if one copy already exist  ?
+	// what would be the case if one copy already exist  ?
 	t.RunSequentially("Should migrate as copy bucket successfully ", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -201,7 +193,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	done
+	// done
 	t.RunSequentially("Should skip migration with skip flag == 1 and migartion should be skipped", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
