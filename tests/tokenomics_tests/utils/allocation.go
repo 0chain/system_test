@@ -90,6 +90,8 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 
 	t.Log("Creating new allocation...", options)
 
+	t.Log("Faucet Tokens : ", faucetTokens)
+
 	// First create a wallet and run faucet command
 	output, err := CreateWalletForName(t, cliConfigFilename, walletName)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
