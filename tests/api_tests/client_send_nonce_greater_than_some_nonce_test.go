@@ -2,7 +2,6 @@ package api_tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"testing"
 	"time"
@@ -21,12 +20,13 @@ func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 
 	wallet1, mnemonic := apiClient.CreateWalletWithMnemonicsInReturnValue(t)
 	zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
+
 	faucetAmount := float64(10)
 	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
 	require.EqualValues(t, zcncore.ConvertToValue(faucetAmount), balResp.Balance)
+
 	wallet2 := apiClient.CreateWallet(t)
-	fmt.Printf("%+v\n", wallet2)
 	futureNonce := GetFutureNonceConfig(t)
 	currentNonce := balResp.Nonce
 
@@ -61,13 +61,11 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
 	require.EqualValues(t, zcncore.ConvertToValue(faucetAmount), balResp.Balance)
+
 	currentNonce := balResp.Nonce
-
 	sameNonce := currentNonce + 2
-
 	numSameTxns := 5
 	wallets := make([]*model.Wallet, numSameTxns)
-	hashes := make(map[string]string, numSameTxns) // clientID:hash
 	transactions := make(map[string]struct{}, numSameTxns)
 	value := int64(1)
 	for i := 0; i < numSameTxns; i++ {
@@ -87,7 +85,6 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		hashes[wallets[i].Id] = txnResp.Request.Hash
 		transactions[txnResp.Request.Hash] = struct{}{}
 	}
 
@@ -197,8 +194,8 @@ func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	txnsMap := GetTransactionsFromTxnPool(t, []string{miner})
 	txnsFromMap := GetTxnsMapFromGivenMapOfSlice(txnsMap)
 	var foundTransaction bool
-	for hash := range txnsFromMap {
-		if hash == txnResp.Request.Hash {
+	for txn := range txnsFromMap {
+		if txn == txnResp.Request.Hash {
 			foundTransaction = true
 			break
 		}
