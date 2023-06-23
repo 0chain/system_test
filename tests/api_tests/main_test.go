@@ -14,6 +14,7 @@ import (
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -53,7 +54,6 @@ func TestMain(m *testing.M) {
 	}
 
 	b, _ := json.Marshal(configMap)
-	zcncore.Init(string(b))
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
@@ -65,6 +65,8 @@ func TestMain(m *testing.M) {
 
 	t := test.NewSystemTest(new(testing.T))
 
+	err = zcncore.Init(string(b))
+	require.NoError(t, err)
 	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
 	sdkWallet = apiClient.CreateWalletForMnemonic(t, sdkWalletMnemonics)
 	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)

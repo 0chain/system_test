@@ -133,7 +133,6 @@ func (w *Wallet) ToZCNCryptoWallet(mnemonic string) *zcncrypto.Wallet {
 		Version:     w.Version,
 		DateCreated: dateCreated,
 	}
-
 }
 
 type TransactionData struct {

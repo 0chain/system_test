@@ -19,7 +19,8 @@ func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	wallet1, mnemonic := apiClient.CreateWalletWithMnemonicsInReturnValue(t)
-	zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
+	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
+	require.NoError(t, err)
 
 	faucetAmount := float64(10)
 	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
@@ -55,7 +56,8 @@ func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	wallet1, mnemonic := apiClient.CreateWalletWithMnemonicsInReturnValue(t)
-	zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
+	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
+	require.NoError(t, err)
 
 	faucetAmount := float64(10)
 	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
@@ -165,7 +167,8 @@ L1:
 func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	wallet1, mnemonic := apiClient.CreateWalletWithMnemonicsInReturnValue(t)
-	zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
+	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
+	require.NoError(t, err)
 
 	faucetAmount := 10
 	apiClient.ExecuteFaucetWithTokens(t, wallet1, float64(faucetAmount), client.TxSuccessfulStatus)
@@ -279,7 +282,7 @@ type GlobalCB struct {
 	errCh   chan error
 }
 
-func (g *GlobalCB) OnInfoAvailable(op int, status int, info string, err string) {
+func (g *GlobalCB) OnInfoAvailable(op, status int, info, err string) {
 	if status == zcncore.StatusError {
 		g.errCh <- errors.New(err)
 		return

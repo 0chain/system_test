@@ -241,13 +241,12 @@ func (c *APIClient) executeForGivenServiceProviders(
 	method int,
 	serviceProviders []string,
 ) (*resty.Response, error) {
-
 	var (
-		resp       *resty.Response
-		respErrors []error
+		resp                                *resty.Response
+		respErrors                          []error
+		expectedExecutionResponseCounter    int
+		notExpectedExecutionResponseCounter int
 	)
-
-	var expectedExecutionResponseCounter, notExpectedExecutionResponseCounter int
 
 	for _, serviceProvider := range serviceProviders {
 		if err := urlBuilder.MustShiftParse(serviceProvider); err != nil {
@@ -284,7 +283,6 @@ func (c *APIClient) executeForAllServiceProviders(
 	method,
 	serviceProviderType int,
 ) (*resty.Response, error) {
-
 	var serviceProviders []string
 
 	switch serviceProviderType {
@@ -795,10 +793,11 @@ func (c *APIClient) V1SharderGetSCState(t *test.SystemTest, scStateGetRequest mo
 
 	return scStateGetResponse, resp, err
 }
-func (c *APIClient) CreateWalletWithMnemonicsInReturnValue(t *test.SystemTest) (*model.Wallet, string) {
-	mnemonic := crypto.GenerateMnemonics(t)
-	wallet := c.CreateWalletForMnemonic(t, mnemonic)
-	return wallet, mnemonic
+
+func (c *APIClient) CreateWalletWithMnemonicsInReturnValue(t *test.SystemTest) (wallet *model.Wallet, mnemonic string) {
+	mnemonic = crypto.GenerateMnemonics(t)
+	wallet = c.CreateWalletForMnemonic(t, mnemonic)
+	return
 }
 
 func (c *APIClient) CreateWallet(t *test.SystemTest) *model.Wallet {
