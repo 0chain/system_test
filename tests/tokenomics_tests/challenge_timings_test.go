@@ -417,8 +417,8 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 				proofGenTime := common.Timestamp(challengeTiming.ProofGenTime)
 
 				proofGenTimes = append(proofGenTimes, proofGenTime)
-				txnSubmissions = append(txnSubmissions, challengeTiming.TxnSubmission)
-				txnVerifications = append(txnVerifications, challengeTiming.TxnVerification)
+				txnSubmissions = append(txnSubmissions, challengeTiming.TxnSubmission-challengeTiming.CreatedAtBlobber)
+				txnVerifications = append(txnVerifications, challengeTiming.TxnVerification-challengeTiming.TxnSubmission)
 			}
 		}
 	}
