@@ -9,6 +9,7 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -69,7 +70,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 }
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	faucetTokens := 1.0
+	faucetTokens := float64(2.0)
 	// Then create new allocation
 	options := map[string]interface{}{"expire": "1h", "size": "10000", "lock": "0.5"}
 
@@ -87,6 +88,8 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 			options[k] = v
 		}
 	}
+
+	options["lock"] = math.Max(faucetTokens-1, 0.5)
 
 	t.Log("Creating new allocation...", options)
 
