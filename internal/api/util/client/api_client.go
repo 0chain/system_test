@@ -74,10 +74,11 @@ const (
 )
 
 const (
-	TxType    = 1000
-	TxFee     = 0.5 * 1e10
-	TxVersion = "1.0"
-	TxOutput  = ""
+	SendTxType = 0
+	SCTxType   = 1000
+	TxFee      = 0.5 * 1e10
+	TxVersion  = "1.0"
+	TxOutput   = ""
 )
 
 var (
@@ -233,24 +234,20 @@ func (c *APIClient) selectHealthyServiceProviders(networkEntrypoint string) erro
 	return nil
 }
 
-func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder *URLBuilder, executionRequest *model.ExecutionRequest, method, serviceProviderType int) (*resty.Response, error) {
+func (c *APIClient) executeForGivenServiceProviders(
+	t *test.SystemTest,
+	urlBuilder *URLBuilder,
+	executionRequest *model.ExecutionRequest,
+	method int,
+	serviceProviders []string,
+) (*resty.Response, error) {
+
 	var (
 		resp       *resty.Response
 		respErrors []error
 	)
 
 	var expectedExecutionResponseCounter, notExpectedExecutionResponseCounter int
-
-	var serviceProviders []string
-
-	switch serviceProviderType {
-	case MinerServiceProvider:
-		serviceProviders = c.HealthyServiceProviders.Miners
-	case SharderServiceProvider:
-		serviceProviders = c.HealthyServiceProviders.Sharders
-	case BlobberServiceProvider:
-		serviceProviders = c.HealthyServiceProviders.Blobbers
-	}
 
 	for _, serviceProvider := range serviceProviders {
 		if err := urlBuilder.MustShiftParse(serviceProvider); err != nil {
@@ -268,6 +265,7 @@ func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder
 			expectedExecutionResponseCounter++
 			resp = newResp
 		} else {
+			t.Logf("Miner %s. Response: %s", serviceProvider, string(newResp.Body()))
 			notExpectedExecutionResponseCounter++
 		}
 	}
@@ -277,6 +275,28 @@ func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder
 	}
 
 	return resp, selectMostFrequentError(respErrors)
+}
+
+func (c *APIClient) executeForAllServiceProviders(
+	t *test.SystemTest,
+	urlBuilder *URLBuilder,
+	executionRequest *model.ExecutionRequest,
+	method,
+	serviceProviderType int,
+) (*resty.Response, error) {
+
+	var serviceProviders []string
+
+	switch serviceProviderType {
+	case MinerServiceProvider:
+		serviceProviders = c.HealthyServiceProviders.Miners
+	case SharderServiceProvider:
+		serviceProviders = c.HealthyServiceProviders.Sharders
+	case BlobberServiceProvider:
+		serviceProviders = c.HealthyServiceProviders.Blobbers
+	}
+
+	return c.executeForGivenServiceProviders(t, urlBuilder, executionRequest, method, serviceProviders)
 }
 
 func selectMostFrequentError(respErrors []error) error {
@@ -317,7 +337,21 @@ func (c *APIClient) V1ClientPut(t *test.SystemTest, clientPutRequest model.Walle
 	return clientPutResponse, resp, err
 }
 
-func (c *APIClient) V1TransactionPut(t *test.SystemTest, internalTransactionPutRequest model.InternalTransactionPutRequest, requiredStatusCode int) (*model.TransactionPutResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1TransactionPut(
+	t *test.SystemTest,
+	internalTransactionPutRequest model.InternalTransactionPutRequest,
+	requiredStatusCode int,
+) (*model.TransactionPutResponse, *resty.Response, error) { //nolint
+
+	return c.V1TransactionPutWithNonceAndServiceProviders(t, internalTransactionPutRequest, requiredStatusCode, 0, nil)
+}
+
+func (c *APIClient) V1TransactionPutWithNonceAndServiceProviders(
+	t *test.SystemTest,
+	internalTransactionPutRequest model.InternalTransactionPutRequest,
+	requiredStatusCode, withNonce int, withProviders []string,
+) (*model.TransactionPutResponse, *resty.Response, error) { //nolint
+
 	var transactionPutResponse *model.TransactionPutResponse
 
 	data, err := json.Marshal(internalTransactionPutRequest.TransactionData)
@@ -332,11 +366,15 @@ func (c *APIClient) V1TransactionPut(t *test.SystemTest, internalTransactionPutR
 		TransactionNonce: internalTransactionPutRequest.Wallet.Nonce + 1,
 		TxnOutputHash:    TxOutput,
 		TransactionValue: *TxValue,
-		TransactionType:  TxType,
+		TransactionType:  internalTransactionPutRequest.TxnType,
 		TransactionFee:   TxFee,
 		TransactionData:  string(data),
 		CreationDate:     time.Now().Unix(),
 		Version:          TxVersion,
+	}
+
+	if withNonce != 0 {
+		transactionPutRequest.TransactionNonce = withNonce
 	}
 
 	if internalTransactionPutRequest.TransactionData.Name == "pour" {
@@ -360,16 +398,21 @@ func (c *APIClient) V1TransactionPut(t *test.SystemTest, internalTransactionPutR
 
 	crypto.SignTransaction(t, &transactionPutRequest, internalTransactionPutRequest.Wallet.Keys)
 
-	resp, err := c.executeForAllServiceProviders(
+	serviceProviders := c.HealthyServiceProviders.Miners
+	if withProviders != nil {
+		serviceProviders = withProviders
+	}
+
+	resp, err := c.executeForGivenServiceProviders(
 		t,
 		NewURLBuilder().SetPath(TransactionPut),
 		&model.ExecutionRequest{
 			Body:               transactionPutRequest,
 			Dst:                &transactionPutResponse,
-			RequiredStatusCode: 200,
+			RequiredStatusCode: requiredStatusCode,
 		},
 		HttpPOSTMethod,
-		MinerServiceProvider)
+		serviceProviders)
 
 	transactionPutResponse.Request = transactionPutRequest
 
@@ -398,7 +441,12 @@ func estimateTxnFee(t *test.SystemTest, c *APIClient, transactionPutRequest *mod
 	return fee.Fee
 }
 
-func (c *APIClient) V1TransactionGetConfirmation(t *test.SystemTest, transactionGetConfirmationRequest model.TransactionGetConfirmationRequest, requiredStatusCode int) (*model.TransactionGetConfirmationResponse, *resty.Response, error) { //nolint
+func (c *APIClient) V1TransactionGetConfirmation(
+	t *test.SystemTest,
+	transactionGetConfirmationRequest model.TransactionGetConfirmationRequest,
+	requiredStatusCode int,
+) (*model.TransactionGetConfirmationResponse, *resty.Response, error) { //nolint
+
 	var transactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
 	urlBuilder := NewURLBuilder().
@@ -746,11 +794,15 @@ func (c *APIClient) V1SharderGetSCState(t *test.SystemTest, scStateGetRequest mo
 
 	return scStateGetResponse, resp, err
 }
+func (c *APIClient) CreateWalletWithMnemonicsInReturnValue(t *test.SystemTest) (*model.Wallet, string) {
+	mnemonic := crypto.GenerateMnemonics(t)
+	wallet := c.CreateWalletForMnemonic(t, mnemonic)
+	return wallet, mnemonic
+}
 
 func (c *APIClient) CreateWallet(t *test.SystemTest) *model.Wallet {
-	mnemonic := crypto.GenerateMnemonics(t)
-
-	return c.CreateWalletForMnemonic(t, mnemonic)
+	wallet, _ := c.CreateWalletWithMnemonicsInReturnValue(t)
+	return wallet
 }
 
 func (c *APIClient) CreateWalletForMnemonic(t *test.SystemTest, mnemonic string) *model.Wallet {
@@ -797,6 +849,7 @@ func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wa
 			ToClientID:      FaucetSmartContractAddress,
 			TransactionData: model.NewFaucetTransactionData(),
 			Value:           pourZCN,
+			TxnType:         SCTxType,
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -839,7 +892,9 @@ func (c *APIClient) ExecuteFaucetWithAssertions(t *test.SystemTest, wallet *mode
 		model.InternalTransactionPutRequest{
 			Wallet:          wallet,
 			ToClientID:      FaucetSmartContractAddress,
-			TransactionData: model.NewFaucetTransactionData()},
+			TransactionData: model.NewFaucetTransactionData(),
+			TxnType:         SCTxType,
+		},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -927,6 +982,7 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse),
 			Value:           tokenomics.IntToZCN(lockValue),
+			TxnType:         SCTxType,
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -976,6 +1032,7 @@ func (c *APIClient) CreateFreeAllocation(t *test.SystemTest,
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewCreateFreeAllocationTransactionData(scRestGetFreeAllocationBlobbersResponse),
 			Value:           tokenomics.IntToZCN(0.1),
+			TxnType:         SCTxType,
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -1027,6 +1084,7 @@ func (c *APIClient) UpdateAllocation(
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewUpdateAllocationTransactionData(uar),
 			Value:           tokenomics.IntToZCN(0.1),
+			TxnType:         SCTxType,
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -1077,7 +1135,8 @@ func (c *APIClient) AddFreeStorageAssigner(
 				IndividualLimit: 10.0,
 				TotalLimit:      100.0,
 			}),
-			Value: tokenomics.IntToZCN(0.1),
+			Value:   tokenomics.IntToZCN(0.1),
+			TxnType: SCTxType,
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -1128,7 +1187,8 @@ func (c *APIClient) MakeAllocationFree(
 				AllocationID: allocationID,
 				Marker:       marker,
 			}),
-			Value: tokenomics.IntToZCN(0.1),
+			Value:   tokenomics.IntToZCN(0.1),
+			TxnType: SCTxType,
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -1176,7 +1236,8 @@ func (c *APIClient) UpdateAllocationBlobbers(t *test.SystemTest, wallet *model.W
 				AddBlobberId:    newBlobberID,
 				RemoveBlobberId: oldBlobberID,
 			}),
-			Value: tokenomics.IntToZCN(0.1),
+			Value:   tokenomics.IntToZCN(0.1),
+			TxnType: SCTxType,
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -1227,6 +1288,7 @@ func (c *APIClient) CancelAllocation(
 			TransactionData: model.NewCancelAllocationTransactionData(&model.CancelAllocationRequest{
 				AllocationID: allocationID,
 			}),
+			TxnType: SCTxType,
 		},
 		HttpOkStatus,
 	)
@@ -1350,6 +1412,7 @@ func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRe
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewUpdateBlobberTransactionData(scRestGetBlobberResponse),
 			Value:           tokenomics.IntToZCN(0.1),
+			TxnType:         SCTxType,
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -1397,7 +1460,9 @@ func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 					ProviderType: providerType,
 					ProviderID:   providerID,
 				}),
-			Value: tokenomics.IntToZCN(1.0)},
+			Value:   tokenomics.IntToZCN(1.0),
+			TxnType: SCTxType,
+		},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1445,7 +1510,9 @@ func (c *APIClient) UnlockStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 					ProviderType: providerType,
 					ProviderID:   providerID,
 				}),
-			Value: tokenomics.IntToZCN(0.1)},
+			Value:   tokenomics.IntToZCN(0.1),
+			TxnType: SCTxType,
+		},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1494,7 +1561,9 @@ func (c *APIClient) CreateMinerStakePool(t *test.SystemTest, wallet *model.Walle
 					ProviderType: providerType,
 					ProviderID:   providerID,
 				}),
-			Value: tokenomics.IntToZCN(tokens)},
+			Value:   tokenomics.IntToZCN(tokens),
+			TxnType: SCTxType,
+		},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1542,7 +1611,9 @@ func (c *APIClient) UnlockMinerStakePool(t *test.SystemTest, wallet *model.Walle
 					ProviderType: providerType,
 					ProviderID:   providerID,
 				}),
-			Value: tokenomics.IntToZCN(0.1)},
+			Value:   tokenomics.IntToZCN(0.1),
+			TxnType: SCTxType,
+		},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1590,7 +1661,9 @@ func (c *APIClient) CreateWritePool(t *test.SystemTest, wallet *model.Wallet, al
 				model.CreateWritePoolRequest{
 					AllocationID: allocationId,
 				}),
-			Value: tokenomics.IntToZCN(tokens)},
+			Value:   tokenomics.IntToZCN(tokens),
+			TxnType: SCTxType,
+		},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1637,7 +1710,9 @@ func (c *APIClient) UnlockWritePool(t *test.SystemTest, wallet *model.Wallet, al
 				model.CreateWritePoolRequest{
 					AllocationID: allocationId,
 				}),
-			Value: tokenomics.IntToZCN(0.1)},
+			Value:   tokenomics.IntToZCN(0.1),
+			TxnType: SCTxType,
+		},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1682,7 +1757,9 @@ func (c *APIClient) CreateReadPool(t *test.SystemTest, wallet *model.Wallet, tok
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewCreateReadPoolTransactionData(),
-			Value:           tokenomics.IntToZCN(tokens)},
+			Value:           tokenomics.IntToZCN(tokens),
+			TxnType:         SCTxType,
+		},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1726,7 +1803,9 @@ func (c *APIClient) UnlockReadPool(t *test.SystemTest, wallet *model.Wallet, req
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewUnlockReadPoolTransactionData(),
-			Value:           tokenomics.IntToZCN(0.1)},
+			Value:           tokenomics.IntToZCN(0.1),
+			TxnType:         SCTxType,
+		},
 		HttpOkStatus)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1828,6 +1907,7 @@ func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, pro
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewCollectRewardTransactionData(providerID, providerType),
 			Value:           tokenomics.IntToZCN(0),
+			TxnType:         SCTxType,
 		},
 		HttpOkStatus)
 	require.Nil(t, err)
@@ -1976,7 +2056,8 @@ func (c *APIClient) BurnZcn(t *test.SystemTest, wallet *model.Wallet, address st
 			TransactionData: model.NewBurnZcnTransactionData(&model.SCRestBurnZcnRequest{
 				EthereumAddress: address,
 			}),
-			Value: tokenomics.IntToZCN(amount),
+			Value:   tokenomics.IntToZCN(amount),
+			TxnType: SCTxType,
 		},
 		requiredTransactionStatus)
 	require.Nil(t, err)
