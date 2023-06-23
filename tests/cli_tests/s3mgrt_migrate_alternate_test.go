@@ -13,10 +13,8 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"golang.org/x/crypto/sha3"
-
-	// "github.com/google/martian/v3/log"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/sha3"
 )
 
 const chunksize = 64 * 1024
