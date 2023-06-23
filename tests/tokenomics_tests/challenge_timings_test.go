@@ -49,7 +49,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 1,
+			"tokens": 9,
 			"data":   1,
 			"parity": 1,
 			"expire": "5m",
@@ -107,7 +107,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   100 * MB,
-			"tokens": 1,
+			"tokens": 9,
 			"data":   1,
 			"parity": 1,
 			"expire": "5m",
@@ -170,7 +170,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			// 1. Create an allocation with 1 data shard and 1 parity shard.
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   100 * MB,
-				"tokens": 1,
+				"tokens": 9,
 				"data":   1,
 				"parity": 1,
 				"expire": "5m",
@@ -237,7 +237,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			// 1. Create an allocation with 1 data shard and 1 parity shard.
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   1 * GB,
-				"tokens": 1,
+				"tokens": 9,
 				"data":   1,
 				"parity": 1,
 				"expire": "1h",
@@ -307,7 +307,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			// 1. Create an allocation with 1 data shard and 1 parity shard.
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * GB,
-				"tokens": 1,
+				"tokens": 9,
 				"data":   1,
 				"parity": 1,
 				"expire": "1h",
