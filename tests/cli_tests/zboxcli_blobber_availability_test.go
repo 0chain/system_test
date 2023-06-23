@@ -104,8 +104,8 @@ func TestBlobberAvailability(testSetup *testing.T) {
 
 func setAvailability(t *test.SystemTest, blobberId string, availability bool) {
 	output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-		"blobber_id":   blobberId,
-		"is_available": availability,
+		"blobber_id":    blobberId,
+		"not_available": availability,
 	}))
 	require.NoError(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1)
