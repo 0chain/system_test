@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
+	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -506,14 +509,19 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 
 	t.RunSequentially("Should pass when allocation flag missing but allocation path is given", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
-		_ = setupAllocation(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
-		allocPath := ""
+		currentDir, err := os.Getwd()
+		require.Nil(t, err, "can't get current dir")
+		allocPath := filepath.Join(currentDir, "allocPathForTestS3.txt")
+		err = ioutil.WriteFile(allocPath, []byte(allocationID), 0644)
+		require.Nil(t, err, "allocation file is not written properly")
+	
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
-			"bucket":     s3bucketName,
+			"bucket":     bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"alloc-path" : allocPath,
 		}))
@@ -525,12 +533,27 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 
 	t.RunSequentially("Should pass when access key and secret key is missing but aws-cred-path path is given", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
-		_ = setupAllocation(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
-		awsCredPath := ""
+		currentDir, err := os.Getwd()
+		require.Nil(t, err, "can't get current dir")
+		awsCredPath := filepath.Join(currentDir, "awsCredPathForTestS3.txt")
+		lines := []string{
+			`s3_access_key: "AKIA4MPQDEZ4ODBRWUOU"`,
+			`s3_secret_key: "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"`,
+		}
+		file, err := os.OpenFile(awsCredPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		require.Nil(t, err, "file is not created properly")
+		defer file.Close()
+		for _, line := range lines {
+			_, err := fmt.Fprintln(file, line)
+			require.Nil(t, err, "failed to write file")
+		}
+		
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"bucket":     s3bucketName,
+			"bucket":     bucketName,
+			"allocation": allocationID,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"aws-cred-path" : awsCredPath,
 		}))
