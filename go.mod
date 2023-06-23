@@ -4,9 +4,9 @@ go 1.18
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.8.17-0.20230608184447-520bdba815be
+	github.com/0chain/gosdk v1.8.17-0.20230619073427-49d616e17d81
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/herumi/bls-go-binary v1.30.4
+	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.15.0
@@ -90,5 +90,3 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 )
-
-replace github.com/herumi/bls-go-binary => github.com/cnlangzi/bls-go-binary v1.30.7
