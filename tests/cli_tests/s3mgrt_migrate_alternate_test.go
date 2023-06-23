@@ -19,22 +19,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-/*
-
--- how to verify older than, just create older than 10 min file
--- resume  what do you mean by previous state
--- retry count , how to verify it, don't you think that retry would be one in ideal case so how to increase the retry count for testing purpose
-*/
-// i think working dir wd can be tested with concurrency
-
-//delete source done
-// skip done
-// migrate to done
-// encrption done
-// --dup-suffix done
-// newer than , prefix and older than , concurrency, resume , retry count I will test in next pr
-// Three isues here, first dupl suffix, second encrption third , can't verify delete source, can't write test cleanup bcz admistratiive privilege is required for that.
-
 const chunksize = 64 * 1024
 
 func Test0S3MigrationAlternate(testSetup *testing.T) {
@@ -63,8 +47,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 
 	})
 
-	// t.Parallel()
-	// t.SetSmokeTests("Should migrate existing bucket successfully")
+	t.SetSmokeTests("Should migrate existing bucket successfully")
 
 	t.RunSequentially("Should migrate existing bucket successfully with skip 0 and replace existing file", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
@@ -92,7 +75,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	// error
 	t.RunSequentially("Should migrate existing bucket to specified path successfully with encryption on", func(t *test.SystemTest) {
 		t.Logf("here")
 		allocSize := int64(50 * MB)
@@ -185,7 +167,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
-		// check if _encrypt is correct extension for encrypted file
+		//FIXME : There is no extra extension for encrypted file
 		// parts := strings.Split(fileKey, ".")
 		// fileKey_modified := parts[0]+ "_encrypted." + parts[1]
 		remoteFilePath := path.Join(remotepath, bucketName)
@@ -194,7 +176,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	// done
 	t.RunSequentially("Should skip migration with skip flag == 1 and migartion should be skipped", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -215,8 +196,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 	})
 
-	// done
-	t.RunSequentially("Should migrate successfully with duplication files  with skip flag == 2", func(t *test.SystemTest) {
+	t.RunSequentially("Should migrate successfully with duplicate files with skip flag == 2", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -236,6 +216,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
+		// FIXME : copy extension is not there
 		// parts := strings.Split(fileKey, ".")
 		// fileKey_modified := parts[0]+ "_copy." + parts[1]
 		remotepath = path.Join(remotepath, bucketName)
@@ -244,7 +225,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	// // done
 	t.RunSequentially("Should migrate successfully with duplication files  with skip flag == 2 and dup-suffix", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -266,6 +246,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
+		// FIXME : dupl suffix is not working 
 		// parts := strings.Split(fileKey, ".")
 		// fileKey_modified := parts[0]+ "_modified." + parts[1]
 		remotepath = path.Join(remotepath, bucketName)
@@ -274,7 +255,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	// // done
 	t.RunSequentially("Should migrate successfully and delete the s3 bucket file", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
