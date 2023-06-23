@@ -94,13 +94,11 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	require.GreaterOrEqual(t, len(apiClient.Miners), 1)
 	// verify transactions are in txn pool
 	txnsMap := GetTransactionsFromTxnPool(t, apiClient.Miners)
-	for _, m := range apiClient.Miners {
-		txns, ok := txnsMap[m]
+	txnsFromMap := GetTxnsMapFromGivenMapOfSlice(txnsMap)
+
+	for txn := range transactions {
+		_, ok := txnsFromMap[txn]
 		require.True(t, ok)
-		for _, txn := range txns {
-			_, ok := transactions[txn["hash"]]
-			require.True(t, ok, "map does not have key: ", txn["hash"])
-		}
 	}
 
 	wallet2 := apiClient.CreateWallet(t)
@@ -118,12 +116,26 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	)
 	require.NoError(t, err)
 
-	confirmationResp, _, err := apiClient.V1TransactionGetConfirmation(
-		t,
-		model.TransactionGetConfirmationRequest{
-			Hash: txnResp.Request.Hash,
-		},
-		client.HttpOkStatus)
+	var confirmationResp *model.TransactionGetConfirmationResponse
+	transactionTimeOut := GetTransactionTimeOut(t)
+	tm := time.NewTimer(transactionTimeOut)
+L1:
+	for {
+		select {
+		case <-tm.C:
+			break L1
+		default:
+		}
+		confirmationResp, _, err = apiClient.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: txnResp.Request.Hash,
+			},
+			client.HttpOkStatus)
+		if err == nil {
+			break
+		}
+	}
 
 	require.NoError(t, err)
 	require.NotNil(t, confirmationResp)
@@ -138,22 +150,19 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 				Hash: txn,
 			},
 			client.HttpOkStatus)
-		putError = append(putError, err)
+		if err != nil {
+			putError = append(putError, err)
+		}
 	}
 
 	require.Len(t, putError, len(transactions)-1)
 
 	txnsMap = GetTransactionsFromTxnPool(t, nil)
-	for _, m := range apiClient.Miners {
-		txns, ok := txnsMap[m]
-		require.True(t, ok)
-		for _, txn := range txns {
-			_, ok := transactions[txn["hash"]]
-			require.False(t, ok)
-		}
+	txnsFromMap = GetTxnsMapFromGivenMapOfSlice(txnsMap)
+	for txn := range transactions {
+		_, ok := txnsFromMap[txn]
+		require.False(t, ok)
 	}
-
-	// https://dev2.zus.network/miner01/_diagnostics/txns_in_pool
 }
 
 func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
@@ -164,8 +173,8 @@ func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	faucetAmount := 10
 	apiClient.ExecuteFaucetWithTokens(t, wallet1, float64(faucetAmount), client.TxSuccessfulStatus)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
-	require.EqualValues(t, faucetAmount, balResp.Balance)
-	require.GreaterOrEqual(t, 1, len(apiClient.Miners))
+	require.EqualValues(t, zcncore.ConvertToValue(float64(faucetAmount)), balResp.Balance)
+	require.GreaterOrEqual(t, len(apiClient.Miners), 1)
 
 	wallet2 := apiClient.CreateWallet(t)
 	value := int64(1)
@@ -186,9 +195,10 @@ func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	require.NoError(t, err)
 	time.Sleep(time.Second * 10) // Wait little optimistic time for transaction to get into pool/get-confirmation
 	txnsMap := GetTransactionsFromTxnPool(t, []string{miner})
+	txnsFromMap := GetTxnsMapFromGivenMapOfSlice(txnsMap)
 	var foundTransaction bool
-	for _, txn := range txnsMap[miner] {
-		if txn["hash"] == txnResp.Request.Hash {
+	for hash := range txnsFromMap {
+		if hash == txnResp.Request.Hash {
 			foundTransaction = true
 			break
 		}
@@ -350,4 +360,14 @@ func GetTransactionsFromTxnPool(t *test.SystemTest, miners []string) map[string]
 	}
 
 	return rMap
+}
+
+func GetTxnsMapFromGivenMapOfSlice(m map[string][]map[string]string) map[string]struct{} {
+	txns := make(map[string]struct{})
+	for _, s := range m {
+		for _, txnMap := range s {
+			txns[txnMap["hash"]] = struct{}{}
+		}
+	}
+	return txns
 }
