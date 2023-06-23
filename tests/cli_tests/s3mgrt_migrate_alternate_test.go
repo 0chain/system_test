@@ -512,6 +512,16 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
+
+		fileKeyNew := "fileForAllocPath" + ".txt"
+		fileContents := []byte("Hello, World!")
+		_, err := S3Client.PutObject(&s3.PutObjectInput{
+			Bucket: aws.String(bucketName),
+			Key:    aws.String(fileKeyNew),
+			Body:   bytes.NewReader(fileContents),
+		})
+		require.Nil(t, err)
+
 		currentDir, err := os.Getwd()
 		require.Nil(t, err, "can't get current dir")
 		allocPath := filepath.Join(currentDir, "allocPathForTestS3.txt")
@@ -529,6 +539,12 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+
+		remotepath := "/"
+		remoteFilePath := path.Join(remotepath, bucketName)
+		remoteFilePath = path.Join(remoteFilePath, fileKeyNew)
+		uploadStats := checkStats(t, remoteFilePath, fileKeyNew, allocationID, false)
+		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should pass when access key and secret key is missing but aws-cred-path path is given", func(t *test.SystemTest) {
@@ -536,6 +552,15 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
+		fileKeyNew := "fileForAwsCredPath" + ".txt"
+		fileContents := []byte("Hello, World!")
+		_, err := S3Client.PutObject(&s3.PutObjectInput{
+			Bucket: aws.String(bucketName),
+			Key:    aws.String(fileKeyNew),
+			Body:   bytes.NewReader(fileContents),
+		})
+		require.Nil(t, err)
+
 		currentDir, err := os.Getwd()
 		require.Nil(t, err, "can't get current dir")
 		awsCredPath := filepath.Join(currentDir, "awsCredPathForTestS3.txt")
@@ -546,6 +571,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		file, err := os.OpenFile(awsCredPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		require.Nil(t, err, "file is not created properly")
 		defer file.Close()
+
 		for _, line := range lines {
 			_, err := fmt.Fprintln(file, line)
 			require.Nil(t, err, "failed to write file")
@@ -561,62 +587,149 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+
+		remotepath := "/"
+		remoteFilePath := path.Join(remotepath, bucketName)
+		remoteFilePath = path.Join(remoteFilePath, fileKeyNew)
+		uploadStats := checkStats(t, remoteFilePath, fileKeyNew, allocationID, false)
+		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should pass concurrency flag is set to 20", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
-		_ = setupAllocation(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
-		awsCredPath := ""
+
+		fileKeyNew := "fileForConCurrTest" + ".txt"
+		fileContents := []byte("Hello, World!")
+		_, err := S3Client.PutObject(&s3.PutObjectInput{
+			Bucket: aws.String(bucketName),
+			Key:    aws.String(fileKeyNew),
+			Body:   bytes.NewReader(fileContents),
+		})
+		require.Nil(t, err)
+
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"bucket":     s3bucketName,
+			"access-key": s3AccessKey,
+			"secret-key": s3SecretKey,
+			"bucket":     bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
-			"aws-cred-path" : awsCredPath,
+			"allocation": allocationID,
 			"concurrency" : 20,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+
+		remotepath := "/"
+		remoteFilePath := path.Join(remotepath, bucketName)
+		remoteFilePath = path.Join(remoteFilePath, fileKeyNew)
+		uploadStats := checkStats(t, remoteFilePath, fileKeyNew, allocationID, false)
+		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should pass retry flag is set to 4", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
-		_ = setupAllocation(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
-		awsCredPath := ""
+		
+		fileKeyNew := "fileForRetryTest" + ".txt"
+		fileContents := []byte("Hello, World!")
+		_, err := S3Client.PutObject(&s3.PutObjectInput{
+			Bucket: aws.String(bucketName),
+			Key:    aws.String(fileKeyNew),
+			Body:   bytes.NewReader(fileContents),
+		})
+		require.Nil(t, err)
+
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"bucket":     s3bucketName,
+			"access-key": s3AccessKey,
+			"secret-key": s3SecretKey,
+			"bucket":     bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
-			"aws-cred-path" : awsCredPath,
+			"allocation": allocationID,
 			"retry" : 4,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+
+		remotepath := "/"
+		remoteFilePath := path.Join(remotepath, bucketName)
+		remoteFilePath = path.Join(remoteFilePath, fileKeyNew)
+		uploadStats := checkStats(t, remoteFilePath, fileKeyNew, allocationID, false)
+		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should pass when working dir is set to current dir", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
-		_ = setupAllocation(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
-		awsCredPath := ""
+
+		fileKeyNew := "fileForWorkingDTest" + ".txt"
+		fileContents := []byte("Hello, World!")
+		_, err := S3Client.PutObject(&s3.PutObjectInput{
+			Bucket: aws.String(bucketName),
+			Key:    aws.String(fileKeyNew),
+			Body:   bytes.NewReader(fileContents),
+		})
+		require.Nil(t, err)
+
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"bucket":     s3bucketName,
+			"access-key": s3AccessKey,
+			"secret-key": s3SecretKey,
+			"bucket":     bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
-			"aws-cred-path" : awsCredPath,
+			"allocation": allocationID,
 			"wd": "/",
+
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+
+		remotepath := "/"
+		remoteFilePath := path.Join(remotepath, bucketName)
+		remoteFilePath = path.Join(remoteFilePath, fileKeyNew)
+		uploadStats := checkStats(t, remoteFilePath, fileKeyNew, allocationID, false)
+		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
+	t.RunSequentially("Should not pass when filename size is more than 100 character", func(t *test.SystemTest) {
+		allocSize := int64(50 * MB)
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		fileKeyNew := t.EscapedName() + ".txt"
+		fileContents := []byte("Hello, World!")
+		_, err := S3Client.PutObject(&s3.PutObjectInput{
+			Bucket: aws.String(bucketName),
+			Key:    aws.String(fileKeyNew),
+			Body:   bytes.NewReader(fileContents),
+		})
+		require.Nil(t, err)
+
+		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
+			"access-key": s3AccessKey,
+			"secret-key": s3SecretKey,
+			"bucket":     bucketName,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"allocation": allocationID,
+			"wd": "/",
+
+		}))
+		// mssg can be changed
+		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+	})
 
 }
 
