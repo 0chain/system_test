@@ -80,6 +80,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		t.Log("TxnSubmissions : ", result[1])
 		t.Log("TxnVerifications : ", result[2])
 
+		require.Equal(t, false, true)
+
 		return
 
 		proofGenTimes := result[0]
@@ -98,7 +100,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.True(t, txnVerification < 184467440720, "Transaction verification time is more than 2 seconds")
 		}
 
-		require.Equal(t, false, true)
 	})
 
 	t.RunWithTimeout("Case 2: 1 100mb allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -144,6 +145,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		t.Log("txnSubmissions", txnSubmissions)
 		t.Log("txnVerifications", txnVerifications)
 
+		require.Equal(t, false, true)
+
 		return
 
 		for _, proofGenTime := range proofGenTimes {
@@ -158,7 +161,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
 		}
 
-		require.Equal(t, false, true)
 	})
 
 	t.RunWithTimeout("Case 3: 10 100mb allocation, 10mb file each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -213,6 +215,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		t.Log("txnSubmissions", txnSubmissions)
 		t.Log("txnVerifications", txnVerifications)
 
+		require.Equal(t, false, true)
+
 		return
 
 		for _, proofGenTime := range proofGenTimes {
@@ -227,7 +231,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
 		}
 
-		require.Equal(t, false, true)
 	})
 
 	t.RunWithTimeout("Case 4: 10 1gb allocation, 100mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -282,6 +285,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		t.Log("txnSubmissions", txnSubmissions)
 		t.Log("txnVerifications", txnVerifications)
 
+		require.Equal(t, false, true)
+
 		return
 
 		for _, proofGenTime := range proofGenTimes {
@@ -296,7 +301,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
 		}
 
-		require.Equal(t, false, true)
 	})
 
 	t.RunWithTimeout("Case 5: 10 10gb allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -354,6 +358,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		t.Log("txnSubmissions", txnSubmissions)
 		t.Log("txnVerifications", txnVerifications)
 
+		require.Equal(t, false, true)
+
 		return
 
 		for _, proofGenTime := range proofGenTimes {
@@ -367,8 +373,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 		for _, txnVerification := range txnVerifications {
 			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
 		}
-
-		require.Equal(t, false, true)
 	})
 
 }
