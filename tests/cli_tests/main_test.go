@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -170,7 +171,18 @@ func TestMain(m *testing.M) {
 
 	// Create an S3 client
 	S3Client = s3.New(sess)
+	fileKey := "TenMinOldfile" + ".txt"
+	bucketName := "dummybucketfortestsmigration"
+	// Read file contents
+	fileContents := []byte("Hello, World!")
 
+	// Upload the file to S3
+	_, err = S3Client.PutObject(&s3.PutObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(fileKey),
+		Body:   bytes.NewReader(fileContents),
+	})
+	
 	snapshotHash, err := tenderlyClient.CreateSnapshot()
 	if err != nil {
 		log.Fatalln(err)
