@@ -33,6 +33,7 @@ import (
 // encrption done
 // --dup-suffix done
 // newer than , prefix and older than , concurrency, resume , retry count I will test in next pr
+// Three isues here, first dupl suffix, second encrption third , can't verify delete source, can't write test cleanup bcz admistratiive privilege is required for that.
 
 const chunksize = 64 * 1024
 
@@ -274,71 +275,32 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 	})
 
 	// // done
-	// t.RunSequentially("Should migrate successfully and delete the s3 bucket file", func(t *test.SystemTest) {
-	// 	allocSize := int64(50 * MB)
-	// 	allocationID := setupAllocation(t, configPath, map[string]interface{}{
-	// 		"size": allocSize,
-	// 	})
+	t.RunSequentially("Should migrate successfully and delete the s3 bucket file", func(t *test.SystemTest) {
+		allocSize := int64(50 * MB)
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
 
-	// 	output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-	// 		"access-key": s3AccessKey,
-	// 		"secret-key": s3SecretKey,
-	// 		"bucket":     s3bucketName,
-	// 		"wallet":     escapedTestName(t) + "_wallet.json",
-	// 		"allocation": allocationID,
-	// 		"skip": 0,
-	// 		"delete-source" : true,
-	// 	}))
+		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
+			"access-key": s3AccessKey,
+			"secret-key": s3SecretKey,
+			"bucket":     bucketName,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"allocation": allocationID,
+			"skip": 0,
+			"delete-source" : true,
+		}))
 
-	// 	require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
-	// 	require.Equal(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
-	// 	require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
+		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
+		require.Equal(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
+		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
-	// 	remotepath := "/"
-	// 	remoteFilePath := path.Join(remotepath, fileKey)
-	// 	uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID)
-	// 	require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
-
-	// 	input := &s3.ListObjectsV2Input{
-	// 		Bucket: aws.String(bucketName),
-	// 	}
-	
-	// 	// Retrieve the list of objects in the bucket
-	// 	result, err := S3Client.ListObjectsV2(input)
-	// 	if err != nil {
-	// 		fmt.Println("Failed to list objects:", err)
-	// 		return
-	// 	}
-	
-	// 	// Iterate over the objects to check if the file exists
-	// 	fileExists := false
-	// 	for _, obj := range result.Contents {
-	// 		if *obj.Key == fileKey {
-	// 			fileExists = true
-	// 			break
-	// 		}
-	// 	}
-	
-	// 	require.Equal(t, fileExists, false, "file is not deleted from source")
-		
-	// })
-
-	// t.Cleanup(func() {
-	// 	input := &s3.DeleteBucketInput{
-	// 		Bucket: aws.String(bucketName),
-	// 	}
-	
-	// 	// Delete the bucket
-	// 	_, err := S3Client.DeleteBucket(input)
-	// 	if err != nil {
-	// 		log.Info("Failed to delete bucket:", err)
-	// 		return
-	// 	}
-	
-	// 	log.Info("Bucket", bucketName, "deleted successfully!")
-	// })
-
-
+		remotepath := "/"
+		remoteFilePath := path.Join(remotepath, bucketName)
+		remoteFilePath = path.Join(remoteFilePath, fileKey)
+		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
+		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+	})
 }
 
 func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string, encrypted bool)(bool){
