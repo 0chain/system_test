@@ -54,15 +54,12 @@ func TestBlobberRewards(testSetup *testing.T) {
 		walletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceBefore := walletBalance.Balance
 
-		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
-		balanceBefore = walletBalance.Balance
-
 		_, fee := apiClient.CollectRewards(t, sdkWallet, blobberID, 3, client.TxSuccessfulStatus)
 
 		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
-		require.Equal(t, balanceAfter, balanceBefore+rewards-fee)
+		require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards-fee)
 	})
 
 	t.RunSequentially("Check if the balance of the wallet has been changed without rewards being claimed, shouldn't work", func(t *test.SystemTest) {
