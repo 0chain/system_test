@@ -969,6 +969,7 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 			HttpOkStatus)
 
 		if err != nil {
+			fmt.Println(err.Error())
 			return false
 		}
 

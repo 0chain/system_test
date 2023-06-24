@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/base64"
+	"fmt"
 	"math"
 	"os"
 	"path/filepath"
@@ -439,6 +440,63 @@ func TestFileUpdate(testSetup *testing.T) {
 
 		createAllocationTestTeardown(t, allocationID)
 	})
+
+	t.RunWithTimeout("File Update with a different size - Blobbers should be paid for the extra file size", (3*time.Minute)+(30*time.Second), func(t *test.SystemTest) {
+		// Logic: Upload a 0.5 MB file and get the upload cost. Update the 0.5 MB file with a 1 MB file
+		// and see that blobber's write pool balances are deduced again for the cost of uploading extra
+		// 0.5 MBs.
+
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock":   "1",
+			"size":   10 * MB,
+			"expire": "3m",
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		fileSize := int64(0.5 * MB)
+
+		// Get expected upload cost for 0.5 MB
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		fmt.Println("expectedUploadCostInZCN", expectedUploadCostInZCN)
+
+		// Wait for write pool balance to be deduced for initial 0.5 MB
+		cliutils.Wait(t, 20*time.Second)
+
+		initialAllocation := getAllocation(t, allocationID)
+
+		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(initialAllocation.MovedToChallenge), 0.05)
+
+		remotepath := "/" + filepath.Base(localpath)
+		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(1*MB))
+
+		// Wait before fetching final write pool
+		cliutils.Wait(t, 20*time.Second)
+
+		finalAllocation := getAllocation(t, allocationID)
+
+		require.InEpsilon(t, expectedUploadCostInZCN*2, intToZCN(finalAllocation.MovedToChallenge), 0.15)
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
 }
 
 func generateThumbnail(t *test.SystemTest, localpath string) int {

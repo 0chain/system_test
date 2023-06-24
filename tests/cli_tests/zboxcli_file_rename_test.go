@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -744,6 +745,106 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.NotContains(t, strings.Join(output, "\n"), destPath)
 	})
+
+	t.RunWithTimeout("Rename and delete file concurrently, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: unacceptably slow
+		const allocSize int64 = 2048
+		const fileSize int64 = 256
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"expire": "6m",
+		})
+
+		var renameFileNames [2]string
+		var destFileNames [2]string
+
+		var deleteFileNames [2]string
+
+		const remotePathPrefix = "/"
+
+		var renameOutputList, deleteOutputList [2][]string
+		var renameErrorList, deleteErrorList [2]error
+		var wg sync.WaitGroup
+
+		renameFileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		renameFileNames[0] = renameFileName
+
+		destFileName := filepath.Base(generateRandomTestFileName(t))
+		destFileNames[0] = destFileName
+
+		renameFileName = filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		renameFileNames[1] = renameFileName
+
+		destFileName = filepath.Base(generateRandomTestFileName(t))
+		destFileNames[1] = destFileName
+
+		deleteFileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		deleteFileNames[0] = deleteFileName
+
+		deleteFileName = filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+		deleteFileNames[1] = deleteFileName
+
+		for i := 0; i < 2; i++ {
+			wg.Add(2)
+
+			go func(currentIndex int) {
+				defer wg.Done()
+
+				op, err := renameFile(t, configPath, map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": filepath.Join(remotePathPrefix, renameFileNames[currentIndex]),
+					"destname":   destFileNames[currentIndex],
+				}, true)
+
+				renameErrorList[currentIndex] = err
+				renameOutputList[currentIndex] = op
+			}(i)
+
+			go func(currentIndex int) {
+				defer wg.Done()
+
+				op, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": filepath.Join(remotePathPrefix, deleteFileNames[currentIndex]),
+				}), true)
+
+				deleteErrorList[currentIndex] = err
+				deleteOutputList[currentIndex] = op
+			}(i)
+		}
+
+		wg.Wait()
+
+		const renameExpectedPattern = "%s renamed"
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, renameErrorList[i], strings.Join(renameOutputList[i], "\n"))
+			require.Len(t, renameOutputList[i], 1, strings.Join(renameOutputList[i], "\n"))
+
+			require.Equal(t, fmt.Sprintf(renameExpectedPattern, renameFileNames[i]), filepath.Base(renameOutputList[i][0]), "Rename output is not appropriate")
+		}
+
+		const deleteExpectedPattern = "%s deleted"
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, deleteErrorList[i], strings.Join(deleteOutputList[i], "\n"))
+			require.Len(t, deleteOutputList[i], 1, strings.Join(deleteOutputList[i], "\n"))
+
+			require.Equal(t, fmt.Sprintf(deleteExpectedPattern, deleteFileNames[i]), filepath.Base(deleteOutputList[i][0]), "Delete output is not appropriate")
+		}
+
+		for i := 0; i < 2; i++ {
+			output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": path.Join(remotePathPrefix, deleteFileNames[i]),
+				"json":       "",
+			}), true)
+
+			require.Error(t, err)
+			require.Len(t, output, 1)
+		}
+	})
+
 }
 
 func renameFileWithWallet(t *test.SystemTest, cliConfigFilename, wallet string, param map[string]interface{}) ([]string, error) {

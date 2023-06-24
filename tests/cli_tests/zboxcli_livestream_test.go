@@ -477,8 +477,150 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 		}
 	})
 
-	// Failure Scenarios
-	// FIXME: Disabled for now due to process hanging
+	t.RunSequentiallyWithTimeout("Upload from local webcam feed with a negative chunksize should fail", 5*time.Minute, func(t *test.SystemTest) {
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"lock":   1,
+			"expire": "10m",
+		}))
+		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		remotepath := "/live/stream.m3u8"
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+		localpath := filepath.Join(localfolder, "up.m3u8")
+		err = os.MkdirAll(localpath, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localpath)
+		defer os.RemoveAll(localfolder)
+
+		chunksize := -655360
+		// FIXME: negative chunksize works without error, after implementing fix change startUploadFeed to
+		// runUploadFeed below
+		err = startUploadFeed(t, configPath, "feed", localfolder, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localpath,
+			"remotepath": remotepath,
+			"live":       "",
+			"chunksize":  chunksize,
+		}))
+		require.Nil(t, err, "expected error when using negative chunksize")
+		KillFFMPEG()
+	})
+
+	t.RunSequentiallyWithTimeout("Upload from youtube feed with a negative chunksize should fail", 5*time.Minute, func(t *test.SystemTest) {
+
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"lock":   1,
+			"expire": "10m",
+		}))
+		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		remotepath := "/live/stream.m3u8"
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+		localpath := filepath.Join(localfolder, "up.m3u8")
+		err = os.MkdirAll(localpath, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localpath)
+		defer os.RemoveAll(localfolder)
+
+		chunksize := -655360
+		// FIXME: negative chunksize works without error, after implementing fix change startUploadFeed to
+		// runUploadFeed below
+		err = startUploadFeed(t, configPath, "feed", localfolder, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localpath,
+			"remotepath": remotepath,
+			"feed":       `https://www.youtube.com/watch?v=5qap5aO4i9A`,
+			"sync":       "",
+			"chunksize":  chunksize,
+		}))
+		require.Nil(t, err, "expected error when using negative chunksize")
+		KillFFMPEG()
+	})
+
+	t.RunSequentiallyWithTimeout("Uploading youtube feed with negative delay should fail", 5*time.Minute, func(t *test.SystemTest) {
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"lock":   1,
+			"expire": "10m",
+		}))
+		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		remotepath := "/live/stream.m3u8"
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+		localpath := filepath.Join(localfolder, "up.m3u8")
+		err = os.MkdirAll(localpath, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localpath)
+		defer os.RemoveAll(localfolder)
+
+		err = startUploadFeed(t, "feed", configPath, localfolder, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localpath,
+			"remotepath": remotepath,
+			"feed":       `https://www.youtube.com/watch?v=5qap5aO4i9A`,
+			"sync":       "",
+			"delay":      -10,
+		}))
+		require.NotNil(t, err, "negative delay should fail")
+		KillFFMPEG()
+	})
+
+	t.RunSequentiallyWithTimeout("Uploading local webcam feed with negative delay should fail", 5*time.Minute, func(t *test.SystemTest) {
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"lock":   1,
+			"expire": "10m",
+		}))
+		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		remotepath := "/live/stream.m3u8"
+		localfolder := filepath.Join(os.TempDir(), escapedTestName(t))
+		localpath := filepath.Join(localfolder, "up.m3u8")
+		err = os.MkdirAll(localpath, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localpath)
+		defer os.RemoveAll(localfolder)
+
+		err = startUploadFeed(t, configPath, "feed", localfolder, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localpath,
+			"remotepath": remotepath,
+			"live":       "",
+			"delay":      -10,
+		}))
+		require.NotNil(t, err, "negative delay should fail")
+		KillFFMPEG()
+	})
 }
 
 func startUploadFeed(t *test.SystemTest, cliConfigFilename, cmdName, localFolder, params string) error {
