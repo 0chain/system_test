@@ -88,7 +88,7 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 		}
 	}
 
-	options["lock"] = (faucetTokens - 1) / 2
+	options["lock"] = faucetTokens / 2
 
 	t.Log("Creating new allocation...", options)
 
