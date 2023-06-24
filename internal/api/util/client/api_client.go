@@ -802,6 +802,9 @@ func (c *APIClient) PrintJsonString(s string, ip interface{}) {
 func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
 
+	walletBalance, _ := c.GetWalletNonce(t, wallet, HttpOkStatus)
+	wallet.Nonce = walletBalance
+
 	pourZCN := tokenomics.IntToZCN(tokens)
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
@@ -1362,6 +1365,26 @@ func (c *APIClient) GetWalletBalance(t *test.SystemTest, wallet *model.Wallet, r
 	require.NotNil(t, clientGetBalanceResponse)
 
 	return clientGetBalanceResponse
+}
+
+func (c *APIClient) GetWalletNonce(t *test.SystemTest, wallet *model.Wallet, requiredStatusCode int) (int, error) {
+	t.Log("Get wallet nonce...")
+
+	clientGetBalanceResponse, _, err := c.V1ClientGetBalance(
+		t,
+		model.ClientGetBalanceRequest{
+			ClientID: wallet.Id,
+		},
+		requiredStatusCode)
+
+	fmt.Println("clientGetBalanceResponse", clientGetBalanceResponse)
+	fmt.Println("err", err)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return int(clientGetBalanceResponse.Nonce), err
 }
 
 func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRestGetBlobberResponse *model.SCRestGetBlobberResponse, requiredTransactionStatus int) {
