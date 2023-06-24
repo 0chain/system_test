@@ -90,6 +90,7 @@ func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo //
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   int64(1024000),
 			"expire": "6m",
+			"tokens": 2,
 		})
 
 		file := generateRandomTestFileName(t)
@@ -122,6 +123,11 @@ func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo //
 
 		initialAllocation := getAllocation(t, allocationID)
 
+		curOwnerBalance, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+		newOwnerBalance, err := getBalanceZCN(t, configPath, newOwner)
+		require.NoError(t, err)
+
 		output, err = transferAllocationOwnership(t, map[string]interface{}{
 			"allocation":    allocationID,
 			"new_owner_key": newOwnerWallet.ClientPublicKey,
@@ -138,12 +144,12 @@ func Test___FlakyTransferAllocation(testSetup *testing.T) { // nolint:gocyclo //
 		// balance of old owner should be unchanged
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 4.4, balance)
+		require.Equal(t, curOwnerBalance-0.01, balance)
 
 		// balance of new owner should be unchanged
 		balance, err = getBalanceZCN(t, configPath, newOwner)
 		require.NoError(t, err)
-		require.Equal(t, 5.9, balance)
+		require.Equal(t, newOwnerBalance, balance)
 
 		// write lock pool of old owner should remain locked
 		cliutils.Wait(t, 2*time.Minute)
