@@ -377,87 +377,83 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 }
 
-func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, allocationIDs []string) [][]common.Timestamp {
-
-	blobberUrls := []string{}
-	for _, blobber := range blobbers {
-		blobberUrls = append(blobberUrls, blobber.Url)
+func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, allocationIDs []string) [][]int64 {
+	blobberUrls := make([]string, len(blobbers))
+	for i, blobber := range blobbers {
+		blobberUrls[i] = blobber.Url
 	}
 
-	var proofGenTimes []common.Timestamp
-	var txnSubmissions []common.Timestamp
-	var txnVerifications []common.Timestamp
+	var proofGenTimes, txnSubmissions, txnVerifications []int64
 
 	for _, allocationID := range allocationIDs {
 		challenges, err := getAllChallenges(t, allocationID)
 		require.Nil(t, err, "Error getting all challenges")
 
 		for _, challenge := range challenges {
-
 			for _, blobberUrl := range blobberUrls {
 				url := blobberUrl + "/challenge-timings-by-challengeId?challenge_id=" + challenge.ChallengeID
 
-				//fmt.Println(url)
-
 				resp, err := http.Get(url)
 				if err != nil {
-					t.Log("Error while getting challenge timings : ", err)
+					t.Log("Error while getting challenge timings:", err)
+					continue // Skip this iteration and move to the next blobber
 				}
 				defer resp.Body.Close()
 
 				body, err := io.ReadAll(resp.Body)
+				if err != nil {
+					t.Log("Error while reading challenge timings response:", err)
+					continue // Skip this iteration and move to the next blobber
+				}
 
 				var challengeTiming ChallengeTiming
 				err = json.Unmarshal(body, &challengeTiming)
 				if err != nil {
-					t.Log("Error while unmarshalling challenge timings : ", err)
+					t.Log("Error while unmarshalling challenge timings:", err)
+					continue // Skip this iteration and move to the next blobber
 				}
 
-				challengeTiming.ProofGenTime = challengeTiming.ProofGenTime / 1000
-				proofGenTime := common.Timestamp(challengeTiming.ProofGenTime)
+				proofGenTimes = append(proofGenTimes, challengeTiming.ProofGenTime)
 
-				proofGenTimes = append(proofGenTimes, proofGenTime)
-				txnSubmissions = append(txnSubmissions, challengeTiming.TxnSubmission-challengeTiming.CreatedAtBlobber)
-				txnVerifications = append(txnVerifications, challengeTiming.TxnVerification-challengeTiming.TxnSubmission)
+				// Calculate the time difference in milliseconds
+				txnSubmission := challengeTiming.TxnSubmission.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime()).Milliseconds()
+				txnSubmissions = append(txnSubmissions, txnSubmission)
+
+				txnVerification := challengeTiming.TxnVerification.ToTime().Sub(challengeTiming.TxnSubmission.ToTime()).Milliseconds()
+				txnVerifications = append(txnVerifications, txnVerification)
 			}
 		}
 	}
 
-	t.Log("Proof Gen Times : ", proofGenTimes)
-	t.Log("Txn Submissions : ", txnSubmissions)
-	t.Log("Txn Verifications : ", txnVerifications)
+	t.Log("Proof Gen Times:", proofGenTimes)
+	t.Log("Txn Submissions:", txnSubmissions)
+	t.Log("Txn Verifications:", txnVerifications)
 
-	// max values from all the lists
-	var maxProofGenTime, maxTxnSubmission, maxTxnVerification common.Timestamp
+	// Find the maximum values from all the lists
+	maxProofGenTime := findMaxValue(proofGenTimes)
+	maxTxnSubmission := findMaxValue(txnSubmissions)
+	maxTxnVerification := findMaxValue(txnVerifications)
 
-	for _, proofGenTime := range proofGenTimes {
-		if proofGenTime > maxProofGenTime {
-			maxProofGenTime = proofGenTime
-		}
+	t.Log("Max Proof Gen Time:", maxProofGenTime)
+	t.Log("Max Txn Submission:", maxTxnSubmission)
+	t.Log("Max Txn Verification:", maxTxnVerification)
+
+	return [][]int64{proofGenTimes, txnSubmissions, txnVerifications}
+}
+
+// findMaxValue returns the maximum value from a given slice of integers.
+func findMaxValue(nums []int64) int64 {
+	if len(nums) == 0 {
+		return 0
 	}
 
-	for _, txnSubmission := range txnSubmissions {
-		if txnSubmission > maxTxnSubmission {
-			maxTxnSubmission = txnSubmission
+	max := nums[0]
+	for _, num := range nums {
+		if num > max {
+			max = num
 		}
 	}
-
-	for _, txnVerification := range txnVerifications {
-		if txnVerification > maxTxnVerification {
-			maxTxnVerification = txnVerification
-		}
-	}
-
-	t.Log("Max Proof Gen Time : ", maxProofGenTime)
-	t.Log("Max Txn Submission : ", maxTxnSubmission)
-	t.Log("Max Txn Verification : ", maxTxnVerification)
-
-	var result [][]common.Timestamp
-	result = append(result, proofGenTimes)
-	result = append(result, txnSubmissions)
-	result = append(result, txnVerifications)
-
-	return result
+	return max
 }
 
 //type ChallengeTiming struct {
