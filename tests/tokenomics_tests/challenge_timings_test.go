@@ -49,7 +49,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
-			"tokens": 9,
+			"tokens": 99,
 			"data":   1,
 			"parity": 1,
 			"expire": "5m",
@@ -96,7 +96,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   100 * MB,
-			"tokens": 9,
+			"tokens": 99,
 			"data":   1,
 			"parity": 1,
 			"expire": "5m",
@@ -153,7 +153,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			// 1. Create an allocation with 1 data shard and 1 parity shard.
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   100 * MB,
-				"tokens": 9,
+				"tokens": 99,
 				"data":   1,
 				"parity": 1,
 				"expire": "5m",
@@ -214,7 +214,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			// 1. Create an allocation with 1 data shard and 1 parity shard.
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   1 * GB,
-				"tokens": 9,
+				"tokens": 99,
 				"data":   1,
 				"parity": 1,
 				"expire": "20m",
@@ -269,7 +269,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 100)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 99)
 		require.Nil(t, err, "Error executing faucet with tokens", strings.Join(output, "\n"))
 
 		// range of 10 allocations
@@ -278,7 +278,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			// 1. Create an allocation with 1 data shard and 1 parity shard.
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * GB,
-				"tokens": 9,
+				"tokens": 99,
 				"data":   1,
 				"parity": 1,
 				"expire": "20m",
