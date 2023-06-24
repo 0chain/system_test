@@ -80,26 +80,12 @@ func TestChallengeTimings(testSetup *testing.T) {
 		t.Log("TxnSubmissions : ", result[1])
 		t.Log("TxnVerifications : ", result[2])
 
-		require.Equal(t, false, true)
+		proofGenTime := result[0]
+		txnVerificationTime := result[2]
 
-		return
+		require.True(t, proofGenTime < 25000, "It is taking more than 25000 milliseconds to generate proof")
 
-		proofGenTimes := result[0]
-		txnSubmissions := result[1]
-		txnVerifications := result[2]
-
-		for _, proofGenTime := range proofGenTimes {
-			require.True(t, proofGenTime < 1681327150, "Proof generation time is more than 2 seconds")
-		}
-
-		for _, txnSubmission := range txnSubmissions {
-			require.True(t, txnSubmission == 0, "Transaction submission time is more than 2 seconds")
-		}
-
-		for _, txnVerification := range txnVerifications {
-			require.True(t, txnVerification < 184467440720, "Transaction verification time is more than 2 seconds")
-		}
-
+		require.True(t, txnVerificationTime < 6000, "It is taking more than 6000 milliseconds to verify txn")
 	})
 
 	t.RunWithTimeout("Case 2: 1 100mb allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -145,21 +131,12 @@ func TestChallengeTimings(testSetup *testing.T) {
 		t.Log("txnSubmissions", txnSubmissions)
 		t.Log("txnVerifications", txnVerifications)
 
-		require.Equal(t, false, true)
+		proofGenTime := result[0]
+		txnVerificationTime := result[2]
 
-		return
+		require.True(t, proofGenTime < 25000, "It is taking more than 25000 milliseconds to generate proof")
 
-		for _, proofGenTime := range proofGenTimes {
-			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
-		}
-
-		for _, txnSubmission := range txnSubmissions {
-			require.True(t, txnSubmission < 1680789860, "Transaction submission time is more than 2 seconds")
-		}
-
-		for _, txnVerification := range txnVerifications {
-			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
-		}
+		require.True(t, txnVerificationTime < 6000, "It is taking more than 6000 milliseconds to verify txn")
 
 	})
 
@@ -215,21 +192,12 @@ func TestChallengeTimings(testSetup *testing.T) {
 		t.Log("txnSubmissions", txnSubmissions)
 		t.Log("txnVerifications", txnVerifications)
 
-		require.Equal(t, false, true)
+		proofGenTime := result[0]
+		txnVerificationTime := result[2]
 
-		return
+		require.True(t, proofGenTime < 75000, "It is taking more than 75000 milliseconds to generate proof")
 
-		for _, proofGenTime := range proofGenTimes {
-			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
-		}
-
-		for _, txnSubmission := range txnSubmissions {
-			require.True(t, txnSubmission < 1680789860, "Transaction submission time is more than 2 seconds")
-		}
-
-		for _, txnVerification := range txnVerifications {
-			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
-		}
+		require.True(t, txnVerificationTime < 10000, "It is taking more than 10000 milliseconds to verify txn")
 
 	})
 
@@ -285,21 +253,12 @@ func TestChallengeTimings(testSetup *testing.T) {
 		t.Log("txnSubmissions", txnSubmissions)
 		t.Log("txnVerifications", txnVerifications)
 
-		require.Equal(t, false, true)
+		proofGenTime := result[0]
+		txnVerificationTime := result[2]
 
-		return
+		require.True(t, proofGenTime < 287000, "It is taking more than 287000 milliseconds to generate proof")
 
-		for _, proofGenTime := range proofGenTimes {
-			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
-		}
-
-		for _, txnSubmission := range txnSubmissions {
-			require.True(t, txnSubmission < 1680789860, "Transaction submission time is more than 2 seconds")
-		}
-
-		for _, txnVerification := range txnVerifications {
-			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
-		}
+		require.True(t, txnVerificationTime < 10000, "It is taking more than 10000 milliseconds to verify txn")
 
 	})
 
@@ -358,26 +317,17 @@ func TestChallengeTimings(testSetup *testing.T) {
 		t.Log("txnSubmissions", txnSubmissions)
 		t.Log("txnVerifications", txnVerifications)
 
-		require.Equal(t, false, true)
+		proofGenTime := result[0]
+		txnVerificationTime := result[2]
 
-		return
+		require.True(t, proofGenTime < 287000, "It is taking more than 287000 milliseconds to generate proof")
 
-		for _, proofGenTime := range proofGenTimes {
-			require.True(t, proofGenTime < 10, "Proof generation time is more than 2 seconds")
-		}
-
-		for _, txnSubmission := range txnSubmissions {
-			require.True(t, txnSubmission < 1680789860, "Transaction submission time is more than 2 seconds")
-		}
-
-		for _, txnVerification := range txnVerifications {
-			require.True(t, txnVerification < 1680789865, "Transaction verification time is more than 2 seconds")
-		}
+		require.True(t, txnVerificationTime < 10000, "It is taking more than 10000 milliseconds to verify txn")
 	})
 
 }
 
-func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, allocationIDs []string) [][]int64 {
+func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, allocationIDs []string) []int64 {
 	blobberUrls := make([]string, len(blobbers))
 	for i, blobber := range blobbers {
 		blobberUrls[i] = blobber.Url
@@ -413,7 +363,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 					continue // Skip this iteration and move to the next blobber
 				}
 
-				proofGenTimes = append(proofGenTimes, challengeTiming.ProofGenTime)
+				proofGenTimes = append(proofGenTimes, challengeTiming.ProofGenTime*1000) // proof gen time in milliseconds
 
 				// Calculate the time difference in milliseconds
 				txnSubmission := challengeTiming.TxnSubmission.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime()).Milliseconds()
@@ -438,7 +388,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 	t.Log("Max Txn Submission:", maxTxnSubmission)
 	t.Log("Max Txn Verification:", maxTxnVerification)
 
-	return [][]int64{proofGenTimes, txnSubmissions, txnVerifications}
+	return []int64{maxProofGenTime, maxTxnSubmission, maxTxnVerification}
 }
 
 // findMaxValue returns the maximum value from a given slice of integers.
