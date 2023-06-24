@@ -9,7 +9,6 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
-	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -89,7 +88,7 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 		}
 	}
 
-	options["lock"] = math.Max(faucetTokens-1, 0.5)
+	options["lock"] = faucetTokens
 
 	t.Log("Creating new allocation...", options)
 
@@ -99,7 +98,7 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 	output, err := CreateWalletForName(t, cliConfigFilename, walletName)
 	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
 
-	output, err = ExecuteFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens)
+	output, err = ExecuteFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens+10)
 	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 	output, err = CreateNewAllocationForWallet(t, walletName, cliConfigFilename, CreateParams(options))
