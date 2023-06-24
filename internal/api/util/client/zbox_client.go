@@ -578,16 +578,22 @@ func (c *ZboxClient) GetUserInfo(t *test.SystemTest, idToken, csrfToken, phoneNu
 	urlBuilder.SetPath("/v2/userinfo")
 
 	formData := map[string]string{
-		"phone_number": phoneNumber,
+		"phone": phoneNumber,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:      &userInfo,
 		FormData: formData,
 		Headers: map[string]string{
-			"X-CSRF-TOKEN": csrfToken,
-			"X-APP-TYPE":   "blimp",
-		}, // TODO: this endpoint doesnt check signature!
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-APP-TYPE":             "blimp",
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
