@@ -2,7 +2,6 @@ package api_tests
 
 import (
 	"fmt"
-	"github.com/0chain/gosdk/zcncore"
 	"os"
 	"path"
 	"strconv"
@@ -26,12 +25,10 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	for i := 0; i < 10; i++ {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus) // 18 * 50 * 1e10
 	}
+
 	for i := 0; i < 10; i++ {
-		apiClient.PrintJsonString("Faucet blobber owner wallet", blobberOwnerWallet)
-		nonce, _ := zcncore.GetWalletNonce(blobberOwnerWallet.Id)
-		fmt.Println("nonce", nonce)
-		fmt.Println("wallet nonce", blobberOwnerWallet.Nonce)
-		blobberOwnerWallet.Nonce = 1
+		blobberOwnerWalletBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
+		blobberOwnerWallet.Nonce = int(blobberOwnerWalletBalance.Nonce)
 		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
 	}
 
@@ -1388,7 +1385,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 //nolint:gocyclo
 func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till fixed")
 	// Faucet the used wallets
 	for i := 0; i < 50; i++ {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
@@ -2047,6 +2043,10 @@ func graphEndpointTestCases(endpoint model.ZboxGraphEndpoint) func(*test.SystemT
 
 		_, resp, err = endpoint(t, &model.ZboxGraphRequest{From: "10", To: "20", DataPoints: "AX"})
 		require.Error(t, err)
+
+		blobberOwnerWalletBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
+		blobberOwnerWallet.Nonce = int(blobberOwnerWalletBalance.Nonce)
+
 		// Faucet the used wallets
 		for i := 0; i < 10; i++ {
 			apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus) // 18 * 50 * 1e10
