@@ -27,8 +27,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	}
 
 	for i := 0; i < 10; i++ {
-		blobberOwnerWalletBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
-		blobberOwnerWallet.Nonce = int(blobberOwnerWalletBalance.Nonce)
+		fmt.Println("-----------------------------------------------------------------------------")
 		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
 	}
 
@@ -104,8 +103,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 				diff := priceAfterStaking - expectedAWP
 				t.Logf("priceBeforeStaking: %d, priceAfterStaking: %d, expectedAWP: %d, diff: %d", priceBeforeStaking, priceAfterStaking, expectedAWP, diff)
-
-				fmt.Println("Here")
 
 				return priceAfterStaking != priceBeforeStaking && diff >= -roundingError && diff <= roundingError && priceAfterStaking == int64(*latest)
 			})
