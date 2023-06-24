@@ -176,6 +176,7 @@ jobs:
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
+          s3_migration_cli_branch: fix/fileMetaHash
           archive_results: true
           run_flaky_tests: true
           run_api_system_tests: true
