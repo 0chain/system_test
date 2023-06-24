@@ -25,7 +25,7 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 	t.Parallel()
 
 	// FIXME: WRITEPOOL TOKEN ACCOUNTING
-	t.RunWithTimeout("File Update with a different size - Blobbers should be paid for the extra file size", (1*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("File Update with a different size - Blobbers should be paid for the extra file size", (3*time.Minute)+(30*time.Second), func(t *test.SystemTest) {
 		// Logic: Upload a 0.5 MB file and get the upload cost. Update the 0.5 MB file with a 1 MB file
 		// and see that blobber's write pool balances are deduced again for the cost of uploading extra
 		// 0.5 MBs.
@@ -38,10 +38,8 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock":   "0.5",
+			"lock":   "1",
 			"size":   10 * MB,
-			"data":   2,
-			"parity": 2,
 			"expire": "3m",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
@@ -56,44 +54,30 @@ func Test___FlakyScenariosCommonUserFunctions(testSetup *testing.T) {
 		// Get expected upload cost for 0.5 MB
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
 		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
-		fmt.Println("output", output)
 		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-		fmt.Println("expectedUploadCostInZCN", expectedUploadCostInZCN)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
 		unit := strings.Fields(output[0])[1]
 		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
 		fmt.Println("expectedUploadCostInZCN", expectedUploadCostInZCN)
 
-		// Expected cost takes into account data+parity, so we divide by that
-		actualExpectedUploadCostInZCN := expectedUploadCostInZCN
-
 		// Wait for write pool balance to be deduced for initial 0.5 MB
-		cliutils.Wait(t, time.Minute)
+		cliutils.Wait(t, 20*time.Second)
 
 		initialAllocation := getAllocation(t, allocationID)
 
-		fmt.Println("initialAllocation.WritePool", intToZCN(initialAllocation.WritePool))
-		fmt.Println("actualExpectedUploadCostInZCN", actualExpectedUploadCostInZCN)
-
-		require.Equal(t, 0.5-actualExpectedUploadCostInZCN, intToZCN(initialAllocation.WritePool))
+		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(initialAllocation.MovedToChallenge), 0.05)
 
 		remotepath := "/" + filepath.Base(localpath)
 		updateFileWithRandomlyGeneratedData(t, allocationID, remotepath, int64(1*MB))
 
 		// Wait before fetching final write pool
-		cliutils.Wait(t, time.Minute)
+		cliutils.Wait(t, 20*time.Second)
 
 		finalAllocation := getAllocation(t, allocationID)
 
-		require.Equal(t, 0.5-2*actualExpectedUploadCostInZCN, intToZCN(finalAllocation.WritePool))
+		require.InEpsilon(t, expectedUploadCostInZCN*2, intToZCN(finalAllocation.MovedToChallenge), 0.15)
 
-		// Blobber pool balance should reduce by expected cost of 0.5 MB
-		totalChangeInWritePool := intToZCN(initialAllocation.WritePool - finalAllocation.WritePool)
-
-		// limiting totalChangeInWritePool to 2 decimal places
-		totalChangeInWritePool = math.Round(totalChangeInWritePool*100) / 100
-
-		require.Equal(t, actualExpectedUploadCostInZCN, totalChangeInWritePool)
 		createAllocationTestTeardown(t, allocationID)
 	})
 }
@@ -427,11 +411,11 @@ func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo
 	t := test.NewSystemTest(testSetup)
 	t.SetRunAllTestsAsSmokeTest()
 
-	t.RunWithTimeout("File copy - Users should not be charged for moving a file ", 3*time.Minute, func(t *test.SystemTest) { // see https://github.com/0chain/zboxcli/issues/334
+	t.RunWithTimeout("File copy - Users should be charged for copying a file ", 3*time.Minute, func(t *test.SystemTest) { // see https://github.com/0chain/zboxcli/issues/334
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Lock 0.5 token for allocation
@@ -446,19 +430,26 @@ func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
+
+		initialAllocation := getAllocation(t, allocationID)
+
 		fileSize := int64(math.Floor(1 * MB))
 
 		// Upload 1 MB file
 		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
-
 		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
 
-		fmt.Println("output", output)
+		allocAfterUpload := getAllocation(t, allocationID)
+		require.Equal(t, initialAllocation.WritePool-allocAfterUpload.WritePool, allocAfterUpload.MovedToChallenge)
+
+		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge), 0.05, "Upload cost is not as expected")
 
 		// Get initial write pool
 		cliutils.Wait(t, 10*time.Second)
-
-		initialAllocation := getAllocation(t, allocationID)
 
 		// Move file
 		remotepath := "/" + filepath.Base(localpath)
@@ -473,31 +464,11 @@ func Test___FlakyFileCopy(testSetup *testing.T) { // nolint:gocyclo
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf(remotepath+" copied"), output[0])
 
-		// Get expected upload cost
-		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
-
-		fmt.Println("output", output)
-
-		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
-
-		unit := strings.Fields(output[0])[1]
-		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
-		fmt.Println("expectedUploadCostInZCN", expectedUploadCostInZCN)
-
-		// Expected cost is given in "per 720 hours", we need 1 hour
-		// Expected cost takes into account data+parity, so we divide by that
-		actualExpectedUploadCostInZCN := expectedUploadCostInZCN * 3
-
 		finalAllocation := getAllocation(t, allocationID)
 
-		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
+		actualCost := finalAllocation.MovedToChallenge - allocAfterUpload.MovedToChallenge
 
-		fmt.Println("actualCost", actualCost)
-		fmt.Println("actualCost", intToZCN(actualCost))
-		fmt.Println("actualExpectedUploadCostInZCN", actualExpectedUploadCostInZCN)
-
-		require.True(t, actualCost == 0 || intToZCN(actualCost) == actualExpectedUploadCostInZCN)
+		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(actualCost), 0.15, "Copy file cost is not as expected")
 
 		createAllocationTestTeardown(t, allocationID)
 	})
