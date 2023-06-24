@@ -966,7 +966,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 }
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	faucetTokens := 2.0
+	faucetTokens := 9.0
 	// Then create new allocation
 	options := map[string]interface{}{"expire": "1h", "size": "10000", "lock": "5"}
 
@@ -1074,11 +1074,6 @@ func updateAllocationWithWallet(t *test.SystemTest, wallet, cliConfigFilename, p
 		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
-
-	fmt.Println(cmd)
-
-	retry = false
-
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 	} else {
