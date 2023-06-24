@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/0chain/gosdk/zcncore"
 	"log"
 	"net/http"
 	"strings"
@@ -803,10 +802,6 @@ func (c *APIClient) PrintJsonString(s string, ip interface{}) {
 func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
 
-	nonce, _ := zcncore.GetWalletNonce(wallet.Id)
-	fmt.Println("nonce", nonce)
-	fmt.Println("wallet nonce", wallet.Nonce)
-
 	pourZCN := tokenomics.IntToZCN(tokens)
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
@@ -817,12 +812,6 @@ func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wa
 			Value:           pourZCN,
 		},
 		HttpOkStatus)
-
-	//PrintJsonString("faucetTransactionPutResponse", faucetTransactionPutResponse)
-	//PrintJsonString("resp", resp)
-	//if err != nil {
-	//	PrintJsonString("err", err.Error())
-	//}
 
 	require.Nil(t, err)
 	require.NotNil(t, resp)
@@ -1092,6 +1081,10 @@ func (c *APIClient) AddFreeStorageAssigner(
 	wallet *model.Wallet,
 	requiredTransactionStatus int) {
 	t.Log("Add free storage assigner...")
+
+	walletBalance := c.GetWalletBalance(t, wallet, HttpOkStatus)
+	wallet.Nonce = int(walletBalance.Nonce)
+
 	freeAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
