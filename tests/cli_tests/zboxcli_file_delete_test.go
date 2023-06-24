@@ -6,6 +6,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -338,6 +339,67 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), remoteFilePath, strings.Join(output, "\n"))
 	})
+
+	t.RunWithTimeout("Delete file concurrently in existing directory, should work", 5*time.Minute, func(t *test.SystemTest) { // TODO: slow
+		const allocSize int64 = 2048
+		const fileSize int64 = 256
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"expire": "5m",
+		})
+
+		var fileNames [2]string
+
+		const remotePathPrefix = "/"
+
+		var outputList [2][]string
+		var errorList [2]error
+		var wg sync.WaitGroup
+
+		for i, fileName := range fileNames {
+			wg.Add(1)
+			go func(currentFileName string, currentIndex int) {
+				defer wg.Done()
+
+				fileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+				fileNames[currentIndex] = fileName
+
+				remoteFilePath := filepath.Join(remotePathPrefix, fileName)
+
+				op, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": remoteFilePath,
+				}), true)
+
+				errorList[currentIndex] = err
+				outputList[currentIndex] = op
+			}(fileName, i)
+		}
+
+		wg.Wait()
+
+		const expectedPattern = "%s deleted"
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
+			require.Len(t, outputList, 2, strings.Join(outputList[i], "\n"))
+
+			require.Equal(t, fmt.Sprintf(expectedPattern, fileNames[i]), filepath.Base(outputList[i][0]), "Output is not appropriate")
+		}
+
+		for i := 0; i < 2; i++ {
+			output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": path.Join(remotePathPrefix, fileNames[i]),
+				"json":       "",
+			}), true)
+
+			require.NotNil(t, err, strings.Join(output, "\n"))
+			require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
+		}
+	})
+
 }
 
 func deleteFile(t *test.SystemTest, walletName, params string, retry bool) ([]string, error) {

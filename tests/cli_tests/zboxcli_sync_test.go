@@ -740,6 +740,314 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 			"Error fetching the allocation.internal_error: can't get allocation: error retrieving allocation: "+
 			"invalid-allocation-id, error: record not found", output[0], strings.Join(output, "\n"))
 	})
+
+	t.Run("Sync path to non-empty allocation - locally updated files (in root) must be updated in allocation", func(t *test.SystemTest) {
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		createAllocationTestTeardown(t, allocationID)
+
+		localFolderRoot := filepath.Join(os.TempDir(), "to-sync", cliutils.RandomAlphaNumericString(10))
+		err := os.MkdirAll(localFolderRoot, os.ModePerm)
+		require.Nil(t, err, "Error in creating the folders", localFolderRoot)
+		defer os.RemoveAll(localFolderRoot)
+
+		// Create a local file in root
+		err = createFileWithSize(filepath.Join(localFolderRoot, "root.txt"), 32*KB)
+		require.Nil(t, err, "Cannot create a local file")
+
+		output, err := syncFolder(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"encryptpath": false,
+			"localpath":   localFolderRoot,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var file_initial climodel.AllocationFile
+		for _, item := range files {
+			if item.Name == "root.txt" {
+				file_initial = item
+			}
+		}
+		require.NotNil(t, file_initial, "sync error, file 'root.txt' must be uploaded to allocation", files)
+
+		// Update the local file in root
+		err = createFileWithSize(filepath.Join(localFolderRoot, "root.txt"), 128*KB)
+		require.Nil(t, err, "Cannot update the local file")
+
+		output, err = getDifferences(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localFolderRoot,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var differences []climodel.FileDiff
+		err = json.Unmarshal([]byte(output[0]), &differences)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, differences, 1, "we updated a file, we except 1 change but we got %v", len(differences), differences)
+
+		output, err = syncFolder(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  localFolderRoot,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files2 []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &files2)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var file climodel.AllocationFile
+		for _, item := range files2 {
+			if item.Name == "root.txt" {
+				file = item
+			}
+		}
+		require.NotNil(t, file, "sync error, file 'root.txt' must've been uploaded to the allocation", files2)
+
+		require.Greater(t, file.Size, file_initial.Size, "file expected to be updated to bigger size")
+	})
+
+	t.Run("BROKEN Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation but is not see zboxcli/issues/250", func(t *test.SystemTest) {
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		createAllocationTestTeardown(t, allocationID)
+
+		// The folder structure tree
+		// Integer values will be consider as files with that size
+		// Map values will be considered as folders
+		mockFolderStructure := map[string]interface{}{
+			"folder1": map[string]interface{}{
+				"file-in-folder1.txt": 32 * KB,
+			},
+			"folder2": map[string]interface{}{
+				"file-in-folder2.txt": 16 * KB,
+			},
+		}
+
+		// Create files and folders based on the defined structure recursively
+		rootLocalFolder, err := createMockFolders(t, "", mockFolderStructure)
+		require.Nil(t, err, "Error in creating mock folders: ", err, rootLocalFolder)
+		defer os.RemoveAll(rootLocalFolder)
+
+		output, err := syncFolder(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  rootLocalFolder,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		// This will traverse the tree and asserts the existent of the files
+		assertFileExistenceRecursively(t, mockFolderStructure, files)
+
+		var file1_initial climodel.AllocationFile
+		var file2_initial climodel.AllocationFile
+		for _, item := range files {
+			if item.Name == "file-in-folder1.txt" {
+				file1_initial = item
+			} else if item.Name == "file-in-folder2.txt" {
+				file2_initial = item
+			}
+		}
+
+		// Update the local files in sub folders
+		err = createFileWithSize(filepath.Join(rootLocalFolder, "folder1", "file-in-folder1.txt"), 128*KB)
+		require.Nil(t, err, "Cannot update the local file")
+		err = createFileWithSize(filepath.Join(rootLocalFolder, "folder2", "file-in-folder2.txt"), 128*KB)
+		require.Nil(t, err, "Cannot update the local file")
+
+		output, err = getDifferences(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  rootLocalFolder,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var differences []climodel.FileDiff
+		err = json.Unmarshal([]byte(output[0]), &differences)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, differences, 2, "Since we updated 2 files we expect 2 differences but we got %v", len(differences), differences)
+
+		output, err = syncFolder(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"encryptpath": false,
+			"localpath":   rootLocalFolder,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files2 []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &files2)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var file1 climodel.AllocationFile
+		var file2 climodel.AllocationFile
+		for _, item := range files2 {
+			if item.Name == "file-in-folder1.txt" {
+				file1 = item
+			} else if item.Name == "file-in-folder2.txt" {
+				file2 = item
+			}
+		}
+		require.NotNil(t, file1, "sync error, file 'file-in-folder1.txt' must be uploaded to allocation", files2)
+		require.NotNil(t, file2, "sync error, file 'file-in-folder2.txt' must be uploaded to allocation", files2)
+
+		require.Greater(t, file1.Size, file1_initial.Size, "file1 expected to be updated to bigger size")
+		require.Greater(t, file2.Size, file2_initial.Size, "file2 expected to be updated to bigger size")
+	})
+
+	t.Run("Sync path to non-empty allocation - exclude a path should work", func(t *test.SystemTest) {
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
+		createAllocationTestTeardown(t, allocationID)
+
+		// We want to exclude the folder containing this file from being synced
+		excludedFileName := "file1.txt"
+		excludedFolderName := "excludedFolder"
+		includedFileName := "file2.txt"
+		includedFolderName := "includedFolder"
+
+		// The folder structure tree
+		// Integer values will be consider as files with that size
+		// Map values will be considered as folders
+		mockFolderStructure := map[string]interface{}{
+			includedFolderName: map[string]interface{}{
+				includedFileName: 8 * KB,
+			},
+			excludedFolderName: map[string]interface{}{
+				excludedFileName: 16 * KB,
+			},
+			"decdisdbejdkcdqo3udewd.txt": 32 * KB,
+		}
+
+		// Create files and folders based on defined structure recursively
+		rootLocalFolder, err := createMockFolders(t, "", mockFolderStructure)
+		require.Nil(t, err, "Error in creating mock folders: ", err, rootLocalFolder)
+		defer os.RemoveAll(rootLocalFolder)
+
+		output, err := getDifferences(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"localpath":   rootLocalFolder,
+			"excludepath": excludedFolderName,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var differences []climodel.FileDiff
+		err = json.Unmarshal([]byte(output[0]), &differences)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		require.Len(t, differences, 2, "Since we added a file and we updated 2 files (1 excluded) we expect 2 differences but we got %v", len(differences))
+
+		output, err = syncFolder(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  rootLocalFolder,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var includedFile_initial climodel.AllocationFile
+		var excludedFile_initial climodel.AllocationFile
+
+		for _, item := range files {
+			if item.Name == includedFileName {
+				includedFile_initial = item
+			} else if item.Name == excludedFileName {
+				excludedFile_initial = item
+			}
+		}
+		require.NotNil(t, includedFile_initial, "sync error, file '%s' must be uploaded to allocation", includedFileName, files)
+		require.NotNil(t, excludedFile_initial, "sync error, file '%s' must be uploaded to allocation", excludedFile_initial, files)
+
+		// Update the local files
+		err = createFileWithSize(filepath.Join(rootLocalFolder, excludedFolderName, excludedFileName), 128*KB)
+		require.Nil(t, err, "Cannot change the file size")
+		err = createFileWithSize(filepath.Join(rootLocalFolder, includedFolderName, includedFileName), 128*KB)
+		require.Nil(t, err, "Cannot change the file size")
+		err = createFileWithSize(filepath.Join(rootLocalFolder, "decdisdbejdkcdqo3udewd.txt"), 128*KB)
+		require.Nil(t, err, "Cannot change the file size")
+
+		output, err = getDifferences(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"localpath":   rootLocalFolder,
+			"excludepath": excludedFolderName,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		err = json.Unmarshal([]byte(output[0]), &differences)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		require.Len(t, differences, 2, "Since we added a file and we updated 2 files (1 excluded) we expect 2 differences but we got %v", len(differences))
+
+		output, err = syncFolder(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"localpath":   rootLocalFolder,
+			"excludepath": excludedFolderName,
+		}, true)
+		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
+		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
+		require.Equal(t, "Sync Complete", output[len(output)-1])
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Error in listing the allocation files: ", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files2 []climodel.AllocationFile
+		err = json.Unmarshal([]byte(output[0]), &files2)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+
+		var includedFile_final climodel.AllocationFile
+		var excludedFile_final climodel.AllocationFile
+		for _, item := range files2 {
+			if item.Name == includedFileName {
+				includedFile_final = item
+			} else if item.Name == excludedFileName {
+				excludedFile_final = item
+			}
+		}
+		require.NotNil(t, includedFile_final, "sync error, file '%s' must be uploaded to allocation", includedFileName, files2)
+		require.NotNil(t, excludedFile_final, "sync error, file '%s' must be uploaded to allocation", excludedFileName, files2)
+
+		require.Greater(t, includedFile_final.Size, includedFile_initial.Size, "included file expected to be updated to bigger size")
+		require.Equal(t, excludedFile_initial.Size, excludedFile_final.Size, "excluded file expected to NOT be updated")
+	})
 }
 
 // This will traverse the tree and asserts the existent of the files

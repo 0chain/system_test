@@ -3,7 +3,10 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -646,6 +649,69 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
+
+	t.RunWithTimeout("File copy - Users should be charged for copying a file ", 3*time.Minute, func(t *test.SystemTest) { // see https://github.com/0chain/zboxcli/issues/334
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 9.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		// Lock 0.5 token for allocation
+		allocParams := createParams(map[string]interface{}{
+			"lock":   "0.5",
+			"size":   4 * MB,
+			"expire": "3m",
+		})
+		output, err = createNewAllocation(t, configPath, allocParams)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
+		allocationID := strings.Fields(output[0])[2]
+
+		initialAllocation := getAllocation(t, allocationID)
+
+		fileSize := int64(math.Floor(1 * MB))
+
+		// Upload 1 MB file
+		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		allocAfterUpload := getAllocation(t, allocationID)
+		require.Equal(t, initialAllocation.WritePool-allocAfterUpload.WritePool, allocAfterUpload.MovedToChallenge)
+
+		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge), 0.05, "Upload cost is not as expected")
+
+		// Get initial write pool
+		cliutils.Wait(t, 10*time.Second)
+
+		// Move file
+		remotepath := "/" + filepath.Base(localpath)
+
+		// copy file
+		output, err = copyFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"destpath":   "/newdir/",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf(remotepath+" copied"), output[0])
+
+		finalAllocation := getAllocation(t, allocationID)
+
+		actualCost := finalAllocation.MovedToChallenge - allocAfterUpload.MovedToChallenge
+
+		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(actualCost), 0.15, "Copy file cost is not as expected")
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
 }
 
 func copyFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
