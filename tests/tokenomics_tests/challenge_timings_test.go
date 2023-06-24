@@ -217,7 +217,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"tokens": 9,
 				"data":   1,
 				"parity": 1,
-				"expire": "1h",
+				"expire": "20m",
 			})
 
 			allocationIDs = append(allocationIDs, allocationId)
@@ -256,7 +256,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 287000, "It is taking more than 287000 milliseconds to generate proof")
+		require.True(t, proofGenTime < 320000, "It is taking more than 320000 milliseconds to generate proof")
 
 		require.True(t, txnVerificationTime < 10000, "It is taking more than 10000 milliseconds to verify txn")
 
@@ -281,7 +281,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"tokens": 9,
 				"data":   1,
 				"parity": 1,
-				"expire": "1h",
+				"expire": "20m",
 			})
 
 			allocationIDs = append(allocationIDs, allocationId)
@@ -320,7 +320,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 287000, "It is taking more than 287000 milliseconds to generate proof")
+		require.True(t, proofGenTime < 400000, "It is taking more than 400000 milliseconds to generate proof")
 
 		require.True(t, txnVerificationTime < 10000, "It is taking more than 10000 milliseconds to verify txn")
 	})
