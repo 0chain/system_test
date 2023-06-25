@@ -800,8 +800,11 @@ func (c *APIClient) PrintJsonString(s string, ip interface{}) {
 func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
 	t.Log("Execute faucet...")
 
-	walletBalance, _ := c.GetWalletNonce(t, wallet, HttpOkStatus)
-	wallet.Nonce = walletBalance
+	walletNonce, err := c.GetWalletNonce(t, wallet, HttpOkStatus)
+	if err != nil {
+		fmt.Println("Wallet Nonce Error : ", err)
+	}
+	wallet.Nonce = walletNonce
 
 	pourZCN := tokenomics.IntToZCN(tokens)
 	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
@@ -933,6 +936,12 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 	lockValue float64,
 	requiredTransactionStatus int) string {
 	t.Log("Create allocation...")
+
+	walletNonce, err := c.GetWalletNonce(t, wallet, HttpOkStatus)
+	if err != nil {
+		fmt.Println("Wallet Nonce Error : ", err)
+	}
+	wallet.Nonce = walletNonce
 
 	createAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
@@ -1207,6 +1216,12 @@ func (c *APIClient) UpdateAllocationBlobbers(t *test.SystemTest, wallet *model.W
 				Hash: txnHash,
 			},
 			HttpOkStatus)
+
+		fmt.Println("updateAllocationTransactionGetConfirmationResponse", updateAllocationTransactionGetConfirmationResponse)
+		fmt.Println("resp", resp)
+		fmt.Println("err", err)
+		fmt.Println(updateAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus)
+
 		if err != nil {
 			return false
 		}
@@ -1369,8 +1384,8 @@ func (c *APIClient) GetWalletNonce(t *test.SystemTest, wallet *model.Wallet, req
 		},
 		requiredStatusCode)
 
-	//fmt.Println("clientGetBalanceResponse", clientGetBalanceResponse)
-	//fmt.Println("err", err)
+	fmt.Println("clientGetBalanceResponse", clientGetBalanceResponse)
+	fmt.Println("err", err)
 
 	if err != nil {
 		return 0, err
@@ -1449,6 +1464,11 @@ func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 				Hash: createStakePoolTransactionPutResponse.Entity.Hash,
 			},
 			HttpOkStatus)
+
+		//fmt.Println("createStakePoolTransactionGetConfirmationResponse", createStakePoolTransactionGetConfirmationResponse)
+		//fmt.Println("resp", resp)
+		//fmt.Println("err", err)
+
 		if err != nil {
 			return false
 		}
@@ -1497,6 +1517,11 @@ func (c *APIClient) UnlockStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 				Hash: unlockStakePoolTransactionPutResponse.Entity.Hash,
 			},
 			HttpOkStatus)
+
+		fmt.Println("unlockStakePoolTransactionGetConfirmationResponse", unlockStakePoolTransactionGetConfirmationResponse)
+		fmt.Println("resp", resp)
+		fmt.Println("err", err)
+
 		if err != nil {
 			return false
 		}
