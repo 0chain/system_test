@@ -261,7 +261,6 @@ func (c *APIClient) executeForAllServiceProviders(t *test.SystemTest, urlBuilder
 
 		newResp, err := c.executeForServiceProvider(t, formattedURL, *executionRequest, method)
 		if err != nil {
-			fmt.Println("Printing Errors : ", err.Error())
 			respErrors = append(respErrors, err)
 			continue
 		}
@@ -784,7 +783,6 @@ func (c *APIClient) CreateWalletForMnemonicWithoutAssertion(t *test.SystemTest, 
 
 // ExecuteFaucet provides basic assertions
 func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) {
-
 	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
 	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
 }
@@ -815,7 +813,6 @@ func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wa
 			Value:           pourZCN,
 		},
 		HttpOkStatus)
-
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, faucetTransactionPutResponse)
@@ -961,7 +958,6 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 			HttpOkStatus)
 
 		if err != nil {
-			fmt.Println(err.Error())
 			return false
 		}
 
@@ -1084,10 +1080,6 @@ func (c *APIClient) AddFreeStorageAssigner(
 	wallet *model.Wallet,
 	requiredTransactionStatus int) {
 	t.Log("Add free storage assigner...")
-
-	walletBalance := c.GetWalletBalance(t, wallet, HttpOkStatus)
-	wallet.Nonce = int(walletBalance.Nonce)
-
 	freeAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
@@ -1377,8 +1369,8 @@ func (c *APIClient) GetWalletNonce(t *test.SystemTest, wallet *model.Wallet, req
 		},
 		requiredStatusCode)
 
-	fmt.Println("clientGetBalanceResponse", clientGetBalanceResponse)
-	fmt.Println("err", err)
+	//fmt.Println("clientGetBalanceResponse", clientGetBalanceResponse)
+	//fmt.Println("err", err)
 
 	if err != nil {
 		return 0, err
