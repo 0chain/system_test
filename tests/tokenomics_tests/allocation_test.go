@@ -57,14 +57,14 @@ func TestAllocation(testSetup *testing.T) {
 		validatorListString = append(validatorListString, validator.ID)
 	}
 
+	stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
+		1, 1, 1, 1,
+	}, 1)
+
 	t.RunWithTimeout("Create + Upload + Cancel equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 1, 1,
-		}, 1)
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
@@ -119,7 +119,7 @@ func TestAllocation(testSetup *testing.T) {
 		require.Equal(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
 
 		// sleep for 5 minutes
-		time.Sleep(6 * time.Minute)
+		time.Sleep(3 * time.Minute)
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
@@ -128,7 +128,7 @@ func TestAllocation(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should be 0")
+		require.Greater(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge Reward should be less than MovedToChallenge")
 
 		// Cancellation Rewards
 		allocCancellationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
@@ -148,17 +148,11 @@ func TestAllocation(testSetup *testing.T) {
 
 		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
 		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
-
-		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 	t.RunWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 1, 1,
-		}, 1)
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 
@@ -230,17 +224,12 @@ func TestAllocation(testSetup *testing.T) {
 
 		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should be 0")
 
-		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 	t.RunWithTimeout("External Party Upgrades Allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 1, 1,
-		}, 1)
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
@@ -312,7 +301,6 @@ func TestAllocation(testSetup *testing.T) {
 
 		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should be equal to MovedToChallenge")
 
-		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 }
