@@ -1,7 +1,6 @@
 package api_tests
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"strconv"
@@ -27,7 +26,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	}
 
 	for i := 0; i < 10; i++ {
-		fmt.Println("-----------------------------------------------------------------------------")
 		apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
 	}
 
@@ -2027,8 +2025,6 @@ func graphEndpointTestCases(endpoint model.ZboxGraphEndpoint) func(*test.SystemT
 	return func(t *test.SystemTest) {
 		// should fail for invalid parameters
 		_, resp, err := endpoint(t, &model.ZboxGraphRequest{From: "AX", To: "20", DataPoints: "5"})
-
-		fmt.Println(resp)
 		require.Error(t, err)
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "invalid from param")
@@ -2040,18 +2036,6 @@ func graphEndpointTestCases(endpoint model.ZboxGraphEndpoint) func(*test.SystemT
 
 		_, resp, err = endpoint(t, &model.ZboxGraphRequest{From: "10", To: "20", DataPoints: "AX"})
 		require.Error(t, err)
-
-		blobberOwnerWalletBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
-		blobberOwnerWallet.Nonce = int(blobberOwnerWalletBalance.Nonce)
-
-		// Faucet the used wallets
-		for i := 0; i < 10; i++ {
-			apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus) // 18 * 50 * 1e10
-		}
-		for i := 0; i < 10; i++ {
-			apiClient.ExecuteFaucet(t, blobberOwnerWallet, client.TxSuccessfulStatus)
-		}
-
 		require.Equal(t, 400, resp.StatusCode())
 		require.Contains(t, resp.String(), "invalid data-points query param")
 

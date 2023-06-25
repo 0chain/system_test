@@ -578,7 +578,7 @@ func (c *ZboxClient) GetUserInfo(t *test.SystemTest, idToken, csrfToken, phoneNu
 	urlBuilder.SetPath("/v2/userinfo")
 
 	formData := map[string]string{
-		"phone": phoneNumber,
+		"phone_number": phoneNumber,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
