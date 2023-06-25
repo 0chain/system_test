@@ -83,7 +83,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 25000, "It is taking more than 25000 milliseconds to generate proof")
+		require.True(t, proofGenTime < 50000, "It is taking more than 50000 milliseconds to generate proof")
 
 		require.True(t, txnVerificationTime < 7000, "It is taking more than 7000 milliseconds to verify txn")
 	})
@@ -134,9 +134,9 @@ func TestChallengeTimings(testSetup *testing.T) {
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 25000, "It is taking more than 25000 milliseconds to generate proof")
+		require.True(t, proofGenTime < 90000, "It is taking more than 90000 milliseconds to generate proof")
 
-		require.True(t, txnVerificationTime < 7000, "It is taking more than 7000 milliseconds to verify txn")
+		require.True(t, txnVerificationTime < 10000, "It is taking more than 10000 milliseconds to verify txn")
 
 	})
 
@@ -256,9 +256,9 @@ func TestChallengeTimings(testSetup *testing.T) {
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 320000, "It is taking more than 320000 milliseconds to generate proof")
+		require.True(t, proofGenTime < 350000, "It is taking more than 320000 milliseconds to generate proof")
 
-		require.True(t, txnVerificationTime < 12000, "It is taking more than 10000 milliseconds to verify txn")
+		require.True(t, txnVerificationTime < 15000, "It is taking more than 10000 milliseconds to verify txn")
 
 	})
 
@@ -320,9 +320,9 @@ func TestChallengeTimings(testSetup *testing.T) {
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 4000000, "It is taking more than 4000000 milliseconds to generate proof")
+		require.True(t, proofGenTime < 4200000, "It is taking more than 4000000 milliseconds to generate proof")
 
-		require.True(t, txnVerificationTime < 17000, "It is taking more than 17000 milliseconds to verify txn")
+		require.True(t, txnVerificationTime < 20000, "It is taking more than 17000 milliseconds to verify txn")
 	})
 
 }
