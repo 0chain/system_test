@@ -338,6 +338,7 @@ func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string, 
 // allocation path and aws credential path also needs to be tested
 // if region is tested or not that we need to check
 // resume retry, first look into code then ask ryan
+
 func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
@@ -366,7 +367,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 
 	t.SetSmokeTests("Should migrate existing bucket successfully")
 
-	t.Run("Should migrate existing bucket successfully with concurrency==4 and working dir current dir", func(t *test.SystemTest) {
+	t.RunSequentially("Should migrate existing bucket successfully with concurrency==4 and working dir current dir", func(t *test.SystemTest) {
 		t.Logf("here")
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -396,7 +397,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	t.Run("Should migrate existing bucket successfully with newer than prefix", func(t *test.SystemTest) {
+	t.RunSequentially("Should migrate existing bucket successfully with newer than prefix", func(t *test.SystemTest) {
 		t.Logf("here")
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -432,7 +433,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	t.Run("Should migrate existing bucket successfully with older than prefix", func(t *test.SystemTest) {
+	t.RunSequentially("Should migrate existing bucket successfully with older than prefix", func(t *test.SystemTest) {
 		t.Logf("here")
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -461,7 +462,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	t.Run("Should migrate existing bucket successfully with files staring with given prefix", func(t *test.SystemTest) {
+	t.RunSequentially("Should migrate existing bucket successfully with files staring with given prefix", func(t *test.SystemTest) {
 		t.Logf("here")
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
