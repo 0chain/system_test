@@ -1348,6 +1348,9 @@ func (c *ZboxClient) GetGraphUsedStorage(t *test.SystemTest, req *model.ZboxGrap
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
+	//fmt.Println("resp", resp.String())
+	//fmt.Println("err", err)
+
 	return &data, resp, err
 }
 

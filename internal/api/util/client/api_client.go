@@ -1404,6 +1404,10 @@ func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRe
 			Value:           tokenomics.IntToZCN(0.1),
 		},
 		HttpOkStatus)
+
+	fmt.Println("updateBlobberTransactionPutResponse", updateBlobberTransactionPutResponse)
+	fmt.Println("resp", resp)
+	fmt.Println("err", err)
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, updateBlobberTransactionPutResponse)

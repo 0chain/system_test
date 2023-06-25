@@ -54,6 +54,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("test /v2/graph-write-price", 5*time.Minute, func(t *test.SystemTest) {
 		t.RunSequentiallyWithTimeout("endpoint parameters", 5*time.Minute, graphEndpointTestCases(zboxClient.GetGraphWritePrice))
 		PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
+
 		t.RunSequentiallyWithTimeout("test graph data", 5*time.Minute, func(t *test.SystemTest) {
 			PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 			data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
@@ -100,6 +101,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				diff := priceAfterStaking - expectedAWP
 				t.Logf("priceBeforeStaking: %d, priceAfterStaking: %d, expectedAWP: %d, diff: %d, latest: %d", priceBeforeStaking, priceAfterStaking, expectedAWP, diff, *latest)
 				t.Log(priceAfterStaking != priceBeforeStaking && diff >= -roundingError && diff <= roundingError)
+				t.Log(priceAfterStaking != priceBeforeStaking && diff >= -roundingError && diff <= roundingError && math.Abs(float64(priceAfterStaking)-float64(*latest)) < 4)
 
 				return priceAfterStaking != priceBeforeStaking && diff >= -roundingError && diff <= roundingError && math.Abs(float64(priceAfterStaking)-float64(*latest)) < 4
 			})
@@ -264,7 +266,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("test /v2/graph-used-storage", 5*time.Minute, func(t *test.SystemTest) {
 		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphUsedStorage))
 
-		t.Run("test graph data", func(t *test.SystemTest) {
+		t.RunWithTimeout("test graph data", 4*time.Minute, func(t *test.SystemTest) {
 			PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 			// Get initial used storage
 			data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
@@ -283,18 +285,28 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			// Upload a file
 			fpath, fsize := sdkClient.UploadFile(t, allocationID)
 
+			fmt.Println("Here 0")
+
 			// Check increased
 			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+
 				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
-				usedStorageAfter := (*data)[0]
 
+				fmt.Println("usedStorage : ", usedStorage)
+				fmt.Println("usedStorageAfter : ", (*data)[0])
+				fmt.Println("fsize : ", fsize)
+				fmt.Println("usedStorage - usedStorageAfter : ", usedStorage-(*data)[0])
+
+				usedStorageAfter := (*data)[0]
 				cond := (usedStorageAfter - usedStorage) == fsize
 				usedStorage = usedStorageAfter
 				return cond
 			})
+
+			fmt.Println("Here 1")
 
 			// Update with a bigger file
 			fpath, newFsize := sdkClient.UpdateFileBigger(t, allocationID, fpath, fsize)
@@ -306,12 +318,20 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
+
+				fmt.Println("usedStorage : ", usedStorage)
+				fmt.Println("usedStorageAfter : ", (*data)[0])
+				fmt.Println("fsize : ", fsize)
+				fmt.Println("usedStorage - usedStorageAfter : ", usedStorage-(*data)[0])
+
 				usedStorageAfter := (*data)[0]
 				cond := (usedStorageAfter - usedStorage) == (newFsize - fsize)
 				usedStorage = usedStorageAfter
 				fsize = newFsize
 				return cond
 			})
+
+			fmt.Println("Here 2")
 
 			// Update with a smaller file
 			fpath, newFsize = sdkClient.UpdateFileSmaller(t, allocationID, fpath, newFsize)
@@ -323,6 +343,12 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
+
+				fmt.Println("usedStorage : ", usedStorage)
+				fmt.Println("usedStorageAfter : ", (*data)[0])
+				fmt.Println("fsize : ", fsize)
+				fmt.Println("usedStorage - usedStorageAfter : ", usedStorage-(*data)[0])
+
 				usedStorageAfter := (*data)[0]
 				cond := (usedStorage - usedStorageAfter) == (fsize - newFsize)
 				usedStorage = usedStorageAfter
@@ -330,15 +356,26 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				return cond
 			})
 
+			fmt.Println("Here 3")
+
 			// Remove a file
 			sdkClient.DeleteFile(t, allocationID, fpath)
 
 			// Check decreased
 			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				time.Sleep(5 * time.Second)
+
 				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
+
+				fmt.Println("usedStorage : ", usedStorage)
+				fmt.Println("usedStorageAfter : ", (*data)[0])
+				fmt.Println("fsize : ", fsize)
+				fmt.Println("usedStorage - usedStorageAfter : ", usedStorage-(*data)[0])
+
 				usedStorageAfter := (*data)[0]
 				cond := (usedStorage - usedStorageAfter) == fsize
 				if cond {
@@ -346,6 +383,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				}
 				return cond
 			})
+
+			fmt.Println("Here 4")
 
 			// Upload another file
 			_, fsize = sdkClient.UploadFile(t, allocationID)
@@ -356,11 +395,19 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
+
+				fmt.Println("usedStorage : ", usedStorage)
+				fmt.Println("usedStorageAfter : ", (*data)[0])
+				fmt.Println("fsize : ", fsize)
+				fmt.Println("usedStorage - usedStorageAfter : ", usedStorage-(*data)[0])
+
 				usedStorageAfter := (*data)[0]
 				cond := (usedStorageAfter - usedStorage) == fsize
 				usedStorage = usedStorageAfter
 				return cond
 			})
+
+			fmt.Println("Here 5")
 
 			// Cancel the allocation
 			apiClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
@@ -372,6 +419,12 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
+
+				fmt.Println("usedStorage : ", usedStorage)
+				fmt.Println("usedStorageAfter : ", (*data)[0])
+				fmt.Println("fsize : ", fsize)
+				fmt.Println("usedStorage - usedStorageAfter : ", usedStorage-(*data)[0])
+
 				usedStorageAfter := (*data)[0]
 				// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is canceled. Check https://github.com/0chain/0chain/issues/2211
 				cond := usedStorage == usedStorageAfter
@@ -387,6 +440,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 				return cond
 			})
+
+			fmt.Println("Here 6")
 		})
 	})
 
