@@ -19,7 +19,7 @@ func Test0S3Migration(testSetup *testing.T) {
 	t.Parallel()
 	t.SetSmokeTests("Should migrate existing bucket successfully")
 
-	t.Run("Should migrate existing bucket successfully", func(t *test.SystemTest) {
+	t.RunSequentially("Should migrate existing bucket successfully", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -38,7 +38,7 @@ func Test0S3Migration(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 	})
 
-	t.Run("Should migrate empty bucket successfully", func(t *test.SystemTest) {
+	t.RunSequentially("Should migrate empty bucket successfully", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -57,7 +57,7 @@ func Test0S3Migration(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 	})
 
-	t.Run("Should fail when bucket too large for allocation", func(t *test.SystemTest) {
+	t.RunSequentially("Should fail when bucket too large for allocation", func(t *test.SystemTest) {
 		allocSize := int64(1 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -76,7 +76,7 @@ func Test0S3Migration(testSetup *testing.T) {
 		require.Contains(t, output[0], "Max size reached for the allocation with this blobber", "Output was not as expected", strings.Join(output, "\n"))
 	})
 
-	t.Run("Should fail when bucket does not exist", func(t *test.SystemTest) {
+	t.RunSequentially("Should fail when bucket does not exist", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -95,7 +95,7 @@ func Test0S3Migration(testSetup *testing.T) {
 		require.Contains(t, output[0], "Error: operation error S3: GetBucketLocation, https response error StatusCode: 403", "Output was not as expected", strings.Join(output, "\n"))
 	})
 
-	t.Run("Should fail when bucket flag missing", func(t *test.SystemTest) {
+	t.RunSequentially("Should fail when bucket flag missing", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -113,7 +113,7 @@ func Test0S3Migration(testSetup *testing.T) {
 		require.Contains(t, output[0], "Error: open : no such file or directory", "Output was not as expected", strings.Join(output, "\n")) // FIXME error message could be better here
 	})
 
-	t.Run("Should fail when allocation flag missing", func(t *test.SystemTest) {
+	t.RunSequentially("Should fail when allocation flag missing", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		_ = setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -131,7 +131,7 @@ func Test0S3Migration(testSetup *testing.T) {
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
 	})
 
-	t.Run("Should fail when access key invalid", func(t *test.SystemTest) {
+	t.RunSequentially("Should fail when access key invalid", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -150,7 +150,7 @@ func Test0S3Migration(testSetup *testing.T) {
 		require.Contains(t, output[0], "Error: operation error S3: GetBucketLocation, https response error StatusCode: 403", "Output was not as expected", strings.Join(output, "\n"))
 	})
 
-	t.Run("Should fail when access key missing", func(t *test.SystemTest) {
+	t.RunSequentially("Should fail when access key missing", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -168,7 +168,7 @@ func Test0S3Migration(testSetup *testing.T) {
 		require.Equal(t, output[0], "Error: aws credentials missing", "Output was not as expected", strings.Join(output, "\n"))
 	})
 
-	t.Run("Should fail when secret key invalid", func(t *test.SystemTest) {
+	t.RunSequentially("Should fail when secret key invalid", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -187,7 +187,7 @@ func Test0S3Migration(testSetup *testing.T) {
 		require.Contains(t, output[0], "Error: operation error S3: GetBucketLocation, https response error StatusCode: 403", "Output was not as expected", strings.Join(output, "\n"))
 	})
 
-	t.Run("Should fail when secret key missing", func(t *test.SystemTest) {
+	t.RunSequentially("Should fail when secret key missing", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -205,7 +205,7 @@ func Test0S3Migration(testSetup *testing.T) {
 		require.Equal(t, output[0], "Error: aws credentials missing", "Output was not as expected", strings.Join(output, "\n"))
 	})
 
-	t.Run("Should fail when access and secret key invalid", func(t *test.SystemTest) {
+	t.RunSequentially("Should fail when access and secret key invalid", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -224,7 +224,7 @@ func Test0S3Migration(testSetup *testing.T) {
 		require.Contains(t, output[0], "Error: operation error S3: GetBucketLocation, https response error StatusCode: 403", "Output was not as expected", strings.Join(output, "\n"))
 	})
 
-	t.Run("Should fail when access and secret key missing", func(t *test.SystemTest) {
+	t.RunSequentially("Should fail when access and secret key missing", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,

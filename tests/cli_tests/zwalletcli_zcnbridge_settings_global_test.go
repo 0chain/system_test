@@ -35,6 +35,7 @@ var (
 
 func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("skip till authorizers are re-enabled")
 	t.SetSmokeTests("should allow update of min_mint_amount")
 
 	if _, err := os.Stat("./config/" + zcnscOwner + "_wallet.json"); err != nil {

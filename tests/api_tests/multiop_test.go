@@ -284,6 +284,45 @@ func TestMultiOperation(testSetup *testing.T) {
 
 		sdkClient.MultiOperation(t, allocationID, newOps)
 	})
+
+	t.RunSequentially("Nested move operation should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		nestedDir := sdkClient.AddUploadOperationWithPath(t, allocationID, "/new/nested/")
+
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{nestedDir})
+
+		newPath := "/child"
+		moveOp := sdkClient.AddMoveOperation(t, allocationID, filepath.Dir(nestedDir.FileMeta.RemotePath), newPath)
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{moveOp})
+		listResult := sdkClient.GetFileList(t, allocationID, "/child/")
+		require.Equal(t, 1, len(listResult.Children), "files count mismatch expected %v actual %v", 1, len(listResult.Children))
+		listResult = sdkClient.GetFileList(t, allocationID, "/new/")
+		require.Equal(t, 0, len(listResult.Children), "files count mismatch expected %v actual %v", 0, len(listResult.Children))
+	})
+
+	t.RunSequentially("Nested copy operation should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		nestedDir := sdkClient.AddUploadOperationWithPath(t, allocationID, "/new/nested/")
+
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{nestedDir})
+
+		newPath := "/child"
+		copyOp := sdkClient.AddCopyOperation(t, allocationID, filepath.Dir(nestedDir.FileMeta.RemotePath), newPath)
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{copyOp})
+
+		listResult := sdkClient.GetFileList(t, allocationID, "/child/")
+		require.Equal(t, 1, len(listResult.Children), "files count mismatch expected %v actual %v", 1, len(listResult.Children))
+	})
 }
 
 func randName() string {
