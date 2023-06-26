@@ -99,7 +99,7 @@ var (
 	s3SecretKey     string
 	s3AccessKey     string
 	s3bucketName    string
-	S3Client 		*s3.S3
+	S3Client        *s3.S3
 )
 
 var (
@@ -161,11 +161,11 @@ func TestMain(m *testing.M) {
 
 	// Create a session with AWS
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-2"), // Replace with your desired AWS region
-		Credentials: credentials.NewStaticCredentials( s3AccessKey,  s3SecretKey, ""),
+		Region:      aws.String("us-east-2"), // Replace with your desired AWS region
+		Credentials: credentials.NewStaticCredentials(s3AccessKey, s3SecretKey, ""),
 	})
 	if err != nil {
-		fmt.Println("Failed to create AWS session:", err)
+		log.Fatalln("Failed to create AWS session:", err)
 		return
 	}
 
@@ -182,7 +182,11 @@ func TestMain(m *testing.M) {
 		Key:    aws.String(fileKey),
 		Body:   bytes.NewReader(fileContents),
 	})
-	
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	snapshotHash, err := tenderlyClient.CreateSnapshot()
 	if err != nil {
 		log.Fatalln(err)
