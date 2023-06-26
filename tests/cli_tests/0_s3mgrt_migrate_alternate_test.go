@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -49,6 +51,13 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
+
+		workingDirName := createDirectoryForTestname(t)
+		// remove the dir after use
+		defer func() {
+			_ = os.RemoveAll(workingDirName)
+		}()
+
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
@@ -56,6 +65,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"skip":       0,
+			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -77,6 +87,11 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
+		workingDirName := createDirectoryForTestname(t)
+		// remove the dir after use
+		defer func() {
+			_ = os.RemoveAll(workingDirName)
+		}()
 		remotepath := "/root2"
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
@@ -85,6 +100,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"migrate-to": remotepath,
+			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -105,12 +121,18 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
+		workingDirName := createDirectoryForTestname(t)
+		// remove the dir after use
+		defer func() {
+			_ = os.RemoveAll(workingDirName)
+		}()
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
 			"bucket":     bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
+			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -146,6 +168,11 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
+		workingDirName := createDirectoryForTestname(t)
+		// remove the dir after use
+		defer func() {
+			_ = os.RemoveAll(workingDirName)
+		}()
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
@@ -153,6 +180,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"encrypt":    "true",
+			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -172,6 +200,11 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
+		workingDirName := createDirectoryForTestname(t)
+		// remove the dir after use
+		defer func() {
+			_ = os.RemoveAll(workingDirName)
+		}()
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
@@ -179,6 +212,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"skip":       1,
+			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -192,6 +226,11 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
+		workingDirName := createDirectoryForTestname(t)
+		// remove the dir after use
+		defer func() {
+			_ = os.RemoveAll(workingDirName)
+		}()
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
@@ -199,6 +238,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"skip":       2,
+			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -221,6 +261,11 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
+		workingDirName := createDirectoryForTestname(t)
+		// remove the dir after use
+		defer func() {
+			_ = os.RemoveAll(workingDirName)
+		}()
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
@@ -229,6 +274,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"allocation": allocationID,
 			"skip":       2,
 			"dup-suffix": "_modified",
+			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -251,6 +297,11 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
+		workingDirName := createDirectoryForTestname(t)
+		// remove the dir after use
+		defer func() {
+			_ = os.RemoveAll(workingDirName)
+		}()
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key":    s3AccessKey,
 			"secret-key":    s3SecretKey,
@@ -259,6 +310,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"allocation":    allocationID,
 			"skip":          0,
 			"delete-source": true,
+			"wd":            workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -321,4 +373,16 @@ func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string, 
 		}
 	}
 	return true
+}
+
+func createDirectoryForTestname(t *test.SystemTest) (fullPath string) {
+	fullPath, err := filepath.Abs(escapedTestName(t))
+	require.Nil(t, err)
+
+	err = os.Mkdir(fullPath, 0755)
+	require.Nil(t, err)
+
+	t.Log("Directory created successfully: ", escapedTestName(t))
+
+	return fullPath
 }
