@@ -67,7 +67,7 @@ func setupConfig() {
 	}
 
 	ethereumNodeURL = viper.GetString("ethereum_node_url")
-	ethereumAddress = viper.GetString("ethereum_address")
+	ethereumAddress = viper.GetString("bridge.ethereum_address")
 }
 
 const (
@@ -96,10 +96,8 @@ var (
 )
 
 var (
-	configPath             string
-	configDir              string
-	bridgeClientConfigFile string
-	bridgeOwnerConfigFile  string
+	configPath string
+	configDir  string
 )
 
 var tenderlyClient *tenderly.Client
@@ -107,16 +105,6 @@ var tenderlyClient *tenderly.Client
 func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
 	configDir = os.Getenv("CONFIG_DIR")
-	bridgeClientConfigFile = os.Getenv("BRIDGE_CONFIG_FILE")
-	bridgeOwnerConfigFile = os.Getenv("BRIDGE_OWNER_CONFIG_FILE")
-
-	if bridgeClientConfigFile == "" {
-		bridgeClientConfigFile = DefaultConfigBridgeFileName
-	}
-
-	if bridgeOwnerConfigFile == "" {
-		bridgeOwnerConfigFile = DefaultConfigOwnerFileName
-	}
 
 	if configDir == "" {
 		configDir = getConfigDir()
