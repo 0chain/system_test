@@ -144,7 +144,11 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+<<<<<<< HEAD
         uses: 0chain/actions/deploy-0chain@feature_uncomment_subgraph
+=======
+        uses: 0chain/actions/deploy-0chain@master
+>>>>>>> 6187bc46f00553fcac1154eda7b03b3a0972e035
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
@@ -169,7 +173,11 @@ jobs:
           authorizer_image: staging
 
       - name: "Run System tests"
+<<<<<<< HEAD
         uses: 0chain/actions/run-system-tests@feature_uncomment_subgraph
+=======
+        uses: 0chain/actions/run-system-tests@master
+>>>>>>> 6187bc46f00553fcac1154eda7b03b3a0972e035
         with:
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
@@ -189,7 +197,11 @@ jobs:
 
       - name: "Set PR status as ${{ job.status }}"
         if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
+<<<<<<< HEAD
         uses: 0chain/actions/set-pr-status@feature_uncomment_subgraph
+=======
+        uses: 0chain/actions/set-pr-status@master
+>>>>>>> 6187bc46f00553fcac1154eda7b03b3a0972e035
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
           description: "System tests with default config ${{ job.status }}"
