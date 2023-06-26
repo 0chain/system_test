@@ -570,6 +570,7 @@ func (c *APIClient) V1BlobberGetHashNodeRoot(t *test.SystemTest, blobberGetHashn
 		"X-App-Client-Key":       blobberGetHashnodeRequest.ClientKey,
 		"X-App-Client-Signature": blobberGetHashnodeRequest.ClientSignature,
 		"allocation":             blobberGetHashnodeRequest.AllocationID,
+		"ALLOCATION-ID":          blobberGetHashnodeRequest.AllocationID,
 	}
 
 	url := blobberGetHashnodeRequest.URL + "/" + strings.Replace(GetHashNodeRoot, ":allocation", blobberGetHashnodeRequest.AllocationID, 1)
@@ -1886,6 +1887,7 @@ func (c *APIClient) V1BlobberGetFileRefs(t *test.SystemTest, blobberGetFileRefsR
 		"X-App-Client-Id":        blobberGetFileRefsRequest.ClientID,
 		"X-App-Client-Key":       blobberGetFileRefsRequest.ClientKey,
 		"X-App-Client-Signature": blobberGetFileRefsRequest.ClientSignature,
+		"ALLOCATION-ID":          blobberGetFileRefsRequest.AllocationID,
 	}
 	resp, err := c.executeForServiceProvider(
 		t,
@@ -1908,6 +1910,7 @@ func (c *APIClient) V1BlobberGetFileRefPaths(t *test.SystemTest, blobberFileRefP
 		"X-App-Client-Id":        blobberFileRefPathRequest.ClientID,
 		"X-App-Client-Key":       blobberFileRefPathRequest.ClientKey,
 		"X-App-Client-Signature": blobberFileRefPathRequest.ClientSignature,
+		"ALLOCATION-ID":          blobberFileRefPathRequest.AllocationID,
 	}
 	resp, err := c.executeForServiceProvider(
 		t,
@@ -1949,6 +1952,7 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 		"X-App-Client-Id":        blobberObjectTreeRequest.ClientID,
 		"X-App-Client-Key":       blobberObjectTreeRequest.ClientKey,
 		"X-App-Client-Signature": blobberObjectTreeRequest.ClientSignature,
+		"ALLOCATION-ID":          blobberObjectTreeRequest.AllocationID,
 	}
 	resp, err := c.executeForServiceProvider(
 		t,
