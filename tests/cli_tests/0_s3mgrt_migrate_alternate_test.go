@@ -282,7 +282,7 @@ func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string, 
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
-	var stats map[string]climodel.FileStats
+	var stats map[string]*climodel.FileStats
 
 	err = json.Unmarshal([]byte(output[0]), &stats)
 	require.Nil(t, err)
