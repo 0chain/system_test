@@ -45,7 +45,7 @@ func createWalletAndLockReadTokens(t *test.SystemTest, cliConfigFilename string)
 	readPoolParams := CreateParams(map[string]interface{}{
 		"tokens": tokens / 2,
 	})
-	_, err = readPoolLock(t, cliConfigFilename, readPoolParams, true)
+	_, err = ReadPoolLock(t, cliConfigFilename, readPoolParams, true)
 
 	return err
 }

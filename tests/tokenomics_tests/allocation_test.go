@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -194,7 +195,10 @@ func TestAllocation(testSetup *testing.T) {
 		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should increase")
 		movedToChallengePool = alloc.MovedToChallenge
 
-		for _, intialBlobberInfo := range blobberDetailList {
+		for count, intialBlobberInfo := range blobberDetailList {
+
+			_, err := utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 99)
+			require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": utils.IntToZCN(intialBlobberInfo.Terms.Read_price + 1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
