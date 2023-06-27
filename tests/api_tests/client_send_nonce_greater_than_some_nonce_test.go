@@ -91,6 +91,7 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	}
 
 	require.GreaterOrEqual(t, len(apiClient.Miners), 1)
+	time.Sleep(time.Second * 10) // Wait for transaction to move to transaction pool?
 	// verify transactions are in txn pool
 	txnsMap := GetTransactionsFromTxnPool(t, apiClient.Miners)
 	txnsFromMap := GetTxnsMapFromGivenMapOfSlice(txnsMap)
