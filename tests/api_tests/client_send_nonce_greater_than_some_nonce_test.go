@@ -97,7 +97,7 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 
 	for txn := range transactions {
 		_, ok := txnsFromMap[txn]
-		require.True(t, ok)
+		require.True(t, ok, "hash: ", txn, " does not exist in extracted transaction list")
 	}
 
 	wallet2 := apiClient.CreateWallet(t)
