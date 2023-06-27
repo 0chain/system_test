@@ -163,12 +163,12 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		// Updating blobber 2 read price
 		blobber2 := blobberList[1]
 		utils.ExecuteFaucetWithTokensForWallet(t, blobber2Wallet, configPath, 9)
-		output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber2.Id, "read_price": utils.IntToZCN(0)}))
+		output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallet/blobber"+strconv.Itoa(2), utils.CreateParams(map[string]interface{}{"blobber_id": blobber2.Id, "read_price": utils.IntToZCN(0)}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		blobber1 := blobberList[0]
 		utils.ExecuteFaucetWithTokensForWallet(t, blobber1Wallet, configPath, 9)
-		output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber1.Id, "read_price": utils.IntToZCN(0)}))
+		output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallet/blobber"+strconv.Itoa(1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber1.Id, "read_price": utils.IntToZCN(0)}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
@@ -272,13 +272,13 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		for count, blobber := range blobberList {
 			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 9)
-			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallet/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 
 		for count, blobber := range blobberList {
 			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 9)
-			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(int64(math.Pow10(count)) * 1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallet/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(int64(math.Pow10(count)) * 1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 
@@ -382,13 +382,13 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Check read price ratio", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		for count, blobber := range blobberList {
 			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 99)
-			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(int64(math.Pow10(count)) * 1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallet/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(int64(math.Pow10(count)) * 1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 
 		for count, blobber := range blobberList {
 			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 99)
-			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallet/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 
@@ -492,13 +492,13 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Verify stake ratio", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		for count, blobber := range blobberList {
 			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 99)
-			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallet/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 
 		for count, blobber := range blobberList {
 			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 99)
-			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallet/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 
@@ -602,13 +602,13 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Check ratio with respect to total read data", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		for count, blobber := range blobberList {
 			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 9)
-			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallet/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 
 		for count, blobber := range blobberList {
 			utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 9)
-			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallet/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 
