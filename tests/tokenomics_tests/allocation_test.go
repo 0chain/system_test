@@ -200,10 +200,10 @@ func TestAllocation(testSetup *testing.T) {
 			_, err := utils.ExecuteFaucetWithTokensForWallet(t, "wallet/blobber"+strconv.Itoa(count+1), configPath, 99)
 			require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
-			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": utils.IntToZCN(intialBlobberInfo.Terms.Read_price + 1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallet/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": utils.IntToZCN(intialBlobberInfo.Terms.Read_price + 1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 
-			output, err = utils.UpdateBlobberInfo(t, configPath, utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": utils.IntToZCN(intialBlobberInfo.Terms.Write_price + 1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallet/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": utils.IntToZCN(intialBlobberInfo.Terms.Write_price + 1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 
