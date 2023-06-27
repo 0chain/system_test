@@ -88,10 +88,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
-			"tokens": 1,
+			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "1h",
 		})
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
@@ -166,10 +166,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
-			"tokens": 1,
+			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "1h",
 		})
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
@@ -238,10 +238,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
-			"tokens": 1,
+			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "1h",
 		})
 
 		// Uploading 10% of allocation
@@ -317,10 +317,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
-			"tokens": 1,
+			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "1h",
 		})
 
 		// Uploading 10% of allocation
@@ -434,10 +434,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
-			"tokens": 1,
+			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "1h",
 		})
 
 		// Uploading 10% of allocation
