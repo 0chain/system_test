@@ -77,7 +77,7 @@ jobs:
     steps:
       - name: Check CI
         id: check-ci
-        uses: 0chain/actions/get-build-state@master
+        uses: 0chain/actions/get-build-state@remove_pour_limit
         with:
           github_token: ${{ github.token }}
           repository: "0chain/system_test"
@@ -103,7 +103,7 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: "Set PR status as pending"
-        uses: 0chain/actions/set-pr-status@master
+        uses: 0chain/actions/set-pr-status@remove_pour_limit
         if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
