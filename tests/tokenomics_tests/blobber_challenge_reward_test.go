@@ -698,13 +698,13 @@ type ProviderAllocationRewards struct {
 }
 
 func tearDownRewardsTests(t *test.SystemTest, blobberList []string, validatorList []string, configPath string, allocationID string, numDelegates int) {
-	allocation := utils.GetAllocation(t, allocationID)
-
-	// check if allocation is finalized
-	if !allocation.Finalized {
-		_, err := utils.CancelAllocation(t, configPath, allocationID, true)
-		require.Nil(t, err, "Error canceling allocation")
-	}
+	//allocation := utils.GetAllocation(t, allocationID)
+	//
+	//// check if allocation is finalized
+	//if !allocation.Finalized {
+	//	_, err := utils.CancelAllocation(t, configPath, allocationID, true)
+	//	require.Nil(t, err, "Error canceling allocation")
+	//}
 
 	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, numDelegates)
 }
