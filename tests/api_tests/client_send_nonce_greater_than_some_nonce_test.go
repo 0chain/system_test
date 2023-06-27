@@ -22,7 +22,7 @@ func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
 	require.NoError(t, err)
 
-	faucetAmount := float64(10)
+	faucetAmount := float64(9)
 	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
 	require.EqualValues(t, zcncore.ConvertToValue(faucetAmount), balResp.Balance)
@@ -59,7 +59,7 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
 	require.NoError(t, err)
 
-	faucetAmount := float64(10)
+	faucetAmount := float64(9)
 	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
 	require.EqualValues(t, zcncore.ConvertToValue(faucetAmount), balResp.Balance)
@@ -170,10 +170,10 @@ func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
 	require.NoError(t, err)
 
-	faucetAmount := 10
-	apiClient.ExecuteFaucetWithTokens(t, wallet1, float64(faucetAmount), client.TxSuccessfulStatus)
+	faucetAmount := float64(9)
+	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
-	require.EqualValues(t, zcncore.ConvertToValue(float64(faucetAmount)), balResp.Balance)
+	require.EqualValues(t, zcncore.ConvertToValue(faucetAmount), balResp.Balance)
 	require.GreaterOrEqual(t, len(apiClient.Miners), 1)
 
 	wallet2 := apiClient.CreateWallet(t)
