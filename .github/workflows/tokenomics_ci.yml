@@ -168,7 +168,7 @@ jobs:
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
           network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
+          zbox_cli_branch: download-from-blobber
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
