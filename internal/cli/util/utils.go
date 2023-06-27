@@ -60,7 +60,10 @@ func RunCommand(t *test.SystemTest, commandString string, maxAttempts int, backo
 
 		errorMessage := err.Error()
 
+		t.Log("Error message: ", errorMessage)
+
 		if strings.Contains(errorMessage, "Download failed for block 0") {
+			t.Log("Download failed for block 0, not retrying...")
 			return output, nil
 		}
 
