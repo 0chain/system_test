@@ -71,17 +71,13 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"data":   1,
 			"parity": 1,
-			"lock":   1,
+			"tokens": 99,
 			"expire": "10m",
-		}))
-		require.Nil(t, err, "Error creating new allocation", strings.Join(output, "\n"))
-
-		allocationId, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
+		})
 
 		t.Log("Allocation ID : ", allocationId)
 
@@ -184,17 +180,15 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"data":   1,
 			"parity": 1,
-			"lock":   1,
-			"expire": "20m",
-		}))
-		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
+			"tokens": 99,
+			"expire": "10m",
+		})
 
-		allocationId, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
+		t.Log("Allocation ID : ", allocationId)
 
 		remotepath := "/dir/"
 		filesize := totalData
@@ -297,17 +291,15 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"data":   1,
 			"parity": 1,
-			"lock":   1,
-			"expire": "20m",
-		}))
-		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
+			"tokens": 99,
+			"expire": "10m",
+		})
 
-		allocationId, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
+		t.Log("Allocation ID : ", allocationId)
 
 		remotepath := "/dir/"
 		filesize := totalData
@@ -409,17 +401,13 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"data":   1,
 			"parity": 1,
-			"lock":   1,
-			"expire": "20m",
-		}))
-		require.Nil(t, err, "Error creating new allocation", strings.Join(output, "\n"))
-
-		allocationId, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
+			"tokens": 99,
+			"expire": "10m",
+		})
 
 		t.Log("Allocation ID : ", allocationId)
 
@@ -523,17 +511,15 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"data":   1,
 			"parity": 1,
-			"lock":   1,
-			"expire": "20m",
-		}))
-		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
+			"tokens": 99,
+			"expire": "10m",
+		})
 
-		allocationId, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
+		t.Log("allocationId", allocationId)
 
 		remotepath := "/dir/"
 		filesize := totalData
@@ -635,17 +621,13 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"data":   1,
 			"parity": 1,
-			"lock":   1,
-			"expire": "20m",
-		}))
-		require.Nil(t, err, "Error creating new allocation", strings.Join(output, "\n"))
-
-		allocationId, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
+			"tokens": 99,
+			"expire": "10m",
+		})
 
 		t.Log("Allocation ID : ", allocationId)
 

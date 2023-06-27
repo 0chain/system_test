@@ -42,7 +42,7 @@ func SetupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, ex
 	readPoolParams := CreateParams(map[string]interface{}{
 		"tokens": tokens / 2,
 	})
-	output, err := readPoolLock(t, cliConfigFilename, readPoolParams, true)
+	output, err := ReadPoolLock(t, cliConfigFilename, readPoolParams, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 	require.Equal(t, "locked", output[0])
@@ -50,7 +50,7 @@ func SetupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, ex
 	return allocationID
 }
 
-func readPoolLock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
+func ReadPoolLock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return readPoolLockWithWallet(t, EscapedTestName(t), cliConfigFilename, params, retry)
 }
 

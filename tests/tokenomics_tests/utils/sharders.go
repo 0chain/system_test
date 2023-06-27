@@ -31,7 +31,7 @@ func getShardersListForWallet(t *test.SystemTest, wallet string) map[string]clim
 	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0)
 	fmt.Println(output)
-	require.Equal(t, "MagicBlock Sharders", output[len(output)-1])
+	require.Equal(t, "MagicBlock Sharders", output[0])
 
 	var sharders map[string]climodel.Sharder
 	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
