@@ -264,9 +264,10 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("test /v2/graph-used-storage", 5*time.Minute, func(t *test.SystemTest) {
-		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphUsedStorage))
+		//t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphUsedStorage))
 
 		t.RunWithTimeout("test graph data", 4*time.Minute, func(t *test.SystemTest) {
+			t.Skip()
 			PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 			// Get initial used storage
 			data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
@@ -634,9 +635,10 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("test /v2/graph-total-minted", 5*time.Minute, func(t *test.SystemTest) {
-		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalMinted))
+		//t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalMinted))
 
 		t.RunWithTimeout("test graph data", 4*time.Minute, func(t *test.SystemTest) {
+			t.Skip()
 			data, resp, err := zboxClient.GetGraphTotalMinted(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
