@@ -352,6 +352,10 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		validatorListString = append(validatorListString, validator.ID)
 	}
 
+	stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
+		1, 1, 1, 1, 1, 1,
+	}, 1)
+
 	t.RunSequentiallyWithTimeout("Add Blobber to Increase Parity", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
@@ -360,10 +364,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
-
-		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 1, 1, 1, 1,
-		}, 1)
 
 		allocSize := 1 * GB
 
@@ -461,7 +461,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
 		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
 
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 	t.RunSequentiallyWithTimeout("Replace Blobber", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -472,10 +471,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
-
-		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 1, 1, 1, 1,
-		}, 1)
 
 		allocSize := 1 * GB
 
@@ -577,7 +572,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
 		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
 
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 }
