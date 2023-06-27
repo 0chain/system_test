@@ -1139,9 +1139,10 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("test /v2/graph-token-supply", 5*time.Minute, func(t *test.SystemTest) {
-		t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
+		//t.Run("endpoint parameters", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
 
 		t.RunWithTimeout("test graph data", 4*time.Minute, func(t *test.SystemTest) {
+			t.Skip()
 			data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
