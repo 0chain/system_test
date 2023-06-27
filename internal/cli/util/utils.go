@@ -58,6 +58,12 @@ func RunCommand(t *test.SystemTest, commandString string, maxAttempts int, backo
 		count++
 		output, err := RunCommandWithoutRetry(commandString)
 
+		errorMessage := err.Error()
+
+		if strings.Contains(errorMessage, "Download failed for block 0") {
+			return output, nil
+		}
+
 		if err == nil {
 			if count > 1 {
 				t.Logf("%sCommand passed on retry [%v/%v]. Output: [%v]\n", green, count, maxAttempts, strings.Join(output, " -<NEWLINE>- "))

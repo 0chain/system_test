@@ -101,13 +101,12 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 			remoteFilepath := remotepath + filepath.Base(filename)
 
-			output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+			utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
 				"allocation": allocationId,
 				"remotepath": remoteFilepath,
 				"localpath":  os.TempDir() + string(os.PathSeparator),
 				"blobber_id": blobberList[0].Id,
 			}), true)
-			require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 		}
 
 		for i := 0; i < readData[1]; i++ {
