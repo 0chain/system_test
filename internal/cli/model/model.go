@@ -403,7 +403,7 @@ type FreeStorageMarker struct {
 	Assigner   string  `json:"assigner,omitempty"`
 	Recipient  string  `json:"recipient"`
 	FreeTokens float64 `json:"free_tokens"`
-	Timestamp  int64   `json:"timestamp"`
+	Nonce      int64   `json:"nonce"`
 	Signature  string  `json:"signature,omitempty"`
 }
 
