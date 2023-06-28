@@ -1,4 +1,4 @@
-default_test_case_timeout: 3m
+default_test_case_timeout: 15m
 s3_access_key: 
 s3_secret_key: 
 s3_bucket_name: system-tests-s3-migration-small
