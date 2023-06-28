@@ -43,17 +43,7 @@ func TestMain(m *testing.M) {
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
 	zs3Client = client.NewZS3Client(parsedConfig.ZS3ServerUrl)
 	zboxClient = client.NewZboxClient(parsedConfig.ZboxUrl, parsedConfig.ZboxPhoneNumber)
-	configMap := map[string]interface{}{
-		"block_worker":              parsedConfig.BlockWorker,
-		"signature_scheme":          "bls0chain",
-		"min_submit":                50,
-		"min_confirmation":          50,
-		"confirmation_chain_length": 3,
-		"max_txn_query":             5,
-		"query_sleep_time":          5,
-	}
 
-	b, _ := json.Marshal(configMap)
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
@@ -65,7 +55,7 @@ func TestMain(m *testing.M) {
 
 	t := test.NewSystemTest(new(testing.T))
 
-	err = zcncore.Init(string(b))
+	err = zcncore.Init(getConfigForZcnCoreInit(parsedConfig.BlockWorker))
 	require.NoError(t, err)
 	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
 	sdkWallet = apiClient.CreateWalletForMnemonic(t, sdkWalletMnemonics)
@@ -78,4 +68,19 @@ func TestMain(m *testing.M) {
 	ownerWallet = apiClient.CreateWalletForMnemonic(t, ownerWalletMnemonics)
 
 	os.Exit(m.Run())
+}
+
+func getConfigForZcnCoreInit(blockWorker string) string {
+	configMap := map[string]interface{}{
+		"block_worker":              blockWorker,
+		"signature_scheme":          "bls0chain",
+		"min_submit":                50,
+		"min_confirmation":          50,
+		"confirmation_chain_length": 3,
+		"max_txn_query":             5,
+		"query_sleep_time":          5,
+	}
+
+	b, _ := json.Marshal(configMap)
+	return string(b)
 }
