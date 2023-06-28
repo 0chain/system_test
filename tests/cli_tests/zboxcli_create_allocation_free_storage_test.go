@@ -104,7 +104,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
 			FreeTokens: 5,
-			Timestamp:  time.Now().Unix(),
+			Nonce:      time.Now().Unix(),
 		}
 
 		forSignatureBytes, err := json.Marshal(&marker)
@@ -199,7 +199,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
 			FreeTokens: 5,
-			Timestamp:  time.Now().Unix(),
+			Nonce:      2,
 		}
 
 		marker.Signature = "badsignature"
@@ -238,7 +238,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
 			FreeTokens: 5,
-			Timestamp:  time.Now().Unix(),
+			Nonce:      time.Now().Unix(),
 		}
 
 		forSignatureBytes, err := json.Marshal(&marker)
@@ -281,7 +281,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
 			FreeTokens: freeTokensIndividualLimit + 1,
-			Timestamp:  time.Now().Unix(),
+			Nonce:      time.Now().Unix(),
 		}
 
 		forSignatureBytes, err := json.Marshal(&marker)
