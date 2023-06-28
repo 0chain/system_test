@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subset of 0Chain System test suite [free-storage/31ad85e1] ran against [dev-4.devnet-0chain.net] at [2023-06-28_16.55.23]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">Subset of 0Chain System test suite [free-storage/31ad85e1] ran against [dev-4.devnet-0chain.net] at [2023-06-28_16.55.23]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>7</strong>Duration: <strong>1ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>7</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">June 28, 2023 16:57:19</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":106.05,"Output":["","    system_test_framework.go:70: Test setup [Create free storage allocation wallet] scheduled at [06-28-2023 16:55:33] \n","    system_test_framework.go:80: Test setup [Create free storage allocation wallet] start at [06-28-2023 16:55:33] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1105: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  4afccaf72e65aba04080af4eeba0cc81551df183d82e4b6e8db9faee5c8961e3]\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1105: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage_ASSIGNER_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  af2c8febdbe278bc98ac8c6452ead9bbde61d057294c4a8bf3673650833c103f]\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1105: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  882b4bff58360904deaeac316aff8ea0f654d4999de4a7c9b05b027ee2d695fc]\n","    utils.go:138: Waiting 5s...\n","    zwalletcli_storage_update_config_test.go:257: Retrieving storage config...\n","    miner_block_rewards_test.go:508: Get miners...\n","    zboxcli_create_allocation_free_storage_test.go:331: Creating new free storage allocation...\n","    zboxcli_create_allocation_free_storage_test.go:91: [fdb06c7d725901e67e88be96ee811dafca90eab38441ab018a883e076cde8f82 added as free storage assigner]\n","    system_test_framework.go:93: Test setup [Create free storage allocation wallet] exit at [06-28-2023 16:55:56]\n","--- PASS: TestCreateAllocationFreeStorage (106.05s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_create_allocation_free_storage_test.go","TestFunctionDetail":{"Line":36,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage/Create_free_storage_from_marker_with_accounting","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":38.53,"Output":["","    zboxcli_create_allocation_free_storage_test.go:94: Test case [Create free storage from marker with accounting] scheduled at [06-28-2023 16:55:56] \n","    system_test_framework.go:149: Test case [Create free storage from marker with accounting] start at [06-28-2023 16:55:56] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1105: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_from_marker_with_accounting_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  d9d322f375d2c9ff06e82ccc80eb4b4a8464b6879d241c8b25411cd206bda5ab]\n","    zwalletcli_register_wallet_test.go:210: Getting wallet...\n","    zboxcli_create_allocation_test.go:459: Creating new allocation...\n","    zboxcli_common_user_functions_test.go:228: Get Allocation...\n","    utils.go:138: Waiting 30s...\n","    zboxcli_download_token_test.go:123: Getting read pool info...\n","    zboxcli_create_allocation_free_storage_test.go:94: Test case [Create free storage from marker with accounting] exit at [06-28-2023 16:56:35]\n","--- PASS: TestCreateAllocationFreeStorage/Create_free_storage_from_marker_with_accounting (38.53s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage/Create_free_storage_with_invalid_marker_contents_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.25,"Output":["","    zboxcli_create_allocation_free_storage_test.go:171: Test case [Create free storage with invalid marker contents should fail] scheduled at [06-28-2023 16:56:38] \n","    system_test_framework.go:149: Test case [Create free storage with invalid marker contents should fail] start at [06-28-2023 16:56:38] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1105: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_with_invalid_marker_contents_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  016cbf28f49c9c63e1f99a67111d50af584eb0f1ccad1bc73b3951534ef2ada9]\n","    zboxcli_create_allocation_free_storage_test.go:171: Test case [Create free storage with invalid marker contents should fail] exit at [06-28-2023 16:56:46]\n","--- PASS: TestCreateAllocationFreeStorage/Create_free_storage_with_invalid_marker_contents_should_fail (8.25s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage/Create_free_storage_with_invalid_marker_signature_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.19,"Output":["","    zboxcli_create_allocation_free_storage_test.go:189: Test case [Create free storage with invalid marker signature should fail] scheduled at [06-28-2023 16:56:46] \n","    system_test_framework.go:149: Test case [Create free storage with invalid marker signature should fail] start at [06-28-2023 16:56:46] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1105: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_with_invalid_marker_signature_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  4ce8217866fcb73553b4559a9086eb96637923eeaf0e31580195817542650213]\n","    zwalletcli_register_wallet_test.go:210: Getting wallet...\n","    zboxcli_create_allocation_free_storage_test.go:189: Test case [Create free storage with invalid marker signature should fail] exit at [06-28-2023 16:56:56]\n","--- PASS: TestCreateAllocationFreeStorage/Create_free_storage_with_invalid_marker_signature_should_fail (10.19s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage/Create_free_storage_with_malformed_marker_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.13,"Output":["","    zboxcli_create_allocation_free_storage_test.go:153: Test case [Create free storage with malformed marker should fail] scheduled at [06-28-2023 16:56:35] \n","    system_test_framework.go:149: Test case [Create free storage with malformed marker should fail] start at [06-28-2023 16:56:35] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1105: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_with_malformed_marker_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  fc2f02b7c49342f28b69265c3e2420adff5932baa7c13813884efa649ce31592]\n","    zboxcli_create_allocation_free_storage_test.go:153: Test case [Create free storage with malformed marker should fail] exit at [06-28-2023 16:56:38]\n","--- PASS: TestCreateAllocationFreeStorage/Create_free_storage_with_malformed_marker_should_fail (3.13s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage/Create_free_storage_with_tokens_exceeding_assigner's_individual_limit_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.24,"Output":["","    zboxcli_create_allocation_free_storage_test.go:271: Test case [Create free storage with tokens exceeding assigner's individual limit should fail] scheduled at [06-28-2023 16:57:09] \n","    system_test_framework.go:149: Test case [Create free storage with tokens exceeding assigner's individual limit should fail] start at [06-28-2023 16:57:09] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1105: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_with_tokens_exceeding_assigner's_individual_limit_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  6a1e48f9afff9d3741d337b6eab1f4eefff13e7406acb2f2430cd29248519570]\n","    zwalletcli_register_wallet_test.go:210: Getting wallet...\n","    zboxcli_create_allocation_free_storage_test.go:271: Test case [Create free storage with tokens exceeding assigner's individual limit should fail] exit at [06-28-2023 16:57:19]\n","--- PASS: TestCreateAllocationFreeStorage/Create_free_storage_with_tokens_exceeding_assigner's_individual_limit_should_fail (10.24s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage/Create_free_storage_with_wrong_recipient_wallet_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.34,"Output":["","    zboxcli_create_allocation_free_storage_test.go:224: Test case [Create free storage with wrong recipient wallet should fail] scheduled at [06-28-2023 16:56:56] \n","    system_test_framework.go:149: Test case [Create free storage with wrong recipient wallet should fail] start at [06-28-2023 16:56:56] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1105: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_with_wrong_recipient_wallet_should_fail_RECIPIENT_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  67af4e3504be9a823dcba5d6c4d76cd702449eb8f6e6bac3abcb8d5a64932735]\n","    zwalletcli_register_wallet_test.go:210: Getting wallet...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1105: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_with_wrong_recipient_wallet_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  1cf48977b13e310562f6ce1bc9a4c60d8eb9d95ff542cb74a55249c4c661a9ef]\n","    zboxcli_create_allocation_free_storage_test.go:224: Test case [Create free storage with wrong recipient wallet should fail] exit at [06-28-2023 16:57:09]\n","--- PASS: TestCreateAllocationFreeStorage/Create_free_storage_with_wrong_recipient_wallet_should_fail (12.34s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
