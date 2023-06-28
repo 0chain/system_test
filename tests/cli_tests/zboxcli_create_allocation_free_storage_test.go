@@ -107,10 +107,10 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 			Nonce:      time.Now().Unix(),
 		}
 
-		forSignatureBytes, err := json.Marshal(&marker)
+		forSignatureBytes := fmt.Sprintf("%s:%f:%d", marker.Recipient, marker.FreeTokens, marker.Nonce)
 		require.Nil(t, err, "Could not marshal marker")
 
-		data := hex.EncodeToString(forSignatureBytes)
+		data := hex.EncodeToString([]byte(forSignatureBytes))
 		rawHash, err := hex.DecodeString(data)
 		require.Nil(t, err, "failed to decode hex %s", data)
 		require.NotNil(t, rawHash, "failed to decode hex %s", data)
@@ -284,10 +284,10 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 			Nonce:      time.Now().Unix(),
 		}
 
-		forSignatureBytes, err := json.Marshal(&marker)
+		forSignatureBytes := fmt.Sprintf("%s:%f:%d", marker.Recipient, marker.FreeTokens, marker.Nonce)
 		require.Nil(t, err, "Could not marshal marker")
 
-		data := hex.EncodeToString(forSignatureBytes)
+		data := hex.EncodeToString([]byte(forSignatureBytes))
 		rawHash, err := hex.DecodeString(data)
 		require.Nil(t, err, "failed to decode hex %s", data)
 		require.NotNil(t, rawHash, "failed to decode hex %s", data)
