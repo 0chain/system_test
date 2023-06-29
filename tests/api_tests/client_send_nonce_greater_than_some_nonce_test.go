@@ -153,6 +153,7 @@ L1:
 		if err != nil {
 			putError = append(putError, err)
 		}
+		time.Sleep(time.Second) // sleep to avoid request rate limit
 	}
 
 	require.Len(t, putError, len(transactions)-1)
