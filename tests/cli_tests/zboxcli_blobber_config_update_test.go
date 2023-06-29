@@ -253,7 +253,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Len(t, output, 1)
 
 		if !newNotAvailable {
-			t.Cleanup(func() { setAvailability(t, intialBlobberInfo.ID, true) })
+			t.Cleanup(func() { setNotAvailability(t, intialBlobberInfo.ID, true) })
 		}
 
 		var finalBlobberInfo climodel.BlobberDetails
