@@ -58,8 +58,8 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		require.NoError(t, err, "error getting allocation id")
 		defer createAllocationTestTeardown(t, beforeAllocationId)
 
-		setAvailability(t, blobberToDeactivate.ID, false)
-		t.Cleanup(func() { setAvailability(t, blobberToDeactivate.ID, true) })
+		setNotAvailability(t, blobberToDeactivate.ID, true)
+		t.Cleanup(func() { setNotAvailability(t, blobberToDeactivate.ID, true) })
 		cliutil.Wait(t, 1*time.Second)
 		betweenBlobbers := getBlobbers(t)
 		for i := range betweenBlobbers {
@@ -79,7 +79,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.True(t, strings.Contains(output[0], "not enough blobbers to honor the allocation"))
 
-		setAvailability(t, blobberToDeactivate.ID, true)
+		setNotAvailability(t, blobberToDeactivate.ID, false)
 		cliutil.Wait(t, 1*time.Second)
 		afterBlobbers := getBlobbers(t)
 		for i := range betweenBlobbers {
@@ -102,7 +102,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 	})
 }
 
-func setAvailability(t *test.SystemTest, blobberId string, availability bool) {
+func setNotAvailability(t *test.SystemTest, blobberId string, availability bool) {
 	output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
 		"blobber_id":    blobberId,
 		"not_available": availability,
