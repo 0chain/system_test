@@ -233,7 +233,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		newReadPrice := intToZCN(intialBlobberInfo.Terms.Read_price) + 1
 		newNumberOfDelegates := intialBlobberInfo.StakePoolSettings.MaxNumDelegates + 1
 		newCapacity := intialBlobberInfo.Capacity + 1
-		newIsAvailable := !intialBlobberInfo.IsAvailable
+		newNotAvailable := !intialBlobberInfo.NotAvailable
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id":     intialBlobberInfo.ID,
@@ -242,7 +242,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 			"read_price":     newReadPrice,
 			"num_delegates":  newNumberOfDelegates,
 			"capacity":       newCapacity,
-			"is_available":   newIsAvailable,
+			"not_available":  newNotAvailable,
 		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -252,8 +252,8 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		if !newIsAvailable {
-			t.Cleanup(func() { setAvailability(t, intialBlobberInfo.ID, true) })
+		if newNotAvailable {
+			t.Cleanup(func() { setNotAvailability(t, intialBlobberInfo.ID, false) })
 		}
 
 		var finalBlobberInfo climodel.BlobberDetails
@@ -265,7 +265,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newReadPrice, intToZCN(finalBlobberInfo.Terms.Read_price))
 		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.MaxNumDelegates)
 		require.Equal(t, newCapacity, finalBlobberInfo.Capacity)
-		require.Equal(t, newIsAvailable, finalBlobberInfo.IsAvailable)
+		require.Equal(t, newNotAvailable, finalBlobberInfo.NotAvailable)
 	})
 }
 
