@@ -403,7 +403,7 @@ type FreeStorageMarker struct {
 	Assigner   string  `json:"assigner,omitempty"`
 	Recipient  string  `json:"recipient"`
 	FreeTokens float64 `json:"free_tokens"`
-	Timestamp  int64   `json:"timestamp"`
+	Nonce      int64   `json:"nonce"`
 	Signature  string  `json:"signature,omitempty"`
 }
 
@@ -771,6 +771,7 @@ var StorageIntSettings = []string{
 	"free_allocation_settings.size",
 	"max_blobbers_per_allocation",
 	"validators_per_challenge",
+	"num_validators_rewarded",
 	"max_delegates",
 	"cost.update_settings",
 	"cost.read_redeem",
