@@ -90,7 +90,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		_, response, _ = zboxClient.CreateFreeStorage(t,
+		storageMarker, response, _ = zboxClient.CreateFreeStorage(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
