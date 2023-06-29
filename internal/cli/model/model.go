@@ -378,7 +378,7 @@ type BlobberDetails struct {
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 	IsKilled          bool              `json:"is_killed"`
 	IsShutdown        bool              `json:"is_shutdown"`
-	IsAvailable       bool              `json:"is_available"`
+	NotAvailable      bool              `json:"not_available"`
 }
 
 type Validator struct {
