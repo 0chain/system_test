@@ -59,7 +59,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		defer createAllocationTestTeardown(t, beforeAllocationId)
 
 		setNotAvailability(t, blobberToDeactivate.ID, true)
-		t.Cleanup(func() { setNotAvailability(t, blobberToDeactivate.ID, true) })
+		t.Cleanup(func() { setNotAvailability(t, blobberToDeactivate.ID, false) })
 		cliutil.Wait(t, 1*time.Second)
 		betweenBlobbers := getBlobbers(t)
 		for i := range betweenBlobbers {
