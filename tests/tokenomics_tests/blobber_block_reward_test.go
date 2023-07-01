@@ -56,7 +56,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		validatorListString = append(validatorListString, validator.ID)
 	}
 
-	totalData := 0.1 * GB
+	totalData := 1.0 * MB
 
 	var descriptions []string
 	descriptions = append(descriptions, "Blobber Block Reward Test - 1")
@@ -75,11 +75,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
+			"size":   10 * MB,
 			"data":   1,
 			"parity": 1,
 			"tokens": 99,
-			"expire": "10m",
+			"expire": "2m",
 		})
 
 		t.Log("Allocation ID : ", allocationId)
@@ -125,8 +125,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			}), true)
 		}
 
-		// Sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		// Sleep for 2 minutes
+		time.Sleep(2 * time.Minute)
 		curBlock := utils.GetLatestFinalizedBlock(t)
 
 		blobber1PassedChallenges := countPassedChallengesForBlobberAndAllocation(t, allocationId, blobberList[0].Id)
@@ -151,6 +151,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber2DelegateRewards", blobber2DelegateRewards)
 		t.Log("blobber1TotalRewards", blobber1TotalRewards)
 		t.Log("blobber2TotalRewards", blobber2TotalRewards)
+		t.Log("blobber1Weight", blobber1Weight)
+		t.Log("blobber2Weight", blobber2Weight)
 
 		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
@@ -159,8 +161,6 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
-
-	//t.Skip()
 
 	t.RunSequentiallyWithTimeout("Verify free reads", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		// Updating blobber 2 read price
@@ -182,11 +182,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
+			"size":   10 * MB,
 			"data":   1,
 			"parity": 1,
 			"tokens": 99,
-			"expire": "10m",
+			"expire": "2m",
 		})
 
 		t.Log("Allocation ID : ", allocationId)
@@ -232,8 +232,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			}), true)
 		}
 
-		// Sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		// Sleep for 2 minutes
+		time.Sleep(2 * time.Minute)
 		curBlock := utils.GetLatestFinalizedBlock(t)
 
 		blobber1PassedChallenges := countPassedChallengesForBlobberAndAllocation(t, allocationId, blobberList[0].Id)
@@ -258,6 +258,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber2DelegateRewards", blobber2DelegateRewards)
 		t.Log("blobber1TotalRewards", blobber1TotalRewards)
 		t.Log("blobber2TotalRewards", blobber2TotalRewards)
+		t.Log("blobber1Weight", blobber1Weight)
+		t.Log("blobber2Weight", blobber2Weight)
 
 		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
@@ -275,7 +277,6 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		}
 
 		for count, blobber := range blobberList {
-			utils.ExecuteFaucetWithTokensForWallet(t, "wallets/blobber"+strconv.Itoa(count+1), configPath, 9)
 			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "write_price": utils.IntToZCN(int64(math.Pow10(count)) * 1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
@@ -290,11 +291,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
+			"size":   10 * MB,
 			"data":   1,
 			"parity": 1,
 			"tokens": 99,
-			"expire": "10m",
+			"expire": "2m",
 		})
 
 		t.Log("Allocation ID : ", allocationId)
@@ -340,8 +341,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			}), true)
 		}
 
-		// Sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		// Sleep for 2 minutes
+		time.Sleep(2 * time.Minute)
 		curBlock := utils.GetLatestFinalizedBlock(t)
 
 		blobber1PassedChallenges := countPassedChallengesForBlobberAndAllocation(t, allocationId, blobberList[0].Id)
@@ -366,6 +367,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber2DelegateRewards", blobber2DelegateRewards)
 		t.Log("blobber1TotalRewards", blobber1TotalRewards)
 		t.Log("blobber2TotalRewards", blobber2TotalRewards)
+		t.Log("blobber1Weight", blobber1Weight)
+		t.Log("blobber2Weight", blobber2Weight)
 
 		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
@@ -396,11 +399,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
+			"size":   10 * MB,
 			"data":   1,
 			"parity": 1,
 			"tokens": 99,
-			"expire": "10m",
+			"expire": "2m",
 		})
 
 		t.Log("Allocation ID : ", allocationId)
@@ -446,8 +449,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			}), true)
 		}
 
-		// Sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		// Sleep for 2 minutes
+		time.Sleep(2 * time.Minute)
 		curBlock := utils.GetLatestFinalizedBlock(t)
 
 		blobber1PassedChallenges := countPassedChallengesForBlobberAndAllocation(t, allocationId, blobberList[0].Id)
@@ -472,6 +475,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber2DelegateRewards", blobber2DelegateRewards)
 		t.Log("blobber1TotalRewards", blobber1TotalRewards)
 		t.Log("blobber2TotalRewards", blobber2TotalRewards)
+		t.Log("blobber1Weight", blobber1Weight)
+		t.Log("blobber2Weight", blobber2Weight)
 
 		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
@@ -502,11 +507,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
+			"size":   10 * MB,
 			"data":   1,
 			"parity": 1,
 			"tokens": 99,
-			"expire": "10m",
+			"expire": "2m",
 		})
 
 		t.Log("Allocation ID : ", allocationId)
@@ -552,8 +557,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			}), true)
 		}
 
-		// Sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		// Sleep for 2 minutes
+		time.Sleep(2 * time.Minute)
 		curBlock := utils.GetLatestFinalizedBlock(t)
 
 		blobber1PassedChallenges := countPassedChallengesForBlobberAndAllocation(t, allocationId, blobberList[0].Id)
@@ -578,6 +583,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber2DelegateRewards", blobber2DelegateRewards)
 		t.Log("blobber1TotalRewards", blobber1TotalRewards)
 		t.Log("blobber2TotalRewards", blobber2TotalRewards)
+		t.Log("blobber1Weight", blobber1Weight)
+		t.Log("blobber2Weight", blobber2Weight)
 
 		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
@@ -608,11 +615,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
+			"size":   10 * MB,
 			"data":   1,
 			"parity": 1,
 			"tokens": 99,
-			"expire": "10m",
+			"expire": "2m",
 		})
 
 		t.Log("allocationId", allocationId)
@@ -658,8 +665,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			}), true)
 		}
 
-		// Sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		// Sleep for 2 minutes
+		time.Sleep(2 * time.Minute)
 		curBlock := utils.GetLatestFinalizedBlock(t)
 
 		blobber1PassedChallenges := countPassedChallengesForBlobberAndAllocation(t, allocationId, blobberList[0].Id)
@@ -684,6 +691,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber2DelegateRewards", blobber2DelegateRewards)
 		t.Log("blobber1TotalRewards", blobber1TotalRewards)
 		t.Log("blobber2TotalRewards", blobber2TotalRewards)
+		t.Log("blobber1Weight", blobber1Weight)
+		t.Log("blobber2Weight", blobber2Weight)
 
 		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.05, "Total rewards not distributed correctly")
 
