@@ -132,6 +132,9 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber1PassedChallenges := countPassedChallengesForBlobberAndAllocation(t, allocationId, blobberList[0].Id)
 		blobber2PassedChallenges := countPassedChallengesForBlobberAndAllocation(t, allocationId, blobberList[1].Id)
 
+		t.Log("Blobber 1 passed challenges : ", blobber1PassedChallenges)
+		t.Log("Blobber 2 passed challenges : ", blobber2PassedChallenges)
+
 		blobberBlockRewards := getBlockRewards(t, strconv.FormatInt(prevBlock.Round, 10), strconv.FormatInt(curBlock.Round, 10), blobberList[0].Id, blobberList[1].Id)
 
 		blobber1ProviderRewards := float64(blobberBlockRewards[0])
