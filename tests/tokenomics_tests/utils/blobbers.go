@@ -23,7 +23,7 @@ func getBlobberInfo(t *test.SystemTest, cliConfigFilename, params string) ([]str
 }
 
 func UpdateBlobberInfo(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	return UpdateBlobberInfoForWallet(t, cliConfigFilename, "wallet/blobber_owner", params)
+	return UpdateBlobberInfoForWallet(t, cliConfigFilename, "wallets/blobber_owner", params)
 }
 
 func UpdateBlobberInfoForWallet(t *test.SystemTest, cliConfigFilename, wallet, params string) ([]string, error) {
