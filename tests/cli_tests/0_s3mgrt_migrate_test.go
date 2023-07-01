@@ -13,7 +13,7 @@ import (
 
 func Test0S3Migration(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till working dir logic is fixed")
+	testId := 0
 
 	if s3SecretKey == "" || s3AccessKey == "" {
 		t.Skip("s3SecretKey or s3AccessKey was missing")
@@ -27,7 +27,8 @@ func Test0S3Migration(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -53,7 +54,8 @@ func Test0S3Migration(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -79,7 +81,8 @@ func Test0S3Migration(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -105,7 +108,8 @@ func Test0S3Migration(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -131,7 +135,8 @@ func Test0S3Migration(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -156,7 +161,8 @@ func Test0S3Migration(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -181,7 +187,8 @@ func Test0S3Migration(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -207,7 +214,8 @@ func Test0S3Migration(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -232,7 +240,8 @@ func Test0S3Migration(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -258,7 +267,8 @@ func Test0S3Migration(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -283,7 +293,8 @@ func Test0S3Migration(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -309,7 +320,8 @@ func Test0S3Migration(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
