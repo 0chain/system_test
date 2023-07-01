@@ -156,7 +156,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
 
@@ -263,7 +263,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
 
@@ -371,7 +371,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
 
@@ -477,7 +477,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
 
@@ -583,7 +583,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
 
@@ -689,7 +689,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
 
