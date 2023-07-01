@@ -391,7 +391,7 @@ func createDirectoryForTestname(t *test.SystemTest, id int) (fullPath string) {
 	err = os.MkdirAll(fullPath, os.ModePerm)
 	require.Nil(t, err)
 
-	t.Log("Directory created successfully: ", )
+	t.Log("Directory created successfully: ", fullPath)
 
 	return fullPath
 }
