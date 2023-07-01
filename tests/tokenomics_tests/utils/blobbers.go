@@ -27,6 +27,7 @@ func UpdateBlobberInfo(t *test.SystemTest, cliConfigFilename, params string) ([]
 }
 
 func UpdateBlobberInfoForWallet(t *test.SystemTest, cliConfigFilename, wallet, params string) ([]string, error) {
-	t.Log("Updating blobber info...")
+	t.Log("Updating blobber info...", wallet)
+	wallet = "wallets/blobber_owner"
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox bl-update %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second*2)
 }
