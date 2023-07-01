@@ -54,10 +54,11 @@ func TestBlobberReadReward(testSetup *testing.T) {
 	blobber1 := blobberListString[0]
 	blobber2 := blobberListString[1]
 
+	stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
+		1, 1, 1, 1,
+	}, 1)
+
 	t.RunSequentiallyWithTimeout("download one time, equal from both blobbers", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 1, 1,
-		}, 1)
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -128,13 +129,9 @@ func TestBlobberReadReward(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1DelegatesDownloadRewards, blobber2DelegatesDownloadRewards, 0.05, "Blobber 1 delegate 1 and Blobber 2 delegate 1 download rewards are not equal")
 		require.InEpsilon(t, blobber1TotalDownloadRewards, blobber2TotalDownloadRewards, 0.05, "Blobber 1 total download rewards and Blobber 2 total download rewards are not equal")
 
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 	t.RunSequentiallyWithTimeout("test download rewards and checking if downloading fails after allocation expiry", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 1, 1,
-		}, 1)
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -219,8 +216,6 @@ func TestBlobberReadReward(testSetup *testing.T) {
 			"localpath":  os.TempDir() + string(os.PathSeparator),
 		}), true)
 		require.NotNil(t, err, "File should not be downloaded from expired allocation", strings.Join(output, "\n"))
-
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
 }
