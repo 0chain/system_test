@@ -113,8 +113,6 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 		t.Log(blobber1Reward, blobber2Reward)
 
 		require.Greater(t, blobber1Reward/blobber2Reward, 1.5, "Killed blobber should get approx half the rewards than other")
-
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 }
 
