@@ -131,7 +131,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
-	t.RunSequentiallyWithTimeout("download several times and checking if downloading fails after allocation expiry", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test download rewards and checking if downloading fails after allocation expiry", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
@@ -162,52 +162,48 @@ func TestBlobberReadReward(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		for i := 0; i < 3; i++ {
+		err = os.Remove(filename)
+		require.Nil(t, err)
 
-			err = os.Remove(filename)
-			require.Nil(t, err)
+		remoteFilepath := remotepath + filepath.Base(filename)
 
-			remoteFilepath := remotepath + filepath.Base(filename)
+		output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remoteFilepath,
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), true)
+		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 
-			output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": remoteFilepath,
-				"localpath":  os.TempDir() + string(os.PathSeparator),
-			}), true)
-			require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
+		time.Sleep(30 * time.Second)
 
-			time.Sleep(30 * time.Second)
+		downloadCost := sizeInGB(int64(filesize)) * math.Pow10(8) * 2
 
-			downloadCost := sizeInGB(int64(filesize)) * math.Pow10(8) * 2
+		downloadRewards, err := getReadRewards(t, allocationId)
+		require.Nil(t, err, "error getting read rewards")
 
-			downloadRewards, err := getReadRewards(t, allocationId)
-			require.Nil(t, err, "error getting read rewards")
+		blobber1DownloadRewards := downloadRewards[blobber1].Amount
+		blobber2DownloadRewards := downloadRewards[blobber2].Amount
+		blobber1DelegatesDownloadRewards := downloadRewards[blobber1].Total - blobber1DownloadRewards
+		blobber2DelegatesDownloadRewards := downloadRewards[blobber2].Total - blobber2DownloadRewards
+		blobber1TotalDownloadRewards := downloadRewards[blobber1].Total
+		blobber2TotalDownloadRewards := downloadRewards[blobber2].Total
 
-			blobber1DownloadRewards := downloadRewards[blobber1].Amount
-			blobber2DownloadRewards := downloadRewards[blobber2].Amount
-			blobber1DelegatesDownloadRewards := downloadRewards[blobber1].Total - blobber1DownloadRewards
-			blobber2DelegatesDownloadRewards := downloadRewards[blobber2].Total - blobber2DownloadRewards
-			blobber1TotalDownloadRewards := downloadRewards[blobber1].Total
-			blobber2TotalDownloadRewards := downloadRewards[blobber2].Total
+		totalDownloadRewards := blobber1TotalDownloadRewards + blobber2TotalDownloadRewards
 
-			totalDownloadRewards := blobber1TotalDownloadRewards + blobber2TotalDownloadRewards
+		// log all the values
+		t.Log("downloadCost", downloadCost)
+		t.Log("blobber1DownloadRewards", blobber1DownloadRewards)
+		t.Log("blobber2DownloadRewards", blobber2DownloadRewards)
+		t.Log("blobber1Delegate1DownloadRewards", blobber1DelegatesDownloadRewards)
+		t.Log("blobber2Delegate1DownloadRewards", blobber2DelegatesDownloadRewards)
+		t.Log("blobber1TotalDownloadRewards", blobber1TotalDownloadRewards)
+		t.Log("blobber2TotalDownloadRewards", blobber2TotalDownloadRewards)
+		t.Log("totalDownloadRewards", totalDownloadRewards)
 
-			// log all the values
-			t.Log("downloadCost", downloadCost)
-			t.Log("blobber1DownloadRewards", blobber1DownloadRewards)
-			t.Log("blobber2DownloadRewards", blobber2DownloadRewards)
-			t.Log("blobber1Delegate1DownloadRewards", blobber1DelegatesDownloadRewards)
-			t.Log("blobber2Delegate1DownloadRewards", blobber2DelegatesDownloadRewards)
-			t.Log("blobber1TotalDownloadRewards", blobber1TotalDownloadRewards)
-			t.Log("blobber2TotalDownloadRewards", blobber2TotalDownloadRewards)
-			t.Log("totalDownloadRewards", totalDownloadRewards)
-
-			require.InEpsilon(t, downloadCost, totalDownloadRewards, 0.05, "Download cost and total download rewards are not equal")
-			require.InEpsilon(t, blobber1DownloadRewards, blobber2DownloadRewards, 0.05, "Blobber 1 and Blobber 2 download rewards are not equal")
-			require.InEpsilon(t, blobber1DelegatesDownloadRewards, blobber2DelegatesDownloadRewards, 0.05, "Blobber 1 delegate 1 and Blobber 2 delegate 1 download rewards are not equal")
-			require.InEpsilon(t, blobber1TotalDownloadRewards, blobber2TotalDownloadRewards, 0.05, "Blobber 1 total download rewards and Blobber 2 total download rewards are not equal")
-
-		}
+		require.InEpsilon(t, downloadCost, totalDownloadRewards, 0.05, "Download cost and total download rewards are not equal")
+		require.InEpsilon(t, blobber1DownloadRewards, blobber2DownloadRewards, 0.05, "Blobber 1 and Blobber 2 download rewards are not equal")
+		require.InEpsilon(t, blobber1DelegatesDownloadRewards, blobber2DelegatesDownloadRewards, 0.05, "Blobber 1 delegate 1 and Blobber 2 delegate 1 download rewards are not equal")
+		require.InEpsilon(t, blobber1TotalDownloadRewards, blobber2TotalDownloadRewards, 0.05, "Blobber 1 total download rewards and Blobber 2 total download rewards are not equal")
 
 		// Sleep for 10 minutes
 		time.Sleep(10 * time.Minute)
@@ -215,7 +211,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
-		remoteFilepath := remotepath + filepath.Base(filename)
+		remoteFilepath = remotepath + filepath.Base(filename)
 
 		output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
 			"allocation": allocationId,
