@@ -702,10 +702,12 @@ func tearDownRewardsTests(t *test.SystemTest, blobberList []string, validatorLis
 	t.Log("Allocation : ", allocation)
 
 	// check if allocation is finalized
-	//if allocation.Finalized == true {
-	//	_, err := utils.CancelAllocation(t, configPath, allocationID, true)
-	//	require.Nil(t, err, "Error canceling allocation")
-	//}
+	if allocation.Finalized == false {
+		_, err := utils.CancelAllocation(t, configPath, allocationID, true)
+
+		fmt.Println("Error cancelling allocation", err.Error())
+		//require.Nil(t, err, "Error canceling allocation")
+	}
 
 	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, numDelegates)
 }
