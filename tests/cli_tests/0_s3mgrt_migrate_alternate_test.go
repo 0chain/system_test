@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -23,6 +24,7 @@ const chunksize = 64 * 1024
 
 func Test0S3MigrationAlternate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	testId := 0
 
 	if s3SecretKey == "" || s3AccessKey == "" {
 		t.Skip("s3SecretKey or s3AccessKey was missing")
@@ -52,7 +54,8 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -81,13 +84,13 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should migrate existing bucket to specified path successfully with encryption on", func(t *test.SystemTest) {
-		t.Logf("here")
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -121,7 +124,8 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -168,7 +172,8 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -200,7 +205,8 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -226,7 +232,8 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -261,7 +268,8 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -297,7 +305,8 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
+		testId++
+		workingDirName := createDirectoryForTestname(t, testId)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -375,14 +384,14 @@ func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string, 
 	return true
 }
 
-func createDirectoryForTestname(t *test.SystemTest) (fullPath string) {
-	fullPath, err := filepath.Abs(escapedTestName(t))
+func createDirectoryForTestname(t *test.SystemTest, id int) (fullPath string) {
+	fullPath, err := filepath.Abs(strconv.Itoa(id))
 	require.Nil(t, err)
 
-	err = os.Mkdir(fullPath, 0755)
+	err = os.MkdirAll(fullPath, os.ModePerm)
 	require.Nil(t, err)
 
-	t.Log("Directory created successfully: ", escapedTestName(t))
+	t.Log("Directory created successfully: ", )
 
 	return fullPath
 }
