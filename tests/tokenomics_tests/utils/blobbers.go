@@ -30,7 +30,7 @@ func UpdateBlobberInfoForWallet(t *test.SystemTest, cliConfigFilename, wallet, p
 	t.Log("Updating blobber info...", wallet)
 
 	wallet = "wallets/blobber_owner"
-	_, err := ExecuteFaucetWithTokensForWallet(t, cliConfigFilename, wallet, 99)
+	_, err := ExecuteFaucetWithTokensForWallet(t, wallet, cliConfigFilename, 99)
 	if err != nil {
 		return nil, err
 	}
