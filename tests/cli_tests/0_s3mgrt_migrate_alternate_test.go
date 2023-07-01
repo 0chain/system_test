@@ -385,7 +385,7 @@ func createDirectoryForTestname(t *test.SystemTest) (fullPath string) {
 	rand.Seed(time.Now().UnixNano())
 
 	// Generate a random number within the range
-	randomNumber := rand.Intn(dirMaxRand)
+	randomNumber := rand.Intn(dirMaxRand) //nolint:gosec
 
 	// Generate a unique directory name based on the random number and current timestamp
 	dirName := fmt.Sprintf("%s%d_%d", dirPrefix, randomNumber, time.Now().UnixNano())
