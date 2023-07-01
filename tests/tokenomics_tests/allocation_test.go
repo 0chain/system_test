@@ -19,7 +19,7 @@ import (
 
 const tokenUnit float64 = 1e+10
 
-func TestAllocation(testSetup *testing.T) {
+func TestAllocationRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	output, err := utils.CreateWallet(t, configPath)
@@ -368,18 +368,14 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		allocSize := 1 * GB
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		utils.ExecuteFaucetWithTokens(t, configPath, 10)
-		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"data":   1,
-			"lock":   2,
+			"tokens": 99,
 			"parity": 1,
 			"expire": "10m",
-		}))
+		})
 		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
-
-		allocationId, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
 
 		allocation := utils.GetAllocation(t, allocationId)
 
@@ -399,10 +395,13 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 			}
 		}
 
-		output, err = utils.UpdateAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
-			"allocation":  allocationId,
-			"add_blobber": newBlobberID,
-		}), true)
+		params := utils.CreateParams(map[string]interface{}{
+			"allocation":                 allocationId,
+			"set_third_party_extendable": nil,
+			"add_blobber":                newBlobberID,
+		})
+
+		output, err = utils.UpdateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 
 		// Uploading 10% of allocation
@@ -475,18 +474,14 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		allocSize := 1 * GB
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		utils.ExecuteFaucetWithTokens(t, configPath, 9)
-		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"data":   1,
-			"lock":   2,
+			"tokens": 99,
 			"parity": 1,
 			"expire": "10m",
-		}))
+		})
 		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
-
-		allocationId, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
 
 		allocation := utils.GetAllocation(t, allocationId)
 
