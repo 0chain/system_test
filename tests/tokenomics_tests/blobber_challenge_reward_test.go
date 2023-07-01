@@ -697,6 +697,8 @@ type ProviderAllocationRewards struct {
 }
 
 func tearDownRewardsTests(t *test.SystemTest, blobberList []string, validatorList []string, configPath string, allocationID string, numDelegates int) {
+	time.Sleep(5 * time.Minute)
+
 	allocation := utils.GetAllocation(t, allocationID)
 
 	t.Log("Allocation : ", allocation)
