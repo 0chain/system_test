@@ -357,8 +357,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Add Blobber to Increase Parity", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
-		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
-
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -421,7 +419,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// Challenge Rewards
-		time.Sleep(12 * time.Minute)
+		time.Sleep(10 * time.Minute)
 		blobberRewards := getAllocationChallengeRewards(t, allocationId)
 
 		require.Equal(t, 3, len(blobberRewards), "All 3 blobber should get the rewards")
@@ -462,8 +460,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Replace Blobber", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
-		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))

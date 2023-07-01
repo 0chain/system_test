@@ -550,10 +550,6 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []string, v
 	tIdx := 0
 
 	for i := 0; i < numDelegates; i++ {
-		if idx == 2 {
-			idx = 0
-		}
-
 		for _, blobber := range blobbers {
 
 			// add balance to delegate wallet
@@ -578,11 +574,6 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []string, v
 	idx = 0
 
 	for i := 0; i < numDelegates; i++ {
-
-		if idx == 2 {
-			idx = 0
-		}
-
 		for _, validator := range validators {
 			// add balance to delegate wallet
 			_, err := utils.ExecuteFaucetWithTokensForWallet(t, validatorDelegates[idx], configPath, tokens[tIdx]+1)
