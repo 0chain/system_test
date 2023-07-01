@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
@@ -22,9 +23,13 @@ import (
 
 const chunksize = 64 * 1024
 
+const (
+	dirPrefix  = "dir"
+	dirMaxRand = 1000
+)
+
 func Test0S3MigrationAlternate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	testId := 0
 
 	if s3SecretKey == "" || s3AccessKey == "" {
 		t.Skip("s3SecretKey or s3AccessKey was missing")
@@ -54,8 +59,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		testId++
-		workingDirName := createDirectoryForTestname(t, testId)
+		workingDirName := createDirectoryForTestname(t)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -89,8 +93,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		testId++
-		workingDirName := createDirectoryForTestname(t, testId)
+		workingDirName := createDirectoryForTestname(t)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -124,8 +127,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		testId++
-		workingDirName := createDirectoryForTestname(t, testId)
+		workingDirName := createDirectoryForTestname(t)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -172,8 +174,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		testId++
-		workingDirName := createDirectoryForTestname(t, testId)
+		workingDirName := createDirectoryForTestname(t)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -205,8 +206,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		testId++
-		workingDirName := createDirectoryForTestname(t, testId)
+		workingDirName := createDirectoryForTestname(t)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -232,8 +232,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		testId++
-		workingDirName := createDirectoryForTestname(t, testId)
+		workingDirName := createDirectoryForTestname(t)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -268,8 +267,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		testId++
-		workingDirName := createDirectoryForTestname(t, testId)
+		workingDirName := createDirectoryForTestname(t)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -305,8 +303,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		testId++
-		workingDirName := createDirectoryForTestname(t, testId)
+		workingDirName := createDirectoryForTestname(t)
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -384,8 +381,16 @@ func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string, 
 	return true
 }
 
-func createDirectoryForTestname(t *test.SystemTest, id int) (fullPath string) {
-	fullPath, err := filepath.Abs(strconv.Itoa(id))
+func createDirectoryForTestname(t *test.SystemTest) (fullPath string) {
+	rand.Seed(time.Now().UnixNano())
+
+	// Generate a random number within the range
+	randomNumber := rand.Intn(dirMaxRand)
+
+	// Generate a unique directory name based on the random number and current timestamp
+	dirName := fmt.Sprintf("%s%d_%d", dirPrefix, randomNumber, time.Now().UnixNano())
+
+	fullPath, err := filepath.Abs(dirName)
 	require.Nil(t, err)
 
 	err = os.MkdirAll(fullPath, os.ModePerm)
