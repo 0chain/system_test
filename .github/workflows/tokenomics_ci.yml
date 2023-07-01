@@ -147,8 +147,8 @@ jobs:
         with:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
-          miner_image: ${{ env.MINER_TAG }}
-          sharder_image: ${{ env.SHARDER_TAG }}
+          miner_image: pr-2574
+          sharder_image: pr-2574
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
           zbox_image: ${{ env.ZBOX_TAG }}
