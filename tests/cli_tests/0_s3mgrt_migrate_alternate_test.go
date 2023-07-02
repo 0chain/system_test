@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"math/rand"
 	"os"
@@ -294,10 +295,13 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		})
 
 		workingDirName := createDirectoryForTestname(t)
+		file, _ := ioutil.TempFile(workingDirName, "prefix")
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
+			_ = os.Remove(file.Name())
 		}()
+
 		remotepath := "/root3"
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
@@ -306,6 +310,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"migrate-to": remotepath,
+			"wd":         workingDirName,
 		}))
 
 		require.NotNil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
