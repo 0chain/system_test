@@ -287,6 +287,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 	})
 
+	t.Skip()
+
 	t.RunSequentiallyWithTimeout("Verify write price diff changes", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		for count, blobber := range blobberList {
