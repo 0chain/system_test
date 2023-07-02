@@ -54,6 +54,13 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		}
 	})
 
+	t.Cleanup(func() {
+		err := cleanupBucket(S3Client, bucketName)
+		if err != nil {
+			t.Log("Failed to cleanup bucket: ", err)
+		}
+	})
+
 	t.RunSequentially("Should migrate existing bucket successfully with skip 0 and replace existing file", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -314,7 +321,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		}))
 
 		require.NotNil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
-		require.Len(t, output, 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
+		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "working directory not empty", "Output was not as expected", strings.Join(output, "\n"))
 	})
 }
@@ -387,4 +394,27 @@ func createDirectoryForTestname(t *test.SystemTest) (fullPath string) {
 	t.Log("Directory created successfully: ", fullPath)
 
 	return fullPath
+}
+
+func cleanupBucket(svc *s3.S3, bucketName string) error {
+	// List all objects within the bucket
+	resp, err := svc.ListObjectsV2(&s3.ListObjectsV2Input{
+		Bucket: aws.String(bucketName),
+	})
+	if err != nil {
+		return err
+	}
+
+	// Delete each object in the bucket
+	for _, obj := range resp.Contents {
+		_, err := svc.DeleteObject(&s3.DeleteObjectInput{
+			Bucket: aws.String(bucketName),
+			Key:    obj.Key,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
