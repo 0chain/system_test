@@ -181,7 +181,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
-		readData := []int{9, 9}
+		readData := []int{1, 1}
 
 		//stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, stake, 1)
 
@@ -194,7 +194,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			"data":   1,
 			"parity": 1,
 			"tokens": 99,
-			"expire": "10m",
+			"expire": "2m",
 		})
 
 		t.Log("Allocation ID : ", allocationId)
@@ -241,7 +241,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		}
 
 		// Sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(2 * time.Minute)
 		curBlock := utils.GetLatestFinalizedBlock(t)
 
 		blobber1PassedChallenges := countPassedChallengesForBlobberAndAllocation(t, allocationId, blobberList[0].Id)
@@ -769,6 +769,9 @@ func calculateWeight(wp, rp, X, R, stakes, challenges float64) float64 {
 
 	zeta := getZeta(wp, rp)
 	gamma := getGamma(X, R)
+
+	fmt.Println("zeta", zeta)
+	fmt.Println("gamma", gamma)
 
 	return (zeta*gamma + 1) * stakes * challenges
 }
