@@ -293,7 +293,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Equal(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
 
 		// sleep for 5 minutes
-		time.Sleep(6 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
@@ -302,7 +302,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should be 0")
+		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
 
 	})
 
