@@ -251,7 +251,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"allocation": allocationID,
 			"expiry":     fmt.Sprintf("%dh", expDuration),
 		})
-		output, err := updateAllocation(t, configPath, params, false)
+		output, err = updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
