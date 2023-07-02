@@ -39,7 +39,6 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		if err != nil {
 			t.Skip("S3 Bucket operatiion is not working properly")
 		}
-
 	})
 
 	t.RunSequentially("Should migrate existing bucket successfully with concurrency==4 and working dir current dir", func(t *test.SystemTest) {
@@ -197,7 +196,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		currentDir, err := os.Getwd()
 		require.Nil(t, err, "can't get current dir")
 		allocPath := filepath.Join(currentDir, "allocPathForTestS3.txt")
-		err = ioutil.WriteFile(allocPath, []byte(allocationID), 0644)
+		err = ioutil.WriteFile(allocPath, []byte(allocationID), 0644) //nolint:gosec
 		require.Nil(t, err, "allocation file is not written properly")
 
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
@@ -399,5 +398,4 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
 	})
-
 }
