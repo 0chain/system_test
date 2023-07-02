@@ -229,6 +229,18 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Update Expired Allocation Should Fail", 10*time.Minute, func(t *test.SystemTest) {
+		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "6m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		t.Cleanup(func() {
+			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+				"time_unit": "1h",
+			}, true)
+			require.Nil(t, err, strings.Join(output, "\n"))
+		})
+
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{"expire": "6m"})
 
 		time.Sleep(7 * time.Minute)

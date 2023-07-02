@@ -1241,6 +1241,18 @@ func TestDownload(testSetup *testing.T) {
 		filesize := int64(256)
 		remotepath := "/"
 
+		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "1m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		t.Cleanup(func() {
+			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+				"time_unit": "1h",
+			}, true)
+			require.Nil(t, err, strings.Join(output, "\n"))
+		})
+
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
@@ -1256,10 +1268,10 @@ func TestDownload(testSetup *testing.T) {
 		time.Sleep(2 * time.Minute)
 
 		// Delete the uploaded file, since we will be downloading it now
-		err := os.Remove(filename)
+		err = os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  "tmp/",
