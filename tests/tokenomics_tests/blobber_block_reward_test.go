@@ -189,7 +189,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			"data":   1,
 			"parity": 1,
 			"tokens": 99,
-			"expire": "2m",
+			"expire": "10m",
 		})
 
 		t.Log("Allocation ID : ", allocationId)
@@ -235,8 +235,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			}), true)
 		}
 
-		// Sleep for 2 minutes
-		time.Sleep(2 * time.Minute)
+		// Sleep for 10 minutes
+		time.Sleep(10 * time.Minute)
 		curBlock := utils.GetLatestFinalizedBlock(t)
 
 		blobber1PassedChallenges := countPassedChallengesForBlobberAndAllocation(t, allocationId, blobberList[0].Id)
@@ -383,7 +383,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Check read price ratio", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		for count, blobber := range blobberList {
-			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(int64(math.Pow10(count)) * 1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber"+strconv.Itoa(count+1),
+				utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(int64(math.Pow10(count)) * 1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 
