@@ -766,6 +766,9 @@ func countPassedChallengesForBlobberAndAllocation(t *test.SystemTest, allocation
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	sharderBaseUrl := utils.GetSharderUrl(t)
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/passed-challenges?allocation_id=" + allocationID)
+
+	t.Log(url)
+
 	var response map[string]int
 
 	res, _ := http.Get(url)
@@ -775,6 +778,8 @@ func countPassedChallengesForBlobberAndAllocation(t *test.SystemTest, allocation
 	if err != nil {
 		return 0
 	}
+
+	t.Log(response)
 
 	return float64(response[blobberID])
 }
