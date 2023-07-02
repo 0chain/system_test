@@ -104,7 +104,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		time.Sleep(1 * time.Minute)
+		time.Sleep(30 * time.Second)
 
 		alloc := utils.GetAllocation(t, allocationId)
 		movedToChallengePool := alloc.MovedToChallenge
