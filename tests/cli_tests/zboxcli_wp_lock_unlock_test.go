@@ -89,6 +89,18 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
+		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "6m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		t.Cleanup(func() {
+			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+				"time_unit": "1h",
+			}, true)
+			require.Nil(t, err, strings.Join(output, "\n"))
+		})
+
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"expire": "6m",

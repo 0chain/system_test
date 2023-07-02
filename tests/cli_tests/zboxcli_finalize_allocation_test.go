@@ -27,11 +27,23 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 		output, err := executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "1m",
+		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "1s",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		t.Cleanup(func() {
+			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+				"time_unit": "1h",
+			}, true)
+			require.Nil(t, err, strings.Join(output, "\n"))
 		})
 
-		time.Sleep(2 * time.Minute)
+		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
+			"expire": "5s",
+		})
+
+		time.Sleep(30 * time.Second)
 
 		allocations := parseListAllocations(t, configPath)
 		_, ok := allocations[allocationID]
