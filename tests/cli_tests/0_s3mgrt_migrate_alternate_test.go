@@ -59,12 +59,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
-		// remove the dir after use
-		defer func() {
-			_ = os.RemoveAll(workingDirName)
-		}()
-
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
@@ -72,7 +66,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"skip":       0,
-			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -93,11 +86,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
-		// remove the dir after use
-		defer func() {
-			_ = os.RemoveAll(workingDirName)
-		}()
 		remotepath := "/root2"
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
@@ -106,7 +94,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"migrate-to": remotepath,
-			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -127,18 +114,12 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
-		// remove the dir after use
-		defer func() {
-			_ = os.RemoveAll(workingDirName)
-		}()
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
 			"bucket":     bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
-			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -174,11 +155,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
-		// remove the dir after use
-		defer func() {
-			_ = os.RemoveAll(workingDirName)
-		}()
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
@@ -186,7 +162,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"encrypt":    "true",
-			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -206,11 +181,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
-		// remove the dir after use
-		defer func() {
-			_ = os.RemoveAll(workingDirName)
-		}()
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
@@ -218,7 +188,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"skip":       1,
-			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -232,11 +201,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
-		// remove the dir after use
-		defer func() {
-			_ = os.RemoveAll(workingDirName)
-		}()
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
@@ -244,7 +208,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"skip":       2,
-			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -267,11 +230,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		workingDirName := createDirectoryForTestname(t)
-		// remove the dir after use
-		defer func() {
-			_ = os.RemoveAll(workingDirName)
-		}()
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
@@ -280,7 +238,6 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 			"allocation": allocationID,
 			"skip":       2,
 			"dup-suffix": "_modified",
-			"wd":         workingDirName,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -297,7 +254,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
 	})
 
-	t.RunSequentially("Should migrate successfully and delete the s3 bucket file", func(t *test.SystemTest) {
+	t.RunSequentially("Should migrate successfully and delete the s3 bucket file and use custom workdir", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -328,6 +285,32 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
 		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+	})
+
+	t.RunSequentially("Should error out if workdir is not default and not empty", func(t *test.SystemTest) {
+		allocSize := int64(50 * MB)
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		workingDirName := createDirectoryForTestname(t)
+		// remove the dir after use
+		defer func() {
+			_ = os.RemoveAll(workingDirName)
+		}()
+		remotepath := "/root3"
+		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
+			"access-key": s3AccessKey,
+			"secret-key": s3SecretKey,
+			"bucket":     bucketName,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"allocation": allocationID,
+			"migrate-to": remotepath,
+		}))
+
+		require.NotNil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "working directory not empty", "Output was not as expected", strings.Join(output, "\n"))
 	})
 }
 
