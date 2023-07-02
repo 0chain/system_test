@@ -91,7 +91,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "5m",
 		})
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
@@ -103,7 +103,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		allocation := utils.GetAllocation(t, allocationId)
 
@@ -169,7 +169,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "5m",
 		})
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
@@ -181,7 +181,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		allocation := utils.GetAllocation(t, allocationId)
 
@@ -240,7 +240,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "5m",
 		})
 
 		// Uploading 10% of allocation
@@ -261,7 +261,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		allocation := utils.GetAllocation(t, allocationId)
 
@@ -319,7 +319,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "5m",
 		})
 
 		// Uploading 10% of allocation
@@ -340,7 +340,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		allocation := utils.GetAllocation(t, allocationId)
 
@@ -436,7 +436,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "5m",
 		})
 
 		// Uploading 10% of allocation
@@ -457,7 +457,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		allocation := utils.GetAllocation(t, allocationId)
 
@@ -688,19 +688,18 @@ type ProviderAllocationRewards struct {
 }
 
 func tearDownRewardsTests(t *test.SystemTest, blobberList []string, validatorList []string, configPath string, allocationID string, numDelegates int) {
-	time.Sleep(5 * time.Minute)
-
-	allocation := utils.GetAllocation(t, allocationID)
-
-	t.Log("Allocation : ", allocation)
-
-	// check if allocation is finalized
-	if allocation.Finalized == false {
-		_, err := utils.CancelAllocation(t, configPath, allocationID, true)
-
-		fmt.Println("Error cancelling allocation", err.Error())
-		//require.Nil(t, err, "Error canceling allocation")
-	}
-
+	waitUntilAllocationIsFinalized(t, allocationID)
 	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, numDelegates)
+}
+
+func waitUntilAllocationIsFinalized(t *test.SystemTest, allocationID string) {
+	for {
+		allocation := utils.GetAllocation(t, allocationID)
+
+		if allocation.Finalized == true {
+			break
+		}
+
+		time.Sleep(5 * time.Second)
+	}
 }
