@@ -77,7 +77,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		v2D1Wallet, _ := utils.GetWalletForName(t, configPath, validator2Delegate1Wallet)
 
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 1, 1, 2, 2, 2, 2,
+			1, 1, 2, 2, 1, 1, 2, 2,
 		}, 2)
 
 		// Creating Allocation
