@@ -761,6 +761,7 @@ func getZeta(wp, rp float64) float64 {
 }
 
 func getGamma(X, R float64) float64 {
+	return 1
 
 	A := float64(10)
 	B := float64(1)
