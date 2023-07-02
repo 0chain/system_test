@@ -67,116 +67,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	v2D1Wallet, _ := utils.GetWalletForName(t, configPath, validator2Delegate1Wallet)
 	v2D2Wallet, _ := utils.GetWalletForName(t, configPath, validator2Delegate2Wallet)
 
-	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
-		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 1, 1, 1, 1, 1, 1,
-		}, 2)
-
-		// Creating Allocation
-
-		output := utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
-
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
-			"tokens": 99,
-			"data":   1,
-			"parity": 1,
-			"expire": "10m",
-		})
-
-		// Uploading 10% of allocation
-
-		remotepath := "/dir/"
-		filesize := 0.1 * GB
-		filename := utils.GenerateRandomTestFileName(t)
-
-		err = utils.CreateFileWithSize(filename, int64(filesize))
-		require.Nil(t, err)
-
-		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			// fetch the latest block in the chain
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
-		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
-
-		allocation := utils.GetAllocation(t, allocationId)
-
-		t.Log(allocation.MovedToChallenge)
-
-		totalExpectedReward := float64(allocation.MovedToChallenge)
-
-		challengeRewards, err := getAllAllocationChallengeRewards(t, allocationId)
-		require.Nil(t, err, "Error getting challenge rewards", strings.Join(output, "\n"))
-
-		blobber1Delegate1TotalReward := challengeRewards[blobber1].DelegateRewards[b1D1Wallet.ClientID]
-		blobber1Delegate2TotalReward := challengeRewards[blobber1].DelegateRewards[b1D2Wallet.ClientID]
-		blobber2Delegate1TotalReward := challengeRewards[blobber2].DelegateRewards[b2D1Wallet.ClientID]
-		blobber2Delegate2TotalReward := challengeRewards[blobber2].DelegateRewards[b2D2Wallet.ClientID]
-		validator1Delegate1TotalReward := challengeRewards[validator1].DelegateRewards[v1D1Wallet.ClientID]
-		validator1Delegate2TotalReward := challengeRewards[validator1].DelegateRewards[v1D2Wallet.ClientID]
-		validator2Delegate1TotalReward := challengeRewards[validator2].DelegateRewards[v2D1Wallet.ClientID]
-		validator2Delegate2TotalReward := challengeRewards[validator2].DelegateRewards[v2D2Wallet.ClientID]
-
-		blobber1TotalReward := challengeRewards[blobber1].Amount
-		blobber2TotalReward := challengeRewards[blobber2].Amount
-		blobber1DelegatesTotalReward := blobber1Delegate1TotalReward + blobber1Delegate2TotalReward
-		blobber2DelegatesTotalReward := blobber2Delegate1TotalReward + blobber2Delegate2TotalReward
-		validator1TotalReward := challengeRewards[validator1].Amount
-		validator2TotalReward := challengeRewards[validator2].Amount
-		validator1DelegatesTotalReward := validator1Delegate1TotalReward + validator1Delegate2TotalReward
-		validator2DelegatesTotalReward := validator2Delegate1TotalReward + validator2Delegate2TotalReward
-
-		totalReward := blobber1TotalReward + blobber2TotalReward + blobber1DelegatesTotalReward + blobber2DelegatesTotalReward + validator1TotalReward + validator2TotalReward + validator1DelegatesTotalReward + validator2DelegatesTotalReward
-
-		t.Log("Total Reward: ", totalReward)
-		t.Log("Total Expected Reward: ", totalExpectedReward)
-		t.Log("Blobber 1 Total Reward: ", blobber1TotalReward)
-		t.Log("Blobber 2 Total Reward: ", blobber2TotalReward)
-		t.Log("Blobber 1 Delegates Total Reward: ", blobber1DelegatesTotalReward)
-		t.Log("Blobber 2 Delegates Total Reward: ", blobber2DelegatesTotalReward)
-		t.Log("Validator 1 Total Reward: ", validator1TotalReward)
-		t.Log("Validator 2 Total Reward: ", validator2TotalReward)
-		t.Log("Validator 1 Delegates Total Reward: ", validator1DelegatesTotalReward)
-		t.Log("Validator 2 Delegates Total Reward: ", validator2DelegatesTotalReward)
-
-		t.Log("Blobber 1 Delegate 1 Total Reward: ", blobber1Delegate1TotalReward)
-		t.Log("Blobber 1 Delegate 2 Total Reward: ", blobber1Delegate2TotalReward)
-		t.Log("Blobber 2 Delegate 1 Total Reward: ", blobber2Delegate1TotalReward)
-		t.Log("Blobber 2 Delegate 2 Total Reward: ", blobber2Delegate2TotalReward)
-		t.Log("Validator 1 Delegate 1 Total Reward: ", validator1Delegate1TotalReward)
-		t.Log("Validator 1 Delegate 2 Total Reward: ", validator1Delegate2TotalReward)
-		t.Log("Validator 2 Delegate 1 Total Reward: ", validator2Delegate1TotalReward)
-		t.Log("Validator 2 Delegate 2 Total Reward: ", validator2Delegate2TotalReward)
-
-		// check if total reward is equal to expected reward with 5% error margin
-		require.InEpsilon(t, totalReward, totalExpectedReward, 0.05, "Total Reward is not equal to expected reward")
-		// check if blobber 1 and blobber 2 got the same amount of reward with 5% error margin
-		require.InEpsilon(t, blobber1TotalReward, blobber2TotalReward, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
-		// check if blobber 1 and blobber 2 delegates got the same amount of reward with 5% error margin
-		require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
-		// check if validator 1 and validator 2 got the same amount of reward with 5% error margin
-		require.InEpsilon(t, validator1TotalReward, validator2TotalReward, 0.05, "Validator 1 and Validator 2 rewards are not equal")
-		// check if validator 1 and validator 2 delegates got the same amount of reward with 5% error margin
-		require.InEpsilon(t, validator1DelegatesTotalReward, validator2DelegatesTotalReward, 0.05, "Validator 1 and Validator 2 delegate rewards are not equal")
-
-		// check if both blobber delegates got the same amount of reward with 5% error margin
-		require.InEpsilon(t, blobber1Delegate1TotalReward, blobber1Delegate2TotalReward, 0.05, "Blobber 1 Delegate 1 and Blobber 1 Delegate 2 rewards are not equal")
-		require.InEpsilon(t, blobber2Delegate1TotalReward, blobber2Delegate2TotalReward, 0.05, "Blobber 2 Delegate 1 and Blobber 2 Delegate 2 rewards are not equal")
-
-		// check if both validator delegates got the same amount of reward with 5% error margin
-		require.InEpsilon(t, validator1Delegate1TotalReward, validator1Delegate2TotalReward, 0.05, "Validator 1 Delegate 1 and Validator 1 Delegate 2 rewards are not equal")
-		require.InEpsilon(t, validator2Delegate1TotalReward, validator2Delegate2TotalReward, 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not equal")
-
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 2)
-
-	})
-
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
 		// Delegate Wallets
@@ -291,6 +181,116 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, validator2Delegate1TotalReward*2, validator2Delegate2TotalReward, 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not equal")
 
 		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 2)
+	})
+
+	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
+			1, 1, 1, 1, 1, 1, 1, 1,
+		}, 2)
+
+		// Creating Allocation
+
+		output := utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
+
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"tokens": 99,
+			"data":   1,
+			"parity": 1,
+			"expire": "10m",
+		})
+
+		// Uploading 10% of allocation
+
+		remotepath := "/dir/"
+		filesize := 0.1 * GB
+		filename := utils.GenerateRandomTestFileName(t)
+
+		err = utils.CreateFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		// sleep for 10 minutes
+		time.Sleep(10 * time.Minute)
+
+		allocation := utils.GetAllocation(t, allocationId)
+
+		t.Log(allocation.MovedToChallenge)
+
+		totalExpectedReward := float64(allocation.MovedToChallenge)
+
+		challengeRewards, err := getAllAllocationChallengeRewards(t, allocationId)
+		require.Nil(t, err, "Error getting challenge rewards", strings.Join(output, "\n"))
+
+		blobber1Delegate1TotalReward := challengeRewards[blobber1].DelegateRewards[b1D1Wallet.ClientID]
+		blobber1Delegate2TotalReward := challengeRewards[blobber1].DelegateRewards[b1D2Wallet.ClientID]
+		blobber2Delegate1TotalReward := challengeRewards[blobber2].DelegateRewards[b2D1Wallet.ClientID]
+		blobber2Delegate2TotalReward := challengeRewards[blobber2].DelegateRewards[b2D2Wallet.ClientID]
+		validator1Delegate1TotalReward := challengeRewards[validator1].DelegateRewards[v1D1Wallet.ClientID]
+		validator1Delegate2TotalReward := challengeRewards[validator1].DelegateRewards[v1D2Wallet.ClientID]
+		validator2Delegate1TotalReward := challengeRewards[validator2].DelegateRewards[v2D1Wallet.ClientID]
+		validator2Delegate2TotalReward := challengeRewards[validator2].DelegateRewards[v2D2Wallet.ClientID]
+
+		blobber1TotalReward := challengeRewards[blobber1].Amount
+		blobber2TotalReward := challengeRewards[blobber2].Amount
+		blobber1DelegatesTotalReward := blobber1Delegate1TotalReward + blobber1Delegate2TotalReward
+		blobber2DelegatesTotalReward := blobber2Delegate1TotalReward + blobber2Delegate2TotalReward
+		validator1TotalReward := challengeRewards[validator1].Amount
+		validator2TotalReward := challengeRewards[validator2].Amount
+		validator1DelegatesTotalReward := validator1Delegate1TotalReward + validator1Delegate2TotalReward
+		validator2DelegatesTotalReward := validator2Delegate1TotalReward + validator2Delegate2TotalReward
+
+		totalReward := blobber1TotalReward + blobber2TotalReward + blobber1DelegatesTotalReward + blobber2DelegatesTotalReward + validator1TotalReward + validator2TotalReward + validator1DelegatesTotalReward + validator2DelegatesTotalReward
+
+		t.Log("Total Reward: ", totalReward)
+		t.Log("Total Expected Reward: ", totalExpectedReward)
+		t.Log("Blobber 1 Total Reward: ", blobber1TotalReward)
+		t.Log("Blobber 2 Total Reward: ", blobber2TotalReward)
+		t.Log("Blobber 1 Delegates Total Reward: ", blobber1DelegatesTotalReward)
+		t.Log("Blobber 2 Delegates Total Reward: ", blobber2DelegatesTotalReward)
+		t.Log("Validator 1 Total Reward: ", validator1TotalReward)
+		t.Log("Validator 2 Total Reward: ", validator2TotalReward)
+		t.Log("Validator 1 Delegates Total Reward: ", validator1DelegatesTotalReward)
+		t.Log("Validator 2 Delegates Total Reward: ", validator2DelegatesTotalReward)
+
+		t.Log("Blobber 1 Delegate 1 Total Reward: ", blobber1Delegate1TotalReward)
+		t.Log("Blobber 1 Delegate 2 Total Reward: ", blobber1Delegate2TotalReward)
+		t.Log("Blobber 2 Delegate 1 Total Reward: ", blobber2Delegate1TotalReward)
+		t.Log("Blobber 2 Delegate 2 Total Reward: ", blobber2Delegate2TotalReward)
+		t.Log("Validator 1 Delegate 1 Total Reward: ", validator1Delegate1TotalReward)
+		t.Log("Validator 1 Delegate 2 Total Reward: ", validator1Delegate2TotalReward)
+		t.Log("Validator 2 Delegate 1 Total Reward: ", validator2Delegate1TotalReward)
+		t.Log("Validator 2 Delegate 2 Total Reward: ", validator2Delegate2TotalReward)
+
+		// check if total reward is equal to expected reward with 5% error margin
+		require.InEpsilon(t, totalReward, totalExpectedReward, 0.05, "Total Reward is not equal to expected reward")
+		// check if blobber 1 and blobber 2 got the same amount of reward with 5% error margin
+		require.InEpsilon(t, blobber1TotalReward, blobber2TotalReward, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
+		// check if blobber 1 and blobber 2 delegates got the same amount of reward with 5% error margin
+		require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
+		// check if validator 1 and validator 2 got the same amount of reward with 5% error margin
+		require.InEpsilon(t, validator1TotalReward, validator2TotalReward, 0.05, "Validator 1 and Validator 2 rewards are not equal")
+		// check if validator 1 and validator 2 delegates got the same amount of reward with 5% error margin
+		require.InEpsilon(t, validator1DelegatesTotalReward, validator2DelegatesTotalReward, 0.05, "Validator 1 and Validator 2 delegate rewards are not equal")
+
+		// check if both blobber delegates got the same amount of reward with 5% error margin
+		require.InEpsilon(t, blobber1Delegate1TotalReward, blobber1Delegate2TotalReward, 0.05, "Blobber 1 Delegate 1 and Blobber 1 Delegate 2 rewards are not equal")
+		require.InEpsilon(t, blobber2Delegate1TotalReward, blobber2Delegate2TotalReward, 0.05, "Blobber 2 Delegate 1 and Blobber 2 Delegate 2 rewards are not equal")
+
+		// check if both validator delegates got the same amount of reward with 5% error margin
+		require.InEpsilon(t, validator1Delegate1TotalReward, validator1Delegate2TotalReward, 0.05, "Validator 1 Delegate 1 and Validator 1 Delegate 2 rewards are not equal")
+		require.InEpsilon(t, validator2Delegate1TotalReward, validator2Delegate2TotalReward, 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not equal")
+
+		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 2)
+
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
