@@ -27,6 +27,8 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 )
 
+require github.com/aws/aws-sdk-go v1.44.294
+
 require (
 	github.com/0chain/common v0.0.6-0.20230127095721-8df4d1d72565 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -35,6 +37,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/klauspost/reedsolomon v1.11.7 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
