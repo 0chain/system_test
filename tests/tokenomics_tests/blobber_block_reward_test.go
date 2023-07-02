@@ -74,8 +74,6 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 1}
 
-		t.Skip()
-
 		//stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, stake, 1)
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -286,8 +284,6 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
-
-	t.Skip()
 
 	t.RunSequentiallyWithTimeout("Verify write price diff changes", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
