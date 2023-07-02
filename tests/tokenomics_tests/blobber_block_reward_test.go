@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -32,6 +33,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	output, err = utils.ListBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
+
+	// sort blobberList by Id
+	sort.Slice(blobberList, func(i, j int) bool {
+		return blobberList[i].Id < blobberList[j].Id
+	})
 
 	err = json.Unmarshal([]byte(output[0]), &blobberList)
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
@@ -171,13 +177,14 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Verify free reads", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		// Updating blobber 2 read price
-		blobber2 := blobberList[1]
-		output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber"+strconv.Itoa(2), utils.CreateParams(map[string]interface{}{"blobber_id": blobber2.Id, "read_price": utils.IntToZCN(0)}))
-		require.Nil(t, err, strings.Join(output, "\n"))
 
 		blobber1 := blobberList[0]
 		output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber"+strconv.Itoa(1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber1.Id, "read_price": utils.IntToZCN(10000000000)}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		// Updating blobber 2 read price
+		blobber2 := blobberList[1]
+		output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber"+strconv.Itoa(2), utils.CreateParams(map[string]interface{}{"blobber_id": blobber2.Id, "read_price": utils.IntToZCN(0)}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
