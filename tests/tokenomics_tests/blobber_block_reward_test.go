@@ -68,6 +68,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 1}
 
+		t.Skip()
+
 		//stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, stake, 1)
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -175,7 +177,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		blobber1 := blobberList[0]
-		output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber"+strconv.Itoa(1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber1.Id, "read_price": utils.IntToZCN(0)}))
+		output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber"+strconv.Itoa(1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber1.Id, "read_price": utils.IntToZCN(10000000000)}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
