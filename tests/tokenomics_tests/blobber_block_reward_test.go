@@ -171,7 +171,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber1Weight", blobber1Weight)
 		t.Log("blobber2Weight", blobber2Weight)
 
-		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.1, "Total rewards not distributed correctly")
+		require.InEpsilon(t, blobber1Weight/blobber2Weight, blobber1TotalRewards/blobber2TotalRewards, 0.1, "Total rewards not distributed correctly")
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
@@ -282,7 +282,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber1Weight", blobber1Weight)
 		t.Log("blobber2Weight", blobber2Weight)
 
-		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.1, "Total rewards not distributed correctly")
+		require.InEpsilon(t, blobber1Weight/blobber2Weight, blobber1TotalRewards/blobber2TotalRewards, 0.1, "Total rewards not distributed correctly")
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
@@ -394,7 +394,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber1Weight", blobber1Weight)
 		t.Log("blobber2Weight", blobber2Weight)
 
-		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.1, "Total rewards not distributed correctly")
+		require.InEpsilon(t, blobber1Weight/blobber2Weight, blobber1TotalRewards/blobber2TotalRewards, 0.1, "Total rewards not distributed correctly")
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
@@ -505,7 +505,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber1Weight", blobber1Weight)
 		t.Log("blobber2Weight", blobber2Weight)
 
-		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.1, "Total rewards not distributed correctly")
+		require.InEpsilon(t, blobber1Weight/blobber2Weight, blobber1TotalRewards/blobber2TotalRewards, 0.1, "Total rewards not distributed correctly")
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
@@ -615,7 +615,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber1Weight", blobber1Weight)
 		t.Log("blobber2Weight", blobber2Weight)
 
-		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.1, "Total rewards not distributed correctly")
+		require.InEpsilon(t, blobber1Weight/blobber2Weight, blobber1TotalRewards/blobber2TotalRewards, 0.1, "Total rewards not distributed correctly")
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
@@ -724,7 +724,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber1Weight", blobber1Weight)
 		t.Log("blobber2Weight", blobber2Weight)
 
-		require.InEpsilon(t, blobber1TotalRewards/blobber2TotalRewards, blobber1Weight/blobber2Weight, 0.1, "Total rewards not distributed correctly")
+		require.InEpsilon(t, blobber1Weight/blobber2Weight, blobber1TotalRewards/blobber2TotalRewards, 0.1, "Total rewards not distributed correctly")
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
@@ -734,11 +734,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 }
 
-func getBlockRewards(t *test.SystemTest, startBlockNumber, endBlockNumber string) map[string]int64 {
+func getBlockRewards(t *test.SystemTest, startBlockNumber, endBlockNumber string) map[string]float64 {
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	sharderBaseUrl := utils.GetSharderUrl(t)
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/block-rewards?start_block_number=" + startBlockNumber + "&end_block_number=" + endBlockNumber)
-	var response map[string]int64
+	var response map[string]float64
 
 	fmt.Println(url)
 
