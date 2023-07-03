@@ -1083,6 +1083,7 @@ func TestShareFile(testSetup *testing.T) {
 			"allocation": allocationID,
 			"localpath":  file,
 			"remotepath": remoteOwnerPath,
+			"encrypt":    "",
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
