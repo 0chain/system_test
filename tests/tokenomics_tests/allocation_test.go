@@ -21,7 +21,12 @@ const tokenUnit float64 = 1e+10
 func TestAllocationRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	output, err := utils.CreateWallet(t, configPath)
+	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+		"time_unit": "5m",
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+
+	output, err = utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
@@ -104,7 +109,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		time.Sleep(1 * time.Minute)
+		time.Sleep(30 * time.Second)
 
 		alloc := utils.GetAllocation(t, allocationId)
 		movedToChallengePool := alloc.MovedToChallenge
@@ -293,7 +298,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Equal(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
 
 		// sleep for 5 minutes
-		time.Sleep(6 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
@@ -302,7 +307,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should be 0")
+		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
 
 	})
 
@@ -311,11 +316,16 @@ func TestAllocationRewards(testSetup *testing.T) {
 func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+		"time_unit": "10m",
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+
 	prevBlock := utils.GetLatestFinalizedBlock(t)
 
 	t.Log("prevBlock", prevBlock)
 
-	output, err := utils.CreateWallet(t, configPath)
+	output, err = utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
@@ -356,8 +366,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 	}, 1)
 
 	t.RunSequentiallyWithTimeout("Add Blobber to Increase Parity", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
-		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -421,7 +429,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// Challenge Rewards
-		time.Sleep(12 * time.Minute)
+		time.Sleep(10 * time.Minute)
 		blobberRewards := getAllocationChallengeRewards(t, allocationId)
 
 		require.Equal(t, 3, len(blobberRewards), "All 3 blobber should get the rewards")
@@ -462,8 +470,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Replace Blobber", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
-		utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))

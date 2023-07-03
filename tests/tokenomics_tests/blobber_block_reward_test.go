@@ -22,11 +22,16 @@ import (
 func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+		"time_unit": "20m",
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+
 	prevBlock := utils.GetLatestFinalizedBlock(t)
 
 	t.Log("prevBlock", prevBlock)
 
-	output, err := utils.CreateWallet(t, configPath)
+	output, err = utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo

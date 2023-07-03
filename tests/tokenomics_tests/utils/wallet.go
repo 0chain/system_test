@@ -211,3 +211,38 @@ func ReadWalletFile(t *test.SystemTest, file string) *climodel.WalletFile {
 
 	return wallet
 }
+
+func UpdateStorageSCConfig(t *test.SystemTest, walletName string, param map[string]string, retry bool) ([]string, error) {
+	t.Logf("Updating storage config...")
+	p := createKeyValueParams(param)
+	cmd := fmt.Sprintf(
+		"./zwallet sc-update-config %s --silent --wallet %s --configDir ./config --config %s",
+		p,
+		walletName+"_wallet.json",
+		configPath,
+	)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*5)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
+func createKeyValueParams(params map[string]string) string {
+	keys := "--keys \""
+	values := "--values \""
+	first := true
+	for k, v := range params {
+		if first {
+			first = false
+		} else {
+			keys += ","
+			values += ","
+		}
+		keys += " " + k
+		values += " " + v
+	}
+	keys += "\""
+	values += "\""
+	return keys + " " + values
+}

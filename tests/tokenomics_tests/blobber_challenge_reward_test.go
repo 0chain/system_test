@@ -19,10 +19,15 @@ import (
 func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+		"time_unit": "5m",
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+
 	utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
 
 	var blobberList []climodel.BlobberInfo
-	output, err := utils.ListBlobbers(t, configPath, "--json")
+	output, err = utils.ListBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
@@ -91,7 +96,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "5m",
 		})
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
@@ -103,7 +108,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		allocation := utils.GetAllocation(t, allocationId)
 
@@ -169,7 +174,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "5m",
 		})
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
@@ -181,7 +186,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		allocation := utils.GetAllocation(t, allocationId)
 
@@ -240,7 +245,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "5m",
 		})
 
 		// Uploading 10% of allocation
@@ -261,7 +266,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		allocation := utils.GetAllocation(t, allocationId)
 
@@ -319,7 +324,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "5m",
 		})
 
 		// Uploading 10% of allocation
@@ -340,7 +345,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		allocation := utils.GetAllocation(t, allocationId)
 
@@ -424,7 +429,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		v2D1Wallet, _ := utils.GetWalletForName(t, configPath, validator2Delegate1Wallet)
 
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 1, 1, 2, 2, 2, 2,
+			1, 1, 2, 2, 1, 1, 2, 2,
 		}, 2)
 
 		// Creating Allocation
@@ -436,7 +441,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
+			"expire": "5m",
 		})
 
 		// Uploading 10% of allocation
@@ -457,7 +462,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		allocation := utils.GetAllocation(t, allocationId)
 
@@ -549,10 +554,6 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []string, v
 	tIdx := 0
 
 	for i := 0; i < numDelegates; i++ {
-		if idx == 2 {
-			idx = 0
-		}
-
 		for _, blobber := range blobbers {
 
 			// add balance to delegate wallet
@@ -577,11 +578,6 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []string, v
 	idx = 0
 
 	for i := 0; i < numDelegates; i++ {
-
-		if idx == 2 {
-			idx = 0
-		}
-
 		for _, validator := range validators {
 			// add balance to delegate wallet
 			_, err := utils.ExecuteFaucetWithTokensForWallet(t, validatorDelegates[idx], configPath, tokens[tIdx]+1)
@@ -697,17 +693,18 @@ type ProviderAllocationRewards struct {
 }
 
 func tearDownRewardsTests(t *test.SystemTest, blobberList []string, validatorList []string, configPath string, allocationID string, numDelegates int) {
-	allocation := utils.GetAllocation(t, allocationID)
-
-	t.Log("Allocation : ", allocation)
-
-	// check if allocation is finalized
-	if allocation.Finalized == false {
-		_, err := utils.CancelAllocation(t, configPath, allocationID, true)
-
-		fmt.Println("Error cancelling allocation", err.Error())
-		//require.Nil(t, err, "Error canceling allocation")
-	}
-
+	waitUntilAllocationIsFinalized(t, allocationID)
 	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, numDelegates)
+}
+
+func waitUntilAllocationIsFinalized(t *test.SystemTest, allocationID string) {
+	for {
+		allocation := utils.GetAllocation(t, allocationID)
+
+		if allocation.Finalized == true {
+			break
+		}
+
+		time.Sleep(5 * time.Second)
+	}
 }
