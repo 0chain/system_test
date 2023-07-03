@@ -23,7 +23,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-		"time_unit": "20m",
+		"time_unit": "2m",
 	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
