@@ -167,6 +167,7 @@ jobs:
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           authorizer_image: staging
+          custom_go_sdk_version: "NONE"
 
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@revert/breaking_gosdk_staging
