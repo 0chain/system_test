@@ -627,7 +627,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		allocAfterUpload := getAllocation(t, allocationID)
 		require.Equal(t, initialAllocation.WritePool-allocAfterUpload.WritePool, allocAfterUpload.MovedToChallenge)
 
-		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge), 0.05, "Upload cost is not as expected")
+		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge), 0.05, "Upload cost is not as expected %v != %v", expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge))
 
 		// Get initial write pool
 		cliutils.Wait(t, 10*time.Second)
