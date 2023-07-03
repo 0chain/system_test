@@ -17,6 +17,11 @@ import (
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/spf13/viper"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 func setupDefaultConfig() {
@@ -93,6 +98,7 @@ var (
 	s3SecretKey     string
 	s3AccessKey     string
 	s3bucketName    string
+	S3Client        *s3.S3
 )
 
 var (
@@ -151,6 +157,19 @@ func TestMain(m *testing.M) {
 	setupConfig()
 
 	tenderlyClient = tenderly.NewClient(ethereumNodeURL)
+
+	// Create a session with AWS
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String("us-east-2"), // Replace with your desired AWS region
+		Credentials: credentials.NewStaticCredentials(s3AccessKey, s3SecretKey, ""),
+	})
+	if err != nil {
+		log.Fatalln("Failed to create AWS session:", err)
+		return
+	}
+
+	// Create an S3 client
+	S3Client = s3.New(sess)
 
 	snapshotHash, err := tenderlyClient.CreateSnapshot()
 	if err != nil {
