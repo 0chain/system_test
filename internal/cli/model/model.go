@@ -58,6 +58,7 @@ type Allocation struct {
 	Owner          string    `json:"owner_id"`
 	OwnerPublicKey string    `json:"owner_public_key"`
 	Payer          string    `json:"payer_id"`
+	MinLockDemand  int64     `json:"min_lock_demand"`
 	Blobbers       []Blobber `json:"blobbers"`
 	// Stats          *AllocationStats          `json:"stats"`
 	TimeUnit    time.Duration `json:"time_unit"`
@@ -152,9 +153,8 @@ type ListFileResult struct {
 }
 
 type Terms struct {
-	Read_price      int64   `json:"read_price"`
-	Write_price     int64   `json:"write_price"`
-	Min_lock_demand float64 `json:"min_lock_demand"`
+	Read_price  int64 `json:"read_price"`
+	Write_price int64 `json:"write_price"`
 }
 
 type Settings struct {
@@ -378,7 +378,7 @@ type BlobberDetails struct {
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 	IsKilled          bool              `json:"is_killed"`
 	IsShutdown        bool              `json:"is_shutdown"`
-	IsAvailable       bool              `json:"is_available"`
+	NotAvailable      bool              `json:"not_available"`
 }
 
 type Validator struct {
@@ -403,7 +403,7 @@ type FreeStorageMarker struct {
 	Assigner   string  `json:"assigner,omitempty"`
 	Recipient  string  `json:"recipient"`
 	FreeTokens float64 `json:"free_tokens"`
-	Timestamp  int64   `json:"timestamp"`
+	Nonce      int64   `json:"nonce"`
 	Signature  string  `json:"signature,omitempty"`
 }
 
@@ -731,6 +731,7 @@ var StorageKeySettings = []string{
 
 var StorageFloatSettings = []string{
 	"cancellation_charge",
+	"min_lock_demand",
 	"free_allocation_settings.read_pool_fraction",
 	"validator_reward",
 	"blobber_slash",
@@ -770,6 +771,7 @@ var StorageIntSettings = []string{
 	"free_allocation_settings.size",
 	"max_blobbers_per_allocation",
 	"validators_per_challenge",
+	"num_validators_rewarded",
 	"max_delegates",
 	"cost.update_settings",
 	"cost.read_redeem",

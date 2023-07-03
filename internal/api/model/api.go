@@ -600,9 +600,8 @@ type SCRestGetBlobbersResponse struct {
 }
 
 type Terms struct {
-	ReadPrice     int64   `json:"read_price"`
-	WritePrice    int64   `json:"write_price"`
-	MinLockDemand float64 `json:"min_lock_demand"`
+	ReadPrice  int64 `json:"read_price"`
+	WritePrice int64 `json:"write_price"`
 }
 
 type StakePoolSettings struct {
