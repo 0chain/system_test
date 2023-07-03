@@ -93,3 +93,5 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 )
+
+// replace github.com/herumi/bls-go-binary => github.com/herumi/bls-go-binary v1.28.2
