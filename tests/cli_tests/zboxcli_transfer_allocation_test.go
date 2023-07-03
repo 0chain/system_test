@@ -67,9 +67,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"new_owner_key": nonOwnerWallet.ClientPublicKey,
 			"new_owner":     nonOwnerWallet.ClientID,
 		}, false)
-
-		fmt.Println("Transfer Allocation output : ", output)
-
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "transfer allocation - Unexpected output", strings.Join(output, "\n"))
 		reg := regexp.MustCompile("Error transferring allocation:allocation_updating_failed: only owner can update the allocation")

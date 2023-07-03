@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TODO
 func TestSyncWithBlobbers(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Sync path with 1 file to empty allocation should work")
@@ -741,7 +742,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 			"invalid-allocation-id, error: record not found", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Sync path to non-empty allocation - locally updated files (in root) must be updated in allocation", func(t *test.SystemTest) {
+	t.Run("Sync path to non-empty allocation -  (in root) must be updated in allocation", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		createAllocationTestTeardown(t, allocationID)
 

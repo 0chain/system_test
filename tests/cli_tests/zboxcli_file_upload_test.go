@@ -25,6 +25,20 @@ func TestUpload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Upload File With half Size of the Allocation Should Work")
 
+	t.TestSetup("register wallet and get blobbers", func() {
+		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "10m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+	})
+
+	t.Cleanup(func() {
+		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "1h",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+	})
+
 	t.Parallel()
 
 	// Success Scenarios
