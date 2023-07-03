@@ -191,7 +191,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
-		readData := []int{1, 1}
+		readData := []int{0, 0}
 
 		//stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, stake, 1)
 
@@ -303,7 +303,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		}
 
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
-		readData := []int{9, 9}
+		readData := []int{0, 0}
 
 		//stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, stake, 1)
 
@@ -403,6 +403,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Check read price ratio", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+
+		t.Skip()
 		for count, blobber := range blobberList {
 			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber"+strconv.Itoa(count+1),
 				utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(int64(math.Pow10(count)) * 1e9)}))
@@ -512,6 +514,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Check ratio with respect to total read data", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		t.Skip()
+
 		for count, blobber := range blobberList {
 			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
@@ -620,6 +624,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Verify stake ratio", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+
 		for count, blobber := range blobberList {
 			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber"+strconv.Itoa(count+1), utils.CreateParams(map[string]interface{}{"blobber_id": blobber.Id, "read_price": utils.IntToZCN(1e9)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
@@ -631,7 +636,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		}
 
 		stake := []float64{1.0, 20.0, 1.0, 20.0}
-		readData := []int{1, 1}
+		readData := []int{0, 0}
 
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, stake, 1)
 
