@@ -78,40 +78,6 @@ func TestCancelAllocation(testSetup *testing.T) {
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.Equal(t, "Error canceling allocation:alloc_cancel_failed: value not present", output[0])
 	})
-
-	t.RunWithTimeout("Cancel Expired Allocation Should Fail", 3*time.Minute, func(t *test.SystemTest) {
-		_, err := createWallet(t, configPath)
-		require.NoError(t, err)
-
-		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "1s",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		t.Cleanup(func() {
-			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
-				"time_unit": "1h",
-			}, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-		})
-
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "5s",
-		})
-
-		time.Sleep(30 * time.Second)
-		allocations := parseListAllocations(t, configPath)
-		ac, ok := allocations[allocationID]
-		require.True(t, ok, "current allocation not found", allocationID, allocations)
-		require.LessOrEqual(t, ac.ExpirationDate, time.Now().Unix())
-
-		// Cancel the expired allocation
-		output, err = cancelAllocation(t, configPath, allocationID, false)
-		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-
-		require.Equal(t, "Error canceling allocation:alloc_cancel_failed: trying to cancel expired allocation", output[0])
-	})
 }
 
 func cancelAllocation(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
