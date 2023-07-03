@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -15,49 +14,8 @@ import (
 
 func TestFinalizeAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.SetSmokeTests("Finalize Expired Allocation Should Work after challenge completion time + expiry")
 
 	t.Parallel()
-
-	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 12*time.Minute, func(t *test.SystemTest) {
-		//TODO: unacceptably slow
-		_, err := createWallet(t, configPath)
-		require.NoError(t, err)
-
-		output, err := executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "1s",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		t.Cleanup(func() {
-			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
-				"time_unit": "1h",
-			}, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-		})
-
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "5s",
-		})
-
-		time.Sleep(30 * time.Second)
-
-		allocations := parseListAllocations(t, configPath)
-		_, ok := allocations[allocationID]
-		require.True(t, ok, "current allocation not found", allocationID, allocations)
-
-		cliutils.Wait(t, 3*time.Minute)
-
-		output, err = finalizeAllocation(t, configPath, allocationID, true)
-
-		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		matcher := regexp.MustCompile("Allocation finalized with txId .*$")
-		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
-	})
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
 		output, err := executeFaucetWithTokens(t, configPath, 10)

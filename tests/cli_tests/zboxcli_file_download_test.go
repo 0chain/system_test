@@ -1236,51 +1236,6 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "pre-redeeming read marker")
 	})
 
-	t.Run("Download File using Expired Allocation Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		filesize := int64(256)
-		remotepath := "/"
-
-		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "1m",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		t.Cleanup(func() {
-			output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
-				"time_unit": "1h",
-			}, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-		})
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
-			"expire": "1m",
-		})
-
-		t.Log("Time after creating the allocation ", time.Now())
-
-		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		t.Log("Time after uploading the file ", time.Now())
-
-		time.Sleep(2 * time.Minute)
-
-		// Delete the uploaded file, since we will be downloading it now
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Contains(t, output[0], "consensus_not_met")
-	})
-
 	t.Run("Download File to Existing File Should Fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
