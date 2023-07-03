@@ -20,6 +20,7 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
+// TODO
 func TestShareFile(testSetup *testing.T) {
 	//TODO: all share operations take ~40s except for PRE which takes ~2mins 30s!
 	t := test.NewSystemTest(testSetup)

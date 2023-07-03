@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Fixed
 func TestFileDelete(testSetup *testing.T) {
 	//todo: slow operations
 	t := test.NewSystemTest(testSetup)
