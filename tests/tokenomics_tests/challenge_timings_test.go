@@ -20,7 +20,12 @@ import (
 func TestChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	output, err := utils.CreateWallet(t, configPath)
+	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+		"time_unit": "5m",
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+
+	output, err = utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
@@ -203,6 +208,11 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 	t.RunWithTimeout("Case 4: 10 1gb allocation, 100mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
+		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "20m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -263,6 +273,11 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 5: 10 10gb allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+
+		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "20m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
 
 		var allocationIDs []string
 

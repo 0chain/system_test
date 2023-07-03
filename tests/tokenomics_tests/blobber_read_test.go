@@ -20,7 +20,12 @@ import (
 func TestBlobberReadReward(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	output, err := utils.CreateWallet(t, configPath)
+	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+		"time_unit": "10m",
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+
+	output, err = utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo

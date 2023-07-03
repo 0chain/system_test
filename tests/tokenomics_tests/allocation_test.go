@@ -21,7 +21,12 @@ const tokenUnit float64 = 1e+10
 func TestAllocationRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	output, err := utils.CreateWallet(t, configPath)
+	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+		"time_unit": "5m",
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+
+	output, err = utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
@@ -311,11 +316,16 @@ func TestAllocationRewards(testSetup *testing.T) {
 func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+		"time_unit": "10m",
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+
 	prevBlock := utils.GetLatestFinalizedBlock(t)
 
 	t.Log("prevBlock", prevBlock)
 
-	output, err := utils.CreateWallet(t, configPath)
+	output, err = utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
