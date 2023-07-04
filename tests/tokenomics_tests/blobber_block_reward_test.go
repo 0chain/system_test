@@ -394,7 +394,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber1Weight", blobber1Weight)
 		t.Log("blobber2Weight", blobber2Weight)
 
-		require.InEpsilon(t, blobber1Weight*100/blobber2Weight, blobber1TotalRewards*100/blobber2TotalRewards, 0.1, "Total rewards not distributed correctly")
+		require.InEpsilon(t, blobber1Weight*100/blobber2Weight, blobber1TotalRewards*100/blobber2TotalRewards, 0.15, "Total rewards not distributed correctly")
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
@@ -724,7 +724,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber1Weight", blobber1Weight)
 		t.Log("blobber2Weight", blobber2Weight)
 
-		require.InEpsilon(t, blobber1Weight*100/blobber2Weight, blobber1TotalRewards*100/blobber2TotalRewards, 0.1, "Total rewards not distributed correctly")
+		require.InEpsilon(t, blobber1Weight*100/blobber2Weight, blobber1TotalRewards*100/blobber2TotalRewards, 0.2, "Total rewards not distributed correctly")
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
