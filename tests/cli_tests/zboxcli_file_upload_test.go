@@ -40,7 +40,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
-	t.Parallel()
+	//t.Parallel()
 
 	// Success Scenarios
 
