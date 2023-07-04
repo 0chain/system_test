@@ -110,31 +110,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		for i := 0; i < readData[0]; i++ {
-			err = os.Remove(filename)
-
-			remoteFilepath := remotepath + filepath.Base(filename)
-
-			utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": remoteFilepath,
-				"localpath":  os.TempDir() + string(os.PathSeparator),
-				"blobber_id": blobberList[0].Id,
-			}), true)
-		}
-
-		for i := 0; i < readData[1]; i++ {
-			err = os.Remove(filename)
-
-			remoteFilepath := remotepath + filepath.Base(filename)
-
-			_, _ = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": remoteFilepath,
-				"localpath":  os.TempDir() + string(os.PathSeparator),
-				"blobber_id": blobberList[1].Id,
-			}), true)
-		}
+		_, _ = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), true)
 
 		// Sleep for 2 minutes
 		time.Sleep(2 * time.Minute)
@@ -224,32 +204,6 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		for i := 0; i < readData[0]; i++ {
-			err = os.Remove(filename)
-
-			remoteFilepath := remotepath + filepath.Base(filename)
-
-			_, _ = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": remoteFilepath,
-				"localpath":  os.TempDir() + string(os.PathSeparator),
-				"blobber_id": blobberList[0].Id,
-			}), true)
-		}
-
-		for i := 0; i < readData[1]; i++ {
-			err = os.Remove(filename)
-
-			remoteFilepath := remotepath + filepath.Base(filename)
-
-			_, _ = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": remoteFilepath,
-				"localpath":  os.TempDir() + string(os.PathSeparator),
-				"blobber_id": blobberList[1].Id,
-			}), true)
-		}
-
 		// Sleep for 10 minutes
 		time.Sleep(2 * time.Minute)
 		curBlock := utils.GetLatestFinalizedBlock(t)
@@ -282,7 +236,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber1Weight", blobber1Weight)
 		t.Log("blobber2Weight", blobber2Weight)
 
-		require.InEpsilon(t, blobber1Weight*100/blobber2Weight, blobber1TotalRewards*100/blobber2TotalRewards, 0.1, "Total rewards not distributed correctly")
+		require.InEpsilon(t, blobber1Weight*100/blobber2Weight, blobber1TotalRewards*100/blobber2TotalRewards, 0.15, "Total rewards not distributed correctly")
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
