@@ -158,8 +158,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber1TotalRewards := blobberBlockRewards[blobberListString[0]]
 		blobber2TotalRewards := blobberBlockRewards[blobberListString[1]]
 
-		blobber1Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[0])*totalData, 2, blobber1PassedChallenges)
-		blobber2Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[1])*totalData, 4, blobber2PassedChallenges)
+		blobber1Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
+		blobber2Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
 
 		// print all values
 		//t.Log("blobber1ProviderRewards", blobber1ProviderRewards)
@@ -711,8 +711,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber1TotalRewards := blobberBlockRewards[blobberListString[0]]
 		blobber2TotalRewards := blobberBlockRewards[blobberListString[1]]
 
-		blobber1Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[0])*totalData, stake[0], blobber1PassedChallenges)
-		blobber2Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[1])*totalData, stake[1], blobber2PassedChallenges)
+		blobber1Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[0])*totalData, 2, blobber1PassedChallenges)
+		blobber2Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[1])*totalData, 4, blobber2PassedChallenges)
 
 		// print all values
 		//t.Log("blobber1ProviderRewards", blobber1ProviderRewards)
