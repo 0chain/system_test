@@ -158,7 +158,10 @@ func CancelAllocation(t *test.SystemTest, cliConfigFilename, allocationID string
 
 func CreateFileWithSize(name string, size int64) error {
 	buffer := make([]byte, size)
-	rand.Read(buffer) //nolint:gosec,revive
+	_, err := rand.Read(buffer)
+	if err != nil {
+		return err
+	} //nolint:gosec,revive
 	return os.WriteFile(name, buffer, os.ModePerm)
 }
 

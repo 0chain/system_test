@@ -536,7 +536,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	})
 }
 
-func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []string, validators []string, configPath string, tokens []float64, numDelegates int) {
+func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers, validators []string, configPath string, tokens []float64, numDelegates int) {
 	var blobberDelegates []string
 	var validatorDelegates []string
 
@@ -597,7 +597,7 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers []string, v
 	}
 }
 
-func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers []string, validators []string, configPath string, numDelegates int) {
+func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers, validators []string, configPath string, numDelegates int) {
 	var blobberDelegates []string
 	var validatorDelegates []string
 
