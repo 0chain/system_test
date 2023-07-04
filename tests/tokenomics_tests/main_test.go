@@ -78,8 +78,6 @@ const (
 	miner03NodeDelegateWalletName   = "wallets/miner03_node_delegate"
 	sharder01NodeDelegateWalletName = "wallets/sharder01_node_delegate"
 	sharder02NodeDelegateWalletName = "wallets/sharder02_node_delegate"
-	blobber1Wallet                  = "wallets/blobber1"
-	blobber2Wallet                  = "wallets/blobber2"
 	blobber1Delegate1Wallet         = "wallets/blobber1_delegate1"
 	blobber1Delegate2Wallet         = "wallets/blobber1_delegate2"
 	blobber2Delegate1Wallet         = "wallets/blobber2_delegate1"
