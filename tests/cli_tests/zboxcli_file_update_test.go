@@ -41,7 +41,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		defer os.Remove(thumbnailFile)
 
 		downloadThumbnailFolder := thumbnailFile + "down"
-		remotepath = remotepath + filepath.Base(localFilePath)
+		remotepath += filepath.Base(localFilePath)
 		defer os.RemoveAll(downloadThumbnailFolder) //nolint: errcheck
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
