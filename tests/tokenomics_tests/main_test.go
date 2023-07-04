@@ -80,7 +80,6 @@ const (
 	zcnscOwner                      = "wallets/zcnsc_owner"
 	scOwnerWallet                   = "wallets/sc_owner"
 	blobberOwnerWallet              = "wallets/blobber_owner"
-	validatorOwnerWallet            = "wallets/validator_owner"
 	miner01NodeDelegateWalletName   = "wallets/miner01_node_delegate"
 	miner02NodeDelegateWalletName   = "wallets/miner02_node_delegate"
 	miner03NodeDelegateWalletName   = "wallets/miner03_node_delegate"
@@ -88,8 +87,6 @@ const (
 	sharder02NodeDelegateWalletName = "wallets/sharder02_node_delegate"
 	blobber1Wallet                  = "wallets/blobber1"
 	blobber2Wallet                  = "wallets/blobber2"
-	validator1Wallet                = "wallets/validator1"
-	validator2Wallet                = "wallets/validator2"
 	blobber1Delegate1Wallet         = "wallets/blobber1_delegate1"
 	blobber1Delegate2Wallet         = "wallets/blobber1_delegate2"
 	blobber2Delegate1Wallet         = "wallets/blobber2_delegate1"
@@ -98,7 +95,6 @@ const (
 	validator1Delegate2Wallet       = "wallets/validator1_delegate2"
 	validator2Delegate1Wallet       = "wallets/validator2_delegate1"
 	validator2Delegate2Wallet       = "wallets/validator2_delegate2"
-	fixedAllocationOwnerWallet      = "wallets/fixed_allocation_owner"
 )
 
 var (
