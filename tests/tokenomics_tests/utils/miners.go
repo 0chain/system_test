@@ -5,14 +5,11 @@ import (
 	"fmt"
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutil "github.com/0chain/system_test/internal/cli/util"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"reflect"
 	"strings"
-	"time"
 )
 
 func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {
@@ -44,21 +41,4 @@ func GetLatestFinalizedBlock(t *test.SystemTest) *climodel.LatestFinalizedBlock 
 	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
 
 	return &block
-}
-
-func GetMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
-	t.Log("Get miners...")
-	return cliutil.RunCommand(t, "./zwallet ls-miners --active --json --silent --wallet "+EscapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
-}
-
-func GetStorageSCConfig(t *test.SystemTest, cliConfigFilename string, retry bool) ([]string, error) {
-	cliutils.Wait(t, 5*time.Second)
-	t.Logf("Retrieving storage config...")
-	cmd := "./zwallet sc-config --wallet " + EscapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename
-
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
 }

@@ -10,7 +10,6 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -133,32 +132,6 @@ func downloadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename, param 
 	}
 }
 
-func generateChecksum(t *test.SystemTest, filePath string) string {
-	t.Logf("Generating checksum for file [%v]...", filePath)
-
-	output, err := cliutils.RunCommandWithoutRetry("shasum -a 256 " + filePath)
-	require.Nil(t, err, "Checksum generation for file %v failed", filePath, strings.Join(output, "\n"))
-	require.Greater(t, len(output), 0)
-
-	matcher := regexp.MustCompile("(.*) " + filePath + "$")
-	require.Regexp(t, matcher, output[0], "Checksum execution output did not match expected", strings.Join(output, "\n"))
-
-	return matcher.FindAllStringSubmatch(output[0], 1)[0][1]
-}
-
-func setupWallet(t *test.SystemTest, configPath string) []string {
-	output, err := CreateWallet(t, configPath)
-	require.Nil(t, err, strings.Join(output, "\n"))
-
-	output, err = ExecuteFaucetWithTokens(t, configPath, 1)
-	require.Nil(t, err, strings.Join(output, "\n"))
-
-	output, err = getBalance(t, configPath)
-	require.Nil(t, err, strings.Join(output, "\n"))
-
-	return output
-}
-
 func CreateNewAllocation(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	return CreateNewAllocationForWallet(t, EscapedTestName(t), cliConfigFilename, params)
 }
@@ -171,15 +144,6 @@ func CreateNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename,
 		wallet+"_wallet.json",
 		cliConfigFilename,
 		wallet+"_allocation.txt"), 3, time.Second*5)
-}
-
-func createNewAllocationWithoutRetry(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	return cliutils.RunCommandWithoutRetry(fmt.Sprintf(
-		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
-		params,
-		EscapedTestName(t)+"_wallet.json",
-		cliConfigFilename,
-		EscapedTestName(t)+"_allocation.txt"))
 }
 
 func CancelAllocation(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
@@ -199,14 +163,6 @@ func CancelAllocation(t *test.SystemTest, cliConfigFilename, allocationID string
 	}
 }
 
-func extractAuthToken(str string) (string, error) {
-	match := reAuthToken.FindStringSubmatch(str)
-	if len(match) > 1 {
-		return match[1], nil
-	}
-	return "", errors.New("auth token did not match")
-}
-
 func CreateFileWithSize(name string, size int64) error {
 	buffer := make([]byte, size)
 	rand.Read(buffer) //nolint:gosec,revive
@@ -221,80 +177,12 @@ func GenerateRandomTestFileName(t *test.SystemTest) string {
 	return fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
 }
 
-func shareFolderInAllocation(t *test.SystemTest, cliConfigFilename, param string) ([]string, error) {
-	return shareFolderInAllocationForWallet(t, EscapedTestName(t), cliConfigFilename, param)
-}
-
-func shareFolderInAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, param string) ([]string, error) {
-	t.Logf("Sharing file/folder...")
-	cmd := fmt.Sprintf(
-		"./zbox share %s --silent --wallet %s --configDir ./config --config %s",
-		param,
-		wallet+"_wallet.json",
-		cliConfigFilename,
-	)
-	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
-}
-
-func listFilesInAllocation(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
-	return listFilesInAllocationForWallet(t, EscapedTestName(t), cliConfigFilename, param, retry)
-}
-
-func listFilesInAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
-	cliutils.Wait(t, 10*time.Second) // TODO replace with poller
-	t.Logf("Listing individual file in allocation...")
-	cmd := fmt.Sprintf(
-		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",
-		param,
-		wallet+"_wallet.json",
-		cliConfigFilename,
-	)
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
-}
-
-func listAllFilesInAllocation(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
-	cliutils.Wait(t, 10*time.Second) // TODO replace with poller
-	t.Logf("Listing all files in allocation...")
-	cmd := fmt.Sprintf(
-		"./zbox list-all %s --silent --wallet %s --configDir ./config --config %s",
-		param,
-		EscapedTestName(t)+"_wallet.json",
-		cliConfigFilename,
-	)
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
-}
-
 func GetAllocationID(str string) (string, error) {
 	match := createAllocationRegex.FindStringSubmatch(str)
 	if len(match) < 2 {
 		return "", errors.New("allocation match not found")
 	}
 	return match[1], nil
-}
-
-func uploadWithParam(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}) {
-	uploadWithParamForWallet(t, EscapedTestName(t), cliConfigFilename, param)
-}
-func uploadWithParamForWallet(t *test.SystemTest, wallet, cliConfigFilename string, param map[string]interface{}) {
-	filename, ok := param["localpath"].(string)
-	require.True(t, ok)
-
-	output, err := uploadFileForWallet(t, wallet, cliConfigFilename, param, true)
-	require.Nil(t, err, "Upload file failed due to error ", err, strings.Join(output, "\n"))
-
-	require.Len(t, output, 2)
-
-	aggregatedOutput := strings.Join(output, " ")
-	require.Contains(t, aggregatedOutput, StatusCompletedCB)
-	require.Contains(t, aggregatedOutput, filepath.Base(filename))
 }
 
 func UploadFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
@@ -319,160 +207,6 @@ func uploadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename string, p
 	}
 }
 
-func uploadFileWithoutRetry(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
-	t.Logf("Uploading file...")
-	p := CreateParams(param)
-	cmd := fmt.Sprintf(
-		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
-		p,
-		EscapedTestName(t)+"_wallet.json",
-		cliConfigFilename,
-	)
-
-	return cliutils.RunCommandWithoutRetry(cmd)
-}
-
-func generateFileAndUpload(t *test.SystemTest, allocationID, remotepath string, size int64) string {
-	return generateFileAndUploadForWallet(t, EscapedTestName(t), allocationID, remotepath, size)
-}
-
-func generateFileAndUploadForWallet(t *test.SystemTest, wallet, allocationID, remotepath string, size int64) string {
-	filename := GenerateRandomTestFileName(t)
-
-	err := CreateFileWithSize(filename, size)
-	require.Nil(t, err)
-
-	// Upload parameters
-	uploadWithParamForWallet(t, wallet, configPath, map[string]interface{}{
-		"allocation": allocationID,
-		"localpath":  filename,
-		"remotepath": remotepath + filepath.Base(filename),
-	})
-
-	return filename
-}
-
-func generateFileAndUploadWithParam(t *test.SystemTest, allocationID, remotepath string, size int64, params map[string]interface{}) string {
-	filename := GenerateRandomTestFileName(t)
-
-	err := CreateFileWithSize(filename, size)
-	require.Nil(t, err)
-
-	p := map[string]interface{}{
-		"allocation": allocationID,
-		"localpath":  filename,
-		"remotepath": remotepath + filepath.Base(filename),
-	}
-
-	for k, v := range params {
-		p[k] = v
-	}
-
-	// Upload parameters
-	uploadWithParam(t, configPath, p)
-
-	return filename
-}
-
-func uploadRandomlyGeneratedFile(t *test.SystemTest, allocationID, remotePath string, fileSize int64) string {
-	return uploadRandomlyGeneratedFileWithWallet(t, EscapedTestName(t), allocationID, remotePath, fileSize)
-}
-
-func uploadRandomlyGeneratedFileWithWallet(t *test.SystemTest, walletName, allocationID, remotePath string, fileSize int64) string {
-	filename := GenerateRandomTestFileName(t)
-	err := CreateFileWithSize(filename, fileSize)
-	require.Nil(t, err)
-
-	if !strings.HasSuffix(remotePath, "/") {
-		remotePath += "/"
-	}
-
-	output, err := uploadFileForWallet(t, walletName, configPath, map[string]interface{}{
-		"allocation": allocationID,
-		"remotepath": remotePath + filepath.Base(filename),
-		"localpath":  filename,
-	}, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 2)
-	require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
-	return filename
-}
-
-func moveAllocationFile(t *test.SystemTest, allocationID, remotepath, destination string) { // nolint
-	output, err := moveFile(t, configPath, map[string]interface{}{
-		"allocation": allocationID,
-		"remotepath": "/" + remotepath,
-		"destpath":   "/" + destination,
-	}, true)
-	require.Nil(t, err, "error in moving the file: ", strings.Join(output, "\n"))
-}
-
-func renameAllocationFile(t *test.SystemTest, allocationID, remotepath, newName string) {
-	output, err := renameFile(t, configPath, map[string]interface{}{
-		"allocation": allocationID,
-		"remotepath": "/" + remotepath,
-		"destname":   newName,
-	}, true)
-	require.Nil(t, err, "error in renaming the file: ", strings.Join(output, "\n"))
-}
-
-func updateFileWithRandomlyGeneratedData(t *test.SystemTest, allocationID, remotepath string, size int64) string {
-	return updateFileWithRandomlyGeneratedDataWithWallet(t, EscapedTestName(t), allocationID, remotepath, size)
-}
-
-func updateFileWithRandomlyGeneratedDataWithWallet(t *test.SystemTest, walletName, allocationID, remotepath string, size int64) string {
-	localfile := GenerateRandomTestFileName(t)
-	err := CreateFileWithSize(localfile, size)
-	require.Nil(t, err)
-
-	output, err := updateFileWithWallet(t, walletName, configPath, map[string]interface{}{
-		"allocation": allocationID,
-		"remotepath": remotepath,
-		"localpath":  localfile,
-	}, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	return localfile
-}
-
-func renameFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
-	t.Logf("Renaming file...")
-	p := CreateParams(param)
-	cmd := fmt.Sprintf(
-		"./zbox rename %s --silent --wallet %s --configDir ./config --config %s",
-		p,
-		EscapedTestName(t)+"_wallet.json",
-		cliConfigFilename,
-	)
-
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
-}
-
-func updateFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
-	return updateFileWithWallet(t, EscapedTestName(t), cliConfigFilename, param, retry)
-}
-
-func updateFileWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
-	t.Logf("Updating file...")
-
-	p := CreateParams(param)
-	cmd := fmt.Sprintf(
-		"./zbox update %s --silent --wallet %s --configDir ./config --config %s",
-		p,
-		walletName+"_wallet.json",
-		cliConfigFilename,
-	)
-
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
-}
-
 func GetAllocation(t *test.SystemTest, allocationID string) (allocation climodel.Allocation) {
 	output, err := getAllocationWithRetry(t, configPath, allocationID, 1)
 	require.Nil(t, err, "error fetching allocation")
@@ -490,47 +224,6 @@ func getAllocationWithRetry(t *test.SystemTest, cliConfigFilename, allocationID 
 		EscapedTestName(t)+"_wallet.json",
 		cliConfigFilename), retry, time.Second*5)
 	return output, err
-}
-
-// ConvertToToken converts the value to ZCN tokens
-func ConvertToToken(value int64) float64 {
-	return float64(value) / float64(TOKEN_UNIT)
-}
-
-// ConvertToValue converts ZCN tokens to value
-func ConvertToValue(token float64) int64 {
-	return int64(token * float64(TOKEN_UNIT))
-}
-
-func moveFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
-	return moveFileWithWallet(t, EscapedTestName(t), cliConfigFilename, param, retry)
-}
-
-func moveFileWithWallet(t *test.SystemTest, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
-	t.Logf("Moving file...")
-	p := CreateParams(param)
-	cmd := fmt.Sprintf(
-		"./zbox move %s --silent --wallet %s --configDir ./config --config %s",
-		p,
-		wallet+"_wallet.json",
-		cliConfigFilename,
-	)
-
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
-}
-
-func setupWalletWithCustomTokens(t *test.SystemTest, configPath string, tokens float64) []string {
-	output, err := CreateWallet(t, configPath)
-	require.Nil(t, err, strings.Join(output, "\n"))
-
-	ExecuteFaucetWithTokens(t, configPath, tokens)
-	require.Nil(t, err, strings.Join(output, "\n"))
-
-	return output
 }
 
 func UpdateAllocation(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {

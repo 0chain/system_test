@@ -10,10 +10,9 @@ import (
 const (
 	configPath = "./zbox_config.yaml"
 
-	KB               = 1024      // kilobyte
-	MB               = 1024 * KB // megabyte
-	GB               = 1024 * MB // gigabyte
-	TOKEN_UNIT int64 = 1e10
+	KB = 1024      // kilobyte
+	MB = 1024 * KB // megabyte
+	GB = 1024 * MB // gigabyte
 
 	tokenUnit float64 = 1e+10
 )

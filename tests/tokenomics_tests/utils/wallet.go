@@ -7,8 +7,6 @@ import (
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
-	"io"
-	"os"
 	"strings"
 	"time"
 )
@@ -61,12 +59,6 @@ type createWalletOption struct {
 
 type createWalletOptionFunc func(*createWalletOption)
 
-func withNoFaucetPour() createWalletOptionFunc {
-	return func(o *createWalletOption) {
-		o.noPourAndReadPool = true
-	}
-}
-
 func CreateWalletForName(t *test.SystemTest, cliConfigFilename, name string, opts ...createWalletOptionFunc) ([]string, error) {
 	t.Logf("creating wallet...")
 	regOpt := &createWalletOption{}
@@ -87,46 +79,6 @@ func CreateWalletForName(t *test.SystemTest, cliConfigFilename, name string, opt
 	output, err := ExecuteFaucetWithTokensForWallet(t, name, cliConfigFilename, 5)
 	t.Logf("faucet output: %v", output)
 	return output, err
-}
-
-func CreateWalletForNameAndLockReadTokens(t *test.SystemTest, cliConfigFilename, name string) {
-	var tokens = 2.0
-	CreateWalletWithTokens(t, cliConfigFilename, name, tokens)
-	readPoolParams := CreateParams(map[string]interface{}{
-		"tokens": tokens / 2,
-	})
-	_, err := readPoolLockWithWallet(t, name, cliConfigFilename, readPoolParams, true)
-	require.NoErrorf(t, err, "error occurred when locking read pool for %s", name)
-}
-
-func CreateWalletWithTokens(t *test.SystemTest, cliConfigFilename, name string, tokens float64) {
-	_, err := CreateWalletForName(t, cliConfigFilename, name)
-	require.NoErrorf(t, err, "create wallet %s", name)
-	_, err = ExecuteFaucetWithTokensForWallet(t, name, cliConfigFilename, tokens)
-	require.NoErrorf(t, err, "get tokens for wallet %s", name)
-}
-
-func getBalance(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
-	cliutils.Wait(t, 5*time.Second)
-	return getBalanceForWallet(t, cliConfigFilename, EscapedTestName(t))
-}
-
-func ensureZeroBalance(t *test.SystemTest, output []string, err error) {
-	if err != nil {
-		require.Len(t, output, 1)
-		require.Equal(t, "Failed to get balance:", output[0])
-		return
-	}
-	require.Equal(t, "Balance: 0 SAS (0.00 USD)", output[0])
-}
-
-func getBalanceForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
-	return cliutils.RunCommand(t, "./zwallet getbalance --silent "+
-		"--wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
-}
-
-func GetWallet(t *test.SystemTest, cliConfigFilename string) (*climodel.Wallet, error) {
-	return GetWalletForName(t, cliConfigFilename, EscapedTestName(t))
 }
 
 func GetWalletForName(t *test.SystemTest, cliConfigFilename, name string) (*climodel.Wallet, error) {
@@ -151,12 +103,6 @@ func GetWalletForName(t *test.SystemTest, cliConfigFilename, name string) (*clim
 	return wallet, err
 }
 
-func verifyTransaction(t *test.SystemTest, cliConfigFilename, txn string) ([]string, error) {
-	t.Logf("Verifying transaction...")
-	return cliutils.RunCommand(t, "./zwallet verify --silent --wallet "+EscapedTestName(t)+""+
-		"_wallet.json"+" --hash "+txn+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
-}
-
 func SetupWalletWithCustomTokens(t *test.SystemTest, configPath string, tokens float64) []string {
 	output, err := CreateWallet(t, configPath)
 	require.Nil(t, err, strings.Join(output, "\n"))
@@ -165,16 +111,6 @@ func SetupWalletWithCustomTokens(t *test.SystemTest, configPath string, tokens f
 	require.Nil(t, err, strings.Join(output, "\n"))
 
 	return output
-}
-
-func stakeTokens(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
-	t.Log("Staking tokens...")
-	cmd := fmt.Sprintf("./zbox sp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, EscapedTestName(t), cliConfigFilename)
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
 }
 
 func StakeTokensForWallet(t *test.SystemTest, cliConfigFilename, wallet, params string, retry bool) ([]string, error) {
@@ -187,29 +123,9 @@ func StakeTokensForWallet(t *test.SystemTest, cliConfigFilename, wallet, params 
 	}
 }
 
-func unstakeTokens(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	t.Log("Unlocking tokens from stake pool...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, EscapedTestName(t), cliConfigFilename), 3, time.Second*2)
-}
-
 func UnstakeTokensForWallet(t *test.SystemTest, cliConfigFilename, wallet, params string) ([]string, error) {
 	t.Log("Unlocking tokens from stake pool...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second*2)
-}
-
-func ReadWalletFile(t *test.SystemTest, file string) *climodel.WalletFile {
-	wallet := &climodel.WalletFile{}
-
-	f, err := os.Open(file)
-	require.Nil(t, err, "wallet file %s not found", file)
-
-	ownerWalletBytes, err := io.ReadAll(f)
-	require.Nil(t, err, "error reading wallet file %s", file)
-
-	err = json.Unmarshal(ownerWalletBytes, wallet)
-	require.Nil(t, err, "error marshaling wallet content")
-
-	return wallet
 }
 
 func UpdateStorageSCConfig(t *test.SystemTest, walletName string, param map[string]string, retry bool) ([]string, error) {
