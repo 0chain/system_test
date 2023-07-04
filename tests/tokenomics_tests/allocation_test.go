@@ -16,8 +16,6 @@ import (
 	"time"
 )
 
-const tokenUnit float64 = 1e+10
-
 func TestAllocationRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
@@ -115,7 +113,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		movedToChallengePool := alloc.MovedToChallenge
 
 		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
-		require.Nil(t, err, "Error cancelling allocation", strings.Join(output, "\n"))
+		require.Nil(t, err, "Error canceling allocation", strings.Join(output, "\n"))
 
 		// sleep for 2 minutes
 		time.Sleep(2 * time.Minute)
@@ -135,24 +133,24 @@ func TestAllocationRewards(testSetup *testing.T) {
 
 		require.Greater(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge Reward should be less than MovedToChallenge")
 
-		// Cancellation Rewards
-		allocCancellationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
+		// cancelation Rewards
+		alloccancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
 		if err != nil {
 			return
 		}
 
-		blobber1CancellationReward := allocCancellationRewards[0]
-		blobber2CancellationReward := allocCancellationRewards[1]
+		blobber1cancelationReward := alloccancelationRewards[0]
+		blobber2cancelationReward := alloccancelationRewards[1]
 
-		totalExpectedCancellationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
+		totalExpectedcancelationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
 
-		t.Log("totalExpectedCancellationReward", totalExpectedCancellationReward)
+		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
 
-		t.Log("blobber1CancellationReward", blobber1CancellationReward)
-		t.Log("blobber2CancellationReward", blobber2CancellationReward)
+		t.Log("blobber1cancelationReward", blobber1cancelationReward)
+		t.Log("blobber2cancelationReward", blobber2cancelationReward)
 
-		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
-		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
+		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
+		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 	})
 
 	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -448,24 +446,24 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 			}
 		}
 
-		// Cancellation Rewards
-		allocCancellationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
+		// cancelation Rewards
+		alloccancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
 		if err != nil {
 			return
 		}
 
-		blobber1CancellationReward := allocCancellationRewards[0]
-		blobber2CancellationReward := allocCancellationRewards[1]
+		blobber1cancelationReward := alloccancelationRewards[0]
+		blobber2cancelationReward := alloccancelationRewards[1]
 
-		totalExpectedCancellationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
+		totalExpectedcancelationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
 
-		t.Log("totalExpectedCancellationReward", totalExpectedCancellationReward)
+		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
 
-		t.Log("blobber1CancellationReward", blobber1CancellationReward)
-		t.Log("blobber2CancellationReward", blobber2CancellationReward)
+		t.Log("blobber1cancelationReward", blobber1cancelationReward)
+		t.Log("blobber2cancelationReward", blobber2cancelationReward)
 
-		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
-		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
+		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
+		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 
 	})
 
@@ -553,33 +551,33 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 			}
 		}
 
-		// Cancellation Rewards
-		allocCancellationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
+		// cancelation Rewards
+		alloccancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
 		if err != nil {
 			return
 		}
 
-		blobber1CancellationReward := allocCancellationRewards[0]
-		blobber2CancellationReward := allocCancellationRewards[1]
+		blobber1cancelationReward := alloccancelationRewards[0]
+		blobber2cancelationReward := alloccancelationRewards[1]
 
-		totalExpectedCancellationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
+		totalExpectedcancelationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
 
-		t.Log("totalExpectedCancellationReward", totalExpectedCancellationReward)
+		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
 
-		t.Log("blobber1CancellationReward", blobber1CancellationReward)
-		t.Log("blobber2CancellationReward", blobber2CancellationReward)
+		t.Log("blobber1cancelationReward", blobber1cancelationReward)
+		t.Log("blobber2cancelationReward", blobber2cancelationReward)
 
-		require.InEpsilon(t, totalExpectedCancellationReward, float64(blobber1CancellationReward+blobber2CancellationReward), 0.05, "Total Cancellation Reward should be equal to total expected cancellation reward")
-		require.InEpsilon(t, blobber1CancellationReward, blobber2CancellationReward, 0.05, "Blobber 1 Cancellation Reward should be equal to total expected cancellation reward")
+		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
+		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 
 	})
 
 }
 
-func getAllocationCancellationReward(t *test.SystemTest, allocationID string, blobberList []string) ([]int64, error) {
+func getAllocationcancelationReward(t *test.SystemTest, allocationID string, blobberList []string) ([]int64, error) {
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	sharderBaseUrl := utils.GetSharderUrl(t)
-	url := fmt.Sprintf(sharderBaseUrl+"/v1/screst/"+StorageScAddress+"/cancellation-rewards?allocation_id=?", allocationID)
+	url := fmt.Sprintf(sharderBaseUrl+"/v1/screst/"+StorageScAddress+"/cancelation-rewards?allocation_id=?", allocationID)
 
 	t.Log("URL : ", url)
 
@@ -588,15 +586,20 @@ func getAllocationCancellationReward(t *test.SystemTest, allocationID string, bl
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			return
+		}
+	}(resp.Body)
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	var allocationCancellationRewards map[string]ProviderAllocationRewards
-	err = json.Unmarshal(body, &allocationCancellationRewards)
+	var allocationcancelationRewards map[string]ProviderAllocationRewards
+	err = json.Unmarshal(body, &allocationcancelationRewards)
 	if err != nil {
 		return nil, err
 	}
@@ -604,7 +607,7 @@ func getAllocationCancellationReward(t *test.SystemTest, allocationID string, bl
 	var result []int64
 
 	for _, blobber := range blobberList {
-		result = append(result, allocationCancellationRewards[blobber].Total)
+		result = append(result, allocationcancelationRewards[blobber].Total)
 	}
 
 	return result, nil

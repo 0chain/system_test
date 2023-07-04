@@ -655,7 +655,7 @@ const (
 	FileDownloadReward
 	ChallengePassReward
 	ChallengeSlashPenalty
-	CancellationChargeReward
+	cancelationChargeReward
 	NumOfRewards
 )
 
@@ -671,7 +671,7 @@ var rewardString = []string{
 	"file download reward",
 	"challenge pass reward",
 	"challenge slash",
-	"cancellation charge",
+	"cancelation charge",
 	"invalid",
 }
 
@@ -743,7 +743,7 @@ var StorageKeySettings = []string{
 }
 
 var StorageFloatSettings = []string{
-	"cancellation_charge",
+	"cancelation_charge",
 	"min_lock_demand",
 	"free_allocation_settings.read_pool_fraction",
 	"validator_reward",

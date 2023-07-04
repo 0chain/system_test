@@ -266,7 +266,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		require.NotNil(t, err, "Write pool tokens unlocked before expired", strings.Join(output, "\n"))
 
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Failed to unlock tokens in write pool: write_pool_unlock_failed: can't unlock until the allocation is finalized or cancelled", output[0]) //nolint
+		require.Equal(t, "Failed to unlock tokens in write pool: write_pool_unlock_failed: can't unlock until the allocation is finalized or canceled", output[0]) //nolint
 	})
 }
 

@@ -16,15 +16,8 @@ import (
 	"time"
 )
 
-const (
-	StatusCompletedCB         = "Status completed callback"
-	FreeTokensIndividualLimit = 10.0
-	FreeTokensTotalLimit      = 100.0
-)
-
 var (
 	createAllocationRegex = regexp.MustCompile(`^Allocation created: (.+)$`)
-	reAuthToken           = regexp.MustCompile(`^Auth token :(.*)$`)
 )
 
 func SetupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, extraParam map[string]interface{}) string {
@@ -68,7 +61,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 }
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	faucetTokens := float64(2.0)
+	faucetTokens := 2.0
 	// Then create new allocation
 	options := map[string]interface{}{"expire": "1h", "size": "10000", "lock": "0.5"}
 

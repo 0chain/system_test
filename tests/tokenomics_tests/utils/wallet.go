@@ -28,25 +28,6 @@ func ExecuteFaucetWithTokensForWallet(t *test.SystemTest, wallet, cliConfigFilen
 		cliConfigFilename,
 	), 3, time.Second*5)
 }
-func createWalletAndLockReadTokens(t *test.SystemTest, cliConfigFilename string) error {
-	_, err := CreateWalletForName(t, cliConfigFilename, EscapedTestName(t))
-	if err != nil {
-		return err
-	}
-	var tokens float64 = 2
-	_, err = ExecuteFaucetWithTokens(t, cliConfigFilename, tokens)
-	if err != nil {
-		return err
-	}
-
-	// Lock half the tokens for read pool
-	readPoolParams := CreateParams(map[string]interface{}{
-		"tokens": tokens / 2,
-	})
-	_, err = ReadPoolLock(t, cliConfigFilename, readPoolParams, true)
-
-	return err
-}
 
 func CreateWallet(t *test.SystemTest, cliConfigFilename string, opt ...createWalletOptionFunc) ([]string, error) {
 	return CreateWalletForName(t, cliConfigFilename, EscapedTestName(t), opt...)

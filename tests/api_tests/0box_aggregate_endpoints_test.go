@@ -886,8 +886,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			confHash = apiClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 			require.NotEmpty(t, confHash)
 
-			// Check decrease and calculate cancellation charge
-			var cancellationCharge int64
+			// Check decrease and calculate cancelation charge
+			var cancelationCharge int64
 			wait.PoolImmediately(t, 2*time.Minute, func() bool {
 				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
@@ -895,7 +895,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
 				cond := totalLockedAfter < graphTotalLocked
-				cancellationCharge = graphTotalLocked - totalLockedAfter
+				cancelationCharge = graphTotalLocked - totalLockedAfter
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})
@@ -904,15 +904,15 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			confHash = apiClient.UnlockWritePool(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 			require.NotEmpty(t, confHash)
 
-			// Check decrease by (initial locked value + write pool value - cancellation charge)
-			t.Logf("Cancellation charge: %d", cancellationCharge)
+			// Check decrease by (initial locked value + write pool value - cancelation charge)
+			t.Logf("cancelation charge: %d", cancelationCharge)
 			wait.PoolImmediately(t, 2*time.Minute, func() bool {
 				data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalLockedAfter := (*data)[0]
-				cond := graphTotalLocked-totalLockedAfter == (*tokenomics.IntToZCN(1.0) + *tokenomics.IntToZCN(0.2) - cancellationCharge)
+				cond := graphTotalLocked-totalLockedAfter == (*tokenomics.IntToZCN(1.0) + *tokenomics.IntToZCN(0.2) - cancelationCharge)
 				graphTotalLocked = totalLockedAfter
 				return cond
 			})

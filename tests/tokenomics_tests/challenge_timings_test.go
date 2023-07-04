@@ -439,8 +439,8 @@ func findMaxValue(nums []int64) int64 {
 //	TxnSubmission common.Timestamp `json:"txn_submission"`
 //	// TxnVerification is when challenge response is verified on blockchain.
 //	TxnVerification common.Timestamp `json:"txn_verification"`
-//	// Cancelled is when challenge is cancelled by blobber due to expiration or bad challenge data (eg. invalid ref or not a file) which is impossible to validate.
-//	Cancelled common.Timestamp `json:"cancelled"`
+//	// canceled is when challenge is canceled by blobber due to expiration or bad challenge data (eg. invalid ref or not a file) which is impossible to validate.
+//	canceled common.Timestamp `json:"canceled"`
 //	// Expiration is when challenge is marked as expired by blobber.
 //	Expiration common.Timestamp `json:"expiration"`
 //}
@@ -463,12 +463,12 @@ type ChallengeTiming struct {
 	TxnSubmission common.Timestamp `gorm:"txn_submission" json:"txn_submission"`
 	// TxnVerification is when challenge response is verified on blockchain.
 	TxnVerification common.Timestamp `gorm:"txn_verification" json:"txn_verification"`
-	// Cancelled is when challenge is cancelled by blobber due to expiration or bad challenge data (eg. invalid ref or not a file) which is impossible to validate.
-	Cancelled common.Timestamp `gorm:"cancelled" json:"cancelled"`
+	// canceled is when challenge is canceled by blobber due to expiration or bad challenge data (eg. invalid ref or not a file) which is impossible to validate.
+	canceled common.Timestamp `gorm:"canceled" json:"canceled"`
 	// Expiration is when challenge is marked as expired by blobber.
 	Expiration common.Timestamp `gorm:"expiration" json:"expiration"`
 
-	// ClosedAt is when challenge is closed (eg. expired, cancelled, or completed/verified).
+	// ClosedAt is when challenge is closed (eg. expired, canceled, or completed/verified).
 	ClosedAt common.Timestamp `gorm:"column:closed_at;index:idx_closed_at,sort:desc;" json:"closed"`
 
 	// UpdatedAt is when row is last updated.
