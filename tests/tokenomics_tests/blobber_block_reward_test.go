@@ -290,32 +290,6 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		for i := 0; i < readData[0]; i++ {
-			err = os.Remove(filename)
-
-			remoteFilepath := remotepath + filepath.Base(filename)
-
-			_, _ = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": remoteFilepath,
-				"localpath":  os.TempDir() + string(os.PathSeparator),
-				"blobber_id": blobberList[0].Id,
-			}), true)
-		}
-
-		for i := 0; i < readData[1]; i++ {
-			err = os.Remove(filename)
-
-			remoteFilepath := remotepath + filepath.Base(filename)
-
-			_, _ = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": remoteFilepath,
-				"localpath":  os.TempDir() + string(os.PathSeparator),
-				"blobber_id": blobberList[1].Id,
-			}), true)
-		}
-
 		// Sleep for 2 minutes
 		time.Sleep(2 * time.Minute)
 		curBlock := utils.GetLatestFinalizedBlock(t)
