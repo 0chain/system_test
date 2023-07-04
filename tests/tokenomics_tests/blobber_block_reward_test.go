@@ -726,6 +726,8 @@ func getGamma(X, R float64) float64 {
 
 func calculateWeight(wp, rp, X, R, stakes, challenges float64) float64 {
 
+	challenges = 1
+
 	zeta := getZeta(wp, rp)
 	gamma := getGamma(X, R)
 
