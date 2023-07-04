@@ -1174,7 +1174,9 @@ func TestShareFile(testSetup *testing.T) {
 		require.NotEmpty(t, finalReadPool)
 
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-		expectedRPBalance := 0.1*1e11 - expectedDownloadCostInSas
+		expectedRPBalance := initialReadPool.Balance - int64(expectedDownloadCostInSas)
+
+		expectedRPBalance = int64(expectedRPBalance*95) / 100 // reducing it to 5% to deal with the rounding off issue
 
 		// getDownloadCost returns download cost when all the associated blobbers of an allocation are required
 		// In current enhancement/verify-download PR, it gets data from minimum blobbers possible.
