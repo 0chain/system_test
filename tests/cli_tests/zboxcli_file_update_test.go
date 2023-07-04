@@ -40,22 +40,23 @@ func TestFileUpdate(testSetup *testing.T) {
 		//nolint: errcheck
 		defer os.Remove(thumbnailFile)
 
-		downloadThumbnailFile := thumbnailFile + ".down"
+		downloadThumbnailFolder := thumbnailFile + "down"
+		remotepath = remotepath + filepath.Base(localFilePath)
+		defer os.RemoveAll(downloadThumbnailFolder) //nolint: errcheck
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  downloadThumbnailFile,
+			"remotepath": remotepath,
+			"localpath":  downloadThumbnailFolder,
 			"thumbnail":  true,
 		}), true)
-
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		stats, err := os.Stat(downloadThumbnailFile)
+		localThumbnailFile := downloadThumbnailFolder + "/" + filepath.Base(remotepath)
+		stats, err := os.Stat(localThumbnailFile)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, thumbnailSize, int(stats.Size()))
-		defer os.Remove(downloadThumbnailFile) //nolint: errcheck
 
 		createAllocationTestTeardown(t, allocationID)
 	})
