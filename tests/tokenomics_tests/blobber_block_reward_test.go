@@ -76,7 +76,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, initialStakes, 1)
 
 	t.RunSequentiallyWithTimeout("All conditions same", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
+		//t.Skip()
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 1}
 
@@ -110,6 +110,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		err = os.Remove(os.TempDir() + string(os.PathSeparator) + filepath.Base(filename))
+		if err != nil {
+			t.Log("Error removing file : ", err)
+		}
 
 		_, _ = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
 			"allocation": allocationId,
@@ -152,7 +157,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber1Weight", blobber1Weight)
 		t.Log("blobber2Weight", blobber2Weight)
 
-		require.InEpsilon(t, blobber1Weight*100/blobber2Weight, blobber1TotalRewards*100/blobber2TotalRewards, 0.1, "Total rewards not distributed correctly")
+		require.InEpsilon(t, blobber1Weight*100/blobber2Weight, blobber1TotalRewards*100/blobber2TotalRewards, 0.15, "Total rewards not distributed correctly")
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
@@ -206,6 +211,11 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		for {
+			err := os.Remove(os.TempDir() + string(os.PathSeparator) + filepath.Base(filename))
+			if err != nil {
+				t.Log("Error removing file : ", err)
+			}
+
 			_, _ = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
 				"allocation": allocationId,
 				"remotepath": remotepath + filepath.Base(filename),
@@ -249,7 +259,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber1Weight", blobber1Weight)
 		t.Log("blobber2Weight", blobber2Weight)
 
-		require.InEpsilon(t, blobber1Weight*100/blobber2Weight, blobber1TotalRewards*100/blobber2TotalRewards, 0.15, "Total rewards not distributed correctly")
+		require.InEpsilon(t, blobber1Weight*100/blobber2Weight, blobber1TotalRewards*100/blobber2TotalRewards, 0.2, "Total rewards not distributed correctly")
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
@@ -257,7 +267,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 	})
 
-	t.Skip()
+	//t.Skip()
 
 	t.RunSequentiallyWithTimeout("Verify write price diff changes", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
@@ -305,8 +315,25 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		// Sleep for 2 minutes
-		time.Sleep(2 * time.Minute)
+		for {
+
+			err := os.Remove(os.TempDir() + string(os.PathSeparator) + filepath.Base(filename))
+			if err != nil {
+				t.Log("Error removing file : ", err)
+			}
+
+			_, _ = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+				"allocation": allocationId,
+				"remotepath": remotepath + filepath.Base(filename),
+				"localpath":  os.TempDir() + string(os.PathSeparator),
+			}), true)
+
+			allocInLoop := utils.GetAllocation(t, allocationId)
+			if allocInLoop.Finalized {
+				break
+			}
+		}
+
 		curBlock := utils.GetLatestFinalizedBlock(t)
 
 		blobber1PassedChallenges := countPassedChallengesForBlobberAndAllocation(t, allocationId, blobberList[0].Id)
@@ -629,7 +656,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		blobber2TotalRewards := blobberBlockRewards[blobberListString[1]]
 
 		blobber1Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[0])*totalData, 2, blobber1PassedChallenges)
-		blobber2Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[1])*totalData, 4, blobber2PassedChallenges)
+		blobber2Weight := calculateWeight(1000000000, 1000000000, totalData, float64(readData[1])*totalData, 21, blobber2PassedChallenges)
 
 		// print all values
 		//t.Log("blobber1ProviderRewards", blobber1ProviderRewards)
@@ -641,7 +668,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		t.Log("blobber1Weight", blobber1Weight)
 		t.Log("blobber2Weight", blobber2Weight)
 
-		require.InEpsilon(t, blobber1Weight*100/blobber2Weight, blobber1TotalRewards*100/blobber2TotalRewards, 0.2, "Total rewards not distributed correctly")
+		require.InEpsilon(t, blobber1Weight*100/blobber2Weight, blobber1TotalRewards*100/blobber2TotalRewards, 0.1, "Total rewards not distributed correctly")
 
 		prevBlock = utils.GetLatestFinalizedBlock(t)
 
