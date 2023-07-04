@@ -40,22 +40,23 @@ func TestFileUpdate(testSetup *testing.T) {
 		//nolint: errcheck
 		defer os.Remove(thumbnailFile)
 
-		downloadThumbnailFile := thumbnailFile + ".down"
+		downloadThumbnailDir := thumbnailFile + "down"
+		remotepath += filepath.Base(localFilePath)
+		defer os.RemoveAll(downloadThumbnailDir) //nolint: errcheck
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  downloadThumbnailFile,
+			"remotepath": remotepath,
+			"localpath":  downloadThumbnailDir,
 			"thumbnail":  true,
 		}), true)
-
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		stats, err := os.Stat(downloadThumbnailFile)
+		localThumbnailFile := filepath.Join(downloadThumbnailDir, filepath.Base(remotepath))
+		stats, err := os.Stat(localThumbnailFile)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, thumbnailSize, int(stats.Size()))
-		defer os.Remove(downloadThumbnailFile) //nolint: errcheck
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -131,15 +132,15 @@ func TestFileUpdate(testSetup *testing.T) {
 		generateThumbnail(t, thumbnail)
 
 		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"thumbnailpath": thumbnail})
-		//nolint: errcheck
-		os.Remove(thumbnail)
-		//nolint: errcheck
-		os.Remove(localFilePath)
+
+		os.Remove(thumbnail)     //nolint: errcheck
+		os.Remove(localFilePath) //nolint: errcheck
+		downloadDir, _ := filepath.Split(localFilePath)
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  localFilePath,
+			"localpath":  downloadDir,
 			"thumbnail":  true,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -148,29 +149,27 @@ func TestFileUpdate(testSetup *testing.T) {
 		// Update with new thumbnail
 		newThumbnail, newThumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
 
-		localThumbnailPath := filepath.Join(os.TempDir(), filepath.Base(newThumbnail))
-		//nolint: errcheck
-		os.Remove(newThumbnail)
-		//nolint: errcheck
-		os.Remove(localFilePath)
-		//nolint: errcheck
-		os.Remove(localThumbnailPath)
+		tempDir := os.TempDir()
+		localNewThumbnailPath := filepath.Join(tempDir, filepath.Base(newThumbnail))
+
+		os.Remove(newThumbnail)          //nolint: errcheck
+		os.Remove(localFilePath)         //nolint: errcheck
+		os.Remove(localNewThumbnailPath) //nolint: errcheck
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  localThumbnailPath,
+			"localpath":  tempDir,
 			"thumbnail":  true,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		stat, err := os.Stat(localThumbnailPath)
+		stat, err := os.Stat(localNewThumbnailPath)
 		require.Nil(t, err)
 		require.Equal(t, newThumbnailSize, int(stat.Size()))
 
-		//nolint: errcheck
-		os.Remove(localThumbnailPath)
+		os.Remove(localNewThumbnailPath) //nolint: errcheck
 
 		createAllocationTestTeardown(t, allocationID)
 	})
