@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -810,7 +811,11 @@ func TestUpload(testSetup *testing.T) {
 
 		minutesElapsed = 10 - minutesElapsed/60
 
-		actualExpectedUploadCostInZCN := intToZCN(int64(minutesElapsed * 1e9 / 1024))
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, filename)
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
 
 		finalAllocation := getAllocation(t, allocationID)
 
@@ -830,7 +835,10 @@ func TestUpload(testSetup *testing.T) {
 
 		totalChangeInWritePool := intToZCN(initialAllocation.WritePool - finalAllocation.WritePool)
 
-		require.InEpsilon(t, actualExpectedUploadCostInZCN, totalChangeInWritePool, 0.15, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", actualExpectedUploadCostInZCN, totalChangeInWritePool)
+		fmt.Println("totalChangeInWritePool", totalChangeInWritePool)
+		fmt.Println("actualExpectedUploadCostInZCN", expectedUploadCostInZCN)
+
+		require.InEpsilon(t, expectedUploadCostInZCN, totalChangeInWritePool, 0.15, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", expectedUploadCostInZCN, totalChangeInWritePool)
 		require.Equal(t, totalChangeInWritePool, intToZCN(challengePool.Balance), "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 

@@ -1069,13 +1069,13 @@ func TestShareFile(testSetup *testing.T) {
 			"share file - Unexpected output", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Share encrypted file using auth ticket - download accounting test - proxy re-encryption ", 3*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Share encrypted file using auth ticket - download accounting test - proxy re-encryption ", 5*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		file := generateRandomTestFileName(t)
 		remoteOwnerPath := "/" + filepath.Base(file)
-		fileSize := int64(10240) // must upload bigger file to ensure has noticeable cost
+		fileSize := int64(1024 * 1024 * 10) // must upload bigger file to ensure has noticeable cost
 		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
