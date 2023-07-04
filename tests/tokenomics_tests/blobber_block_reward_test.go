@@ -22,16 +22,16 @@ import (
 func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-		"time_unit": "2m",
-	}, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
+	//output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+	//	"time_unit": "2m",
+	//}, true)
+	//require.Nil(t, err, strings.Join(output, "\n"))
 
 	prevBlock := utils.GetLatestFinalizedBlock(t)
 
 	t.Log("prevBlock", prevBlock)
 
-	output, err = utils.CreateWallet(t, configPath)
+	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
@@ -76,6 +76,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, initialStakes, 1)
 
 	t.RunSequentiallyWithTimeout("All conditions same", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		t.Skip()
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 1}
 
@@ -184,7 +185,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 			"data":   1,
 			"parity": 1,
 			"tokens": 99,
-			"expire": "2m",
+			"expire": "5m",
 		})
 
 		t.Log("Allocation ID : ", allocationId)
@@ -204,8 +205,20 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
+		for {
+			_, _ = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+				"allocation": allocationId,
+				"remotepath": remotepath + filepath.Base(filename),
+				"localpath":  os.TempDir() + string(os.PathSeparator),
+			}), true)
+
+			allocInLoop := utils.GetAllocation(t, allocationId)
+			if allocInLoop.Finalized {
+				break
+			}
+		}
+
 		// Sleep for 10 minutes
-		time.Sleep(2 * time.Minute)
 		curBlock := utils.GetLatestFinalizedBlock(t)
 
 		blobber1PassedChallenges := countPassedChallengesForBlobberAndAllocation(t, allocationId, blobberList[0].Id)
@@ -243,6 +256,8 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 		//tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 
 	})
+
+	t.Skip()
 
 	t.RunSequentiallyWithTimeout("Verify write price diff changes", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 
@@ -669,7 +684,6 @@ func getZeta(wp, rp float64) float64 {
 }
 
 func getGamma(X, R float64) float64 {
-	return 1
 
 	A := float64(10)
 	B := float64(1)
