@@ -38,7 +38,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
-	t.Parallel()
+	//t.Parallel()
 
 	t.RunWithTimeout("Copy file concurrently to existing directory, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: way too slow
 		const allocSize int64 = 2048
