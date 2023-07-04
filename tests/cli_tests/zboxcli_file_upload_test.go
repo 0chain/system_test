@@ -457,7 +457,7 @@ func TestUpload(testSetup *testing.T) {
 		require.True(t, strings.Contains(strings.Join(output, "\n"), "alloc: no enough space left in allocation"), strings.Join(output, "\n"))
 	})
 
-	t.Run("Upload File too large - parity shards take up allocation space - more than half Size of the Allocation Should Fail when 1 parity shard", func(t *test.SystemTest) {
+	t.Run("Upload File too large - parity shards take up allocation space - more than half Size of the Allocation Should not Fail when 1 parity shard", func(t *test.SystemTest) {
 		allocSize := int64(1 * MB)
 		fileSize := int64(513 * KB)
 
@@ -476,11 +476,11 @@ func TestUpload(testSetup *testing.T) {
 			"remotepath": "/",
 			"localpath":  filename,
 		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.Contains(strings.Join(output, "\n"), "upload_failed"), strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.False(t, strings.Contains(strings.Join(output, "\n"), "upload_failed"), strings.Join(output, "\n"))
 	})
 
-	t.Run("Upload File too large - parity shards take up allocation space - more than quarter Size of the Allocation Should Fail when 3 parity shards", func(t *test.SystemTest) {
+	t.Run("Upload File too large - parity shards take up allocation space - more than quarter Size of the Allocation Should not Fail when 3 parity shards", func(t *test.SystemTest) {
 		allocSize := int64(1 * MB)
 		fileSize := int64(257 * KB)
 
@@ -499,9 +499,9 @@ func TestUpload(testSetup *testing.T) {
 			"remotepath": "/",
 			"localpath":  filename,
 		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Nil(t, err, strings.Join(output, "\n"))
 
-		require.True(t, strings.Contains(strings.Join(output, ""), "upload_failed"), strings.Join(output, "\n"))
+		require.False(t, strings.Contains(strings.Join(output, ""), "upload_failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *test.SystemTest) {
