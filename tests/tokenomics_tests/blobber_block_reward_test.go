@@ -741,8 +741,8 @@ func getBlockRewards(t *test.SystemTest, startBlockNumber, endBlockNumber, blobb
 func getZeta(wp, rp float64) float64 {
 
 	i := float64(1)
-	k := float64(0.9)
-	mu := float64(0.2)
+	k := 0.9
+	mu := 0.2
 
 	if wp == 0 {
 		return 0

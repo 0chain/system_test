@@ -437,7 +437,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 			avgBlobberReward += int(v.(float64))
 		}
 
-		avgBlobberReward = avgBlobberReward / len(blobberRewards)
+		avgBlobberReward /= len(blobberRewards)
 
 		for k, v := range blobberRewards {
 			require.Containsf(t, allocationBlobbers, k, "blobber id not found in allocation blobber list")
@@ -542,7 +542,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 			avgBlobberReward += int(v.(float64))
 		}
 
-		avgBlobberReward = avgBlobberReward / len(blobberRewards)
+		avgBlobberReward /= len(blobberRewards)
 
 		for k, v := range blobberRewards {
 			require.Containsf(t, allocationBlobbers, k, "blobber id not found in allocation blobber list")

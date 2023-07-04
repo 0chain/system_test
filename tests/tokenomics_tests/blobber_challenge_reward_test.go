@@ -89,7 +89,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		// Creating Allocation
 
-		output := utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
+		_ = utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
@@ -99,7 +99,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"expire": "5m",
 		})
 
-		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
 			// fetch the latest block in the chain
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
@@ -167,7 +167,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		// Creating Allocation
 
-		output := utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
+		utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
@@ -177,7 +177,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"expire": "5m",
 		})
 
-		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
 			// fetch the latest block in the chain
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
@@ -238,7 +238,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		// Creating Allocation
 
-		output := utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
+		utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
@@ -317,7 +317,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		// Creating Allocation
 
-		output := utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
+		utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
@@ -434,7 +434,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		// Creating Allocation
 
-		output := utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
+		utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
 
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,

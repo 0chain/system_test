@@ -24,10 +24,9 @@ const (
 )
 
 const (
-	KB               = 1024      // kilobyte
-	MB               = 1024 * KB // megabyte
-	GB               = 1024 * MB // gigabyte
-	TOKEN_UNIT int64 = 1e10
+	KB = 1024      // kilobyte
+	MB = 1024 * KB // megabyte
+	GB = 1024 * MB // gigabyte
 )
 
 func setupDefaultConfig() {
@@ -49,12 +48,6 @@ func setupConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalln(fmt.Errorf("fatal error config file: %s", err))
 	}
-
-	miner01ID = viper.GetString("nodes.miner01ID")
-	miner02ID = viper.GetString("nodes.miner02ID")
-	miner03ID = viper.GetString("nodes.miner03ID")
-	sharder01ID = viper.GetString("nodes.sharder01ID")
-	sharder02ID = viper.GetString("nodes.sharder02ID")
 
 	parsedConfig := config.Parse(filepath.Join(".", path, "tokenomics_tests_config.yaml"))
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
@@ -98,12 +91,6 @@ const (
 )
 
 var (
-	miner01ID   string
-	miner02ID   string
-	miner03ID   string
-	sharder01ID string
-	sharder02ID string
-
 	ethereumNodeURL string
 	ethereumAddress string
 )

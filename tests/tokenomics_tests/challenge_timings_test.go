@@ -363,7 +363,12 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 					t.Log("Error while getting challenge timings:", err)
 					continue // Skip this iteration and move to the next blobber
 				}
-				defer resp.Body.Close()
+				defer func(Body io.ReadCloser) {
+					err := Body.Close()
+					if err != nil {
+						t.Log("Error while closing challenge timings response body:", err)
+					}
+				}(resp.Body)
 
 				body, err := io.ReadAll(resp.Body)
 				if err != nil {
@@ -421,30 +426,6 @@ func findMaxValue(nums []int64) int64 {
 	return max
 }
 
-//type ChallengeTiming struct {
-//	// ChallengeID is the challenge ID generated on blockchain.
-//	ChallengeID string `json:"id"`
-//
-//	// CreatedAtChain is when generated on blockchain.
-//	CreatedAtChain common.Timestamp `json:"created_at_chain"`
-//	// CreatedAtBlobber is when synchronized and created at blobber.
-//	CreatedAtBlobber common.Timestamp `json:"created_at_blobber"`
-//	// FileSize is size of file that was randomly selected for challenge
-//	FileSize int64 `json:"file_size"`
-//	// ProofGenTime is the time taken in millisecond to generate challenge proof for the file
-//	ProofGenTime int64 `json:"proof_gen_time"`
-//	// CompleteValidation is when all validation tickets are all received.
-//	CompleteValidation common.Timestamp `json:"complete_validation"`
-//	// TxnSubmission is when challenge response is first sent to blockchain.
-//	TxnSubmission common.Timestamp `json:"txn_submission"`
-//	// TxnVerification is when challenge response is verified on blockchain.
-//	TxnVerification common.Timestamp `json:"txn_verification"`
-//	// canceled is when challenge is canceled by blobber due to expiration or bad challenge data (eg. invalid ref or not a file) which is impossible to validate.
-//	canceled common.Timestamp `json:"canceled"`
-//	// Expiration is when challenge is marked as expired by blobber.
-//	Expiration common.Timestamp `json:"expiration"`
-//}
-
 type ChallengeTiming struct {
 	// ChallengeID is the challenge ID generated on blockchain.
 	ChallengeID string `gorm:"column:challenge_id;size:64;primaryKey" json:"id"`
@@ -463,8 +444,8 @@ type ChallengeTiming struct {
 	TxnSubmission common.Timestamp `gorm:"txn_submission" json:"txn_submission"`
 	// TxnVerification is when challenge response is verified on blockchain.
 	TxnVerification common.Timestamp `gorm:"txn_verification" json:"txn_verification"`
-	// canceled is when challenge is canceled by blobber due to expiration or bad challenge data (eg. invalid ref or not a file) which is impossible to validate.
-	canceled common.Timestamp `gorm:"canceled" json:"canceled"`
+	// Canceled is when challenge is Canceled by blobber due to expiration or bad challenge data (eg. invalid ref or not a file) which is impossible to validate.
+	Canceled common.Timestamp `gorm:"canceled" json:"canceled"`
 	// Expiration is when challenge is marked as expired by blobber.
 	Expiration common.Timestamp `gorm:"expiration" json:"expiration"`
 
