@@ -3,7 +3,7 @@ package tokenomics_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/gosdk/core/common"
+	"github.com/0chain/gosdk/core/common" //nolint:goimports
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
@@ -239,7 +239,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"localpath":  filename,
 			}, true)
 			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
 		}
 
 		time.Sleep(1 * time.Minute)
@@ -345,7 +344,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 			for _, blobberUrl := range blobberUrls {
 				url := blobberUrl + "/challenge-timings-by-challengeId?challenge_id=" + challenge.ChallengeID
 
-				resp, err := http.Get(url)
+				resp, err := http.Get(url) //nolint:gosec
 				if err != nil {
 					t.Log("Error while getting challenge timings:", err)
 					continue // Skip this iteration and move to the next blobber
@@ -446,7 +445,7 @@ func getAllChallenges(t *test.SystemTest, allocationID string) ([]Challenge, err
 
 	var result []Challenge
 
-	res, _ := http.Get(url)
+	res, _ := http.Get(url) //nolint:gosec
 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()

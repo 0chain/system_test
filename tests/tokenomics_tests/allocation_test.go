@@ -3,7 +3,7 @@ package tokenomics_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/internal/api/util/test" //nolint:goimports
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 	"github.com/stretchr/testify/require"
@@ -577,7 +577,7 @@ func getAllocationcancelationReward(t *test.SystemTest, allocationID string, blo
 
 	t.Log("URL : ", url)
 
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) //nolint:gosec
 	if err != nil {
 		return nil, err
 	}
@@ -615,7 +615,7 @@ func getAllocationChallengeRewards(t *test.SystemTest, allocationID string) map[
 
 	t.Log("URL : ", url)
 
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) //nolint:gosec
 	if err != nil {
 		t.Fatalf("Error getting allocation challenge rewards: %v", err)
 	}
@@ -651,7 +651,7 @@ func getTotalAllocationChallengeRewards(t *test.SystemTest, allocationID string)
 
 	t.Log("URL : ", url)
 
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) //nolint:gosec
 	if err != nil {
 		t.Fatalf("Error getting allocation challenge rewards: %v", err)
 	}

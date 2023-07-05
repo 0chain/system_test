@@ -3,7 +3,7 @@ package tokenomics_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/internal/api/util/test" //nolint:goimports
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 	"github.com/stretchr/testify/require"
@@ -132,7 +132,6 @@ func TestBlobberReadReward(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1DownloadRewards, blobber2DownloadRewards, 0.05, "Blobber 1 and Blobber 2 download rewards are not equal")
 		require.InEpsilon(t, blobber1DelegatesDownloadRewards, blobber2DelegatesDownloadRewards, 0.05, "Blobber 1 delegate 1 and Blobber 2 delegate 1 download rewards are not equal")
 		require.InEpsilon(t, blobber1TotalDownloadRewards, blobber2TotalDownloadRewards, 0.05, "Blobber 1 total download rewards and Blobber 2 total download rewards are not equal")
-
 	})
 
 	t.RunSequentiallyWithTimeout("test download rewards and checking if downloading fails after allocation expiry", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
