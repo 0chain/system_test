@@ -344,17 +344,20 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, allocationIDs []string) []int64 {
 	blobberUrls := make([]string, len(blobbers))
-	for i, blobber := range blobbers {
+	for i := 0; i < len(blobbers); i++ {
+		blobber := blobbers[i]
 		blobberUrls[i] = blobber.Url
 	}
 
 	var proofGenTimes, txnSubmissions, txnVerifications []int64
 
-	for _, allocationID := range allocationIDs {
+	for i := 0; i < len(allocationIDs); i++ {
+		allocationID := allocationIDs[i]
 		challenges, err := getAllChallenges(t, allocationID)
 		require.Nil(t, err, "Error getting all challenges")
 
-		for _, challenge := range challenges {
+		for i := 0; i < len(challenges); i++ {
+			challenge := challenges[i]
 			for _, blobberUrl := range blobberUrls {
 				url := blobberUrl + "/challenge-timings-by-challengeId?challenge_id=" + challenge.ChallengeID
 

@@ -73,7 +73,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	v2D2Wallet, _ := utils.GetWalletForName(t, configPath, validator2Delegate2Wallet)
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
@@ -151,7 +150,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 30% of Allocation and 1 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
@@ -230,7 +228,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
 		// Staking Tokens to all blobbers and validators
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 2, 1, 2,
@@ -310,7 +307,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (equal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1, 1, 1, 1, 1,
 		}, 2)
@@ -420,7 +416,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
 		// Delegate Wallets
 		b1D1Wallet, _ := utils.GetWalletForName(t, configPath, blobber1Delegate1Wallet)
 		b2D1Wallet, _ := utils.GetWalletForName(t, configPath, blobber2Delegate1Wallet)
@@ -540,15 +535,8 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers, validators
 	var blobberDelegates []string
 	var validatorDelegates []string
 
-	blobberDelegates = append(blobberDelegates, blobber1Delegate1Wallet)
-	blobberDelegates = append(blobberDelegates, blobber2Delegate1Wallet)
-	blobberDelegates = append(blobberDelegates, blobber1Delegate2Wallet)
-	blobberDelegates = append(blobberDelegates, blobber2Delegate2Wallet)
-
-	validatorDelegates = append(validatorDelegates, validator1Delegate1Wallet)
-	validatorDelegates = append(validatorDelegates, validator2Delegate1Wallet)
-	validatorDelegates = append(validatorDelegates, validator1Delegate2Wallet)
-	validatorDelegates = append(validatorDelegates, validator2Delegate2Wallet)
+	blobberDelegates = append(blobberDelegates, blobber1Delegate1Wallet, blobber2Delegate1Wallet, blobber1Delegate2Wallet, blobber2Delegate2Wallet)
+	validatorDelegates = append(validatorDelegates, validator1Delegate1Wallet, validator2Delegate1Wallet, validator1Delegate2Wallet, validator2Delegate2Wallet)
 
 	idx := 0
 	tIdx := 0
@@ -601,15 +589,8 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers, validat
 	var blobberDelegates []string
 	var validatorDelegates []string
 
-	blobberDelegates = append(blobberDelegates, blobber1Delegate1Wallet)
-	blobberDelegates = append(blobberDelegates, blobber2Delegate1Wallet)
-	blobberDelegates = append(blobberDelegates, blobber1Delegate2Wallet)
-	blobberDelegates = append(blobberDelegates, blobber2Delegate2Wallet)
-
-	validatorDelegates = append(validatorDelegates, validator1Delegate1Wallet)
-	validatorDelegates = append(validatorDelegates, validator2Delegate1Wallet)
-	validatorDelegates = append(validatorDelegates, validator1Delegate2Wallet)
-	validatorDelegates = append(validatorDelegates, validator2Delegate2Wallet)
+	blobberDelegates = append(blobberDelegates, blobber1Delegate1Wallet, blobber2Delegate1Wallet, blobber1Delegate2Wallet, blobber2Delegate2Wallet)
+	validatorDelegates = append(validatorDelegates, validator1Delegate1Wallet, validator2Delegate1Wallet, validator1Delegate2Wallet, validator2Delegate2Wallet)
 
 	idx := 0
 
@@ -692,7 +673,7 @@ type ProviderAllocationRewards struct {
 	ProviderType    int64            `json:"provider_type"`
 }
 
-func tearDownRewardsTests(t *test.SystemTest, blobberList []string, validatorList []string, configPath string, allocationID string, numDelegates int) {
+func tearDownRewardsTests(t *test.SystemTest, blobberList, validatorList []string, configPath, allocationID string, numDelegates int) {
 	waitUntilAllocationIsFinalized(t, allocationID)
 	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, numDelegates)
 }

@@ -64,7 +64,6 @@ func TestBlobberReadReward(testSetup *testing.T) {
 	}, 1)
 
 	t.RunSequentiallyWithTimeout("download one time, equal from both blobbers", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -137,7 +136,6 @@ func TestBlobberReadReward(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("test download rewards and checking if downloading fails after allocation expiry", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 

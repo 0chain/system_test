@@ -88,7 +88,7 @@ func SetupWalletWithCustomTokens(t *test.SystemTest, configPath string, tokens f
 	output, err := CreateWallet(t, configPath)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
-	ExecuteFaucetWithTokens(t, configPath, tokens)
+	_, err = ExecuteFaucetWithTokens(t, configPath, tokens)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
 	return output
