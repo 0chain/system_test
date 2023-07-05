@@ -30,7 +30,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		// The folder structure tree
-		// Integer values will be consider as files with that size
+		// Integer values will be considered as files with that size
 		// Map values will be considered as folders
 		mockFolderStructure := map[string]interface{}{
 			"file1.txt": 64*KB + 1,
