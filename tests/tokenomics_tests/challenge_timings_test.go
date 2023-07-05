@@ -47,7 +47,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
 	t.RunWithTimeout("Case 1: 1 10mb allocation, 1mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -94,7 +93,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 2: 1 100mb allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -146,7 +144,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 3: 10 100mb allocation, 10mb file each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -207,7 +204,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 4: 10 1gb allocation, 100mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
 		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			"time_unit": "20m",
 		}, true)
@@ -273,7 +269,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 5: 10 10gb allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-
 		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			"time_unit": "20m",
 		}, true)
