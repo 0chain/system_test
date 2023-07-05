@@ -956,7 +956,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		output, err := getDifferences(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"localpath":   rootLocalFolder,
-			"excludepath": excludedFolderName,
+			"excludepath": "/" + excludedFolderName,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -1007,7 +1007,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		output, err = getDifferences(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"localpath":   rootLocalFolder,
-			"excludepath": excludedFolderName,
+			"excludepath": "/" + excludedFolderName,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -1020,7 +1020,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		output, err = syncFolder(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"localpath":   rootLocalFolder,
-			"excludepath": excludedFolderName,
+			"excludepath": "/" + excludedFolderName,
 		}, true)
 		require.Nil(t, err, "Error in syncing the folder: ", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1, "unexpected number of output lines", strings.Join(output, "\n"))
