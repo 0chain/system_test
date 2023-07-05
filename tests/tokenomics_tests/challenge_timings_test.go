@@ -196,9 +196,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		txnVerificationTime := result[2]
 
 		require.True(t, proofGenTime < 90000, "It is taking more than 75000 milliseconds to generate proof")
-
 		require.True(t, txnVerificationTime < 10000, "It is taking more than 10000 milliseconds to verify txn")
-
 	})
 
 	t.RunWithTimeout("Case 4: 10 1gb allocation, 100mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -260,9 +258,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		txnVerificationTime := result[2]
 
 		require.True(t, proofGenTime < 350000, "It is taking more than 320000 milliseconds to generate proof")
-
 		require.True(t, txnVerificationTime < 15000, "It is taking more than 10000 milliseconds to verify txn")
-
 	})
 
 	t.RunWithTimeout("Case 5: 10 10gb allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -289,11 +285,9 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"parity": 1,
 				"expire": "20m",
 			})
-
 			allocationIDs = append(allocationIDs, allocationId)
 
 			// Uploading 10% of allocation
-
 			remotepath := "/dir/"
 			filesize := 1 * GB
 			filename := utils.GenerateRandomTestFileName(t)
@@ -327,7 +321,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 		txnVerificationTime := result[2]
 
 		require.True(t, proofGenTime < 4200000, "It is taking more than 4000000 milliseconds to generate proof")
-
 		require.True(t, txnVerificationTime < 20000, "It is taking more than 17000 milliseconds to verify txn")
 	})
 
@@ -379,7 +372,6 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 
 				txnVerification := challengeTiming.TxnVerification.ToTime().Sub(challengeTiming.TxnSubmission.ToTime()).Milliseconds()
 				txnVerifications = append(txnVerifications, txnVerification)
-
 			}
 		}
 	}
