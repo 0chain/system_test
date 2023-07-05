@@ -19,7 +19,6 @@ func TestBlobberRewards(testSetup *testing.T) {
 	t.SetSmokeTests("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work")
 
 	t.RunSequentially("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work", func(t *test.SystemTest) {
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
