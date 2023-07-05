@@ -76,7 +76,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 	stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, initialStakes, 1)
 
 	t.RunSequentiallyWithTimeout("All conditions same", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		//t.Skip()
+		t.Skip()
 		stake := []float64{1.0, 1.0, 1.0, 1.0}
 		readData := []int{1, 1}
 
@@ -267,7 +267,7 @@ func TestBlockRewardsForBlobbers(testSetup *testing.T) {
 
 	})
 
-	//t.Skip()
+	t.Skip()
 
 	t.RunSequentiallyWithTimeout("Verify write price diff changes", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 

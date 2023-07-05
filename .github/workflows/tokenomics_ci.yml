@@ -149,8 +149,8 @@ jobs:
           teardown_condition: "TESTS_PASSED"
           miner_image: pr-2543
           sharder_image: pr-2543
-          blobber_image: sprint-july-1-3a3dfd5b
-          validator_image: sprint-july-1-3a3dfd5b
+          blobber_image: staging
+          validator_image: staging
           zbox_image: ${{ env.ZBOX_TAG }}
           zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
