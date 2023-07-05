@@ -26,21 +26,7 @@ func TestUpload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Upload File With half Size of the Allocation Should Work")
 
-	t.TestSetup("register wallet and get blobbers", func() {
-		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "10m",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-	})
-
-	t.Cleanup(func() {
-		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "1h",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-	})
-
-	//t.Parallel()
+	t.Parallel()
 
 	// Success Scenarios
 
@@ -834,9 +820,6 @@ func TestUpload(testSetup *testing.T) {
 		require.False(t, challengePool.Finalized)
 
 		totalChangeInWritePool := intToZCN(initialAllocation.WritePool - finalAllocation.WritePool)
-
-		fmt.Println("totalChangeInWritePool", totalChangeInWritePool)
-		fmt.Println("actualExpectedUploadCostInZCN", expectedUploadCostInZCN)
 
 		require.InEpsilon(t, expectedUploadCostInZCN, totalChangeInWritePool, 0.15, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", expectedUploadCostInZCN, totalChangeInWritePool)
 		require.Equal(t, totalChangeInWritePool, intToZCN(challengePool.Balance), "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
