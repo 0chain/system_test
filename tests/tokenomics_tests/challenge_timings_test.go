@@ -151,7 +151,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		// range of 10 allocations
 		for i := 0; i < 10; i++ {
-
 			// 1. Create an allocation with 1 data shard and 1 parity shard.
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   100 * MB,
@@ -164,7 +163,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 			allocationIDs = append(allocationIDs, allocationId)
 
 			// Uploading 10% of allocation
-
 			remotepath := "/dir/"
 			filesize := 10 * MB
 			filename := utils.GenerateRandomTestFileName(t)
@@ -216,7 +214,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		// range of 10 allocations
 		for i := 0; i < 10; i++ {
-
 			// 1. Create an allocation with 1 data shard and 1 parity shard.
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   1 * GB,
@@ -284,7 +281,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		// range of 10 allocations
 		for i := 0; i < 10; i++ {
-
 			// 1. Create an allocation with 1 data shard and 1 parity shard.
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   10 * GB,
@@ -361,12 +357,6 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 					t.Log("Error while getting challenge timings:", err)
 					continue // Skip this iteration and move to the next blobber
 				}
-				defer func(Body io.ReadCloser) {
-					err := Body.Close()
-					if err != nil {
-						t.Log("Error while closing challenge timings response body:", err)
-					}
-				}(resp.Body)
 
 				body, err := io.ReadAll(resp.Body)
 				if err != nil {
@@ -389,6 +379,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 
 				txnVerification := challengeTiming.TxnVerification.ToTime().Sub(challengeTiming.TxnSubmission.ToTime()).Milliseconds()
 				txnVerifications = append(txnVerifications, txnVerification)
+
 			}
 		}
 	}
