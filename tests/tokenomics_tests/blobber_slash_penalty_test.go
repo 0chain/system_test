@@ -8,7 +8,7 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 	"github.com/stretchr/testify/require"
-	"path/filepath"
+	"path/filepath" //nolint:goimports
 	"strings"
 	"testing"
 	"time"

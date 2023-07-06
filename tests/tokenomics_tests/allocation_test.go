@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
+	"time" //nolint:goimports
 )
 
 func TestAllocationRewards(testSetup *testing.T) {
@@ -69,6 +69,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		allocSize := 10 * MB
 
@@ -203,6 +204,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 			"set_third_party_extendable": nil,
 		})
 		output, err = utils.UpdateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 
 		// Updating allocation with new wallet
 		_, err = utils.UpdateAllocationWithWallet(t, nonAllocationOwnerWallet, configPath, utils.CreateParams(map[string]interface{}{
@@ -225,7 +227,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 		}
 
 		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should be equal to MovedToChallenge")
-
 	})
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -233,6 +234,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
 			"size":   10 * MB,
@@ -273,7 +275,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 		movedToChallengePool = alloc.MovedToChallenge
 
 		for _, intialBlobberInfo := range blobberDetailList {
-
 			_, err := utils.ExecuteFaucetWithTokensForWallet(t, "wallets/blobber_owner", configPath, 99)
 			require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
@@ -304,7 +305,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 		}
 
 		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
-
 	})
 
 }
@@ -557,9 +557,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		blobber2cancelationReward := alloccancelationRewards[1]
 
 		totalExpectedcancelationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
-
 		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
-
 		t.Log("blobber1cancelationReward", blobber1cancelationReward)
 		t.Log("blobber2cancelationReward", blobber2cancelationReward)
 

@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
+	"time" //nolint:goimports
 )
 
 func TestBlobberChallengeRewards(testSetup *testing.T) {
@@ -224,7 +224,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 
 		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
-
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {

@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
+	"time" //nolint:goimports
 )
 
 // 1687440537
@@ -177,7 +177,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"localpath":  filename,
 			}, true)
 			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
 		}
 
 		time.Sleep(1 * time.Minute)
@@ -449,8 +448,8 @@ func getAllChallenges(t *test.SystemTest, allocationID string) ([]Challenge, err
 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
-		if err != nil {
-		}
+		require.Nil(t, err, "Error closing response body")
+
 	}(res.Body)
 
 	body, _ := io.ReadAll(res.Body)

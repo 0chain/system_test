@@ -14,7 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
+	"time" //nolint:goimports
 )
 
 func TestBlobberReadReward(testSetup *testing.T) {
@@ -219,7 +219,6 @@ func TestBlobberReadReward(testSetup *testing.T) {
 		}), true)
 		require.NotNil(t, err, "File should not be downloaded from expired allocation", strings.Join(output, "\n"))
 	})
-
 }
 
 func getReadRewards(t *test.SystemTest, allocationID string) (map[string]ProviderAllocationRewards, error) {
@@ -231,24 +230,20 @@ func getReadRewards(t *test.SystemTest, allocationID string) (map[string]Provide
 
 	t.Log("Allocation challenge rewards url: ", url)
 
-	res, _ := http.Get(url)
-
+	res, _ := http.Get(url) //nolint:gosec
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
+			t.Log("Error closing response body")
 		}
 	}(res.Body)
-
 	body, _ := io.ReadAll(res.Body)
-
 	err := json.Unmarshal(body, &result)
 	if err != nil {
 		return nil, err
 	}
-
 	return result, nil
 }
-
 func sizeInGB(size int64) float64 {
 	return float64(size) / float64(GB)
 }
