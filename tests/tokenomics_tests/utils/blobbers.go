@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	"fmt" //nolint:goimports
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"time"

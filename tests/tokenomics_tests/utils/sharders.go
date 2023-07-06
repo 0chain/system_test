@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"encoding/json"
+	"encoding/json" //nolint:goimports
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
@@ -14,9 +14,7 @@ func getShardersList(t *test.SystemTest) map[string]climodel.Sharder {
 	return getShardersListForWallet(t, EscapedTestName(t))
 }
 
-func getShardersListForWallet(t *test.SystemTest, wallet string) map[string]climodel.Sharder {
-
-	// Get sharder list.
+func getShardersListForWallet(t *test.SystemTest, wallet string) map[string]climodel.Sharder { // Get sharder list.
 	output, err := getShardersForWallet(t, configPath, wallet)
 	found := false
 	for index, line := range output {

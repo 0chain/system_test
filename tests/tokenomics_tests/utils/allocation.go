@@ -13,7 +13,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
+	"time" //nolint:goimports
 )
 
 var (

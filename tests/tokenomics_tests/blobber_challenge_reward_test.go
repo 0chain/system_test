@@ -554,7 +554,6 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers, validators
 
 			idx++
 			tIdx++
-
 		}
 	}
 
@@ -575,7 +574,6 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers, validators
 
 			idx++
 			tIdx++
-
 		}
 	}
 }
@@ -590,7 +588,6 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers, validat
 	idx := 0
 
 	for i := 0; i < numDelegates; i++ {
-
 		for _, blobber := range blobbers {
 			t.Log("Unstaking tokens for blobber: ", blobber)
 			// unstake tokens
@@ -642,7 +639,7 @@ func getAllAllocationChallengeRewards(t *test.SystemTest, allocationID string) (
 
 	t.Log("Allocation challenge rewards url: ", url)
 
-	res, _ := http.Get(url)
+	res, _ := http.Get(url) //nolint:gosec
 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
