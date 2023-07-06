@@ -166,7 +166,7 @@ jobs:
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@feature/add-repo-snapshots-integration
         with:
-          repo_snapshots_branch: "feature/test-image"
+          repo_snapshots_branch: "<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>"
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
