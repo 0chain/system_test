@@ -140,7 +140,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.True(t, proofGenTime < 90000, "It is taking more than 90000 milliseconds to generate proof")
 
 		require.True(t, txnVerificationTime < 10000, "It is taking more than 10000 milliseconds to verify txn")
-
 	})
 
 	t.RunWithTimeout("Case 3: 10 100mb allocation, 10mb file each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -292,7 +291,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 			err = utils.CreateFileWithSize(filename, int64(filesize))
 			require.Nil(t, err)
-
 			output, err = utils.UploadFile(t, configPath, map[string]interface{}{
 				// fetch the latest block in the chain
 				"allocation": allocationId,
@@ -300,13 +298,11 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"localpath":  filename,
 			}, true)
 			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
 		}
 
 		time.Sleep(1 * time.Minute)
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
-
 		proofGenTimes := result[0]
 		txnSubmissions := result[1]
 		txnVerifications := result[2]
@@ -317,13 +313,10 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
-
 		require.True(t, proofGenTime < 4200000, "It is taking more than 4000000 milliseconds to generate proof")
 		require.True(t, txnVerificationTime < 20000, "It is taking more than 17000 milliseconds to verify txn")
 	})
-
 }
-
 func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, allocationIDs []string) []int64 {
 	blobberUrls := make([]string, len(blobbers))
 	for i := 0; i < len(blobbers); i++ {
@@ -439,25 +432,17 @@ func getAllChallenges(t *test.SystemTest, allocationID string) ([]Challenge, err
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	sharderBaseUrl := utils.GetSharderUrl(t)
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/all-challenges?allocation_id=" + allocationID)
-
 	t.Log("Allocation challenge list url: ", url)
-
 	var result []Challenge
-
 	res, _ := http.Get(url) //nolint:gosec
-
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		require.Nil(t, err, "Error closing response body")
-
 	}(res.Body)
-
 	body, _ := io.ReadAll(res.Body)
-
 	err := json.Unmarshal(body, &result)
 	if err != nil {
 		return nil, err
 	}
-
 	return result, nil
 }

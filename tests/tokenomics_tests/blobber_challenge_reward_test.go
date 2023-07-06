@@ -410,7 +410,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		require.InEpsilon(t, validator2Delegate1TotalReward, validator2Delegate2TotalReward, 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not equal")
 
 		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 2)
-
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -540,9 +539,7 @@ func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers, validators
 	tIdx := 0
 
 	for i := 0; i < numDelegates; i++ {
-		for _, blobber := range blobbers {
-
-			// add balance to delegate wallet
+		for _, blobber := range blobbers { // add balance to delegate wallet
 			_, err := utils.ExecuteFaucetWithTokensForWallet(t, blobberDelegates[idx], configPath, tokens[tIdx]+1)
 			require.Nil(t, err, "Error executing faucet")
 
@@ -609,7 +606,6 @@ func unstakeTokensForBlobbersAndValidators(t *test.SystemTest, blobbers, validat
 	idx = 0
 
 	for i := 0; i < numDelegates; i++ {
-
 		for _, validator := range validators {
 			t.Log("Unstaking tokens for validator: ", validator)
 			// unstake tokens

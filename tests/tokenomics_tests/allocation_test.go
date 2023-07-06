@@ -306,7 +306,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 
 		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
 	})
-
 }
 
 func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
@@ -458,21 +457,14 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 		t.Log("blobber1cancelationReward", blobber1cancelationReward)
 		t.Log("blobber2cancelationReward", blobber2cancelationReward)
-
 		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
 		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
-
 	})
-
 	t.RunSequentiallyWithTimeout("Replace Blobber", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
-
-		allocSize := 1 * GB
-
-		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocSize := 1 * GB // 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"data":   1,
@@ -552,20 +544,15 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		if err != nil {
 			return
 		}
-
 		blobber1cancelationReward := alloccancelationRewards[0]
 		blobber2cancelationReward := alloccancelationRewards[1]
-
 		totalExpectedcancelationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
 		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
 		t.Log("blobber1cancelationReward", blobber1cancelationReward)
 		t.Log("blobber2cancelationReward", blobber2cancelationReward)
-
 		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
 		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
-
 	})
-
 }
 
 func getAllocationcancelationReward(t *test.SystemTest, allocationID string, blobberList []string) ([]int64, error) {
