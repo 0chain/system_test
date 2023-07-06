@@ -2,16 +2,17 @@ package tokenomics_tests
 
 import (
 	"encoding/json"
-	"fmt" //nolint:goimports
+	"fmt"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 	"github.com/stretchr/testify/require"
-	"path/filepath" //nolint:goimports
-	"strings"
-	"testing"
-	"time"
 )
 
 func TestBlobberSlashPenalty(testSetup *testing.T) {

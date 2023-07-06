@@ -1,10 +1,11 @@
 package utils
 
 import (
-	"fmt" //nolint:goimports
+	"fmt"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
-	"time"
 )
 
 func ListBlobbers(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {

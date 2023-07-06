@@ -2,9 +2,10 @@ package utils
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test" //nolint:goimports
 	"reflect"
 	"strings"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 )
 
 const (

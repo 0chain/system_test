@@ -1,13 +1,14 @@
 package utils
 
 import (
-	"encoding/json" //nolint:goimports
+	"encoding/json"
+	"reflect"
+	"strings"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutil "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
-	"reflect"
-	"strings"
 )
 
 func getShardersList(t *test.SystemTest) map[string]climodel.Sharder {

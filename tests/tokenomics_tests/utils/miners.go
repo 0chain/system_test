@@ -3,13 +3,14 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test" //nolint:goimports
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"reflect"
 	"strings"
+
+	"github.com/0chain/system_test/internal/api/util/test"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	"github.com/stretchr/testify/require"
 )
 
 func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {

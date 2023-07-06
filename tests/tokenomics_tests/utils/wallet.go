@@ -2,13 +2,14 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt" //nolint:goimports
+	"fmt"
+	"strings"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
-	"strings"
-	"time"
 )
 
 // ExecuteFaucetWithTokens executes faucet command with given tokens.

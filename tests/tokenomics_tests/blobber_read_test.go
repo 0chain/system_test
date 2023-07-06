@@ -3,10 +3,6 @@ package tokenomics_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test" //nolint:goimports
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
-	"github.com/stretchr/testify/require"
 	"io"
 	"math"
 	"net/http"
@@ -14,7 +10,12 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time" //nolint:goimports
+	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBlobberReadReward(testSetup *testing.T) {
