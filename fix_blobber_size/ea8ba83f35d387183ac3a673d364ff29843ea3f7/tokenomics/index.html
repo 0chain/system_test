@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>0Chain System test suite [fix_blobber_size/ea8ba83f] ran against [dev-7.devnet-0chain.net] at [2023-07-06_19.36.45]</title>
+    <title>0Chain Tokenomics System test suite [fix_blobber_size/ea8ba83f] ran against [dev-7.devnet-0chain.net] at [2023-07-06_19.36.45]</title>
     <style type="text/css">
         body {
             font-family: sans-serif;
@@ -234,34 +234,20 @@
 </head>
 <body>
 <div class="pageHeader">
-    <span class="projectTitle">0Chain System test suite [fix_blobber_size/ea8ba83f] ran against [dev-7.devnet-0chain.net] at [2023-07-06_19.36.45]</span>
+    <span class="projectTitle">0Chain Tokenomics System test suite [fix_blobber_size/ea8ba83f] ran against [dev-7.devnet-0chain.net] at [2023-07-06_19.36.45]</span>
     <div class="testStats">
-        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>7</strong>Duration: <strong>0s</strong>
-        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>2</strong>
-        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>5</strong>
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>0</strong>Duration: <strong>0s</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>0</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
         </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
         </span>
     </div>
     <span class="testGroupsTitle">Test Groups:</span>
-    <span class="testExecutionDate">July 6, 2023 19:57:56</span>
+    <span class="testExecutionDate">July 6, 2023 19:57:59</span>
 </div>
 <div class="testReportContainer">
     <div class="cardContainer">
         <div id="testResults">
-            
-                <div class="testResultGroup  skipped" id="0"></div>
-            
-                <div class="testResultGroup  " id="1"></div>
-            
-                <div class="testResultGroup  skipped" id="2"></div>
-            
-                <div class="testResultGroup  skipped" id="3"></div>
-            
-                <div class="testResultGroup  " id="4"></div>
-            
-                <div class="testResultGroup  skipped" id="5"></div>
-            
-                <div class="testResultGroup  skipped" id="6"></div>
             
         </div>
     </div>
@@ -466,7 +452,7 @@ window.GoTestReport = function (elements) {
 
     
 
-    const data = [{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillBlobber","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    zboxcli_kill_blobber_test.go:22: skipping test; need to fix the test\n","--- SKIP: TestKillBlobber (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"zboxcli_kill_blobber_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillMiner","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.15,"Output":["","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1074: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestKillMiner_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  04f1ade67295fafb4c081d687a8400fb0944a6b6b51673c5144c102a1dcf0a43]\n","    miner_block_rewards_test.go:421: getting sharder url...\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    miner_block_rewards_test.go:448: getting miner or sharder nodes...\n","--- PASS: TestKillMiner (3.15s)",""],"Passed":true,"Skipped":false,"TestFileName":"zzzwalletcli_kill_miner_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillMiner/Killed_miner_does_not_receive_rewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_framework.go:104: Test skipped as it is not a smoke test.\n","--- SKIP: TestKillMiner/Killed_miner_does_not_receive_rewards (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillMiner/kill_miner_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_framework.go:104: Test skipped as it is not a smoke test.\n","--- SKIP: TestKillMiner/kill_miner_by_non-smartcontract_owner_should_fail (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillSharder","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.15,"Output":["","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1074: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestKillSharder_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  1b184693237e6afa2cf2f4be131bb5ee6e77f60269218f5b0eca4452470d2cda]\n","    miner_block_rewards_test.go:421: getting sharder url...\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    miner_block_rewards_test.go:448: getting miner or sharder nodes...\n","--- PASS: TestKillSharder (3.15s)",""],"Passed":true,"Skipped":false,"TestFileName":"zzwalletcli_kill_sharder_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillSharder/Killed_sharder_does_not_receive_rewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_framework.go:104: Test skipped as it is not a smoke test.\n","--- SKIP: TestKillSharder/Killed_sharder_does_not_receive_rewards (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillSharder/kill_sharder_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_framework.go:104: Test skipped as it is not a smoke test.\n","--- SKIP: TestKillSharder/kill_sharder_by_non-smartcontract_owner_should_fail (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+    const data =  null 
 
     const report = window.GoTestReport({
                                          data: data,
