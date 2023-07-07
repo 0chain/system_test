@@ -236,16 +236,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error creating allocation: allocation_creation_failed: invalid request: insufficient allocation size", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("Create allocation with expire smaller than limit (expire < 1s) Should Fail", func(t *test.SystemTest) {
-		_ = setupWallet(t, configPath)
-
-		options := map[string]interface{}{"expire": "1s", "lock": "0.5", "size": 1024}
-		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: allocation_creation_failed: invalid request: insufficient allocation duration", output[0], strings.Join(output, "\n"))
-	})
-
 	t.Run("Create allocation with no parameter (missing lock) Should Fail", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 

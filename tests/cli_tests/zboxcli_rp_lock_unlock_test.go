@@ -168,7 +168,7 @@ func readPoolUnlock(t *test.SystemTest, cliConfigFilename, params string, retry 
 func getReadPoolInfo(t *test.SystemTest) climodel.ReadPoolInfo {
 	output, err := readPoolInfo(t, configPath)
 	require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
-	require.Len(t, output, 1)
+	require.Lenf(t, output, 1, "ouptut: %v", output)
 
 	var readPool climodel.ReadPoolInfo
 	err = json.Unmarshal([]byte(output[0]), &readPool)
