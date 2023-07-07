@@ -162,10 +162,10 @@ jobs:
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: "3efa10f4-68ca-4782-9ad1-895a88bd0381" # ${{ secrets.TENDERLY_FORK_ID }}
+          TENDERLY_FORK_ID: "b4fb51d0-3804-46f5-89e1-cd00e6d1be46" # ${{ secrets.TENDERLY_FORK_ID }}
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/b4fb51d0-3804-46f5-89e1-cd00e6d1be46
           authorizer_image: staging
 
       - name: "Run System tests"
