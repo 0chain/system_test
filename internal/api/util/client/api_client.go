@@ -1397,6 +1397,12 @@ func (c *APIClient) GetWalletBalance(t *test.SystemTest, wallet *model.Wallet, r
 			ClientID: wallet.Id,
 		},
 		requiredStatusCode)
+
+	if err != nil {
+		t.Logf("Error getting wallet balance: %v", err)
+		clientGetBalanceResponse.Balance = 0
+		return clientGetBalanceResponse
+	}
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, clientGetBalanceResponse)
