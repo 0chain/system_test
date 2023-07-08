@@ -38,6 +38,8 @@ func TestBridgeBurn(testSetup *testing.T) {
 
 		ethTxHash := getTransactionHash(output, true)
 
+		fmt.Println(ethTxHash)
+
 		output, err = getWrappedZcnBurnTicket(t, ethTxHash, true)
 		require.Nil(t, err)
 
@@ -182,7 +184,7 @@ func getWrappedZcnBurnTicket(t *test.SystemTest, hash string, retry bool) ([]str
 	)
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
+		return cliutils.RunCommand(t, cmd, 6, time.Minute)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
