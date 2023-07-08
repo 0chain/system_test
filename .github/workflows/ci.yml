@@ -162,10 +162,10 @@ jobs:
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: "8a44f21c-082d-4cd4-8105-0a33a8ad54cf" # ${{ secrets.TENDERLY_FORK_ID }}
+          TENDERLY_FORK_ID: "a57f6f3e-adc8-4bf4-9b78-d476433f5ba0" # ${{ secrets.TENDERLY_FORK_ID }}
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/8a44f21c-082d-4cd4-8105-0a33a8ad54cf
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/a57f6f3e-adc8-4bf4-9b78-d476433f5ba0
           authorizer_image: staging
 
       - name: "Run System tests"
@@ -182,7 +182,7 @@ jobs:
           run_cli_system_tests: true
           run_tokenomics_system_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
-          TENDERLY_FORK_ID: "8a44f21c-082d-4cd4-8105-0a33a8ad54cf"
+          TENDERLY_FORK_ID: "a57f6f3e-adc8-4bf4-9b78-d476433f5ba0"
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
