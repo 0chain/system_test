@@ -51,7 +51,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.RunSequentially("endpoint parameters ( test /v2/graph-write-price )", graphEndpointTestCases(zboxClient.GetGraphWritePrice))
 
 	t.RunSequentially("test graph data ( test /v2/graph-write-price )", func(t *test.SystemTest) {
-		t.Skip("skip till fixed")
 		PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 		data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
 		require.NoError(t, err)
@@ -109,7 +108,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.RunSequentially("endpoint parameters ( test /v2/graph-total-challenge-pools )", graphEndpointTestCases(zboxClient.GetGraphTotalChallengePools))
 
 	t.RunSequentially("test graph data ( test /v2/graph-total-challenge-pools )", func(t *test.SystemTest) {
-		t.Skip("skip till fixed")
 		PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 		// Get initial total challenge pools
 		data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
@@ -156,7 +154,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.RunSequentially("endpoint parameters ( test /v2/graph-allocated-storage )", graphEndpointTestCases(zboxClient.GetGraphAllocatedStorage))
 
 	t.RunSequentially("test graph data ( test /v2/graph-allocated-storage )", func(t *test.SystemTest) {
-		t.Skip("skip till fixed")
 		// Get initial total challenge pools
 		PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 		data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
@@ -256,7 +253,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.RunSequentially("endpoint parameters ( test /v2/graph-used-storage )", graphEndpointTestCases(zboxClient.GetGraphUsedStorage))
 
 	t.RunSequentially("test graph data ( test /v2/graph-used-storage )", func(t *test.SystemTest) {
-		t.Skip("skip till fixed")
 		PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 		// Get initial used storage
 		data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
@@ -570,7 +566,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.RunSequentially("endpoint parameters ( test /v2/graph-total-minted )", graphEndpointTestCases(zboxClient.GetGraphTotalMinted))
 
 	t.RunSequentially("test graph data ( test /v2/graph-total-minted )", func(t *test.SystemTest) {
-		t.Skip("skip till fixed")
 		data, resp, err := zboxClient.GetGraphTotalMinted(t, &model.ZboxGraphRequest{DataPoints: "1"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
@@ -666,7 +661,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.RunSequentially("endpoint parameters ( test /v2/graph-total-locked )", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
 
 	t.RunSequentially("test graph data ( test /v2/graph-total-locked )", func(t *test.SystemTest) {
-		t.Skip("skip till fixed")
 		data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
@@ -978,7 +972,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("test graph data ( test /v2/graph-challenges )", func(t *test.SystemTest) {
-		t.Skip("skip till fixed")
 		// Get initial graph data
 		data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
 		require.NoError(t, err)
@@ -1050,7 +1043,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.RunSequentially("endpoint parameters ( test /v2/graph-token-supply )", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
 
 	t.RunSequentially("test graph data ( test /v2/graph-token-supply )", func(t *test.SystemTest) {
-		t.Skip("skip till fixed")
 		data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
@@ -1306,7 +1298,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("test /v2/total-blobber-capacity", func(t *test.SystemTest) {
-		t.Skip("skip till fixed")
 		// Get initial
 		data, resp, err := zboxClient.GetTotalBlobberCapacity(t)
 		require.NoError(t, err)
