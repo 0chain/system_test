@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"math"
 	"os"
 	"path/filepath"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
@@ -36,26 +38,25 @@ func TestFileUpdate(testSetup *testing.T) {
 		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
 		thumbnailFile, thumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
+		os.Remove(thumbnailFile) //nolint: errcheck
 
-		//nolint: errcheck
-		defer os.Remove(thumbnailFile)
-
-		downloadThumbnailFile := thumbnailFile + ".down"
+		downloadThumbnailDir := thumbnailFile + "down"
+		defer os.RemoveAll(downloadThumbnailDir) //nolint: errcheck
+		remotepath += filepath.Base(localFilePath)
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  downloadThumbnailFile,
+			"remotepath": remotepath,
+			"localpath":  downloadThumbnailDir,
 			"thumbnail":  true,
 		}), true)
-
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		stats, err := os.Stat(downloadThumbnailFile)
+		localThumbnail := filepath.Join(downloadThumbnailDir, filepath.Base(remotepath))
+		stats, err := os.Stat(localThumbnail)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, thumbnailSize, int(stats.Size()))
-		defer os.Remove(downloadThumbnailFile) //nolint: errcheck
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -127,19 +128,18 @@ func TestFileUpdate(testSetup *testing.T) {
 		filesize := int64(0.5 * MB)
 		remotepath := "/"
 		thumbnail := escapedTestName(t) + "thumbnail.png"
-		//nolint
-		generateThumbnail(t, thumbnail)
+		generateThumbnail(t, thumbnail) //nolint
 
 		localFilePath := generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{"thumbnailpath": thumbnail})
-		//nolint: errcheck
-		os.Remove(thumbnail)
-		//nolint: errcheck
-		os.Remove(localFilePath)
+
+		os.Remove(thumbnail)     //nolint: errcheck
+		os.Remove(localFilePath) //nolint: errcheck
+		downloadDir, _ := filepath.Split(localFilePath)
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  localFilePath,
+			"localpath":  downloadDir,
 			"thumbnail":  true,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -148,29 +148,25 @@ func TestFileUpdate(testSetup *testing.T) {
 		// Update with new thumbnail
 		newThumbnail, newThumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
 
-		localThumbnailPath := filepath.Join(os.TempDir(), filepath.Base(newThumbnail))
-		//nolint: errcheck
-		os.Remove(newThumbnail)
-		//nolint: errcheck
-		os.Remove(localFilePath)
-		//nolint: errcheck
-		os.Remove(localThumbnailPath)
+		os.Remove(newThumbnail)  //nolint: errcheck
+		os.Remove(localFilePath) //nolint: errcheck
+
+		downloadNewThumbnailDir := newThumbnail + "down"
+		defer os.RemoveAll(downloadNewThumbnailDir) //nolint: errcheck
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(localFilePath),
-			"localpath":  localThumbnailPath,
+			"localpath":  downloadNewThumbnailDir,
 			"thumbnail":  true,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		stat, err := os.Stat(localThumbnailPath)
+		localNewThumbnail := filepath.Join(downloadNewThumbnailDir, filepath.Base(remotepath))
+		stat, err := os.Stat(localNewThumbnail)
 		require.Nil(t, err)
 		require.Equal(t, newThumbnailSize, int(stat.Size()))
-
-		//nolint: errcheck
-		os.Remove(localThumbnailPath)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -183,23 +179,32 @@ func TestFileUpdate(testSetup *testing.T) {
 		remotepath := "/"
 		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
-		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}), true)
+		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"json":       "",
+			"remotepath": remotepath + filepath.Base(localFilePath),
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Len(t, output, 1)
 
-		actualSize, err := strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
-		require.Nil(t, err)
-		require.Equal(t, 0.5*MB, actualSize, "file size should be same as uploaded")
+		var meta climodel.FileMetaResult
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, filesize, meta.ActualFileSize, "file size should be same as uploaded")
 
 		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath), int64(filesize))
 
-		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}), true)
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"json":       "",
+			"remotepath": remotepath + filepath.Base(localFilePath),
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Len(t, output, 1)
 
-		actualSize, err = strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
-		require.Nil(t, err)
-		require.Equal(t, 0.5*MB, actualSize)
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, filesize, meta.ActualFileSize)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
@@ -212,24 +217,33 @@ func TestFileUpdate(testSetup *testing.T) {
 		remotepath := "/"
 		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
-		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}), true)
+		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"json":       "",
+			"remotepath": remotepath + filepath.Base(localFilePath),
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Len(t, output, 1)
 
-		actualSize, err := strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
-		require.Nil(t, err)
-		require.Equal(t, 0.5*MB, actualSize, "file size should be same as uploaded")
+		var meta climodel.FileMetaResult
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, filesize, meta.ActualFileSize, "file size should be same as uploaded")
 
 		newFileSize := int64(1.5 * MB)
 		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath), int64(newFileSize))
 
-		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}), true)
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"json":       "",
+			"remotepath": remotepath + filepath.Base(localFilePath),
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Len(t, output, 1)
 
-		actualSize, err = strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
-		require.Nil(t, err)
-		require.Equal(t, 1.5*MB, actualSize)
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, newFileSize, meta.ActualFileSize)
 
 		createAllocationTestTeardown(t, allocationID)
 	})
