@@ -1387,7 +1387,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 //nolint:gocyclo
 func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till fixed")
 	// Faucet the used wallets
 	for i := 0; i < 50; i++ {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
@@ -1409,20 +1408,20 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		require.NotEmpty(t, confHash)
 	}
 
-	t.Run("test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed", func(t *test.SystemTest) {
+	t.RunSequentially("test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed", func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, blobbers, 1)
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesPassed, blobbers[0].ID))
+		t.RunSequentially("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesPassed, blobbers[0].ID))
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesCompleted, blobbers[0].ID))
+		t.RunSequentially("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesCompleted, blobbers[0].ID))
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesOpen, blobbers[0].ID))
+		t.RunSequentially("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesOpen, blobbers[0].ID))
 
-		t.Run("test graph data", func(t *test.SystemTest) {
+		t.RunSequentially("test graph data", func(t *test.SystemTest) {
 			// Create allocation
 			blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 			blobberRequirements.DataShards = 1
@@ -1488,29 +1487,29 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-blobber-inactive-rounds", func(t *test.SystemTest) {
+	t.RunSequentially("test /v2/graph-blobber-inactive-rounds", func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, blobbers, 1)
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberInactiveRounds, blobbers[0].ID))
+		t.RunSequentially("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberInactiveRounds, blobbers[0].ID))
 
 		// TODO: Complete if needed
-		// t.Run("test graph data", func(t *test.SystemTest) {})
+		// t.RunSequentially("test graph data", func(t *test.SystemTest) {})
 	})
 
-	t.Run("test /v2/graph-blobber-write-price", func(t *test.SystemTest) {
+	t.RunSequentially("test /v2/graph-blobber-write-price", func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, blobbers, 1)
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberWritePrice, blobbers[0].ID))
+		t.RunSequentially("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberWritePrice, blobbers[0].ID))
 
-		t.Run("test graph data", func(t *test.SystemTest) {
+		t.RunSequentially("test graph data", func(t *test.SystemTest) {
 			// Get a single blobber to use in graph parameters test
 			targetBlobber := blobbers[0]
 
@@ -1562,16 +1561,16 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-blobber-capacity", func(t *test.SystemTest) {
+	t.RunSequentially("test /v2/graph-blobber-capacity", func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, blobbers, 1)
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberCapacity, blobbers[0].ID))
+		t.RunSequentially("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberCapacity, blobbers[0].ID))
 
-		t.Run("test graph data", func(t *test.SystemTest) {
+		t.RunSequentially("test graph data", func(t *test.SystemTest) {
 			// Get a single blobber to use in graph parameters test
 			targetBlobber := blobbers[0]
 
@@ -1623,16 +1622,16 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-blobber-allocated", func(t *test.SystemTest) {
+	t.RunSequentially("test /v2/graph-blobber-allocated", func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, blobbers, 1)
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberAllocated, blobbers[0].ID))
+		t.RunSequentially("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberAllocated, blobbers[0].ID))
 
-		t.Run("test graph data", func(t *test.SystemTest) {
+		t.RunSequentially("test graph data", func(t *test.SystemTest) {
 			// Get allocated of all blobbers
 			blobberAllocated := make(map[string]int64)
 
@@ -1689,16 +1688,16 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-blobber-saved-data", func(t *test.SystemTest) {
+	t.RunSequentially("test /v2/graph-blobber-saved-data", func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, blobbers, 1)
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberSavedData, blobbers[0].ID))
+		t.RunSequentially("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberSavedData, blobbers[0].ID))
 
-		t.Run("test graph data", func(t *test.SystemTest) {
+		t.RunSequentially("test graph data", func(t *test.SystemTest) {
 			// Get saved data of all blobbers
 			blobberSavedData := make(map[string]int64)
 
@@ -1793,16 +1792,16 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-blobber-read-data", func(t *test.SystemTest) {
+	t.RunSequentially("test /v2/graph-blobber-read-data", func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, blobbers, 1)
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberReadData, blobbers[0].ID))
+		t.RunSequentially("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberReadData, blobbers[0].ID))
 
-		t.Run("test graph data", func(t *test.SystemTest) {
+		t.RunSequentially("test graph data", func(t *test.SystemTest) {
 			// Get read data of all blobbers
 			blobberReadData := make(map[string]int64)
 
@@ -1847,16 +1846,16 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-blobber-offers-total", func(t *test.SystemTest) {
+	t.RunSequentially("test /v2/graph-blobber-offers-total", func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, blobbers, 1)
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberOffersTotal, blobbers[0].ID))
+		t.RunSequentially("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberOffersTotal, blobbers[0].ID))
 
-		t.Run("test graph data", func(t *test.SystemTest) {
+		t.RunSequentially("test graph data", func(t *test.SystemTest) {
 			// Get offers of all blobbers
 			blobberOffersTotal := make(map[string]int64)
 
@@ -1919,16 +1918,16 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-blobber-unstake-total and /v2/graph-blobber-stake-total", func(t *test.SystemTest) {
+	t.RunSequentially("test /v2/graph-blobber-unstake-total and /v2/graph-blobber-stake-total", func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, blobbers, 1)
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalStake, blobbers[0].ID))
+		t.RunSequentially("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalStake, blobbers[0].ID))
 
-		t.Run("test graph data", func(t *test.SystemTest) {
+		t.RunSequentially("test graph data", func(t *test.SystemTest) {
 			targetBlobber := blobbers[0].ID
 			data, resp, err := apiClient.V1SCRestGetStakePoolStat(t, model.SCRestGetStakePoolStatRequest{
 				ProviderType: "3",
@@ -1972,16 +1971,16 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("test /v2/graph-blobber-total-rewards", func(t *test.SystemTest) {
+	t.RunSequentially("test /v2/graph-blobber-total-rewards", func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, blobbers, 1)
 
-		t.Run("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalRewards, blobbers[0].ID))
+		t.RunSequentially("endpoint parameters", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalRewards, blobbers[0].ID))
 
-		t.Run("test graph data", func(t *test.SystemTest) {
+		t.RunSequentially("test graph data", func(t *test.SystemTest) {
 			// Get read data of all blobbers
 			blobberRewards := make(map[string]int64)
 
