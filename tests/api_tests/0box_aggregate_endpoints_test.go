@@ -1182,7 +1182,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 	t.RunSequentially("endpoint parameters ( test /v2/graph-token-supply )", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
 
-	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-token-supply )", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-token-supply )", 5*time.Minute, func(t *test.SystemTest) {
 		data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
@@ -1701,10 +1701,6 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			require.Len(t, *data, 1)
 			afterValue := (*data)[0]
 			cond := afterValue > allocated
-
-			if cond {
-				allocated = afterValue
-			}
 			return cond
 		})
 
@@ -1719,10 +1715,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			require.Equal(t, 200, resp.StatusCode())
 			require.Len(t, *data, 1)
 			afterValue := (*data)[0]
-			cond := afterValue == allocated
-			if cond {
-				allocated = afterValue
-			}
+			cond := allocated == afterValue
 			return cond
 		})
 	})
