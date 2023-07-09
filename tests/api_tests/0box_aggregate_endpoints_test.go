@@ -3,12 +3,13 @@ package api_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"os"
 	"path"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/tokenomics"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -1713,7 +1714,6 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			afterValue := (*data)[0]
 			cond := afterValue > allocated
 
-			fmt.Print()
 			if cond {
 				allocated = afterValue
 			}
