@@ -2057,6 +2057,10 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 
 func (c *APIClient) BurnZcn(t *test.SystemTest, wallet *model.Wallet, address string, amount float64, requiredTransactionStatus int) string {
 	t.Log("Burn ZCN")
+
+	walletBalance := c.GetWalletBalance(t, wallet, HttpOkStatus)
+	wallet.Nonce = int(walletBalance.Nonce)
+
 	burnZcnTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
