@@ -243,7 +243,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
-			// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is canceled. Check https://github.com/0chain/0chain/issues/2211
 			cond := (allocatedStorageAfter == allocatedStorage) && (allocatedStorageAfter == int64(*latest)) //nolint
 			allocatedStorage = allocatedStorageAfter
 
@@ -383,7 +382,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
 			usedStorageAfter := (*data)[0]
-			// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is canceled. Check https://github.com/0chain/0chain/issues/2211
 			cond := usedStorage == usedStorageAfter
 			usedStorage = usedStorageAfter
 
@@ -1464,11 +1462,11 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		// TODO: Burn is not working, investigate why
 		// Burn ZCN
-		//confHash = apiClient.BurnZcn(t, sdkWallet, parsedConfig.EthereumAddress, float64(1.0), client.TxSuccessfulStatus)
-		//require.NotEmpty(t, confHash)
+		// confHash = apiClient.BurnZcn(t, sdkWallet, parsedConfig.EthereumAddress, float64(1.0), client.TxSuccessfulStatus)
+		// require.NotEmpty(t, confHash)
 		//
-		//// Check decrease
-		//wait.PoolImmediately(t, 2*time.Minute, func() bool {
+		// Check decrease
+		// wait.PoolImmediately(t, 2*time.Minute, func() bool {
 		//	data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 		//	require.NoError(t, err)
 		//	require.Equal(t, 200, resp.StatusCode())
@@ -1479,7 +1477,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		//		totalSupply = totalSupplyAfter
 		//	}
 		//	return cond
-		//})
+		// })
 	})
 
 }
@@ -1492,7 +1490,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
 	t.Logf("Blobber owner balance: %v", blobberOwnerBalance)
 	blobberOwnerWallet.Nonce = int(blobberOwnerBalance.Nonce)
-	//apiClient.ExecuteFaucetWithTokens(t, blobberOwnerWallet, 4500, client.TxSuccessfulStatus)
+	apiClient.ExecuteFaucetWithTokens(t, blobberOwnerWallet, 4500, client.TxSuccessfulStatus)
 
 	// Stake 6 blobbers, each with 1 token
 	targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 6, client.HttpOkStatus)
@@ -1542,7 +1540,6 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Len(t, *data, 1)
-		//challnegesOpen := (*data)[0]
 
 		// Upload file
 		fpath, fsize := sdkClient.UploadFile(t, allocationID)
@@ -1569,13 +1566,10 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Len(t, *data, 1)
-			//challnegesOpenAfter := (*data)[0]
-			//cond = cond && challnegesOpenAfter >= challnegesOpen
 
 			if cond {
 				challnegesPassed = challnegesPassedAfter
 				challnegesCompleted = challnegesCompletedAfter
-				//challnegesOpen = challnegesOpenAfter
 			}
 			return cond
 		})
@@ -1730,14 +1724,13 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		confHash := apiClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
-		//Check decreased for the same blobber
+		// Check decreased for the same blobber
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {
 			data, resp, err := zboxClient.GetGraphBlobberAllocated(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Len(t, *data, 1)
 			afterValue := (*data)[0]
-			// FIXME: allocated and saved_data of the blobbers table doesn't decrease when the allocation is canceled. Check https://github.com/0chain/0chain/issues/2211
 			cond := afterValue == allocated
 			if cond {
 				allocated = afterValue
@@ -1874,7 +1867,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		sdkClient.DownloadFile(t, allocationID, fpath, ".")
 		defer os.Remove(path.Join(".", fpath))
 
-		// // Check increased for the same blobber
+		// Check increased for the same blobber
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {
 			data, resp, err := zboxClient.GetGraphBlobberReadData(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
