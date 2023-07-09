@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
-
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/0chain/system_test/internal/api/util/wait"
@@ -147,5 +147,39 @@ func TestReplaceBlobber(testSetup *testing.T) {
 
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 		require.Greater(t, balanceBeforeAllocationUpdate, balanceAfterAllocationUpdate)
+	})
+
+	t.Run("Replace blobber in allocation with repair should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		uploadOp := sdkClient.AddUploadOperation(t, allocationID)
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
+
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+
+		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
+
+		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
+		apiClient.UpdateAllocationBlobbers(t, sdkWallet, newBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
+
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.Nil(t, err)
+
+		// check for repair
+		_, _, req, _, err := alloc.RepairRequired("/")
+		require.Nil(t, err)
+		require.True(t, req)
+
+		// do repair
+		sdkClient.RepairAllocation(t, allocationID)
+
+		_, err = sdk.GetFileRefFromBlobber(allocationID, newBlobberID, uploadOp.RemotePath)
+		require.Nil(t, err)
 	})
 }
