@@ -40,7 +40,6 @@ func TestFileUpdate(testSetup *testing.T) {
 		thumbnailFile, thumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
 		os.Remove(thumbnailFile) //nolint: errcheck
 
-
 		downloadThumbnailDir := thumbnailFile + "down"
 		defer os.RemoveAll(downloadThumbnailDir) //nolint: errcheck
 		remotepath += filepath.Base(localFilePath)
@@ -53,7 +52,6 @@ func TestFileUpdate(testSetup *testing.T) {
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
-
 
 		localThumbnail := filepath.Join(downloadThumbnailDir, filepath.Base(remotepath))
 		stats, err := os.Stat(localThumbnail)
@@ -150,7 +148,6 @@ func TestFileUpdate(testSetup *testing.T) {
 		// Update with new thumbnail
 		newThumbnail, newThumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
 
-
 		os.Remove(newThumbnail)  //nolint: errcheck
 		os.Remove(localFilePath) //nolint: errcheck
 
@@ -196,7 +193,6 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Equal(t, filesize, meta.ActualFileSize, "file size should be same as uploaded")
 
 		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath), int64(filesize))
-
 		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
