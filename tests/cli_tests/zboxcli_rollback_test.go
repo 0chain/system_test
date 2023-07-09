@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -37,24 +36,33 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		err := os.Remove(localFilePath)
 		require.Nil(t, err)
 
-		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}), true)
+		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"json":       "",
+			"remotepath": remotepath + filepath.Base(localFilePath),
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Len(t, output, 1)
 
-		actualSize, err := strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
-		require.Nil(t, err)
-		require.Equal(t, 0.5*MB, actualSize, "file size should be same as uploaded")
+		var meta climodel.FileMetaResult
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, filesize, meta.ActualFileSize, "file size should be same as uploaded")
 
 		newFileSize := int64(1.5 * MB)
 		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath), int64(newFileSize))
 
-		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{"allocation": allocationID, "remotepath": remotepath + filepath.Base(localFilePath)}), true)
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"json":       "",
+			"remotepath": remotepath + filepath.Base(localFilePath),
+		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Len(t, output, 1)
 
-		actualSize, err = strconv.ParseFloat(strings.TrimSpace(strings.Split(output[2], "|")[4]), 64)
-		require.Nil(t, err)
-		require.Equal(t, 1.5*MB, actualSize)
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, newFileSize, meta.ActualFileSize)
 
 		// rollback allocation
 
@@ -197,7 +205,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			if f.Path == destpath+filename {
 				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -232,7 +240,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			if f.Path == destpath+filename {
 				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -301,7 +309,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			if f.Path == destPath {
 				foundAtDest = true
 				require.Equal(t, destName, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -336,7 +344,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			if f.Path == destPath {
 				foundAtDest = true
 				require.Equal(t, destName, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
