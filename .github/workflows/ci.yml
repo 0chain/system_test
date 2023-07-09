@@ -120,6 +120,8 @@ jobs:
           echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=$(echo ${{github.event.inputs.zbox_cli_branch}})" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo ${{github.event.inputs.zwallet_cli_branch}})" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
+
 
           echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
 
@@ -129,6 +131,7 @@ jobs:
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "ZBOX_BRANCH=$(echo $(([ -z '${{github.event.inputs.zbox_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_cli_branch}}'))" >> $GITHUB_ENV
           echo "ZWALLET_BRANCH=$(echo $(([ -z '${{github.event.inputs.zwallet_cli_branch}}' ] && echo 'staging') || echo '${{github.event.inputs.zwallet_cli_branch}}'))" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
 
           echo "MINER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_sharder_image}}' ] && echo 'staging') || echo '${{github.event.inputs.miner_sharder_image}}'))" >> $GITHUB_ENV
           echo "SHARDER_TAG=$(echo $(([ -z '${{github.event.inputs.miner_sharder_image}}' ] && echo 'staging') || echo '${{github.event.inputs.miner_sharder_image}}'))" >> $GITHUB_ENV
@@ -172,6 +175,7 @@ jobs:
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@master
         with:
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
