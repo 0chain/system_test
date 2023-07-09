@@ -3,13 +3,16 @@ package config
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3" //nolint
-	"log"
-	"os"
 )
 
 // ConfigPathEnv contains name of env variable
@@ -60,25 +63,24 @@ func CreateFreeStorageMarker(
 	t *test.SystemTest,
 	wallet *model.SdkWallet,
 	assignerWallet *model.SdkWallet,
-	nonce int,
 ) string {
+	freeToken := 5.0
+	nonce := time.Now().Unix()
 	marker := model.FreeStorageMarker{
 		Recipient:  wallet.ClientID,
-		FreeTokens: 5,
-		Nonce:      0,
+		FreeTokens: freeToken,
+		Nonce:      nonce,
 	}
 
-	forSignatureBytes, err := json.Marshal(&marker)
-	require.Nil(t, err, "Could not marshal marker")
+	reqmarker := fmt.Sprintf("%s:%f:%d", wallet.ClientID, freeToken, nonce)
+	data := hex.EncodeToString([]byte(reqmarker))
 
-	data := hex.EncodeToString(forSignatureBytes)
 	rawHash, err := hex.DecodeString(data)
 	require.Nil(t, err, "failed to decode hex %s", data)
 	require.NotNil(t, rawHash, "failed to decode hex %s", data)
 	secretKey := crypto.ToSecretKey(t, assignerWallet.ToCliModelWalletFile())
 	marker.Signature = crypto.Sign(t, string(rawHash), secretKey)
 	marker.Assigner = assignerWallet.ClientID
-	marker.Nonce = nonce
 
 	markerJson, err := json.Marshal(marker)
 	require.Nil(t, err, "Could not marshal marker")
