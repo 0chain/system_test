@@ -1,8 +1,6 @@
 package api_tests
 
 import (
-	"encoding/json"
-	"fmt"
 	"os"
 	"path"
 	"strconv"
@@ -18,12 +16,6 @@ import (
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
 )
-
-func _printJsonFromInterface(message string, i interface{}) {
-	printJSON, _ := json.Marshal(i)
-
-	fmt.Println(message, string(printJSON))
-}
 
 //nolint:gocyclo
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
@@ -274,11 +266,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		blobberRequirements.DataShards = 1
 		blobberRequirements.ParityShards = 1
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		_printJsonFromInterface("Blobbers : ", allocationBlobbers)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		_printJsonFromInterface("Allocation : ", alloc)
 
 		fpath, fsize := sdkClient.UploadFile(t, allocationID)
 
@@ -511,7 +499,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		require.NotEmpty(t, miners)
 		minerId := miners[0].SimpleNodeResponse.ID
 		t.Logf("Staking miner %s", minerId)
-		confHash = apiClient.CreateMinerStakePool(t, sdkWallet, 1, minerId, float64(1.0), client.TxSuccessfulStatus)
+		confHash = apiClient.CreateMinerStakePool(t, sdkWallet, 1, minerId, 1.0, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
 		// Check increase
@@ -816,7 +804,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		require.NotEmpty(t, miners)
 		minerId := miners[0].SimpleNodeResponse.ID
 		t.Logf("Staking miner %s", minerId)
-		confHash = apiClient.CreateMinerStakePool(t, sdkWallet, 1, minerId, float64(1.0), client.TxSuccessfulStatus)
+		confHash = apiClient.CreateMinerStakePool(t, sdkWallet, 1, minerId, 1.0, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
 		// Check increase
@@ -859,7 +847,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 		require.NotEmpty(t, sharders)
 		sharderId := sharders[0].SimpleNodeResponse.ID
-		confHash = apiClient.CreateMinerStakePool(t, sdkWallet, 2, sharderId, float64(1.0), client.TxSuccessfulStatus)
+		confHash = apiClient.CreateMinerStakePool(t, sdkWallet, 2, sharderId, 1.0, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
 		// Check increase
@@ -919,7 +907,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 
 		// Create write pool for the allocation
-		confHash = apiClient.CreateWritePool(t, sdkWallet, allocationID, float64(1.0), client.TxSuccessfulStatus)
+		confHash = apiClient.CreateWritePool(t, sdkWallet, allocationID, 1.0, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
 		// Check increase
@@ -979,7 +967,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 
 		// Create read pool
-		confHash = apiClient.CreateReadPool(t, sdkWallet, float64(1.0), client.TxSuccessfulStatus)
+		confHash = apiClient.CreateReadPool(t, sdkWallet, 1.0, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
 		// Check increase
@@ -1346,7 +1334,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 		require.NotEmpty(t, miners)
 		minerID := miners[0].ID
-		confHash = apiClient.CreateMinerStakePool(t, sdkWallet, 1, minerID, float64(1.0), client.TxSuccessfulStatus)
+		confHash = apiClient.CreateMinerStakePool(t, sdkWallet, 1, minerID, 1.0, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
 		// Check decreased (staked tokens are burnt)
@@ -1387,7 +1375,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 		require.NotEmpty(t, sharders)
 		sharderID := sharders[0].ID
-		confHash = apiClient.CreateMinerStakePool(t, sdkWallet, 2, sharderID, float64(1.0), client.TxSuccessfulStatus)
+		confHash = apiClient.CreateMinerStakePool(t, sdkWallet, 2, sharderID, 1.0, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
 		// Check decreased (staked tokens are burnt)
@@ -1423,7 +1411,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 
 		// Create read pool
-		confHash = apiClient.CreateReadPool(t, sdkWallet, float64(1.0), client.TxSuccessfulStatus)
+		confHash = apiClient.CreateReadPool(t, sdkWallet, 1.0, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
 		// Check decrease
