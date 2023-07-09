@@ -146,7 +146,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain@feature/add-repo-snapshots-integration
         with:
-          repo_snapshots_branch: "feature/test-image"
+          repo_snapshots_branch: "<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>"
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           zs3_client: ${{ env.ZS3SERVER_TAG }}
@@ -166,7 +166,7 @@ jobs:
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@feature/add-repo-snapshots-integration
         with:
-          repo_snapshots_branch: "feature/test-image"
+          repo_snapshots_branch: "<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>"
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
