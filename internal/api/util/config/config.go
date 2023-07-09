@@ -3,15 +3,13 @@ package config
 import (
 	"encoding/hex"
 	"encoding/json"
-	"log"
-	"os"
-	"time"
-
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3" //nolint
+	"log"
+	"os"
 )
 
 // ConfigPathEnv contains name of env variable
@@ -62,11 +60,12 @@ func CreateFreeStorageMarker(
 	t *test.SystemTest,
 	wallet *model.SdkWallet,
 	assignerWallet *model.SdkWallet,
+	nonce int,
 ) string {
 	marker := model.FreeStorageMarker{
 		Recipient:  wallet.ClientID,
 		FreeTokens: 5,
-		Timestamp:  time.Now().Unix(),
+		Nonce:      0,
 	}
 
 	forSignatureBytes, err := json.Marshal(&marker)
@@ -79,6 +78,7 @@ func CreateFreeStorageMarker(
 	secretKey := crypto.ToSecretKey(t, assignerWallet.ToCliModelWalletFile())
 	marker.Signature = crypto.Sign(t, string(rawHash), secretKey)
 	marker.Assigner = assignerWallet.ClientID
+	marker.Nonce = nonce
 
 	markerJson, err := json.Marshal(marker)
 	require.Nil(t, err, "Could not marshal marker")
