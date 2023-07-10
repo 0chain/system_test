@@ -1468,7 +1468,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		//	return cond
 		// })
 	})
-
 }
 
 //nolint:gocyclo
