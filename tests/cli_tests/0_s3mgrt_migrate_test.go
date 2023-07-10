@@ -16,7 +16,7 @@ func Test0S3Migration(testSetup *testing.T) {
 	if s3SecretKey == "" || s3AccessKey == "" {
 		t.Skip("s3SecretKey or s3AccessKey was missing")
 	}
-	t.Parallel()
+
 	t.SetSmokeTests("Should migrate existing bucket successfully")
 
 	t.RunSequentially("Should migrate existing bucket successfully", func(t *test.SystemTest) {
