@@ -39,7 +39,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("%dh", expDuration),
+			"extend":     true,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 
@@ -85,7 +85,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		params := createParams(map[string]interface{}{
 			"allocation":   allocationID,
-			"expiry":       fmt.Sprintf("%dh", expDuration),
+			"extend":       true,
 			"size":         size,
 			"update_terms": true,
 		})
@@ -100,20 +100,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
 		require.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
 		require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size)
-	})
-
-	t.Run("Update Negative Expiry Should Not Work", func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, configPath)
-		expDuration := int64(-30) // In minutes
-
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("\"%dm\"", expDuration),
-		})
-		output, err := updateAllocation(t, configPath, params, true)
-
-		require.NotNil(t, err, "expected error while updating allocation expiry "+
-			"by negative value", strings.Join(output, "\n"))
 	})
 
 	t.Run("Update Negative Size Should Work", func(t *test.SystemTest) {
@@ -194,7 +180,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		) // size should be unaffected
 	})
 
-	// FIXME expiry or size should be required params - should not bother sharders with an empty update
+	// FIXME extend or size should be required params - should not bother sharders with an empty update
 	t.Run("Update Nothing Should Fail", func(t *test.SystemTest) {
 		_, err := executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed")
@@ -211,7 +197,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error updating allocation:allocation_updating_failed: update allocation changes nothing", output[0])
 	})
 
-	// TODO is it normal to create read pool?
 	t.Run("Update Non-existent Allocation Should Fail", func(t *test.SystemTest) {
 		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
@@ -220,7 +205,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"expiry":     "1h",
+			"extend":     true,
 		})
 		output, err := updateAllocation(t, configPath, params, false)
 
@@ -279,27 +264,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error updating allocation:allocation_updating_failed: only owner can update the allocation", output[0])
-	})
-
-	t.Run("Update Mistake Expiry Parameter Should Fail", func(t *test.SystemTest) {
-		allocationID := setupAllocation(t, configPath)
-		expiry := 1
-
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     expiry,
-		})
-		output, err := updateAllocation(t, configPath, params, false)
-
-		require.NotNil(t, err, "expected error updating "+
-			"allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length "+
-			"be at least 1", strings.Join(output, "\n"))
-		expected := fmt.Sprintf(
-			`Error: invalid argument "%v" for "--expiry" flag: time: missing unit in duration "%v"`,
-			expiry, expiry,
-		)
-		require.Equal(t, expected, output[0])
 	})
 
 	t.Run("Update Mistake Size Parameter Should Fail", func(t *test.SystemTest) {
@@ -691,7 +655,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"size":       2,
-			"expiry":     "24h",
+			"extend":     true,
 		})
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, true)
 
