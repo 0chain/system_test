@@ -688,7 +688,7 @@ func TestDownload(testSetup *testing.T) {
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  localPath,
+			"localpath":  os.TempDir(),
 			"thumbnail":  nil,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -733,7 +733,7 @@ func TestDownload(testSetup *testing.T) {
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  localPath,
+			"localpath":  os.TempDir(),
 			"thumbnail":  nil,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))

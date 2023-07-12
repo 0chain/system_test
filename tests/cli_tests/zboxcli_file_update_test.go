@@ -163,7 +163,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		localNewThumbnail := filepath.Join(downloadNewThumbnailDir, filepath.Base(remotepath))
+		localNewThumbnail := filepath.Join(downloadNewThumbnailDir, filepath.Base(localFilePath))
 		stat, err := os.Stat(localNewThumbnail)
 		require.Nil(t, err)
 		require.Equal(t, newThumbnailSize, int(stat.Size()))
