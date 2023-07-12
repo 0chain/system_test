@@ -40,9 +40,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		output, err := executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "1m",
-		})
+		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
 
 		time.Sleep(90 * time.Second)
 
@@ -64,9 +62,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "1m",
-		})
+		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
 
 		time.Sleep(5 * time.Minute)
 		allocations := parseListAllocations(t, configPath)
@@ -90,7 +86,6 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
-			"expire": "1m",
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -112,7 +107,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Update Expired Allocation Should Fail", 10*time.Minute, func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{"expire": "1m"})
+		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
 
 		time.Sleep(5 * time.Minute)
 
@@ -147,9 +142,8 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"expire": "1m",
-			"size":   "1024",
-			"lock":   "0.5",
+			"size": "1024",
+			"lock": "0.5",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))

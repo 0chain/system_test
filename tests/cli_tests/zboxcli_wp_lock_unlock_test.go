@@ -29,9 +29,8 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"expire": "6m",
-			"size":   "1024",
-			"lock":   "0.5",
+			"size": "1024",
+			"lock": "0.5",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -91,9 +90,8 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"expire": "6m",
-			"size":   "1024",
-			"lock":   "0.5",
+			"size": "1024",
+			"lock": "0.5",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -129,9 +127,8 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"expire": "6m",
-			"size":   "1024",
-			"lock":   "0.5",
+			"size": "1024",
+			"lock": "0.5",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -167,9 +164,8 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"expire": "6m",
-			"size":   "1024",
-			"lock":   "0.5",
+			"size": "1024",
+			"lock": "0.5",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -205,9 +201,8 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"expire": "6m",
-			"size":   "1024",
-			"lock":   "0.5",
+			"size": "1024",
+			"lock": "0.5",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -232,9 +227,8 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"expire": "30m",
-			"size":   "1024",
-			"lock":   "0.5",
+			"size": "1024",
+			"lock": "0.5",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
