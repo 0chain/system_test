@@ -215,14 +215,22 @@ func getWalletForName(t *test.SystemTest, cliConfigFilename, name string) (*clim
 		return nil, err
 	}
 
-	require.Len(t, output, 1)
+	require.True(t, len(output) == 1 || len(output) == 2)
 
 	var wallet *climodel.Wallet
-
-	err = json.Unmarshal([]byte(output[0]), &wallet)
-	if err != nil {
-		t.Errorf("failed to unmarshal the result into wallet")
-		return nil, err
+	if len(output) == 1 {
+		err = json.Unmarshal([]byte(output[0]), &wallet)
+		if err != nil {
+			t.Errorf("failed to unmarshal the result into wallet")
+			return nil, err
+		}
+	} else {
+		require.EqualValues(t, "ZCN wallet created", output[0])
+		err = json.Unmarshal([]byte(output[1]), &wallet)
+		if err != nil {
+			t.Errorf("failed to unmarshal the result into wallet")
+			return nil, err
+		}
 	}
 
 	return wallet, err
