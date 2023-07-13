@@ -1256,10 +1256,7 @@ func TestDownload(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		expected := fmt.Sprintf(
-			"Download failed. Local file already exists '%s'",
-			strings.TrimSuffix(os.TempDir(), "/")+"/"+filepath.Base(filename),
-		)
+		expected := "file is already downloaded"
 		require.Equal(t, expected, output[0])
 	})
 
