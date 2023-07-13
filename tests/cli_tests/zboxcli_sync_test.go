@@ -515,9 +515,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 			}
 		}
 		require.NotNil(t, foundItem, "The original file doesn't exist anymore", files)
-		// Double the number because the size is calculated to be (ActualFileSize/Data-shards)*total-blobbers
-		// In our case we have 2-data shards and 2-parity shards. So it will double the size.
-		require.Equal(t, 128*KB*2, foundItem.Size, "The original file doesn't exist anymore", files)
+		require.Equal(t, 128*KB, foundItem.Size, "The original file doesn't exist anymore", files)
 	})
 
 	t.Run("Sync path with chunk number specified should work", func(t *test.SystemTest) {
