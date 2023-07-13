@@ -2,6 +2,9 @@ package cli_tests
 
 import (
 	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	"math"
 	"os"
 	"path/filepath"
