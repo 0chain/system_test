@@ -1860,8 +1860,6 @@ func TestDexState(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		csrfToken = createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-
 		dexState, response, err := zboxClient.PostDexState(t,
 			postData,
 			firebaseToken.IdToken,
@@ -1869,7 +1867,7 @@ func TestDexState(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 201, response.StatusCode())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, dexState)
 	})
 
@@ -1967,15 +1965,13 @@ func TestDexState(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		csrfToken = createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-
 		dexState, response, err := zboxClient.GetDexState(t,
 			firebaseToken.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode())
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, dexState)
 		require.Equal(t, postData["stage"], dexState.Stage)
 		require.Equal(t, postData["reference"], dexState.Reference)
@@ -2020,8 +2016,6 @@ func TestDexState(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		csrfToken = createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-
 		// get dex state
 		dexState, response, err := zboxClient.GetDexState(t,
 			firebaseToken.IdToken,
@@ -2030,7 +2024,7 @@ func TestDexState(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode())
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, postData["reference"], dexState.Reference)
 
 		// update dex state
@@ -2052,7 +2046,7 @@ func TestDexState(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode())
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, updateData["reference"], dexState.Reference)
 	})
 
