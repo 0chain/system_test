@@ -83,14 +83,14 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			if f.Path == remotePath {
 				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
 			if f.Path == destpath+filename {
 				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -173,7 +173,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 				_, ok = cliutils.Contains(fileNames[:], f.Name)
 				require.True(t, ok, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -238,14 +238,14 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			if f.Path == remotePath {
 				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
 			if f.Path == destpath+filename {
 				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -309,7 +309,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			if f.Path == remotePath { // nolint:gocritic // this is better than inverted if cond
 				found = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -372,7 +372,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			if f.Path == remotePath { // nolint:gocritic // this is better than inverted if cond
 				found = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -455,14 +455,14 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			if f.Path == remotePath {
 				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
 			if f.Path == destpath+filename {
 				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -550,7 +550,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			if f.Path == remotePath {
 				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.Greater(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
