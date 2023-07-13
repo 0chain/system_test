@@ -758,22 +758,12 @@ func TestUpload(testSetup *testing.T) {
 		err = createFileWithSize(filename, 1024*1024*0.5)
 		require.Nil(t, err, "error while generating file: ", err)
 
-		// record time in minute
-		startTime := float64(time.Now().Second())
-
 		// upload a dummy 5 MB file
 		uploadWithParam(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  filename,
 			"remotepath": "/",
 		})
-
-		// record time in minute
-		endTime := float64(time.Now().Second())
-
-		minutesElapsed := endTime - startTime
-
-		minutesElapsed = 10 - minutesElapsed/60
 
 		output, _ = getUploadCostInUnit(t, configPath, allocationID, filename)
 		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)

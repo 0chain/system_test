@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	climodel "github.com/0chain/system_test/internal/cli/model"
 	"math"
 	"os"
 	"path/filepath"
@@ -13,6 +12,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	climodel "github.com/0chain/system_test/internal/cli/model"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -509,7 +510,6 @@ func TestFileUpdate(testSetup *testing.T) {
 
 		createAllocationTestTeardown(t, allocationID)
 	})
-
 }
 
 func generateThumbnail(t *test.SystemTest, localpath string) int {

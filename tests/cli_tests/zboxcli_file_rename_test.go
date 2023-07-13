@@ -845,7 +845,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			require.Len(t, output, 1)
 		}
 	})
-
 }
 
 func renameFileWithWallet(t *test.SystemTest, cliConfigFilename, wallet string, param map[string]interface{}) ([]string, error) {

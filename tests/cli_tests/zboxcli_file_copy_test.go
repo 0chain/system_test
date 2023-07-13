@@ -713,7 +713,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 		createAllocationTestTeardown(t, allocationID)
 	})
-
 }
 
 func copyFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
