@@ -400,7 +400,6 @@ func TestFileDelete(testSetup *testing.T) {
 			require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 		}
 	})
-
 }
 
 func deleteFile(t *test.SystemTest, walletName, params string, retry bool) ([]string, error) {
