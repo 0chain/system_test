@@ -401,12 +401,23 @@ func TestUpload(testSetup *testing.T) {
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		output, err := uploadFileWithTimeout(t, ctx, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"remotepath":  "/",
+			"localpath":   filename,
+			"chunknumber": 1024, // 64KB * 1024 = 64M
+		})
+		// check if
+		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  "/",
 			"localpath":   filename,
 			"chunknumber": 1024, // 64KB * 1024 = 64M
 		}, true)
+
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
@@ -985,7 +996,7 @@ func uploadFileWithTimeout(t *test.SystemTest, ctx context.Context, cliConfigFil
 	case <-ctx.Done():
 		// Check if the context was canceled or timed out
 		if ctx.Err() == context.DeadlineExceeded {
-			return []string{"Function timed out"}, nil
+			return []string{}, nil
 		}
 		return []string{"Function canceled"}, nil
 	}
