@@ -15,8 +15,6 @@ import (
 func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	t.Skip("wait for duplicate transaction issue to be solved, https://github.com/0chain/0chain/issues/2348")
-
 	// Take a snapshot of the chains miners, repeat a transaction with a fee a few times,
 	// take another snapshot.
 	// Examine the rewards paid between the two snapshot and confirm the self-consistency
@@ -156,11 +154,11 @@ func checkMinerFeeAmounts(
 			}
 			// if this miner is the round miner check fees add up
 			if id == roundHistory.Block.MinerID {
-				require.InDeltaf(t, fees, recordedRoundRewards, delta,
+				require.InDeltaf(
+					t, fees, recordedRoundRewards, delta,
 					"incorrect service charge %v for round %d"+
 						" service charge should be fees %d multiplied by service ratio %v."+
-						"length stake pools %d",
-					"round history %v",
+						"length stake pools %d, round history %v",
 					recordedRoundRewards, round, fees, beforeMiners[i].Settings.ServiceCharge,
 					len(beforeMiners[i].StakePool.Pools), roundHistory)
 			}
