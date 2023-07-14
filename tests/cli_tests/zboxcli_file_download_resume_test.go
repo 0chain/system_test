@@ -16,12 +16,11 @@ import (
 )
 
 func TestResumeDownload(testSetup *testing.T) {
-
 	t := test.NewSystemTest(testSetup)
 
 	t.RunWithTimeout("Resume download should work", 5*time.Minute, func(t *test.SystemTest) {
-		allocSize := int64(500 * MB)
-		filesize := int64(400 * MB)
+		allocSize := int64(600 * MB)
+		filesize := int64(500 * MB)
 		remotepath := "/"
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -47,6 +46,9 @@ func TestResumeDownload(testSetup *testing.T) {
 		// Delete the uploaded file, since we will be downloading it now
 		err = os.Remove(filename)
 		require.Nil(t, err)
+		defer func() {
+			os.Remove(filename) //nolint: errcheck
+		}()
 
 		cmd, err := startDownloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -54,27 +56,18 @@ func TestResumeDownload(testSetup *testing.T) {
 			"localpath":  filename,
 		}), false)
 		require.Nil(t, err, "Download failed to start")
-		defer func() {
-			os.Remove(filename) //nolint: errcheck
-		}()
 
-		// Wait till 20% of the file is downloaded
-		downloaded := waitPartialDownload(t, filename, filesize)
+		// Wait till more than 20% of the file is downloaded
+		downloaded := waitPartialDownloadAndInterrupt(t, cmd, filename, filesize)
 		require.True(t, downloaded)
 
-		// Send interrupt signal to command
-		err = cmd.Process.Signal(os.Interrupt)
-		require.Nil(t, err)
-
 		// Allow command to stop
-		time.Sleep(1 * time.Second)
+		time.Sleep(5 * time.Second)
 
 		info, err := os.Stat(filename)
 		require.Nil(t, err, "File was not partially downloaded")
-
 		percentDownloaded := float64(info.Size()) / float64(filesize) * 100
 		t.Logf("Partially downloaded %.2f%% of the file: %v / %v\n", percentDownloaded, info.Size(), filesize)
-
 		require.Greater(t, info.Size(), int64(0))
 		require.Less(t, info.Size(), filesize)
 
@@ -90,7 +83,6 @@ func TestResumeDownload(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(filename))
 
 		downloadedFileChecksum := generateChecksum(t, filename)
-
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 }
@@ -100,7 +92,7 @@ func startDownloadFile(t *test.SystemTest, cliConfigFilename, param string, retr
 }
 
 func startDownloadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename, param string, retry bool) (*exec.Cmd, error) {
-	t.Logf("Downloading file...")
+	t.Log("Downloading file...")
 	cmd := fmt.Sprintf(
 		"./zbox download %s --silent --wallet %s --configDir ./config --config %s",
 		param,
@@ -115,8 +107,9 @@ func startDownloadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename, p
 	}
 }
 
-func waitPartialDownload(t *test.SystemTest, filename string, filesize int64) bool {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+func waitPartialDownloadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd, filename string, filesize int64) bool {
+	t.Log("Waiting till file is partially downloaded...")
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
 	for {
@@ -127,11 +120,13 @@ func waitPartialDownload(t *test.SystemTest, filename string, filesize int64) bo
 		case <-time.After(1 * time.Second):
 			info, err := os.Stat(filename)
 			if err != nil {
-				t.Logf("File is not yet created: %v", err)
 				continue
 			}
 			if info.Size() > filesize/5 {
-				t.Log("File is more than 20% downloaded")
+				// Send interrupt signal to command
+				err = cmd.Process.Signal(os.Interrupt)
+				require.Nil(t, err)
+				t.Log("Partial download successful, download has been interrupted")
 				return true
 			}
 		}
