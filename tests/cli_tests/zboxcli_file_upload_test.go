@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -347,6 +348,41 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Upload Large File Should Work", 6*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
+		allocSize := int64(2 * GB)
+		fileSize := int64(1 * GB)
+
+		for i := 0; i < 6; i++ {
+			output, err := executeFaucetWithTokens(t, configPath, 9.0)
+			require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+		}
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"lock":   50,
+			"expire": "30m",
+		})
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"remotepath":  "/",
+			"localpath":   filename,
+			"chunknumber": 1024, // 64KB * 1024 = 64M
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+	})
+
+	t.RunWithTimeout("Resume upload should work fine", 6*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
 		allocSize := int64(2 * GB)
 		fileSize := int64(1 * GB)
 
@@ -942,6 +978,42 @@ func uploadFileWithoutRetry(t *test.SystemTest, cliConfigFilename string, param 
 	)
 
 	return cliutils.RunCommandWithoutRetry(cmd)
+}
+
+func uploadFileWithTimeout(t *test.SystemTest, ctx context.Context, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
+	t.Logf("Uploading file...")
+	p := createParams(param)
+	cmd := fmt.Sprintf(
+		"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
+		p,
+		escapedTestName(t)+"_wallet.json",
+		cliConfigFilename,
+	)
+	resultChan := make(chan []string)
+	errChan := make(chan error, 1)
+
+	go func() {
+		result, err := cliutils.RunCommandWithoutRetry(cmd)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		resultChan <- result
+	}()
+
+	select {
+	case results := <-resultChan:
+		return results, nil
+	case err := <-errChan:
+		return []string{}, err
+	case <-ctx.Done():
+		// Check if the context was canceled or timed out
+		if ctx.Err() == context.DeadlineExceeded {
+			return []string{"Function timed out"}, nil
+		}
+		return []string{"Function canceled"}, nil
+	}
+
 }
 
 func generateFileAndUpload(t *test.SystemTest, allocationID, remotepath string, size int64) string {
