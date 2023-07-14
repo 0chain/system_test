@@ -410,7 +410,9 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":   filename,
 			"chunknumber": 1024, // 64KB * 1024 = 64M
 		})
-		// check if
+		require.Equal(t, len(output), 0, "upload not cancelled properly")
+		require.Nil(t, err, "upload not cancelled properly")
+
 		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  "/",
