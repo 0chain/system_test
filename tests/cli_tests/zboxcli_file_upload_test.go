@@ -1002,7 +1002,6 @@ func uploadFileWithTimeout(t *test.SystemTest, ctx context.Context, cliConfigFil
 		}
 		return []string{"Function canceled"}, nil
 	}
-
 }
 
 func generateFileAndUpload(t *test.SystemTest, allocationID, remotepath string, size int64) string {
