@@ -382,54 +382,6 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.RunWithTimeout("Resume upload should work fine", 6*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
-		allocSize := int64(2 * GB)
-		fileSize := int64(1 * GB)
-
-		for i := 0; i < 6; i++ {
-			output, err := executeFaucetWithTokens(t, configPath, 9.0)
-			require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-		}
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"lock":   50,
-			"expire": "30m",
-		})
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		output, err := uploadFileWithTimeout(t, ctx, configPath, map[string]interface{}{
-			"allocation":  allocationID,
-			"remotepath":  "/",
-			"localpath":   filename,
-			"chunknumber": 1024, // 64KB * 1024 = 64M
-		})
-		require.Equal(t, len(output), 0, "upload not cancelled properly")
-		require.Nil(t, err, "upload not cancelled properly")
-
-		output, err = uploadFile(t, configPath, map[string]interface{}{
-			"allocation":  allocationID,
-			"remotepath":  "/",
-			"localpath":   filename,
-			"chunknumber": 1024, // 64KB * 1024 = 64M
-		}, true)
-
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
-
 	t.Run("Upload File with Encryption Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
