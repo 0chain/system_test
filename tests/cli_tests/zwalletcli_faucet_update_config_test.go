@@ -29,7 +29,7 @@ func TestFaucetUpdateConfig(testSetup *testing.T) {
 		}
 
 		configKey := "max_pour_amount"
-		newValue := "15000"
+		newValue := "15"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
 		output, err := createWallet(t, configPath)
