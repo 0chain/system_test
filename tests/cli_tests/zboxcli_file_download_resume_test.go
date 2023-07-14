@@ -58,7 +58,7 @@ func TestResumeDownload(testSetup *testing.T) {
 		}), false)
 		require.Nil(t, err, "Download failed to start")
 
-		// Wait till more than 20% of the file is downloaded
+		// Wait till more than 20% of the file is downloaded and send interrupt signal to command
 		downloaded := waitPartialDownloadAndInterrupt(t, cmd, filename, filesize)
 		require.True(t, downloaded)
 
