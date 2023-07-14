@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -66,10 +67,11 @@ func TestResumeDownload(testSetup *testing.T) {
 
 		info, err := os.Stat(filename)
 		require.Nil(t, err, "File was not partially downloaded")
-		percentDownloaded := float64(info.Size()) / float64(filesize) * 100
-		t.Logf("Partially downloaded %.2f%% of the file: %v / %v\n", percentDownloaded, info.Size(), filesize)
-		require.Greater(t, info.Size(), int64(0))
-		require.Less(t, info.Size(), filesize)
+		partialDownloadedBytes := info.Size()
+		percentDownloaded := float64(partialDownloadedBytes) / float64(filesize) * 100
+		t.Logf("Partially downloaded %.2f%% of the file: %v / %v\n", percentDownloaded, partialDownloadedBytes, filesize)
+		require.Greater(t, partialDownloadedBytes, int64(0))
+		require.Less(t, partialDownloadedBytes, filesize)
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -81,6 +83,15 @@ func TestResumeDownload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 		require.Contains(t, output[1], StatusCompletedCB)
 		require.Contains(t, output[1], filepath.Base(filename))
+
+		outputStatus := strings.Fields(output[0])
+		actualDownloadedBytes, err := strconv.ParseInt(outputStatus[len(outputStatus)-6], 10, 64) // This gets the 6th element from the end
+		require.Nil(t, err)
+
+		t.Log("Bytes downloaded after resuming:", actualDownloadedBytes)
+		require.Equal(t, filesize-partialDownloadedBytes, actualDownloadedBytes,
+			fmt.Sprintf("Actual bytes downloaded after resume %v does not equal to expected amount of bytes %v",
+				actualDownloadedBytes, filesize-partialDownloadedBytes))
 
 		downloadedFileChecksum := generateChecksum(t, filename)
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
