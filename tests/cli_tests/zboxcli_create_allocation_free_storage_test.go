@@ -104,13 +104,13 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
 			FreeTokens: 5,
-			Timestamp:  time.Now().Unix(),
+			Nonce:      time.Now().Unix(),
 		}
 
-		forSignatureBytes, err := json.Marshal(&marker)
+		forSignatureBytes := fmt.Sprintf("%s:%f:%d", marker.Recipient, marker.FreeTokens, marker.Nonce)
 		require.Nil(t, err, "Could not marshal marker")
 
-		data := hex.EncodeToString(forSignatureBytes)
+		data := hex.EncodeToString([]byte(forSignatureBytes))
 		rawHash, err := hex.DecodeString(data)
 		require.Nil(t, err, "failed to decode hex %s", data)
 		require.NotNil(t, rawHash, "failed to decode hex %s", data)
@@ -199,7 +199,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
 			FreeTokens: 5,
-			Timestamp:  time.Now().Unix(),
+			Nonce:      2,
 		}
 
 		marker.Signature = "badsignature"
@@ -238,7 +238,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
 			FreeTokens: 5,
-			Timestamp:  time.Now().Unix(),
+			Nonce:      time.Now().Unix(),
 		}
 
 		forSignatureBytes, err := json.Marshal(&marker)
@@ -281,13 +281,13 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		marker := climodel.FreeStorageMarker{
 			Recipient:  recipientWallet.ClientID,
 			FreeTokens: freeTokensIndividualLimit + 1,
-			Timestamp:  time.Now().Unix(),
+			Nonce:      time.Now().Unix(),
 		}
 
-		forSignatureBytes, err := json.Marshal(&marker)
+		forSignatureBytes := fmt.Sprintf("%s:%f:%d", marker.Recipient, marker.FreeTokens, marker.Nonce)
 		require.Nil(t, err, "Could not marshal marker")
 
-		data := hex.EncodeToString(forSignatureBytes)
+		data := hex.EncodeToString([]byte(forSignatureBytes))
 		rawHash, err := hex.DecodeString(data)
 		require.Nil(t, err, "failed to decode hex %s", data)
 		require.NotNil(t, rawHash, "failed to decode hex %s", data)
