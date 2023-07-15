@@ -280,13 +280,10 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 		require.NotEmpty(t, stakePoolAfter)
 
-		fmt.Println("stakePoolAfter", stakePoolAfter)
-
 		rewards := int64(0)
 		for _, poolDelegateInfo := range stakePoolAfter.Delegate {
 			if poolDelegateInfo.DelegateID == wallet.ClientID {
 				rewards = poolDelegateInfo.TotalReward
-				fmt.Println("rewards", rewards)
 				break
 			}
 		}

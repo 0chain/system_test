@@ -29,6 +29,7 @@ const (
 
 func TestEthRegisterAccount(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("skip till authorizers are re-enabled")
 	t.SetSmokeTests("Register ethereum account in local key storage")
 
 	t.RunSequentially("Register ethereum account in local key storage", func(t *test.SystemTest) {
@@ -120,16 +121,6 @@ func getConfigDir() string {
 		log.Fatalln(err)
 	}
 	configDir = filepath.Join(curr, "config")
-	return configDir
-}
-
-func getZCNDir() string {
-	var configDir string
-	home, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	configDir = home + "/.zcn"
 	return configDir
 }
 

@@ -19,12 +19,14 @@ import (
 
 func TestBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("skip till authorizers are re-enabled")
 	t.SetSmokeTests("Burning WZCN tokens on balance, should work")
 
 	t.Parallel()
 
-	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
-		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
+	t.Run("Burning WZCN tokens on balance, should work", func(t *test.SystemTest) {
+		t.Skip("Skip till runners are updated to newer ubuntu")
+		output, err := burnEth(t, "1", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
@@ -32,7 +34,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 
 	t.RunWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
 		t.Skip("Skip till runners are updated to newer ubuntu")
-		output, err := burnEth(t, "1", bridgeClientConfigFile, true)
+		output, err := burnEth(t, "1", true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
@@ -59,17 +61,17 @@ func TestBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*10, func(t *test.SystemTest) {
-		output, err := burnZcn(t, "1", bridgeClientConfigFile, false)
+		output, err := burnZcn(t, "1", false)
 		require.NotNil(t, err)
 		require.Greater(t, len(output), 0)
 		require.NotContains(t, output[len(output)-1], "Transaction completed successfully:")
 	})
 
-	t.RunWithTimeout("Burning ZCN tokens with available ZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
+	t.Run("Burning ZCN tokens with available ZCN tokens on balance, should work", func(t *test.SystemTest) {
 		output, err := executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = burnZcn(t, "1", bridgeClientConfigFile, true)
+		output, err = burnZcn(t, "1", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Transaction completed successfully:")
@@ -80,7 +82,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		output, err := executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err = burnZcn(t, "1", bridgeClientConfigFile, true)
+		output, err = burnZcn(t, "1", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Transaction completed successfully:")
@@ -120,13 +122,12 @@ func isEthereumAddress(src string) bool {
 	return reg.MatchString(src)
 }
 
-func burnZcn(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
+func burnZcn(t *test.SystemTest, amount string, retry bool) ([]string, error) {
 	t.Logf("Burning ZCN tokens that will be minted for WZCN tokens...")
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-burn-zcn --token %s --path %s --bridge_config %s --wallet %s --configDir ./config --config %s",
+		"./zwallet bridge-burn-zcn --token %s --path %s --wallet %s --configDir ./config --config %s",
 		amount,
 		configDir,
-		bridgeClientConfigFile,
 		escapedTestName(t)+"_wallet.json",
 		configPath,
 	)
@@ -138,13 +139,12 @@ func burnZcn(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bo
 	}
 }
 
-func burnEth(t *test.SystemTest, amount, bridgeClientConfigFile string, retry bool) ([]string, error) {
+func burnEth(t *test.SystemTest, amount string, retry bool) ([]string, error) {
 	t.Logf("Burning WZCN tokens that will be minted for ZCN tokens...")
 	cmd := fmt.Sprintf(
-		"./zwallet bridge-burn-eth --amount %s --path %s --bridge_config %s --retries 200",
+		"./zwallet bridge-burn-eth --amount %s --path %s --retries 200",
 		amount,
 		configDir,
-		bridgeClientConfigFile,
 	)
 
 	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)

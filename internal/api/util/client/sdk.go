@@ -9,6 +9,7 @@ import (
 
 	"github.com/0chain/gosdk/constants"
 	"github.com/0chain/gosdk/core/conf"
+	"github.com/0chain/gosdk/zboxcore/blockchain"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/gosdk/zboxcore/zboxutil"
 	"github.com/0chain/system_test/internal/api/model"
@@ -26,22 +27,30 @@ type SDKClient struct {
 }
 
 type StatusCallback struct {
-	wg      *sync.WaitGroup
-	success bool
+	wg       *sync.WaitGroup
+	isRepair bool
+	success  bool
 }
 
+type MultiOperationOption func(alloc *sdk.Allocation)
+
 func (cb *StatusCallback) Started(allocationId, filePath string, op, totalBytes int) {
-	cb.wg.Add(1)
+
 }
 
 func (cb *StatusCallback) InProgress(allocationId, filePath string, op, completedBytes int, data []byte) {
 }
 
-func (cb *StatusCallback) RepairCompleted(filesRepaired int) {}
-
-func (cb *StatusCallback) Completed(allocationId, filePath, filename, mimetype string, size, op int) {
+func (cb *StatusCallback) RepairCompleted(filesRepaired int) {
 	cb.success = true
 	cb.wg.Done()
+}
+
+func (cb *StatusCallback) Completed(allocationId, filePath, filename, mimetype string, size, op int) {
+	if !cb.isRepair {
+		cb.success = true
+		cb.wg.Done()
+	}
 }
 
 func (cb *StatusCallback) Error(allocationID, filePath string, op int, err error) {
@@ -245,10 +254,20 @@ func (c *SDKClient) DownloadFile(t *test.SystemTest, allocationID, remotepath, l
 
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
 	require.NoError(t, err)
-
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
 	err = sdkAllocation.DownloadFile(localpath, "/"+remotepath, false, &StatusCallback{
-		wg: &sync.WaitGroup{},
-	})
+		wg: wg,
+	}, true)
+	require.NoError(t, err)
+	wg.Wait()
+}
+
+func (c *SDKClient) DownloadFileWithParam(t *test.SystemTest, alloc *sdk.Allocation, remotepath, localpath string, wg *sync.WaitGroup, isFinal bool) {
+	wg.Add(1)
+	err := alloc.DownloadFile(localpath, remotepath, false, &StatusCallback{
+		wg: wg,
+	}, isFinal)
 	require.NoError(t, err)
 }
 
@@ -271,7 +290,7 @@ func (c *SDKClient) Rollback(t *test.SystemTest, allocationID string) {
 	require.True(t, status)
 }
 
-func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops []sdk.OperationRequest) {
+func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops []sdk.OperationRequest, multiOps ...MultiOperationOption) {
 	defer func() {
 		for i := 0; i < len(ops); i++ {
 			if ops[i].OperationType == constants.FileOperationInsert || ops[i].OperationType == constants.FileOperationUpdate {
@@ -283,11 +302,15 @@ func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops 
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
 	require.NoError(t, err)
 
+	for _, opt := range multiOps {
+		opt(sdkAllocation)
+	}
+
 	err = sdkAllocation.DoMultiOperation(ops)
 	require.NoError(t, err)
 }
 
-func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string) sdk.OperationRequest {
+func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string, opts ...int64) sdk.OperationRequest {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
@@ -296,7 +319,10 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string) 
 		require.NoError(t, err)
 	}
 
-	const actualSize int64 = 1024
+	var actualSize int64 = 1024
+	if len(opts) > 0 {
+		actualSize = opts[0]
+	}
 
 	rawBuf := make([]byte, actualSize)
 	_, err = rand.Read(rawBuf)
@@ -321,6 +347,7 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string) 
 		FileReader:    buf,
 		FileMeta:      fileMeta,
 		Workdir:       homeDir,
+		RemotePath:    fileMeta.RemotePath,
 	}
 }
 
@@ -391,9 +418,69 @@ func (c *SDKClient) AddCopyOperation(t *test.SystemTest, allocationID, remotePat
 	}
 }
 
+func (c *SDKClient) AddUploadOperationWithPath(t *test.SystemTest, allocationID, remotePath string) sdk.OperationRequest {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	tmpFile, err := os.CreateTemp("", "*")
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	const actualSize int64 = 1024
+
+	rawBuf := make([]byte, actualSize)
+	_, err = rand.Read(rawBuf)
+	if err != nil {
+		require.NoError(t, err)
+	} //nolint:gosec,revive
+
+	fileMeta := sdk.FileMeta{
+		Path:       tmpFile.Name(),
+		ActualSize: actualSize,
+		RemoteName: filepath.Base(tmpFile.Name()),
+		RemotePath: remotePath + filepath.Join("", filepath.Base(tmpFile.Name())),
+	}
+
+	buf := bytes.NewBuffer(rawBuf)
+
+	homeDir, err := config.GetHomeDir()
+	require.NoError(t, err)
+
+	return sdk.OperationRequest{
+		OperationType: constants.FileOperationInsert,
+		FileReader:    buf,
+		FileMeta:      fileMeta,
+		Workdir:       homeDir,
+	}
+}
+
 func (c *SDKClient) AddCreateDirOperation(t *test.SystemTest, allocationID, remotePath string) sdk.OperationRequest {
 	return sdk.OperationRequest{
 		OperationType: constants.FileOperationCreateDir,
 		RemotePath:    remotePath,
+	}
+}
+
+func (c *SDKClient) RepairAllocation(t *test.SystemTest, allocationID string) {
+	sdkAllocation, err := sdk.GetAllocation(allocationID)
+	require.NoError(t, err)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	statusBar := &StatusCallback{
+		wg:       wg,
+		isRepair: true,
+	}
+	err = sdkAllocation.RepairAlloc(statusBar)
+	require.NoError(t, err)
+	wg.Wait()
+	require.True(t, statusBar.success)
+}
+
+func WithRepair(blobbers []*blockchain.StorageNode) MultiOperationOption {
+	return func(alloc *sdk.Allocation) {
+		alloc.SetConsensusThreshold()
+		alloc.Blobbers = blobbers
 	}
 }

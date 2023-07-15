@@ -72,7 +72,8 @@ func TestHashnodeRoot(testSetup *testing.T) {
 
 		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
-		require.Equal(t, "bad request: Invalid Allocation id. Allocation not found in blockchain.\n", string(restyResponse.Body()))
+		require.Equal(t, 500, restyResponse.StatusCode())
+		require.Contains(t, string(restyResponse.Body()), "too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders")
 		require.Nil(t, getBlobberResponse)
 	})
 

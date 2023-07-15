@@ -31,7 +31,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		var blobberToDeactivate *model.BlobberDetails
 		var activeBlobbers int
 		for i := range startBlobbers {
-			if startBlobbers[i].IsAvailable && !startBlobbers[i].IsKilled && !startBlobbers[i].IsShutdown {
+			if !startBlobbers[i].NotAvailable && !startBlobbers[i].IsKilled && !startBlobbers[i].IsShutdown {
 				activeBlobbers++
 				if blobberToDeactivate == nil {
 					blobberToDeactivate = &startBlobbers[i]
@@ -58,13 +58,13 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		require.NoError(t, err, "error getting allocation id")
 		defer createAllocationTestTeardown(t, beforeAllocationId)
 
-		setAvailability(t, blobberToDeactivate.ID, false)
-		t.Cleanup(func() { setAvailability(t, blobberToDeactivate.ID, true) })
+		setNotAvailability(t, blobberToDeactivate.ID, true)
+		t.Cleanup(func() { setNotAvailability(t, blobberToDeactivate.ID, false) })
 		cliutil.Wait(t, 1*time.Second)
 		betweenBlobbers := getBlobbers(t)
 		for i := range betweenBlobbers {
 			if betweenBlobbers[i].ID == blobberToDeactivate.ID {
-				require.Falsef(t, betweenBlobbers[i].IsAvailable, "blobber %s should be deactivated", blobberToDeactivate.ID)
+				require.Falsef(t, !betweenBlobbers[i].NotAvailable, "blobber %s should be deactivated", blobberToDeactivate.ID)
 			}
 		}
 
@@ -79,12 +79,12 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.True(t, strings.Contains(output[0], "not enough blobbers to honor the allocation"))
 
-		setAvailability(t, blobberToDeactivate.ID, true)
+		setNotAvailability(t, blobberToDeactivate.ID, false)
 		cliutil.Wait(t, 1*time.Second)
 		afterBlobbers := getBlobbers(t)
 		for i := range betweenBlobbers {
 			if afterBlobbers[i].ID == blobberToDeactivate.ID {
-				require.Truef(t, afterBlobbers[i].IsAvailable, "blobber %s should be activated", blobberToDeactivate.ID)
+				require.Truef(t, !afterBlobbers[i].NotAvailable, "blobber %s should be activated", blobberToDeactivate.ID)
 			}
 		}
 
@@ -102,10 +102,10 @@ func TestBlobberAvailability(testSetup *testing.T) {
 	})
 }
 
-func setAvailability(t *test.SystemTest, blobberId string, availability bool) {
+func setNotAvailability(t *test.SystemTest, blobberId string, availability bool) {
 	output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-		"blobber_id":   blobberId,
-		"is_available": availability,
+		"blobber_id":    blobberId,
+		"not_available": availability,
 	}))
 	require.NoError(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1)
