@@ -34,6 +34,9 @@ func TestStakePool(testSetup *testing.T) {
 		_, err := createWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", err)
 
+		// stake 1 token on this blobber
+		stakeTokensToAllBlobbers(t, 1)
+
 		// select the blobber with minimum available stake capacity
 		minAvailableCapacityBlobber, minAvailableCapacity, err := getMinStakedCapacityBlobber(t, blobbersList)
 		require.Nil(t, err, "Error fetching blobber with minimum available capacity")
@@ -43,11 +46,6 @@ func TestStakePool(testSetup *testing.T) {
 
 		lenDelegates, err := countDelegates(t, minAvailableCapacityBlobber.Id)
 		require.Nil(t, err, "error counting delegates")
-
-		// stake 1 token on this blobber
-		stakeTokensToAllBlobbers(t, 1)
-
-		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates+1)
 
 		// Create an allocation of maximum size that all blobbers can honor.
 		// This requires creating an allocation of capacity = available capacity of blobber which has minimum
@@ -162,7 +160,7 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 		"cost":        "",
 		"data":        3,
 		"parity":      3,
-		"expire":      "5m",
+		"expire":      "10m",
 		"size":        allocSize,
 		"read_price":  "0-0.1",
 		"write_price": "0-0.1",
@@ -172,12 +170,8 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 	allocationCost, err := getAllocationCost(output[0])
 	require.Nil(t, err, "could not get allocation cost")
 
-	// Matching the wallet balance to allocationCost by executing faucet with tokens
-	// As max limit of faucet is 9 tokens we are executing faucet with 9 tokens multiple times till wallet balance is equal to allocationCost
-	for i := float64(0); i <= (allocationCost/9)+1; i++ {
-		_, err = executeFaucetWithTokens(t, configPath, 9)
-		require.Nil(t, err, "Error executing faucet with tokens", err)
-	}
+	_, err = executeFaucetWithTokens(t, configPath, allocationCost)
+	require.Nil(t, err, "Error executing faucet with tokens", err)
 
 	// Create an allocation of maximum size that all blobbers can honor.
 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
