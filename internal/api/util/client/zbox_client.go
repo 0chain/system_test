@@ -153,7 +153,7 @@ func (c *ZboxClient) GetDexState(t *test.SystemTest, idToken, csrfToken, phoneNu
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -183,7 +183,7 @@ func (c *ZboxClient) PostDexState(t *test.SystemTest, data map[string]string, id
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
@@ -213,7 +213,7 @@ func (c *ZboxClient) PutDexState(t *test.SystemTest, data map[string]string, idT
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPUTMethod)
