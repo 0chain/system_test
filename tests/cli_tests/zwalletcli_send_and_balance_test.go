@@ -156,7 +156,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 
 		invalidClientID := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabb" // more than 64 chars
 		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
-			"\"error\":\"invalid_request: Invalid request (to client id must be a hexadecimal hash)\"}"
+			"\"error\":\"invalid to client id\"}"
 
 		output, err = sendZCN(t, configPath, invalidClientID, "1", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
