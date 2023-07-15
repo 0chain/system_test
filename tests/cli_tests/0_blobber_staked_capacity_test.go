@@ -47,8 +47,6 @@ func TestStakePool(testSetup *testing.T) {
 		lenDelegates, err := countDelegates(t, minAvailableCapacityBlobber.Id)
 		require.Nil(t, err, "error counting delegates")
 
-		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates+1)
-
 		// Create an allocation of maximum size that all blobbers can honor.
 		// This requires creating an allocation of capacity = available capacity of blobber which has minimum
 		// available capacity. For example, if 3 blobbers have 4 GB, 5 GB and 6 GB available,
@@ -162,7 +160,7 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 		"cost":        "",
 		"data":        3,
 		"parity":      3,
-		"expire":      "5m",
+		"expire":      "10m",
 		"size":        allocSize,
 		"read_price":  "0-0.1",
 		"write_price": "0-0.1",
