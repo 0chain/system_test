@@ -32,7 +32,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 7*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 5*time.Minute, func(t *test.SystemTest) {
 		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
@@ -47,7 +47,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		_, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
 
-		cliutils.Wait(t, 4*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 
 		output, err = finalizeAllocation(t, configPath, allocationID, true)
 
@@ -57,13 +57,13 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 	})
 
-	t.RunWithTimeout("Cancel Expired Allocation Should Fail", 7*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Cancel Expired Allocation Should Fail", 4*time.Minute, func(t *test.SystemTest) {
 		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
 
-		time.Sleep(5 * time.Minute)
+		time.Sleep(2 * time.Minute)
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -105,10 +105,10 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	t.RunWithTimeout("Update Expired Allocation Should Fail", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Update Expired Allocation Should Fail", 7*time.Minute, func(t *test.SystemTest) {
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
 
-		time.Sleep(5 * time.Minute)
+		time.Sleep(2 * time.Minute)
 
 		// Update expired alloc's duration
 		params := createParams(map[string]interface{}{
