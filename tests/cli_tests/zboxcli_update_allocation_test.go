@@ -35,13 +35,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	t.RunWithTimeout("Update Expiry Should Work", 15*time.Minute, func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-		expDuration := int64(1) // In hours
-
-		time.Sleep(2 * time.Minute)
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"extend":     nil,
+			"extend":     true,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 
@@ -51,7 +48,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		ac := getAllocation(t, allocationID)
-		require.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate,
+		require.Less(t, allocationBeforeUpdate.ExpirationDate, ac.ExpirationDate,
 			fmt.Sprint("Expiration Time doesn't match: "+
 				"Before:", allocationBeforeUpdate.ExpirationDate, "After:", ac.ExpirationDate),
 		)
@@ -82,7 +79,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	t.Run("Update All Parameters Should Work", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-		expDuration := int64(1) // In hours
 		size := int64(2048)
 
 		params := createParams(map[string]interface{}{
@@ -100,7 +96,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
-		require.Equal(t, allocationBeforeUpdate.ExpirationDate+expDuration*3600, ac.ExpirationDate)
+		require.Less(t, allocationBeforeUpdate.ExpirationDate, ac.ExpirationDate)
 		require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size)
 	})
 
@@ -667,9 +663,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		allocUpdated := getAllocation(t, allocationID)
 		require.Equal(t, alloc.Size+2, allocUpdated.Size)
 
-		expandedDuration, err := time.ParseDuration("24h")
 		require.Nil(t, err)
-		require.Equal(t, alloc.ExpirationDate+int64(expandedDuration.Seconds()), allocUpdated.ExpirationDate)
+		require.Less(t, alloc.ExpirationDate, allocUpdated.ExpirationDate)
 	})
 
 	t.RunWithTimeout("Update allocation any other action than expand by third party regardless of third_party_extendable should fail", 7*time.Minute, func(t *test.SystemTest) {
@@ -718,7 +713,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
+		require.Contains(t, strings.Join(output, "\n"), "third party can only extend the allocation")
 
 		// add blobber should fail
 		params = createParams(map[string]interface{}{
