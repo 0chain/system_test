@@ -713,7 +713,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "third party can only extend the allocation")
+		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
 
 		// add blobber should fail
 		params = createParams(map[string]interface{}{
@@ -896,7 +896,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 }
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	faucetTokens := 20.0
+	faucetTokens := 2.0
 	// Then create new allocation
 	options := map[string]interface{}{"size": "10000", "lock": "5"}
 
