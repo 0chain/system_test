@@ -88,7 +88,7 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"expiry":     "30m",
+			"extend":     true,
 			"lock":       1,
 		})
 		output, err = updateAllocation(t, configPath, params, true)

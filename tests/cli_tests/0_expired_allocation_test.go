@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -112,10 +111,8 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		time.Sleep(5 * time.Minute)
 
 		// Update expired alloc's duration
-		expDuration := int64(1) // In hours
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("%dh", expDuration),
 		})
 		output, err := updateAllocation(t, configPath, params, false)
 
