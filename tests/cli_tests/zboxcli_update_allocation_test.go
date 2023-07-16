@@ -33,13 +33,15 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Update Expiry Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Update Expiry Should Work", 15*time.Minute, func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		expDuration := int64(1) // In hours
 
+		time.Sleep(2 * time.Minute)
+
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"extend":     true,
+			"extend":     nil,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 
@@ -899,7 +901,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 }
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	faucetTokens := 2.0
+	faucetTokens := 20.0
 	// Then create new allocation
 	options := map[string]interface{}{"size": "10000", "lock": "5"}
 

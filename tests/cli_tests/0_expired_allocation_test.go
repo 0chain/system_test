@@ -113,12 +113,13 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		// Update expired alloc's duration
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
+			"extend":     true,
 		})
 		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[len(output)-1])
 
 		// Update the expired allocation's size
 		size := int64(2048)
