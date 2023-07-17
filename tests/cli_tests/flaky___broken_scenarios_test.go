@@ -372,6 +372,7 @@ func Test___FlakyBrokenScenarios(testSetup *testing.T) {
 		// Expected cost is given in "per 720 hours", we need 1 hour
 		// Expected cost takes into account data+parity, so we divide by that
 		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / ((2 + 2) * 720)
+		fmt.Print(actualExpectedUploadCostInZCN)
 		// upload a dummy 5 MB file
 		uploadWithParam(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
