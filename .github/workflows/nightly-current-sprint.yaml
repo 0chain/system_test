@@ -1,6 +1,6 @@
 name: "0Chain Nightly Tests - Current Sprint"
 concurrency:
-  group: "nightly-tests-${{ github.ref }}-${{ github.event_name }}"
+  group: "sprint-nightly-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
 on:
   schedule:
