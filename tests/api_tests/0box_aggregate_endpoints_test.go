@@ -996,7 +996,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
 			totalLockedAfter := (*data)[0]
-			cond := graphTotalLocked-totalLockedAfter == *tokenomics.IntToZCN(2.0)
+			cond := graphTotalLocked-totalLockedAfter == *tokenomics.IntToZCN(1.0)
 			if cond {
 				graphTotalLocked = totalLockedAfter
 			}
