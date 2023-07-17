@@ -1798,7 +1798,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		confHash := apiClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
-		// Check decreased for the same blobber
+		// Check decreased for the same  blobber
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {
 			data, resp, err := zboxClient.GetGraphBlobberSavedData(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
