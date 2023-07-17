@@ -181,7 +181,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			cond := allocatedStorageAfterAllocation > allocatedStorage && allocatedStorageAfterAllocation == int64(*latest)
-			allocatedStorage = allocatedStorageAfterAllocation
+			if cond {
+				allocatedStorage = allocatedStorageAfterAllocation
+			}
 			return cond
 		})
 
@@ -198,7 +200,10 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.Equal(t, 1, len([]int64(*data)))
 			allocatedStorageAfter := (*data)[0]
 			cond := allocatedStorageAfter < allocatedStorage
-			allocatedStorage = allocatedStorageAfter
+			if cond {
+				allocatedStorage = allocatedStorageAfter
+			}
+
 			return cond
 		})
 
@@ -219,7 +224,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			cond := allocatedStorageAfter > allocatedStorage && allocatedStorageAfter == int64(*latest)
-			allocatedStorage = allocatedStorageAfter
+			if cond {
+				allocatedStorage = allocatedStorageAfter
+			}
 			return cond
 		})
 
@@ -698,10 +705,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		require.Equal(t, 1, len([]int64(*data)))
 		graphTotalLocked := (*data)[0]
 
-		// Some more stake. It's gonna be tough
-		// for i := 0; i < 10; i++ {
-		// 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-		// }
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 90, client.TxSuccessfulStatus)
 
 		// Stake blobber
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
@@ -729,6 +733,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				graphTotalLocked = totalLockedAfter
 			}
 
+			t.Logf("1 Check increase: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
+
 			return cond
 		})
 
@@ -750,6 +756,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			if cond {
 				graphTotalLocked = totalLockedAfter
 			}
+
+			t.Logf("1 Check decrease: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
 
 			return cond
 		})
@@ -775,6 +783,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				graphTotalLocked = totalLockedAfter
 			}
 
+			t.Logf("2 Check increase: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
+
 			return cond
 		})
 
@@ -793,6 +803,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			if cond {
 				graphTotalLocked = totalLockedAfter
 			}
+
+			t.Logf("2 Check decrease: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
 
 			return cond
 		})
@@ -819,6 +831,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				graphTotalLocked = totalLockedAfter
 			}
 
+			t.Logf("3 Check increase: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
+
 			return cond
 		})
 
@@ -837,6 +851,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			if cond {
 				graphTotalLocked = totalLockedAfter
 			}
+
+			t.Logf("3 Check decrease: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
 
 			return cond
 		})
@@ -862,6 +878,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				graphTotalLocked = totalLockedAfter
 			}
 
+			t.Logf("4 Check increase: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
+
 			return cond
 		})
 
@@ -880,6 +898,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			if cond {
 				graphTotalLocked = totalLockedAfter
 			}
+
+			t.Logf("4 Check decrease: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
 
 			return cond
 		})
@@ -903,6 +923,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				graphTotalLocked = totalLockedAfter
 			}
 
+			t.Logf("5 Check increase: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
+
 			return cond
 		})
 
@@ -922,6 +944,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				graphTotalLocked = totalLockedAfter
 			}
 
+			t.Logf("6 Check increase: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
+
 			return cond
 		})
 
@@ -938,10 +962,13 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.Equal(t, 1, len([]int64(*data)))
 			totalLockedAfter := (*data)[0]
 			cond := totalLockedAfter < graphTotalLocked
-			cancellationCharge = graphTotalLocked - totalLockedAfter
+
 			if cond {
+				cancellationCharge = graphTotalLocked - totalLockedAfter
 				graphTotalLocked = totalLockedAfter
 			}
+
+			t.Logf("5 Check decrease: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
 
 			return cond
 		})
@@ -963,6 +990,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				graphTotalLocked = totalLockedAfter
 			}
 
+			t.Logf("6 Check decrease: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
+
 			return cond
 		})
 
@@ -982,6 +1011,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				graphTotalLocked = totalLockedAfter
 			}
 
+			t.Logf("7 Check increase: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
+
 			return cond
 		})
 
@@ -1000,6 +1031,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			if cond {
 				graphTotalLocked = totalLockedAfter
 			}
+
+			t.Logf("7 Check decrease: totalLockedAfter=%d, graphTotalLocked=%d, cond=%v", totalLockedAfter, graphTotalLocked, cond)
 
 			return cond
 		})

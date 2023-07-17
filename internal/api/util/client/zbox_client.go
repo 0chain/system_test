@@ -1400,6 +1400,8 @@ func (c *ZboxClient) GetGraphTotalLocked(t *test.SystemTest, req *model.ZboxGrap
 	urlBuilder.queries.Set("to", req.To)
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
+	t.Logf("URL: %s", urlBuilder.String())
+
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:                &data,
 		RequiredStatusCode: 200,
