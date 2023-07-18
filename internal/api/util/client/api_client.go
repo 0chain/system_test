@@ -486,7 +486,7 @@ func (c *APIClient) V1ClientGetBalance(t *test.SystemTest, clientGetBalanceReque
 func (c *APIClient) V1ClientGetReadPoolBalance(t *test.SystemTest, clientGetReadBalanceRequest model.ClientGetReadPoolBalanceRequest, requiredStatusCode int) (*model.ClientGetReadPoolBalanceResponse, *resty.Response, error) { //nolint
 	var clientGetReadPoolBalanceResponse *model.ClientGetReadPoolBalanceResponse
 
-	urlBuilder := NewURLBuilder().SetPath(ClientReadPool).AddParams("client_id", clientGetReadBalanceRequest.ClientID)
+	urlBuilder := NewURLBuilder().SetPath(ClientReadPool).AddParams("client_id", clientGetReadBalanceRequest.ClientID).SetPathVariable("sc_address", StorageSmartContractAddress)
 
 	resp, err := c.executeForAllServiceProviders(
 		t,
@@ -1440,8 +1440,7 @@ func (c *APIClient) GetReadPoolBalance(t *test.SystemTest, wallet *model.Wallet,
 		requiredStatusCode)
 
 	if err != nil {
-		t.Logf("Error getting wallet balance: %v", err)
-		clientGetReadPoolBalanceResponse.Balance = 0
+		t.Logf("Error getting readpool balance: %v", err)
 		return clientGetReadPoolBalanceResponse
 	}
 	require.Nil(t, err)
