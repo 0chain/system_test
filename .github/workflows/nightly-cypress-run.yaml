@@ -10,7 +10,7 @@ on:
 
 jobs:
   system-tests:
-    name: "System Tests"
+    name: "Deploy 0Chain"
     runs-on: [ tests-suite ]
     timeout-minutes: 90
     steps:
