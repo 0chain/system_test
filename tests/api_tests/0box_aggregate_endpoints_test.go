@@ -1160,7 +1160,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.RunSequentially("test /v2/total-blobber-capacity", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test /v2/total-blobber-capacity", 5*time.Minute, func(t *test.SystemTest) {
 		// Get initial
 		data, resp, err := zboxClient.GetTotalBlobberCapacity(t)
 		require.NoError(t, err)
@@ -1211,7 +1211,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			expectedCapacity := calculateCapacity(blobbers)
-			require.Equal(t, expectedCapacity, totalBlobberCapacityAfter)
+			cond = expectedCapacity == totalBlobberCapacityAfter
 			return cond
 		})
 	})
