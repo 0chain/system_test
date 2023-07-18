@@ -1017,6 +1017,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 
 		// Unlock the read pool
+		rpBalResponse := apiClient.GetReadPoolBalance(t, sdkWallet, client.TxSuccessfulStatus)
+		rpBal := rpBalResponse.Balance
+
 		confHash = apiClient.UnlockReadPool(t, sdkWallet, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
@@ -1027,7 +1030,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
 			totalLockedAfter := (*data)[0]
-			cond := graphTotalLocked-totalLockedAfter == *tokenomics.IntToZCN(1.0)
+			cond := graphTotalLocked-totalLockedAfter == rpBal
 			if cond {
 				graphTotalLocked = totalLockedAfter
 			}
