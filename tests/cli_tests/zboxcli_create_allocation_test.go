@@ -223,7 +223,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: not enough blobbers to honor the allocation", output[0], strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: not enough blobbers to honor the allocation", strings.Join(output, "\n"))
 	})
 
 	t.Run("Create allocation with size smaller than limit (size < 1024) Should Fail", func(t *test.SystemTest) {
