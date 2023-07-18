@@ -91,11 +91,6 @@ jobs:
           docker tag ${{ secrets.BOLT_REGISTRY }}:latest ${{ secrets.BOLT_REGISTRY }}:$TAG-$SHORT_SHA
           docker push ${{ secrets.BOLT_REGISTRY }}:$TAG-$SHORT_SHA
 
-      - name: Push latest
-        if: ${{ github.event.inputs.branch }} == 'master'
-        run: |
-          docker push ${{ secrets.BOLT_REGISTRY }}:latest
-
       - name: Clean Up The Workspace.
         if: ${{ always() }}
         run: |
@@ -211,7 +206,6 @@ jobs:
           retention-days: 3
 
   build-and-push-atlus-docker-image:
-    if: ${{ github.event.inputs.atlus == 'true' || github.event.client_payload.atlus }}
     runs-on: arc-runner
 
     outputs:
@@ -269,11 +263,6 @@ jobs:
 
           docker tag ${{ secrets.ATLUS_REGISTRY }}:latest ${{ secrets.ATLUS_REGISTRY }}:$TAG-$SHORT_SHA
           docker push ${{ secrets.ATLUS_REGISTRY }}:$TAG-$SHORT_SHA
-
-      - name: Push latest
-        if: ${{ github.event.inputs.branch }} == 'master'
-        run: |
-          docker push ${{ secrets.ATLUS_REGISTRY }}:latest
 
       - name: Clean Up The Workspace.
         if: ${{ always() }}
@@ -388,7 +377,6 @@ jobs:
           retention-days: 3
 
   build-and-push-chalk-docker-image:
-    if: ${{ github.event.inputs.znft == 'true' || github.event.client_payload.znft }}
     runs-on: arc-runner
 
     outputs:
@@ -449,11 +437,6 @@ jobs:
 
           docker tag ${{ secrets.ZNFT_REGISTRY }}:latest ${{ secrets.ZNFT_REGISTRY }}:$TAG-$SHORT_SHA
           docker push ${{ secrets.ZNFT_REGISTRY }}:$TAG-$SHORT_SHA
-
-      - name: Push latest
-        if: ${{ github.event.inputs.branch }} == 'master'
-        run: |
-          docker push ${{ secrets.ZNFT_REGISTRY }}:latest
 
       - name: Clean Up The Workspace.
         if: ${{ always() }}
@@ -572,7 +555,6 @@ jobs:
           retention-days: 3
 
   build-and-push-chimney-docker-image:
-    if: ${{ github.event.inputs.chimney == 'true' || github.event.client_payload.chimney }}
     runs-on: arc-runner
 
     outputs:
@@ -631,11 +613,6 @@ jobs:
 
           docker tag ${{ secrets.CHIMNEY_REGISTRY }}:latest ${{ secrets.CHIMNEY_REGISTRY }}:$TAG-$SHORT_SHA
           docker push ${{ secrets.CHIMNEY_REGISTRY }}:$TAG-$SHORT_SHA
-
-      - name: Push latest
-        if: ${{ github.event.inputs.branch }} == 'master'
-        run: |
-          docker push ${{ secrets.CHIMNEY_REGISTRY }}:latest
 
       - name: Clean Up The Workspace.
         if: ${{ always() }}
@@ -751,7 +728,6 @@ jobs:
           retention-days: 3
 
   build-and-push-blimp-docker-image:
-    if: ${{ github.event.inputs.blimp == 'true' || github.event.client_payload.blimp }}
     runs-on: arc-runner
 
     outputs:
@@ -811,11 +787,6 @@ jobs:
 
           docker tag ${{ secrets.BLIMP_REGISTRY }}:latest ${{ secrets.BLIMP_REGISTRY }}:$TAG-$SHORT_SHA
           docker push ${{ secrets.BLIMP_REGISTRY }}:$TAG-$SHORT_SHA
-
-      - name: Push latest
-        if: ${{ github.event.inputs.branch }} == 'master'
-        run: |
-          docker push ${{ secrets.BLIMP_REGISTRY }}:latest
 
       - name: Clean Up The Workspace.
         if: ${{ always() }}
@@ -930,7 +901,6 @@ jobs:
           retention-days: 3
 
   build-and-push-vult-docker-image:
-    if: ${{ github.event.inputs.vult == 'true' || github.event.client_payload.vult }}
     runs-on: arc-runner
 
     outputs:
@@ -989,11 +959,6 @@ jobs:
 
           docker tag ${{ secrets.VULT_REGISTRY }}:latest ${{ secrets.VULT_REGISTRY }}:$TAG-$SHORT_SHA
           docker push ${{ secrets.VULT_REGISTRY }}:$TAG-$SHORT_SHA
-
-      - name: Push latest
-        if: ${{ github.event.inputs.branch }} == 'master'
-        run: |
-          docker push ${{ secrets.VULT_REGISTRY }}:latest
 
       - name: Clean Up The Workspace.
         if: ${{ always() }}
