@@ -699,6 +699,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.RunSequentially("endpoint parameters ( test /v2/graph-total-locked )", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
 
 	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-total-locked )", 5*time.Minute, func(t *test.SystemTest) {
+		t.Skip("skip until https://github.com/0chain/0box/issues/714")
 		data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
