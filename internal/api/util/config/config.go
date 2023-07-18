@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -64,17 +63,16 @@ func CreateFreeStorageMarker(
 	wallet *model.SdkWallet,
 	assignerWallet *model.SdkWallet,
 ) string {
-	freeToken := 5.0
-	nonce := time.Now().Unix()
 	marker := model.FreeStorageMarker{
 		Recipient:  wallet.ClientID,
-		FreeTokens: freeToken,
-		Nonce:      nonce,
+		FreeTokens: 5,
+		Timestamp:  time.Now().Unix(),
 	}
 
-	reqmarker := fmt.Sprintf("%s:%f:%d", wallet.ClientID, freeToken, nonce)
-	data := hex.EncodeToString([]byte(reqmarker))
+	forSignatureBytes, err := json.Marshal(&marker)
+	require.Nil(t, err, "Could not marshal marker")
 
+	data := hex.EncodeToString(forSignatureBytes)
 	rawHash, err := hex.DecodeString(data)
 	require.Nil(t, err, "failed to decode hex %s", data)
 	require.NotNil(t, rawHash, "failed to decode hex %s", data)
