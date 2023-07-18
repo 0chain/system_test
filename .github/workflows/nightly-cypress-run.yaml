@@ -37,6 +37,7 @@ jobs:
       
   build-and-push-bolt-docker-image:
     runs-on: arc-runner
+    needs: [system-tests]
 
     outputs:
       output1: ${{ steps.docker_build.outputs.COMMIT_TAG }}
@@ -207,6 +208,7 @@ jobs:
 
   build-and-push-atlus-docker-image:
     runs-on: arc-runner
+    needs: [system-tests]
 
     outputs:
       output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
@@ -378,6 +380,7 @@ jobs:
 
   build-and-push-chalk-docker-image:
     runs-on: arc-runner
+    needs: [system-tests]
 
     outputs:
       output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
@@ -556,6 +559,7 @@ jobs:
 
   build-and-push-chimney-docker-image:
     runs-on: arc-runner
+    needs: [system-tests]
 
     outputs:
       output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
@@ -729,6 +733,7 @@ jobs:
 
   build-and-push-blimp-docker-image:
     runs-on: arc-runner
+    needs: [system-tests]
 
     outputs:
       output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
@@ -902,6 +907,7 @@ jobs:
 
   build-and-push-vult-docker-image:
     runs-on: arc-runner
+    needs: [system-tests]
 
     outputs:
       output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
