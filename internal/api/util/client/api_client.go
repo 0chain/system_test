@@ -1401,12 +1401,6 @@ func (c *APIClient) GetWalletBalance(t *test.SystemTest, wallet *model.Wallet, r
 			ClientID: wallet.Id,
 		},
 		requiredStatusCode)
-
-	if err != nil {
-		t.Logf("Error getting wallet balance: %v", err)
-		clientGetBalanceResponse.Balance = 0
-		return clientGetBalanceResponse
-	}
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, clientGetBalanceResponse)
@@ -2061,10 +2055,6 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 
 func (c *APIClient) BurnZcn(t *test.SystemTest, wallet *model.Wallet, address string, amount float64, requiredTransactionStatus int) string {
 	t.Log("Burn ZCN")
-
-	walletBalance := c.GetWalletBalance(t, wallet, HttpOkStatus)
-	wallet.Nonce = int(walletBalance.Nonce)
-
 	burnZcnTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
