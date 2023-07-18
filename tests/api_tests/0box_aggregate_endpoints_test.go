@@ -154,7 +154,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 	t.RunSequentially("endpoint parameters ( test /v2/graph-allocated-storage )", graphEndpointTestCases(zboxClient.GetGraphAllocatedStorage))
 
-	t.RunSequentially("test graph data ( test /v2/graph-allocated-storage )", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-allocated-storage )", 10*time.Minute, func(t *test.SystemTest) {
 		// Get initial total challenge pools
 		PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 		data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
