@@ -661,9 +661,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock":   "0.5",
-			"size":   4 * MB,
-			"expire": "3m",
+			"lock": "0.5",
+			"size": 4 * MB,
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))

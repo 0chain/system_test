@@ -727,9 +727,8 @@ func TestUpload(testSetup *testing.T) {
 		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
 
 		allocParam := createParams(map[string]interface{}{
-			"lock":   0.8,
-			"size":   10485760,
-			"expire": "10m",
+			"lock": 0.8,
+			"size": 10485760,
 		})
 		output, err = createNewAllocation(t, configPath, allocParam)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
