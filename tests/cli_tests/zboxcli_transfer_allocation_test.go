@@ -423,7 +423,6 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 	t.RunWithTimeout("transfer allocation accounting test", 6*time.Minute, func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   int64(1024000),
-			"expire": "6m",
 			"tokens": 2,
 		})
 
@@ -510,8 +509,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 
 	t.RunWithTimeout("transfer allocation and upload file", 6*time.Minute, func(t *test.SystemTest) { // todo: very slow
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   int64(20480),
-			"expire": "6m",
+			"size": int64(20480),
 		})
 
 		file := generateRandomTestFileName(t)

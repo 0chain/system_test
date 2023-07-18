@@ -750,8 +750,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		const fileSize int64 = 256
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"expire": "6m",
+			"size": allocSize,
 		})
 
 		var renameFileNames [2]string

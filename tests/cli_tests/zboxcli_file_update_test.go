@@ -465,9 +465,8 @@ func TestFileUpdate(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock":   "1",
-			"size":   10 * MB,
-			"expire": "3m",
+			"lock": "1",
+			"size": 10 * MB,
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))

@@ -346,8 +346,7 @@ func TestFileDelete(testSetup *testing.T) {
 		const fileSize int64 = 256
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"expire": "5m",
+			"size": allocSize,
 		})
 
 		var fileNames [2]string
