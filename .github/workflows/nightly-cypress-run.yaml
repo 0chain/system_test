@@ -21,7 +21,6 @@ jobs:
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
-
         uses: 0chain/actions/deploy-0chain@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
@@ -33,7 +32,6 @@ jobs:
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-
       
   build-and-push-bolt-docker-image:
     runs-on: arc-runner
@@ -1084,6 +1082,7 @@ jobs:
   notify-slack:
     name: "Notify Slack"
     runs-on: [ tests-suite ]
+    needs: [ vult-cypress-run, blimp-cypress-run, chimney-cypress-run, chalk-cypress-run, atlus-cypress-run, bolt-cypress-run ]
     steps:
       - name: "notify slack"
         if: failure()
