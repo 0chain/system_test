@@ -471,7 +471,6 @@ func TestShareFile(testSetup *testing.T) {
 		allocParam := createParams(map[string]interface{}{
 			"lock":   24,
 			"size":   1024000,
-			"expire": "30m",
 			"parity": 1,
 			"data":   1,
 		})
@@ -1220,7 +1219,6 @@ func createWalletAndAllocation(t *test.SystemTest, configPath, wallet string) (s
 	allocParam := createParams(map[string]interface{}{
 		"lock":   2,
 		"size":   1024 * 1024 * 1024,
-		"expire": "10m",
 		"parity": 1,
 		"data":   1,
 	})
