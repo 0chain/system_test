@@ -284,7 +284,7 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 
 		output, err = updateAllocationWithWallet(t, newOwner, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"expiry":     "24h",
+			"extend":     true,
 		}), true)
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1, "update allocation - Unexpected output", strings.Join(output, "\n"))
