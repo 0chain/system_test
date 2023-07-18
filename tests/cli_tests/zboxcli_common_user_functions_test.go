@@ -38,9 +38,8 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 
 		// Lock tokens for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock":   "5",
-			"size":   1 * MB,
-			"expire": "1h",
+			"lock": "5",
+			"size": 1 * MB,
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -70,9 +69,8 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 
 		// Lock 5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock":   "5",
-			"size":   1 * MB,
-			"expire": "5m",
+			"lock": "5",
+			"size": 1 * MB,
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -90,7 +88,7 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"expiry":     "30m",
+			"extend":     true,
 			"lock":       1,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
