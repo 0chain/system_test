@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -37,23 +38,6 @@ func TestFreeReads(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(blobberList), 0, "blobber list is empty")
 
-		// revert read prices irrespective of test results
-		t.Cleanup(func() {
-			for _, blobber := range blobberList {
-				output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.ID, "read_price": intToZCN(blobber.Terms.Read_price)}))
-				require.Nil(t, err, strings.Join(output, "\n"))
-			}
-		})
-
-		// init enough tokens to blobber owner wallet to issue txns
-		_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 100)
-		require.NoError(t, err)
-	})
-
-	t.RunSequentially("update blobber read price should work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
 		// Set read price to 0 on all blobbers
 		newReadPrice := 0
 		for _, blobber := range blobberList {
@@ -62,6 +46,23 @@ func TestFreeReads(testSetup *testing.T) {
 			require.Len(t, output, 1)
 			require.Equal(t, "blobber settings updated successfully", output[0])
 		}
+
+		// init enough tokens to blobber owner wallet to issue txns
+		_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 100)
+		require.NoError(t, err)
+	})
+
+	// revert read prices irrespective of test results
+	t.Cleanup(func() {
+		for _, blobber := range blobberList {
+			output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.ID, "read_price": intToZCN(blobber.Terms.Read_price)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		}
+	})
+
+	t.RunSequentially("free reads should work with normal and encrypted download", func(t *test.SystemTest) {
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		_ = setupWallet(t, configPath)
 
@@ -88,6 +89,68 @@ func TestFreeReads(testSetup *testing.T) {
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
+
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
+
+		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
+	})
+
+	t.RunWithTimeout("Download Shared File Should Work", 5*time.Minute, func(t *test.SystemTest) { // todo: too slow
+		var authTicket, filename, originalFileChecksum string
+
+		filesize := int64(10)
+		remotepath := "/"
+
+		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
+		t.Run("Share File from Another Wallet for free read", func(t *test.SystemTest) {
+			// Create an allocation
+			options := map[string]interface{}{"size": 1 * MB, "lock": "0.5"}
+			output, err := createNewAllocation(t, configPath, createParams(options))
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1")
+			require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
+
+			allocationID, err := getAllocationID(output[0])
+			require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
+
+			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
+			originalFileChecksum = generateChecksum(t, filename)
+
+			require.NotEqual(t, "", filename)
+
+			// Delete the uploaded file from tmp folder if it exist,
+			// since we will be downloading it now
+			err = os.RemoveAll("tmp/" + filepath.Base(filename))
+			require.Nil(t, err)
+
+			shareParam := createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": remotepath + filepath.Base(filename),
+			})
+
+			output, err = shareFolderInAllocation(t, configPath, shareParam)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+
+			authTicket, err = extractAuthToken(output[0])
+			require.Nil(t, err, "extract auth token failed")
+			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
+		})
+
+		// Just create a wallet so that we can work further
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
+		// Download file using auth-ticket: should work
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"authticket": authTicket,
 			"localpath":  "tmp/",
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
