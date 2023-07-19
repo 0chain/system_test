@@ -139,7 +139,7 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 
 	t.RunSequentially("Testing LeaderBoard", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		// teardown(t, firebaseToken.IdToken, "+919876543210")
+		teardown(t, firebaseToken.IdToken, "+919876543210")
 
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
@@ -171,13 +171,11 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 		require.NotNil(t, zboxRferral)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		// teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-		// teardown(t, firebaseToken.IdToken, "+919876543210")
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, firebaseToken.IdToken, "+919876543210")
 
 		description = "wallet created as part of " + t.Name()
 		walletName = "wallet_name1"
-		// firebaseToken = authenticateWithFirebase(t, "+919876543210")
-		// csrfToken = createCsrfToken(t, "+919876543210")
 
 		referralMnemonic := "total today fortune output enjoy season desert tool transfer awkward post disease junk offer wedding wire brown broccoli size banana harsh stove raise skull"
 
