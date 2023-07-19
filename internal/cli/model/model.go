@@ -755,6 +755,7 @@ var StorageFloatSettings = []string{
 	"block_reward.zeta.k",
 	"block_reward.zeta.mu",
 	"stakepool.kill_slash",
+	"max_charge",
 }
 
 var StorageCurrencySettigs = []string{
