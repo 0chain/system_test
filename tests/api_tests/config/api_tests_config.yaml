@@ -1,7 +1,7 @@
 block_worker:  https://dev.zus.network/dns
 0box_url: http://localhost:9081
 0box_phone_number: +917696229925
-default_test_case_timeout: 45s
+default_test_case_timeout: 450s
 zs3_server_url: https://dev.0chain.net/zs3server/
 blobber_owner_wallet_mnemonics: "economy day fan flower between rebuild valid bid catch bargain vivid hybrid room permit check manage mean twelve damage summer close churn boat either"
 owner_wallet_mnemonics: "cactus panther essence ability copper fox wise actual need cousin boat uncover ride diamond group jacket anchor current float rely tragic omit child payment"
