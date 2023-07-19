@@ -18,9 +18,10 @@ jobs:
       network_url: ${{ steps.network_config.outputs.NETWORK_URL }}
 
     steps:
-      - name: network_config
+      - name: "Config: Deploy new 0Chain network then run tests against it"
         id: network_config
         run: |
+          echo "NETWORK_URL=dev-9.devnet-0chain.net" >> $GITHUB_OUTPUT
           echo "NETWORK_URL=dev-9.devnet-0chain.net" >> $GITHUB_ENV
           echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
@@ -50,7 +51,7 @@ jobs:
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
-      - name:
+      - name: Set Docker Image Tags.
         id: get_info
         run: |
           cd web-apps
