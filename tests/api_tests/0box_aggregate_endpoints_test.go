@@ -1177,14 +1177,13 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			totalBlobberCapacityAfter := int64(*data)
-			cond := totalBlobberCapacityAfter < totalBlobberCapacity
 			totalBlobberCapacity = totalBlobberCapacityAfter
 
 			blobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			expectedCapacity := calculateCapacity(blobbers)
-			cond = expectedCapacity == totalBlobberCapacityAfter
+			cond := expectedCapacity == totalBlobberCapacityAfter
 			return cond
 		})
 	})
