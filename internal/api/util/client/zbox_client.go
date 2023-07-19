@@ -1923,7 +1923,7 @@ func (c *ZboxClient) GetLeaderBoard(t *test.SystemTest, csrfToken, idToken, phon
 }
 
 func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralRankOfUser, *resty.Response, error) {
-	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
+	t.Log("Getting referral rank...")
 	var ReferralRankOfUser model.ReferralRankOfUser
 
 	urlBuilder := NewURLBuilder()
