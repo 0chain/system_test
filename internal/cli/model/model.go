@@ -47,17 +47,6 @@ type Wallet struct {
 	EncryptionPublicKey string `json:"encryption_public_key"`
 }
 
-type AllocationStats struct {
-	UsedSize                  int64  `json:"used_size"`
-	NumWrites                 int64  `json:"num_of_writes"`
-	NumReads                  int64  `json:"num_of_reads"`
-	TotalChallenges           int64  `json:"total_challenges"`
-	OpenChallenges            int64  `json:"num_open_challenges"`
-	SuccessChallenges         int64  `json:"num_success_challenges"`
-	FailedChallenges          int64  `json:"num_failed_challenges"`
-	LastestClosedChallengeTxn string `json:"latest_closed_challenge"`
-}
-
 type Allocation struct {
 	ID             string    `json:"id"`
 	Tx             string    `json:"tx"`
@@ -74,8 +63,6 @@ type Allocation struct {
 	// Stats          *AllocationStats          `json:"stats"`
 	TimeUnit    time.Duration `json:"time_unit"`
 	IsImmutable bool          `json:"is_immutable"`
-
-	Stats AllocationStats `json:"stats"`
 
 	WritePool int64 `json:"write_pool"`
 
