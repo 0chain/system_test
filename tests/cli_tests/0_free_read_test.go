@@ -110,6 +110,8 @@ func TestFreeReads(testSetup *testing.T) {
 
 		// This subtest creates a separate wallet and allocates there
 		t.Run("Share File from Another Wallet for free read", func(t *test.SystemTest) {
+			_ = setupWallet(t, configPath)
+
 			// Create an allocation
 			options := map[string]interface{}{"size": 1 * MB, "lock": "0.5"}
 			output, err := createNewAllocation(t, configPath, createParams(options))
