@@ -60,7 +60,7 @@ func TestFreeReads(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentially("free reads should work with normal and encrypted download", func(t *test.SystemTest) {
+	t.RunSequentially("Free reads should work", func(t *test.SystemTest) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
@@ -102,13 +102,13 @@ func TestFreeReads(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.RunWithTimeout("Download Shared File Should Work", 5*time.Minute, func(t *test.SystemTest) { // todo: too slow
+	t.RunWithTimeout("Free read by authticket should Work", 5*time.Minute, func(t *test.SystemTest) {
 		var authTicket, filename, originalFileChecksum string
 
 		filesize := int64(10)
 		remotepath := "/"
 
-		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
+		// This subtest creates a separate wallet and allocates there
 		t.Run("Share File from Another Wallet for free read", func(t *test.SystemTest) {
 			// Create an allocation
 			options := map[string]interface{}{"size": 1 * MB, "lock": "0.5"}
