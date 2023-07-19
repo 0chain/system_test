@@ -1871,11 +1871,7 @@ func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, idToken, pho
 }
 
 func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralCountOfUser, *resty.Response, error) {
-<<<<<<< HEAD
-	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
-=======
 	t.Log("Getting referral count...")
->>>>>>> c7766008d8989988b97d2a75065ba81dc227fd14
 	var ReferralCountOfUser model.ReferralCountOfUser
 
 	urlBuilder := NewURLBuilder()
