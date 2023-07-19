@@ -19,6 +19,7 @@ jobs:
 
     steps:
       - name: network_config
+        id: network_config
         run: |
           echo "NETWORK_URL=dev-9.devnet-0chain.net" >> $GITHUB_ENV
           echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
