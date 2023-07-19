@@ -48,7 +48,6 @@ func TestFreeReads(testSetup *testing.T) {
 		// init enough tokens to blobber owner wallet to issue txns
 		_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 100)
 		require.NoError(t, err)
-
 	})
 
 	t.RunSequentially("update blobber read price should work", func(t *test.SystemTest) {
