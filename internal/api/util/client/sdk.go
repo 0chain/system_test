@@ -30,6 +30,7 @@ type StatusCallback struct {
 	wg       *sync.WaitGroup
 	isRepair bool
 	success  bool
+	err      error
 }
 
 type MultiOperationOption func(alloc *sdk.Allocation)
@@ -42,8 +43,10 @@ func (cb *StatusCallback) InProgress(allocationId, filePath string, op, complete
 }
 
 func (cb *StatusCallback) RepairCompleted(filesRepaired int) {
-	cb.success = true
-	cb.wg.Done()
+	if cb.err == nil {
+		cb.success = true
+		cb.wg.Done()
+	}
 }
 
 func (cb *StatusCallback) Completed(allocationId, filePath, filename, mimetype string, size, op int) {
@@ -55,6 +58,7 @@ func (cb *StatusCallback) Completed(allocationId, filePath, filename, mimetype s
 
 func (cb *StatusCallback) Error(allocationID, filePath string, op int, err error) {
 	cb.success = false
+	cb.err = err
 	cb.wg.Done()
 }
 
