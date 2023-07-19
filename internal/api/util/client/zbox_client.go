@@ -153,7 +153,7 @@ func (c *ZboxClient) GetDexState(t *test.SystemTest, idToken, csrfToken, phoneNu
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -183,7 +183,7 @@ func (c *ZboxClient) PostDexState(t *test.SystemTest, data map[string]string, id
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
@@ -213,7 +213,7 @@ func (c *ZboxClient) PutDexState(t *test.SystemTest, data map[string]string, idT
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPUTMethod)
@@ -282,6 +282,68 @@ func (c *ZboxClient) ListAllocation(t *test.SystemTest, idToken, csrfToken, phon
 	}, HttpGETMethod)
 
 	return allocWalletList, resp, err
+}
+
+func (c *ZboxClient) CreateFreeStorage(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType string) (*model.ZboxFreeStorage, *resty.Response, error) {
+	t.Logf("Creating FreeStorage using 0box...")
+	var ZboxFreeStorage *model.ZboxFreeStorage
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/freestorage")
+
+	formData := map[string]string{
+		"mnemonic":    mnemonic,
+		"name":        walletName,
+		"description": walletDescription,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &ZboxFreeStorage,
+		FormData: formData,
+		Headers: map[string]string{
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-App-Type":             appType,
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return ZboxFreeStorage, resp, err
+}
+
+func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, csrfToken, phoneNumber, appType string) (*model.ZboxFundingResponse, *resty.Response, error) {
+	t.Logf("Checking status of funding using funding id")
+	var zboxFundingResponse *model.ZboxFundingResponse
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/zbox/fund")
+
+	url := fmt.Sprintf("%s/%s", urlBuilder.String(), fundingId)
+	resp, err := c.executeForServiceProvider(t, url, model.ExecutionRequest{
+		Dst: &zboxFundingResponse,
+		Headers: map[string]string{
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-App-Type":             appType,
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return zboxFundingResponse, resp, err
 }
 
 func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType string) (*model.ZboxWallet, *resty.Response, error) {
@@ -1783,7 +1845,11 @@ func (c *ZboxClient) GetGraphBlobberTotalRewards(t *test.SystemTest, blobberId s
 }
 
 func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralCodeOfUser, *resty.Response, error) {
+<<<<<<< HEAD
 	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
+=======
+	t.Log("Getting referral code...")
+>>>>>>> c7766008d8989988b97d2a75065ba81dc227fd14
 	var ReferralCodeOfUser model.ReferralCodeOfUser
 
 	urlBuilder := NewURLBuilder()
@@ -1809,7 +1875,11 @@ func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, idToken, pho
 }
 
 func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralCountOfUser, *resty.Response, error) {
+<<<<<<< HEAD
 	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
+=======
+	t.Log("Getting referral count...")
+>>>>>>> c7766008d8989988b97d2a75065ba81dc227fd14
 	var ReferralCountOfUser model.ReferralCountOfUser
 
 	urlBuilder := NewURLBuilder()

@@ -5,6 +5,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/0chain/gosdk/core/zcncrypto"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"gorm.io/gorm"
@@ -107,6 +108,30 @@ func (w *SdkWallet) ToCliModelWalletFile() *climodel.WalletFile {
 		Mnemonic:    w.Mnemonics,
 		Version:     w.Version,
 		DateCreated: w.DateCreated,
+	}
+}
+
+func (w *Wallet) ToZCNCryptoWallet(mnemonic string) *zcncrypto.Wallet {
+	if w == nil {
+		return nil
+	}
+
+	var keys []zcncrypto.KeyPair
+	keys = append(keys, zcncrypto.KeyPair{
+		PublicKey:  w.Keys.PublicKey.GetHexString(),
+		PrivateKey: w.Keys.PrivateKey.GetHexString(),
+	})
+	var dateCreated string
+	if w.CreationDate != nil {
+		dateCreated = time.Unix(int64(*w.CreationDate), 0).Format(time.RFC3339)
+	}
+	return &zcncrypto.Wallet{
+		ClientID:    w.Id,
+		ClientKey:   w.PublicKey,
+		Keys:        keys,
+		Mnemonic:    mnemonic,
+		Version:     w.Version,
+		DateCreated: dateCreated,
 	}
 }
 
@@ -256,6 +281,7 @@ type InternalTransactionPutRequest struct {
 	ToClientID string
 	Wallet     *Wallet
 	Value      *int64
+	TxnType    int
 }
 
 type TransactionPutRequest struct {
@@ -348,6 +374,15 @@ type ClientGetBalanceResponse struct {
 	Round   int64  `json:"round"`
 	Balance int64  `json:"balance"`
 	Nonce   int64  `json:"nonce"`
+}
+
+type ClientGetReadPoolBalanceRequest struct {
+	ClientID string
+}
+
+type ClientGetReadPoolBalanceResponse struct {
+	UserID  string `json:"user_id" gorm:"uniqueIndex"`
+	Balance int64  `json:"balance"`
 }
 
 type SCStateGetRequest struct {
@@ -574,9 +609,8 @@ type SCRestGetBlobbersResponse struct {
 }
 
 type Terms struct {
-	ReadPrice     int64   `json:"read_price"`
-	WritePrice    int64   `json:"write_price"`
-	MinLockDemand float64 `json:"min_lock_demand"`
+	ReadPrice  int64 `json:"read_price"`
+	WritePrice int64 `json:"write_price"`
 }
 
 type StakePoolSettings struct {
@@ -930,7 +964,7 @@ type FreeStorageMarker struct {
 	Assigner   string  `json:"assigner,omitempty"`
 	Recipient  string  `json:"recipient"`
 	FreeTokens float64 `json:"free_tokens"`
-	Timestamp  int64   `json:"timestamp"`
+	Nonce      int64   `json:"nonce"`
 	Signature  string  `json:"signature,omitempty"`
 }
 

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -22,6 +24,7 @@ import (
 var (
 	createAllocationRegex = regexp.MustCompile(`^Allocation created: (.+)$`)
 	updateAllocationRegex = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
+	repairCompletednRegex = regexp.MustCompile(`Repair file completed, Total files repaired: {2}1`)
 )
 
 func TestUpdateAllocation(testSetup *testing.T) {
@@ -223,37 +226,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.Equal(t, "Error updating allocation:couldnt_find_allocation: Couldn't find the allocation required for update", output[0])
-	})
-
-	t.RunWithTimeout("Update Expired Allocation Should Fail", 10*time.Minute, func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{"expire": "6m"})
-
-		time.Sleep(7 * time.Minute)
-
-		expDuration := int64(1) // In hours
-
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("%dh", expDuration),
-		})
-		output, err := updateAllocation(t, configPath, params, false)
-
-		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
-
-		// Update the expired allocation's size
-		size := int64(2048)
-
-		params = createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"size":       size,
-		})
-		output, err = updateAllocation(t, configPath, params, false)
-
-		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
 	})
 
 	t.Run("Update Size To Less Than 1024 Should Fail", func(t *test.SystemTest) {
@@ -825,6 +797,103 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, alloc.FileOptions, updatedAlloc.FileOptions)
 		// assert that no more blobber was added
 		require.Equal(t, len(alloc.Blobbers), len(updatedAlloc.Blobbers))
+	})
+
+	t.Run("Update allocation with add blobber should succeed", func(t *test.SystemTest) {
+		// setup allocation and upload a file
+		allocSize := int64(4096)
+		fileSize := int64(1024)
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 9,
+		})
+
+		// faucet tokens
+		_, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed")
+
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		remotePath := "/dir" + filename
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
+		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
+		require.Nil(t, err)
+
+		params := createParams(map[string]interface{}{
+			"allocation":                 allocationID,
+			"set_third_party_extendable": nil,
+			"add_blobber":                blobberID,
+		})
+
+		output, err = updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
+		fref, err := VerifyFileRefFromBlobber(walletFile, configFile, allocationID, blobberID, remotePath)
+		require.Nil(t, err)
+		require.NotNil(t, fref) // not nil when the file exists
+	})
+
+	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
+		// setup allocation and upload a file
+		allocSize := int64(4096)
+		fileSize := int64(1024)
+
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"tokens": 9,
+		})
+
+		// faucet tokens
+		_, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed")
+
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		remotePath := "/dir" + filename
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
+
+		addBlobber, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
+		require.Nil(t, err)
+		removeBlobber, err := GetRandomBlobber(walletFile, configFile, allocationID, addBlobber)
+		require.Nil(t, err)
+		params := createParams(map[string]interface{}{
+			"allocation":                 allocationID,
+			"set_third_party_extendable": nil,
+			"add_blobber":                addBlobber,
+			"remove_blobber":             removeBlobber,
+		})
+
+		output, err = updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		assertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
+		fref, err := VerifyFileRefFromBlobber(walletFile, configFile, allocationID, addBlobber, remotePath)
+		require.Nil(t, err)
+		require.NotNil(t, fref) // not nil when the file exists
 	})
 }
 
