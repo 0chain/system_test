@@ -76,7 +76,7 @@ jobs:
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.network_config.outputs.network_url }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "BE_URL=https://lp-backend.zus.network" >> .env
           echo "JWT_ENABLED=true" >> .env
           echo "ZBOX_APP=bolt" >> .env
@@ -125,7 +125,7 @@ jobs:
               - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
               - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
               - TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}
-              - DOMAIN=${{ needs.network_config.outputs.network_url }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
               - BE_URL=https://lp-backend.zus.network
               - JWT_ENABLED=true
               - ZBOX_APP=bolt
@@ -255,7 +255,7 @@ jobs:
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "TRANSLATION_API_KEY=A7280aF1dfF458d1E60F0D28575C77A82Ac37391f0DeEEB7" >> .env
-          echo "DOMAIN=${{ needs.network_config.outputs.network_url }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "ZBOX_APP=atlus" >> .env
           echo "JWT_ENABLED=true" >> .env
           echo "APP_ENV=test" >> .env
@@ -302,7 +302,7 @@ jobs:
               - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
               - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
               - TRANSLATION_API_KEY=A7280aF1dfF458d1E60F0D28575C77A82Ac37391f0DeEEB7
-              - DOMAIN=${{ needs.network_config.outputs.network_url }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
               - ZBOX_APP="atlus"
               - JWT_ENABLED="false"
               - APP_ENV=test
@@ -430,7 +430,7 @@ jobs:
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.network_config.outputs.network_url }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "ZBOX_APP=chalk" >> .env
           echo "JWT_ENABLED=true" >> .env
           echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
@@ -481,7 +481,7 @@ jobs:
               - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
               - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
               - ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}
-              - DOMAIN=${{ needs.network_config.outputs.network_url }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
               - ZBOX_APP="chalk"
               - JWT_ENABLED="false"
               - BE_URL="https://dev-lpbackend.zus.network"
@@ -611,7 +611,7 @@ jobs:
           echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.network_config.outputs.network_url }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "TRANSLATION_API_KEY=${{ secrets.CHIMNEY_TRANSLATION_API_KEY }}" >> .env
           echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
@@ -659,7 +659,7 @@ jobs:
               - FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}
               - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
               - ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}
-              - DOMAIN=${{ needs.network_config.outputs.network_url }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
               - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
               - TRANSLATION_API_KEY=${{ secrets.CHIMNEY_TRANSLATION_API_KEY }}
               - BE_URL="https://dev-lpbackend.zus.network"
@@ -789,7 +789,7 @@ jobs:
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.network_config.outputs.network_url }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "ZBOX_APP=blimp" >> .env
           echo "JWT_ENABLED=true" >> .env
           echo "BE_URL=https://lp-backend.zus.network" >> .env
@@ -838,7 +838,7 @@ jobs:
               - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
               - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
               - TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}
-              - DOMAIN=${{ needs.network_config.outputs.network_url }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
               - BE_URL=https://lp-backend.zus.network
               - ETH_CHAIN_ID=0x13881
               - APP_ENV=test
@@ -966,7 +966,7 @@ jobs:
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.network_config.outputs.network_url }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "ZBOX_APP=vult" >> .env
           echo "JWT_ENABLED=true" >> .env
           echo "BE_URL=https://lp-backend.zus.network" >> .env
@@ -1008,7 +1008,7 @@ jobs:
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.network_config.outputs.network_url }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "ZBOX_APP=vult" >> .env
           echo "JWT_ENABLED=true" >> .env
           echo "BE_URL=https://lp-backend.zus.network" >> .env
