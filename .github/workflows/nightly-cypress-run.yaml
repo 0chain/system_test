@@ -21,23 +21,23 @@ jobs:
       - name: "Config: Deploy new 0Chain network then run tests against it"
         id: network_config
         run: |
-          echo "NETWORK_URL=dev-9.devnet-0chain.net" >> $GITHUB_OUTPUT
-          echo "NETWORK_URL=dev-9.devnet-0chain.net" >> $GITHUB_ENV
+          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_OUTPUT
+          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
-      # - name: "Deploy 0Chain"
-      #   uses: 0chain/actions/deploy-0chain@master
-      #   with:
-      #     repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-      #     kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-      #     teardown_condition: "TESTS_PASSED"
-      #     SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-      #     TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-      #     graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
-      #     graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-      #     graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
-      #     svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+      - name: "Deploy 0Chain"
+        uses: 0chain/actions/deploy-0chain@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
   build-and-push-bolt-docker-image:
     runs-on: arc-runner
@@ -281,7 +281,7 @@ jobs:
   deploy-atlus-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-atlus-docker-image,system-tests]
+    needs: [build-and-push-atlus-docker-image, system-tests]
 
     steps:
     - name: Preparing docker-compose file.
@@ -459,7 +459,7 @@ jobs:
   deploy-chalk-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-chalk-docker-image,system-tests]
+    needs: [build-and-push-chalk-docker-image, system-tests]
 
     steps:
     - name: Preparing docker-compose file.
@@ -639,7 +639,7 @@ jobs:
   deploy-chimney-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-chimney-docker-image,system-tests]
+    needs: [build-and-push-chimney-docker-image, system-tests]
 
     steps:
     - name: Preparing docker-compose file.
@@ -817,7 +817,7 @@ jobs:
   deploy-blimp-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-blimp-docker-image,system-tests]
+    needs: [build-and-push-blimp-docker-image, system-tests]
 
     steps:
     - name: Preparing docker-compose file.
@@ -993,7 +993,7 @@ jobs:
   deploy-vult-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-vult-docker-image,system-tests]
+    needs: [build-and-push-vult-docker-image, system-tests]
 
     steps:
     - name: Preparing docker-compose file.
