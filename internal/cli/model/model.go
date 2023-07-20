@@ -241,16 +241,16 @@ type PriceRange struct {
 }
 
 type BlobberAllocation struct {
-	BlobberID       string `json:"blobber_id"`
-	Size            int64  `json:"size"`
-	Terms           Terms  `json:"terms"`
-	MinLockDemand   int64  `json:"min_lock_demand"`
-	Spent           int64  `json:"spent"`
-	Penalty         int64  `json:"penalty"`
-	ReadReward      int64  `json:"read_reward"`
-	Returned        int64  `json:"returned"`
-	ChallengeReward int64  `json:"challenge_reward"`
-	FinalReward     int64  `json:"final_reward"`
+	BlobberID       string  `json:"blobber_id"`
+	Size            int64   `json:"size"`
+	Terms           Terms   `json:"terms"`
+	MinLockDemand   float64 `json:"min_lock_demand"`
+	Spent           int64   `json:"spent"`
+	Penalty         int64   `json:"penalty"`
+	ReadReward      int64   `json:"read_reward"`
+	Returned        int64   `json:"returned"`
+	ChallengeReward int64   `json:"challenge_reward"`
+	FinalReward     int64   `json:"final_reward"`
 }
 
 type StakePoolInfo struct {
