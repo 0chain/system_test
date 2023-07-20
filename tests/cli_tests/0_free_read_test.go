@@ -67,7 +67,7 @@ func TestFreeReads(testSetup *testing.T) {
 		_ = setupWallet(t, configPath)
 
 		// Create an allocation
-		options := map[string]interface{}{"size": 1 * MB, "lock": "0.5"}
+		options := map[string]interface{}{"size": 1 * MB, "lock": "0.5", "read_price": "0-0"}
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -113,7 +113,7 @@ func TestFreeReads(testSetup *testing.T) {
 			_ = setupWallet(t, configPath)
 
 			// Create an allocation
-			options := map[string]interface{}{"size": 1 * MB, "lock": "0.5"}
+			options := map[string]interface{}{"size": 1 * MB, "lock": "0.5", "read_price": "0-0"}
 			output, err := createNewAllocation(t, configPath, createParams(options))
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.True(t, len(output) > 0, "expected output length be at least 1")
