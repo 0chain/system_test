@@ -125,9 +125,9 @@ func Test0BoxReferral(testSetup *testing.T) {
 
 func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.SetSmokeTests("Post referrals with correct CSRF should work properly")
+	t.SetSmokeTests("Testing LeaderBoard")
 
-	firebaseToken := authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+	var firebaseToken *model.FirebaseToken
 	t.TestSetup("Autenticate with firebase", func() {
 		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 	})
@@ -137,7 +137,6 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 		teardown(t, firebaseToken.IdToken, "+919876543210")
 
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
-
 		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 		description := "wallet created as part of " + t.Name()
@@ -151,7 +150,6 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
 		)
-
 		require.NotNil(t, zboxWallet)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -161,7 +159,6 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			zboxClient.DefaultPhoneNumber,
 		)
-
 		require.NoError(t, err)
 		require.NotNil(t, zboxRferral)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -171,9 +168,7 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 
 		description = "wallet created as part of " + t.Name()
 		walletName = "wallet_name1"
-
 		referralMnemonic := "total today fortune output enjoy season desert tool transfer awkward post disease junk offer wedding wire brown broccoli size banana harsh stove raise skull"
-
 		zboxWallet, response, err = zboxClient.PostWalletWithReferralCode(t,
 			referralMnemonic,
 			walletName,
@@ -184,7 +179,6 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 			"blimp",
 			zboxRferral.ReferrerCode,
 		)
-
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
@@ -195,7 +189,6 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 			firebaseToken.IdToken,
 			zboxClient.DefaultPhoneNumber,
 		)
-
 		require.NoError(t, errs)
 		require.NotNil(t, zboxRferral)
 
