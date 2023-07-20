@@ -10,18 +10,23 @@ on:
 
 jobs:
   system-tests:
-    name: "System Tests"
-    runs-on: [ tests-suite ]
+    name: "Deploy 0Chain"
+    runs-on: [ tests-suite09 ]
     timeout-minutes: 90
+
+    outputs:
+      network_url: ${{ steps.network_config.outputs.NETWORK_URL }}
+
     steps:
       - name: "Config: Deploy new 0Chain network then run tests against it"
+        id: network_config
         run: |
+          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_OUTPUT
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
-
         uses: 0chain/actions/deploy-0chain@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
@@ -34,26 +39,24 @@ jobs:
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
-      
   build-and-push-bolt-docker-image:
     runs-on: arc-runner
+    needs: [system-tests]
 
     outputs:
       output1: ${{ steps.docker_build.outputs.COMMIT_TAG }}
 
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
       - name: Set Docker Image Tags.
         id: get_info
         run: |
+          cd web-apps
           echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
-          if [[ "${{github.ref}}" == refs/pull/* ]]; then
-            tag=${GITHUB_REF/\/merge/}
-            echo "TAG=$(echo pr-${tag:10})" >> $GITHUB_ENV
-          else
-            echo "TAG=$(echo ${GITHUB_REF#refs/*/} | sed 's/\//-/g')" >> $GITHUB_ENV
-          fi
+          echo "TAG=master" >> $GITHUB_ENV
 
       - name: Login To Docker Repository.
         uses: docker/login-action@v2
@@ -63,6 +66,7 @@ jobs:
 
       - name: Setting Up Environment Variables.
         run: |
+          cd web-apps
           cd packages/bolt
           touch .env
           echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
@@ -74,7 +78,7 @@ jobs:
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}" >> .env
-          echo "DOMAIN=${{ env.NETWORK_URL }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "BE_URL=https://lp-backend.zus.network" >> .env
           echo "JWT_ENABLED=true" >> .env
           echo "ZBOX_APP=bolt" >> .env
@@ -84,6 +88,7 @@ jobs:
       - name: Build & Push Docker Image.
         id: docker_build
         run: |
+          cd web-apps
           docker build -f ./packages/bolt/docker/dockerfile . -t ${{ secrets.BOLT_REGISTRY }}:latest
           echo $TAG-$SHORT_SHA
           echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
@@ -99,7 +104,7 @@ jobs:
   deploy-bolt-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-bolt-docker-image]
+    needs: [build-and-push-bolt-docker-image, system-tests]
 
     steps:
     - name: Preparing docker-compose file.
@@ -122,7 +127,7 @@ jobs:
               - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
               - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
               - TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}
-              - DOMAIN=${{ env.NETWORK_URL }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
               - BE_URL=https://lp-backend.zus.network
               - JWT_ENABLED=true
               - ZBOX_APP=bolt
@@ -159,10 +164,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
       - name: Point to cypress.bolt.software webapp
         run: |
+          cd web-apps
           sed -i "s/http:\/\/localhost:3001/https:\/\/cypress.bolt.holdings/g" "packages/test/bolt.cypress.config.js"
           cat packages/test/bolt.cypress.config.js
 
@@ -187,13 +194,14 @@ jobs:
 
       - name: Cypress build
         run: |
+          cd web-apps
           yarn install --frozen-lockfile --force
           cd packages/test/
           yarn install --frozen-lockfile --force
 
       - name: Cypress run
         run: |
-          pwd
+          cd web-apps
           yarn workspace test cypress:bolt:run
 
       - uses: actions/upload-artifact@v3
@@ -201,18 +209,21 @@ jobs:
         with:
           name: bolt-cypress-artifacts
           path: |
-            /runner/_work/web-apps/web-apps/packages/test/cypress/screenshots
-            /runner/_work/web-apps/web-apps/packages/test/cypress/videos
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
           retention-days: 3
 
   build-and-push-atlus-docker-image:
     runs-on: arc-runner
+    needs: [system-tests]
 
     outputs:
       output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
 
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -222,13 +233,9 @@ jobs:
       - name: Set Docker Image Tags.
         id: get_info
         run: |
+          cd web-apps
           echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
-          if [[ "${{github.ref}}" == refs/pull/* ]]; then
-            tag=${GITHUB_REF/\/merge/}
-            echo "TAG=$(echo pr-${tag:10})" >> $GITHUB_ENV
-          else
-            echo "TAG=$(echo ${GITHUB_REF#refs/*/} | sed 's/\//-/g')" >> $GITHUB_ENV
-          fi
+          echo "TAG=master" >> $GITHUB_ENV
 
       - name: Login To Docker Repository.
         uses: docker/login-action@v2
@@ -238,6 +245,7 @@ jobs:
 
       - name: Setting Up Environment Variables.
         run: |
+          cd web-apps
           cd packages/explorer
           touch .env
           echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
@@ -249,7 +257,7 @@ jobs:
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "TRANSLATION_API_KEY=A7280aF1dfF458d1E60F0D28575C77A82Ac37391f0DeEEB7" >> .env
-          echo "DOMAIN=${{ env.NETWORK_URL }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "ZBOX_APP=atlus" >> .env
           echo "JWT_ENABLED=true" >> .env
           echo "APP_ENV=test" >> .env
@@ -257,6 +265,7 @@ jobs:
       - name: Build & Push Docker Image.
         id: docker_build
         run: |
+          cd web-apps
           docker build -f ./packages/explorer/docker/dockerfile . -t ${{ secrets.ATLUS_REGISTRY }}:latest
           echo $TAG-$SHORT_SHA
           echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
@@ -272,7 +281,7 @@ jobs:
   deploy-atlus-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-atlus-docker-image]
+    needs: [build-and-push-atlus-docker-image, system-tests]
 
     steps:
     - name: Preparing docker-compose file.
@@ -295,7 +304,7 @@ jobs:
               - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
               - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
               - TRANSLATION_API_KEY=A7280aF1dfF458d1E60F0D28575C77A82Ac37391f0DeEEB7
-              - DOMAIN=${{ env.NETWORK_URL }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
               - ZBOX_APP="atlus"
               - JWT_ENABLED="false"
               - APP_ENV=test
@@ -330,10 +339,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
       - name: Point to cypress.atlus.cloud webapp
         run: |
+          cd web-apps
           sed -i "s/http:\/\/localhost:3000/https:\/\/cypress.atlus.cloud/g" "packages/test/explorer.cypress.config.js"
           cat packages/test/explorer.cypress.config.js
 
@@ -358,13 +369,14 @@ jobs:
 
       - name: Cypress build
         run: |
+          cd web-apps
           yarn install --frozen-lockfile --force
           cd packages/test/
           yarn install --frozen-lockfile --force
 
       - name: Cypress run
         run: |
-          pwd
+          cd web-apps
           yarn workspace test cypress:explorer:run
 
       - uses: actions/upload-artifact@v3
@@ -372,18 +384,21 @@ jobs:
         with:
           name: atlus-cypress-artifacts
           path: |
-            /runner/_work/web-apps/web-apps/packages/test/cypress/screenshots
-            /runner/_work/web-apps/web-apps/packages/test/cypress/videos
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
           retention-days: 3
 
   build-and-push-chalk-docker-image:
     runs-on: arc-runner
+    needs: [system-tests]
 
     outputs:
       output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
 
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -393,13 +408,9 @@ jobs:
       - name: Set Docker Image Tags.
         id: get_info
         run: |
+          cd web-apps
           echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
-          if [[ "${{github.ref}}" == refs/pull/* ]]; then
-            tag=${GITHUB_REF/\/merge/}
-            echo "TAG=$(echo pr-${tag:10})" >> $GITHUB_ENV
-          else
-            echo "TAG=$(echo ${GITHUB_REF#refs/*/} | sed 's/\//-/g')" >> $GITHUB_ENV
-          fi
+          echo "TAG=master" >> $GITHUB_ENV
 
       - name: Login To Docker Repository.
         uses: docker/login-action@v2
@@ -409,6 +420,7 @@ jobs:
 
       - name: Setting Up Environment Variables.
         run: |
+          cd web-apps
           cd packages/chalk
           touch .env
           echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
@@ -420,7 +432,7 @@ jobs:
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ env.NETWORK_URL }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "ZBOX_APP=chalk" >> .env
           echo "JWT_ENABLED=true" >> .env
           echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
@@ -431,6 +443,7 @@ jobs:
       - name: Build & Push Docker Image.
         id: docker_build
         run: |
+          cd web-apps
           docker build -f ./packages/chalk/docker/dockerfile . -t ${{ secrets.ZNFT_REGISTRY }}:latest
           echo $TAG-$SHORT_SHA
           echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
@@ -446,7 +459,7 @@ jobs:
   deploy-chalk-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-chalk-docker-image]
+    needs: [build-and-push-chalk-docker-image, system-tests]
 
     steps:
     - name: Preparing docker-compose file.
@@ -470,7 +483,7 @@ jobs:
               - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
               - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
               - ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}
-              - DOMAIN=${{ env.NETWORK_URL }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
               - ZBOX_APP="chalk"
               - JWT_ENABLED="false"
               - BE_URL="https://dev-lpbackend.zus.network"
@@ -508,10 +521,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
       - name: Point to cypress.chalk.software webapp
         run: |
+          cd web-apps
           sed -i "s/http:\/\/localhost:3000/https:\/\/cypress.chalk.software/g" "packages/test/chalk.cypress.config.js"
           cat packages/test/chalk.cypress.config.js
 
@@ -536,13 +551,14 @@ jobs:
 
       - name: Cypress build
         run: |
+          cd web-apps
           yarn install --frozen-lockfile --force
           cd packages/test/
           yarn install --frozen-lockfile --force
 
       - name: Cypress run
         run: |
-          pwd
+          cd web-apps
           yarn workspace test cypress:chalk:run
 
       - uses: actions/upload-artifact@v3
@@ -550,18 +566,21 @@ jobs:
         with:
           name: chalk-cypress-artifacts
           path: |
-            /runner/_work/web-apps/web-apps/packages/test/cypress/screenshots
-            /runner/_work/web-apps/web-apps/packages/test/cypress/videos
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
           retention-days: 3
 
   build-and-push-chimney-docker-image:
     runs-on: arc-runner
+    needs: [system-tests]
 
     outputs:
       output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
 
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -571,13 +590,9 @@ jobs:
       - name: Set Docker Image Tags.
         id: get_info
         run: |
+          cd web-apps
           echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
-          if [[ "${{github.ref}}" == refs/pull/* ]]; then
-            tag=${GITHUB_REF/\/merge/}
-            echo "TAG=$(echo pr-${tag:10})" >> $GITHUB_ENV
-          else
-            echo "TAG=$(echo ${GITHUB_REF#refs/*/} | sed 's/\//-/g')" >> $GITHUB_ENV
-          fi
+          echo "TAG=master" >> $GITHUB_ENV
 
       - name: Login To Docker Repository.
         uses: docker/login-action@v2
@@ -587,6 +602,7 @@ jobs:
 
       - name: Setting Up Environment Variables.
         run: |
+          cd web-apps
           cd packages/chimney
           touch .env
           echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
@@ -597,7 +613,7 @@ jobs:
           echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ env.NETWORK_URL }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "TRANSLATION_API_KEY=${{ secrets.CHIMNEY_TRANSLATION_API_KEY }}" >> .env
           echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
@@ -607,6 +623,7 @@ jobs:
       - name: Build & Push Docker Image.
         id: docker_build
         run: |
+          cd web-apps
           docker build -f ./packages/chimney/docker/dockerfile . -t ${{ secrets.CHIMNEY_REGISTRY }}:latest
           echo $TAG-$SHORT_SHA
           echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
@@ -622,7 +639,7 @@ jobs:
   deploy-chimney-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-chimney-docker-image]
+    needs: [build-and-push-chimney-docker-image, system-tests]
 
     steps:
     - name: Preparing docker-compose file.
@@ -644,7 +661,7 @@ jobs:
               - FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}
               - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
               - ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}
-              - DOMAIN=${{ env.NETWORK_URL }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
               - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
               - TRANSLATION_API_KEY=${{ secrets.CHIMNEY_TRANSLATION_API_KEY }}
               - BE_URL="https://dev-lpbackend.zus.network"
@@ -681,10 +698,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
       - name: Point to cypress.chimney.software webapp
         run: |
+          cd web-apps
           sed -i "s/http:\/\/localhost:3000/https:\/\/cypress.chimney.software/g" "packages/test/chimney.cypress.config.js"
           cat packages/test/chimney.cypress.config.js
 
@@ -709,13 +728,14 @@ jobs:
 
       - name: Cypress build
         run: |
+          cd web-apps
           yarn install --frozen-lockfile --force
           cd packages/test/
           yarn install --frozen-lockfile --force
 
       - name: Cypress run
         run: |
-          pwd
+          cd web-apps
           yarn workspace test cypress:chimney:run
 
       - uses: actions/upload-artifact@v3
@@ -723,18 +743,21 @@ jobs:
         with:
           name: chimney-cypress-artifacts
           path: |
-            /runner/_work/web-apps/web-apps/packages/test/cypress/screenshots
-            /runner/_work/web-apps/web-apps/packages/test/cypress/videos
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
           retention-days: 3
 
   build-and-push-blimp-docker-image:
     runs-on: arc-runner
+    needs: [system-tests]
 
     outputs:
       output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
 
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -744,13 +767,9 @@ jobs:
       - name: Set Docker Image Tags.
         id: get_info
         run: |
+          cd web-apps
           echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
-          if [[ "${{github.ref}}" == refs/pull/* ]]; then
-            tag=${GITHUB_REF/\/merge/}
-            echo "TAG=$(echo pr-${tag:10})" >> $GITHUB_ENV
-          else
-            echo "TAG=$(echo ${GITHUB_REF#refs/*/} | sed 's/\//-/g')" >> $GITHUB_ENV
-          fi
+          echo "TAG=master" >> $GITHUB_ENV
 
       - name: Login To Docker Repository.
         uses: docker/login-action@v2
@@ -760,6 +779,7 @@ jobs:
 
       - name: Setting Up Environment Variables.
         run: |
+          cd web-apps
           cd packages/blimp
           touch .env
           echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
@@ -771,7 +791,7 @@ jobs:
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ env.NETWORK_URL }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "ZBOX_APP=blimp" >> .env
           echo "JWT_ENABLED=true" >> .env
           echo "BE_URL=https://lp-backend.zus.network" >> .env
@@ -781,6 +801,7 @@ jobs:
       - name: Build & Push Docker Image.
         id: docker_build
         run: |
+          cd web-apps
           docker build -f ./packages/blimp/docker/dockerfile . -t ${{ secrets.BLIMP_REGISTRY }}:latest
           echo $TAG-$SHORT_SHA
           echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
@@ -796,7 +817,7 @@ jobs:
   deploy-blimp-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-blimp-docker-image]
+    needs: [build-and-push-blimp-docker-image, system-tests]
 
     steps:
     - name: Preparing docker-compose file.
@@ -819,7 +840,7 @@ jobs:
               - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
               - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
               - TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}
-              - DOMAIN=${{ env.NETWORK_URL }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
               - BE_URL=https://lp-backend.zus.network
               - ETH_CHAIN_ID=0x13881
               - APP_ENV=test
@@ -854,10 +875,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
       - name: Point to cypress.blimp.software webapp
         run: |
+          cd web-apps
           sed -i "s/http:\/\/localhost:3000/https:\/\/cypress.blimp.software/g" "packages/test/blimp.cypress.config.js"
           cat packages/test/blimp.cypress.config.js
 
@@ -882,13 +905,14 @@ jobs:
 
       - name: Cypress build
         run: |
+          cd web-apps
           yarn install --frozen-lockfile --force
           cd packages/test/
           yarn install --frozen-lockfile --force
 
       - name: Cypress run
         run: |
-          pwd
+          cd web-apps
           yarn workspace test cypress:blimp:run
 
       - uses: actions/upload-artifact@v3
@@ -896,18 +920,21 @@ jobs:
         with:
           name: blimp-cypress-artifacts
           path: |
-            /runner/_work/web-apps/web-apps/packages/test/cypress/screenshots
-            /runner/_work/web-apps/web-apps/packages/test/cypress/videos
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
           retention-days: 3
 
   build-and-push-vult-docker-image:
     runs-on: arc-runner
+    needs: [system-tests]
 
     outputs:
       output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
 
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -917,13 +944,9 @@ jobs:
       - name: Set Docker Image Tags.
         id: get_info
         run: |
+          cd web-apps
           echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
-          if [[ "${{github.ref}}" == refs/pull/* ]]; then
-            tag=${GITHUB_REF/\/merge/}
-            echo "TAG=$(echo pr-${tag:10})" >> $GITHUB_ENV
-          else
-            echo "TAG=$(echo ${GITHUB_REF#refs/*/} | sed 's/\//-/g')" >> $GITHUB_ENV
-          fi
+          echo "TAG=master" >> $GITHUB_ENV
 
       - name: Login To Docker Repository.
         uses: docker/login-action@v2
@@ -933,6 +956,7 @@ jobs:
 
       - name: Setting Up Environment Variables.
         run: |
+          cd web-apps
           cd packages/vult/
           touch .env
           echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
@@ -944,7 +968,7 @@ jobs:
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ env.NETWORK_URL }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "ZBOX_APP=vult" >> .env
           echo "JWT_ENABLED=true" >> .env
           echo "BE_URL=https://lp-backend.zus.network" >> .env
@@ -953,6 +977,7 @@ jobs:
       - name: Build & Push Docker Image.
         id: docker_build
         run: |
+          cd web-apps
           docker build -f ./packages/vult/docker/dockerfile . -t ${{ secrets.VULT_REGISTRY }}:latest
           echo $TAG-$SHORT_SHA
           echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
@@ -968,7 +993,7 @@ jobs:
   deploy-vult-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-vult-docker-image]
+    needs: [build-and-push-vult-docker-image, system-tests]
 
     steps:
     - name: Preparing docker-compose file.
@@ -985,7 +1010,7 @@ jobs:
           echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
           echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
           echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ env.NETWORK_URL }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
           echo "ZBOX_APP=vult" >> .env
           echo "JWT_ENABLED=true" >> .env
           echo "BE_URL=https://lp-backend.zus.network" >> .env
@@ -1029,10 +1054,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
 
       - name: Point to cypress.vult.network webapp
         run: |
+          cd web-apps
           sed -i "s/http:\/\/localhost:3000/https:\/\/cypress.vult.network/g" "packages/test/vult.cypress.config.js"
           cat packages/test/vult.cypress.config.js
 
@@ -1057,13 +1084,14 @@ jobs:
 
       - name: Cypress build
         run: |
+          cd web-apps
           yarn install --frozen-lockfile --force
           cd packages/test/
           yarn install --frozen-lockfile --force
 
       - name: Cypress run
         run: |
-          pwd
+          cd web-apps
           yarn workspace test cypress:vult:run
 
       - uses: actions/upload-artifact@v3
@@ -1071,6 +1099,16 @@ jobs:
         with:
           name: vult-cypress-artifacts
           path: |
-            /runner/_work/web-apps/web-apps/packages/test/cypress/screenshots
-            /runner/_work/web-apps/web-apps/packages/test/cypress/videos
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
           retention-days: 3
+
+  notify-slack:
+    name: "Notify Slack"
+    runs-on: [ tests-suite ]
+    needs: [ vult-cypress-run, blimp-cypress-run, chimney-cypress-run, chalk-cypress-run, atlus-cypress-run, bolt-cypress-run ]
+    steps:
+      - name: "notify slack"
+        if: failure()
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"<!here> 0Chain nightly cypress run failed against current-sprint. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
