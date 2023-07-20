@@ -85,7 +85,7 @@ func TestResumeDownload(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(filename))
 
 		outputStatus := strings.Fields(output[0])
-		actualDownloadedBytes, err := strconv.ParseInt(outputStatus[len(outputStatus)-6], 10, 64) // This gets the 6th element from the end
+		actualDownloadedBytes, err := strconv.ParseInt(outputStatus[len(outputStatus)-5], 10, 64) // This gets the 5th element from the end
 		require.Nil(t, err)
 
 		t.Log("Bytes downloaded after resuming:", actualDownloadedBytes)
