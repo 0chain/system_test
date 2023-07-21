@@ -2100,7 +2100,7 @@ func TestDexState(testSetup *testing.T) {
 
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {
 	t.Logf("Tearing down existing test data for [%v]", phoneNumber)
-	csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+	csrfToken := createCsrfToken(t, phoneNumber)
 	appType := [5]string{"blimp", "vult", "chimney", "bolt", "chalk"}
 	for _, app := range appType {
 		wallets, _, _ := zboxClient.GetWalletKeys(t, idToken, csrfToken, phoneNumber, app) // This endpoint used instead of list wallet as list wallet doesn't return the required data
