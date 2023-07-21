@@ -19,17 +19,17 @@ import (
 
 func TestFileDownloadTokenMovement(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till https://github.com/0chain/zboxcli/issues/334 is fixed")
+	t.SetSmokeTests("Downloader's readpool balance should reduce by download cost")
 
 	t.Parallel()
 
-	t.RunWithTimeout("Downloader's readpool balance should reduce by download cost", 3*time.Minute, func(t *test.SystemTest) { //TODO: way too slow
+	t.RunWithTimeout("Downloader's readpool balance should reduce by download cost", 5*time.Minute, func(t *test.SystemTest) { //TODO: way too slow
 		walletOwner := escapedTestName(t)
 		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
 		file := generateRandomTestFileName(t)
 		remoteOwnerPath := "/" + filepath.Base(file)
-		fileSize := int64(10240) // must upload bigger file to ensure has noticeable cost
+		fileSize := int64(10 * MB) // must upload bigger file to ensure has noticeable cost
 		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
@@ -101,7 +101,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
-		expectedRPBalance := 1.4*1e10 - expectedDownloadCostInSas
+		expectedRPBalance := 1.4*1e10 - expectedDownloadCostInSas - 10 // because download cost is till 3 decimal point only and missing the 4th decimal digit
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
 		// getDownloadCost returns download cost when all the associated blobbers of an allocation are required
