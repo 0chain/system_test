@@ -400,6 +400,9 @@ func TestUpload(testSetup *testing.T) {
 		filename := generateRandomTestFileName(t)
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
+		defer func() {
+			os.Remove(filename) //nolint: errcheck
+		}()
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
