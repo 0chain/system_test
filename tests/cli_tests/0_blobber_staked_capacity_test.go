@@ -169,8 +169,10 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 	allocationCost, err := getAllocationCost(output[0])
 	require.Nil(t, err, "could not get allocation cost")
 
-	_, err = executeFaucetWithTokens(t, configPath, allocationCost)
-	require.Nil(t, err, "Error executing faucet with tokens", err)
+	for i := float64(0); i <= (allocationCost/9999)+1; i++ {
+		_, err = executeFaucetWithTokens(t, configPath, 9999)
+		require.Nil(t, err, "Error executing faucet with tokens", err)
+	}
 
 	balance, err := getBalanceZCN(t, configPath)
 	t.Log("the balance: ", balance)
