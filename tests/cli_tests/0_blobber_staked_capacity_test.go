@@ -174,9 +174,6 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 		require.Nil(t, err, "Error executing faucet with tokens", err)
 	}
 
-	balance, err := getBalanceZCN(t, configPath)
-	t.Log("the balance: ", balance)
-
 	// Create an allocation of maximum size that all blobbers can honor.
 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 		"size":        allocSize,
