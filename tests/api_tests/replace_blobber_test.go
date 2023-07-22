@@ -160,6 +160,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+		apiClient.CreateReadPool(t, sdkWallet, 1.0, client.TxSuccessfulStatus)
 
 		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
