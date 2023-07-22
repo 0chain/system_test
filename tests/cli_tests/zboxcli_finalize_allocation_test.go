@@ -26,7 +26,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 		output, err = finalizeAllocation(t, configPath, allocationID, false)
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet, or waiting a challenge completion", output[0])
+		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet", output[0])
 	})
 
 	t.Run("Finalize Other's Allocation Should Fail", func(t *test.SystemTest) {
