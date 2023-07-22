@@ -645,6 +645,7 @@ func getAllAllocationChallengeRewards(t *test.SystemTest, allocationID string) (
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
+			return
 		}
 	}(res.Body)
 
