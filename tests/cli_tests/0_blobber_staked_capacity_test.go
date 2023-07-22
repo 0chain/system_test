@@ -177,7 +177,7 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 		"size":        allocSize,
 		"data":        3,
 		"parity":      3,
-		"lock":        allocationCost + 1,
+		"lock":        allocationCost,
 		"read_price":  "0-0.1",
 		"write_price": "0-0.1",
 	}))
