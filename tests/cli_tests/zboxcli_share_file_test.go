@@ -1181,7 +1181,7 @@ func TestShareFile(testSetup *testing.T) {
 		// So the download cost will be in between initial balance and expected balance.
 		require.Equal(t, true,
 			finalReadPool.Balance < initialReadPool.Balance &&
-				finalReadPool.Balance >= int64(expectedRPBalance))
+				finalReadPool.Balance >= expectedRPBalance)
 	})
 }
 

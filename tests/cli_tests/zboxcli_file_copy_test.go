@@ -651,7 +651,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.RunWithTimeout("File copy - Users should be charged for copying a file ", 3*time.Minute, func(t *test.SystemTest) {
-		t.Skip("Skipping until the issue that running it in workflow is fixed")
 
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
