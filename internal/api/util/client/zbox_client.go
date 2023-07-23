@@ -1979,7 +1979,7 @@ func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, wa
 		Dst:      &zboxWallet,
 		FormData: formData,
 		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-ID":        X_APP_CLIENT_ID_R,
 			"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
 			"X-App-Timestamp":        "1618213324",
