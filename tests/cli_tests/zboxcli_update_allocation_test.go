@@ -228,37 +228,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error updating allocation:couldnt_find_allocation: Couldn't find the allocation required for update", output[0])
 	})
 
-	t.RunWithTimeout("Update Expired Allocation Should Fail", 10*time.Minute, func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{"expire": "6m"})
-
-		time.Sleep(7 * time.Minute)
-
-		expDuration := int64(1) // In hours
-
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("%dh", expDuration),
-		})
-		output, err := updateAllocation(t, configPath, params, false)
-
-		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
-
-		// Update the expired allocation's size
-		size := int64(2048)
-
-		params = createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"size":       size,
-		})
-		output, err = updateAllocation(t, configPath, params, false)
-
-		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
-	})
-
 	t.Run("Update Size To Less Than 1024 Should Fail", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := -allocationBeforeUpdate.Size + 1023

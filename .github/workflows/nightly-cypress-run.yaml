@@ -1,0 +1,1114 @@
+name: 'ZUS WEB-APPS CYPRESS TESTS - NIGHTLY RUN'
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+on:
+  schedule:
+    # Runs every morning at 4am UTC
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  system-tests:
+    name: "Deploy 0Chain"
+    runs-on: [ tests-suite09 ]
+    timeout-minutes: 90
+
+    outputs:
+      network_url: ${{ steps.network_config.outputs.NETWORK_URL }}
+
+    steps:
+      - name: "Config: Deploy new 0Chain network then run tests against it"
+        id: network_config
+        run: |
+          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_OUTPUT
+          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
+          echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
+
+      - name: "Deploy 0Chain"
+        uses: 0chain/actions/deploy-0chain@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+
+  build-and-push-bolt-docker-image:
+    runs-on: arc-runner
+    needs: [system-tests]
+
+    outputs:
+      output1: ${{ steps.docker_build.outputs.COMMIT_TAG }}
+
+    steps:
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+
+      - name: Set Docker Image Tags.
+        id: get_info
+        run: |
+          cd web-apps
+          echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
+          echo "TAG=master" >> $GITHUB_ENV
+
+      - name: Login To Docker Repository.
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Setting Up Environment Variables.
+        run: |
+          cd web-apps
+          cd packages/bolt
+          touch .env
+          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+          echo "TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+          echo "BE_URL=https://lp-backend.zus.network" >> .env
+          echo "JWT_ENABLED=true" >> .env
+          echo "ZBOX_APP=bolt" >> .env
+          echo "ATLUS_URL=https://cypress.atlus.cloud" >> .env
+          echo "APP_ENV=test" >> .env
+
+      - name: Build & Push Docker Image.
+        id: docker_build
+        run: |
+          cd web-apps
+          docker build -f ./packages/bolt/docker/dockerfile . -t ${{ secrets.BOLT_REGISTRY }}:latest
+          echo $TAG-$SHORT_SHA
+          echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
+
+          docker tag ${{ secrets.BOLT_REGISTRY }}:latest ${{ secrets.BOLT_REGISTRY }}:$TAG-$SHORT_SHA
+          docker push ${{ secrets.BOLT_REGISTRY }}:$TAG-$SHORT_SHA
+
+      - name: Clean Up The Workspace.
+        if: ${{ always() }}
+        run: |
+          rm -rf ./*
+
+  deploy-bolt-on-cypress:
+    runs-on: cypress-webapps
+
+    needs: [build-and-push-bolt-docker-image, system-tests]
+
+    steps:
+    - name: Preparing docker-compose file.
+      run: |
+        mkdir -p /home/root/codebase/bolt
+        cd /home/root/codebase/bolt
+        cat <<\EOF >./docker-compose.yaml
+        version: '3.2'
+        services:
+          bolt-app:
+            container_name: bolt_webapp
+            image: ${{ secrets.BOLT_REGISTRY }}:${{ needs.build-and-push-bolt-docker-image.outputs.output1 }}
+            environment:
+              - FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}
+              - FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}
+              - FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}
+              - FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}
+              - FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}
+              - FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}
+              - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
+              - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
+              - TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
+              - BE_URL=https://lp-backend.zus.network
+              - JWT_ENABLED=true
+              - ZBOX_APP=bolt
+              - ATLUS_URL=https://cypress.atlus.cloud
+              - APP_ENV=test
+            restart: "always"
+            networks:
+              - bolt_network
+            ports:
+              - 3002:3000
+
+        networks:
+          bolt_network:
+            driver: bridge
+        EOF
+
+    - name: Login To Docker Repository.
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Deploying cypress.bolt.holdings
+      run: |
+        cd /home/root/codebase/bolt
+        docker-compose up -d
+        sleep 5s
+        docker ps -a
+
+  bolt-cypress-run:
+    runs-on: arc-runner
+
+    needs: [deploy-bolt-on-cypress]
+
+    steps:
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+
+      - name: Point to cypress.bolt.software webapp
+        run: |
+          cd web-apps
+          sed -i "s/http:\/\/localhost:3001/https:\/\/cypress.bolt.holdings/g" "packages/test/bolt.cypress.config.js"
+          cat packages/test/bolt.cypress.config.js
+
+      - name: Install node.
+        run: |
+          curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
+          sudo bash /tmp/nodesource_setup.sh
+          sudo apt install nodejs
+          node -v
+
+      - name: Install yarn
+        run: |
+          curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/yarn.gpg
+          echo "deb [signed-by=/etc/apt/trusted.gpg.d/yarn.gpg] https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+          sudo apt update
+          sudo apt install yarn -y
+          yarn --version
+
+      - name: Install yarn
+        run: |
+          sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb -y
+
+      - name: Cypress build
+        run: |
+          cd web-apps
+          yarn install --frozen-lockfile --force
+          cd packages/test/
+          yarn install --frozen-lockfile --force
+
+      - name: Cypress run
+        run: |
+          cd web-apps
+          yarn workspace test cypress:bolt:run
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: bolt-cypress-artifacts
+          path: |
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
+          retention-days: 3
+
+  build-and-push-atlus-docker-image:
+    runs-on: arc-runner
+    needs: [system-tests]
+
+    outputs:
+      output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
+
+    steps:
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+
+      # - name: Cloning web-apps Repository.
+      #   run: |
+      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
+      #     echo "Successfully cloned the web-apps repository"
+
+      - name: Set Docker Image Tags.
+        id: get_info
+        run: |
+          cd web-apps
+          echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
+          echo "TAG=master" >> $GITHUB_ENV
+
+      - name: Login To Docker Repository.
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Setting Up Environment Variables.
+        run: |
+          cd web-apps
+          cd packages/explorer
+          touch .env
+          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+          echo "TRANSLATION_API_KEY=A7280aF1dfF458d1E60F0D28575C77A82Ac37391f0DeEEB7" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+          echo "ZBOX_APP=atlus" >> .env
+          echo "JWT_ENABLED=true" >> .env
+          echo "APP_ENV=test" >> .env
+
+      - name: Build & Push Docker Image.
+        id: docker_build
+        run: |
+          cd web-apps
+          docker build -f ./packages/explorer/docker/dockerfile . -t ${{ secrets.ATLUS_REGISTRY }}:latest
+          echo $TAG-$SHORT_SHA
+          echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
+
+          docker tag ${{ secrets.ATLUS_REGISTRY }}:latest ${{ secrets.ATLUS_REGISTRY }}:$TAG-$SHORT_SHA
+          docker push ${{ secrets.ATLUS_REGISTRY }}:$TAG-$SHORT_SHA
+
+      - name: Clean Up The Workspace.
+        if: ${{ always() }}
+        run: |
+          rm -rf ./*
+
+  deploy-atlus-on-cypress:
+    runs-on: cypress-webapps
+
+    needs: [build-and-push-atlus-docker-image, system-tests]
+
+    steps:
+    - name: Preparing docker-compose file.
+      run: |
+        mkdir -p /home/root/codebase/atlus
+        cd /home/root/codebase/atlus
+        cat <<\EOF >./docker-compose.yaml
+        version: '3.2'
+        services:
+          atlus-app:
+            container_name: atlus_webapp
+            image: ${{ secrets.ATLUS_REGISTRY }}:${{ needs.build-and-push-atlus-docker-image.outputs.output2 }}
+            environment:
+              - FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}
+              - FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}
+              - FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}
+              - FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}
+              - FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}
+              - FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}
+              - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
+              - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
+              - TRANSLATION_API_KEY=A7280aF1dfF458d1E60F0D28575C77A82Ac37391f0DeEEB7
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
+              - ZBOX_APP="atlus"
+              - JWT_ENABLED="false"
+              - APP_ENV=test
+            restart: "always"
+            networks:
+              - atlus_network
+            ports:
+              - 3001:3000
+
+        networks:
+          atlus_network:
+            driver: bridge
+        EOF
+
+    - name: Login To Docker Repository.
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Deploying cypress.atlus.cloud
+      run: |
+        cd /home/root/codebase/atlus
+        docker-compose up -d
+        sleep 5s
+        docker ps -a
+
+  atlus-cypress-run:
+    runs-on: arc-runner
+
+    needs: [deploy-atlus-on-cypress]
+
+    steps:
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+
+      - name: Point to cypress.atlus.cloud webapp
+        run: |
+          cd web-apps
+          sed -i "s/http:\/\/localhost:3000/https:\/\/cypress.atlus.cloud/g" "packages/test/explorer.cypress.config.js"
+          cat packages/test/explorer.cypress.config.js
+
+      - name: Install node.
+        run: |
+          curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
+          sudo bash /tmp/nodesource_setup.sh
+          sudo apt install nodejs
+          node -v
+
+      - name: Install yarn
+        run: |
+          curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/yarn.gpg
+          echo "deb [signed-by=/etc/apt/trusted.gpg.d/yarn.gpg] https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+          sudo apt update
+          sudo apt install yarn -y
+          yarn --version
+
+      - name: Install yarn
+        run: |
+          sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb -y
+
+      - name: Cypress build
+        run: |
+          cd web-apps
+          yarn install --frozen-lockfile --force
+          cd packages/test/
+          yarn install --frozen-lockfile --force
+
+      - name: Cypress run
+        run: |
+          cd web-apps
+          yarn workspace test cypress:explorer:run
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: atlus-cypress-artifacts
+          path: |
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
+          retention-days: 3
+
+  build-and-push-chalk-docker-image:
+    runs-on: arc-runner
+    needs: [system-tests]
+
+    outputs:
+      output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
+
+    steps:
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+
+      # - name: Cloning web-apps Repository.
+      #   run: |
+      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
+      #     echo "Successfully cloned the web-apps repository"
+
+      - name: Set Docker Image Tags.
+        id: get_info
+        run: |
+          cd web-apps
+          echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
+          echo "TAG=master" >> $GITHUB_ENV
+
+      - name: Login To Docker Repository.
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Setting Up Environment Variables.
+        run: |
+          cd web-apps
+          cd packages/chalk
+          touch .env
+          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+          echo "ZBOX_APP=chalk" >> .env
+          echo "JWT_ENABLED=true" >> .env
+          echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
+          echo "NEXT_PUBLIC_MONDAY_FORM=https://forms.monday.com/forms/66a8452f47fe1e157bdced96242f53b2?r=use1" >> .env
+          echo "DEFAULT_THEME=dark" >> .env
+          echo "APP_ENV=test" >> .env
+
+      - name: Build & Push Docker Image.
+        id: docker_build
+        run: |
+          cd web-apps
+          docker build -f ./packages/chalk/docker/dockerfile . -t ${{ secrets.ZNFT_REGISTRY }}:latest
+          echo $TAG-$SHORT_SHA
+          echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
+
+          docker tag ${{ secrets.ZNFT_REGISTRY }}:latest ${{ secrets.ZNFT_REGISTRY }}:$TAG-$SHORT_SHA
+          docker push ${{ secrets.ZNFT_REGISTRY }}:$TAG-$SHORT_SHA
+
+      - name: Clean Up The Workspace.
+        if: ${{ always() }}
+        run: |
+          rm -rf ./*
+
+  deploy-chalk-on-cypress:
+    runs-on: cypress-webapps
+
+    needs: [build-and-push-chalk-docker-image, system-tests]
+
+    steps:
+    - name: Preparing docker-compose file.
+      run: |
+        mkdir -p /home/root/codebase/chalk
+        cd /home/root/codebase/chalk
+
+        cat <<\EOF >./docker-compose.yaml
+        version: '3.2'
+        services:
+          atlus-app:
+            container_name: chalk_webapp
+            image: ${{ secrets.ZNFT_REGISTRY }}:${{ needs.build-and-push-chalk-docker-image.outputs.output2 }}
+            environment:
+              - FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}
+              - FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}
+              - FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}
+              - FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}
+              - FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}
+              - FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}
+              - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
+              - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
+              - ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
+              - ZBOX_APP="chalk"
+              - JWT_ENABLED="false"
+              - BE_URL="https://dev-lpbackend.zus.network"
+              - NEXT_PUBLIC_MONDAY_FORM="https://forms.monday.com/forms/66a8452f47fe1e157bdced96242f53b2?r=use1"
+              - DEFAULT_THEME="dark"
+              - APP_ENV=test
+            restart: "always"
+            networks:
+              - chalk_network
+            ports:
+              - 3004:3000
+
+        networks:
+          chalk_network:
+            driver: bridge
+        EOF
+
+    - name: Login To Docker Repository.
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Deploying cypress.chalk.software
+      run: |
+        cd /home/root/codebase/chalk
+        docker-compose up -d
+        sleep 5s
+        docker ps -a
+
+  chalk-cypress-run:
+    runs-on: arc-runner
+
+    needs: [deploy-chalk-on-cypress]
+
+    steps:
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+
+      - name: Point to cypress.chalk.software webapp
+        run: |
+          cd web-apps
+          sed -i "s/http:\/\/localhost:3000/https:\/\/cypress.chalk.software/g" "packages/test/chalk.cypress.config.js"
+          cat packages/test/chalk.cypress.config.js
+
+      - name: Install node.
+        run: |
+          curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
+          sudo bash /tmp/nodesource_setup.sh
+          sudo apt install nodejs
+          node -v
+
+      - name: Install yarn
+        run: |
+          curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/yarn.gpg
+          echo "deb [signed-by=/etc/apt/trusted.gpg.d/yarn.gpg] https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+          sudo apt update
+          sudo apt install yarn -y
+          yarn --version
+
+      - name: Install yarn
+        run: |
+          sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb -y
+
+      - name: Cypress build
+        run: |
+          cd web-apps
+          yarn install --frozen-lockfile --force
+          cd packages/test/
+          yarn install --frozen-lockfile --force
+
+      - name: Cypress run
+        run: |
+          cd web-apps
+          yarn workspace test cypress:chalk:run
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: chalk-cypress-artifacts
+          path: |
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
+          retention-days: 3
+
+  build-and-push-chimney-docker-image:
+    runs-on: arc-runner
+    needs: [system-tests]
+
+    outputs:
+      output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
+
+    steps:
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+
+      # - name: Cloning web-apps Repository.
+      #   run: |
+      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
+      #     echo "Successfully cloned the web-apps repository"
+
+      - name: Set Docker Image Tags.
+        id: get_info
+        run: |
+          cd web-apps
+          echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
+          echo "TAG=master" >> $GITHUB_ENV
+
+      - name: Login To Docker Repository.
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Setting Up Environment Variables.
+        run: |
+          cd web-apps
+          cd packages/chimney
+          touch .env
+          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+          echo "TRANSLATION_API_KEY=${{ secrets.CHIMNEY_TRANSLATION_API_KEY }}" >> .env
+          echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
+          echo "ATLUS_URL=https://cypress.atlus.cloud" >> .env
+          echo "APP_ENV=test" >> .env
+
+      - name: Build & Push Docker Image.
+        id: docker_build
+        run: |
+          cd web-apps
+          docker build -f ./packages/chimney/docker/dockerfile . -t ${{ secrets.CHIMNEY_REGISTRY }}:latest
+          echo $TAG-$SHORT_SHA
+          echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
+
+          docker tag ${{ secrets.CHIMNEY_REGISTRY }}:latest ${{ secrets.CHIMNEY_REGISTRY }}:$TAG-$SHORT_SHA
+          docker push ${{ secrets.CHIMNEY_REGISTRY }}:$TAG-$SHORT_SHA
+
+      - name: Clean Up The Workspace.
+        if: ${{ always() }}
+        run: |
+          rm -rf ./*
+
+  deploy-chimney-on-cypress:
+    runs-on: cypress-webapps
+
+    needs: [build-and-push-chimney-docker-image, system-tests]
+
+    steps:
+    - name: Preparing docker-compose file.
+      run: |
+        mkdir -p /home/root/codebase/chimney
+        cd /home/root/codebase/chimney
+        cat <<\EOF >./docker-compose.yaml
+        version: '3.2'
+        services:
+          atlus-app:
+            container_name: chimney_webapp
+            image: ${{ secrets.CHIMNEY_REGISTRY }}:${{ needs.build-and-push-chimney-docker-image.outputs.output2 }}
+            environment:
+              - FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}
+              - FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}
+              - FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}
+              - FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}
+              - FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}
+              - FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}
+              - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
+              - ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
+              - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
+              - TRANSLATION_API_KEY=${{ secrets.CHIMNEY_TRANSLATION_API_KEY }}
+              - BE_URL="https://dev-lpbackend.zus.network"
+              - ATLUS_URL="https://cypress.atlus.cloud"
+              - APP_ENV=test
+            restart: "always"
+            networks:
+              - chimney_network
+            ports:
+              - 3005:3000
+
+        networks:
+          chimney_network:
+            driver: bridge
+        EOF
+
+    - name: Login To Docker Repository.
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Deploying cypress.chimney.software
+      run: |
+        cd /home/root/codebase/chimney
+        docker-compose up -d
+        sleep 5s
+        docker ps -a
+
+  chimney-cypress-run:
+    runs-on: arc-runner
+
+    needs: [deploy-chimney-on-cypress]
+
+    steps:
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+
+      - name: Point to cypress.chimney.software webapp
+        run: |
+          cd web-apps
+          sed -i "s/http:\/\/localhost:3000/https:\/\/cypress.chimney.software/g" "packages/test/chimney.cypress.config.js"
+          cat packages/test/chimney.cypress.config.js
+
+      - name: Install node.
+        run: |
+          curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
+          sudo bash /tmp/nodesource_setup.sh
+          sudo apt install nodejs
+          node -v
+
+      - name: Install yarn
+        run: |
+          curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/yarn.gpg
+          echo "deb [signed-by=/etc/apt/trusted.gpg.d/yarn.gpg] https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+          sudo apt update
+          sudo apt install yarn -y
+          yarn --version
+
+      - name: Install yarn
+        run: |
+          sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb -y
+
+      - name: Cypress build
+        run: |
+          cd web-apps
+          yarn install --frozen-lockfile --force
+          cd packages/test/
+          yarn install --frozen-lockfile --force
+
+      - name: Cypress run
+        run: |
+          cd web-apps
+          yarn workspace test cypress:chimney:run
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: chimney-cypress-artifacts
+          path: |
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
+          retention-days: 3
+
+  build-and-push-blimp-docker-image:
+    runs-on: arc-runner
+    needs: [system-tests]
+
+    outputs:
+      output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
+
+    steps:
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+
+      # - name: Cloning web-apps Repository.
+      #   run: |
+      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
+      #     echo "Successfully cloned the web-apps repository"
+
+      - name: Set Docker Image Tags.
+        id: get_info
+        run: |
+          cd web-apps
+          echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
+          echo "TAG=master" >> $GITHUB_ENV
+
+      - name: Login To Docker Repository.
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Setting Up Environment Variables.
+        run: |
+          cd web-apps
+          cd packages/blimp
+          touch .env
+          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+          echo "ZBOX_APP=blimp" >> .env
+          echo "JWT_ENABLED=true" >> .env
+          echo "BE_URL=https://lp-backend.zus.network" >> .env
+          echo "ETH_CHAIN_ID=0x13881" >> .env
+          echo "APP_ENV=test" >> .env
+
+      - name: Build & Push Docker Image.
+        id: docker_build
+        run: |
+          cd web-apps
+          docker build -f ./packages/blimp/docker/dockerfile . -t ${{ secrets.BLIMP_REGISTRY }}:latest
+          echo $TAG-$SHORT_SHA
+          echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
+
+          docker tag ${{ secrets.BLIMP_REGISTRY }}:latest ${{ secrets.BLIMP_REGISTRY }}:$TAG-$SHORT_SHA
+          docker push ${{ secrets.BLIMP_REGISTRY }}:$TAG-$SHORT_SHA
+
+      - name: Clean Up The Workspace.
+        if: ${{ always() }}
+        run: |
+          rm -rf ./*
+
+  deploy-blimp-on-cypress:
+    runs-on: cypress-webapps
+
+    needs: [build-and-push-blimp-docker-image, system-tests]
+
+    steps:
+    - name: Preparing docker-compose file.
+      run: |
+        mkdir -p /home/root/codebase/blimp
+        cd /home/root/codebase/blimp
+        cat <<\EOF >./docker-compose.yaml
+        version: '3.2'
+        services:
+          atlus-app:
+            container_name: blimp_webapp
+            image: ${{ secrets.BLIMP_REGISTRY }}:${{ needs.build-and-push-blimp-docker-image.outputs.output2 }}
+            environment:
+              - FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}
+              - FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}
+              - FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}
+              - FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}
+              - FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}
+              - FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}
+              - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
+              - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
+              - TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}
+              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
+              - BE_URL=https://lp-backend.zus.network
+              - ETH_CHAIN_ID=0x13881
+              - APP_ENV=test
+            restart: "always"
+            networks:
+              - blimp_network
+            ports:
+              - 3006:3000
+
+        networks:
+          blimp_network:
+            driver: bridge
+        EOF
+
+    - name: Login To Docker Repository.
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Deploying cypress.blimp.software
+      run: |
+        cd /home/root/codebase/blimp
+        docker-compose up -d
+        sleep 5s
+        docker ps -a
+
+  blimp-cypress-run:
+    runs-on: arc-runner
+
+    needs: [deploy-blimp-on-cypress]
+
+    steps:
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+
+      - name: Point to cypress.blimp.software webapp
+        run: |
+          cd web-apps
+          sed -i "s/http:\/\/localhost:3000/https:\/\/cypress.blimp.software/g" "packages/test/blimp.cypress.config.js"
+          cat packages/test/blimp.cypress.config.js
+
+      - name: Install node.
+        run: |
+          curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
+          sudo bash /tmp/nodesource_setup.sh
+          sudo apt install nodejs
+          node -v
+
+      - name: Install yarn
+        run: |
+          curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/yarn.gpg
+          echo "deb [signed-by=/etc/apt/trusted.gpg.d/yarn.gpg] https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+          sudo apt update
+          sudo apt install yarn -y
+          yarn --version
+
+      - name: Install yarn
+        run: |
+          sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb -y
+
+      - name: Cypress build
+        run: |
+          cd web-apps
+          yarn install --frozen-lockfile --force
+          cd packages/test/
+          yarn install --frozen-lockfile --force
+
+      - name: Cypress run
+        run: |
+          cd web-apps
+          yarn workspace test cypress:blimp:run
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: blimp-cypress-artifacts
+          path: |
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
+          retention-days: 3
+
+  build-and-push-vult-docker-image:
+    runs-on: arc-runner
+    needs: [system-tests]
+
+    outputs:
+      output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
+
+    steps:
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+
+      # - name: Cloning web-apps Repository.
+      #   run: |
+      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
+      #     echo "Successfully cloned the web-apps repository"
+
+      - name: Set Docker Image Tags.
+        id: get_info
+        run: |
+          cd web-apps
+          echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
+          echo "TAG=master" >> $GITHUB_ENV
+
+      - name: Login To Docker Repository.
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Setting Up Environment Variables.
+        run: |
+          cd web-apps
+          cd packages/vult/
+          touch .env
+          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+          echo "ZBOX_APP=vult" >> .env
+          echo "JWT_ENABLED=true" >> .env
+          echo "BE_URL=https://lp-backend.zus.network" >> .env
+          echo "APP_ENV=test" >> .env
+
+      - name: Build & Push Docker Image.
+        id: docker_build
+        run: |
+          cd web-apps
+          docker build -f ./packages/vult/docker/dockerfile . -t ${{ secrets.VULT_REGISTRY }}:latest
+          echo $TAG-$SHORT_SHA
+          echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
+
+          docker tag ${{ secrets.VULT_REGISTRY }}:latest ${{ secrets.VULT_REGISTRY }}:$TAG-$SHORT_SHA
+          docker push ${{ secrets.VULT_REGISTRY }}:$TAG-$SHORT_SHA
+
+      - name: Clean Up The Workspace.
+        if: ${{ always() }}
+        run: |
+          rm -rf ./*
+
+  deploy-vult-on-cypress:
+    runs-on: cypress-webapps
+
+    needs: [build-and-push-vult-docker-image, system-tests]
+
+    steps:
+    - name: Preparing docker-compose file.
+      run: |
+        mkdir -p /home/root/codebase/vult
+        cd /home/root/codebase/vult
+        touch .env
+          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
+          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+          echo "ZBOX_APP=vult" >> .env
+          echo "JWT_ENABLED=true" >> .env
+          echo "BE_URL=https://lp-backend.zus.network" >> .env
+          echo "APP_ENV=test" >> .env
+        cat <<\EOF >./docker-compose.yaml
+        version: '3.2'
+        services:
+          atlus-app:
+            container_name: vult_webapp
+            image: ${{ secrets.VULT_REGISTRY }}:${{ needs.build-and-push-vult-docker-image.outputs.output2 }}
+            env_file:
+              - ./.env
+            restart: "always"
+            networks:
+              - vult_network
+            ports:
+              - 3003:3000
+
+        networks:
+          vult_network:
+            driver: bridge
+        EOF
+
+    - name: Login To Docker Repository.
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Deploying cypress.vult.network
+      run: |
+        cd /home/root/codebase/vult
+        docker-compose up -d
+        sleep 5s
+        docker ps -a
+
+  vult-cypress-run:
+    runs-on: arc-runner
+
+    needs: [deploy-vult-on-cypress]
+
+    steps:
+      - name: Checkout
+        run: |
+          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+
+      - name: Point to cypress.vult.network webapp
+        run: |
+          cd web-apps
+          sed -i "s/http:\/\/localhost:3000/https:\/\/cypress.vult.network/g" "packages/test/vult.cypress.config.js"
+          cat packages/test/vult.cypress.config.js
+
+      - name: Install node.
+        run: |
+          curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
+          sudo bash /tmp/nodesource_setup.sh
+          sudo apt install nodejs
+          node -v
+
+      - name: Install yarn
+        run: |
+          curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/yarn.gpg
+          echo "deb [signed-by=/etc/apt/trusted.gpg.d/yarn.gpg] https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+          sudo apt update
+          sudo apt install yarn -y
+          yarn --version
+
+      - name: Install yarn
+        run: |
+          sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb -y
+
+      - name: Cypress build
+        run: |
+          cd web-apps
+          yarn install --frozen-lockfile --force
+          cd packages/test/
+          yarn install --frozen-lockfile --force
+
+      - name: Cypress run
+        run: |
+          cd web-apps
+          yarn workspace test cypress:vult:run
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: vult-cypress-artifacts
+          path: |
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
+          retention-days: 3
+
+  notify-slack:
+    name: "Notify Slack"
+    runs-on: [ tests-suite ]
+    needs: [ vult-cypress-run, blimp-cypress-run, chimney-cypress-run, chalk-cypress-run, atlus-cypress-run, bolt-cypress-run ]
+    steps:
+      - name: "notify slack"
+        if: always() && (needs.vult-cypress-run.result != 'success' || needs.blimp-cypress-run.result != 'success' || needs.chimney-cypress-run.result != 'success' || needs.chalk-cypress-run.result != 'success' || needs.atlus-cypress-run.result != 'success' || needs.bolt-cypress-run.result != 'success')
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"<!here> 0Chain nightly cypress run failed against current-sprint. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}

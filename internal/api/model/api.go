@@ -376,6 +376,15 @@ type ClientGetBalanceResponse struct {
 	Nonce   int64  `json:"nonce"`
 }
 
+type ClientGetReadPoolBalanceRequest struct {
+	ClientID string
+}
+
+type ClientGetReadPoolBalanceResponse struct {
+	UserID  string `json:"user_id" gorm:"uniqueIndex"`
+	Balance int64  `json:"balance"`
+}
+
 type SCStateGetRequest struct {
 	SCAddress, Key string
 }
@@ -600,9 +609,8 @@ type SCRestGetBlobbersResponse struct {
 }
 
 type Terms struct {
-	ReadPrice     int64   `json:"read_price"`
-	WritePrice    int64   `json:"write_price"`
-	MinLockDemand float64 `json:"min_lock_demand"`
+	ReadPrice  int64 `json:"read_price"`
+	WritePrice int64 `json:"write_price"`
 }
 
 type StakePoolSettings struct {
@@ -956,7 +964,7 @@ type FreeStorageMarker struct {
 	Assigner   string  `json:"assigner,omitempty"`
 	Recipient  string  `json:"recipient"`
 	FreeTokens float64 `json:"free_tokens"`
-	Timestamp  int64   `json:"timestamp"`
+	Nonce      int64   `json:"nonce"`
 	Signature  string  `json:"signature,omitempty"`
 }
 
