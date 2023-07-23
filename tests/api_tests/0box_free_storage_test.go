@@ -90,7 +90,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		_, response, _ = zboxClient.CreateFreeStorage(t,
+		storageMarker, response, _ := zboxClient.CreateFreeStorage(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -98,8 +98,13 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp")
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, response.String(), `{"error":"400: free storage for appType: blimp already used"}`)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		marker, markerResponse, err := UnmarshalMarkerData(storageMarker)
+		require.Nil(t, err)
+		require.Equal(t, X_APP_CLIENT_ID, marker.Recipient)
+		require.Equal(t, marker.Assigner, "0chain")
+		require.Equal(t, markerResponse.RecipientPublicKey, X_APP_CLIENT_KEY)
+		require.Positive(t, marker.FreeTokens)
 	})
 }
 

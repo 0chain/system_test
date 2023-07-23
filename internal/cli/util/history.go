@@ -166,9 +166,6 @@ func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
 	}
 	ch.setupTransactions(t)
 
-	if currentRound > 0 {
-		ch.roundHistories[currentRound] = currentHistory
-	}
 	require.Equalf(t, int(ch.to-ch.from+1), len(ch.roundHistories),
 		"mismatched round count recorded, from %d, to %d", ch.to, ch.from)
 }

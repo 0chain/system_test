@@ -153,7 +153,7 @@ func (c *ZboxClient) GetDexState(t *test.SystemTest, idToken, csrfToken, phoneNu
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -183,7 +183,7 @@ func (c *ZboxClient) PostDexState(t *test.SystemTest, data map[string]string, id
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
@@ -213,7 +213,7 @@ func (c *ZboxClient) PutDexState(t *test.SystemTest, data map[string]string, idT
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-APP-TYPE":             "chimney",
+			"X-APP-TYPE":             "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPUTMethod)
@@ -1894,6 +1894,32 @@ func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, idToken, ph
 	}, HttpGETMethod)
 
 	return ReferralCountOfUser, resp, err
+}
+
+func (c *ZboxClient) GetLeaderBoard(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralLeaderBoard, *resty.Response, error) {
+	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
+	var ReferralLeaderBoard model.ReferralLeaderBoard
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/referral/topusers/")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst: &ReferralLeaderBoard,
+		Headers: map[string]string{
+			"X-App-Phone-Number": phoneNumber,
+			"X-APP-TYPE":         "blimp",
+			"X-App-Client-ID":    X_APP_CLIENT_ID,
+			"X-App-Client-Key":   X_APP_CLIENT_KEY,
+			"X-App-Timestamp":    "1618213324",
+			"X-App-ID-TOKEN":     idToken,
+			"X-CSRF-TOKEN":       csrfToken,
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return ReferralLeaderBoard, resp, err
 }
 
 func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralRankOfUser, *resty.Response, error) {
