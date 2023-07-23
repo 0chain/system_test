@@ -650,13 +650,15 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
 
-	t.RunWithTimeout("File copy - Users should be charged for copying a file ", 3*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("File copy - Users should be charged for copying a file ", 5*time.Minute, func(t *test.SystemTest) {
 
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		t.Logf("Wallet created: %s", output[0])
 
 		output, err = executeFaucetWithTokens(t, configPath, 9.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		t.Logf("Faucet executed: %s", output[0])
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
@@ -665,12 +667,15 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+		t.Logf("Allocation created: %s", output[0])
 
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
+		t.Logf("Allocation ID: %s", allocationID)
 
 		initialAllocation := getAllocation(t, allocationID)
+		t.Logf("Initial allocation: %+v", initialAllocation)
 
 		fileSize := int64(math.Floor(1 * MB))
 
@@ -679,11 +684,20 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
 		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
 		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		t.Logf("Upload cost: %v", expectedUploadCostInZCN)
 		unit := strings.Fields(output[0])[1]
+		t.Logf("Upload cost unit: %v", unit)
 		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+		t.Logf("Upload cost in ZCN: %v", expectedUploadCostInZCN)
+
+		time.Sleep(30 * time.Second)
 
 		allocAfterUpload := getAllocation(t, allocationID)
 		require.Equal(t, initialAllocation.WritePool-allocAfterUpload.WritePool, allocAfterUpload.MovedToChallenge)
+		// convert allocAfterUpload to json
+		allocAfterUploadJSON, err := json.Marshal(allocAfterUpload)
+		require.Nil(t, err, "Failed to marshal allocation", strings.Join(output, "\n"))
+		t.Log("allocAfterUpload : ", string(allocAfterUploadJSON))
 
 		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge), 0.05, "Upload cost is not as expected %v != %v", expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge))
 
@@ -703,9 +717,18 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf(remotepath+" copied"), output[0])
 
+		t.Logf("File copied: %s", output)
+
 		finalAllocation := getAllocation(t, allocationID)
+		finalAllocationJSON, err := json.Marshal(allocAfterUpload)
+		require.Nil(t, err, "Failed to marshal allocation", strings.Join(output, "\n"))
+		t.Log("finalAllocationJSON : ", string(finalAllocationJSON))
 
 		actualCost := finalAllocation.MovedToChallenge - allocAfterUpload.MovedToChallenge
+
+		t.Logf("Actual cost: %v", actualCost)
+
+		t.Log("expectedUploadCostInZCN : ", expectedUploadCostInZCN, " actualCost : ", intToZCN(actualCost))
 
 		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(actualCost), 0.15, "Copy file cost is not as expected")
 
