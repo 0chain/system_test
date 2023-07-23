@@ -820,7 +820,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		require.Greater(t, file.Size, file_initial.Size, "file expected to be updated to bigger size")
 	})
 
-	t.Run("BROKEN Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation but is not see zboxcli/issues/250", func(t *test.SystemTest) {
+	t.Run("Sync path to non-empty allocation - locally updated files (in sub folder) must be updated in allocation but is not see zboxcli/issues/250", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 2 * MB})
 		createAllocationTestTeardown(t, allocationID)
 

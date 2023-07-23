@@ -718,8 +718,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", 10*time.Minute, func(t *test.SystemTest) {
-		t.Skip("Skipping until the issue that running it in workflow is fixed")
-
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
