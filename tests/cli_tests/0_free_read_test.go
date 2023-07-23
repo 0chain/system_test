@@ -60,7 +60,7 @@ func TestFreeReads(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentially("Free reads should work", func(t *test.SystemTest) {
+	t.Run("Free reads should work", func(t *test.SystemTest) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
