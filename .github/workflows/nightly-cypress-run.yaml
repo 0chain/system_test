@@ -64,26 +64,35 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Setting Up Environment Variables.
-        run: |
-          cd web-apps
-          cd packages/bolt
-          touch .env
-          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
-          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
-          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
-          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
-          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
-          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
-          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
-          echo "TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
-          echo "BE_URL=https://lp-backend.zus.network" >> .env
-          echo "JWT_ENABLED=true" >> .env
-          echo "ZBOX_APP=bolt" >> .env
-          echo "ATLUS_URL=https://cypress.atlus.cloud" >> .env
-          echo "APP_ENV=test" >> .env
+      # - name: Setting Up Environment Variables.
+      #   run: |
+      #     cd web-apps
+      #     cd packages/bolt
+      #     touch .env
+      #     echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+      #     echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+      #     echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+      #     echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+      #     echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+      #     echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+      #     echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+      #     echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+      #     echo "TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}" >> .env
+      #     echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+      #     echo "BE_URL=https://lp-backend.zus.network" >> .env
+      #     echo "JWT_ENABLED=true" >> .env
+      #     echo "ZBOX_APP=bolt" >> .env
+      #     echo "ATLUS_URL=https://cypress.atlus.cloud" >> .env
+      #     echo "APP_ENV=test" >> .env
+      #     echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
+      #     echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
+      #     echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
+      #     echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
+      #     echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
+      #     echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
+      #     echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
+      #     echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
+      #     echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
 
       - name: Build & Push Docker Image.
         id: docker_build
@@ -111,28 +120,40 @@ jobs:
       run: |
         mkdir -p /home/root/codebase/bolt
         cd /home/root/codebase/bolt
+        touch .env
+        echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+        echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+        echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+        echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+        echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+        echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+        echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+        echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+        echo "TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}" >> .env
+        echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+        echo "BE_URL=https://lp-backend.zus.network" >> .env
+        echo "JWT_ENABLED=true" >> .env
+        echo "ZBOX_APP=bolt" >> .env
+        echo "ATLUS_URL=https://cypress.atlus.cloud" >> .env
+        echo "APP_ENV=test" >> .env
+        echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
+        echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
+        echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
+        echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
+        echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
+        echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
+        echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
+        echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
+        echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
+
         cat <<\EOF >./docker-compose.yaml
         version: '3.2'
         services:
           bolt-app:
             container_name: bolt_webapp
             image: ${{ secrets.BOLT_REGISTRY }}:${{ needs.build-and-push-bolt-docker-image.outputs.output1 }}
-            environment:
-              - FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}
-              - FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}
-              - FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}
-              - FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}
-              - FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}
-              - FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}
-              - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
-              - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
-              - TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}
-              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
-              - BE_URL=https://lp-backend.zus.network
-              - JWT_ENABLED=true
-              - ZBOX_APP=bolt
-              - ATLUS_URL=https://cypress.atlus.cloud
-              - APP_ENV=test
+            env_file:
+              - ./.env
             restart: "always"
             networks:
               - bolt_network
@@ -243,24 +264,33 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Setting Up Environment Variables.
-        run: |
-          cd web-apps
-          cd packages/explorer
-          touch .env
-          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
-          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
-          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
-          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
-          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
-          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
-          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
-          echo "TRANSLATION_API_KEY=A7280aF1dfF458d1E60F0D28575C77A82Ac37391f0DeEEB7" >> .env
-          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
-          echo "ZBOX_APP=atlus" >> .env
-          echo "JWT_ENABLED=true" >> .env
-          echo "APP_ENV=test" >> .env
+      # - name: Setting Up Environment Variables.
+      #   run: |
+      #     cd web-apps
+      #     cd packages/explorer
+      #     touch .env
+      #     echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+      #     echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+      #     echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+      #     echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+      #     echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+      #     echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+      #     echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+      #     echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+      #     echo "TRANSLATION_API_KEY=A7280aF1dfF458d1E60F0D28575C77A82Ac37391f0DeEEB7" >> .env
+      #     echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+      #     echo "ZBOX_APP=atlus" >> .env
+      #     echo "JWT_ENABLED=true" >> .env
+      #     echo "APP_ENV=test" >> .env
+      #     echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
+      #     echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
+      #     echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
+      #     echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
+      #     echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
+      #     echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
+      #     echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
+      #     echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
+      #     echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
 
       - name: Build & Push Docker Image.
         id: docker_build
@@ -288,26 +318,38 @@ jobs:
       run: |
         mkdir -p /home/root/codebase/atlus
         cd /home/root/codebase/atlus
+        touch .env
+        echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+        echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+        echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+        echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+        echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+        echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+        echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+        echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+        echo "TRANSLATION_API_KEY=A7280aF1dfF458d1E60F0D28575C77A82Ac37391f0DeEEB7" >> .env
+        echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+        echo "ZBOX_APP=atlus" >> .env
+        echo "JWT_ENABLED=true" >> .env
+        echo "APP_ENV=test" >> .env
+        echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
+        echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
+        echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
+        echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
+        echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
+        echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
+        echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
+        echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
+        echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
+
         cat <<\EOF >./docker-compose.yaml
         version: '3.2'
         services:
           atlus-app:
             container_name: atlus_webapp
             image: ${{ secrets.ATLUS_REGISTRY }}:${{ needs.build-and-push-atlus-docker-image.outputs.output2 }}
-            environment:
-              - FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}
-              - FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}
-              - FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}
-              - FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}
-              - FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}
-              - FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}
-              - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
-              - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
-              - TRANSLATION_API_KEY=A7280aF1dfF458d1E60F0D28575C77A82Ac37391f0DeEEB7
-              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
-              - ZBOX_APP="atlus"
-              - JWT_ENABLED="false"
-              - APP_ENV=test
+            env_file:
+              - ./.env
             restart: "always"
             networks:
               - atlus_network
@@ -345,7 +387,7 @@ jobs:
       - name: Point to cypress.atlus.cloud webapp
         run: |
           cd web-apps
-          sed -i "s/http:\/\/localhost:3000/https:\/\/cypress.atlus.cloud/g" "packages/test/explorer.cypress.config.js"
+          sed -i "s/http:\/\/localhost:3030/https:\/\/cypress.atlus.cloud/g" "packages/test/explorer.cypress.config.js"
           cat packages/test/explorer.cypress.config.js
 
       - name: Install node.
@@ -418,27 +460,36 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Setting Up Environment Variables.
-        run: |
-          cd web-apps
-          cd packages/chalk
-          touch .env
-          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
-          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
-          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
-          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
-          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
-          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
-          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
-          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
-          echo "ZBOX_APP=chalk" >> .env
-          echo "JWT_ENABLED=true" >> .env
-          echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
-          echo "NEXT_PUBLIC_MONDAY_FORM=https://forms.monday.com/forms/66a8452f47fe1e157bdced96242f53b2?r=use1" >> .env
-          echo "DEFAULT_THEME=dark" >> .env
-          echo "APP_ENV=test" >> .env
+      # - name: Setting Up Environment Variables.
+      #   run: |
+      #     cd web-apps
+      #     cd packages/chalk
+      #     touch .env
+      #     echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+      #     echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+      #     echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+      #     echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+      #     echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+      #     echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+      #     echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+      #     echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+      #     echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
+      #     echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+      #     echo "ZBOX_APP=chalk" >> .env
+      #     echo "JWT_ENABLED=true" >> .env
+      #     echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
+      #     echo "NEXT_PUBLIC_MONDAY_FORM=https://forms.monday.com/forms/66a8452f47fe1e157bdced96242f53b2?r=use1" >> .env
+      #     echo "DEFAULT_THEME=dark" >> .env
+      #     echo "APP_ENV=test" >> .env
+      #     echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
+      #     echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
+      #     echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
+      #     echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
+      #     echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
+      #     echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
+      #     echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
+      #     echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
+      #     echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
 
       - name: Build & Push Docker Image.
         id: docker_build
@@ -466,6 +517,32 @@ jobs:
       run: |
         mkdir -p /home/root/codebase/chalk
         cd /home/root/codebase/chalk
+        touch .env
+        echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+        echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+        echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+        echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+        echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+        echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+        echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+        echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+        echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
+        echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+        echo "ZBOX_APP=chalk" >> .env
+        echo "JWT_ENABLED=true" >> .env
+        echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
+        echo "NEXT_PUBLIC_MONDAY_FORM=https://forms.monday.com/forms/66a8452f47fe1e157bdced96242f53b2?r=use1" >> .env
+        echo "DEFAULT_THEME=dark" >> .env
+        echo "APP_ENV=test" >> .env
+        echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
+        echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
+        echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
+        echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
+        echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
+        echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
+        echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
+        echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
+        echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
 
         cat <<\EOF >./docker-compose.yaml
         version: '3.2'
@@ -473,23 +550,8 @@ jobs:
           atlus-app:
             container_name: chalk_webapp
             image: ${{ secrets.ZNFT_REGISTRY }}:${{ needs.build-and-push-chalk-docker-image.outputs.output2 }}
-            environment:
-              - FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}
-              - FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}
-              - FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}
-              - FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}
-              - FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}
-              - FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}
-              - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
-              - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
-              - ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}
-              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
-              - ZBOX_APP="chalk"
-              - JWT_ENABLED="false"
-              - BE_URL="https://dev-lpbackend.zus.network"
-              - NEXT_PUBLIC_MONDAY_FORM="https://forms.monday.com/forms/66a8452f47fe1e157bdced96242f53b2?r=use1"
-              - DEFAULT_THEME="dark"
-              - APP_ENV=test
+            env_file:
+              - ./.env
             restart: "always"
             networks:
               - chalk_network
@@ -600,25 +662,34 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Setting Up Environment Variables.
-        run: |
-          cd web-apps
-          cd packages/chimney
-          touch .env
-          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
-          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
-          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
-          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
-          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
-          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
-          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
-          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
-          echo "TRANSLATION_API_KEY=${{ secrets.CHIMNEY_TRANSLATION_API_KEY }}" >> .env
-          echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
-          echo "ATLUS_URL=https://cypress.atlus.cloud" >> .env
-          echo "APP_ENV=test" >> .env
+      # - name: Setting Up Environment Variables.
+      #   run: |
+      #     cd web-apps
+      #     cd packages/chimney
+      #     touch .env
+      #     echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+      #     echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+      #     echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+      #     echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+      #     echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+      #     echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+      #     echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+      #     echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
+      #     echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+      #     echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+      #     echo "TRANSLATION_API_KEY=${{ secrets.CHIMNEY_TRANSLATION_API_KEY }}" >> .env
+      #     echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
+      #     echo "ATLUS_URL=https://cypress.atlus.cloud" >> .env
+      #     echo "APP_ENV=test" >> .env
+      #     echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
+      #     echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
+      #     echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
+      #     echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
+      #     echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
+      #     echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
+      #     echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
+      #     echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
+      #     echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
 
       - name: Build & Push Docker Image.
         id: docker_build
@@ -646,27 +717,39 @@ jobs:
       run: |
         mkdir -p /home/root/codebase/chimney
         cd /home/root/codebase/chimney
+        touch .env
+        echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+        echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+        echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+        echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+        echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+        echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+        echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+        echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
+        echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+        echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+        echo "TRANSLATION_API_KEY=${{ secrets.CHIMNEY_TRANSLATION_API_KEY }}" >> .env
+        echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
+        echo "ATLUS_URL=https://cypress.atlus.cloud" >> .env
+        echo "APP_ENV=test" >> .env
+        echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
+        echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
+        echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
+        echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
+        echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
+        echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
+        echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
+        echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
+        echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
+
         cat <<\EOF >./docker-compose.yaml
         version: '3.2'
         services:
           atlus-app:
             container_name: chimney_webapp
             image: ${{ secrets.CHIMNEY_REGISTRY }}:${{ needs.build-and-push-chimney-docker-image.outputs.output2 }}
-            environment:
-              - FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}
-              - FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}
-              - FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}
-              - FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}
-              - FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}
-              - FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}
-              - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
-              - ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}
-              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
-              - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
-              - TRANSLATION_API_KEY=${{ secrets.CHIMNEY_TRANSLATION_API_KEY }}
-              - BE_URL="https://dev-lpbackend.zus.network"
-              - ATLUS_URL="https://cypress.atlus.cloud"
-              - APP_ENV=test
+            env_file:
+              - ./.env
             restart: "always"
             networks:
               - chimney_network
@@ -797,6 +880,15 @@ jobs:
           echo "BE_URL=https://lp-backend.zus.network" >> .env
           echo "ETH_CHAIN_ID=0x13881" >> .env
           echo "APP_ENV=test" >> .env
+          echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
+          echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
+          echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
+          echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
+          echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
+          echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
+          echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
+          echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
+          echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
 
       - name: Build & Push Docker Image.
         id: docker_build
@@ -824,26 +916,40 @@ jobs:
       run: |
         mkdir -p /home/root/codebase/blimp
         cd /home/root/codebase/blimp
+        touch .env
+        echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+        echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+        echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+        echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+        echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+        echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+        echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+        echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+        echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
+        echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+        echo "ZBOX_APP=blimp" >> .env
+        echo "JWT_ENABLED=true" >> .env
+        echo "BE_URL=https://lp-backend.zus.network" >> .env
+        echo "ETH_CHAIN_ID=0x13881" >> .env
+        echo "APP_ENV=test" >> .env
+        echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
+        echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
+        echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
+        echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
+        echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
+        echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
+        echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
+        echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
+        echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
+
         cat <<\EOF >./docker-compose.yaml
         version: '3.2'
         services:
           atlus-app:
             container_name: blimp_webapp
             image: ${{ secrets.BLIMP_REGISTRY }}:${{ needs.build-and-push-blimp-docker-image.outputs.output2 }}
-            environment:
-              - FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}
-              - FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}
-              - FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}
-              - FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}
-              - FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}
-              - FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}
-              - FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}
-              - WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}
-              - TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}
-              - DOMAIN=${{ needs.system-tests.outputs.network_url }}
-              - BE_URL=https://lp-backend.zus.network
-              - ETH_CHAIN_ID=0x13881
-              - APP_ENV=test
+            env_file:
+              - ./.env
             restart: "always"
             networks:
               - blimp_network
@@ -954,25 +1060,34 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Setting Up Environment Variables.
-        run: |
-          cd web-apps
-          cd packages/vult/
-          touch .env
-          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
-          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
-          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
-          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
-          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
-          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
-          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
-          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
-          echo "ZBOX_APP=vult" >> .env
-          echo "JWT_ENABLED=true" >> .env
-          echo "BE_URL=https://lp-backend.zus.network" >> .env
-          echo "APP_ENV=test" >> .env
+      # - name: Setting Up Environment Variables.
+      #   run: |
+      #     cd web-apps
+      #     cd packages/vult/
+      #     touch .env
+      #     echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+      #     echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+      #     echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+      #     echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+      #     echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+      #     echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+      #     echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+      #     echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+      #     echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
+      #     echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+      #     echo "ZBOX_APP=vult" >> .env
+      #     echo "JWT_ENABLED=true" >> .env
+      #     echo "BE_URL=https://lp-backend.zus.network" >> .env
+      #     echo "APP_ENV=test" >> .env
+      #     echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
+      #     echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
+      #     echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
+      #     echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
+      #     echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
+      #     echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
+      #     echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
+      #     echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
+      #     echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
 
       - name: Build & Push Docker Image.
         id: docker_build
@@ -1001,20 +1116,29 @@ jobs:
         mkdir -p /home/root/codebase/vult
         cd /home/root/codebase/vult
         touch .env
-          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
-          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
-          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
-          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
-          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
-          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
-          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
-          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
-          echo "ZBOX_APP=vult" >> .env
-          echo "JWT_ENABLED=true" >> .env
-          echo "BE_URL=https://lp-backend.zus.network" >> .env
-          echo "APP_ENV=test" >> .env
+        echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
+        echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
+        echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
+        echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
+        echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
+        echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
+        echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
+        echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
+        echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
+        echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+        echo "ZBOX_APP=vult" >> .env
+        echo "JWT_ENABLED=true" >> .env
+        echo "BE_URL=https://lp-backend.zus.network" >> .env
+        echo "APP_ENV=test" >> .env
+        echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
+        echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
+        echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
+        echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
+        echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
+        echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
+        echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
+        echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
+        echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
         cat <<\EOF >./docker-compose.yaml
         version: '3.2'
         services:
