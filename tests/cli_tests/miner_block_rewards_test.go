@@ -131,9 +131,23 @@ func checkMinerBlockRewards(
 	beforeMiners, afterMiners []climodel.Node,
 	history *cliutil.ChainHistory,
 ) {
-	for i, id := range minerIds {
+	for _, id := range minerIds {
 		var feeRewards, blockRewards int64
-		for round := beforeMiners[i].RoundServiceChargeLastUpdated + 1; round <= afterMiners[i].RoundServiceChargeLastUpdated; round++ {
+		var currNodeBefore climodel.Node
+		var currNodeAfter climodel.Node
+		for j := range beforeMiners {
+			if beforeMiners[j].ID == id {
+				currNodeBefore = beforeMiners[j]
+				break
+			}
+		}
+		for j := range afterMiners {
+			if afterMiners[j].ID == id {
+				currNodeAfter = afterMiners[j]
+				break
+			}
+		}
+		for round := currNodeBefore.RoundServiceChargeLastUpdated + 1; round <= currNodeAfter.RoundServiceChargeLastUpdated; round++ {
 			roundHistory := history.RoundHistory(t, round)
 			for _, pReward := range roundHistory.ProviderRewards {
 				if pReward.ProviderId != id {
@@ -141,11 +155,11 @@ func checkMinerBlockRewards(
 				}
 				switch pReward.RewardType {
 				case climodel.BlockRewardMiner:
-					require.Falsef(t, beforeMiners[i].IsKilled,
+					require.Falsef(t, currNodeBefore.IsKilled,
 						"killed miners cannot receive rewards, %s is killed", id)
 					var expectedServiceCharge int64
-					if len(beforeMiners[i].StakePool.Pools) > 0 {
-						expectedServiceCharge = int64(float64(minerBlockReward) * beforeMiners[i].Settings.ServiceCharge)
+					if len(currNodeBefore.StakePool.Pools) > 0 {
+						expectedServiceCharge = int64(float64(minerBlockReward) * currNodeBefore.Settings.ServiceCharge)
 					} else {
 						expectedServiceCharge = minerBlockReward
 					}
@@ -154,8 +168,8 @@ func checkMinerBlockRewards(
 							" service charge should be block reward %v multiplied by service ratio %v."+
 							"length stake pools %d",
 						pReward.Amount, round,
-						minerBlockReward, beforeMiners[i].Settings.ServiceCharge,
-						len(beforeMiners[i].StakePool.Pools))
+						minerBlockReward, currNodeBefore.Settings.ServiceCharge,
+						len(currNodeBefore.StakePool.Pools))
 					blockRewards += pReward.Amount
 				case climodel.FeeRewardMiner:
 					feeRewards += pReward.Amount
@@ -164,7 +178,7 @@ func checkMinerBlockRewards(
 				}
 			}
 		}
-		actualReward := afterMiners[i].Reward - beforeMiners[i].Reward
+		actualReward := currNodeAfter.Reward - currNodeBefore.Reward
 		require.InDeltaf(t, actualReward, feeRewards+blockRewards, delta,
 			"rewards expected %v, change in miners reward during the test is %v", actualReward, feeRewards+blockRewards)
 	}
@@ -215,14 +229,28 @@ func checkMinerDelegatePoolBlockRewards(
 	beforeMiners, afterMiners []climodel.Node,
 	history *cliutil.ChainHistory,
 ) {
-	for i, id := range minerIds {
-		delegateBlockReward := int64(float64(minerBlockReward) * (1 - beforeMiners[i].Settings.ServiceCharge))
-		numPools := len(afterMiners[i].StakePool.Pools)
+	for _, id := range minerIds {
+		var currNodeBefore climodel.Node
+		var currNodeAfter climodel.Node
+		for j := range beforeMiners {
+			if beforeMiners[j].ID == id {
+				currNodeBefore = beforeMiners[j]
+				break
+			}
+		}
+		for j := range afterMiners {
+			if afterMiners[j].ID == id {
+				currNodeAfter = afterMiners[j]
+				break
+			}
+		}
+		delegateBlockReward := int64(float64(minerBlockReward) * (1 - currNodeBefore.Settings.ServiceCharge))
+		numPools := len(currNodeAfter.StakePool.Pools)
 		rewards := make(map[string]int64, numPools)
-		for poolId := range afterMiners[i].StakePool.Pools {
+		for poolId := range currNodeAfter.StakePool.Pools {
 			rewards[poolId] = 0
 		}
-		for round := beforeMiners[i].RoundServiceChargeLastUpdated + 1; round <= afterMiners[i].RoundServiceChargeLastUpdated; round++ {
+		for round := currNodeBefore.RoundServiceChargeLastUpdated + 1; round <= currNodeAfter.RoundServiceChargeLastUpdated; round++ {
 			poolsBlockRewarded := make(map[string]int64)
 			roundHistory := history.RoundHistory(t, round)
 			for _, dReward := range roundHistory.DelegateRewards {
@@ -249,11 +277,11 @@ func checkMinerDelegatePoolBlockRewards(
 					"delegate pools should not get a block reward unless their parent miner won the round lottery")
 			}
 			confirmPoolPayments(
-				t, delegateBlockReward, poolsBlockRewarded, afterMiners[i].StakePool.Pools, numMinerDelegatesRewarded,
+				t, delegateBlockReward, poolsBlockRewarded, currNodeAfter.StakePool.Pools, numMinerDelegatesRewarded,
 			)
 		}
-		for poolId := range afterMiners[i].StakePool.Pools {
-			actualReward := afterMiners[i].StakePool.Pools[poolId].Reward - beforeMiners[i].StakePool.Pools[poolId].Reward
+		for poolId := range currNodeAfter.StakePool.Pools {
+			actualReward := currNodeAfter.StakePool.Pools[poolId].Reward - currNodeBefore.StakePool.Pools[poolId].Reward
 			require.InDeltaf(t, actualReward, rewards[poolId], delta,
 				"poolID %s, rewards expected %v change in pools reward during test", poolId, rewards[poolId],
 			)
@@ -271,8 +299,8 @@ func confirmPoolPayments(
 	if len(poolsBlockRewarded) == 0 {
 		return
 	}
-	if numRewards > len(pools) {
-		numRewards = len(pools)
+	if numRewards > len(poolsBlockRewarded) {
+		numRewards = len(poolsBlockRewarded)
 	}
 	require.Equal(t, len(poolsBlockRewarded), numRewards,
 		"expected reward payments %d does not equal actual payment count %d", numRewards, len(poolsBlockRewarded))
