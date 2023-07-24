@@ -230,8 +230,8 @@ jobs:
         with:
           name: bolt-cypress-artifacts
           path: |
-            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
-            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
+            /runner/_work/system_test/system_test/packages/test/cypress/screenshots
+            /runner/_work/system_test/system_test/web-apps/packages/test/cypress/videos
           retention-days: 3
 
   build-and-push-atlus-docker-image:
@@ -426,8 +426,8 @@ jobs:
         with:
           name: atlus-cypress-artifacts
           path: |
-            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
-            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
+            /runner/_work/system_test/system_test/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/system_test/web-apps/packages/test/cypress/videos
           retention-days: 3
 
   build-and-push-chalk-docker-image:
@@ -628,8 +628,8 @@ jobs:
         with:
           name: chalk-cypress-artifacts
           path: |
-            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
-            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
+            /runner/_work/system_test/system_test/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/system_test/web-apps/packages/test/cypress/videos
           retention-days: 3
 
   build-and-push-chimney-docker-image:
@@ -826,8 +826,8 @@ jobs:
         with:
           name: chimney-cypress-artifacts
           path: |
-            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
-            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
+            /runner/_work/system_test/system_test/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/system_test/web-apps/packages/test/cypress/videos
           retention-days: 3
 
   build-and-push-blimp-docker-image:
@@ -1026,8 +1026,8 @@ jobs:
         with:
           name: blimp-cypress-artifacts
           path: |
-            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
-            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
+            /runner/_work/system_test/system_test/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/system_test/web-apps/packages/test/cypress/videos
           retention-days: 3
 
   build-and-push-vult-docker-image:
@@ -1223,8 +1223,8 @@ jobs:
         with:
           name: vult-cypress-artifacts
           path: |
-            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/screenshots
-            /runner/_work/system_test/0helm/web-apps/packages/test/cypress/videos
+            /runner/_work/system_test/system_test/web-apps/packages/test/cypress/screenshots
+            /runner/_work/system_test/system_test/web-apps/packages/test/cypress/videos
           retention-days: 3
 
   notify-slack:
