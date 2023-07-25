@@ -1,10 +1,10 @@
-name: "0Chain Nightly Tests"
+name: "0Chain Nightly Tests - Staging"
 concurrency:
   group: "nightly-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
 on:
   schedule:
-    # Runs every morning at 2am
+    # Runs every morning at 2am UTC
     - cron: '0 2 * * *'
   workflow_dispatch:
 
@@ -12,61 +12,44 @@ jobs:
   system-tests:
     name: "System Tests"
     runs-on: [ tests-suite ]
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
-      - name: "Get current PR"
-        uses: jwalton/gh-find-current-pr@v1
-        id: findPr
-        with:
-          github-token: ${{ github.token }}
-
       - name: "Config: Deploy new 0Chain network then run tests against it"
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
-          echo "ZBOX_BRANCH=staging" >> $GITHUB_ENV
-          echo "ZWALLET_BRANCH=staging" >> $GITHUB_ENV
-
-          echo "MINER_TAG=staging" >> $GITHUB_ENV
-          echo "SHARDER_TAG=staging" >> $GITHUB_ENV
-          echo "BLOBBER_TAG=staging" >> $GITHUB_ENV
-          echo "VALIDATOR_TAG=staging" >> $GITHUB_ENV
-          echo "ZBOX_TAG=staging" >> $GITHUB_ENV
-          echo "ZBLOCK_TAG=staging" >> $GITHUB_ENV
-          echo "ZDNS_TAG=staging" >> $GITHUB_ENV
-          echo "EXPLORER_TAG=staging" >> $GITHUB_ENV
-
+          echo "REPO_SNAPSHOTS_BRANCH=staging" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain@master
         with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
-          miner_image: ${{ env.MINER_TAG }}
-          sharder_image: ${{ env.SHARDER_TAG }}
-          blobber_image: ${{ env.BLOBBER_TAG }}
-          validator_image: ${{ env.VALIDATOR_TAG }}
-          zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
-          zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zproxy_image: staging
-          zsearch_image: staging
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@master
         with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
-          run_flaky_tests: false
-          test_file_filter: ""
+          run_flaky_tests: true
+          run_api_system_tests: true
+          run_cli_system_tests: true
+          run_tokenomics_system_tests: true
+          run_smoke_tests: false
+          test_file_filter: ${{ env.TEST_FILE_FILTER }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
 
       - name: "Check if should send slack notification"
         if: failure()

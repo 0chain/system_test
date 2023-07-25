@@ -1841,7 +1841,24 @@ func TestDexState(testSetup *testing.T) {
 
 	// POST DEX STATE
 	t.RunSequentially("Create a DEX state with valid phone number should work", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+			"blimp",
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
 		dexState, response, err := zboxClient.PostDexState(t,
 			postData,
@@ -1850,7 +1867,7 @@ func TestDexState(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 201, response.StatusCode())
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, dexState)
 	})
 
@@ -1929,7 +1946,24 @@ func TestDexState(testSetup *testing.T) {
 
 	// GET DEX STATE
 	t.RunSequentially("Get DEX state with valid phone number should work", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+			"blimp",
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
 		dexState, response, err := zboxClient.GetDexState(t,
 			firebaseToken.IdToken,
@@ -1937,7 +1971,7 @@ func TestDexState(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode())
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, dexState)
 		require.Equal(t, postData["stage"], dexState.Stage)
 		require.Equal(t, postData["reference"], dexState.Reference)
@@ -1963,7 +1997,24 @@ func TestDexState(testSetup *testing.T) {
 
 	// UPDATE DEX STATE
 	t.RunSequentially("Update DEX state with valid phone number should work", func(t *test.SystemTest) {
+		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		description := "wallet created as part of " + t.Name()
+		walletName := "wallet_name"
+		zboxWallet, response, err := zboxClient.PostWallet(t,
+			zboxClient.DefaultMnemonic,
+			walletName,
+			description,
+			firebaseToken.IdToken,
+			csrfToken,
+			zboxClient.DefaultPhoneNumber,
+			"blimp",
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxWallet)
+		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
 		// get dex state
 		dexState, response, err := zboxClient.GetDexState(t,
@@ -1973,7 +2024,7 @@ func TestDexState(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode())
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, postData["reference"], dexState.Reference)
 
 		// update dex state
@@ -1995,7 +2046,7 @@ func TestDexState(testSetup *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode())
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, updateData["reference"], dexState.Reference)
 	})
 
@@ -2049,15 +2100,30 @@ func TestDexState(testSetup *testing.T) {
 
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {
 	t.Logf("Tearing down existing test data for [%v]", phoneNumber)
-	csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+	csrfToken := createCsrfToken(t, phoneNumber)
+
+	var clientId string
+	var clientKey string
+	var clientSignature string
+	if phoneNumber == zboxClient.DefaultPhoneNumber {
+		clientId = X_APP_CLIENT_ID
+		clientKey = X_APP_CLIENT_KEY
+		clientSignature = X_APP_CLIENT_SIGNATURE
+	}
+	if phoneNumber == "+919876543210" {
+		clientId = X_APP_CLIENT_ID_R
+		clientKey = X_APP_CLIENT_KEY_R
+		clientSignature = X_APP_CLIENT_SIGNATURE_R
+	}
+
 	appType := [5]string{"blimp", "vult", "chimney", "bolt", "chalk"}
 	for _, app := range appType {
-		wallets, _, _ := zboxClient.GetWalletKeys(t, idToken, csrfToken, phoneNumber, app) // This endpoint used instead of list wallet as list wallet doesn't return the required data
+		wallets, _, _ := zboxClient.GetWalletKeysForNumber(t, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber, app) // This endpoint used instead of list wallet as list wallet doesn't return the required data
 
 		if len(wallets) != 0 {
 			t.Logf("Found [%v] existing wallets for [%v] for the app type [%v]", len(wallets), phoneNumber, app)
 			for _, wallet := range wallets {
-				message, response, err := zboxClient.DeleteWallet(t, wallet.WalletId, idToken, csrfToken, phoneNumber)
+				message, response, err := zboxClient.DeleteWalletForNumber(t, wallet.WalletId, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber)
 				println(message, response, err)
 			}
 		} else {
