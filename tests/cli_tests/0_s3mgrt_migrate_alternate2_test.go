@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/aws/aws-sdk-go/aws"
@@ -94,7 +95,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 			"bucket":     s3bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
-			"newer-than": "1m",
+			"newer-than": time.Now().Unix() - 60, // start timestamp
 		}))
 		remotepath := "/"
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -119,7 +120,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 			"bucket":     s3bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
-			"older-than": "1m",
+			"older-than": time.Now().Unix() + 60, // end timestamp
 		}))
 
 		remotepath := "/"
