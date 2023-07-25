@@ -3,7 +3,6 @@ package cli_tests
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -56,7 +55,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key":  s3AccessKey,
 			"secret-key":  s3SecretKey,
-			"bucket":      s3bucketName,
+			"bucket":      bucketName,
 			"wallet":      escapedTestName(t) + "_wallet.json",
 			"allocation":  allocationID,
 			"concurrency": 4,
@@ -92,7 +91,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
-			"bucket":     s3bucketName,
+			"bucket":     bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"newer-than": time.Now().Unix() - 60, // start timestamp
@@ -117,7 +116,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
-			"bucket":     s3bucketName,
+			"bucket":     bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"older-than": time.Now().Unix() + 60, // end timestamp
@@ -197,7 +196,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		currentDir, err := os.Getwd()
 		require.Nil(t, err, "can't get current dir")
 		allocPath := filepath.Join(currentDir, "allocPathForTestS3.txt")
-		err = ioutil.WriteFile(allocPath, []byte(allocationID), 0644) //nolint:gosec
+		err = os.WriteFile(allocPath, []byte(allocationID), 0644) //nolint:gosec
 		require.Nil(t, err, "allocation file is not written properly")
 
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
@@ -258,7 +257,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 
 		require.Nil(t, err, "Expected a Migration completed successfully but got error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
 		remoteFilePath := path.Join(remotepath, bucketName)
@@ -362,6 +361,6 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		// mssg can be changed
 		require.Nil(t, err, "Expected a Migration completed successfully but got error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
 	})
 }
