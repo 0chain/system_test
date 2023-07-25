@@ -705,7 +705,7 @@ func TestUpload(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		require.Equal(t, "Error: remotepath flag is missing", output[0])
+		require.Equal(t, "Error: multiuploadjson or remotepath/localpath flag is missing", output[0])
 	})
 
 	t.Run("Upload File longer than 100 chars should fail", func(t *test.SystemTest) {
