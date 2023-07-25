@@ -45,6 +45,7 @@ const (
 	TransactionFeeGet            = "/v1/estimate_txn_fee"
 	TransactionGetConfirmation   = "/v1/transaction/get/confirmation"
 	ClientGetBalance             = "/v1/client/get/balance"
+	ClientReadPool               = "/v1/screst/:sc_address/getReadPoolStat"
 	GetNetworkDetails            = "/network"
 	GetFileRef                   = "/v1/file/refs/:allocation_id"
 	GetFileRefPath               = "/v1/file/referencepath/:allocation_id"
@@ -480,6 +481,24 @@ func (c *APIClient) V1ClientGetBalance(t *test.SystemTest, clientGetBalanceReque
 		SharderServiceProvider)
 
 	return clientGetBalanceResponse, resp, err
+}
+
+func (c *APIClient) V1ClientGetReadPoolBalance(t *test.SystemTest, clientGetReadBalanceRequest model.ClientGetReadPoolBalanceRequest, requiredStatusCode int) (*model.ClientGetReadPoolBalanceResponse, *resty.Response, error) { //nolint
+	var clientGetReadPoolBalanceResponse *model.ClientGetReadPoolBalanceResponse
+
+	urlBuilder := NewURLBuilder().SetPath(ClientReadPool).AddParams("client_id", clientGetReadBalanceRequest.ClientID).SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &clientGetReadPoolBalanceResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return clientGetReadPoolBalanceResponse, resp, err
 }
 
 func (c *APIClient) V1SCRestGetAllMiners(t *test.SystemTest, requiredStatusCode int) ([]*model.SCRestGetMinerSharderResponse, *resty.Response, error) {
@@ -1397,11 +1416,38 @@ func (c *APIClient) GetWalletBalance(t *test.SystemTest, wallet *model.Wallet, r
 			ClientID: wallet.Id,
 		},
 		requiredStatusCode)
+
+	if err != nil {
+		t.Logf("Error getting wallet balance: %v", err)
+		clientGetBalanceResponse.Balance = 0
+		return clientGetBalanceResponse
+	}
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, clientGetBalanceResponse)
 
 	return clientGetBalanceResponse
+}
+
+func (c *APIClient) GetReadPoolBalance(t *test.SystemTest, wallet *model.Wallet, requiredStatusCode int) *model.ClientGetReadPoolBalanceResponse {
+	t.Log("Get read pool balance...")
+
+	clientGetReadPoolBalanceResponse, resp, err := c.V1ClientGetReadPoolBalance(
+		t,
+		model.ClientGetReadPoolBalanceRequest{
+			ClientID: wallet.Id,
+		},
+		requiredStatusCode)
+
+	if err != nil {
+		t.Logf("Error getting readpool balance: %v", err)
+		return clientGetReadPoolBalanceResponse
+	}
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, clientGetReadPoolBalanceResponse)
+
+	return clientGetReadPoolBalanceResponse
 }
 
 func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRestGetBlobberResponse *model.SCRestGetBlobberResponse, requiredTransactionStatus int) {
@@ -2051,6 +2097,10 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 
 func (c *APIClient) BurnZcn(t *test.SystemTest, wallet *model.Wallet, address string, amount float64, requiredTransactionStatus int) string {
 	t.Log("Burn ZCN")
+
+	walletBalance := c.GetWalletBalance(t, wallet, HttpOkStatus)
+	wallet.Nonce = int(walletBalance.Nonce)
+
 	burnZcnTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
 		model.InternalTransactionPutRequest{
