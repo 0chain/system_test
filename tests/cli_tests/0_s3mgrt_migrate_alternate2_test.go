@@ -208,7 +208,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 			"alloc-path": allocPath,
 		}))
 
-		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
+		require.Nil(t, err, "Expected a Migration completed successfully but got error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
 
@@ -237,8 +237,8 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		require.Nil(t, err, "can't get current dir")
 		awsCredPath := filepath.Join(currentDir, "awsCredPathForTestS3.txt")
 		lines := []string{
-			fmt.Sprintf(`s3_access_key: "%v"`, s3AccessKey),
-			fmt.Sprintf(`s3_secret_key: "%v"`, s3SecretKey),
+			fmt.Sprintf(`aws_access_key: "%v"`, s3AccessKey),
+			fmt.Sprintf(`aws_secret_key: "%v"`, s3SecretKey),
 		}
 		file, err := os.OpenFile(awsCredPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		require.Nil(t, err, "file is not created properly")
@@ -291,7 +291,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 			"concurrency": 20,
 		}))
 
-		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
+		require.Nil(t, err, "Expected a Migration completed successfully but got error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
 
@@ -326,7 +326,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 			"retry":      4,
 		}))
 
-		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
+		require.Nil(t, err, "Expected a Migration completed successfully but got error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
 
@@ -360,7 +360,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 			"allocation": allocationID,
 		}))
 		// mssg can be changed
-		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
+		require.Nil(t, err, "Expected a Migration completed successfully but got error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
 	})
