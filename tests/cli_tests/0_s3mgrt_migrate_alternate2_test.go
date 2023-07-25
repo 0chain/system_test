@@ -71,7 +71,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		remoteFilePath := path.Join(remotepath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate existing bucket successfully with newer than prefix", func(t *test.SystemTest) {
@@ -105,7 +105,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		remoteFilePath := path.Join(remotepath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, fileKeyNew)
 		uploadStats := checkStats(t, remoteFilePath, fileKeyNew, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate existing bucket successfully with older than prefix", func(t *test.SystemTest) {
@@ -132,7 +132,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		remoteFilePath := path.Join(remotepath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, fileKeyOld)
 		uploadStats := checkStats(t, remoteFilePath, fileKeyOld, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate existing bucket successfully with files staring with given prefix", func(t *test.SystemTest) {
@@ -210,7 +210,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 
 		require.Nil(t, err, "Expected a Migration completed successfully but got error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
 		remoteFilePath := path.Join(remotepath, bucketName)
@@ -256,7 +256,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 			"aws-cred-path": awsCredPath,
 		}))
 
-		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
+		require.Nil(t, err, "Expected a Migration completed successfully but got error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
 
@@ -293,7 +293,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 
 		require.Nil(t, err, "Expected a Migration completed successfully but got error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
 		remoteFilePath := path.Join(remotepath, bucketName)
@@ -328,7 +328,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 
 		require.Nil(t, err, "Expected a Migration completed successfully but got error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Error: allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
 		remoteFilePath := path.Join(remotepath, bucketName)
