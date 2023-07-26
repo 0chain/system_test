@@ -11,9 +11,12 @@ import (
 )
 
 const (
-	X_APP_CLIENT_ID        = "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9"
-	X_APP_CLIENT_KEY       = "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96"
-	X_APP_CLIENT_SIGNATURE = "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a"
+	X_APP_CLIENT_ID          = "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9"
+	X_APP_CLIENT_KEY         = "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96"
+	X_APP_CLIENT_SIGNATURE   = "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a"
+	X_APP_CLIENT_ID_R        = "3fb9694ebf47b5a51c050025d9c807c3319a05499b1eb980bbb9f1e27e119c9f"
+	X_APP_CLIENT_KEY_R       = "9a8a960db2dd93eb35f26e8f7e84976349064cae3246da23abd575f05e7ed31bd90726cfcc960e017a9246d080f5419ada219d03758c370208c5b688e5ec7a9c"
+	X_APP_CLIENT_SIGNATURE_R = "6b710d015b9e5e4734c08ac2de79ffeeeb49e53571cce8f71f21e375e5eca916"
 )
 
 type ZboxClient struct {
@@ -447,6 +450,10 @@ func (c *ZboxClient) UpdateAllocation(t *test.SystemTest, allocationId, allocati
 }
 
 func (c *ZboxClient) DeleteWallet(t *test.SystemTest, walletId int, idToken, csrfToken, phoneNumber string) (*model.MessageContainer, *resty.Response, error) {
+	return c.DeleteWalletForNumber(t, walletId, X_APP_CLIENT_ID, X_APP_CLIENT_KEY, X_APP_CLIENT_SIGNATURE, idToken, csrfToken, phoneNumber)
+}
+
+func (c *ZboxClient) DeleteWalletForNumber(t *test.SystemTest, walletId int, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber string) (*model.MessageContainer, *resty.Response, error) {
 	t.Logf("Deleting wallet id [%v] using 0box...", walletId)
 	var message *model.MessageContainer
 
@@ -463,9 +470,9 @@ func (c *ZboxClient) DeleteWallet(t *test.SystemTest, walletId int, idToken, csr
 		Dst:  &message,
 		Body: formData,
 		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Client-ID":        clientId,
+			"X-App-Client-Key":       clientKey,
+			"X-App-Client-Signature": clientSignature,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
@@ -774,6 +781,10 @@ func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, pho
 }
 
 func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType string) (model.ZboxWalletArr, *resty.Response, error) {
+	return c.GetWalletKeysForNumber(t, X_APP_CLIENT_ID, X_APP_CLIENT_KEY, X_APP_CLIENT_SIGNATURE, idToken, csrfToken, phoneNumber, appType)
+}
+
+func (c *ZboxClient) GetWalletKeysForNumber(t *test.SystemTest, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber, appType string) (model.ZboxWalletArr, *resty.Response, error) {
 	t.Logf("Getting wallet keys for [%v] using 0box...", phoneNumber)
 	var zboxWalletKeys *model.ZboxWalletArr
 
@@ -785,9 +796,9 @@ func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phone
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst: &zboxWalletKeys,
 		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Client-ID":        clientId,
+			"X-App-Client-Key":       clientKey,
+			"X-App-Client-Signature": clientSignature,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
 			"X-App-Phone-Number":     phoneNumber,
@@ -1963,10 +1974,6 @@ func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, wa
 		"description": walletDescription,
 		"refcode":     refCode,
 	}
-
-	X_APP_CLIENT_ID_R := "3fb9694ebf47b5a51c050025d9c807c3319a05499b1eb980bbb9f1e27e119c9f"
-	X_APP_CLIENT_KEY_R := "9a8a960db2dd93eb35f26e8f7e84976349064cae3246da23abd575f05e7ed31bd90726cfcc960e017a9246d080f5419ada219d03758c370208c5b688e5ec7a9c"
-	X_APP_CLIENT_SIGNATURE_R := "6b710d015b9e5e4734c08ac2de79ffeeeb49e53571cce8f71f21e375e5eca916"
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:      &zboxWallet,
