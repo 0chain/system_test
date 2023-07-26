@@ -4,9 +4,7 @@ concurrency:
   group: "system-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
 on:
-  schedule:
-    # Runs every morning at 2am
-    - cron: '0 2 * * *'
+  push:
   workflow_dispatch:
     inputs:
       zbox_cli_branch:
