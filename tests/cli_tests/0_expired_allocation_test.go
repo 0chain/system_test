@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -33,16 +32,14 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 7*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 5*time.Minute, func(t *test.SystemTest) {
 		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
 		output, err := executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "1m",
-		})
+		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
 
 		time.Sleep(90 * time.Second)
 
@@ -50,7 +47,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		_, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
 
-		cliutils.Wait(t, 4*time.Minute)
+		cliutils.Wait(t, 2*time.Minute)
 
 		output, err = finalizeAllocation(t, configPath, allocationID, true)
 
@@ -60,15 +57,13 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 	})
 
-	t.RunWithTimeout("Cancel Expired Allocation Should Fail", 7*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Cancel Expired Allocation Should Fail", 4*time.Minute, func(t *test.SystemTest) {
 		_, err := createWallet(t, configPath)
 		require.NoError(t, err)
 
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"expire": "1m",
-		})
+		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
 
-		time.Sleep(5 * time.Minute)
+		time.Sleep(2 * time.Minute)
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -90,7 +85,6 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
-			"expire": "1m",
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -111,22 +105,21 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	t.RunWithTimeout("Update Expired Allocation Should Fail", 10*time.Minute, func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{"expire": "1m"})
+	t.RunWithTimeout("Update Expired Allocation Should Fail", 7*time.Minute, func(t *test.SystemTest) {
+		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
 
-		time.Sleep(5 * time.Minute)
+		time.Sleep(2 * time.Minute)
 
 		// Update expired alloc's duration
-		expDuration := int64(1) // In hours
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"expiry":     fmt.Sprintf("%dh", expDuration),
+			"extend":     true,
 		})
 		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[len(output)-1])
 
 		// Update the expired allocation's size
 		size := int64(2048)
@@ -147,9 +140,8 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"expire": "1m",
-			"size":   "1024",
-			"lock":   "0.5",
+			"size": "1024",
+			"lock": "0.5",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))

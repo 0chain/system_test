@@ -452,9 +452,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock":   "5",
-			"size":   4 * MB,
-			"expire": "1h",
+			"lock": "5",
+			"size": 4 * MB,
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -659,9 +658,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock":   "5",
-			"size":   4 * MB,
-			"expire": "1h",
+			"lock": "5",
+			"size": 4 * MB,
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
