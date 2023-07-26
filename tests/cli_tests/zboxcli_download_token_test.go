@@ -86,7 +86,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		})
 
 		// downloading file for wallet
-		output, err = downloadFileForWallet(t, , configPath, downloadParams, true)
+		output, err = downloadFileForWallet(t, walletOwner, configPath, downloadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[1], StatusCompletedCB)
