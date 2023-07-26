@@ -58,8 +58,8 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		// staked a total of 1.4*1e10 tokens in readpool
-		require.Equal(t, 1.4*1e10, float64(initialReadPool.Balance))
+		// staked a total of 1*1e10 tokens in readpool
+		require.Equal(t, 1e10, float64(initialReadPool.Balance))
 
 		// download cost functions works fine with no issues.
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
