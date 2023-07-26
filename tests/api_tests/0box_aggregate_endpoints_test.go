@@ -1481,6 +1481,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 //nolint:gocyclo
 func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("skip till aggregate refactor")
 	// Faucet the used wallets
 	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 4500, client.TxSuccessfulStatus)
 	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)

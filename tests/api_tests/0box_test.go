@@ -2100,15 +2100,30 @@ func TestDexState(testSetup *testing.T) {
 
 func teardown(t *test.SystemTest, idToken, phoneNumber string) {
 	t.Logf("Tearing down existing test data for [%v]", phoneNumber)
-	csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+	csrfToken := createCsrfToken(t, phoneNumber)
+
+	var clientId string
+	var clientKey string
+	var clientSignature string
+	if phoneNumber == zboxClient.DefaultPhoneNumber {
+		clientId = X_APP_CLIENT_ID
+		clientKey = X_APP_CLIENT_KEY
+		clientSignature = X_APP_CLIENT_SIGNATURE
+	}
+	if phoneNumber == "+919876543210" {
+		clientId = X_APP_CLIENT_ID_R
+		clientKey = X_APP_CLIENT_KEY_R
+		clientSignature = X_APP_CLIENT_SIGNATURE_R
+	}
+
 	appType := [5]string{"blimp", "vult", "chimney", "bolt", "chalk"}
 	for _, app := range appType {
-		wallets, _, _ := zboxClient.GetWalletKeys(t, idToken, csrfToken, phoneNumber, app) // This endpoint used instead of list wallet as list wallet doesn't return the required data
+		wallets, _, _ := zboxClient.GetWalletKeysForNumber(t, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber, app) // This endpoint used instead of list wallet as list wallet doesn't return the required data
 
 		if len(wallets) != 0 {
 			t.Logf("Found [%v] existing wallets for [%v] for the app type [%v]", len(wallets), phoneNumber, app)
 			for _, wallet := range wallets {
-				message, response, err := zboxClient.DeleteWallet(t, wallet.WalletId, idToken, csrfToken, phoneNumber)
+				message, response, err := zboxClient.DeleteWalletForNumber(t, wallet.WalletId, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber)
 				println(message, response, err)
 			}
 		} else {
