@@ -25,7 +25,10 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 
 	t.RunWithTimeout("Downloader's readpool balance should reduce by download cost", 5*time.Minute, func(t *test.SystemTest) { //TODO: way too slow
 		walletOwner := escapedTestName(t)
-		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+		allocSize := int64(50 * MB)
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
 
 		file := generateRandomTestFileName(t)
 		remoteOwnerPath := "/" + filepath.Base(file)
@@ -83,7 +86,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		})
 
 		// downloading file for wallet
-		output, err = downloadFileForWallet(t, walletOwner, configPath, downloadParams, true)
+		output, err = downloadFileForWallet(t, , configPath, downloadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[1], StatusCompletedCB)
