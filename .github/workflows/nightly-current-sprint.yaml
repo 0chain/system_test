@@ -1,0 +1,66 @@
+name: "0Chain Nightly Tests - Current Sprint"
+concurrency:
+  group: "sprint-nightly-tests-${{ github.ref }}-${{ github.event_name }}"
+  cancel-in-progress: true
+on:
+  schedule:
+    # Runs every morning at 4am UTC
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  system-tests:
+    name: "System Tests"
+    runs-on: [ tests-suite ]
+    timeout-minutes: 120
+    steps:
+      - name: "Config: Deploy new 0Chain network then run tests against it"
+        run: |
+          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
+          echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
+
+      - name: "Deploy 0Chain"
+
+        uses: 0chain/actions/deploy-0chain@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+
+      - name: "Run System tests"
+        uses: 0chain/actions/run-system-tests@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: true
+          run_api_system_tests: true
+          run_cli_system_tests: true
+          run_tokenomics_system_tests: true
+          run_smoke_tests: false
+          test_file_filter: ${{ env.TEST_FILE_FILTER }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+      - name: "Check if should send slack notification"
+        if: failure()
+        id: send-slack-notification
+        uses: peter-murray/value-as-flag-action@0.0.1
+        with:
+          value: ${{ secrets.SEND_SLACK_NOTIFICATION }}
+          default: false
+
+      - name: "Notify Slack"
+        if: failure() && steps.send-slack-notification.outputs.value == 'true'
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"<!here> 0Chain nightly run failed against current sprint. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
