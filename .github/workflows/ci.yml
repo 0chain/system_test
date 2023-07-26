@@ -120,7 +120,7 @@ jobs:
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/dcf1ae29-309c-41e1-ae3d-7f66bc814b82
-          authorizer_image: pr-103-281e7341
+          authorizer_image: staging
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run System tests"
