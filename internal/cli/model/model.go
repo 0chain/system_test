@@ -585,6 +585,7 @@ type Challenges struct {
 	AllocationRoot string            `json:"allocation_root"`
 	BlobberID      string            `json:"blobber_id"`
 	Responded      int64             `json:"responded"`
+	RoundCreatedAt int64             `json:"round_created_at"`
 }
 
 type Transaction struct {
