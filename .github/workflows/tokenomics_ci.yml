@@ -35,10 +35,6 @@ on:
         description: '0box DOCKER IMAGE to deploy'
         default: 'staging'
         required: false
-      zblock_image:
-        description: '0block DOCKER IMAGE to deploy'
-        default: 'staging'
-        required: false
       run_smoke_tests:
         description: 'Only run smoke tests (subset of system tests for fast feedback)'
         default: 'false'
@@ -127,9 +123,7 @@ jobs:
           echo "BLOBBER_TAG=$(echo $(([ -z '${{github.event.inputs.blobber_image}}' ] && echo 'staging') || echo '${{github.event.inputs.blobber_image}}'))" >> $GITHUB_ENV
           echo "VALIDATOR_TAG=$(echo $(([ -z '${{github.event.inputs.validator_image}}' ] && echo 'staging') || echo '${{github.event.inputs.validator_image}}'))" >> $GITHUB_ENV
           echo "ZBOX_TAG=$(echo $(([ -z '${{github.event.inputs.zbox_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zbox_image}}'))" >> $GITHUB_ENV
-          echo "ZBLOCK_TAG=$(echo $(([ -z '${{github.event.inputs.zblock_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zblock_image}}'))" >> $GITHUB_ENV
           echo "ZDNS_TAG=$(echo $(([ -z '${{github.event.inputs.zdns_image}}' ] && echo 'staging') || echo '${{github.event.inputs.zdns_image}}'))" >> $GITHUB_ENV
-          echo "EXPLORER_TAG=$(echo $(([ -z '${{github.event.inputs.explorer_image}}' ] && echo 'latest') || echo '${{github.event.inputs.explorer_image}}'))" >> $GITHUB_ENV
 
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "TOKENOMICS_ALLOCATION_TESTS=$(echo $(([ -z 'TestAllocationRewards' ] && echo '') || echo 'TestAllocationRewards'))" >> $GITHUB_ENV
@@ -152,10 +146,7 @@ jobs:
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
           zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zsearch_image: staging
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -196,10 +187,7 @@ jobs:
           blobber_image: pr-1107
           validator_image: pr-1107
           zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zsearch_image: staging
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -238,10 +226,7 @@ jobs:
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
           zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zsearch_image: staging
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -281,10 +266,7 @@ jobs:
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
           zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zsearch_image: staging
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -324,10 +306,7 @@ jobs:
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
           zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zsearch_image: staging
           zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -367,10 +346,7 @@ jobs:
           blobber_image: ${{ env.BLOBBER_TAG }}
           validator_image: ${{ env.VALIDATOR_TAG }}
           zbox_image: ${{ env.ZBOX_TAG }}
-          zblock_image: ${{ env.ZBLOCK_TAG }}
           zdns_image: ${{ env.ZDNS_TAG }}
-          explorer_image: staging
-          zsearch_image: staging
           zbox_cli_branch: test/repair_complete
           zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
