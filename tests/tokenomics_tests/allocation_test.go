@@ -80,7 +80,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 			"data":   1,
 			"lock":   2,
 			"parity": 1,
-			"expire": "5m",
 		}))
 		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
 
@@ -164,7 +163,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 			"data":   1,
 			"lock":   2,
 			"parity": 1,
-			"expire": "5m",
 		}))
 		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
 
@@ -242,7 +240,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 			"data":   1,
 			"lock":   2,
 			"parity": 1,
-			"expire": "5m",
 		}))
 		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
 
@@ -375,7 +372,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 			"data":   1,
 			"tokens": 99,
 			"parity": 1,
-			"expire": "10m",
 		})
 		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
 
@@ -471,7 +467,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 			"data":   1,
 			"tokens": 99,
 			"parity": 1,
-			"expire": "10m",
 		})
 		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
 

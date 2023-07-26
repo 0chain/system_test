@@ -74,7 +74,6 @@ func TestBlobberReadReward(testSetup *testing.T) {
 			"tokens": 1,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
 		})
 
 		remotepath := "/dir/"
@@ -145,7 +144,6 @@ func TestBlobberReadReward(testSetup *testing.T) {
 			"tokens": 1,
 			"data":   1,
 			"parity": 1,
-			"expire": "10m",
 		})
 
 		remotepath := "/dir/"

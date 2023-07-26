@@ -57,7 +57,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "5m",
 		})
 
 		// Uploading 10% of allocation
@@ -103,7 +102,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "5m",
 		})
 
 		// Uploading 10% of allocation
@@ -157,7 +155,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"tokens": 99,
 				"data":   1,
 				"parity": 1,
-				"expire": "5m",
 			})
 
 			allocationIDs = append(allocationIDs, allocationId)
@@ -217,7 +214,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"tokens": 99,
 				"data":   1,
 				"parity": 1,
-				"expire": "20m",
 			})
 
 			allocationIDs = append(allocationIDs, allocationId)
@@ -281,7 +277,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"tokens": 99,
 				"data":   1,
 				"parity": 1,
-				"expire": "20m",
 			})
 			allocationIDs = append(allocationIDs, allocationId)
 

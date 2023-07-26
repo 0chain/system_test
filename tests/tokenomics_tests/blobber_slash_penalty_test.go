@@ -72,7 +72,6 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 			"tokens": 1,
 			"data":   1,
 			"parity": 1,
-			"expire": "20m",
 		})
 
 		remotepath := "/dir/"

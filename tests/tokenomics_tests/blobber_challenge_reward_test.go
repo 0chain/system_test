@@ -96,7 +96,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "5m",
 		})
 
 		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
@@ -173,7 +172,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "5m",
 		})
 
 		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
@@ -242,7 +240,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "5m",
 		})
 
 		// Uploading 10% of allocation
@@ -319,7 +316,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "5m",
 		})
 
 		// Uploading 10% of allocation
@@ -434,7 +430,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"tokens": 99,
 			"data":   1,
 			"parity": 1,
-			"expire": "5m",
 		})
 
 		// Uploading 10% of allocation
