@@ -58,7 +58,7 @@ type Allocation struct {
 	Owner          string    `json:"owner_id"`
 	OwnerPublicKey string    `json:"owner_public_key"`
 	Payer          string    `json:"payer_id"`
-	MinLockDemand  int64     `json:"min_lock_demand"`
+	MinLockDemand  float64   `json:"min_lock_demand"`
 	Blobbers       []Blobber `json:"blobbers"`
 	// Stats          *AllocationStats          `json:"stats"`
 	TimeUnit    time.Duration `json:"time_unit"`
@@ -585,6 +585,7 @@ type Challenges struct {
 	AllocationRoot string            `json:"allocation_root"`
 	BlobberID      string            `json:"blobber_id"`
 	Responded      int64             `json:"responded"`
+	RoundCreatedAt int64             `json:"round_created_at"`
 }
 
 type Transaction struct {
