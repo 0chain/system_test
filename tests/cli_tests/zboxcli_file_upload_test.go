@@ -329,7 +329,6 @@ func TestUpload(testSetup *testing.T) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
-			"expire": "10m",
 		})
 
 		output, err := cliutils.RunCommand(t, "wget http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4 -O test_video.mp4", 3, 2*time.Second)
@@ -357,9 +356,8 @@ func TestUpload(testSetup *testing.T) {
 		}
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"lock":   50,
-			"expire": "30m",
+			"size": allocSize,
+			"lock": 50,
 		})
 
 		filename := generateRandomTestFileName(t)
@@ -708,7 +706,7 @@ func TestUpload(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		require.Equal(t, "Error: remotepath flag is missing", output[0])
+		require.Equal(t, "Error: multiuploadjson or remotepath/localpath flag is missing", output[0])
 	})
 
 	t.Run("Upload File longer than 100 chars should fail", func(t *test.SystemTest) {
@@ -900,7 +898,6 @@ func TestUpload(testSetup *testing.T) {
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
 				"size":   allocSize,
 				"tokens": 9,
-				"expire": "10m",
 			})
 			downloadVideo := "wget " + videoLink + " -O " + videoName + "." + videoFormat
 			output, err := cliutils.RunCommand(t, downloadVideo, 3, 2*time.Second)
