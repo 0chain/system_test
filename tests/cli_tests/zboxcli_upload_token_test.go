@@ -32,9 +32,8 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
 
 		allocParam := createParams(map[string]interface{}{
-			"lock":   balance,
-			"size":   10000,
-			"expire": "10m",
+			"lock": balance,
+			"size": 10000,
 		})
 		output, err = createNewAllocation(t, configPath, allocParam)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -66,9 +65,8 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
 
 		allocParam := createParams(map[string]interface{}{
-			"lock":   balance,
-			"size":   10000,
-			"expire": "10m",
+			"lock": balance,
+			"size": 10000,
 		})
 		output, err = createNewAllocation(t, configPath, allocParam)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))

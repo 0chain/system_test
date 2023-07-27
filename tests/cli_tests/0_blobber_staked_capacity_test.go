@@ -160,7 +160,6 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 		"cost":        "",
 		"data":        3,
 		"parity":      3,
-		"expire":      "10m",
 		"size":        allocSize,
 		"read_price":  "0-0.1",
 		"write_price": "0-0.1",
@@ -170,16 +169,17 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 	allocationCost, err := getAllocationCost(output[0])
 	require.Nil(t, err, "could not get allocation cost")
 
-	_, err = executeFaucetWithTokens(t, configPath, allocationCost)
-	require.Nil(t, err, "Error executing faucet with tokens", err)
+	for i := float64(0); i <= (allocationCost/9999)+1; i++ {
+		_, err = executeFaucetWithTokens(t, configPath, 9999)
+		require.Nil(t, err, "Error executing faucet with tokens", err)
+	}
 
 	// Create an allocation of maximum size that all blobbers can honor.
 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 		"size":        allocSize,
 		"data":        3,
 		"parity":      3,
-		"lock":        allocationCost + 1,
-		"expire":      "5m",
+		"lock":        allocationCost,
 		"read_price":  "0-0.1",
 		"write_price": "0-0.1",
 	}))
