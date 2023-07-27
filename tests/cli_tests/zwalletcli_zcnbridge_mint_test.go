@@ -19,24 +19,29 @@ const (
 // todo: enable tests
 func TestBridgeMint(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till authorizers are re-enabled")
 	t.SetSmokeTests("Mint WZCN tokens")
 
 	t.Parallel()
 
 	t.Run("Mint WZCN tokens", func(t *test.SystemTest) {
-		t.Skip("Skipping due to deployment issue")
+		output, err := burnZcn(t, "1", false)
+		require.NotNil(t, err)
+		require.Greater(t, len(output), 0)
+		require.NotContains(t, output[len(output)-1], "Transaction completed successfully:")
 
-		output, err := mintWrappedZcnTokens(t, false)
+		output, err = mintWrappedZcnTokens(t, false)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification [OK]")
 	})
 
 	t.Run("Mint ZCN tokens", func(t *test.SystemTest) {
-		t.Skip("Skipping due to deployment issue")
+		output, err := burnEth(t, "1", true)
+		require.Nil(t, err)
+		require.Greater(t, len(output), 0)
+		require.Contains(t, output[len(output)-1], "Verification:")
 
-		output, err := mintZcnTokens(t, false)
+		output, err = mintZcnTokens(t, false)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification [OK]")
