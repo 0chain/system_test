@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain S3 CLI System tests [fix_unskip-cli-tests/33ff948d] ran against [dev-6.devnet-0chain.net] at [2023-07-27_09.28.24]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain S3 CLI System tests [fix_unskip-cli-tests/33ff948d] ran against [dev-6.devnet-0chain.net] at [2023-07-27_09.28.24]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>33</strong>Duration: <strong>3ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>33</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">July 27, 2023 09:55:30</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+                <div class="testResultGroup  " id="17"></div>
+            
+                <div class="testResultGroup  " id="18"></div>
+            
+                <div class="testResultGroup  " id="19"></div>
+            
+                <div class="testResultGroup  " id="20"></div>
+            
+                <div class="testResultGroup  " id="21"></div>
+            
+                <div class="testResultGroup  " id="22"></div>
+            
+                <div class="testResultGroup  " id="23"></div>
+            
+                <div class="testResultGroup  " id="24"></div>
+            
+                <div class="testResultGroup  " id="25"></div>
+            
+                <div class="testResultGroup  " id="26"></div>
+            
+                <div class="testResultGroup  " id="27"></div>
+            
+                <div class="testResultGroup  " id="28"></div>
+            
+                <div class="testResultGroup  " id="29"></div>
+            
+                <div class="testResultGroup  " id="30"></div>
+            
+                <div class="testResultGroup  " id="31"></div>
+            
+                <div class="testResultGroup  " id="32"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":163.44,"Output":["","--- PASS: Test0S3Migration (163.44s)",""],"Passed":true,"Skipped":false,"TestFileName":"0_s3mgrt_migrate_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration/Should_fail_when_access_and_secret_key_invalid","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.2,"Output":["","    0_s3mgrt_migrate_test.go:208: Test case [Should fail when access and secret key invalid] scheduled at [07-27-2023 09:55:04] \n","    system_test_framework.go:149: Test case [Should fail when access and secret key invalid] start at [07-27-2023 09:55:04] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3Migration-Should_fail_when_access_and_secret_key_invalid_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  7f51b48732481fb5aaca97f5a07aeaac626f150a3b8cce131cbe6fd888aa3613]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:208: Test case [Should fail when access and secret key invalid] exit at [07-27-2023 09:55:16]\n","--- PASS: Test0S3Migration/Should_fail_when_access_and_secret_key_invalid (12.20s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration/Should_fail_when_access_and_secret_key_missing","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.3,"Output":["","    0_s3mgrt_migrate_test.go:227: Test case [Should fail when access and secret key missing] scheduled at [07-27-2023 09:55:16] \n","    system_test_framework.go:149: Test case [Should fail when access and secret key missing] start at [07-27-2023 09:55:16] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3Migration-Should_fail_when_access_and_secret_key_missing_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  768cc128818c9b7580ec076170f4b788c059886260a97b1a2e17a2b40a3f3129]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:227: Test case [Should fail when access and secret key missing] exit at [07-27-2023 09:55:29]\n","--- PASS: Test0S3Migration/Should_fail_when_access_and_secret_key_missing (13.30s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration/Should_fail_when_access_key_invalid","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.04,"Output":["","    0_s3mgrt_migrate_test.go:134: Test case [Should fail when access key invalid] scheduled at [07-27-2023 09:54:15] \n","    system_test_framework.go:149: Test case [Should fail when access key invalid] start at [07-27-2023 09:54:15] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3Migration-Should_fail_when_access_key_invalid_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  dea38ad33e5d6fcd3fd117f5cfbbdff56200179bd16f80da3430a255cdd125ec]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:134: Test case [Should fail when access key invalid] exit at [07-27-2023 09:54:28]\n","--- PASS: Test0S3Migration/Should_fail_when_access_key_invalid (13.04s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration/Should_fail_when_access_key_missing","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.47,"Output":["","    0_s3mgrt_migrate_test.go:153: Test case [Should fail when access key missing] scheduled at [07-27-2023 09:54:28] \n","    system_test_framework.go:149: Test case [Should fail when access key missing] start at [07-27-2023 09:54:28] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3Migration-Should_fail_when_access_key_missing_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  22613e1c07e41c82ac05dc1b42a0da507f9fc69bb8ecdca42819dde8dfc744eb]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:153: Test case [Should fail when access key missing] exit at [07-27-2023 09:54:40]\n","--- PASS: Test0S3Migration/Should_fail_when_access_key_missing (12.47s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration/Should_fail_when_allocation_flag_missing","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":15.52,"Output":["","    0_s3mgrt_migrate_test.go:116: Test case [Should fail when allocation flag missing] scheduled at [07-27-2023 09:53:59] \n","    system_test_framework.go:149: Test case [Should fail when allocation flag missing] start at [07-27-2023 09:53:59] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3Migration-Should_fail_when_allocation_flag_missing_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  1ebbe706f9cbd0957a9a489ea2b00b1b19fb91b06898775ffda1c6ceb6f670c8]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:116: Test case [Should fail when allocation flag missing] exit at [07-27-2023 09:54:15]\n","--- PASS: Test0S3Migration/Should_fail_when_allocation_flag_missing (15.52s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration/Should_fail_when_bucket_does_not_exist","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12,"Output":["","    0_s3mgrt_migrate_test.go:79: Test case [Should fail when bucket does not exist] scheduled at [07-27-2023 09:53:35] \n","    system_test_framework.go:149: Test case [Should fail when bucket does not exist] start at [07-27-2023 09:53:35] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3Migration-Should_fail_when_bucket_does_not_exist_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  fe8c328021e64d0a5baa89b11243cbb865e8ebc006bce18517b5bab621569265]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:79: Test case [Should fail when bucket does not exist] exit at [07-27-2023 09:53:47]\n","--- PASS: Test0S3Migration/Should_fail_when_bucket_does_not_exist (12.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration/Should_fail_when_bucket_flag_missing","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.42,"Output":["","    0_s3mgrt_migrate_test.go:98: Test case [Should fail when bucket flag missing] scheduled at [07-27-2023 09:53:47] \n","    system_test_framework.go:149: Test case [Should fail when bucket flag missing] start at [07-27-2023 09:53:47] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3Migration-Should_fail_when_bucket_flag_missing_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  2b0e332df0bf2f0a4690e8568b5894eff9706debe81882f92351c5c70e35f3b3]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:98: Test case [Should fail when bucket flag missing] exit at [07-27-2023 09:53:59]\n","--- PASS: Test0S3Migration/Should_fail_when_bucket_flag_missing (12.42s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration/Should_fail_when_bucket_too_large_for_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.42,"Output":["","    0_s3mgrt_migrate_test.go:60: Test case [Should fail when bucket too large for allocation] scheduled at [07-27-2023 09:53:14] \n","    system_test_framework.go:149: Test case [Should fail when bucket too large for allocation] start at [07-27-2023 09:53:14] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3Migration-Should_fail_when_bucket_too_large_for_allocation_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  125722e4d639383c9c1be5b5ebe1a219f50fb3888fe6fc1fdc3cb75a91a711a6]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:60: Test case [Should fail when bucket too large for allocation] exit at [07-27-2023 09:53:35]\n","--- PASS: Test0S3Migration/Should_fail_when_bucket_too_large_for_allocation (21.42s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration/Should_fail_when_secret_key_invalid","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12,"Output":["","    0_s3mgrt_migrate_test.go:171: Test case [Should fail when secret key invalid] scheduled at [07-27-2023 09:54:40] \n","    system_test_framework.go:149: Test case [Should fail when secret key invalid] start at [07-27-2023 09:54:40] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3Migration-Should_fail_when_secret_key_invalid_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  343b59ac942cb3a425db055705d764953b5583249e2fe89647ca90d85611e376]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:171: Test case [Should fail when secret key invalid] exit at [07-27-2023 09:54:52]\n","--- PASS: Test0S3Migration/Should_fail_when_secret_key_invalid (12.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration/Should_fail_when_secret_key_missing","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.48,"Output":["","    0_s3mgrt_migrate_test.go:190: Test case [Should fail when secret key missing] scheduled at [07-27-2023 09:54:52] \n","    system_test_framework.go:149: Test case [Should fail when secret key missing] start at [07-27-2023 09:54:52] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3Migration-Should_fail_when_secret_key_missing_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  1ec1d6ed0729c546be474d31077c6881d73de6871483229098884b55fd1af24c]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:190: Test case [Should fail when secret key missing] exit at [07-27-2023 09:55:04]\n","--- PASS: Test0S3Migration/Should_fail_when_secret_key_missing (11.48s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration/Should_migrate_empty_bucket_successfully","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.13,"Output":["","    0_s3mgrt_migrate_test.go:41: Test case [Should migrate empty bucket successfully] scheduled at [07-27-2023 09:53:01] \n","    system_test_framework.go:149: Test case [Should migrate empty bucket successfully] start at [07-27-2023 09:53:01] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3Migration-Should_migrate_empty_bucket_successfully_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  aa5ea6e0b25c82c349aa30d4bf16c9ac3fd5dd09d78913e06c5ff567cdb019a3]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:41: Test case [Should migrate empty bucket successfully] exit at [07-27-2023 09:53:14]\n","--- PASS: Test0S3Migration/Should_migrate_empty_bucket_successfully (12.13s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3Migration/Should_migrate_existing_bucket_successfully","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":15.48,"Output":["","    0_s3mgrt_migrate_test.go:22: Test case [Should migrate existing bucket successfully] scheduled at [07-27-2023 09:52:46] \n","    system_test_framework.go:149: Test case [Should migrate existing bucket successfully] start at [07-27-2023 09:52:46] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3Migration-Should_migrate_existing_bucket_successfully_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  ef39396bb8c87be7301055b774b01a817a366bd32f23714f6c7bf7f1a6fd1e63]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:22: Test case [Should migrate existing bucket successfully] exit at [07-27-2023 09:53:01]\n","--- PASS: Test0S3Migration/Should_migrate_existing_bucket_successfully (15.48s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternate","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":261.64,"Output":["","    system_test_framework.go:70: Test setup [Setup s3 bucket with relevant file] scheduled at [07-27-2023 09:48:24] \n","    system_test_framework.go:80: Test setup [Setup s3 bucket with relevant file] start at [07-27-2023 09:48:24] \n","    system_test_framework.go:93: Test setup [Setup s3 bucket with relevant file] exit at [07-27-2023 09:48:25]\n","    0_s3mgrt_migrate_alternate_test.go:60: Failed to cleanup bucket:  AccessDenied: Access Denied\n","        \tstatus code: 403, request id: AZAH4C82HX0R5ZQT, host id: bIirLN3nySiHimG5j6frkhTj3TiNUKS5nrN6P9DwvZgtmrbrcTi8Z7AM73fkAkGuy+sGBGfEu1Y=\n","--- PASS: Test0S3MigrationAlternate (261.64s)",""],"Passed":true,"Skipped":false,"TestFileName":"0_s3mgrt_migrate_alternate_test.go","TestFunctionDetail":{"Line":32,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternate/Should_error_out_if_workdir_is_not_default_and_not_empty","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.45,"Output":["","    0_s3mgrt_migrate_alternate_test.go:298: Test case [Should error out if workdir is not default and not empty] scheduled at [07-27-2023 09:52:34] \n","    system_test_framework.go:149: Test case [Should error out if workdir is not default and not empty] start at [07-27-2023 09:52:34] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternate-Should_error_out_if_workdir_is_not_default_and_not_empty_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  9cea6e246ca1f5219ef0d7cb43cbfd13e4dd2d4ea6d577be191a5516dbd25b8c]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_alternate_test.go:394: Directory created successfully:  /root/actions-runner6/_work/system_test/system_test/tests/cli_tests/dir146_1690444365824450214\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_alternate_test.go:298: Test case [Should error out if workdir is not default and not empty] exit at [07-27-2023 09:52:45]\n","--- PASS: Test0S3MigrationAlternate/Should_error_out_if_workdir_is_not_default_and_not_empty (11.45s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternate/Should_migrate_as_copy_bucket_successfully","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":56.6,"Output":["","    0_s3mgrt_migrate_alternate_test.go:119: Test case [Should migrate as copy bucket successfully] scheduled at [07-27-2023 09:49:20] \n","    system_test_framework.go:149: Test case [Should migrate as copy bucket successfully] start at [07-27-2023 09:49:20] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternate-Should_migrate_as_copy_bucket_successfully_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  0631b45a230df91cf93f897a0b91da7e575e33fba1640c09e1d1e45b6fbeec9d]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_alternate_test.go:119: Test case [Should migrate as copy bucket successfully] exit at [07-27-2023 09:50:16]\n","--- PASS: Test0S3MigrationAlternate/Should_migrate_as_copy_bucket_successfully (56.60s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternate/Should_migrate_existing_bucket_successfully_with_encryption_on","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.85,"Output":["","    0_s3mgrt_migrate_alternate_test.go:160: Test case [Should migrate existing bucket successfully with encryption on] scheduled at [07-27-2023 09:50:16] \n","    system_test_framework.go:149: Test case [Should migrate existing bucket successfully with encryption on] start at [07-27-2023 09:50:16] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternate-Should_migrate_existing_bucket_successfully_with_encryption_on_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  216c5b735a6a3b029f21d0de65a7e2d947958627978635dc78cbbc0762ed26b7]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate_test.go:160: Test case [Should migrate existing bucket successfully with encryption on] exit at [07-27-2023 09:50:43]\n","--- PASS: Test0S3MigrationAlternate/Should_migrate_existing_bucket_successfully_with_encryption_on (26.85s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternate/Should_migrate_existing_bucket_successfully_with_skip_0_and_replace_existing_file","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":28.7,"Output":["","    0_s3mgrt_migrate_alternate_test.go:64: Test case [Should migrate existing bucket successfully with skip 0 and replace existing file] scheduled at [07-27-2023 09:48:25] \n","    system_test_framework.go:149: Test case [Should migrate existing bucket successfully with skip 0 and replace existing file] start at [07-27-2023 09:48:25] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternate-Should_migrate_existing_bucket_successfully_with_skip_0_and_replace_existing_file_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  db937ac4c7f00fae060d01738ecf5c86b491181f9698c4259bd807e365878479]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate_test.go:64: Test case [Should migrate existing bucket successfully with skip 0 and replace existing file] exit at [07-27-2023 09:48:53]\n","--- PASS: Test0S3MigrationAlternate/Should_migrate_existing_bucket_successfully_with_skip_0_and_replace_existing_file (28.70s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternate/Should_migrate_existing_bucket_to_specified_path_successfully_with_encryption_on","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.62,"Output":["","    0_s3mgrt_migrate_alternate_test.go:91: Test case [Should migrate existing bucket to specified path successfully with encryption on] scheduled at [07-27-2023 09:48:53] \n","    system_test_framework.go:149: Test case [Should migrate existing bucket to specified path successfully with encryption on] start at [07-27-2023 09:48:53] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternate-Should_migrate_existing_bucket_to_specified_path_successfully_with_encryption_on_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3ee33bc22af0243da7b0b13e31f89c04ea3576f13ef36be5b7fc5edade961fd3]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate_test.go:91: Test case [Should migrate existing bucket to specified path successfully with encryption on] exit at [07-27-2023 09:49:20]\n","--- PASS: Test0S3MigrationAlternate/Should_migrate_existing_bucket_to_specified_path_successfully_with_encryption_on (26.62s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternate/Should_migrate_successfully_and_delete_the_s3_bucket_file_and_use_custom_workdir","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":29.46,"Output":["","    0_s3mgrt_migrate_alternate_test.go:265: Test case [Should migrate successfully and delete the s3 bucket file and use custom workdir] scheduled at [07-27-2023 09:52:04] \n","    system_test_framework.go:149: Test case [Should migrate successfully and delete the s3 bucket file and use custom workdir] start at [07-27-2023 09:52:04] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternate-Should_migrate_successfully_and_delete_the_s3_bucket_file_and_use_custom_workdir_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  ecb7ddc4227b62b5bfa06d0307fd312025ea20456aadbfbfa6c986d281fc9d89]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_alternate_test.go:394: Directory created successfully:  /root/actions-runner6/_work/system_test/system_test/tests/cli_tests/dir885_1690444337373346031\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate_test.go:265: Test case [Should migrate successfully and delete the s3 bucket file and use custom workdir] exit at [07-27-2023 09:52:34]\n","--- PASS: Test0S3MigrationAlternate/Should_migrate_successfully_and_delete_the_s3_bucket_file_and_use_custom_workdir (29.46s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternate/Should_migrate_successfully_with_duplicate_files_with_skip_flag_==_2","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.66,"Output":["","    0_s3mgrt_migrate_alternate_test.go:206: Test case [Should migrate successfully with duplicate files with skip flag == 2] scheduled at [07-27-2023 09:51:11] \n","    system_test_framework.go:149: Test case [Should migrate successfully with duplicate files with skip flag == 2] start at [07-27-2023 09:51:11] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternate-Should_migrate_successfully_with_duplicate_files_with_skip_flag_==_2_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  870f51e595c48013a15c8da2cf5f32b697e6fe09c49196a310f551eef715bc25]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate_test.go:206: Test case [Should migrate successfully with duplicate files with skip flag == 2] exit at [07-27-2023 09:51:38]\n","--- PASS: Test0S3MigrationAlternate/Should_migrate_successfully_with_duplicate_files_with_skip_flag_==_2 (26.66s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternate/Should_migrate_successfully_with_duplication_files__with_skip_flag_==_2_and_dup-suffix","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.89,"Output":["","    0_s3mgrt_migrate_alternate_test.go:235: Test case [Should migrate successfully with duplication files  with skip flag == 2 and dup-suffix] scheduled at [07-27-2023 09:51:38] \n","    system_test_framework.go:149: Test case [Should migrate successfully with duplication files  with skip flag == 2 and dup-suffix] start at [07-27-2023 09:51:38] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternate-Should_migrate_successfully_with_duplication_files__with_skip_flag_==_2_and_dup-suffix_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  bac83de0cf39b9cabd639fd59f731f201264283b4de12d12bffa07016646a634]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate_test.go:235: Test case [Should migrate successfully with duplication files  with skip flag == 2 and dup-suffix] exit at [07-27-2023 09:52:04]\n","--- PASS: Test0S3MigrationAlternate/Should_migrate_successfully_with_duplication_files__with_skip_flag_==_2_and_dup-suffix (26.89s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternate/Should_skip_migration_with_skip_flag_==_1_and_migartion_should_be_skipped","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.66,"Output":["","    0_s3mgrt_migrate_alternate_test.go:186: Test case [Should skip migration with skip flag == 1 and migartion should be skipped] scheduled at [07-27-2023 09:50:43] \n","    system_test_framework.go:149: Test case [Should skip migration with skip flag == 1 and migartion should be skipped] start at [07-27-2023 09:50:43] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternate-Should_skip_migration_with_skip_flag_==_1_and_migartion_should_be_skipped_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  7b98bdf4583cf7779664f530b2f31b01c0a7d928f326a13a4f12395e9c77fa04]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_alternate_test.go:186: Test case [Should skip migration with skip flag == 1 and migartion should be skipped] exit at [07-27-2023 09:51:11]\n","--- PASS: Test0S3MigrationAlternate/Should_skip_migration_with_skip_flag_==_1_and_migartion_should_be_skipped (27.66s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternatePart2","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":217.95,"Output":["","    system_test_framework.go:70: Test setup [Setup s3 bucket with relevant file] scheduled at [07-27-2023 09:44:46] \n","    system_test_framework.go:80: Test setup [Setup s3 bucket with relevant file] start at [07-27-2023 09:44:46] \n","    system_test_framework.go:93: Test setup [Setup s3 bucket with relevant file] exit at [07-27-2023 09:44:47]\n","--- PASS: Test0S3MigrationAlternatePart2 (217.95s)",""],"Passed":true,"Skipped":false,"TestFileName":"0_s3mgrt_migrate_alternate2_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternatePart2/Should_migrate_existing_bucket_successfully_with_concurrency==4_and_working_dir_current_dir","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.61,"Output":["","    0_s3mgrt_migrate_alternate2_test.go:44: Test case [Should migrate existing bucket successfully with concurrency==4 and working dir current dir] scheduled at [07-27-2023 09:44:47] \n","    system_test_framework.go:149: Test case [Should migrate existing bucket successfully with concurrency==4 and working dir current dir] start at [07-27-2023 09:44:47] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternatePart2-Should_migrate_existing_bucket_successfully_with_concurrency==4_and_working_dir_current_dir_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  20704633562c345ab34d8107327cc16d9dd1ad87f2b36d7bc92fc9366c95c8ee]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_alternate_test.go:394: Directory created successfully:  /root/actions-runner6/_work/system_test/system_test/tests/cli_tests/dir70_1690443898823411761\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate2_test.go:44: Test case [Should migrate existing bucket successfully with concurrency==4 and working dir current dir] exit at [07-27-2023 09:45:14]\n","--- PASS: Test0S3MigrationAlternatePart2/Should_migrate_existing_bucket_successfully_with_concurrency==4_and_working_dir_current_dir (26.61s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternatePart2/Should_migrate_existing_bucket_successfully_with_files_staring_with_given_prefix","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":14.12,"Output":["","    0_s3mgrt_migrate_alternate2_test.go:137: Test case [Should migrate existing bucket successfully with files staring with given prefix] scheduled at [07-27-2023 09:45:54] \n","    system_test_framework.go:149: Test case [Should migrate existing bucket successfully with files staring with given prefix] start at [07-27-2023 09:45:54] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternatePart2-Should_migrate_existing_bucket_successfully_with_files_staring_with_given_prefix_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  8c8968a7923e2eec1eabd844576f035010c5c25633e9be4c168d62b65969897d]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate2_test.go:137: Test case [Should migrate existing bucket successfully with files staring with given prefix] exit at [07-27-2023 09:46:09]\n","--- PASS: Test0S3MigrationAlternatePart2/Should_migrate_existing_bucket_successfully_with_files_staring_with_given_prefix (14.12s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternatePart2/Should_migrate_existing_bucket_successfully_with_newer_than_prefix","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":14.08,"Output":["","    0_s3mgrt_migrate_alternate2_test.go:76: Test case [Should migrate existing bucket successfully with newer than prefix] scheduled at [07-27-2023 09:45:14] \n","    system_test_framework.go:149: Test case [Should migrate existing bucket successfully with newer than prefix] start at [07-27-2023 09:45:14] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternatePart2-Should_migrate_existing_bucket_successfully_with_newer_than_prefix_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  0fe57e4719c4e02532f5426d1a903bd2f255965e56b6822f6b49e95b3da9abc2]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate2_test.go:76: Test case [Should migrate existing bucket successfully with newer than prefix] exit at [07-27-2023 09:45:28]\n","--- PASS: Test0S3MigrationAlternatePart2/Should_migrate_existing_bucket_successfully_with_newer_than_prefix (14.08s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternatePart2/Should_migrate_existing_bucket_successfully_with_older_than_prefix","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.76,"Output":["","    0_s3mgrt_migrate_alternate2_test.go:110: Test case [Should migrate existing bucket successfully with older than prefix] scheduled at [07-27-2023 09:45:28] \n","    system_test_framework.go:149: Test case [Should migrate existing bucket successfully with older than prefix] start at [07-27-2023 09:45:28] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternatePart2-Should_migrate_existing_bucket_successfully_with_older_than_prefix_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  285c77459d044b57738ddc6e0856f49d4ade799575b69d6462166ed4fa265a80]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate2_test.go:110: Test case [Should migrate existing bucket successfully with older than prefix] exit at [07-27-2023 09:45:54]\n","--- PASS: Test0S3MigrationAlternatePart2/Should_migrate_existing_bucket_successfully_with_older_than_prefix (26.76s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternatePart2/Should_not_pass_when_filename_size_is_more_than_100_character","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.77,"Output":["","    0_s3mgrt_migrate_alternate2_test.go:339: Test case [Should not pass when filename size is more than 100 character] scheduled at [07-27-2023 09:47:58] \n","    system_test_framework.go:149: Test case [Should not pass when filename size is more than 100 character] start at [07-27-2023 09:47:58] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternatePart2-Should_not_pass_when_filename_size_is_more_than_100_character_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  0170dd2a0058dbc60da39ccd1b3d8924061e3c04e1cfa13e4e30588b4e3263c2]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    0_s3mgrt_migrate_alternate2_test.go:339: Test case [Should not pass when filename size is more than 100 character] exit at [07-27-2023 09:48:24]\n","--- PASS: Test0S3MigrationAlternatePart2/Should_not_pass_when_filename_size_is_more_than_100_character (26.77s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternatePart2/Should_pass_concurrency_flag_is_set_to_20","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":28,"Output":["","    0_s3mgrt_migrate_alternate2_test.go:269: Test case [Should pass concurrency flag is set to 20] scheduled at [07-27-2023 09:47:03] \n","    system_test_framework.go:149: Test case [Should pass concurrency flag is set to 20] start at [07-27-2023 09:47:03] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternatePart2-Should_pass_concurrency_flag_is_set_to_20_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3c0c4aaf84ff2ed95fe430c5d4fa9042d80ab91f0aa9699e0af7d1600eca8363]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate2_test.go:269: Test case [Should pass concurrency flag is set to 20] exit at [07-27-2023 09:47:31]\n","--- PASS: Test0S3MigrationAlternatePart2/Should_pass_concurrency_flag_is_set_to_20 (28.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternatePart2/Should_pass_retry_flag_is_set_to_4","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":26.89,"Output":["","    0_s3mgrt_migrate_alternate2_test.go:304: Test case [Should pass retry flag is set to 4] scheduled at [07-27-2023 09:47:31] \n","    system_test_framework.go:149: Test case [Should pass retry flag is set to 4] start at [07-27-2023 09:47:31] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternatePart2-Should_pass_retry_flag_is_set_to_4_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  8b8a1f81bf98f7f54a7ddf23dfa9d2a3a3fa05eb0c6627bae576b8382371c115]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate2_test.go:304: Test case [Should pass retry flag is set to 4] exit at [07-27-2023 09:47:58]\n","--- PASS: Test0S3MigrationAlternatePart2/Should_pass_retry_flag_is_set_to_4 (26.89s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternatePart2/Should_pass_when_access_key_and_secret_key_is_missing_but_aws-cred-path_path_is_given","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.03,"Output":["","    0_s3mgrt_migrate_alternate2_test.go:221: Test case [Should pass when access key and secret key is missing but aws-cred-path path is given] scheduled at [07-27-2023 09:46:36] \n","    system_test_framework.go:149: Test case [Should pass when access key and secret key is missing but aws-cred-path path is given] start at [07-27-2023 09:46:36] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternatePart2-Should_pass_when_access_key_and_secret_key_is_missing_but_aws-cred-path_path_is_given_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  5c50c137ba0f824c137962effbef85746f2e2d0dee861584c414f71e99da15dd]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate2_test.go:221: Test case [Should pass when access key and secret key is missing but aws-cred-path path is given] exit at [07-27-2023 09:47:03]\n","--- PASS: Test0S3MigrationAlternatePart2/Should_pass_when_access_key_and_secret_key_is_missing_but_aws-cred-path_path_is_given (27.03s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test0S3MigrationAlternatePart2/Should_pass_when_allocation_flag_missing_but_allocation_path_is_given","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.16,"Output":["","    0_s3mgrt_migrate_alternate2_test.go:181: Test case [Should pass when allocation flag missing but allocation path is given] scheduled at [07-27-2023 09:46:09] \n","    system_test_framework.go:149: Test case [Should pass when allocation flag missing but allocation path is given] start at [07-27-2023 09:46:09] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test0S3MigrationAlternatePart2-Should_pass_when_allocation_flag_missing_but_allocation_path_is_given_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  4f85991803c123648eeffaa6cca95fa2ce77ff72a8799f4ef78f75c586c0eee2]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    0_s3mgrt_migrate_test.go:246: Migrating S3 bucket to Zus...\n","    zboxcli_file_stats_test.go:493: Getting file stats...\n","    0_s3mgrt_migrate_alternate2_test.go:181: Test case [Should pass when allocation flag missing but allocation path is given] exit at [07-27-2023 09:46:36]\n","--- PASS: Test0S3MigrationAlternatePart2/Should_pass_when_allocation_flag_missing_but_allocation_path_is_given (27.16s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
