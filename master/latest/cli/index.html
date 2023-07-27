@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>0Chain System test suite [master/6b0c2ae0] ran against [dev-1.devnet-0chain.net] at [2023-07-27_01.10.51]</title>
+    <title>0Chain System test suite [master/6b0c2ae0] ran against [dev-6.devnet-0chain.net] at [2023-07-27_04.26.50]</title>
     <style type="text/css">
         body {
             font-family: sans-serif;
@@ -234,16 +234,16 @@
 </head>
 <body>
 <div class="pageHeader">
-    <span class="projectTitle">0Chain System test suite [master/6b0c2ae0] ran against [dev-1.devnet-0chain.net] at [2023-07-27_01.10.51]</span>
+    <span class="projectTitle">0Chain System test suite [master/6b0c2ae0] ran against [dev-6.devnet-0chain.net] at [2023-07-27_04.26.50]</span>
     <div class="testStats">
-        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>7</strong>Duration: <strong>0s</strong>
-        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>2</strong>
-        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>5</strong>
-        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>2</strong>Duration: <strong>0s</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>0</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>1</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>1</strong>
         </span>
     </div>
     <span class="testGroupsTitle">Test Groups:</span>
-    <span class="testExecutionDate">July 27, 2023 01:29:48</span>
+    <span class="testExecutionDate">July 27, 2023 05:54:10</span>
 </div>
 <div class="testReportContainer">
     <div class="cardContainer">
@@ -251,17 +251,7 @@
             
                 <div class="testResultGroup  skipped" id="0"></div>
             
-                <div class="testResultGroup  " id="1"></div>
-            
-                <div class="testResultGroup  skipped" id="2"></div>
-            
-                <div class="testResultGroup  skipped" id="3"></div>
-            
-                <div class="testResultGroup  " id="4"></div>
-            
-                <div class="testResultGroup  skipped" id="5"></div>
-            
-                <div class="testResultGroup  skipped" id="6"></div>
+                <div class="testResultGroup failed " id="1"></div>
             
         </div>
     </div>
@@ -466,7 +456,7 @@ window.GoTestReport = function (elements) {
 
     
 
-    const data = [{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillBlobber","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    zboxcli_kill_blobber_test.go:22: skipping test; need to fix the test\n","--- SKIP: TestKillBlobber (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"zboxcli_kill_blobber_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillMiner","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.18,"Output":["","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestKillMiner_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  69dab456784d1a963260a97b25a6f4609b1d09aa0d06abd26f6d5e4fe7959abe]\n","    miner_block_rewards_test.go:421: getting sharder url...\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    miner_block_rewards_test.go:448: getting miner or sharder nodes...\n","--- PASS: TestKillMiner (3.18s)",""],"Passed":true,"Skipped":false,"TestFileName":"zzzwalletcli_kill_miner_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillMiner/Killed_miner_does_not_receive_rewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_framework.go:104: Test skipped as it is not a smoke test.\n","--- SKIP: TestKillMiner/Killed_miner_does_not_receive_rewards (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillMiner/kill_miner_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_framework.go:104: Test skipped as it is not a smoke test.\n","--- SKIP: TestKillMiner/kill_miner_by_non-smartcontract_owner_should_fail (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillSharder","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.22,"Output":["","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestKillSharder_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3be099011fe8090c9f5e52faa41ef8689e8ed53ea144a477edfbbf0427345367]\n","    miner_block_rewards_test.go:421: getting sharder url...\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    miner_block_rewards_test.go:448: getting miner or sharder nodes...\n","--- PASS: TestKillSharder (3.22s)",""],"Passed":true,"Skipped":false,"TestFileName":"zzwalletcli_kill_sharder_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillSharder/Killed_sharder_does_not_receive_rewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_framework.go:104: Test skipped as it is not a smoke test.\n","--- SKIP: TestKillSharder/Killed_sharder_does_not_receive_rewards (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillSharder/kill_sharder_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_framework.go:104: Test skipped as it is not a smoke test.\n","--- SKIP: TestKillSharder/kill_sharder_by_non-smartcontract_owner_should_fail (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+    const data = [{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillBlobber","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    zboxcli_kill_blobber_test.go:22: skipping test; need to fix the test\n","--- SKIP: TestKillBlobber (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"zboxcli_kill_blobber_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestKillSharder","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.33,"Output":["","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestKillSharder_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  694a7f95d78c58b24507003c4e058e73d074be87a7cdef2631345182409850c8]\n","    miner_block_rewards_test.go:421: getting sharder url...\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    miner_block_rewards_test.go:448: getting miner or sharder nodes...\n","    api_get_list.go:21: retry 1, with request http://dev-6.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getSharderList, Get \"http://dev-6.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getSharderList\": dial tcp 65.109.107.228:31102: connect: connection refused\n","    api_get_list.go:21: retry 2, with request http://dev-6.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getSharderList, Get \"http://dev-6.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getSharderList\": dial tcp 65.109.107.228:31102: connect: connection refused\n","    api_get_list.go:21: retry 3, with request http://dev-6.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getSharderList, Get \"http://dev-6.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getSharderList\": dial tcp 65.109.107.228:31102: connect: connection refused\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/api_get_list.go:26\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/miner_block_rewards_test.go:450\n","        \t            \t\t\t\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/zzwalletcli_kill_sharder_test.go:27\n","        \tError:      \tReceived unexpected error:\n","        \t            \twith request http://dev-6.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getSharderList, Get \"http://dev-6.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getSharderList\": dial tcp 65.109.107.228:31102: connect: connection refused\n","        \tTest:       \tTestKillSharder\n","        \tMessages:   \thttp://dev-6.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getSharderList failed after 3 retries\n","panic: runtime error: invalid memory address or nil pointer dereference [recovered]\n","\tpanic: runtime error: invalid memory address or nil pointer dereference\n","[signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0xa72dd0]\n","\n","goroutine 69 [running]:\n","testing.tRunner.func1.2({0xd08aa0, 0x14dd220})\n","\t/usr/local/go/src/testing/testing.go:1526 +0x24e\n","testing.tRunner.func1()\n","\t/usr/local/go/src/testing/testing.go:1529 +0x39f\n","panic({0xd08aa0, 0x14dd220})\n","\t/usr/local/go/src/runtime/panic.go:884 +0x213\n","github.com/0chain/system_test/tests/cli_tests.getNodeSlice(0x10e0248?, {0xdae4cd, 0xe}, {0xc00002ef00, 0x24})\n","\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/miner_block_rewards_test.go:451 +0x90\n","github.com/0chain/system_test/tests/cli_tests.TestKillSharder(0xc000602b60)\n","\t/root/actions-runner6/_work/system_test/system_test/tests/cli_tests/zzwalletcli_kill_sharder_test.go:27 +0x1d3\n","testing.tRunner(0xc000602b60, 0xe39800)\n","\t/usr/local/go/src/testing/testing.go:1576 +0x10b\n","created by testing.(*T).Run\n","\t/usr/local/go/src/testing/testing.go:1629 +0x3ea\n",""],"Passed":false,"Skipped":false,"TestFileName":"zzwalletcli_kill_sharder_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]}]
 
     const report = window.GoTestReport({
                                          data: data,
