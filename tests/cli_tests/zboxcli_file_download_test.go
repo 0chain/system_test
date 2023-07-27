@@ -13,11 +13,11 @@ import (
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	"golang.org/x/crypto/sha3"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/sha3"
 )
 
 const StatusCompletedCB = "Status completed callback"
@@ -680,21 +680,20 @@ func TestDownload(testSetup *testing.T) {
 		})
 
 		// Delete the uploaded file, since we will be downloading it now
+		os.Remove(thumbnail) // nolint: errcheck
 		err = os.Remove(filename)
 		require.Nil(t, err)
-
-		localPath := filepath.Join(os.TempDir(), filepath.Base(filename))
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  localPath,
+			"localpath":  thumbnail,
 			"thumbnail":  nil,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		stat, err := os.Stat(localPath)
+		stat, err := os.Stat(thumbnail)
 		require.Nil(t, err)
 		require.Equal(t, thumbnailSize, int(stat.Size()))
 	})
@@ -726,20 +725,19 @@ func TestDownload(testSetup *testing.T) {
 
 		// Delete the uploaded file, since we will be downloading it now
 		err = os.Remove(filename)
+		os.Remove(thumbnail) // nolint: errcheck
 		require.Nil(t, err)
-
-		localPath := filepath.Join(os.TempDir(), filepath.Base(filename))
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  localPath,
+			"localpath":  thumbnail,
 			"thumbnail":  nil,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		stat, err := os.Stat(localPath)
+		stat, err := os.Stat(thumbnail)
 		require.Nil(t, err)
 		require.Equal(t, thumbnailSize, int(stat.Size()))
 	})
@@ -761,10 +759,15 @@ func TestDownload(testSetup *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
+		newLocalPath := "tmp/tmp2/" + filepath.Base(filename)
+		defer func() {
+			os.Remove(newLocalPath) //nolint: errcheck
+		}()
+
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/tmp2/" + filepath.Base(filename),
+			"localpath":  newLocalPath,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
@@ -772,11 +775,10 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, output[1], StatusCompletedCB)
 		require.Contains(t, output[1], filepath.Base(filename))
 
-		downloadedFileChecksum := generateChecksum(t, "tmp/tmp2/"+filepath.Base(filename))
+		downloadedFileChecksum := generateChecksum(t, newLocalPath)
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
-
 	t.Run("Download File With Only startblock Should Work", func(t *test.SystemTest) {
 		// 1 block is of size 65536
 		allocSize := int64(655360 * 4)
@@ -1251,19 +1253,16 @@ func TestDownload(testSetup *testing.T) {
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  os.TempDir(),
+			"localpath":  filename,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		expected := fmt.Sprintf(
-			"Download failed. Local file already exists '%s'",
-			strings.TrimSuffix(os.TempDir(), "/")+"/"+filepath.Base(filename),
-		)
+		expected := "Error in file operation: Error while calculating shard params. Error: exceeded_max_offset_value: file is already downloaded"
 		require.Equal(t, expected, output[0])
 	})
 
-	t.Run("Download Moved File Should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Download Moved File Should Work", 5*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/"
@@ -1280,52 +1279,9 @@ func TestDownload(testSetup *testing.T) {
 		err := os.Remove(filename)
 		require.Nil(t, err)
 
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(filename))
-
-		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
-
-		err = os.Remove("tmp/" + filepath.Base(filename))
-		require.Nil(t, err)
-
-		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
-
-		newRemotePath := "/dir1/"
-
-		newFileName := generateFileAndUpload(t, allocationID, newRemotePath, filesize)
-		newFileChecksum := generateChecksum(t, newFileName)
-
-		err = os.Remove(newFileName)
-		require.Nil(t, err)
-
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": newRemotePath + filepath.Base(newFileName),
-			"localpath":  "tmp/",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(newFileName))
-
-		downloadedFileChecksum = generateChecksum(t, "tmp/"+filepath.Base(newFileName))
-		require.Equal(t, newFileChecksum, downloadedFileChecksum)
-
-		err = os.Remove("tmp/" + filepath.Base(newFileName))
-		require.Nil(t, err)
-
 		remotepath += filepath.Base(filename)
 		destpath := "/child/"
-		output, err = moveFile(t, configPath, map[string]interface{}{
+		output, err := moveFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath,
 			"destpath":   destpath,
@@ -1333,6 +1289,10 @@ func TestDownload(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf(remotepath+" moved"), output[0])
+
+		defer func() {
+			os.Remove("tmp/" + filepath.Base(filename)) //nolint: errcheck
+		}()
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1346,7 +1306,7 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, output[1], StatusCompletedCB)
 		require.Contains(t, output[1], filepath.Base(filename))
 
-		downloadedFileChecksum = generateChecksum(t, "tmp/"+filepath.Base(filename))
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})

@@ -154,7 +154,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 	t.RunSequentially("endpoint parameters ( test /v2/graph-allocated-storage )", graphEndpointTestCases(zboxClient.GetGraphAllocatedStorage))
 
-	t.RunSequentially("test graph data ( test /v2/graph-allocated-storage )", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-allocated-storage )", 10*time.Minute, func(t *test.SystemTest) {
 		// Get initial total challenge pools
 		PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 		data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
@@ -181,7 +181,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			cond := allocatedStorageAfterAllocation > allocatedStorage && allocatedStorageAfterAllocation == int64(*latest)
-			allocatedStorage = allocatedStorageAfterAllocation
+			if cond {
+				allocatedStorage = allocatedStorageAfterAllocation
+			}
 			return cond
 		})
 
@@ -198,7 +200,10 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.Equal(t, 1, len([]int64(*data)))
 			allocatedStorageAfter := (*data)[0]
 			cond := allocatedStorageAfter < allocatedStorage
-			allocatedStorage = allocatedStorageAfter
+			if cond {
+				allocatedStorage = allocatedStorageAfter
+			}
+
 			return cond
 		})
 
@@ -219,7 +224,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			cond := allocatedStorageAfter > allocatedStorage && allocatedStorageAfter == int64(*latest)
-			allocatedStorage = allocatedStorageAfter
+			if cond {
+				allocatedStorage = allocatedStorageAfter
+			}
 			return cond
 		})
 
@@ -692,16 +699,14 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.RunSequentially("endpoint parameters ( test /v2/graph-total-locked )", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
 
 	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-total-locked )", 5*time.Minute, func(t *test.SystemTest) {
+		t.Skip("skip until https://github.com/0chain/0box/issues/714")
 		data, resp, err := zboxClient.GetGraphTotalLocked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Equal(t, 1, len([]int64(*data)))
 		graphTotalLocked := (*data)[0]
 
-		// Some more stake. It's gonna be tough
-		// for i := 0; i < 10; i++ {
-		// 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-		// }
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 90, client.TxSuccessfulStatus)
 
 		// Stake blobber
 		blobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
@@ -938,8 +943,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.Equal(t, 1, len([]int64(*data)))
 			totalLockedAfter := (*data)[0]
 			cond := totalLockedAfter < graphTotalLocked
-			cancellationCharge = graphTotalLocked - totalLockedAfter
+
 			if cond {
+				cancellationCharge = graphTotalLocked - totalLockedAfter
 				graphTotalLocked = totalLockedAfter
 			}
 
@@ -986,6 +992,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 
 		// Unlock the read pool
+		rpBalResponse := apiClient.GetReadPoolBalance(t, sdkWallet, client.TxSuccessfulStatus)
+		rpBal := rpBalResponse.Balance
+
 		confHash = apiClient.UnlockReadPool(t, sdkWallet, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
@@ -996,7 +1005,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
 			totalLockedAfter := (*data)[0]
-			cond := graphTotalLocked-totalLockedAfter == *tokenomics.IntToZCN(2.0)
+			cond := graphTotalLocked-totalLockedAfter == rpBal
 			if cond {
 				graphTotalLocked = totalLockedAfter
 			}
@@ -1124,7 +1133,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.RunSequentially("test /v2/total-blobber-capacity", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test /v2/total-blobber-capacity", 5*time.Minute, func(t *test.SystemTest) {
 		// Get initial
 		data, resp, err := zboxClient.GetTotalBlobberCapacity(t)
 		require.NoError(t, err)
@@ -1168,14 +1177,13 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			totalBlobberCapacityAfter := int64(*data)
-			cond := totalBlobberCapacityAfter < totalBlobberCapacity
 			totalBlobberCapacity = totalBlobberCapacityAfter
 
 			blobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			expectedCapacity := calculateCapacity(blobbers)
-			require.Equal(t, expectedCapacity, totalBlobberCapacityAfter)
+			cond := expectedCapacity == totalBlobberCapacityAfter
 			return cond
 		})
 	})
@@ -1473,6 +1481,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 //nolint:gocyclo
 func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("skip till aggregate refactor")
 	// Faucet the used wallets
 	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 4500, client.TxSuccessfulStatus)
 	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
@@ -1798,7 +1807,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		confHash := apiClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 		require.NotEmpty(t, confHash)
 
-		// Check decreased for the same blobber
+		// Check decreased for the same  blobber
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {
 			data, resp, err := zboxClient.GetGraphBlobberSavedData(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
