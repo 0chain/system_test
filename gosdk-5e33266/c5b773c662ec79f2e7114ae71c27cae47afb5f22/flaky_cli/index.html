@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain Flaky system test suite [gosdk-5e33266/c5b773c6] ran against [dev-4.devnet-0chain.net] at [2023-07-27_21.12.23]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain Flaky system test suite [gosdk-5e33266/c5b773c6] ran against [dev-4.devnet-0chain.net] at [2023-07-27_21.12.23]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>11</strong>Duration: <strong>1ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>3</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>3</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>5</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">July 27, 2023 21:36:47</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  skipped" id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  skipped" id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup failed " id="5"></div>
+            
+                <div class="testResultGroup failed " id="6"></div>
+            
+                <div class="testResultGroup  skipped" id="7"></div>
+            
+                <div class="testResultGroup failed " id="8"></div>
+            
+                <div class="testResultGroup failed " id="9"></div>
+            
+                <div class="testResultGroup failed " id="10"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyBrokenScenarios","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___broken_scenarios_test.go:30: \n","--- SKIP: Test___FlakyBrokenScenarios (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"flaky___broken_scenarios_test.go","TestFunctionDetail":{"Line":27,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileCopy","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyFileCopy (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":411,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyFileCopy/File_copy_-_Users_should_not_be_charged_for_moving_a_file_","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___flaky_test.go:415: Test case [File copy - Users should not be charged for moving a file ] scheduled at [07-27-2023 21:34:15] \n","","","    system_test_framework.go:149: Test case [File copy - Users should not be charged for moving a file ] start at [07-27-2023 21:34:15] \n","    flaky___flaky_test.go:416: Test calculations are flaky in  CLI\n","    flaky___flaky_test.go:415: Test case [File copy - Users should not be charged for moving a file ] exit at [07-27-2023 21:34:15]\n","--- SKIP: Test___FlakyFileCopy/File_copy_-_Users_should_not_be_charged_for_moving_a_file_ (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileDelete","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","--- PASS: Test___FlakyFileDelete (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":242,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileDelete/Delete_file_concurrently_in_existing_directory,_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":86.02,"Output":["","    flaky___flaky_test.go:246: Test case [Delete file concurrently in existing directory, should work] scheduled at [07-27-2023 21:32:49] \n","","","    system_test_framework.go:149: Test case [Delete file concurrently in existing directory, should work] start at [07-27-2023 21:32:49] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test___FlakyFileDelete-Delete_file_concurrently_in_existing_directory,_should_work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  49c3d694ae84cfaff0bfb155399fe635a6a4c169072f3c212e6b7f6113e993a4]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    zboxcli_file_upload_test.go:932: Uploading file /tmp/72kwxcQ7yd_test.txt to allocation ff917f1767b0f7dcb55d1000d3807b12af21469476b56be058043c4d6df08e66 with remotepath /72kwxcQ7yd_test.txt\n","    zboxcli_file_upload_test.go:890: Uploading file...\n","    zboxcli_file_upload_test.go:932: Uploading file /tmp/TJYQpyL1PQ_test.txt to allocation ff917f1767b0f7dcb55d1000d3807b12af21469476b56be058043c4d6df08e66 with remotepath /TJYQpyL1PQ_test.txt\n","    zboxcli_file_upload_test.go:890: Uploading file...\n","    zboxcli_file_delete_test.go:344: Deleting file...\n","    zboxcli_file_delete_test.go:344: Deleting file...\n","    utils.go:138: Waiting 10s...\n","    zboxcli_list_file_test.go:638: Listing individual file in allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list --allocation ff917f1767b0f7dcb55d1000d3807b12af21469476b56be058043c4d6df08e66 --remotepath /72kwxcQ7yd_test.txt --json --silent --wallet Test___FlakyFileDelete-Delete_file_concurrently_in_existing_directory,_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/07/27 21:34:00.787803 wallet_base.go:327: ******* Wallet SDK Version:v1.8.16-114-g2b0a3484 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:34:00.787854 sdk.go:78: ******* Storage SDK Version: v1.8.16-114-g2b0a3484 *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/07/27 21:34:00.813599 transaction_base.go:140: ******* Wallet SDK Version:v1.8.16-114-g2b0a3484 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/07/27 21:34:00.822324 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-4.devnet-0chain.net/miner02\",\"https://dev-4.devnet-0chain.net/miner01\",\"https://dev-4.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-4.devnet-0chain.net/sharder02\",\"https://dev-4.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/07/27 21:34:00.859033 listworker.go:112: List result from Blobber:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/07/27 21:34:00.861898 listworker.go:112: List result from Blobber:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/07/27 21:34:00.862285 listworker.go:112: List result from Blobber:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/07/27 21:34:00.862550 listworker.go:112: List result from Blobber:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:138: Waiting 10s...\n","    zboxcli_list_file_test.go:638: Listing individual file in allocation...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox list --remotepath /TJYQpyL1PQ_test.txt --json  --allocation ff917f1767b0f7dcb55d1000d3807b12af21469476b56be058043c4d6df08e66 --silent --wallet Test___FlakyFileDelete-Delete_file_concurrently_in_existing_directory,_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [error from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/07/27 21:34:15.281111 wallet_base.go:327: ******* Wallet SDK Version:v1.8.16-114-g2b0a3484 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:34:15.281242 sdk.go:78: ******* Storage SDK Version: v1.8.16-114-g2b0a3484 *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/07/27 21:34:15.298409 transaction_base.go:140: ******* Wallet SDK Version:v1.8.16-114-g2b0a3484 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/07/27 21:34:15.305527 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-4.devnet-0chain.net/miner03\",\"https://dev-4.devnet-0chain.net/miner02\",\"https://dev-4.devnet-0chain.net/miner01\"],\"sharders\":[\"https://dev-4.devnet-0chain.net/sharder01\",\"https://dev-4.devnet-0chain.net/sharder02\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/07/27 21:34:15.346511 listworker.go:112: List result from Blobber:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/07/27 21:34:15.354981 listworker.go:112: List result from Blobber:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/07/27 21:34:15.355077 listworker.go:112: List result from Blobber:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/07/27 21:34:15.357131 listworker.go:112: List result from Blobber:{\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    utils.go:77: \u001b[31merror from server list response: {\"code\":\"invalid_parameters\",\"error\":\"invalid_parameters: Invalid path record not found\"}\n","    flaky___flaky_test.go:246: Test case [Delete file concurrently in existing directory, should work] exit at [07-27-2023 21:34:15]\n","--- PASS: Test___FlakyFileDelete/Delete_file_concurrently_in_existing_directory,_should_work (86.02s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileRename","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":306,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyFileRename/Rename_and_delete_file_concurrently,_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":151.95,"Output":["","    flaky___flaky_test.go:312: Test case [Rename and delete file concurrently, should work] scheduled at [07-27-2023 21:34:15] \n","","","    system_test_framework.go:149: Test case [Rename and delete file concurrently, should work] start at [07-27-2023 21:34:15] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test___FlakyFileRename-Rename_and_delete_file_concurrently,_should_work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  251456c6f0e0b43a9f75501bb727a1be6f5f3978691da97512b678e1f2d19600]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    zboxcli_file_upload_test.go:932: Uploading file /tmp/tkpfxOH7CB_test.txt to allocation 9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326 with remotepath /tkpfxOH7CB_test.txt\n","    zboxcli_file_upload_test.go:890: Uploading file...\n","    zboxcli_file_upload_test.go:932: Uploading file /tmp/rw6V5c9I-m_test.txt to allocation 9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326 with remotepath /rw6V5c9I-m_test.txt\n","    zboxcli_file_upload_test.go:890: Uploading file...\n","    zboxcli_file_upload_test.go:932: Uploading file /tmp/X3yzlWTVuF_test.txt to allocation 9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326 with remotepath /X3yzlWTVuF_test.txt\n","    zboxcli_file_upload_test.go:890: Uploading file...\n","    zboxcli_file_upload_test.go:932: Uploading file /tmp/OblgFT5Jmq_test.txt to allocation 9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326 with remotepath /OblgFT5Jmq_test.txt\n","    zboxcli_file_upload_test.go:890: Uploading file...\n","    zboxcli_common_user_functions_test.go:178: Renaming file...\n","    zboxcli_common_user_functions_test.go:178: Renaming file...\n","    zboxcli_file_delete_test.go:344: Deleting file...\n","    zboxcli_file_delete_test.go:344: Deleting file...\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [consensus_not_met: Required consensus 3 got 0. Error: commit_error: Got error response {\"error\":\"allocation_root_mismatch: Allocation root in the write marker does not match the calculated allocation root. Expected hash: 1d1b422feecfbedfcadd57d06fcacde48c4658503c10af16006d6602fc19d6ae\"} -\u003cNEWLINE\u003e- with status 400\tcommit_error: Got error response {\"error\":\"allocation_root_mismatch: Allocation root in the write marker does not match the calculated allocation root. Expected hash: a1550f71811ccb928396f234d8fde6c8f45bf420f5fc27568060809e5cec95b7\"} -\u003cNEWLINE\u003e- with status 400\tcommit_error: Got error response {\"error\":\"allocation_root_mismatch: Allocation root in the write marker does not match the calculated allocation root. Expected hash: 67e5665f23b34147053ce967631b22b738da8f3e87cf757c755cc9a957fb757c\"} -\u003cNEWLINE\u003e- with status 400\tcommit_error: Got error response {\"error\":\"allocation_root_mismatch: Allocation root in the"," write marker does not match the calculated allocation root. Expected hash: 27824ff019fe6038d813bd8ddfa8c4c5ab069fd270743c482fdf4dadfdb70773\"} -\u003cNEWLINE\u003e- with status 400]\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Delete failed. consensus_not_met: Consensus on commit not met. Required 3, got 1]\n","    utils.go:67: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [retry_operation]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [retry_operation]\n","    utils.go:67: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [retry_operation]\n","    utils.go:63: \u001b[32mCommand passed on retry [2/3]. Output: [/X3yzlWTVuF_test.txt deleted]\n","    utils.go:63: \u001b[32mCommand passed on retry [3/3]. Output: [/tkpfxOH7CB_test.txt renamed]\n","    utils.go:70: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [./zbox rename --allocation 9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326 --remotepath /rw6V5c9I-m_test.txt --destname CaYGtYO7A7_test.txt --silent --wallet Test___FlakyFileRename-Rename_and_delete_file_concurrently,_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml] Output: [retry_operation]\n","    utils.go:73: \u001b[31mThe verbose output for the command is:\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/07/27 21:36:45.200553 wallet_base.go:327: ******* Wallet SDK Version:v1.8.16-114-g2b0a3484 ******* (SetLogFile)\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.200609 sdk.go:78: ******* Storage SDK Version: v1.8.16-114-g2b0a3484 *******\n","    utils.go:77: \u001b[31m0chain-core-sdk [INFO]   2023/07/27 21:36:45.227686 transaction_base.go:140: ******* Wallet SDK Version:v1.8.16-114-g2b0a3484 ******* (InitZCNSDK)\n","    utils.go:77: \u001b[31m0box-sdk        [DEBUG]  2023/07/27 21:36:45.238111 networkworker.go:105: Get network result:{\"miners\":[\"https://dev-4.devnet-0chain.net/miner02\",\"https://dev-4.devnet-0chain.net/miner01\",\"https://dev-4.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-4.devnet-0chain.net/sharder02\",\"https://dev-4.devnet-0chain.net/sharder01\"]}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.265839 common.go:50: Object tree:{\"meta_data\":{\"actual_file_hash\":\"e11fa07446c4d7de86a19119e0309b0f2f5a77d7a7eef63cd3943a15f1d4af69\",\"actual_file_hash_signature\":\"c2026860e3df0336e19cc178b59be6b76d1691f9490bd07aba2c37749aa86e8e\",\"actual_file_size\":256,\"actual_thumbnail_hash\":\"\",\"actual_thumbnail_size\":0,\"allocation_id\":\"9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326\",\"chunk_size\":65536,\"created_at\":1690486468,\"custom_meta\":\"\",\"encrypted_key\":\"\",\"file_id\":\"27478fc5-cfb6-5f9a-8626-32ab34fd01ba\",\"file_meta_hash\":\"458876610c9047f73d9a1227506d6d71a4bb2d06c8b36734f99ee1bf305c3041\",\"fixed_merkle_root\":\"fd27a0fbe5e6d5d46604a8e9ea350670e0df41cc23c3b01ee7be7dc6d9e70a23\",\"hash\":\"5514680c4d3ab328287db5700c5b095c0791455f195be12c60e38eb70829f743\",\"is_precommit\":false,\"lookup_hash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",\"mimetype\":\"application/octet-stream\",\"name\":\"rw6V5c9I-m_test.txt\",\"num_of_blocks\":1,\"path\":\"/","rw6V5c9I-m_test.txt\",\"path_hash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",\"prev_thumbnail_hash\":\"\",\"prev_validation_root\":\"d140264614a738c928ca6f48e4565456b1795c3d198eb5e47f5de89cb2d8555e\",\"size\":128,\"thumbnail_hash\":\"\",\"thumbnail_size\":0,\"type\":\"f\",\"updated_at\":1690486468,\"validation_root\":\"d140264614a738c928ca6f48e4565456b1795c3d198eb5e47f5de89cb2d8555e\",\"validation_root_signature\":\"a4e3c951cefe20ebec8809cc98b67cb7dce8e69f73de136732f37700c4532a09\"},\"Ref\":{\"ID\":90,\"FileID\":\"27478fc5-cfb6-5f9a-8626-32ab34fd01ba\",\"Type\":\"f\",\"AllocationID\":\"9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326\",\"LookupHash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",\"Name\":\"rw6V5c9I-m_test.txt\",\"Path\":\"/rw6V5c9I-m_test.txt\",\"FileMetaHash\":\"458876610c9047f73d9a1227506d6d71a4bb2d06c8b36734f99ee1bf305c3041\",\"Hash\":\"5514680c4d3ab328287db5700c5b095c0791455f195be12c60e38eb70829f743\",\"NumBlocks\":1,\"PathHash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",","\"ParentPath\":\"/\",\"PathLevel\":2,\"CustomMeta\":\"\",\"ValidationRoot\":\"d140264614a738c928ca6f48e4565456b1795c3d198eb5e47f5de89cb2d8555e\",\"prev_validation_root\":\"d140264614a738c928ca6f48e4565456b1795c3d198eb5e47f5de89cb2d8555e\",\"validation_root_signature\":\"a4e3c951cefe20ebec8809cc98b67cb7dce8e69f73de136732f37700c4532a09\",\"Size\":128,\"FixedMerkleRoot\":\"fd27a0fbe5e6d5d46604a8e9ea350670e0df41cc23c3b01ee7be7dc6d9e70a23\",\"ActualFileSize\":256,\"actual_file_hash_signature\":\"c2026860e3df0336e19cc178b59be6b76d1691f9490bd07aba2c37749aa86e8e\",\"ActualFileHash\":\"e11fa07446c4d7de86a19119e0309b0f2f5a77d7a7eef63cd3943a15f1d4af69\",\"MimeType\":\"application/octet-stream\",\"AllocationRoot\":\"8f00269e6f92096f1b478be80f6b530c3f0e78ca387353e57f3ba1785abfe01e\",\"ThumbnailSize\":0,\"ThumbnailHash\":\"\",\"PrevThumbnailHash\":\"\",\"ActualThumbnailSize\":0,\"ActualThumbnailHash\":\"\",\"EncryptedKey\":\"\",\"Children\":null,\"CreatedAt\":1690486468,\"UpdatedAt\":1690486468,\"DeletedAt\":null,\"IsPrecommit\":false,\"ChunkSize\":65536,\"HashToBeComputed\":false},\"latest_write_marke","r\":{\"allocation_root\":\"df84bd7045c765a1d97f00466c22bb1c6fb5298e7a995faf4682e09147dd69a4\",\"prev_allocation_root\":\"8f00269e6f92096f1b478be80f6b530c3f0e78ca387353e57f3ba1785abfe01e\",\"file_meta_root\":\"c55b6f70c7958bbddf9d790ac3415fbcb794b423aefec34b1c1ef52e14ba0d89\",\"allocation_id\":\"9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326\",\"size\":0,\"blobber_id\":\"3812b813bdbba23d548442add2e49d24edd1a178ba0e8daf878599270a2be0ae\",\"timestamp\":1690486603,\"client_id\":\"24c2944d462218e896a6ea42f9b099433d46d256c0ad0f35ee8ca75229aa0957\",\"signature\":\"33c4ea1b294ce6ab532ff9b61deab50ccba85e9862bb30337d6289069642dd94\"}}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.265886 common.go:50: Object tree:{\"meta_data\":{\"actual_file_hash\":\"e11fa07446c4d7de86a19119e0309b0f2f5a77d7a7eef63cd3943a15f1d4af69\",\"actual_file_hash_signature\":\"c2026860e3df0336e19cc178b59be6b76d1691f9490bd07aba2c37749aa86e8e\",\"actual_file_size\":256,\"actual_thumbnail_hash\":\"\",\"actual_thumbnail_size\":0,\"allocation_id\":\"9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326\",\"chunk_size\":65536,\"created_at\":1690486468,\"custom_meta\":\"\",\"encrypted_key\":\"\",\"file_id\":\"27478fc5-cfb6-5f9a-8626-32ab34fd01ba\",\"file_meta_hash\":\"458876610c9047f73d9a1227506d6d71a4bb2d06c8b36734f99ee1bf305c3041\",\"fixed_merkle_root\":\"cd2047f1c9df1f19c81f8fe07fa0a3b19e43af069c0c9e5abc97cbb10f1cf6e1\",\"hash\":\"e91df6ec7bea70cd5e7bd59f973f2e1adbe9e02d69ce4724dc72570ae893e72d\",\"is_precommit\":false,\"lookup_hash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",\"mimetype\":\"application/octet-stream\",\"name\":\"rw6V5c9I-m_test.txt\",\"num_of_blocks\":1,\"path\":\"/","rw6V5c9I-m_test.txt\",\"path_hash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",\"prev_thumbnail_hash\":\"\",\"prev_validation_root\":\"c50ce677725d3b85c9416a8bfb652e75700b1b28dc64558cc4ddaa7f5c574d57\",\"size\":128,\"thumbnail_hash\":\"\",\"thumbnail_size\":0,\"type\":\"f\",\"updated_at\":1690486468,\"validation_root\":\"c50ce677725d3b85c9416a8bfb652e75700b1b28dc64558cc4ddaa7f5c574d57\",\"validation_root_signature\":\"3bccd939b3497631f50b57565365a1397913236264eff447426db491f276121e\"},\"Ref\":{\"ID\":90,\"FileID\":\"27478fc5-cfb6-5f9a-8626-32ab34fd01ba\",\"Type\":\"f\",\"AllocationID\":\"9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326\",\"LookupHash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",\"Name\":\"rw6V5c9I-m_test.txt\",\"Path\":\"/rw6V5c9I-m_test.txt\",\"FileMetaHash\":\"458876610c9047f73d9a1227506d6d71a4bb2d06c8b36734f99ee1bf305c3041\",\"Hash\":\"e91df6ec7bea70cd5e7bd59f973f2e1adbe9e02d69ce4724dc72570ae893e72d\",\"NumBlocks\":1,\"PathHash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",","\"ParentPath\":\"/\",\"PathLevel\":2,\"CustomMeta\":\"\",\"ValidationRoot\":\"c50ce677725d3b85c9416a8bfb652e75700b1b28dc64558cc4ddaa7f5c574d57\",\"prev_validation_root\":\"c50ce677725d3b85c9416a8bfb652e75700b1b28dc64558cc4ddaa7f5c574d57\",\"validation_root_signature\":\"3bccd939b3497631f50b57565365a1397913236264eff447426db491f276121e\",\"Size\":128,\"FixedMerkleRoot\":\"cd2047f1c9df1f19c81f8fe07fa0a3b19e43af069c0c9e5abc97cbb10f1cf6e1\",\"ActualFileSize\":256,\"actual_file_hash_signature\":\"c2026860e3df0336e19cc178b59be6b76d1691f9490bd07aba2c37749aa86e8e\",\"ActualFileHash\":\"e11fa07446c4d7de86a19119e0309b0f2f5a77d7a7eef63cd3943a15f1d4af69\",\"MimeType\":\"application/octet-stream\",\"AllocationRoot\":\"2a785aa843718329dc8183052dcd5bbceb574fb0155b37ef83fd11b5e670af1f\",\"ThumbnailSize\":0,\"ThumbnailHash\":\"\",\"PrevThumbnailHash\":\"\",\"ActualThumbnailSize\":0,\"ActualThumbnailHash\":\"\",\"EncryptedKey\":\"\",\"Children\":null,\"CreatedAt\":1690486468,\"UpdatedAt\":1690486468,\"DeletedAt\":null,\"IsPrecommit\":false,\"ChunkSize\":65536,\"HashToBeComputed\":false},\"latest_write_marke","r\":{\"allocation_root\":\"71d05a88e447030fcb2617f1b8f4208b2f3ca318e077726387ad9cef57313f9f\",\"prev_allocation_root\":\"2a785aa843718329dc8183052dcd5bbceb574fb0155b37ef83fd11b5e670af1f\",\"file_meta_root\":\"c55b6f70c7958bbddf9d790ac3415fbcb794b423aefec34b1c1ef52e14ba0d89\",\"allocation_id\":\"9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326\",\"size\":0,\"blobber_id\":\"45d0de870ee7cd36f83fd633c9989b9e640f0b386c639aa6c178923f3e968fc1\",\"timestamp\":1690486603,\"client_id\":\"24c2944d462218e896a6ea42f9b099433d46d256c0ad0f35ee8ca75229aa0957\",\"signature\":\"63fcff414e8945995223de02178a59c082e66339a16af2970c38cca4632ea39e\"}}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.274791 common.go:50: Object tree:{\"meta_data\":{\"actual_file_hash\":\"e11fa07446c4d7de86a19119e0309b0f2f5a77d7a7eef63cd3943a15f1d4af69\",\"actual_file_hash_signature\":\"c2026860e3df0336e19cc178b59be6b76d1691f9490bd07aba2c37749aa86e8e\",\"actual_file_size\":256,\"actual_thumbnail_hash\":\"\",\"actual_thumbnail_size\":0,\"allocation_id\":\"9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326\",\"chunk_size\":65536,\"created_at\":1690486468,\"custom_meta\":\"\",\"encrypted_key\":\"\",\"file_id\":\"27478fc5-cfb6-5f9a-8626-32ab34fd01ba\",\"file_meta_hash\":\"458876610c9047f73d9a1227506d6d71a4bb2d06c8b36734f99ee1bf305c3041\",\"fixed_merkle_root\":\"9e6096776f6fc9dd53c50d3f1f4e5e0c51c28cc7758000ec92d876fd82578dcd\",\"hash\":\"5965c057eeb2ffcdd3d12047461058d7e3341cc23c03186334f73cb4ec3cd317\",\"is_precommit\":false,\"lookup_hash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",\"mimetype\":\"application/octet-stream\",\"name\":\"rw6V5c9I-m_test.txt\",\"num_of_blocks\":1,\"path\":\"/","rw6V5c9I-m_test.txt\",\"path_hash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",\"prev_thumbnail_hash\":\"\",\"prev_validation_root\":\"dc252cb93d8393df8696a378abfca4bd591ded14617b4cd240380ddb7afa7d2e\",\"size\":128,\"thumbnail_hash\":\"\",\"thumbnail_size\":0,\"type\":\"f\",\"updated_at\":1690486468,\"validation_root\":\"dc252cb93d8393df8696a378abfca4bd591ded14617b4cd240380ddb7afa7d2e\",\"validation_root_signature\":\"46f773d15e03c8895a36342460e9909adee7645c21bc0bc41a2af9f8c804531d\"},\"Ref\":{\"ID\":84,\"FileID\":\"27478fc5-cfb6-5f9a-8626-32ab34fd01ba\",\"Type\":\"f\",\"AllocationID\":\"9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326\",\"LookupHash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",\"Name\":\"rw6V5c9I-m_test.txt\",\"Path\":\"/rw6V5c9I-m_test.txt\",\"FileMetaHash\":\"458876610c9047f73d9a1227506d6d71a4bb2d06c8b36734f99ee1bf305c3041\",\"Hash\":\"5965c057eeb2ffcdd3d12047461058d7e3341cc23c03186334f73cb4ec3cd317\",\"NumBlocks\":1,\"PathHash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",","\"ParentPath\":\"/\",\"PathLevel\":2,\"CustomMeta\":\"\",\"ValidationRoot\":\"dc252cb93d8393df8696a378abfca4bd591ded14617b4cd240380ddb7afa7d2e\",\"prev_validation_root\":\"dc252cb93d8393df8696a378abfca4bd591ded14617b4cd240380ddb7afa7d2e\",\"validation_root_signature\":\"46f773d15e03c8895a36342460e9909adee7645c21bc0bc41a2af9f8c804531d\",\"Size\":128,\"FixedMerkleRoot\":\"9e6096776f6fc9dd53c50d3f1f4e5e0c51c28cc7758000ec92d876fd82578dcd\",\"ActualFileSize\":256,\"actual_file_hash_signature\":\"c2026860e3df0336e19cc178b59be6b76d1691f9490bd07aba2c37749aa86e8e\",\"ActualFileHash\":\"e11fa07446c4d7de86a19119e0309b0f2f5a77d7a7eef63cd3943a15f1d4af69\",\"MimeType\":\"application/octet-stream\",\"AllocationRoot\":\"b5e029f81dca121c4652e7979f146d1d21fc5d338014eea1709c8b1313b87e7e\",\"ThumbnailSize\":0,\"ThumbnailHash\":\"\",\"PrevThumbnailHash\":\"\",\"ActualThumbnailSize\":0,\"ActualThumbnailHash\":\"\",\"EncryptedKey\":\"\",\"Children\":null,\"CreatedAt\":1690486468,\"UpdatedAt\":1690486468,\"DeletedAt\":null,\"IsPrecommit\":false,\"ChunkSize\":65536,\"HashToBeComputed\":false},\"latest_write_marke","r\":{\"allocation_root\":\"0c9e5f3f6c18b20cb15f48591d0acf0c468a0d581e657fe9655bd8adc8e84974\",\"prev_allocation_root\":\"b5e029f81dca121c4652e7979f146d1d21fc5d338014eea1709c8b1313b87e7e\",\"file_meta_root\":\"c55b6f70c7958bbddf9d790ac3415fbcb794b423aefec34b1c1ef52e14ba0d89\",\"allocation_id\":\"9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326\",\"size\":0,\"blobber_id\":\"5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\",\"timestamp\":1690486603,\"client_id\":\"24c2944d462218e896a6ea42f9b099433d46d256c0ad0f35ee8ca75229aa0957\",\"signature\":\"a6da236c64e62e5c3179620152bd042937aa963edbc0d3eaf4a446cb239b0325\"}}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.279437 renameworker.go:126: https://dev-4.devnet-0chain.net/blobber04 /rw6V5c9I-m_test.txt renamed.\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.279711 renameworker.go:126: https://dev-4.devnet-0chain.net/blobber05 /rw6V5c9I-m_test.txt renamed.\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.280784 renameworker.go:126: https://dev-4.devnet-0chain.net/blobber02 /rw6V5c9I-m_test.txt renamed.\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.281601 common.go:50: Object tree:{\"meta_data\":{\"actual_file_hash\":\"e11fa07446c4d7de86a19119e0309b0f2f5a77d7a7eef63cd3943a15f1d4af69\",\"actual_file_hash_signature\":\"c2026860e3df0336e19cc178b59be6b76d1691f9490bd07aba2c37749aa86e8e\",\"actual_file_size\":256,\"actual_thumbnail_hash\":\"\",\"actual_thumbnail_size\":0,\"allocation_id\":\"9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326\",\"chunk_size\":65536,\"created_at\":1690486468,\"custom_meta\":\"\",\"encrypted_key\":\"\",\"file_id\":\"27478fc5-cfb6-5f9a-8626-32ab34fd01ba\",\"file_meta_hash\":\"458876610c9047f73d9a1227506d6d71a4bb2d06c8b36734f99ee1bf305c3041\",\"fixed_merkle_root\":\"07b9651119fd8f18959c4fd8e07239fd19f325af9454557552dfa550b0ae1b9a\",\"hash\":\"2f95b4ffea71a37df439acb6a8e30c0b861ddc46bc332a3a207397a784140de9\",\"is_precommit\":false,\"lookup_hash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",\"mimetype\":\"application/octet-stream\",\"name\":\"rw6V5c9I-m_test.txt\",\"num_of_blocks\":1,\"path\":\"/","rw6V5c9I-m_test.txt\",\"path_hash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",\"prev_thumbnail_hash\":\"\",\"prev_validation_root\":\"1ddfc6598b27d157f0803a1989b6c05b52d07a8dffe94067df58df954f694fb6\",\"size\":128,\"thumbnail_hash\":\"\",\"thumbnail_size\":0,\"type\":\"f\",\"updated_at\":1690486468,\"validation_root\":\"1ddfc6598b27d157f0803a1989b6c05b52d07a8dffe94067df58df954f694fb6\",\"validation_root_signature\":\"1507de6193b00374a373aa095825759e0afe9981fac8b9179976a0536e652501\"},\"Ref\":{\"ID\":84,\"FileID\":\"27478fc5-cfb6-5f9a-8626-32ab34fd01ba\",\"Type\":\"f\",\"AllocationID\":\"9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326\",\"LookupHash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",\"Name\":\"rw6V5c9I-m_test.txt\",\"Path\":\"/rw6V5c9I-m_test.txt\",\"FileMetaHash\":\"458876610c9047f73d9a1227506d6d71a4bb2d06c8b36734f99ee1bf305c3041\",\"Hash\":\"2f95b4ffea71a37df439acb6a8e30c0b861ddc46bc332a3a207397a784140de9\",\"NumBlocks\":1,\"PathHash\":\"83e9b78c2ec5d4a06f843f92cd9c4a58cfb9988a8108f03cfc9d14205382a0d0\",","\"ParentPath\":\"/\",\"PathLevel\":2,\"CustomMeta\":\"\",\"ValidationRoot\":\"1ddfc6598b27d157f0803a1989b6c05b52d07a8dffe94067df58df954f694fb6\",\"prev_validation_root\":\"1ddfc6598b27d157f0803a1989b6c05b52d07a8dffe94067df58df954f694fb6\",\"validation_root_signature\":\"1507de6193b00374a373aa095825759e0afe9981fac8b9179976a0536e652501\",\"Size\":128,\"FixedMerkleRoot\":\"07b9651119fd8f18959c4fd8e07239fd19f325af9454557552dfa550b0ae1b9a\",\"ActualFileSize\":256,\"actual_file_hash_signature\":\"c2026860e3df0336e19cc178b59be6b76d1691f9490bd07aba2c37749aa86e8e\",\"ActualFileHash\":\"e11fa07446c4d7de86a19119e0309b0f2f5a77d7a7eef63cd3943a15f1d4af69\",\"MimeType\":\"application/octet-stream\",\"AllocationRoot\":\"aa9c56af817ee35ca06e66374d6bf7bc2dd91d479178e717e0cdf715ef141482\",\"ThumbnailSize\":0,\"ThumbnailHash\":\"\",\"PrevThumbnailHash\":\"\",\"ActualThumbnailSize\":0,\"ActualThumbnailHash\":\"\",\"EncryptedKey\":\"\",\"Children\":null,\"CreatedAt\":1690486468,\"UpdatedAt\":1690486468,\"DeletedAt\":null,\"IsPrecommit\":false,\"ChunkSize\":65536,\"HashToBeComputed\":false},\"latest_write_marke","r\":{\"allocation_root\":\"67e5665f23b34147053ce967631b22b738da8f3e87cf757c755cc9a957fb757c\",\"prev_allocation_root\":\"799719519e9f0e97b86f5a81c804d7dc6a617051945e2174e467d478d9832050\",\"file_meta_root\":\"9617ba2910c7179eca6d3f59159144bf4a1d47cbbf42785181c11e526fdba4e4\",\"allocation_id\":\"9bbba2f349f7eac5c9f8e8f9bbb09eba8e17ede268df2a2741aa5ba92db68326\",\"size\":0,\"blobber_id\":\"48592ae54bcd3f6e4f36f6e94b95247afb1addcf4704a87967f6e5f25bcb625e\",\"timestamp\":1690486603,\"client_id\":\"24c2944d462218e896a6ea42f9b099433d46d256c0ad0f35ee8ca75229aa0957\",\"signature\":\"e95bb4e93fde89dd14178c4d6a8ae40687a9bc33cd3c70369c50985a69fcb699\"}}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.285993 renameworker.go:126: https://dev-4.devnet-0chain.net/blobber03 /rw6V5c9I-m_test.txt renamed.\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.288645 writemarker_mutex.go:305: https://dev-4.devnet-0chain.net/blobber02vyNQUDNEvrEoH3JCd6gmwL locked\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.288646 writemarker_mutex.go:305: https://dev-4.devnet-0chain.net/blobber05vyNQUDNEvrEoH3JCd6gmwL locked\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.288950 writemarker_mutex.go:305: https://dev-4.devnet-0chain.net/blobber03vyNQUDNEvrEoH3JCd6gmwL locked\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.294395 writemarker_mutex.go:305: https://dev-4.devnet-0chain.net/blobber04vyNQUDNEvrEoH3JCd6gmwL locked\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.301228 rollback.go:272: versionMap{versionMap 23 0  map[9617ba2910c7179eca6d3f59159144bf4a1d47cbbf42785181c11e526fdba4e4:[0xc00014a2a0] c55b6f70c7958bbddf9d790ac3415fbcb794b423aefec34b1c1ef52e14ba0d89:[0xc0004342a0 0xc000698138 0xc0000124f8]]}\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.301270 commitworker.go:96: received a commit request\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.301277 commitworker.go:96: received a commit request\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.301303 commitworker.go:96: received a commit request\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.301285 commitworker.go:96: received a commit request\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.307103 commitworker.go:223: Committing to blobber.https://dev-4.devnet-0chain.net/blobber05\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.308396 commitworker.go:223: Committing to blobber.https://dev-4.devnet-0chain.net/blobber02\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.308439 commitworker.go:223: Committing to blobber.https://dev-4.devnet-0chain.net/blobber04\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:45.308706 commitworker.go:223: Committing to blobber.https://dev-4.devnet-0chain.net/blobber03\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:47.271068 commitworker.go:257: https://dev-4.devnet-0chain.net/blobber02 committed\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:47.271599 commitworker.go:257: https://dev-4.devnet-0chain.net/blobber03 committed\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:47.282400 commitworker.go:257: https://dev-4.devnet-0chain.net/blobber05 committed\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:47.287181 commitworker.go:257: https://dev-4.devnet-0chain.net/blobber04 committed\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:47.287242 renameworker.go:273: Commit successhttps://dev-4.devnet-0chain.net/blobber04\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:47.287256 renameworker.go:273: Commit successhttps://dev-4.devnet-0chain.net/blobber05\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:47.287266 renameworker.go:273: Commit successhttps://dev-4.devnet-0chain.net/blobber03\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:47.287276 renameworker.go:273: Commit successhttps://dev-4.devnet-0chain.net/blobber02\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:47.295774 writemarker_mutex.go:122: https://dev-4.devnet-0chain.net/blobber04vyNQUDNEvrEoH3JCd6gmwL unlocked\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:47.298953 writemarker_mutex.go:122: https://dev-4.devnet-0chain.net/blobber02vyNQUDNEvrEoH3JCd6gmwL unlocked\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:47.299096 writemarker_mutex.go:122: https://dev-4.devnet-0chain.net/blobber03vyNQUDNEvrEoH3JCd6gmwL unlocked\n","    utils.go:77: \u001b[31m0box-sdk        [INFO]   2023/07/27 21:36:47.301912 writemarker_mutex.go:122: https://dev-4.devnet-0chain.net/blobber05vyNQUDNEvrEoH3JCd6gmwL unlocked\n","    utils.go:77: \u001b[31m/rw6V5c9I-m_test.txt renamed\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner4/_work/system_test/system_test/tests/cli_tests/flaky___flaky_test.go:383\n","        \t            \t\t\t\t/root/actions-runner4/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner4/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0008067c8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTest___FlakyFileRename/Rename_and_delete_file_concurrently,_should_work\n","        \tMessages:   \tretry_operation\n","    flaky___flaky_test.go:312: Test case [Rename and delete file concurrently, should work] exit at [07-27-2023 21:36:47]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test___FlakyScenariosCommonUserFunctions","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    flaky___flaky_test.go:25: \n","--- SKIP: Test___FlakyScenariosCommonUserFunctions (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":22,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["",""],"Passed":false,"Skipped":false,"TestFileName":"flaky___flaky_test.go","TestFunctionDetail":{"Line":90,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation/transfer_allocation_accounting_test","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":37.41,"Output":["","    flaky___flaky_test.go:94: Test case [transfer allocation accounting test] scheduled at [07-27-2023 21:31:50] \n","","","    system_test_framework.go:149: Test case [transfer allocation accounting test] start at [07-27-2023 21:31:50] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test___FlakyTransferAllocation-transfer_allocation_accounting_test_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  cebae68acba2c7502c09ab14aae259b6c4973d1aea523aefd04e2fb5ade9aa58]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    zboxcli_file_upload_test.go:890: Uploading file...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test___FlakyTransferAllocation-transfer_allocation_accounting_test_NEW_OWNER_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  99e0a4ea79465b85d703c390984b08074a3e901065b8fe02f3599e3511b06734]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:210: Getting wallet...\n","    zboxcli_common_user_functions_test.go:226: Get Allocation...\n","    zboxcli_transfer_allocation_test.go:428: Transferring allocation ownership...\n","    zboxcli_transfer_allocation_test.go:445: Polling for 5 minutes until allocation ownership changed...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:331: Listing all...\n","    utils.go:138: Waiting 5s...\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner4/_work/system_test/system_test/tests/cli_tests/flaky___flaky_test.go:145\n","        \t            \t\t\t\t/root/actions-runner4/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner4/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1598\n","        \tError:      \tNot equal: \n","        \t            \texpected: 4.4\n","        \t            \tactual  : 1.99\n","        \tTest:       \tTest___FlakyTransferAllocation/transfer_allocation_accounting_test\n","    flaky___flaky_test.go:94: Test case [transfer allocation accounting test] exit at [07-27-2023 21:32:28]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"Test___FlakyTransferAllocation/transfer_allocation_and_upload_file","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":58.56,"Output":["","    flaky___flaky_test.go:176: Test case [transfer allocation and upload file] scheduled at [07-27-2023 21:31:50] \n","","","    system_test_framework.go:149: Test case [transfer allocation and upload file] start at [07-27-2023 21:31:50] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test___FlakyTransferAllocation-transfer_allocation_and_upload_file_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  1463303a47820a7a92bb72c6635be61643d5c198a8ceb0e3ee733867cb58fc0c]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:425: Creating new allocation...\n","    zboxcli_file_upload_test.go:890: Uploading file...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/Test___FlakyTransferAllocation-transfer_allocation_and_upload_file_NEW_OWNER_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  6bdf13983607c9f368d894a402411ff93fa6565511e6ed7e6d7dd03b8503efe6]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:210: Getting wallet...\n","    zboxcli_transfer_allocation_test.go:428: Transferring allocation ownership...\n","    zboxcli_transfer_allocation_test.go:445: Polling for 5 minutes until allocation ownership changed...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_dir_test.go:331: Listing all...\n","    zboxcli_wp_lock_unlock_test.go:272: Locking write tokens...\n","    assertions.go:264: \n","        \tError Trace:\t/root/actions-runner4/_work/system_test/system_test/tests/cli_tests/flaky___flaky_test.go:226\n","        \t            \t\t\t\t/root/actions-runner4/_work/system_test/system_test/tests/cli_tests/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner4/_work/system_test/system_test/tests/cli_tests/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000132c0), Stderr:[]uint8(nil)}\n","        \tTest:       \tTest___FlakyTransferAllocation/transfer_allocation_and_upload_file\n","        \tMessages:   \tTokens could not be locked%!(EXTRA string=Failed to lock tokens in write pool: [txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-4.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=80bf558b02b79af77cd6e5b416cca38040fa02242f870513c88862aa354ca556: [400] {\"error\":\"unexpected end of JSON input\"}\n","        \t            \thttps://dev-4.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=80bf558b02b79af77cd6e5b416cca38040fa02242f870513c88862aa354ca556: [400] {\"error\":\"unexpected end of JSON input\"})\n","    flaky___flaky_test.go:176: Test case [transfer allocation and upload file] exit at [07-27-2023 21:32:49]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
