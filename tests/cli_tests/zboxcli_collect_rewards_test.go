@@ -51,7 +51,6 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 			"tokens": 9,
 			"data":   3,
 			"parity": 1,
-			"expire": "30m",
 		})
 
 		alloc := getAllocation(t, allocationID)
@@ -251,7 +250,6 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 			"tokens": 9,
 			"data":   4,
 			"parity": 1,
-			"expire": "30m",
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, int64(filesize))
