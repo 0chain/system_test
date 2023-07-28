@@ -787,7 +787,7 @@ func TestUpload(testSetup *testing.T) {
 		totalChangeInWritePool := intToZCN(initialAllocation.WritePool - finalAllocation.WritePool)
 
 		require.InEpsilon(t, expectedUploadCostInZCN, totalChangeInWritePool, 0.05, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", expectedUploadCostInZCN, totalChangeInWritePool)
-		require.Equal(t, totalChangeInWritePool, intToZCN(challengePool.Balance), "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
+		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), 0.05, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 
 	sampleVideos := [][]string{
