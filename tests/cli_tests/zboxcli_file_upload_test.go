@@ -766,6 +766,8 @@ func TestUpload(testSetup *testing.T) {
 		unit := strings.Fields(output[0])[1]
 		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
 
+		cliutils.Wait(t, 30*time.Second)
+
 		finalAllocation := getAllocation(t, allocationID)
 
 		// Get Challenge-Pool info after upload
@@ -784,7 +786,7 @@ func TestUpload(testSetup *testing.T) {
 
 		totalChangeInWritePool := intToZCN(initialAllocation.WritePool - finalAllocation.WritePool)
 
-		require.InEpsilon(t, expectedUploadCostInZCN, totalChangeInWritePool, 0.15, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", expectedUploadCostInZCN, totalChangeInWritePool)
+		require.InEpsilon(t, expectedUploadCostInZCN, totalChangeInWritePool, 0.05, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", expectedUploadCostInZCN, totalChangeInWritePool)
 		require.Equal(t, totalChangeInWritePool, intToZCN(challengePool.Balance), "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 
