@@ -19,12 +19,16 @@ import (
 
 func TestFileDownloadTokenMovement(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Downloader's readpool balance should reduce by download cost")
 
 	t.Parallel()
 
 	t.RunWithTimeout("Downloader's readpool balance should reduce by download cost", 5*time.Minute, func(t *test.SystemTest) { //TODO: way too slow
 		walletOwner := escapedTestName(t)
-		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+		allocSize := int64(50 * MB)
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
 
 		file := generateRandomTestFileName(t)
 		remoteOwnerPath := "/" + filepath.Base(file)
@@ -54,10 +58,9 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, initialReadPool)
 
-		// staked a total of 1.4*1e10 tokens in readpool
-		require.Equal(t, 1.4*1e10, float64(initialReadPool.Balance))
+		// staked a total of 1 ZCN in readpool
+		require.Equal(t, 1e10, float64(initialReadPool.Balance))
 
-		// download cost functions works fine with no issues.
 		output, err = getDownloadCost(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remoteOwnerPath,
@@ -100,7 +103,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling read pool", strings.Join(output, "\n"))
 		require.NotEmpty(t, finalReadPool)
 
-		expectedRPBalance := 1.4*1e10 - expectedDownloadCostInSas - 10 // because download cost is till 3 decimal point only and missing the 4th decimal digit
+		expectedRPBalance := float64(initialReadPool.Balance) - expectedDownloadCostInSas - 10 // because download cost is till 3 decimal point only and missing the 4th decimal digit
 		require.Nil(t, err, "Error fetching read pool", strings.Join(output, "\n"))
 
 		// getDownloadCost returns download cost when all the associated blobbers of an allocation are required
