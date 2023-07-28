@@ -17,16 +17,18 @@ func TestRepairAllocation(testSetup *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
 		blobberRequirements.Size = 2056
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
-		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
-
+		lastBlobber := alloc.Blobbers[0]
+		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
 		op := sdkClient.AddUploadOperation(t, allocationID)
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op}, client.WithRepair(alloc.Blobbers[:len(alloc.Blobbers)-1]))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op}, client.WithRepair(alloc.Blobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
@@ -37,19 +39,22 @@ func TestRepairAllocation(testSetup *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
 		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
+		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 
 		ops := make([]sdk.OperationRequest, 0, 4)
 		for i := 0; i < 4; i++ {
 			op := sdkClient.AddUploadOperation(t, allocationID)
 			ops = append(ops, op)
 		}
-		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers[:len(alloc.Blobbers)-1]))
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		for _, op := range ops {
@@ -62,7 +67,9 @@ func TestRepairAllocation(testSetup *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.Size = 4096
+		blobberRequirements.Size = 6096
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -74,8 +81,9 @@ func TestRepairAllocation(testSetup *testing.T) {
 		op := sdkClient.AddUploadOperation(t, allocationID)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
+		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
 		updateOp := sdkClient.AddUpdateOperation(t, allocationID, op.RemotePath, op.FileMeta.RemoteName)
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{updateOp}, client.WithRepair(alloc.Blobbers[:len(alloc.Blobbers)-1]))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{updateOp}, client.WithRepair(alloc.Blobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 
@@ -92,6 +100,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		blobberRequirements.Size = 2056
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -102,8 +112,9 @@ func TestRepairAllocation(testSetup *testing.T) {
 		op := sdkClient.AddUploadOperation(t, allocationID)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
+		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 		deleteOp := sdkClient.AddDeleteOperation(t, allocationID, op.RemotePath)
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{deleteOp}, client.WithRepair(alloc.Blobbers[:len(alloc.Blobbers)-1]))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{deleteOp}, client.WithRepair(alloc.Blobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
@@ -114,7 +125,9 @@ func TestRepairAllocation(testSetup *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.Size = 4096
+		blobberRequirements.Size = 6096
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -125,9 +138,10 @@ func TestRepairAllocation(testSetup *testing.T) {
 		op := sdkClient.AddUploadOperation(t, allocationID)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
+		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 		newPath := "/new/" + filepath.Join("", filepath.Base(op.FileMeta.Path))
 		moveOp := sdkClient.AddMoveOperation(t, allocationID, op.RemotePath, newPath)
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{moveOp}, client.WithRepair(alloc.Blobbers[:len(alloc.Blobbers)-1]))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{moveOp}, client.WithRepair(alloc.Blobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, newPath)
@@ -138,7 +152,9 @@ func TestRepairAllocation(testSetup *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.Size = 4096
+		blobberRequirements.Size = 8096
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -149,9 +165,10 @@ func TestRepairAllocation(testSetup *testing.T) {
 		op := sdkClient.AddUploadOperation(t, allocationID)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
+		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 		newPath := "/new/" + filepath.Join("", filepath.Base(op.FileMeta.Path))
 		copyOP := sdkClient.AddCopyOperation(t, allocationID, op.RemotePath, newPath)
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{copyOP}, client.WithRepair(alloc.Blobbers[:len(alloc.Blobbers)-1]))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{copyOP}, client.WithRepair(alloc.Blobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, newPath)
@@ -164,7 +181,9 @@ func TestRepairAllocation(testSetup *testing.T) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.Size = 4096
+		blobberRequirements.Size = 6096
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -175,9 +194,10 @@ func TestRepairAllocation(testSetup *testing.T) {
 		op := sdkClient.AddUploadOperation(t, allocationID)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
+		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 		newName := randName()
 		renameOp := sdkClient.AddRenameOperation(t, allocationID, op.RemotePath, newName)
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{renameOp}, client.WithRepair(alloc.Blobbers[:len(alloc.Blobbers)-1]))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{renameOp}, client.WithRepair(alloc.Blobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, "/"+newName)
