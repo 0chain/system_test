@@ -693,19 +693,9 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 		allocAfterUpload := getAllocation(t, allocationID)
 		require.Equal(t, initialAllocation.WritePool-allocAfterUpload.WritePool, allocAfterUpload.MovedToChallenge)
-		// convert allocAfterUpload to json
-		allocAfterUploadJSON, err := json.Marshal(allocAfterUpload)
-		require.Nil(t, err, "Failed to marshal allocation", strings.Join(output, "\n"))
-		t.Log("allocAfterUpload : ", string(allocAfterUploadJSON))
-
 		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge), 0.05, "Upload cost is not as expected %v != %v", expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge))
 
-		// Get initial write pool
-		cliutils.Wait(t, 10*time.Second)
-
-		// Move file
 		remotepath := "/" + filepath.Base(localpath)
-
 		// copy file
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
@@ -716,20 +706,19 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Len(t, output, 1)
 		require.Equal(t, fmt.Sprintf(remotepath+" copied"), output[0])
 
-		t.Logf("File copied: %s", output)
+		cliutils.Wait(t, 30*time.Second)
 
 		finalAllocation := getAllocation(t, allocationID)
 		finalAllocationJSON, err := json.Marshal(allocAfterUpload)
 		require.Nil(t, err, "Failed to marshal allocation", strings.Join(output, "\n"))
-		t.Log("finalAllocationJSON : ", string(finalAllocationJSON))
+		t.Log("finalAllocationJSON: ", string(finalAllocationJSON))
 
 		actualCost := finalAllocation.MovedToChallenge - allocAfterUpload.MovedToChallenge
 
 		t.Logf("Actual cost: %v", actualCost)
-
 		t.Log("expectedUploadCostInZCN : ", expectedUploadCostInZCN, " actualCost : ", intToZCN(actualCost))
 
-		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(actualCost), 0.15, "Copy file cost is not as expected")
+		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(actualCost), 0.05, "Copy file cost is not as expected")
 
 		createAllocationTestTeardown(t, allocationID)
 	})
