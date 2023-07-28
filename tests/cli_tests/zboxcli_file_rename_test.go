@@ -838,7 +838,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 				"json":       "",
 			}), true)
 
-			require.Error(t, err)
+			require.Error(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 		}
 	})
