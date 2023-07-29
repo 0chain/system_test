@@ -2,7 +2,6 @@ package api_tests
 
 import (
 	"os"
-	"path/filepath"
 	"sync"
 	"testing"
 
@@ -42,9 +41,9 @@ func TestMultiDownload(testSetup *testing.T) {
 		}()
 		wg := &sync.WaitGroup{}
 		for i := 0; i < 9; i++ {
-			sdkClient.DownloadFileWithParam(t, alloc, ops[i].FileMeta.RemotePath, "temp/"+filepath.Join("", ops[i].FileMeta.RemoteName), wg, false)
+			sdkClient.DownloadFileWithParam(t, alloc, ops[i].FileMeta.RemotePath, "temp/", wg, false)
 		}
-		sdkClient.DownloadFileWithParam(t, alloc, ops[9].FileMeta.RemotePath, "temp/"+filepath.Join("", ops[9].FileMeta.RemoteName), wg, true)
+		sdkClient.DownloadFileWithParam(t, alloc, ops[9].FileMeta.RemotePath, "temp/", wg, true)
 		wg.Wait()
 		files, err := os.ReadDir("temp")
 		require.NoError(t, err, "error reading temp dir")
