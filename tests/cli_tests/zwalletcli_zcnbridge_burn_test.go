@@ -48,7 +48,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		var amountInt int
 		amountInt, err = strconv.Atoi(amount)
 		require.Nil(t, err)
-		require.Equal(t, 1, amountInt)
+		require.Equal(t, 10000000000, amountInt)
 
 		nonce := strings.TrimSpace(strings.Split(output[len(output)-4], ":")[1])
 		var nonceInt int
