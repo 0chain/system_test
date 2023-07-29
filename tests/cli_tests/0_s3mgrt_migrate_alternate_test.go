@@ -85,7 +85,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remoteFilePath = path.Join(remoteFilePath, remotepath)
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate existing bucket to specified path successfully with encryption on", func(t *test.SystemTest) {
@@ -113,7 +113,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remoteFilePath = path.Join(remoteFilePath, "/")
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate as copy bucket successfully", func(t *test.SystemTest) {
@@ -154,7 +154,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		// fileKey_modified := parts[0]+ "_modified." + parts[1]
 		// remoteFilePath := path.Join(remotepath, fileKey_modified)
 		// uploadStats := checkStats(t, remoteFilePath, fileKey_modified, allocationID)
-		// require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		// require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate existing bucket successfully with encryption on", func(t *test.SystemTest) {
@@ -180,7 +180,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remoteFilePath := path.Join(remotepath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, true)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should skip migration with skip flag == 1 and migartion should be skipped", func(t *test.SystemTest) {
@@ -229,7 +229,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remotepath = path.Join(remotepath, bucketName)
 		remoteFilePath := path.Join(remotepath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate successfully with duplication files  with skip flag == 2 and dup-suffix", func(t *test.SystemTest) {
@@ -259,7 +259,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remotepath = path.Join(remotepath, bucketName)
 		remoteFilePath := path.Join(remotepath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate successfully and delete the s3 bucket file and use custom workdir", func(t *test.SystemTest) {
@@ -292,7 +292,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remoteFilePath := path.Join(remotepath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should error out if workdir is not default and not empty", func(t *test.SystemTest) {
