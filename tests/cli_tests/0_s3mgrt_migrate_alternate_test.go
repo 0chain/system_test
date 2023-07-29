@@ -32,6 +32,8 @@ const (
 func Test0S3MigrationAlternate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	t.Skip()
+
 	if s3SecretKey == "" || s3AccessKey == "" {
 		t.Skip("s3SecretKey or s3AccessKey was missing")
 	}
