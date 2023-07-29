@@ -84,6 +84,39 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		passed := areNewChallengesOpened(t, sharderBaseURLs, blobbers, openChallengesBefore)
 		require.True(t, passed, "expected new challenges to be created after an upload operation")
 	})
+
+	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations", 4*time.Minute, func(t *test.SystemTest) {
+		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   10 * MB,
+			"tokens": 9,
+		})
+
+		startBlock := getLatestFinalizedBlock(t)
+
+		remotepath := "/dir/"
+		filesize := 2 * MB
+		filename := generateRandomTestFileName(t)
+
+		err := createFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		time.Sleep(2 * time.Minute)
+
+		endBlock := getLatestFinalizedBlock(t)
+
+		challenges, err := countChallengesByBlocks(t, startBlock.Round, endBlock.Round, sharderBaseURLs)
+		require.Nil(t, err, "error counting challenges", strings.Join(output, "\n"))
+
+		require.Equal(t, endBlock.Round-startBlock.Round, challenges["total"], "number of challenges should be equal to the number of blocks")
+		require.Equal(t, endBlock.Round-startBlock.Round, challenges["passed"], "number of challenges should be equal to the number of blocks")
+	})
 }
 
 func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
@@ -158,4 +191,32 @@ func areNewChallengesOpened(t *test.SystemTest, sharderBaseURLs, blobbers []stri
 		cliutils.Wait(t, time.Second)
 	}
 	return false
+}
+
+func countChallengesByBlocks(t *test.SystemTest, start, end int64, sharderBaseURLs []string) (map[string]int64, error) {
+	for _, sharderBaseURL := range sharderBaseURLs {
+		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress +
+			"/count-challenges-between-blocks" + "?start=" + strconv.FormatInt(start, 10) + "&end=" + strconv.FormatInt(end, 10)))
+		if err != nil || res.StatusCode < 200 || res.StatusCode >= 300 {
+			continue
+		}
+
+		require.Nil(t, err, "error getting challenges count", res)
+		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get challenges count between blocks")
+		require.NotNil(t, res.Body, "get challenges count between blocks API response must not be nil")
+
+		resBody, err := io.ReadAll(res.Body)
+		func() { defer res.Body.Close() }()
+
+		require.Nil(t, err, "Error reading response body")
+
+		var challengesCount map[string]int64
+		err = json.Unmarshal(resBody, &challengesCount)
+		require.Nil(t, err, "error unmarshalling response body")
+
+		return challengesCount, nil
+	}
+	t.Errorf("all sharders gave an error at endpoint /openchallenges")
+
+	return nil, nil
 }
