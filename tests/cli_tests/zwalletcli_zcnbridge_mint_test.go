@@ -30,7 +30,7 @@ func TestBridgeMint(testSetup *testing.T) {
 		output, err = mintWrappedZcnTokens(t, true)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
-		require.Contains(t, output[len(output)-1], "Verification [OK]")
+		require.Contains(t, output[len(output)-1], "Done.")
 	})
 
 	t.Run("Mint ZCN tokens", func(t *test.SystemTest) {
