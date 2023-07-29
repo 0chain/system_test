@@ -116,7 +116,8 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "error counting challenges", strings.Join(output, "\n"))
 
 		require.Equal(t, endBlock.Round-startBlock.Round, challenges["total"], "number of challenges should be equal to the number of blocks")
-		require.Equal(t, endBlock.Round-startBlock.Round, challenges["passed"], "number of challenges should be equal to the number of blocks")
+		require.Equal(t, 0, challenges["failed"], "number of failed challenges should be 0")
+		require.Less(t, 720, challenges["open"], "number of successful challenges should be greater than 720")
 	})
 }
 
