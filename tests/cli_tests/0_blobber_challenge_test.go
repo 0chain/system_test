@@ -111,7 +111,8 @@ func TestBlobberChallenge(testSetup *testing.T) {
 
 		endBlock := getLatestFinalizedBlock(t)
 
-		challenges, err := countChallengesByBlocks(t, startBlock.Round, endBlock.Round, sharderBaseURLs)
+		challengesCountQuery := fmt.Sprintf("round_created_at >= %d AND round_created_at < %d", startBlock.Round, endBlock.Round)
+		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges", strings.Join(output, "\n"))
 
 		require.Equal(t, endBlock.Round-startBlock.Round, challenges["total"], "number of challenges should be equal to the number of blocks")
@@ -193,10 +194,10 @@ func areNewChallengesOpened(t *test.SystemTest, sharderBaseURLs, blobbers []stri
 	return false
 }
 
-func countChallengesByBlocks(t *test.SystemTest, start, end int64, sharderBaseURLs []string) (map[string]int64, error) {
+func countChallengesByBlocks(t *test.SystemTest, query string, sharderBaseURLs []string) (map[string]int64, error) {
 	for _, sharderBaseURL := range sharderBaseURLs {
 		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress +
-			"/count-challenges-between-blocks" + "?start=" + strconv.FormatInt(start, 10) + "&end=" + strconv.FormatInt(end, 10)))
+			"/count-challenges" + "?query=" + query))
 		if err != nil || res.StatusCode < 200 || res.StatusCode >= 300 {
 			continue
 		}
@@ -216,7 +217,7 @@ func countChallengesByBlocks(t *test.SystemTest, start, end int64, sharderBaseUR
 
 		return challengesCount, nil
 	}
-	t.Errorf("all sharders gave an error at endpoint /openchallenges")
+	t.Errorf("all sharders gave an error at endpoint /count-challenges")
 
 	return nil, nil
 }
