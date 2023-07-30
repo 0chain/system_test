@@ -14,11 +14,6 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-var (
-	configKey string
-	newValue  string
-)
-
 func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("should allow update of min_mint_amount")
@@ -42,29 +37,30 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 
 	cfgBefore, _ := keyValuePairStringToMap(output)
 
-	// ensure revert in config is run regardless of test result
-	defer func() {
-		oldValue := cfgBefore[configKey]
-		output, err = updateZCNBridgeSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   configKey,
-			"values": oldValue,
-		}, true)
+	t.Cleanup(func() {
+		cfgRevert := make(map[string]interface{})
+		for k, v := range cfgBefore {
+			cfgRevert[k] = v
+		}
+
+		output, err = updateZCNBridgeSCConfig(t, zcnscOwner, cfgRevert, true)
+
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "faucet smart contract settings updated", output[0], strings.Join(output, "\n"))
 		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
-	}()
+	})
 
 	t.RunSequentially("should allow update of min_mint_amount", func(t *test.SystemTest) {
-		testKey(t, "min_mint_amount", "1")
+		testKey(t, "min_mint", "1")
 	})
 
 	t.RunSequentially("should allow update of min_burn_amount", func(t *test.SystemTest) {
-		testKey(t, "min_burn_amount", "2")
+		testKey(t, "min_burn", "2")
 	})
 
 	t.RunSequentially("should allow update of min_stake_amount", func(t *test.SystemTest) {
-		testKey(t, "min_stake_amount", "3")
+		testKey(t, "min_stake", "3")
 	})
 
 	t.RunSequentially("should allow update of max_fee", func(t *test.SystemTest) {
@@ -90,11 +86,11 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 
 func testKey(t *test.SystemTest, key, value string) {
 	cfgAfter := updateAndVerify(t, key, value)
-	require.Equal(t, newValue, cfgAfter[key], "new value %s for config %s was not set", value, key)
+	require.Equal(t, value, cfgAfter[key], "new value %s for config %s was not set", value, key)
 }
 
 func updateAndVerify(t *test.SystemTest, key, value string) map[string]string {
-	output, err := updateZCNBridgeSCConfig(t, scOwnerWallet, map[string]interface{}{
+	output, err := updateZCNBridgeSCConfig(t, zcnscOwner, map[string]interface{}{
 		"keys":   key,
 		"values": value,
 	}, true)

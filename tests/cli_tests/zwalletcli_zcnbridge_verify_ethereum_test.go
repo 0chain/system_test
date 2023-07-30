@@ -12,22 +12,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	Address = "0x31925839586949a96e72cacf25fed7f47de5faff78adc20946183daf3c4cf230"
-)
-
 func TestBridgeVerify(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till authorizers are re-enabled")
 	t.SetSmokeTests("Verify ethereum transaction")
 
 	t.Parallel()
 
 	t.Run("Verify ethereum transaction", func(t *test.SystemTest) {
-		output, err := verifyBridgeTransaction(t, Address, false)
+		output, err := burnEth(t, "10000000000", true)
+		require.Nil(t, err, output)
+		require.Greater(t, len(output), 0)
+		require.Contains(t, output[len(output)-1], "Verification:")
+
+		ethTxHash := getTransactionHash(output, true)
+
+		output, err = verifyBridgeTransaction(t, ethTxHash, false)
 		require.Nil(t, err, "error trying to verify transaction", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
-		require.Equal(t, "Transaction verification success: "+Address, output[len(output)-1])
+		require.Equal(t, "Transaction verification success: "+ethTxHash, output[len(output)-1])
 	})
 }
 
