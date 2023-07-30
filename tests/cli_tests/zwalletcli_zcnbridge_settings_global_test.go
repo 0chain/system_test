@@ -14,20 +14,6 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-// This will test the following config
-
-// ZCNSConfig config both for GlobalNode and AuthorizerNode
-// type ZCNSConfig struct {
-//	MinMintAmount      state.Balance `json:"min_mint_amount"`
-//	MinBurnAmount      state.Balance `json:"min_burn_amount"`
-//	MinStakeAmount     state.Balance `json:"min_stake_amount"`
-//	MaxFee             state.Balance `json:"max_fee"`
-//	PercentAuthorizers float64       `json:"percent_authorizers"`
-//	MinAuthorizers     int64         `json:"min_authorizers"`
-//	BurnAddress        string        `json:"burn_address"`
-//	OwnerId            datastore.Key `json:"owner_id"`
-// }
-
 var (
 	configKey string
 	newValue  string
@@ -35,7 +21,6 @@ var (
 
 func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till authorizers are re-enabled")
 	t.SetSmokeTests("should allow update of min_mint_amount")
 
 	if _, err := os.Stat("./config/" + zcnscOwner + "_wallet.json"); err != nil {
