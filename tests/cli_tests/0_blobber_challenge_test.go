@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -14,7 +14,6 @@ import (
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -54,37 +53,6 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 	})
 
-	t.RunSequentiallyWithTimeout("Uploading a file greater than 1 MB should generate randomized challenges", 3*time.Minute, func(t *test.SystemTest) {
-		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 9,
-		})
-
-		var blobbers []string
-		for _, blobber := range blobberList {
-			blobbers = append(blobbers, blobber.Id)
-		}
-
-		openChallengesBefore := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
-
-		remotepath := "/dir/"
-		filesize := 2 * MB
-		filename := generateRandomTestFileName(t)
-
-		err := createFileWithSize(filename, int64(filesize))
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
-		passed := areNewChallengesOpened(t, sharderBaseURLs, blobbers, openChallengesBefore)
-		require.True(t, passed, "expected new challenges to be created after an upload operation")
-	})
-
 	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations", 4*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
@@ -113,11 +81,51 @@ func TestBlobberChallenge(testSetup *testing.T) {
 
 		challengesCountQuery := fmt.Sprintf("round_created_at >= %d AND round_created_at < %d", startBlock.Round, endBlock.Round)
 		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
-		require.Nil(t, err, "error counting challenges", strings.Join(output, "\n"))
+		require.Nil(t, err, "error counting challenges")
 
 		require.Equal(t, endBlock.Round-startBlock.Round, challenges["total"], "number of challenges should be equal to the number of blocks")
 		require.Equal(t, 0, challenges["failed"], "number of failed challenges should be 0")
-		require.Less(t, 720, challenges["open"], "number of successful challenges should be greater than 720")
+		require.Less(t, 720, challenges["open"], "number of open challenges should be greater than 720")
+	})
+
+	t.RunWithTimeout("Allocation with writes should get challenges", 4*time.Minute, func(t *test.SystemTest) {
+		// read allocation id in first line of challenge_allocations.txt
+
+		file := "challenge_allocations.txt"
+		allocationId := readAllocationIdFromFile(t, file, 0)
+
+		challengesCountQuery := fmt.Sprintf("allocation_id = '%s'", allocationId)
+		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		require.Nil(t, err, "error counting challenges")
+
+		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
+		require.Equal(t, 0, challenges["failed"], "number of failed challenges should be 0")
+	})
+
+	t.RunWithTimeout("Allocation with writes and deletes should not get challenges", 4*time.Minute, func(t *test.SystemTest) {
+		// read allocation id in second line of challenge_allocations.txt
+
+		file := "challenge_allocations.txt"
+		allocationId := readAllocationIdFromFile(t, file, 1)
+
+		challengesCountQuery := fmt.Sprintf("allocation_id = '%s'", allocationId)
+		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		require.Nil(t, err, "error counting challenges")
+
+		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
+	})
+
+	t.RunWithTimeout("Empty Allocation should not get challenges", 4*time.Minute, func(t *test.SystemTest) {
+		// read allocation id in third line of challenge_allocations.txt
+
+		file := "challenge_allocations.txt"
+		allocationId := readAllocationIdFromFile(t, file, 2)
+
+		challengesCountQuery := fmt.Sprintf("allocation_id = '%s'", allocationId)
+		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		require.Nil(t, err, "error counting challenges")
+
+		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
 	})
 }
 
@@ -127,72 +135,6 @@ func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 		sharderURLs = append(sharderURLs, getNodeBaseURL(sharder.Host, sharder.Port))
 	}
 	return sharderURLs
-}
-
-func apiGetOpenChallenges(t require.TestingT, sharderBaseURLs []string, blobberId string, offset, limit int, lastChallengeRound int64) *climodel.BlobberChallenge {
-	for _, sharderBaseURL := range sharderBaseURLs {
-		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress +
-			"/openchallenges" + "?blobber=" + blobberId + "&offset=" + strconv.Itoa(offset) + "&limit=" + strconv.Itoa(limit) + "&from=" + strconv.FormatInt(lastChallengeRound, 10)))
-		if err != nil || res.StatusCode < 200 || res.StatusCode >= 300 {
-			continue
-		}
-
-		require.Nil(t, err, "error getting challenges", res)
-		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get open challenges for blobber id: %s", blobberId)
-		require.NotNil(t, res.Body, "Open challenges API response must not be nil")
-
-		resBody, err := io.ReadAll(res.Body)
-		func() { defer res.Body.Close() }()
-
-		require.Nil(t, err, "Error reading response body")
-		var openChallengesInBlobber climodel.BlobberChallenge
-		err = json.Unmarshal(resBody, &openChallengesInBlobber)
-		require.Nil(t, err, "error unmarshalling response body")
-
-		return &openChallengesInBlobber
-	}
-	t.Errorf("all sharders gave an error at endpoint /openchallenges")
-
-	return nil
-}
-
-func openChallengesForAllBlobbers(t *test.SystemTest, sharderBaseURLs, blobbers []string) (openChallenges map[string]climodel.Challenges) {
-	openChallenges = make(map[string]climodel.Challenges)
-	for _, blobberId := range blobbers {
-		offset := 0
-		limit := 50
-		lastChallengeRound := int64(0)
-
-		for {
-			openChallengesInBlobber := apiGetOpenChallenges(t, sharderBaseURLs, blobberId, offset, limit, lastChallengeRound)
-			if openChallengesInBlobber == nil || len(openChallengesInBlobber.Challenges) == 0 {
-				break
-			}
-			for _, challenge := range openChallengesInBlobber.Challenges {
-				openChallenges[challenge.ID] = challenge
-
-				if challenge.RoundCreatedAt > lastChallengeRound {
-					lastChallengeRound = challenge.RoundCreatedAt
-				}
-			}
-		}
-	}
-
-	return openChallenges
-}
-
-func areNewChallengesOpened(t *test.SystemTest, sharderBaseURLs, blobbers []string, openChallengesBefore map[string]climodel.Challenges) bool {
-	t.Log("Checking for new challenges to open...")
-	for i := 0; i < 150; i++ {
-		openChallengesAfter := openChallengesForAllBlobbers(t, sharderBaseURLs, blobbers)
-		for _, challenge := range openChallengesAfter {
-			if _, ok := openChallengesBefore[challenge.ID]; !ok {
-				return true
-			}
-		}
-		cliutils.Wait(t, time.Second)
-	}
-	return false
 }
 
 func countChallengesByBlocks(t *test.SystemTest, query string, sharderBaseURLs []string) (map[string]int64, error) {
@@ -221,4 +163,14 @@ func countChallengesByBlocks(t *test.SystemTest, query string, sharderBaseURLs [
 	t.Errorf("all sharders gave an error at endpoint /count-challenges")
 
 	return nil, nil
+}
+
+func readAllocationIdFromFile(t *test.SystemTest, file string, line int) string {
+	output, err := ioutil.ReadFile(file)
+	require.Nil(t, err, "error reading file", file)
+
+	lines := strings.Split(string(output), "\n")
+	require.Greater(t, len(lines), line, "file should have at least %d lines", line)
+
+	return lines[line]
 }
