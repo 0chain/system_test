@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -18,32 +17,10 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("should allow update of min_mint_amount")
 
-	if _, err := os.Stat("./config/" + zcnscOwner + "_wallet.json"); err != nil {
-		t.Skipf("SC owner wallet located at %s is missing", "./config/"+zcnscOwner+"_wallet.json")
-	}
-
-	// unused wallet, just added to avoid having the creating new wallet outputs
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-	// create SC owner wallet
-	output, err = createWalletForName(t, configPath, zcnscOwner)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-	// get global config
-	output, err = getZCNBridgeGlobalSCConfig(t, configPath, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
-
-	cfgBefore, _ := keyValuePairStringToMap(output)
+	defaultConfig := getDefaultConfig(t)
 
 	t.Cleanup(func() {
-		cfgRevert := make(map[string]interface{})
-		for k, v := range cfgBefore {
-			cfgRevert[k] = v
-		}
-
-		output, err = updateZCNBridgeSCConfig(t, zcnscOwner, cfgRevert, true)
+		output, err := updateZCNBridgeSCConfig(t, zcnscOwner, defaultConfig, true)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
@@ -84,6 +61,21 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	})
 }
 
+func getDefaultConfig(t *test.SystemTest) map[string]interface{} {
+	output, err := getZCNBridgeGlobalSCConfig(t, configPath, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
+
+	defaultConfig, _ := keyValuePairStringToMap(output)
+
+	result := make(map[string]interface{})
+	for k, v := range defaultConfig {
+		result[k] = v
+	}
+
+	return result
+}
+
 func testKey(t *test.SystemTest, key, value string) {
 	cfgAfter := updateAndVerify(t, key, value)
 	require.Equal(t, value, cfgAfter[key], "new value %s for config %s was not set", value, key)
@@ -115,7 +107,7 @@ func getZCNBridgeGlobalSCConfig(t *test.SystemTest, cliConfigFilename string, re
 
 	cmd :=
 		"./zwallet bridge-config --silent --wallet " +
-			escapedTestName(t) +
+			zcnscOwner +
 			"_wallet.json --configDir ./config --config " +
 			cliConfigFilename
 
