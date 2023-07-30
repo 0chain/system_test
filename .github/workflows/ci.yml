@@ -123,7 +123,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@master
+        uses: 0chain/actions/run-system-tests@feature/challenge_system_tests
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
