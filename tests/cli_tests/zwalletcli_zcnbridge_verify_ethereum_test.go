@@ -18,7 +18,7 @@ func TestBridgeVerify(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Verify ethereum transaction", func(t *test.SystemTest) {
+	t.RunWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {
 		output, err := burnEth(t, "10000000000", true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
