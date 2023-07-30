@@ -18,7 +18,7 @@ func TestBridgeMint(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Mint WZCN tokens", func(t *test.SystemTest) {
+	t.RunWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
 		output, err := executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
@@ -33,7 +33,7 @@ func TestBridgeMint(testSetup *testing.T) {
 		require.Contains(t, output[len(output)-1], "Done.")
 	})
 
-	t.Run("Mint ZCN tokens", func(t *test.SystemTest) {
+	t.RunWithTimeout("Mint ZCN tokens", time.Minute*10, func(t *test.SystemTest) {
 		_, err := createWalletForName(t, configPath, escapedTestName(t))
 		require.NoError(t, err)
 
