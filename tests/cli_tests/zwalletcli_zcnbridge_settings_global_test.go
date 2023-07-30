@@ -28,6 +28,9 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 	})
 
+	output, err := executeFaucetWithTokensForWallet(t, zcnscOwner, configPath, 10.0)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
 	t.RunSequentially("should allow update of min_mint_amount", func(t *test.SystemTest) {
 		testKey(t, "min_mint", "1")
 	})
