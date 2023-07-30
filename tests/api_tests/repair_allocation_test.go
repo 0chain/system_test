@@ -15,6 +15,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 	apiClient.CreateReadPool(t, sdkWallet, 0.5, client.TxSuccessfulStatus)
+
 	t.RunSequentially("Repair allocation after single upload should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
