@@ -953,7 +953,7 @@ func (c *ZboxClient) CreateFCMToken(t *test.SystemTest, idToken, csrfToken, phon
 	return resp, err
 }
 
-func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToken, phoneNumber, createdBy, collectionName, collectionId, totalNfts, collectionType, allocationId, baseUrl, symbol string, pricePerPack, maxMints, currMints, batchSize int) (*model.ZboxNftCollection, *resty.Response, error) {
+func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToken, phoneNumber, createdBy, collectionName, collectionId, authTicket, totalNfts, collectionType, allocationId, baseUrl, symbol string, pricePerPack, maxMints, currMints, batchSize int) (*model.ZboxNftCollection, *resty.Response, error) {
 	t.Logf("Creating nft collection using 0box...")
 	var ZboxNftCollection *model.ZboxNftCollection
 
@@ -966,6 +966,7 @@ func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToke
 		"created_by":      createdBy,
 		"collection_name": collectionName,
 		"collection_id":   collectionId,
+		"auth_ticket":     authTicket,
 		"total_nfts":      totalNfts,
 		"collection_type": collectionType,
 		"allocation_id":   allocationId,
