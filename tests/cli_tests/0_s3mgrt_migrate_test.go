@@ -244,5 +244,5 @@ func Test0S3Migration(testSetup *testing.T) {
 
 func migrateFromS3(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Migrating S3 bucket to Zus...")
-	return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./s3mgrt migrate --silent --configDir ./config --config %s --network %s %s", cliConfigFilename, cliConfigFilename, params))
+	return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./s3mgrt migrate --configDir ./config --config %s --network %s %s", cliConfigFilename, cliConfigFilename, params))
 }
