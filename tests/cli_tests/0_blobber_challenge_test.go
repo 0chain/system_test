@@ -89,7 +89,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.Less(t, 720, challenges["open"], "number of open challenges should be greater than 720")
 	})
 
-	t.RunWithTimeout("Allocation with writes should get challenges", 4*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Allocation  with writes should get challenges", 4*time.Minute, func(t *test.SystemTest) {
 		// read allocation id in first line of challenge_allocations.txt
 
 		file := "challenge_allocations.txt"
