@@ -168,6 +168,8 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 		apiClient.UpdateAllocationBlobbers(t, sdkWallet, newBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
 
+		time.Sleep(10 * time.Second)
+
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.Nil(t, err)
 		// Check for blobber replacement
