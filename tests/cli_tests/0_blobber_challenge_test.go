@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -19,7 +20,7 @@ import (
 
 func TestBlobberChallenge(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.SetSmokeTests("Uploading a file greater than 1 MB should generate randomized challenges")
+	t.SetSmokeTests("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)")
 
 	var blobberList []climodel.BlobberInfo
 	var sharderBaseURLs []string
@@ -53,7 +54,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 	})
 
-	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations", 4*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)", 4*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 9,
@@ -92,9 +93,9 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		// read allocation id in first line of challenge_allocations.txt
 
 		file := "challenge_allocations.txt"
-		allocationId := readAllocationIdFromFile(t, file, 0)
+		allocationId := readLineFromFile(t, file, 0)
 
-		challengesCountQuery := fmt.Sprintf("allocation_id = '%s'", allocationId)
+		challengesCountQuery := fmt.Sprintf("allocation_id='%s'", allocationId)
 		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
@@ -106,7 +107,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		// read allocation id in second line of challenge_allocations.txt
 
 		file := "challenge_allocations.txt"
-		allocationId := readAllocationIdFromFile(t, file, 1)
+		allocationId := readLineFromFile(t, file, 1)
 
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s'", allocationId)
 		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
@@ -119,10 +120,60 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		// read allocation id in third line of challenge_allocations.txt
 
 		file := "challenge_allocations.txt"
-		allocationId := readAllocationIdFromFile(t, file, 2)
+		allocationId := readLineFromFile(t, file, 2)
 
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s'", allocationId)
 		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		require.Nil(t, err, "error counting challenges")
+
+		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
+	})
+
+	t.RunWithTimeout("Added blobber in an allocation should also be challenged for this blobber allocation", 4*time.Minute, func(t *test.SystemTest) {
+		challengeAllocationFile := "challenge_allocations.txt"
+		challengeBlobberFile := "challenge_blobbers.txt"
+
+		// read allocation id in fourth line of challenge_allocations.txt
+		allocationId := readLineFromFile(t, challengeAllocationFile, 3)
+
+		// read blobber id in first line of challenge_blobbers.txt
+		blobberId := readLineFromFile(t, challengeBlobberFile, 0)
+
+		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, blobberId)
+
+		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		require.Nil(t, err, "error counting challenges")
+
+		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
+		require.Equal(t, 0, challenges["failed"], "number of failed challenges should be 0")
+	})
+
+	t.RunWithTimeout("Replaced blobber in an allocation should not be challenged for this blobber allocation", 4*time.Minute, func(t *test.SystemTest) {
+		challengeAllocationFile := "challenge_allocations.txt"
+		challengeBlobberFile := "challenge_blobbers.txt"
+
+		// read allocation id in fifth line of challenge_allocations.txt
+		allocationId := readLineFromFile(t, challengeAllocationFile, 4)
+
+		// read blobber id in second line of challenge_blobbers.txt
+		addedBlobberID := readLineFromFile(t, challengeBlobberFile, 1)
+		replacedBlobberID := readLineFromFile(t, challengeBlobberFile, 2)
+
+		// Added Blobber should get challenges for this allocation
+
+		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, addedBlobberID)
+
+		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		require.Nil(t, err, "error counting challenges")
+
+		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
+		require.Equal(t, 0, challenges["failed"], "number of failed challenges should be 0")
+
+		// Replaced Blobber should not get challenges for this allocation
+
+		challengesCountQuery = fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, replacedBlobberID)
+
+		challenges, err = countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
 		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
@@ -139,8 +190,12 @@ func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 
 func countChallengesByBlocks(t *test.SystemTest, query string, sharderBaseURLs []string) (map[string]int64, error) {
 	for _, sharderBaseURL := range sharderBaseURLs {
-		res, err := http.Get(fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress +
-			"/count-challenges" + "?query=" + query))
+		encodedQuery := url.QueryEscape(query)
+		baseURL := sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/count-challenges"
+		challengeCountURL := fmt.Sprintf("%s?query=%s", baseURL, encodedQuery)
+
+		res, err := http.Get(challengeCountURL)
+
 		if err != nil || res.StatusCode < 200 || res.StatusCode >= 300 {
 			continue
 		}
@@ -165,7 +220,7 @@ func countChallengesByBlocks(t *test.SystemTest, query string, sharderBaseURLs [
 	return nil, nil
 }
 
-func readAllocationIdFromFile(t *test.SystemTest, file string, line int) string {
+func readLineFromFile(t *test.SystemTest, file string, line int) string {
 	output, err := ioutil.ReadFile(file)
 	require.Nil(t, err, "error reading file", file)
 
