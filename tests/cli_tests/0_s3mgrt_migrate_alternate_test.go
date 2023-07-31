@@ -327,6 +327,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 }
 
 func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string, encrypted bool) bool {
+	t.Log("remotepath: ", remoteFilePath)
 	output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
 		"allocation": allocationID,
 		"remotepath": remoteFilePath,
@@ -336,11 +337,12 @@ func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string, 
 	require.Len(t, output, 1)
 
 	var stats map[string]*climodel.FileStats
-
+	t.Log(output[0])
 	err = json.Unmarshal([]byte(output[0]), &stats)
 	require.Nil(t, err)
 
 	if len(stats) == 0 {
+		t.Logf("0. zero no files")
 		return false
 	}
 
