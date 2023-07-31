@@ -346,29 +346,38 @@ func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string, 
 
 	for _, data := range stats {
 		if fname != data.Name {
+			t.Logf("1. %s != %s", fname, data.Name)
 			return false
 		}
 		if remoteFilePath != data.Path {
+			t.Logf("2. %s != %s", remoteFilePath, data.Path)
 			return false
 		}
-		if fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath))) != data.PathHash {
+		hash := fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath)))
+		if hash != data.PathHash {
+			t.Logf("3. %s != %s", hash, data.PathHash)
 			return false
 		}
 		if int64(0) != data.NumOfBlockDownloads {
+			t.Logf("4. %d != %d", int64(0), data.NumOfBlockDownloads)
 			return false
 		}
 		if int64(1) != data.NumOfUpdates {
+			t.Logf("5. %d != %d", int64(1), data.NumOfUpdates)
 			return false
 		}
 		if float64(data.NumOfBlocks) != math.Ceil(float64(data.Size)/float64(chunksize)) {
+			t.Logf("6. %f != %f", float64(data.NumOfBlocks), math.Ceil(float64(data.Size)/float64(chunksize)))
 			return false
 		}
 		if data.WriteMarkerTxn == "" {
 			if data.BlockchainAware != false {
+				t.Logf("7. %t", data.BlockchainAware)
 				return false
 			}
 		} else {
 			if data.BlockchainAware != true {
+				t.Logf("8. %t", data.BlockchainAware)
 				return false
 			}
 		}
