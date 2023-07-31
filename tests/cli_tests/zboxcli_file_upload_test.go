@@ -430,7 +430,7 @@ func TestUpload(testSetup *testing.T) {
 
 		// require.Equal(t, len(output), 0, "upload not cancelled properly")
 		// require.Nil(t, err, "upload not cancelled properly")
-
+		// rawOutput, err := cmd.CombinedOutput()
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  "/",
@@ -692,7 +692,7 @@ func TestUpload(testSetup *testing.T) {
 	// 		"allocation": allocationID,
 	// 		"remotepath": "/",
 	// 		"localpath":  filename,
-	// 	})
+	// 	})rawOutput, err := cmd.CombinedOutput()
 	// 	require.NotNil(t, err, strings.Join(output, "\n"))
 	// 	require.Len(t, output, 1)
 
@@ -1045,7 +1045,8 @@ func waitPartialUploadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd) bool {
 			// Send interrupt signal to command
 			err := cmd.Process.Signal(os.Interrupt)
 			require.Nil(t, err)
-
+			rawOutput, err := cmd.CombinedOutput()
+			t.Log("output is v", rawOutput)
 			t.Log("Partial download successful, download has been interrupted")
 			return true
 
