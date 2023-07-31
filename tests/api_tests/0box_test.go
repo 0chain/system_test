@@ -31,7 +31,6 @@ func Test0boxNftCollection(testSetup *testing.T) {
 	defaultPricePerPack := 1
 	defaultTotalNFT := "1"
 	collection_id := "collection id created as a part of testing nft collection"
-	auth_ticket := "eyJjbGllbnRfaWQiOiIiLCJvd25lcl9pZCI6IjA0OTE3ZjlhNWFmNmNjOTY2Mjc5YWRlNmEyMjUyNDA4Zjk5YzE5ZjQ0YjcyNTA0MmRlZjE3NjJiZGUxOWRkMzUiLCJhbGxvY2F0aW9uX2lkIjoiNDg3ZWI2NjM3YjdjOWMyMGFmODYzNDc5ODgwOWVkNWQzNDkxZDZiZjU0NDFjOWQ1OTA4YzUzMDgxOTY1YTFkMSIsImZpbGVfcGF0aF9oYXNoIjoiZTM2Y2QxNmE1MGQ4M2Q1ZmQxN2NhMWQ1Y2JhYmFkN2FkOGEzYTc5Mzk3OTY1MTY3ZjBkMjAwMjdiN2M4YWFmNSIsImFjdHVhbF9maWxlX2hhc2giOiIiLCJmaWxlX25hbWUiOiIiLCJyZWZlcmVuY2VfdHlwZSI6ImQiLCJleHBpcmF0aW9uIjowLCJ0aW1lc3RhbXAiOjE2OTA3NDM2MjIsImVuY3J5cHRlZCI6ZmFsc2UsInNpZ25hdHVyZSI6IjQ4ZDdmYzk0M2IxZjQzMTdjMzdhMjQ2MGYxYmFlNWY0MDZiOWJmZGRlOTZiZDJjZGY5MDQ3MWIyNmQzNDMxOGEifQ=="
 
 	t.RunSequentially("List NFT collection id with zero nft collection id  should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
@@ -145,7 +144,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 			"created_by",
 			collection_name,
 			collection_id,
-			auth_ticket,
+			"auth_ticket",
 			defaultTotalNFT,
 			"collection_type",
 			allocationId,
@@ -282,7 +281,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"created_by",
 			collection_name,
 			collection_id,
-			auth_ticket,
+			"auth_ticket",
 			defaultTotalNFT,
 			"collection_type",
 			allocationId,
@@ -391,7 +390,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"created_by",
 			collection_name,
 			defaultCollectionId,
-			auth_ticket,
+			"auth_ticket",
 			defaultTotalNFT,
 			"collection_type",
 			allocationId,
@@ -611,7 +610,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"created_by",
 			collection_name,
 			collection_id,
-			auth_ticket,
+			"auth_ticket",
 			defaultTotalNFT,
 			"collection_type",
 			allocationId,
@@ -700,7 +699,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"created_by",
 			collection_name,
 			collection_id,
-			auth_ticket,
+			"auth_ticket",
 			defaultTotalNFT,
 			"collection_type",
 			allocationId,
