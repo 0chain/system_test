@@ -700,7 +700,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"created_by",
 			collection_name,
 			collection_id,
-			auth_ticket
+			auth_ticket,
 			defaultTotalNFT,
 			"collection_type",
 			allocationId,
