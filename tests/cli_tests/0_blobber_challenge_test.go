@@ -191,14 +191,13 @@ func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 func countChallengesByBlocks(t *test.SystemTest, query string, sharderBaseURLs []string) (map[string]int64, error) {
 	for _, sharderBaseURL := range sharderBaseURLs {
 		encodedQuery := url.QueryEscape(query)
-		baseURL := sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/count-challenges"
+		baseURL := fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/count-challenges")
 		challengeCountURL := fmt.Sprintf("%s?query=%s", baseURL, encodedQuery)
 
-		res, err := http.Get(challengeCountURL)
-
+		res, err := http.Get(challengeCountURL) //nolint:gosec
 		if err != nil || res.StatusCode < 200 || res.StatusCode >= 300 {
 			continue
-		}
+		} //nolint:gosec
 
 		require.Nil(t, err, "error getting challenges count", res)
 		require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get challenges count between blocks")
