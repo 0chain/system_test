@@ -85,7 +85,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "error counting challenges")
 
 		require.Equal(t, endBlock.Round-startBlock.Round, challenges["total"], "number of challenges should be equal to the number of blocks")
-		require.Equal(t, 0, challenges["failed"], "number of failed challenges should be 0")
+		require.Equal(t, int64(0), challenges["failed"], "number of failed challenges should be 0")
 		require.Less(t, 720, challenges["open"], "number of open challenges should be greater than 720")
 	})
 
@@ -100,7 +100,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "error counting challenges")
 
 		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
-		require.Equal(t, 0, challenges["failed"], "number of failed challenges should be 0")
+		require.Equal(t, int64(0), challenges["failed"], "number of failed challenges should be 0")
 	})
 
 	t.RunWithTimeout("Allocation with writes and deletes should not get challenges", 4*time.Minute, func(t *test.SystemTest) {
@@ -145,7 +145,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "error counting challenges")
 
 		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
-		require.Equal(t, 0, challenges["failed"], "number of failed challenges should be 0")
+		require.Equal(t, int64(0), challenges["failed"], "number of failed challenges should be 0")
 	})
 
 	t.RunWithTimeout("Replaced blobber in an allocation should not be challenged for this blobber allocation", 4*time.Minute, func(t *test.SystemTest) {
@@ -167,7 +167,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "error counting challenges")
 
 		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
-		require.Equal(t, 0, challenges["failed"], "number of failed challenges should be 0")
+		require.Equal(t, int64(0), challenges["failed"], "number of failed challenges should be 0")
 
 		// Replaced Blobber should not get challenges for this allocation
 
