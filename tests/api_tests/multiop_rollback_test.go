@@ -13,6 +13,7 @@ import (
 
 func TestMultiOperationRollback(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Multi different operations rollback should work")
 	t.RunSequentially("Multi upload operations rollback should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
