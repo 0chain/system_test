@@ -172,11 +172,11 @@ func TestReplaceBlobber(testSetup *testing.T) {
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.Nil(t, err)
+
 		// Check for blobber replacement
 		oldFound := false
 		newFound := false
 		require.True(t, len(alloc.Blobbers) > 0)
-		// Check if new blobber is in the same position as old blobber
 		for _, blobber := range alloc.Blobbers {
 			if blobber.ID == oldBlobberID {
 				oldFound = true
@@ -187,6 +187,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		}
 		require.True(t, newFound, "new blobber should be in the list")
 		require.False(t, oldFound, "old blobber should not be in the list")
+
 		// check for repair
 		_, _, req, _, err := alloc.RepairRequired("/")
 		require.Nil(t, err)
