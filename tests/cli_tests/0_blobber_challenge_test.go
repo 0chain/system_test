@@ -81,7 +81,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		endBlock := getLatestFinalizedBlock(t)
 
 		challengesCountQuery := fmt.Sprintf("round_created_at >= %d AND round_created_at < %d", startBlock.Round, endBlock.Round)
-		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
 		require.Equal(t, endBlock.Round-startBlock.Round, challenges["total"], "number of challenges should be equal to the number of blocks")
@@ -96,7 +96,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		allocationId := readLineFromFile(t, file, 0)
 
 		challengesCountQuery := fmt.Sprintf("allocation_id='%s'", allocationId)
-		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
 		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
@@ -110,7 +110,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		allocationId := readLineFromFile(t, file, 1)
 
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s'", allocationId)
-		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
 		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
@@ -123,7 +123,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		allocationId := readLineFromFile(t, file, 2)
 
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s'", allocationId)
-		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
 		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
@@ -141,7 +141,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, blobberId)
 
-		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
 		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
@@ -163,7 +163,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, addedBlobberID)
 
-		challenges, err := countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
 		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
@@ -173,7 +173,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 
 		challengesCountQuery = fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, replacedBlobberID)
 
-		challenges, err = countChallengesByBlocks(t, challengesCountQuery, sharderBaseURLs)
+		challenges, err = countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
 		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
@@ -188,7 +188,9 @@ func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 	return sharderURLs
 }
 
-func countChallengesByBlocks(t *test.SystemTest, query string, sharderBaseURLs []string) (map[string]int64, error) {
+func countChallengesByQuery(t *test.SystemTest, query string, sharderBaseURLs []string) (map[string]int64, error) {
+	t.Logf("Counting challenges with query: %s", query)
+
 	for _, sharderBaseURL := range sharderBaseURLs {
 		encodedQuery := url.QueryEscape(query)
 		baseURL := fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/count-challenges")
@@ -211,6 +213,8 @@ func countChallengesByBlocks(t *test.SystemTest, query string, sharderBaseURLs [
 		var challengesCount map[string]int64
 		err = json.Unmarshal(resBody, &challengesCount)
 		require.Nil(t, err, "error unmarshalling response body")
+
+		t.Logf("Challenges count: %v", challengesCount)
 
 		return challengesCount, nil
 	}
