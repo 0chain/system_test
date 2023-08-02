@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/0chain/system_test/internal/api/util/tokenomics"
 
 	"github.com/stretchr/testify/require"
 
@@ -60,31 +59,66 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("should allow update of min_mint_amount", func(t *test.SystemTest) {
-		testKey(t, "min_mint", "1")
+		cfgAfter := updateAndVerify(t, "min_mint", "1")
+
+		resultInt, err := strconv.ParseInt(cfgAfter["min_mint"], 10, 64)
+		require.NoError(t, err)
+
+		require.Equal(t, 10000000000, resultInt, "new value for config min_mint was not set")
 	})
 
 	t.RunSequentially("should allow update of min_burn_amount", func(t *test.SystemTest) {
-		testKey(t, "min_burn", "2")
+		cfgAfter := updateAndVerify(t, "min_burn", "2")
+
+		resultInt, err := strconv.ParseInt(cfgAfter["min_burn"], 10, 64)
+		require.NoError(t, err)
+
+		require.Equal(t, 20000000000, resultInt, "new value for config min_burn was not set")
 	})
 
 	t.RunSequentially("should allow update of min_stake_amount", func(t *test.SystemTest) {
-		testKey(t, "min_stake", "3")
+		cfgAfter := updateAndVerify(t, "min_stake", "3")
+
+		resultInt, err := strconv.ParseInt(cfgAfter["min_stake"], 10, 64)
+		require.NoError(t, err)
+
+		require.Equal(t, 30000000000, resultInt, "new value for config min_stake was not set")
 	})
 
 	t.RunSequentially("should allow update of max_fee", func(t *test.SystemTest) {
-		testKey(t, "max_fee", "4")
+		cfgAfter := updateAndVerify(t, "max_fee", "4")
+
+		resultInt, err := strconv.ParseInt(cfgAfter["max_fee"], 10, 64)
+		require.NoError(t, err)
+
+		require.Equal(t, 40000000000, resultInt, "new value for config max_fee was not set")
 	})
 
 	t.RunSequentially("should allow update of percent_authorizers", func(t *test.SystemTest) {
-		testKey(t, "percent_authorizers", "5")
+		cfgAfter := updateAndVerify(t, "percent_authorizers", "5")
+
+		resultInt, err := strconv.ParseInt(cfgAfter["percent_authorizers"], 10, 64)
+		require.NoError(t, err)
+
+		require.Equal(t, 5, resultInt, "new value for config percent_authorizers was not set")
 	})
 
 	t.RunSequentially("should allow update of min_authorizers", func(t *test.SystemTest) {
-		testKey(t, "min_authorizers", "6")
+		cfgAfter := updateAndVerify(t, "min_authorizers", "6")
+
+		resultInt, err := strconv.ParseInt(cfgAfter["min_authorizers"], 10, 64)
+		require.NoError(t, err)
+
+		require.Equal(t, 6, resultInt, "new value for config min_authorizers was not set")
 	})
 
 	t.RunSequentially("should allow update of burn_address", func(t *test.SystemTest) {
-		testKey(t, "burn_address", "7")
+		cfgAfter := updateAndVerify(t, "burn_address", "7")
+
+		resultInt, err := strconv.ParseInt(cfgAfter["burn_address"], 10, 64)
+		require.NoError(t, err)
+
+		require.Equal(t, 7, resultInt, "new value for config burn_address was not set")
 	})
 
 	// t.RunSequentially("should allow update of owner_id", func(t *test.SystemTest) {
@@ -113,18 +147,6 @@ func getDefaultConfig(t *test.SystemTest) []map[string]string {
 	}
 
 	return result
-}
-
-func testKey(t *test.SystemTest, key, value string) {
-	cfgAfter := updateAndVerify(t, key, value)
-
-	valueFloat, err := strconv.ParseFloat(value, 64)
-	require.NoError(t, err)
-
-	resultInt, err := strconv.ParseInt(cfgAfter[key], 10, 64)
-	require.NoError(t, err)
-
-	require.Equal(t, *tokenomics.IntToZCN(valueFloat), resultInt, "new value %s for config %s was not set", value, key)
 }
 
 func createConfigParams(params map[string]string) map[string]interface{} {
