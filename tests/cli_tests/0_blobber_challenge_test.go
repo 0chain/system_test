@@ -86,10 +86,10 @@ func TestBlobberChallenge(testSetup *testing.T) {
 
 		require.Equal(t, endBlock.Round-startBlock.Round, challenges["total"], "number of challenges should be equal to the number of blocks")
 		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
-		require.Less(t, challenges["open"], int64(720), "number of open challenges should be greater than 720")
+		require.Less(t, challenges["open"], int64(720), "number of open challenges should be lesser than 720")
 	})
 
-	t.RunWithTimeout("Allocation  with writes should get challenges", 4*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Allocation with writes should get challenges", 4*time.Minute, func(t *test.SystemTest) {
 		// read allocation id in first line of challenge_allocations.txt
 
 		file := "challenge_allocations.txt"
@@ -166,7 +166,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		require.Greater(t, int64(0), challenges["total"], "number of challenges should be greater than 0")
+		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
 		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
 
 		// Replaced Blobber should not get challenges for this allocation
