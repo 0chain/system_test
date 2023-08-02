@@ -61,7 +61,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t.RunSequentially("should allow update of min_mint_amount", func(t *test.SystemTest) {
 		cfgAfter := updateAndVerify(t, "min_mint", "1")
 
-		resultInt, err := strconv.ParseInt(cfgAfter["min_mint"], 10, 64)
+		resultInt, err := strconv.Atoi(cfgAfter["min_mint"])
 		require.NoError(t, err)
 
 		require.Equal(t, 10000000000, resultInt, "new value for config min_mint was not set")
@@ -70,7 +70,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t.RunSequentially("should allow update of min_burn_amount", func(t *test.SystemTest) {
 		cfgAfter := updateAndVerify(t, "min_burn", "2")
 
-		resultInt, err := strconv.ParseInt(cfgAfter["min_burn"], 10, 64)
+		resultInt, err := strconv.Atoi(cfgAfter["min_burn"])
 		require.NoError(t, err)
 
 		require.Equal(t, 20000000000, resultInt, "new value for config min_burn was not set")
@@ -79,7 +79,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t.RunSequentially("should allow update of min_stake_amount", func(t *test.SystemTest) {
 		cfgAfter := updateAndVerify(t, "min_stake", "3")
 
-		resultInt, err := strconv.ParseInt(cfgAfter["min_stake"], 10, 64)
+		resultInt, err := strconv.Atoi(cfgAfter["min_stake"])
 		require.NoError(t, err)
 
 		require.Equal(t, 30000000000, resultInt, "new value for config min_stake was not set")
@@ -88,7 +88,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t.RunSequentially("should allow update of max_fee", func(t *test.SystemTest) {
 		cfgAfter := updateAndVerify(t, "max_fee", "4")
 
-		resultInt, err := strconv.ParseInt(cfgAfter["max_fee"], 10, 64)
+		resultInt, err := strconv.Atoi(cfgAfter["max_fee"])
 		require.NoError(t, err)
 
 		require.Equal(t, 40000000000, resultInt, "new value for config max_fee was not set")
@@ -97,7 +97,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t.RunSequentially("should allow update of percent_authorizers", func(t *test.SystemTest) {
 		cfgAfter := updateAndVerify(t, "percent_authorizers", "5")
 
-		resultInt, err := strconv.ParseInt(cfgAfter["percent_authorizers"], 10, 64)
+		resultInt, err := strconv.Atoi(cfgAfter["percent_authorizers"])
 		require.NoError(t, err)
 
 		require.Equal(t, 5, resultInt, "new value for config percent_authorizers was not set")
@@ -106,7 +106,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t.RunSequentially("should allow update of min_authorizers", func(t *test.SystemTest) {
 		cfgAfter := updateAndVerify(t, "min_authorizers", "6")
 
-		resultInt, err := strconv.ParseInt(cfgAfter["min_authorizers"], 10, 64)
+		resultInt, err := strconv.Atoi(cfgAfter["min_authorizers"])
 		require.NoError(t, err)
 
 		require.Equal(t, 6, resultInt, "new value for config min_authorizers was not set")
@@ -115,7 +115,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t.RunSequentially("should allow update of burn_address", func(t *test.SystemTest) {
 		cfgAfter := updateAndVerify(t, "burn_address", "7")
 
-		resultInt, err := strconv.ParseInt(cfgAfter["burn_address"], 10, 64)
+		resultInt, err := strconv.Atoi(cfgAfter["burn_address"])
 		require.NoError(t, err)
 
 		require.Equal(t, 7, resultInt, "new value for config burn_address was not set")
