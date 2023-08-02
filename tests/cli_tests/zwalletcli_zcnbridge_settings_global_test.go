@@ -143,7 +143,7 @@ func updateAndVerify(t *test.SystemTest, key, value string) map[string]string {
 
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 2, strings.Join(output, "\n"))
-	require.Equal(t, "zcnsc smart contract settings updated", output[0], strings.Join(output, "\n"))
+	require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
 	require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 
 	output, err = getZCNBridgeGlobalSCConfig(t, configPath, true)
