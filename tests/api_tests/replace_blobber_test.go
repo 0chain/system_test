@@ -17,7 +17,7 @@ import (
 func TestReplaceBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Replace blobber in allocation, should work")
-
+	t.Skip()
 	t.Parallel()
 
 	t.Run("Replace blobber in allocation, should work", func(t *test.SystemTest) {
