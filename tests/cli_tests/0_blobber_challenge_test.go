@@ -180,7 +180,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.Equal(t, int64(0), challenges["total"], "number of challenges should be 0")
 	})
 
-	t.RunWithTimeout("Cancelled allocation should no more get any challenges", 4*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Canceled allocation should no more get any challenges", 4*time.Minute, func(t *test.SystemTest) {
 		// read allocation id in sixth line of challenge_allocations.txt
 
 		file := "challenge_allocations.txt"
