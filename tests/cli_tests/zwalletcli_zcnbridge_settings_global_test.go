@@ -53,7 +53,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2, strings.Join(output, "\n"))
-			require.Equal(t, "faucet smart contract settings updated", output[0], strings.Join(output, "\n"))
+			require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
 			require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 		}
 	})
