@@ -121,10 +121,10 @@ func testKey(t *test.SystemTest, key, value string) {
 	valueFloat, err := strconv.ParseFloat(value, 64)
 	require.NoError(t, err)
 
-	resultFloat, err := strconv.ParseFloat(cfgAfter[key], 64)
+	resultInt, err := strconv.ParseInt(cfgAfter[key], 10, 64)
 	require.NoError(t, err)
 
-	require.Equal(t, *tokenomics.IntToZCN(valueFloat), resultFloat, "new value %s for config %s was not set", value, key)
+	require.Equal(t, *tokenomics.IntToZCN(valueFloat), resultInt, "new value %s for config %s was not set", value, key)
 }
 
 func createConfigParams(params map[string]string) map[string]interface{} {
