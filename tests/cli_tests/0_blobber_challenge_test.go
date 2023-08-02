@@ -76,9 +76,9 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		time.Sleep(2 * time.Minute)
-
 		endBlock := getLatestFinalizedBlock(t)
+
+		time.Sleep(30 * time.Second)
 
 		challengesCountQuery := fmt.Sprintf("round_created_at >= %d AND round_created_at < %d", startBlock.Round, endBlock.Round)
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
@@ -86,7 +86,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 
 		require.Equal(t, endBlock.Round-startBlock.Round, challenges["total"], "number of challenges should be equal to the number of blocks")
 		require.Equal(t, int64(0), challenges["failed"], "number of failed challenges should be 0")
-		require.Less(t, 720, challenges["open"], "number of open challenges should be greater than 720")
+		require.Less(t, challenges["open"], int64(720), "number of open challenges should be greater than 720")
 	})
 
 	t.RunWithTimeout("Allocation  with writes should get challenges", 4*time.Minute, func(t *test.SystemTest) {
