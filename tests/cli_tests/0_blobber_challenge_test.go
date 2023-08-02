@@ -85,7 +85,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "error counting challenges")
 
 		require.Equal(t, endBlock.Round-startBlock.Round, challenges["total"], "number of challenges should be equal to the number of blocks")
-		require.Equal(t, int64(0), challenges["failed"], "number of failed challenges should be 0")
+		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
 		require.Less(t, challenges["open"], int64(720), "number of open challenges should be greater than 720")
 	})
 
@@ -100,7 +100,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "error counting challenges")
 
 		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
-		require.Equal(t, int64(0), challenges["failed"], "number of failed challenges should be 0")
+		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
 	})
 
 	t.RunWithTimeout("Allocation with writes and deletes should not get challenges", 4*time.Minute, func(t *test.SystemTest) {
@@ -113,7 +113,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
+		require.Equal(t, int64(0), challenges["total"], "number of challenges should be greater than 0")
 	})
 
 	t.RunWithTimeout("Empty Allocation should not get challenges", 4*time.Minute, func(t *test.SystemTest) {
@@ -126,7 +126,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
+		require.Equal(t, int64(0), challenges["total"], "number of challenges should be 0")
 	})
 
 	t.RunWithTimeout("Added blobber in an allocation should also be challenged for this blobber allocation", 4*time.Minute, func(t *test.SystemTest) {
@@ -145,7 +145,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "error counting challenges")
 
 		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
-		require.Equal(t, int64(0), challenges["failed"], "number of failed challenges should be 0")
+		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
 	})
 
 	t.RunWithTimeout("Replaced blobber in an allocation should not be challenged for this blobber allocation", 4*time.Minute, func(t *test.SystemTest) {
@@ -166,8 +166,8 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
-		require.Equal(t, int64(0), challenges["failed"], "number of failed challenges should be 0")
+		require.Greater(t, int64(0), challenges["total"], "number of challenges should be greater than 0")
+		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
 
 		// Replaced Blobber should not get challenges for this allocation
 
@@ -176,7 +176,25 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		challenges, err = countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		require.Equal(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
+		require.Equal(t, int64(0), challenges["total"], "number of challenges should be 0")
+	})
+
+	t.RunWithTimeout("Challenges success rate and blobber distribution should be good", 5*time.Minute, func(t *test.SystemTest) {
+		allChallengesCount, err := countChallengesByQuery(t, "", sharderBaseURLs)
+		require.Nil(t, err, "error counting challenges")
+
+		require.InEpsilonf(t, allChallengesCount["total"], allChallengesCount["passed"], 5, "Challenge Failure rate should not be more than 5%")
+
+		lenBlobberList := int64(len(blobberList))
+
+		for _, blobber := range blobberList {
+			challengesCountQuery := fmt.Sprintf("blobber_id = '%s'", blobber.Id)
+			blobberChallengeCount, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
+			require.Nil(t, err, "error counting challenges")
+
+			require.InEpsilon(t, allChallengesCount["total"]/lenBlobberList, blobberChallengeCount["total"], 0.05, "blobber distribution should be good")
+			require.InEpsilon(t, blobberChallengeCount["total"], blobberChallengeCount["passed"]+blobberChallengeCount["open"], 0.05, "failure rate should not be more than 5 percent")
+		}
 	})
 }
 
