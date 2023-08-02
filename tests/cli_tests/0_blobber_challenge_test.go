@@ -114,7 +114,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "error counting challenges")
 
 		require.NotEqual(t, int64(0), challenges["total"], "number of challenges should not be complete 0")
-		require.Less(t, challenges["total"], 720, "number of challenges should not more increase after a threshold")
+		require.Less(t, challenges["total"], int64(720), "number of challenges should not more increase after a threshold")
 	})
 
 	t.RunWithTimeout("Empty Allocation should not get challenges", 4*time.Minute, func(t *test.SystemTest) {
@@ -191,7 +191,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "error counting challenges")
 
 		require.NotEqual(t, int64(0), challenges["total"], "number of challenges should not be complete 0")
-		require.Less(t, challenges["total"], 720, "number of challenges should not more increase after a threshold")
+		require.Less(t, challenges["total"], int64(720), "number of challenges should not more increase after a threshold")
 	})
 
 	t.RunWithTimeout("Challenges success rate and blobber distribution should be good", 5*time.Minute, func(t *test.SystemTest) {
