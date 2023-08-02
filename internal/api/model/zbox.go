@@ -161,6 +161,7 @@ type ZboxShareInfoList struct {
 type ZboxNftCollection struct {
 	AllocationId           string `json:"allocation_id"`
 	CollectionId           string `json:"collection_id"`
+	AuthTicket             string `json:"auth_ticket"`
 	CreatedBy              string `json:"created_by"`
 	CollectionName         string `json:"collection_name"`
 	TotalNfts              string `json:"total_nfts"`
