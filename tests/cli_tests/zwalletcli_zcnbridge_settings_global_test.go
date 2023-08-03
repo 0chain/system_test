@@ -2,121 +2,190 @@ package cli_tests
 
 import (
 	"fmt"
-	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/internal/api/util/tokenomics"
 
 	"github.com/stretchr/testify/require"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-// This will test the following config
-
-// ZCNSConfig config both for GlobalNode and AuthorizerNode
-// type ZCNSConfig struct {
-//	MinMintAmount      state.Balance `json:"min_mint_amount"`
-//	MinBurnAmount      state.Balance `json:"min_burn_amount"`
-//	MinStakeAmount     state.Balance `json:"min_stake_amount"`
-//	MaxFee             state.Balance `json:"max_fee"`
-//	PercentAuthorizers float64       `json:"percent_authorizers"`
-//	MinAuthorizers     int64         `json:"min_authorizers"`
-//	BurnAddress        string        `json:"burn_address"`
-//	OwnerId            datastore.Key `json:"owner_id"`
-// }
-
-var (
-	configKey string
-	newValue  string
-)
+type BridgeConfig struct {
+	Fields struct {
+		BurnAddress        string `json:"burn_address"`
+		MaxDelegates       string `json:"max_delegates"`
+		MaxFee             string `json:"max_fee"`
+		MaxStake           string `json:"max_stake"`
+		MinAuthorizers     string `json:"min_authorizers"`
+		MinBurn            string `json:"min_burn"`
+		MinLock            string `json:"min_lock"`
+		MinMint            string `json:"min_mint"`
+		MinStake           string `json:"min_stake"`
+		OwnerID            string `json:"owner_id"`
+		AuthorizersPercent string `json:"percent_authorizers"`
+	} `json:"fields"`
+}
 
 func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till authorizers are re-enabled")
 	t.SetSmokeTests("should allow update of min_mint_amount")
 
-	if _, err := os.Stat("./config/" + zcnscOwner + "_wallet.json"); err != nil {
-		t.Skipf("SC owner wallet located at %s is missing", "./config/"+zcnscOwner+"_wallet.json")
-	}
+	output, err := executeFaucetWithTokensForWallet(t, zcnscOwner, configPath, 10.0)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-	// unused wallet, just added to avoid having the creating new wallet outputs
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-	// create SC owner wallet
-	output, err = createWalletForName(t, configPath, zcnscOwner)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-	// get global config
-	output, err = getZCNBridgeGlobalSCConfig(t, configPath, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
-
-	cfgBefore, _ := keyValuePairStringToMap(output)
-
-	// ensure revert in config is run regardless of test result
-	defer func() {
-		oldValue := cfgBefore[configKey]
-		output, err = updateZCNBridgeSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   configKey,
-			"values": oldValue,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, strings.Join(output, "\n"))
-		require.Equal(t, "faucet smart contract settings updated", output[0], strings.Join(output, "\n"))
-		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
-	}()
+	defaultParams := getDefaultConfig(t)
 
 	t.RunSequentially("should allow update of min_mint_amount", func(t *test.SystemTest) {
-		testKey(t, "min_mint_amount", "1")
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "min_mint", fmt.Sprintf("%v", tokenomics.ZcnToInt(defaultParams["min_mint"])))
+		})
+		cfgAfter := updateAndVerify(t, "min_mint", "1")
+
+		resultInt, err := strconv.Atoi(cfgAfter["min_mint"])
+		require.NoError(t, err)
+
+		require.Equal(t, 10000000000, resultInt, "new value for config min_mint was not set")
 	})
 
 	t.RunSequentially("should allow update of min_burn_amount", func(t *test.SystemTest) {
-		testKey(t, "min_burn_amount", "2")
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "min_burn", fmt.Sprintf("%v", tokenomics.ZcnToInt(defaultParams["min_burn"])))
+		})
+		cfgAfter := updateAndVerify(t, "min_burn", "2")
+
+		resultInt, err := strconv.Atoi(cfgAfter["min_burn"])
+		require.NoError(t, err)
+
+		require.Equal(t, 20000000000, resultInt, "new value for config min_burn was not set")
 	})
 
 	t.RunSequentially("should allow update of min_stake_amount", func(t *test.SystemTest) {
-		testKey(t, "min_stake_amount", "3")
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "min_stake", fmt.Sprintf("%v", tokenomics.ZcnToInt(defaultParams["min_stake"])))
+		})
+		cfgAfter := updateAndVerify(t, "min_stake", "3")
+
+		resultInt, err := strconv.Atoi(cfgAfter["min_stake"])
+		require.NoError(t, err)
+
+		require.Equal(t, 30000000000, resultInt, "new value for config min_stake was not set")
 	})
 
 	t.RunSequentially("should allow update of max_fee", func(t *test.SystemTest) {
-		testKey(t, "max_fee", "4")
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "max_fee", "100")
+		})
+		cfgAfter := updateAndVerify(t, "max_fee", "4")
+
+		resultInt, err := strconv.Atoi(cfgAfter["max_fee"])
+		require.NoError(t, err)
+
+		require.Equal(t, 40000000000, resultInt, "new value for config max_fee was not set")
 	})
 
 	t.RunSequentially("should allow update of percent_authorizers", func(t *test.SystemTest) {
-		testKey(t, "percent_authorizers", "5")
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "percent_authorizers", fmt.Sprintf("%v", defaultParams["percent_authorizers"]))
+		})
+		cfgAfter := updateAndVerify(t, "percent_authorizers", "5")
+
+		resultInt, err := strconv.Atoi(cfgAfter["percent_authorizers"])
+		require.NoError(t, err)
+
+		require.Equal(t, 5, resultInt, "new value for config percent_authorizers was not set")
 	})
 
 	t.RunSequentially("should allow update of min_authorizers", func(t *test.SystemTest) {
-		testKey(t, "min_authorizers", "6")
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "min_authorizers", fmt.Sprintf("%v", defaultParams["min_authorizers"]))
+		})
+		cfgAfter := updateAndVerify(t, "min_authorizers", "6")
+
+		resultInt, err := strconv.Atoi(cfgAfter["min_authorizers"])
+		require.NoError(t, err)
+
+		require.Equal(t, 6, resultInt, "new value for config min_authorizers was not set")
 	})
 
 	t.RunSequentially("should allow update of burn_address", func(t *test.SystemTest) {
-		testKey(t, "burn_address", "7")
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "burn_address", "0000000000000000000000000000000000000000000000000000000000000000")
+		})
+		cfgAfter := updateAndVerify(t, "burn_address", "7")
+
+		resultInt, err := strconv.Atoi(cfgAfter["burn_address"])
+		require.NoError(t, err)
+
+		require.Equal(t, 7, resultInt, "new value for config burn_address was not set")
 	})
 
 	t.RunSequentially("should allow update of owner_id", func(t *test.SystemTest) {
-		testKey(t, "owner_id", "8")
+		newOwner := escapedTestName(t)
+
+		output, err := createWalletForName(t, configPath, newOwner)
+		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+
+		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
+		t.Cleanup(func() {
+			zcnscOwnerWallet, err := getWalletForName(t, configPath, zcnscOwner)
+			require.Nil(t, err)
+			_ = updateAndVerifyWithWallet(t, "owner_id", zcnscOwnerWallet.ClientID, newOwner)
+		})
+
+		cfgAfter := updateAndVerify(t, "owner_id", newOwnerWallet.ClientID)
+
+		result := cfgAfter["owner_id"]
+		require.NoError(t, err)
+
+		require.Equal(t, newOwnerWallet.ClientID, result, "new value for config owner_id was not set")
 	})
 }
 
-func testKey(t *test.SystemTest, key, value string) {
-	cfgAfter := updateAndVerify(t, key, value)
-	require.Equal(t, newValue, cfgAfter[key], "new value %s for config %s was not set", value, key)
+func getDefaultConfig(t *test.SystemTest) map[string]float64 {
+	output, err := getZCNBridgeGlobalSCConfig(t, configPath, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
+
+	_, cfgBefore := keyValuePairStringToMap(output)
+
+	return cfgBefore
+}
+
+func createConfigParams(params map[string]string) map[string]interface{} {
+	var (
+		keys   []string
+		values []string
+	)
+	for k, v := range params {
+		keys = append(keys, k)
+		values = append(values, v)
+	}
+
+	return map[string]interface{}{
+		"keys":   strings.Join(keys, ","),
+		"values": strings.Join(values, ","),
+	}
 }
 
 func updateAndVerify(t *test.SystemTest, key, value string) map[string]string {
-	output, err := updateZCNBridgeSCConfig(t, scOwnerWallet, map[string]interface{}{
-		"keys":   key,
-		"values": value,
-	}, true)
+	return updateAndVerifyWithWallet(t, key, value, zcnscOwner)
+}
+
+func updateAndVerifyWithWallet(t *test.SystemTest, key, value, walletName string) map[string]string {
+	params := createConfigParams(map[string]string{
+		key: value,
+	})
+
+	output, err := updateZCNBridgeSCConfig(t, walletName, params, true)
 
 	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 2, strings.Join(output, "\n"))
-	require.Equal(t, "zcnsc smart contract settings updated", output[0], strings.Join(output, "\n"))
+	require.Equal(t, 2, len(output), strings.Join(output, "\n"))
+	require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
 	require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 
 	output, err = getZCNBridgeGlobalSCConfig(t, configPath, true)
@@ -134,7 +203,7 @@ func getZCNBridgeGlobalSCConfig(t *test.SystemTest, cliConfigFilename string, re
 
 	cmd :=
 		"./zwallet bridge-config --silent --wallet " +
-			escapedTestName(t) +
+			zcnscOwner +
 			"_wallet.json --configDir ./config --config " +
 			cliConfigFilename
 
