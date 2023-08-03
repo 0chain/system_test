@@ -14,6 +14,8 @@ import (
 
 func TestMultiDownload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.SetSmokeTests("Multi download should work")
+
 	t.RunSequentially("Multi download should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
