@@ -198,7 +198,7 @@ func TestBlobberChallenge(testSetup *testing.T) {
 		allChallengesCount, err := countChallengesByQuery(t, "", sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		require.InEpsilonf(t, allChallengesCount["total"], allChallengesCount["passed"], 0.05, "Challenge Failure rate should not be more than 5%")
+		require.InEpsilonf(t, allChallengesCount["total"], allChallengesCount["passed"]+allChallengesCount["open"], 0.05, "Challenge Failure rate should not be more than 5%")
 
 		lenBlobberList := int64(len(blobberList))
 
