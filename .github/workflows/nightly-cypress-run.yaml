@@ -113,7 +113,7 @@ jobs:
   deploy-bolt-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-bolt-docker-image, system-tests]
+    needs: [build-and-push-bolt-docker-image]
 
     steps:
     - name: Preparing docker-compose file.
@@ -311,7 +311,7 @@ jobs:
   deploy-atlus-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-atlus-docker-image, system-tests]
+    needs: [build-and-push-atlus-docker-image]
 
     steps:
     - name: Preparing docker-compose file.
@@ -510,7 +510,7 @@ jobs:
   deploy-chalk-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-chalk-docker-image, system-tests]
+    needs: [build-and-push-chalk-docker-image]
 
     steps:
     - name: Preparing docker-compose file.
@@ -710,7 +710,7 @@ jobs:
   deploy-chimney-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-chimney-docker-image, system-tests]
+    needs: [build-and-push-chimney-docker-image]
 
     steps:
     - name: Preparing docker-compose file.
@@ -909,7 +909,7 @@ jobs:
   deploy-blimp-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-blimp-docker-image, system-tests]
+    needs: [build-and-push-blimp-docker-image]
 
     steps:
     - name: Preparing docker-compose file.
@@ -1108,7 +1108,7 @@ jobs:
   deploy-vult-on-cypress:
     runs-on: cypress-webapps
 
-    needs: [build-and-push-vult-docker-image, system-tests]
+    needs: [build-and-push-vult-docker-image]
 
     steps:
     - name: Preparing docker-compose file.
