@@ -47,17 +47,6 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 
 	defaultParams := getDefaultConfig(t)
 
-	t.Cleanup(func() {
-		for _, defaultParam := range defaultParams {
-			output, err := updateZCNBridgeSCConfig(t, zcnscOwner, createConfigParams(defaultParam), true)
-
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 2, strings.Join(output, "\n"))
-			require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
-			require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
-		}
-	})
-
 	t.RunSequentially("should allow update of min_mint_amount", func(t *test.SystemTest) {
 		cfgAfter := updateAndVerify(t, "min_mint", "1")
 
@@ -65,6 +54,8 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, 10000000000, resultInt, "new value for config min_mint was not set")
+
+		revertConfigParams(t, defaultParams)
 	})
 
 	t.RunSequentially("should allow update of min_burn_amount", func(t *test.SystemTest) {
@@ -74,6 +65,8 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, 20000000000, resultInt, "new value for config min_burn was not set")
+
+		revertConfigParams(t, defaultParams)
 	})
 
 	t.RunSequentially("should allow update of min_stake_amount", func(t *test.SystemTest) {
@@ -83,6 +76,8 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, 30000000000, resultInt, "new value for config min_stake was not set")
+
+		revertConfigParams(t, defaultParams)
 	})
 
 	t.RunSequentially("should allow update of max_fee", func(t *test.SystemTest) {
@@ -92,6 +87,8 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, 40000000000, resultInt, "new value for config max_fee was not set")
+
+		revertConfigParams(t, defaultParams)
 	})
 
 	t.RunSequentially("should allow update of percent_authorizers", func(t *test.SystemTest) {
@@ -101,6 +98,8 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, 5, resultInt, "new value for config percent_authorizers was not set")
+
+		revertConfigParams(t, defaultParams)
 	})
 
 	t.RunSequentially("should allow update of min_authorizers", func(t *test.SystemTest) {
@@ -110,6 +109,8 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, 6, resultInt, "new value for config min_authorizers was not set")
+
+		revertConfigParams(t, defaultParams)
 	})
 
 	t.RunSequentially("should allow update of burn_address", func(t *test.SystemTest) {
@@ -119,11 +120,24 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, 7, resultInt, "new value for config burn_address was not set")
+
+		revertConfigParams(t, defaultParams)
 	})
 
 	// t.RunSequentially("should allow update of owner_id", func(t *test.SystemTest) {
 	// 	testKey(t, "owner_id", "8")
 	// })
+}
+
+func revertConfigParams(t *test.SystemTest, params []map[string]string) {
+	for _, param := range params {
+		output, err := updateZCNBridgeSCConfig(t, zcnscOwner, createConfigParams(param), true)
+
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2, strings.Join(output, "\n"))
+		require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
+		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
+	}
 }
 
 func getDefaultConfig(t *test.SystemTest) []map[string]string {
