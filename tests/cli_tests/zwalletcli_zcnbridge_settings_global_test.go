@@ -78,7 +78,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 
 	t.RunSequentially("should allow update of max_fee", func(t *test.SystemTest) {
 		t.Cleanup(func() {
-			_ = updateAndVerify(t, "max_fee", fmt.Sprintf("%v", "100"))
+			_ = updateAndVerify(t, "max_fee", "100")
 		})
 		cfgAfter := updateAndVerify(t, "max_fee", "4")
 
@@ -114,7 +114,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 
 	t.RunSequentially("should allow update of burn_address", func(t *test.SystemTest) {
 		t.Cleanup(func() {
-			_ = updateAndVerify(t, "burn_address", fmt.Sprintf("%v", "0000000000000000000000000000000000000000000000000000000000000000"))
+			_ = updateAndVerify(t, "burn_address", "0000000000000000000000000000000000000000000000000000000000000000")
 		})
 		cfgAfter := updateAndVerify(t, "burn_address", "7")
 
