@@ -1,40 +1,33 @@
 package cli_tests
 
 import (
-	"encoding/json"
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/internal/api/util/tokenomics"
 
 	"github.com/stretchr/testify/require"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
-
-	"github.com/fatih/structs"
 )
 
 type BridgeConfig struct {
 	Fields struct {
-		BurnAddress          string `json:"burn_address"`
-		AddAuthorizerCost    string `json:"cost.add-authorizer"`
-		BurnCost             string `json:"cost.burn"`
-		DeleteAuthorizerCost string `json:"cost.delete-authorizer"`
-		MintCost             string `json:"cost.mint"`
-		MaxDelegates         string `json:"max_delegates"`
-		MaxFee               string `json:"max_fee"`
-		MaxStake             string `json:"max_stake"`
-		MinAuthorizers       string `json:"min_authorizers"`
-		MinBurn              string `json:"min_burn"`
-		MinLock              string `json:"min_lock"`
-		MinMint              string `json:"min_mint"`
-		MinStake             string `json:"min_stake"`
-		OwnerID              string `json:"owner_id"`
-		AuthorizersPercent   string `json:"percent_authorizers"`
+		BurnAddress        string `json:"burn_address"`
+		MaxDelegates       string `json:"max_delegates"`
+		MaxFee             string `json:"max_fee"`
+		MaxStake           string `json:"max_stake"`
+		MinAuthorizers     string `json:"min_authorizers"`
+		MinBurn            string `json:"min_burn"`
+		MinLock            string `json:"min_lock"`
+		MinMint            string `json:"min_mint"`
+		MinStake           string `json:"min_stake"`
+		OwnerID            string `json:"owner_id"`
+		AuthorizersPercent string `json:"percent_authorizers"`
 	} `json:"fields"`
 }
 
@@ -47,134 +40,120 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 
 	defaultParams := getDefaultConfig(t)
 
-	t.RunSequentially("should allow update of min_mint_amount", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("should allow update of min_mint_amount", 100*time.Minute, func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "min_mint", fmt.Sprintf("%v", tokenomics.ZcnToInt(defaultParams["min_mint"])))
+		})
 		cfgAfter := updateAndVerify(t, "min_mint", "1")
 
 		resultInt, err := strconv.Atoi(cfgAfter["min_mint"])
 		require.NoError(t, err)
 
 		require.Equal(t, 10000000000, resultInt, "new value for config min_mint was not set")
-
-		revertConfigParams(t, defaultParams, zcnscOwner)
 	})
 
 	t.RunSequentially("should allow update of min_burn_amount", func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "min_burn", fmt.Sprintf("%v", tokenomics.ZcnToInt(defaultParams["min_burn"])))
+		})
 		cfgAfter := updateAndVerify(t, "min_burn", "2")
 
 		resultInt, err := strconv.Atoi(cfgAfter["min_burn"])
 		require.NoError(t, err)
 
 		require.Equal(t, 20000000000, resultInt, "new value for config min_burn was not set")
-
-		revertConfigParams(t, defaultParams, zcnscOwner)
 	})
 
 	t.RunSequentially("should allow update of min_stake_amount", func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "min_stake", fmt.Sprintf("%v", tokenomics.ZcnToInt(defaultParams["min_stake"])))
+		})
 		cfgAfter := updateAndVerify(t, "min_stake", "3")
 
 		resultInt, err := strconv.Atoi(cfgAfter["min_stake"])
 		require.NoError(t, err)
 
 		require.Equal(t, 30000000000, resultInt, "new value for config min_stake was not set")
-
-		revertConfigParams(t, defaultParams, zcnscOwner)
 	})
 
 	t.RunSequentially("should allow update of max_fee", func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "max_fee", fmt.Sprintf("%v", tokenomics.ZcnToInt(defaultParams["max_fee"])))
+		})
 		cfgAfter := updateAndVerify(t, "max_fee", "4")
 
 		resultInt, err := strconv.Atoi(cfgAfter["max_fee"])
 		require.NoError(t, err)
 
 		require.Equal(t, 40000000000, resultInt, "new value for config max_fee was not set")
-
-		revertConfigParams(t, defaultParams, zcnscOwner)
 	})
 
 	t.RunSequentially("should allow update of percent_authorizers", func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "percent_authorizers", fmt.Sprintf("%v", defaultParams["percent_authorizers"]))
+		})
 		cfgAfter := updateAndVerify(t, "percent_authorizers", "5")
 
 		resultInt, err := strconv.Atoi(cfgAfter["percent_authorizers"])
 		require.NoError(t, err)
 
 		require.Equal(t, 5, resultInt, "new value for config percent_authorizers was not set")
-
-		revertConfigParams(t, defaultParams, zcnscOwner)
 	})
 
 	t.RunSequentially("should allow update of min_authorizers", func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "min_authorizers", fmt.Sprintf("%v", defaultParams["min_authorizers"]))
+		})
 		cfgAfter := updateAndVerify(t, "min_authorizers", "6")
 
 		resultInt, err := strconv.Atoi(cfgAfter["min_authorizers"])
 		require.NoError(t, err)
 
 		require.Equal(t, 6, resultInt, "new value for config min_authorizers was not set")
-
-		revertConfigParams(t, defaultParams, zcnscOwner)
 	})
 
 	t.RunSequentially("should allow update of burn_address", func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			_ = updateAndVerify(t, "burn_address", fmt.Sprintf("%v", defaultParams["burn_address"]))
+		})
 		cfgAfter := updateAndVerify(t, "burn_address", "7")
 
 		resultInt, err := strconv.Atoi(cfgAfter["burn_address"])
 		require.NoError(t, err)
 
 		require.Equal(t, 7, resultInt, "new value for config burn_address was not set")
-
-		revertConfigParams(t, defaultParams, zcnscOwner)
 	})
 
 	t.RunSequentially("should allow update of owner_id", func(t *test.SystemTest) {
-		newOwner := escapedTestName(t) + "_wallet.jsons"
+		newOwner := escapedTestName(t)
 
 		output, err := createWalletForName(t, configPath, newOwner)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
+		t.Cleanup(func() {
+			zcnscOwnerWallet, err := getWalletForName(t, configPath, zcnscOwner)
+			require.Nil(t, err)
+			_ = updateAndVerifyWithWallet(t, "owner_id", zcnscOwnerWallet.ClientID, newOwner)
+		})
 
 		cfgAfter := updateAndVerify(t, "owner_id", newOwnerWallet.ClientID)
 
-		resultInt, err := strconv.Atoi(cfgAfter["owner_id"])
+		result := cfgAfter["owner_id"]
 		require.NoError(t, err)
 
-		require.Equal(t, newOwnerWallet.ClientID, resultInt, "new value for config owner_id was not set")
-
-		revertConfigParams(t, defaultParams, newOwner)
+		require.Equal(t, newOwnerWallet.ClientID, result, "new value for config owner_id was not set")
 	})
 }
 
-func revertConfigParams(t *test.SystemTest, params []map[string]string, walletName string) {
-	for _, param := range params {
-		output, err := updateZCNBridgeSCConfig(t, walletName, createConfigParams(param), true)
-
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, strings.Join(output, "\n"))
-		require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
-		require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
-	}
-}
-
-func getDefaultConfig(t *test.SystemTest) []map[string]string {
+func getDefaultConfig(t *test.SystemTest) map[string]float64 {
 	output, err := getZCNBridgeGlobalSCConfig(t, configPath, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
-	match := regexp.MustCompile(`{"fields":\s*({.*?})}`).FindAllString(strings.Join(output, " "), 1)[0]
+	_, cfgBefore := keyValuePairStringToMap(output)
 
-	var resultRaw BridgeConfig
-	err = json.Unmarshal([]byte(match), &resultRaw)
-	require.Nil(t, err)
-
-	var result []map[string]string
-
-	fields := structs.Fields(resultRaw.Fields)
-	for _, field := range fields {
-		result = append(result, map[string]string{
-			field.Tag("json"): field.Value().(string),
-		})
-	}
-
-	return result
+	return cfgBefore
 }
 
 func createConfigParams(params map[string]string) map[string]interface{} {
@@ -194,11 +173,15 @@ func createConfigParams(params map[string]string) map[string]interface{} {
 }
 
 func updateAndVerify(t *test.SystemTest, key, value string) map[string]string {
+	return updateAndVerifyWithWallet(t, key, value, zcnscOwner)
+}
+
+func updateAndVerifyWithWallet(t *test.SystemTest, key, value, walletName string) map[string]string {
 	params := createConfigParams(map[string]string{
 		key: value,
 	})
 
-	output, err := updateZCNBridgeSCConfig(t, zcnscOwner, params, true)
+	output, err := updateZCNBridgeSCConfig(t, walletName, params, true)
 
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 2, strings.Join(output, "\n"))
