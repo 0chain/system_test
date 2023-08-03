@@ -78,7 +78,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 
 	t.RunSequentially("should allow update of max_fee", func(t *test.SystemTest) {
 		t.Cleanup(func() {
-			_ = updateAndVerify(t, "max_fee", fmt.Sprintf("%v", tokenomics.ZcnToInt(defaultParams["max_fee"])))
+			_ = updateAndVerify(t, "max_fee", fmt.Sprintf("%v", "100"))
 		})
 		cfgAfter := updateAndVerify(t, "max_fee", "4")
 
@@ -114,7 +114,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 
 	t.RunSequentially("should allow update of burn_address", func(t *test.SystemTest) {
 		t.Cleanup(func() {
-			_ = updateAndVerify(t, "burn_address", fmt.Sprintf("%v", defaultParams["burn_address"]))
+			_ = updateAndVerify(t, "burn_address", fmt.Sprintf("%v", "0000000000000000000000000000000000000000000000000000000000000000"))
 		})
 		cfgAfter := updateAndVerify(t, "burn_address", "7")
 
@@ -184,7 +184,7 @@ func updateAndVerifyWithWallet(t *test.SystemTest, key, value, walletName string
 	output, err := updateZCNBridgeSCConfig(t, walletName, params, true)
 
 	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 2, strings.Join(output, "\n"))
+	require.Equal(t, 2, len(output), strings.Join(output, "\n"))
 	require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
 	require.Regexp(t, `Hash: [0-9a-f]+`, output[1], strings.Join(output, "\n"))
 
