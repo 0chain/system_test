@@ -40,24 +40,22 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 	bucketName := "dummybucketfortestsmigration"
 	fileKey := "sdfg" + ".txt"
 	t.TestSetup("Setup s3 bucket with relevant file", func() {
+		// Cleanup bucket before test
+		err := cleanupBucket(S3Client, bucketName)
+		if err != nil {
+			t.Log("Failed to cleanup bucket: ", err)
+		}
 		// Read file contents
 		fileContents := []byte("Hello, World!")
 
 		// Upload the file to S3
-		_, err := S3Client.PutObject(&s3.PutObjectInput{
+		_, err = S3Client.PutObject(&s3.PutObjectInput{
 			Bucket: aws.String(bucketName),
 			Key:    aws.String(fileKey),
 			Body:   bytes.NewReader(fileContents),
 		})
 		if err != nil {
 			t.Skip("S3 Bucket operatiion is not working properly")
-		}
-	})
-
-	t.Cleanup(func() {
-		err := cleanupBucket(S3Client, bucketName)
-		if err != nil {
-			t.Log("Failed to cleanup bucket: ", err)
 		}
 	})
 
