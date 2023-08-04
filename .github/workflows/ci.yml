@@ -9,7 +9,7 @@ on:
     inputs:
       repo_snapshots_branch:
         description: 'branch of repo-snapshots to derive images and branches from.'
-        default: 'fix/partition'
+        default: 'current-sprint'
         required: true
       existing_network:
         description: '(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]'
@@ -111,7 +111,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain@master
         with:
-          repo_snapshots_branch: "fix/partition"
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -123,16 +123,16 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@feature/challenge_system_tests
+        uses: 0chain/actions/run-system-tests@master
         with:
-          repo_snapshots_branch: "fix/partition"
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
           run_flaky_tests: true
-          run_api_system_tests: false
+          run_api_system_tests: true
           run_cli_system_tests: true
           run_tokenomics_system_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
