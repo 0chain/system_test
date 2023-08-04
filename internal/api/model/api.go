@@ -643,23 +643,31 @@ type FreeAllocationRequest struct {
 }
 
 type SCRestGetAllocationResponse struct {
-	ID              string           `json:"id"`
-	Tx              string           `json:"tx"`
-	Name            string           `json:"name"`
-	DataShards      int              `json:"data_shards"`
-	ParityShards    int              `json:"parity_shards"`
-	Size            int64            `json:"size"`
-	Expiration      int64            `json:"expiration_date"`
-	Owner           string           `json:"owner_id"`
-	OwnerPublicKey  string           `json:"owner_public_key"`
-	Payer           string           `json:"payer_id"`
-	Blobbers        []*StorageNode   `json:"blobbers"`
-	Stats           *AllocationStats `json:"stats"`
-	TimeUnit        time.Duration    `json:"time_unit"`
-	IsImmutable     bool             `json:"is_immutable"`
-	WritePool       int64            `json:"write_pool"`
-	ReadPriceRange  PriceRange       `json:"read_price_range"`
-	WritePriceRange PriceRange       `json:"write_price_range"`
+	ID                string           `json:"id"`
+	Tx                string           `json:"tx"`
+	Name              string           `json:"name"`
+	DataShards        int              `json:"data_shards"`
+	ParityShards      int              `json:"parity_shards"`
+	Size              int64            `json:"size"`
+	CreatedAt         int64            `json:"created_at"`
+	Expiration        int64            `json:"expiration_date"`
+	Owner             string           `json:"owner_id"`
+	OwnerPublicKey    string           `json:"owner_public_key"`
+	Payer             string           `json:"payer_id"`
+	Blobbers          []*StorageNode   `json:"blobbers"`
+	Stats             *AllocationStats `json:"stats"`
+	TimeUnit          time.Duration    `json:"time_unit"`
+	IsImmutable       bool             `json:"is_immutable"`
+	StartTime         int64            `json:"start_time"`
+	Finalized         bool             `json:"finalized"`
+	Cancelled         bool             `json:"cancelled"`
+	WritePool         int64            `json:"write_pool"`
+	MovedToChallenge  bool             `json:"moved_to_challenge"`
+	MovedBack         bool             `json:"moved_back"`
+	MovedToValidators bool             `json:"moved_to_validators"`
+	MinLockDemand     int64            `json:"min_lock_demand"`
+	ReadPriceRange    PriceRange       `json:"read_price_range"`
+	WritePriceRange   PriceRange       `json:"write_price_range"`
 }
 
 type StorageNodes struct {
