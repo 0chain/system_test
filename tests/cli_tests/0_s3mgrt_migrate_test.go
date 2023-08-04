@@ -71,7 +71,7 @@ func Test0S3Migration(testSetup *testing.T) {
 			"allocation": allocationID,
 		}))
 
-		require.Nil(t, err, "Expected a Migration completed successfully", strings.Join(output, "\n"))
+		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "Max size reached for the allocation with this blobber", "Output was not as expected", strings.Join(output, "\n"))
 	})
