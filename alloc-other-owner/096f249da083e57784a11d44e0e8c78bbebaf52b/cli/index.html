@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subset of 0Chain System test suite [alloc-other-owner/096f249d] ran against [dev-9.devnet-0chain.net] at [2023-08-04_21.18.45]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">Subset of 0Chain System test suite [alloc-other-owner/096f249d] ran against [dev-9.devnet-0chain.net] at [2023-08-04_21.18.45]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>26</strong>Duration: <strong>2ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>26</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">August 4, 2023 21:21:51</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+                <div class="testResultGroup  " id="17"></div>
+            
+                <div class="testResultGroup  " id="18"></div>
+            
+                <div class="testResultGroup  " id="19"></div>
+            
+                <div class="testResultGroup  " id="20"></div>
+            
+                <div class="testResultGroup  " id="21"></div>
+            
+                <div class="testResultGroup  " id="22"></div>
+            
+                <div class="testResultGroup  " id="23"></div>
+            
+                <div class="testResultGroup  " id="24"></div>
+            
+                <div class="testResultGroup  " id="25"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestCreateAllocation (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_create_allocation_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_for_another_owner_should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":29.62,"Output":["","    zboxcli_create_allocation_test.go:110: Test case [Create allocation for another owner should Work] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation for another owner should Work] start at [08-04-2023 21:20:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_for_another_owner_should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  1a307551d24ebc1089e3a69d3cf6d590cd91fa86353babeb17544c9372ff10d2]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_for_another_owner_should_Work_TARGET_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  adbdafd1da7ee7dc4e1489fbe8cf6468ea11ae8588dabf24a89785840a2c5933]\n","    zwalletcli_register_wallet_test.go:210: Getting wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:890: Uploading file...\n","    zboxcli_file_upload_test.go:890: Uploading file...\n","    zboxcli_create_allocation_test.go:110: Test case [Create allocation for another owner should Work] exit at [08-04-2023 21:20:54]\n","--- PASS: TestCreateAllocation/Create_allocation_for_another_owner_should_Work (29.62s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_for_locking_cost_equal_to_the_cost_calculated_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.14,"Output":["","    zboxcli_create_allocation_test.go:24: Test case [Create allocation for locking cost equal to the cost calculated should work] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation for locking cost equal to the cost calculated should work] start at [08-04-2023 21:20:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_for_locking_cost_equal_to_the_cost_calculated_should_work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  c0384d2c2e8d0017978d43bc33eb16ce771bbaf3f82217a404d540539867c048]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_create_allocation_test.go:24: Test case [Create allocation for locking cost equal to the cost calculated should work] exit at [08-04-2023 21:20:47]\n","--- PASS: TestCreateAllocation/Create_allocation_for_locking_cost_equal_to_the_cost_calculated_should_work (23.14s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_for_locking_cost_less_than_minimum_cost_should_not_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.03,"Output":["","    zboxcli_create_allocation_test.go:57: Test case [Create allocation for locking cost less than minimum cost should not work] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation for locking cost less than minimum cost should not work] start at [08-04-2023 21:20:42] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_for_locking_cost_less_than_minimum_cost_should_not_work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  38bad8ee79fb5adb696eb0c916004861791b2e3ee9ed66d10614be1a9b04cddf]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_create_allocation_test.go:57: Test case [Create allocation for locking cost less than minimum cost should not work] exit at [08-04-2023 21:21:00]\n","--- PASS: TestCreateAllocation/Create_allocation_for_locking_cost_less_than_minimum_cost_should_not_work (18.03s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_for_locking_negative_cost_should_not_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.24,"Output":["","    zboxcli_create_allocation_test.go:80: Test case [Create allocation for locking negative cost should not work] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation for locking negative cost should not work] start at [08-04-2023 21:20:41] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_for_locking_negative_cost_should_not_work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  36ca17e17516995c5d50de8b561dcc299330322a67dfa43b94dbba8fab806526]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:80: Test case [Create allocation for locking negative cost should not work] exit at [08-04-2023 21:20:55]\n","--- PASS: TestCreateAllocation/Create_allocation_for_locking_negative_cost_should_not_work (13.24s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_should_have_all_file_options_permitted_by_default","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":22.62,"Output":["","    zboxcli_create_allocation_test.go:277: Test case [Create allocation should have all file options permitted by default] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation should have all file options permitted by default] start at [08-04-2023 21:20:42] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_should_have_all_file_options_permitted_by_default_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  935e8bb97808e90c1dafd1cad1e4f08af92f4a3801804e7c9258e95a0b5a7cce]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_common_user_functions_test.go:226: Get Allocation...\n","    zboxcli_create_allocation_test.go:277: Test case [Create allocation should have all file options permitted by default] exit at [08-04-2023 21:20:59]\n","--- PASS: TestCreateAllocation/Create_allocation_should_have_all_file_options_permitted_by_default (22.62s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_third_party_extendable_should_be_false_by_default_and_change_with_flags","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":35.52,"Output":["","    zboxcli_create_allocation_test.go:394: Test case [Create allocation third_party_extendable should be false by default and change with flags] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation third_party_extendable should be false by default and change with flags] start at [08-04-2023 21:20:47] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_third_party_extendable_should_be_false_by_default_and_change_with_flags_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  a283cc009fc14bf043217d4d9046fc0c960f58d7b8ad9511bd1cdfa68e8aac75]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_common_user_functions_test.go:226: Get Allocation...\n","    zboxcli_common_user_functions_test.go:226: Get Allocation...\n","    zboxcli_create_allocation_test.go:394: Test case [Create allocation third_party_extendable should be false by default and change with flags] exit at [08-04-2023 21:21:12]\n","--- PASS: TestCreateAllocation/Create_allocation_third_party_extendable_should_be_false_by_default_and_change_with_flags (35.52s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_data_specified_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.08,"Output":["","    zboxcli_create_allocation_test.go:173: Test case [Create allocation with data specified Should Work] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation with data specified Should Work] start at [08-04-2023 21:20:42] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_with_data_specified_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  a651cf42d6ec481406ade9c06cb8f4aed4a2b8b4bd1e0247aa939d8bd195c764]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_create_allocation_test.go:173: Test case [Create allocation with data specified Should Work] exit at [08-04-2023 21:21:00]\n","--- PASS: TestCreateAllocation/Create_allocation_with_data_specified_Should_Work (23.08s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_no_parameter_(missing_lock)_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.98,"Output":["","    zboxcli_create_allocation_test.go:267: Test case [Create allocation with no parameter (missing lock) Should Fail] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation with no parameter (missing lock) Should Fail] start at [08-04-2023 21:20:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_with_no_parameter_-missing_lock-_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  58ac015390ba94742f0d32781d1b61a9cad826957de8868fc218cbcb822dde27]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:267: Test case [Create allocation with no parameter (missing lock) Should Fail] exit at [08-04-2023 21:20:42]\n","--- PASS: TestCreateAllocation/Create_allocation_with_no_parameter_(missing_lock)_Should_Fail (12.98s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_parity_specified_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":22.08,"Output":["","    zboxcli_create_allocation_test.go:158: Test case [Create allocation with parity specified Should Work] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation with parity specified Should Work] start at [08-04-2023 21:20:44] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_with_parity_specified_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3fb931c1ec93ac7e37e3effb307680118a2156ea08f633eb054397e8b1f996da]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_create_allocation_test.go:158: Test case [Create allocation with parity specified Should Work] exit at [08-04-2023 21:21:01]\n","--- PASS: TestCreateAllocation/Create_allocation_with_parity_specified_Should_Work (22.08s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_read_price_range_0-0_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.98,"Output":["","    zboxcli_create_allocation_test.go:247: Test case [Create allocation with read price range 0-0 Should Fail] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation with read price range 0-0 Should Fail] start at [08-04-2023 21:20:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_with_read_price_range_0-0_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  877ae7e47b0b751ca865dbec25bd7e010fea05e666de5469d632a4ecaf2147bf]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:247: Test case [Create allocation with read price range 0-0 Should Fail] exit at [08-04-2023 21:20:42]\n","--- PASS: TestCreateAllocation/Create_allocation_with_read_price_range_0-0_Should_Fail (12.98s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_read_price_range_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.11,"Output":["","    zboxcli_create_allocation_test.go:188: Test case [Create allocation with read price range Should Work] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation with read price range Should Work] start at [08-04-2023 21:20:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_with_read_price_range_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  e67104903ae43d313ad29592346a5debd478faf381cfeb8f2abb8179c42101b7]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_create_allocation_test.go:188: Test case [Create allocation with read price range Should Work] exit at [08-04-2023 21:20:47]\n","--- PASS: TestCreateAllocation/Create_allocation_with_read_price_range_Should_Work (23.11s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_size_smaller_than_limit_(size_\u003c_1024)_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.03,"Output":["","    zboxcli_create_allocation_test.go:257: Test case [Create allocation with size smaller than limit (size \u003c 1024) Should Fail] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation with size smaller than limit (size \u003c 1024) Should Fail] start at [08-04-2023 21:20:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_with_size_smaller_than_limit_-size_LESS_THAN_1024-_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  e43c354646ebd9cc508191d93b4f77c7c6b03579e499aaabc9147e75a8ff155c]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:257: Test case [Create allocation with size smaller than limit (size \u003c 1024) Should Fail] exit at [08-04-2023 21:20:47]\n","--- PASS: TestCreateAllocation/Create_allocation_with_size_smaller_than_limit_(size_\u003c_1024)_Should_Fail (18.03s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_smallest_possible_size_(1024)_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":22.42,"Output":["","    zboxcli_create_allocation_test.go:95: Test case [Create allocation with smallest possible size (1024) Should Work] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation with smallest possible size (1024) Should Work] start at [08-04-2023 21:20:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_with_smallest_possible_size_-1024-_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  e439378826d8903e749cab843906d13c544dc80440d52396bff9cfad8561a49c]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_create_allocation_test.go:95: Test case [Create allocation with smallest possible size (1024) Should Work] exit at [08-04-2023 21:20:46]\n","--- PASS: TestCreateAllocation/Create_allocation_with_smallest_possible_size_(1024)_Should_Work (22.42s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_some_forbidden_file_options_flags_should_pass_and_show_in_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":81.94,"Output":["","    zboxcli_create_allocation_test.go:301: Test case [Create allocation with some forbidden file options flags should pass and show in allocation] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation with some forbidden file options flags should pass and show in allocation] start at [08-04-2023 21:20:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_with_some_forbidden_file_options_flags_should_pass_and_show_in_allocation_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  1ac2844083d3192acc9d70bcc9d778e9cfe079098025f3d9c22cc7617b434c9a]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zboxcli_common_user_functions_test.go:226: Get Allocation...\n","    zboxcli_common_user_functions_test.go:226: Get Allocation...\n","    zboxcli_common_user_functions_test.go:226: Get Allocation...\n","    zboxcli_common_user_functions_test.go:226: Get Allocation...\n","    zboxcli_common_user_functions_test.go:226: Get Allocation...\n","    zboxcli_common_user_functions_test.go:226: Get Allocation...\n","    zboxcli_create_allocation_test.go:301: Test case [Create allocation with some forbidden file options flags should pass and show in allocation] exit at [08-04-2023 21:21:20]\n","--- PASS: TestCreateAllocation/Create_allocation_with_some_forbidden_file_options_flags_should_pass_and_show_in_allocation (81.94s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_too_large_data_(Greater_than_the_number_of_blobbers)_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.32,"Output":["","    zboxcli_create_allocation_test.go:227: Test case [Create allocation with too large data (Greater than the number of blobbers) Should Fail] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation with too large data (Greater than the number of blobbers) Should Fail] start at [08-04-2023 21:20:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_with_too_large_data_-Greater_than_the_number_of_blobbers-_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  f0074ee50e9aeb95baa4e35604ff39d6a64eb4908fdd9f820b2045a50d5c797c]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:227: Test case [Create allocation with too large data (Greater than the number of blobbers) Should Fail] exit at [08-04-2023 21:20:41]\n","--- PASS: TestCreateAllocation/Create_allocation_with_too_large_data_(Greater_than_the_number_of_blobbers)_Should_Fail (12.32s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_too_large_data_and_parity_(Greater_than_the_number_of_blobbers)_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":15.06,"Output":["","    zboxcli_create_allocation_test.go:237: Test case [Create allocation with too large data and parity (Greater than the number of blobbers) Should Fail] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation with too large data and parity (Greater than the number of blobbers) Should Fail] start at [08-04-2023 21:20:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_with_too_large_data_and_parity_-Greater_than_the_number_of_blobbers-_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  4f53b4df383ae847404f5ba5596d9c0f0f5fbc8907729a63819edb9b16c424a9]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:237: Test case [Create allocation with too large data and parity (Greater than the number of blobbers) Should Fail] exit at [08-04-2023 21:20:44]\n","--- PASS: TestCreateAllocation/Create_allocation_with_too_large_data_and_parity_(Greater_than_the_number_of_blobbers)_Should_Fail (15.06s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_too_large_parity_(Greater_than_the_number_of_blobbers)_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13,"Output":["","    zboxcli_create_allocation_test.go:217: Test case [Create allocation with too large parity (Greater than the number of blobbers) Should Fail] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation with too large parity (Greater than the number of blobbers) Should Fail] start at [08-04-2023 21:20:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_with_too_large_parity_-Greater_than_the_number_of_blobbers-_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  db8a628c57a9d9f97abfbac2bcf20a90abd8d73a52466a081b99ba12756d2a6e]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:217: Test case [Create allocation with too large parity (Greater than the number of blobbers) Should Fail] exit at [08-04-2023 21:20:42]\n","--- PASS: TestCreateAllocation/Create_allocation_with_too_large_parity_(Greater_than_the_number_of_blobbers)_Should_Fail (13.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocation/Create_allocation_with_write_price_range_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.1,"Output":["","    zboxcli_create_allocation_test.go:203: Test case [Create allocation with write price range Should Work] scheduled at [08-04-2023 21:20:29] \n","","","    system_test_framework.go:149: Test case [Create allocation with write price range Should Work] start at [08-04-2023 21:20:29] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocation-Create_allocation_with_write_price_range_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  973d3aabd1c65f15b0039fa5aec994c27b441d0fe6178d04be7111e635fc1a4f]\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    utils.go:138: Waiting 5s...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_create_allocation_test.go:203: Test case [Create allocation with write price range Should Work] exit at [08-04-2023 21:20:47]\n","--- PASS: TestCreateAllocation/Create_allocation_with_write_price_range_Should_Work (23.10s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":100.08,"Output":["","    system_test_framework.go:70: Test setup [Create free storage allocation wallet] scheduled at [08-04-2023 21:18:49] \n","    system_test_framework.go:80: Test setup [Create free storage allocation wallet] start at [08-04-2023 21:18:49] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  060b294ae630af6eb7e2e8e85e865364d96ef801ef7ea733c2316c4c50ed043a]\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage_ASSIGNER_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  a97d9cb550a6d5eca35f680c7038c5bcd8ca23e8c41af648cab0a92494a804d9]\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3443b019d0e923149be861505b939a1415e51d0fb332d03f9d14777ba59cb977]\n","    utils.go:138: Waiting 5s...\n","    zwalletcli_storage_update_config_test.go:257: Retrieving storage config...\n","    miner_block_rewards_test.go:508: Get miners...\n","    zboxcli_create_allocation_free_storage_test.go:331: Creating new free storage allocation...\n","    zboxcli_create_allocation_free_storage_test.go:91: [0075d49fe34f0cd1f5e5d2ee43332b9990139c04b888ed66ee480b0377aff387 added as free storage assigner]\n","    system_test_framework.go:93: Test setup [Create free storage allocation wallet] exit at [08-04-2023 21:19:10]\n","--- PASS: TestCreateAllocationFreeStorage (100.08s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_create_allocation_free_storage_test.go","TestFunctionDetail":{"Line":36,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage/Create_free_storage_from_marker_with_accounting","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":39.47,"Output":["","    zboxcli_create_allocation_free_storage_test.go:94: Test case [Create free storage from marker with accounting] scheduled at [08-04-2023 21:19:10] \n","    system_test_framework.go:149: Test case [Create free storage from marker with accounting] start at [08-04-2023 21:19:10] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_from_marker_with_accounting_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  cb182f6b0922c520894a6e4619c25dd900403f2755eae351967dcdcfb01e8602]\n","    zwalletcli_register_wallet_test.go:210: Getting wallet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_common_user_functions_test.go:226: Get Allocation...\n","    utils.go:138: Waiting 30s...\n","    zboxcli_download_token_test.go:125: Getting read pool info...\n","    zboxcli_create_allocation_free_storage_test.go:94: Test case [Create free storage from marker with accounting] exit at [08-04-2023 21:19:50]\n","--- PASS: TestCreateAllocationFreeStorage/Create_free_storage_from_marker_with_accounting (39.47s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage/Create_free_storage_with_invalid_marker_contents_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.17,"Output":["","    zboxcli_create_allocation_free_storage_test.go:171: Test case [Create free storage with invalid marker contents should fail] scheduled at [08-04-2023 21:19:53] \n","    system_test_framework.go:149: Test case [Create free storage with invalid marker contents should fail] start at [08-04-2023 21:19:53] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_with_invalid_marker_contents_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  c34c24f02978d5da98e8e945281fa3ba1261567ecb33f78dfba992d636aa9203]\n","    zboxcli_create_allocation_free_storage_test.go:171: Test case [Create free storage with invalid marker contents should fail] exit at [08-04-2023 21:20:01]\n","--- PASS: TestCreateAllocationFreeStorage/Create_free_storage_with_invalid_marker_contents_should_fail (8.17s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage/Create_free_storage_with_invalid_marker_signature_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.27,"Output":["","    zboxcli_create_allocation_free_storage_test.go:189: Test case [Create free storage with invalid marker signature should fail] scheduled at [08-04-2023 21:20:01] \n","    system_test_framework.go:149: Test case [Create free storage with invalid marker signature should fail] start at [08-04-2023 21:20:01] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_with_invalid_marker_signature_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  1e7162d5c2c1cf5e430517b8829c213ff514219cd0018d84b181027e91dd056c]\n","    zwalletcli_register_wallet_test.go:210: Getting wallet...\n","    zboxcli_create_allocation_free_storage_test.go:189: Test case [Create free storage with invalid marker signature should fail] exit at [08-04-2023 21:20:09]\n","--- PASS: TestCreateAllocationFreeStorage/Create_free_storage_with_invalid_marker_signature_should_fail (8.27s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage/Create_free_storage_with_malformed_marker_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.14,"Output":["","    zboxcli_create_allocation_free_storage_test.go:153: Test case [Create free storage with malformed marker should fail] scheduled at [08-04-2023 21:19:50] \n","    system_test_framework.go:149: Test case [Create free storage with malformed marker should fail] start at [08-04-2023 21:19:50] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_with_malformed_marker_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  318725d066575a8de78c31512b92afb70ae5e220e0a558ac36e74d60294aed50]\n","    zboxcli_create_allocation_free_storage_test.go:153: Test case [Create free storage with malformed marker should fail] exit at [08-04-2023 21:19:53]\n","--- PASS: TestCreateAllocationFreeStorage/Create_free_storage_with_malformed_marker_should_fail (3.14s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage/Create_free_storage_with_tokens_exceeding_assigner's_individual_limit_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.24,"Output":["","    zboxcli_create_allocation_free_storage_test.go:271: Test case [Create free storage with tokens exceeding assigner's individual limit should fail] scheduled at [08-04-2023 21:20:21] \n","    system_test_framework.go:149: Test case [Create free storage with tokens exceeding assigner's individual limit should fail] start at [08-04-2023 21:20:21] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_with_tokens_exceeding_assigner's_individual_limit_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  f23660f4b802d0a6ec9ff6953eb55dcdcf5a1a16f66ae8b3c165c2a46fc81a45]\n","    zwalletcli_register_wallet_test.go:210: Getting wallet...\n","    zboxcli_create_allocation_free_storage_test.go:271: Test case [Create free storage with tokens exceeding assigner's individual limit should fail] exit at [08-04-2023 21:20:29]\n","--- PASS: TestCreateAllocationFreeStorage/Create_free_storage_with_tokens_exceeding_assigner's_individual_limit_should_fail (8.24s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateAllocationFreeStorage/Create_free_storage_with_wrong_recipient_wallet_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.35,"Output":["","    zboxcli_create_allocation_free_storage_test.go:224: Test case [Create free storage with wrong recipient wallet should fail] scheduled at [08-04-2023 21:20:09] \n","    system_test_framework.go:149: Test case [Create free storage with wrong recipient wallet should fail] start at [08-04-2023 21:20:09] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_with_wrong_recipient_wallet_should_fail_RECIPIENT_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  0a338caf5511fcf5c55b2cf31cd5e53b1e72b04c11e7a25c7fc00a61b044d1e7]\n","    zwalletcli_register_wallet_test.go:210: Getting wallet...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestCreateAllocationFreeStorage-Create_free_storage_with_wrong_recipient_wallet_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  fe62ef75407d968d6aca1debe111217948fd6c1b1f10793983032f3b6c3d1054]\n","    zboxcli_create_allocation_free_storage_test.go:224: Test case [Create free storage with wrong recipient wallet should fail] exit at [08-04-2023 21:20:21]\n","--- PASS: TestCreateAllocationFreeStorage/Create_free_storage_with_wrong_recipient_wallet_should_fail (11.35s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
