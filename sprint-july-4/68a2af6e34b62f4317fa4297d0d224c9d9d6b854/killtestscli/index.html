@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>0Chain S3 CLI System tests [sprint-july-4/68a2af6e] ran against [dev-6.devnet-0chain.net] at [2023-08-04_22.32.35]</title>
+    <title>0Chain System test suite: Kill tests [sprint-july-4/68a2af6e] ran against [dev-6.devnet-0chain.net] at [2023-08-04_22.32.35]</title>
     <style type="text/css">
         body {
             font-family: sans-serif;
@@ -234,16 +234,16 @@
 </head>
 <body>
 <div class="pageHeader">
-    <span class="projectTitle">0Chain S3 CLI System tests [sprint-july-4/68a2af6e] ran against [dev-6.devnet-0chain.net] at [2023-08-04_22.32.35]</span>
+    <span class="projectTitle">0Chain System test suite: Kill tests [sprint-july-4/68a2af6e] ran against [dev-6.devnet-0chain.net] at [2023-08-04_22.32.35]</span>
     <div class="testStats">
-        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>3</strong>Duration: <strong>0s</strong>
-        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>0</strong>
-        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>3</strong>
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>7</strong>Duration: <strong>0s</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>2</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>5</strong>
         </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
         </span>
     </div>
     <span class="testGroupsTitle">Test Groups:</span>
-    <span class="testExecutionDate">August 4, 2023 22:35:40</span>
+    <span class="testExecutionDate">August 4, 2023 22:53:27</span>
 </div>
 <div class="testReportContainer">
     <div class="cardContainer">
@@ -251,9 +251,17 @@
             
                 <div class="testResultGroup  skipped" id="0"></div>
             
-                <div class="testResultGroup  skipped" id="1"></div>
+                <div class="testResultGroup  " id="1"></div>
             
                 <div class="testResultGroup  skipped" id="2"></div>
+            
+                <div class="testResultGroup  skipped" id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  skipped" id="5"></div>
+            
+                <div class="testResultGroup  skipped" id="6"></div>
             
         </div>
     </div>
@@ -458,7 +466,7 @@ window.GoTestReport = function (elements) {
 
     
 
-    const data = [{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test0S3Migration","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    0_s3mgrt_migrate_test.go:16: \n","--- SKIP: Test0S3Migration (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"0_s3mgrt_migrate_test.go","TestFunctionDetail":{"Line":13,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test0S3MigrationAlternate","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    0_s3mgrt_migrate_alternate_test.go:35: \n","--- SKIP: Test0S3MigrationAlternate (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"0_s3mgrt_migrate_alternate_test.go","TestFunctionDetail":{"Line":32,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"Test0S3MigrationAlternatePart2","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    0_s3mgrt_migrate_alternate2_test.go:22: \n","--- SKIP: Test0S3MigrationAlternatePart2 (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"0_s3mgrt_migrate_alternate2_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]}]
+    const data = [{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillBlobber","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    zboxcli_kill_blobber_test.go:22: skipping test; need to fix the test\n","--- SKIP: TestKillBlobber (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"zboxcli_kill_blobber_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillMiner","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.26,"Output":["","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestKillMiner_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  103c4e5dfdc8c9c73b81863d759e7bdf2bcd55b133986d29c535b7f2bc2bd696]\n","    miner_block_rewards_test.go:421: getting sharder url...\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    miner_block_rewards_test.go:448: getting miner or sharder nodes...\n","--- PASS: TestKillMiner (3.26s)",""],"Passed":true,"Skipped":false,"TestFileName":"zzzwalletcli_kill_miner_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillMiner/Killed_miner_does_not_receive_rewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_framework.go:104: Test skipped as it is not a smoke test.\n","--- SKIP: TestKillMiner/Killed_miner_does_not_receive_rewards (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillMiner/kill_miner_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_framework.go:104: Test skipped as it is not a smoke test.\n","--- SKIP: TestKillMiner/kill_miner_by_non-smartcontract_owner_should_fail (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestKillSharder","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":2.22,"Output":["","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:1035: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestKillSharder_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  150164ec3920a8ca59bd6c44d59ba5e046eb633f9249857accada8ae6129cc87]\n","    miner_block_rewards_test.go:421: getting sharder url...\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    miner_block_rewards_test.go:448: getting miner or sharder nodes...\n","--- PASS: TestKillSharder (2.22s)",""],"Passed":true,"Skipped":false,"TestFileName":"zzwalletcli_kill_sharder_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillSharder/Killed_sharder_does_not_receive_rewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_framework.go:104: Test skipped as it is not a smoke test.\n","--- SKIP: TestKillSharder/Killed_sharder_does_not_receive_rewards (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestKillSharder/kill_sharder_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    system_test_framework.go:104: Test skipped as it is not a smoke test.\n","--- SKIP: TestKillSharder/kill_sharder_by_non-smartcontract_owner_should_fail (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
 
     const report = window.GoTestReport({
                                          data: data,
