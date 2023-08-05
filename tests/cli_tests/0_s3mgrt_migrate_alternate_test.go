@@ -68,7 +68,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		})
 
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"access-key": s3AccessKey,
+			"access-key":           s3AccessKey,
 			"secret-key": s3SecretKey,
 			"bucket":     bucketName,
 			"wallet":     escapedTestName(t) + "_wallet.json",
