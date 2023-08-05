@@ -2126,7 +2126,7 @@ func (c *APIClient) V1BlockGetLatestFinalizedMagicBlock(t *test.SystemTest, hash
 }
 
 func (c *APIClient) V1BlockGetLatestFinalizedBlock(t *test.SystemTest, requiredStatusCode int) (*model.LatestFinalizedBlock, *resty.Response, error) {
-	t.Log("Get latest finalized magic block")
+	t.Log("Get latest finalized block")
 
 	var latestFinalizedBlock *model.LatestFinalizedBlock
 
@@ -2181,7 +2181,9 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 func (c *APIClient) V1QueryRewards(t *test.SystemTest, queryRewardsRequest model.QueryRewardsRequest, requiredStatusCode int) (*model.QueryRewardsResponse, *resty.Response, error) {
 	var queryRewardsResponse *model.QueryRewardsResponse
 
-	urlBuilder := NewURLBuilder().SetPath(QueryRewards).AddParams("query", queryRewardsRequest.Query)
+	urlBuilder := NewURLBuilder().SetPath(QueryRewards).AddParams("query", queryRewardsRequest.Query).SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	t.Log("Query rewards: ", urlBuilder.String())
 
 	resp, err := c.executeForAllServiceProviders(
 		t,
@@ -2199,7 +2201,7 @@ func (c *APIClient) V1QueryRewards(t *test.SystemTest, queryRewardsRequest model
 func (c *APIClient) V1BlobberPartitionSelectionFrequency(t *test.SystemTest, request model.BlockRewardsRequest, requiredStatusCode int) (map[string]int64, *resty.Response, error) {
 	var result map[string]int64
 
-	urlBuilder := NewURLBuilder().SetPath(BlobberPartitionSelectionFrequency).AddParams("start", strconv.FormatInt(request.Start, 10)).AddParams("end", strconv.FormatInt(request.End, 10))
+	urlBuilder := NewURLBuilder().SetPath(BlobberPartitionSelectionFrequency).AddParams("start", strconv.FormatInt(request.Start, 10)).AddParams("end", strconv.FormatInt(request.End, 10)).SetPathVariable("sc_address", StorageSmartContractAddress)
 
 	resp, err := c.executeForAllServiceProviders(
 		t,
@@ -2217,7 +2219,7 @@ func (c *APIClient) V1BlobberPartitionSelectionFrequency(t *test.SystemTest, req
 func (c *APIClient) V1PartitionSizeFrequency(t *test.SystemTest, request model.BlockRewardsRequest, requiredStatusCode int) (map[float64]float64, *resty.Response, error) {
 	var result map[float64]float64
 
-	urlBuilder := NewURLBuilder().SetPath(BlobberPartitionSelectionFrequency).AddParams("start", strconv.FormatInt(request.Start, 10)).AddParams("end", strconv.FormatInt(request.End, 10))
+	urlBuilder := NewURLBuilder().SetPath(BlobberPartitionSelectionFrequency).AddParams("start", strconv.FormatInt(request.Start, 10)).AddParams("end", strconv.FormatInt(request.End, 10)).SetPathVariable("sc_address", StorageSmartContractAddress)
 
 	resp, err := c.executeForAllServiceProviders(
 		t,

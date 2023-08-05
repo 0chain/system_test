@@ -6,7 +6,6 @@ import (
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
@@ -19,9 +18,9 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 	startBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
 
 	const (
-		allocSize = 107374182400
-		fileSize  = 1024
-		sleepTime = 1 * time.Minute
+		allocSize = 1073741824
+		fileSize  = 1024 * 1024 * 5
+		sleepTime = 0 * time.Minute
 
 		standardErrorMargin = 0.05
 		extraErrorMargin    = 0.1
@@ -100,20 +99,22 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 	blobberRequirements.Size = allocSize
 
 	allocationBlobbers := chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-	allocationID := chimneyClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+	allocationID := chimneyClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
 
 	uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
 	sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 	time.Sleep(sleepTime)
 
+	prevAlloc := chimneyClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+
 	chimneyClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 
-	var alloc *model.SCRestGetAllocationResponse
-	wait.PoolImmediately(t, time.Second*30, func() bool {
-		alloc = chimneyClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		return alloc.Canceled == alloc.Finalized == true
-	})
+	alloc := chimneyClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+	require.Equal(t, true, alloc.Canceled, "Allocation should be cancelled")
+	require.Equal(t, true, alloc.Finalized, "Allocation should be finalized")
+
+	alloc.Blobbers = prevAlloc.Blobbers
 
 	endBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
 
@@ -130,7 +131,7 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 		// Calculating expected allocation cost
 		totalWritePrice := int64(0)
 		for _, blobber := range alloc.Blobbers {
-			expectedAllocationCost += float64(blobber.Terms.WritePrice) * durationInTimeUnits * sizeInGB(int64(allocSize/alloc.DataShards))
+			expectedAllocationCost += float64(blobber.Terms.WritePrice) * sizeInGB(int64(allocSize/alloc.DataShards))
 			totalWritePrice += blobber.Terms.WritePrice
 		}
 
@@ -138,7 +139,10 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 		expectedCancellationCharge = expectedAllocationCost * 0.2
 		expectedWritePoolBalance = 5e13
 
-		expectedMovedToChallenge = expectedAllocationCost * 0.1
+		//expectedMovedToChallenge = (expectedAllocationCost * fileSize) / allocSize
+		for _, blobber := range alloc.Blobbers {
+			expectedMovedToChallenge += float64(blobber.Terms.WritePrice) * sizeInGB(int64(fileSize/alloc.DataShards))
+		}
 
 		// Assert moved to challenge
 		require.InEpsilon(t, expectedMovedToChallenge, actualMovedToChallenge, standardErrorMargin, "Expected moved to challenge is not equal to actual")
@@ -191,7 +195,7 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 		require.InEpsilon(t, expectedBlobberChallengeRewards, actualBlobberChallengeRewards, standardErrorMargin, "Expected challenge rewards is not equal to actual")
 
 		// Compare Validator Challenge Rewards
-		validatorChallengeRewardQuery := fmt.Sprintf("allocation_id = '%s' AND reward_type = %d", allocationID, ChallengePassReward)
+		validatorChallengeRewardQuery := fmt.Sprintf("allocation_id = '%s' AND reward_type = %d", allocationID, ValidationReward)
 
 		queryValidatorReward := chimneyClient.GetRewardsByQuery(t, validatorChallengeRewardQuery, client.HttpOkStatus)
 		actualValidatorChallengeRewards = queryValidatorReward.TotalReward
