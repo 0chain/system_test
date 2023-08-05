@@ -59,6 +59,7 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 		actualChallengeRewards          float64
 		actualBlobberChallengeRewards   float64
 		actualValidatorChallengeRewards float64
+		actualMinLockDemandReward       float64
 	)
 
 	chimneyClient.ExecuteFaucetWithTokens(t, sdkWallet, 9000, client.TxSuccessfulStatus)
@@ -178,8 +179,8 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 		// Compare Validator Challenge Rewards
 		validatorChallengeRewardQuery := fmt.Sprintf("allocation_id = '%s' AND reward_type = %d", allocationID, ChallengePassReward)
 
-		queryReward := chimneyClient.GetRewardsByQuery(t, validatorChallengeRewardQuery, client.HttpOkStatus)
-		actualValidatorChallengeRewards = queryReward.TotalReward
+		queryValidatorReward := chimneyClient.GetRewardsByQuery(t, validatorChallengeRewardQuery, client.HttpOkStatus)
+		actualValidatorChallengeRewards = queryValidatorReward.TotalReward
 		actualChallengeRewards += actualValidatorChallengeRewards
 
 		require.InEpsilon(t, expectedValidatorChallengeRewards, actualValidatorChallengeRewards, standardErrorMargin, "Expected validator challenge rewards is not equal to actual")
@@ -190,6 +191,14 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 
 		// Reduce expected write pool
 		expectedWritePoolBalance -= actualChallengeRewards
+
+		// Total Min Lock Demand Reward
+		minLockDemandQuery := fmt.Sprintf("allocation_id = '%s' AND reward_type = %d", allocationID, MinLockDemandReward)
+		queryMinLockDemand := chimneyClient.GetRewardsByQuery(t, minLockDemandQuery, client.HttpOkStatus)
+		actualMinLockDemandReward = queryMinLockDemand.TotalReward
+
+		// Reduce expected write pool
+		expectedWritePoolBalance -= actualMinLockDemandReward
 
 		// Compare Write Pool Balance
 		require.InEpsilon(t, expectedWritePoolBalance, actualWritePoolBalance, standardErrorMargin, "Expected write pool balance is not equal to actual")
