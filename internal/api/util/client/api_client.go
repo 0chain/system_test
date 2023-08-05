@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,35 +24,37 @@ import (
 
 // Contains all used url paths in the client
 const (
-	GetHashNodeRoot              = "/v1/hashnode/root/:allocation"
-	GetBlobbers                  = "/v1/screst/:sc_address/getblobbers"
-	GetMiners                    = "/v1/screst/:sc_address/getMinerList"
-	GetSharders                  = "/v1/screst/:sc_address/getSharderList"
-	GetValidators                = "/v1/screst/:sc_address/validators"
-	GetStakePoolStat             = "/v1/screst/:sc_address/getStakePoolStat"
-	getUserStakePoolStat         = "/v1/screst/:sc_address/getUserStakePoolStat"
-	GetAllocationBlobbers        = "/v1/screst/:sc_address/alloc_blobbers"
-	GetFreeAllocationBlobbers    = "/v1/screst/:sc_address/free_alloc_blobbers"
-	SCRestGetOpenChallenges      = "/v1/screst/:sc_address/openchallenges"
-	MinerGetStatus               = "/v1/miner/get/stats"
-	SharderGetStatus             = "/v1/sharder/get/stats"
-	SCStateGet                   = "/v1/scstate/get"
-	SCRestGetAllocation          = "/v1/screst/:sc_address/allocation"
-	SCRestGetBlobbers            = "/v1/screst/:sc_address/getBlobber"
-	ChainGetStats                = "/v1/chain/get/stats"
-	BlobberGetStats              = "/_stats"
-	ClientPut                    = "/v1/client/put"
-	TransactionPut               = "/v1/transaction/put"
-	TransactionFeeGet            = "/v1/estimate_txn_fee"
-	TransactionGetConfirmation   = "/v1/transaction/get/confirmation"
-	ClientGetBalance             = "/v1/client/get/balance"
-	ClientReadPool               = "/v1/screst/:sc_address/getReadPoolStat"
-	GetNetworkDetails            = "/network"
-	GetFileRef                   = "/v1/file/refs/:allocation_id"
-	GetFileRefPath               = "/v1/file/referencepath/:allocation_id"
-	GetObjectTree                = "/v1/file/objecttree/:allocation_id"
-	GetLatestFinalizedMagicBlock = "/v1/block/get/latest_finalized_magic_block"
-	QueryRewards                 = "/v1/screst/:sc_address/query-rewards"
+	GetHashNodeRoot                    = "/v1/hashnode/root/:allocation"
+	GetBlobbers                        = "/v1/screst/:sc_address/getblobbers"
+	GetMiners                          = "/v1/screst/:sc_address/getMinerList"
+	GetSharders                        = "/v1/screst/:sc_address/getSharderList"
+	GetValidators                      = "/v1/screst/:sc_address/validators"
+	GetStakePoolStat                   = "/v1/screst/:sc_address/getStakePoolStat"
+	getUserStakePoolStat               = "/v1/screst/:sc_address/getUserStakePoolStat"
+	GetAllocationBlobbers              = "/v1/screst/:sc_address/alloc_blobbers"
+	GetFreeAllocationBlobbers          = "/v1/screst/:sc_address/free_alloc_blobbers"
+	SCRestGetOpenChallenges            = "/v1/screst/:sc_address/openchallenges"
+	MinerGetStatus                     = "/v1/miner/get/stats"
+	SharderGetStatus                   = "/v1/sharder/get/stats"
+	SCStateGet                         = "/v1/scstate/get"
+	SCRestGetAllocation                = "/v1/screst/:sc_address/allocation"
+	SCRestGetBlobbers                  = "/v1/screst/:sc_address/getBlobber"
+	ChainGetStats                      = "/v1/chain/get/stats"
+	BlobberGetStats                    = "/_stats"
+	ClientPut                          = "/v1/client/put"
+	TransactionPut                     = "/v1/transaction/put"
+	TransactionFeeGet                  = "/v1/estimate_txn_fee"
+	TransactionGetConfirmation         = "/v1/transaction/get/confirmation"
+	ClientGetBalance                   = "/v1/client/get/balance"
+	ClientReadPool                     = "/v1/screst/:sc_address/getReadPoolStat"
+	GetNetworkDetails                  = "/network"
+	GetFileRef                         = "/v1/file/refs/:allocation_id"
+	GetFileRefPath                     = "/v1/file/referencepath/:allocation_id"
+	GetObjectTree                      = "/v1/file/objecttree/:allocation_id"
+	GetLatestFinalizedMagicBlock       = "/v1/block/get/latest_finalized_magic_block"
+	GetLatestFinalizedBlock            = "/v1/block/get/latest_finalized"
+	QueryRewards                       = "/v1/screst/:sc_address/query-rewards"
+	BlobberPartitionSelectionFrequency = "/v1/screst/:sc_address/blobber-selection-frequency"
 )
 
 // Contains all used service providers
@@ -1461,16 +1464,47 @@ func (c *APIClient) GetRewardsByQuery(t *test.SystemTest, query string, required
 		},
 		requiredStatusCode)
 
-	if err != nil {
-		t.Logf("Error getting rewards by query: %v", err)
-		return queryRewardsResponse
-	}
-
 	require.Nil(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, queryRewardsResponse)
 
 	return queryRewardsResponse
+}
+
+func (c *APIClient) GetBlobberPartitionSelectionFrequency(t *test.SystemTest, start, end int64, requiredStatusCode int) map[string]int64 {
+	t.Log("Get blobber partition selection frequency...")
+
+	blobberPartitionSelectionFrequencyResponse, resp, err := c.V1BlobberPartitionSelectionFrequency(
+		t,
+		model.BlockRewardsRequest{
+			Start: start,
+			End:   end,
+		},
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, blobberPartitionSelectionFrequencyResponse)
+
+	return blobberPartitionSelectionFrequencyResponse
+}
+
+func (c *APIClient) GetPartitionSizeFrequency(t *test.SystemTest, start, end int64, requiredStatusCode int) map[float64]float64 {
+	t.Log("Get blobber partition selection frequency...")
+
+	blobberPartitionSelectionFrequencyResponse, resp, err := c.V1PartitionSizeFrequency(
+		t,
+		model.BlockRewardsRequest{
+			Start: start,
+			End:   end,
+		},
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, blobberPartitionSelectionFrequencyResponse)
+
+	return blobberPartitionSelectionFrequencyResponse
 }
 
 func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRestGetBlobberResponse *model.SCRestGetBlobberResponse, requiredTransactionStatus int) {
@@ -2091,6 +2125,36 @@ func (c *APIClient) V1BlockGetLatestFinalizedMagicBlock(t *test.SystemTest, hash
 	return resp, err
 }
 
+func (c *APIClient) V1BlockGetLatestFinalizedBlock(t *test.SystemTest, requiredStatusCode int) (*model.LatestFinalizedBlock, *resty.Response, error) {
+	t.Log("Get latest finalized magic block")
+
+	var latestFinalizedBlock *model.LatestFinalizedBlock
+
+	urlBuilder := NewURLBuilder().SetPath(GetLatestFinalizedBlock)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			RequiredStatusCode: requiredStatusCode,
+			Dst:                &latestFinalizedBlock,
+		},
+		HttpPOSTMethod,
+		SharderServiceProvider)
+
+	return latestFinalizedBlock, resp, err
+}
+
+func (c *APIClient) GetLatestFinalizedBlock(t *test.SystemTest, requiredStatusCode int) *model.LatestFinalizedBlock {
+	latestFinalizedBlock, resp, err := c.V1BlockGetLatestFinalizedBlock(t, requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, latestFinalizedBlock)
+
+	return latestFinalizedBlock
+}
+
 func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeRequest *model.BlobberObjectTreeRequest, requiredStatusCode int) (*model.BlobberObjectTreePathResponse, *resty.Response, error) {
 	var blobberObjectTreePathResponse *model.BlobberObjectTreePathResponse
 
@@ -2123,14 +2187,49 @@ func (c *APIClient) V1QueryRewards(t *test.SystemTest, queryRewardsRequest model
 		t,
 		urlBuilder,
 		&model.ExecutionRequest{
-			Body:               queryRewardsRequest,
 			Dst:                &queryRewardsResponse,
 			RequiredStatusCode: requiredStatusCode,
 		},
-		HttpPOSTMethod,
-		MinerServiceProvider)
+		HttpGETMethod,
+		SharderServiceProvider)
 
 	return queryRewardsResponse, resp, err
+}
+
+func (c *APIClient) V1BlobberPartitionSelectionFrequency(t *test.SystemTest, request model.BlockRewardsRequest, requiredStatusCode int) (map[string]int64, *resty.Response, error) {
+	var result map[string]int64
+
+	urlBuilder := NewURLBuilder().SetPath(BlobberPartitionSelectionFrequency).AddParams("start", strconv.FormatInt(request.Start, 10)).AddParams("end", strconv.FormatInt(request.End, 10))
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &result,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return result, resp, err
+}
+
+func (c *APIClient) V1PartitionSizeFrequency(t *test.SystemTest, request model.BlockRewardsRequest, requiredStatusCode int) (map[float64]float64, *resty.Response, error) {
+	var result map[float64]float64
+
+	urlBuilder := NewURLBuilder().SetPath(BlobberPartitionSelectionFrequency).AddParams("start", strconv.FormatInt(request.Start, 10)).AddParams("end", strconv.FormatInt(request.End, 10))
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &result,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return result, resp, err
 }
 
 //----------------------------------------------------------

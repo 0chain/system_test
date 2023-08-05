@@ -384,6 +384,11 @@ type QueryRewardsRequest struct {
 	Query string
 }
 
+type BlockRewardsRequest struct {
+	Start int64
+	End   int64
+}
+
 type ClientGetReadPoolBalanceResponse struct {
 	UserID  string `json:"user_id" gorm:"uniqueIndex"`
 	Balance int64  `json:"balance"`
@@ -691,6 +696,7 @@ type StorageNode struct {
 	Terms             Terms                  `json:"terms"`     // terms
 	Capacity          int64                  `json:"capacity"`  // total blobber capacity
 	Allocated         int64                  `json:"allocated"` // allocated capacity
+	TotalStake        int64                  `json:"total_stake"`
 	LastHealthCheck   int64                  `json:"last_health_check"`
 	PublicKey         string                 `json:"-"`
 	StakePoolSettings StakePoolSettings      `json:"stake_pool_settings"`
@@ -996,3 +1002,13 @@ type SCRestBurnZcnRequest struct {
 //----------------------------------------------
 // End ZCN SC
 //----------------------------------------------
+
+type LatestFinalizedBlock struct {
+	CreationDate      int64  `json:"creation_date"`
+	Hash              string `json:"hash,omitempty"`
+	StateHash         string `json:"state_hash"`
+	MinerId           string `json:"miner_id"`
+	Round             int64  `json:"round"`
+	StateChangesCount int    `json:"state_changes_count"`
+	NumTxns           int    `json:"num_txns"`
+}
