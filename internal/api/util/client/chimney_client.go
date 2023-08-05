@@ -422,6 +422,25 @@ func (c *ChimneyClient) V1ClientGetReadPoolBalance(t *test.SystemTest, clientGet
 	return clientGetReadPoolBalanceResponse, resp, err
 }
 
+func (c *ChimneyClient) V1QueryRewards(t *test.SystemTest, queryRewardsRequest model.QueryRewardsRequest, requiredStatusCode int) (*model.QueryRewardsResponse, *resty.Response, error) {
+	var queryRewardsResponse *model.QueryRewardsResponse
+
+	urlBuilder := NewURLBuilder().SetPath(QueryRewards).AddParams("query", queryRewardsRequest.Query)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Body:               queryRewardsRequest,
+			Dst:                &queryRewardsResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpPOSTMethod,
+		MinerServiceProvider)
+
+	return queryRewardsResponse, resp, err
+}
+
 func (c *ChimneyClient) V1SCRestGetAllMiners(t *test.SystemTest, requiredStatusCode int) ([]*model.SCRestGetMinerSharderResponse, *resty.Response, error) {
 	var scRestGetMinersResponse *model.SCRestGetMinersShardersResponse
 
@@ -1391,6 +1410,28 @@ func (c *ChimneyClient) GetReadPoolBalance(t *test.SystemTest, wallet *model.Wal
 	require.NotNil(t, clientGetReadPoolBalanceResponse)
 
 	return clientGetReadPoolBalanceResponse
+}
+
+func (c *ChimneyClient) GetRewardsByQuery(t *test.SystemTest, query string, requiredStatusCode int) *model.QueryRewardsResponse {
+	t.Log("Get rewards by query...")
+
+	queryRewardsResponse, resp, err := c.V1QueryRewards(
+		t,
+		model.QueryRewardsRequest{
+			Query: query,
+		},
+		requiredStatusCode)
+
+	if err != nil {
+		t.Logf("Error getting rewards by query: %v", err)
+		return queryRewardsResponse
+	}
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, queryRewardsResponse)
+
+	return queryRewardsResponse
 }
 
 func (c *ChimneyClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRestGetBlobberResponse *model.SCRestGetBlobberResponse, requiredTransactionStatus int) {

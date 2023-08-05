@@ -380,9 +380,19 @@ type ClientGetReadPoolBalanceRequest struct {
 	ClientID string
 }
 
+type QueryRewardsRequest struct {
+	Query string
+}
+
 type ClientGetReadPoolBalanceResponse struct {
 	UserID  string `json:"user_id" gorm:"uniqueIndex"`
 	Balance int64  `json:"balance"`
+}
+
+type QueryRewardsResponse struct {
+	TotalProviderReward float64 `json:"total_provider_reward"`
+	TotalDelegateReward float64 `json:"total_delegate_reward"`
+	TotalReward         float64 `json:"total_reward"`
 }
 
 type SCStateGetRequest struct {
@@ -660,11 +670,11 @@ type SCRestGetAllocationResponse struct {
 	IsImmutable       bool             `json:"is_immutable"`
 	StartTime         int64            `json:"start_time"`
 	Finalized         bool             `json:"finalized"`
-	Cancelled         bool             `json:"cancelled"`
+	Canceled          bool             `json:"canceled"`
 	WritePool         int64            `json:"write_pool"`
-	MovedToChallenge  bool             `json:"moved_to_challenge"`
-	MovedBack         bool             `json:"moved_back"`
-	MovedToValidators bool             `json:"moved_to_validators"`
+	MovedToChallenge  int64            `json:"moved_to_challenge"`
+	MovedBack         int64            `json:"moved_back"`
+	MovedToValidators int64            `json:"moved_to_validators"`
 	MinLockDemand     int64            `json:"min_lock_demand"`
 	ReadPriceRange    PriceRange       `json:"read_price_range"`
 	WritePriceRange   PriceRange       `json:"write_price_range"`

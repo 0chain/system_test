@@ -51,6 +51,7 @@ const (
 	GetFileRefPath               = "/v1/file/referencepath/:allocation_id"
 	GetObjectTree                = "/v1/file/objecttree/:allocation_id"
 	GetLatestFinalizedMagicBlock = "/v1/block/get/latest_finalized_magic_block"
+	QueryRewards                 = "/v1/screst/:sc_address/query-rewards"
 )
 
 // Contains all used service providers
