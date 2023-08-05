@@ -4,6 +4,11 @@ package tenderly
 import (
 	"context"
 	"errors"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/ybbus/jsonrpc/v3"
 )
@@ -41,8 +46,28 @@ func (c *Client) CreateSnapshot() (string, error) {
 	return result, nil
 }
 
-// Revert reverts a state of Ethereum network using snapshot hash with a help of Ethereum JSON-RPC method call.
-func (c *Client) Revert(snapshotHash string) error {
+// ShadowRevert guarantees to revert a state of Ethereum network using snapshot hash with a help of Ethereum JSON-RPC method call.
+func (c *Client) ShadowRevert(snapshotHash string) {
+	notificationStream := make(chan os.Signal, 1)
+	load := time.NewTicker(time.Millisecond * 500)
+
+	signal.Notify(notificationStream, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		for {
+			select {
+			case <-notificationStream:
+				if err := c.revert(snapshotHash); err != nil {
+					log.Fatalln(err)
+				}
+			case <-load.C:
+			}
+		}
+	}()
+}
+
+// revert reverts a state of Ethereum network using snapshot hash with a help of Ethereum JSON-RPC method call.
+func (c *Client) revert(snapshotHash string) error {
 	resp, err := c.client.Call(context.Background(), "evm_revert", snapshotHash)
 	if err != nil {
 		return err
