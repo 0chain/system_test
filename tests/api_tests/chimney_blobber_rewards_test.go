@@ -1,9 +1,10 @@
 package api_tests
 
 import (
+	"crypto/rand"
 	"fmt"
 	"math"
-	"math/rand"
+	"math/big"
 	"testing"
 	"time"
 
@@ -142,7 +143,6 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 		expectedCancellationCharge = expectedAllocationCost * 0.2
 		expectedWritePoolBalance = 5e13
 
-		// expectedMovedToChallenge = (expectedAllocationCost * fileSize) / allocSize
 		for _, blobber := range alloc.Blobbers {
 			expectedMovedToChallenge += float64(blobber.Terms.WritePrice) * sizeInGB(int64(fileSize/alloc.DataShards))
 		}
@@ -265,19 +265,33 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 		getTotalWeightOfRandomBlobbersSize := func(size int) float64 {
 			totalWeight := float64(0)
 			selectedIndexes := make(map[int]bool)
+			lenBlobbers := len(allBlobbers)
+
 			for i := 0; i < size; i++ {
 				// Generate a random index within the range of available blobbers.
-				randomIndex := rand.Intn(int(lenBlobbers))
+				randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(lenBlobbers)))
+				if err != nil {
+					// Handle the error if any.
+					// For simplicity, you can log the error or return an error value.
+					return 0
+				}
+				index := int(randomIndex.Int64())
 
 				// Check if the index has already been selected. If yes, generate a new random index.
-				for selectedIndexes[randomIndex] {
-					randomIndex = rand.Intn(int(lenBlobbers))
+				for selectedIndexes[index] {
+					randomIndex, err = rand.Int(rand.Reader, big.NewInt(int64(lenBlobbers)))
+					if err != nil {
+						// Handle the error if any.
+						// For simplicity, you can log the error or return an error value.
+						return 0
+					}
+					index = int(randomIndex.Int64())
 				}
 
 				// Mark the current index as selected.
-				selectedIndexes[randomIndex] = true
+				selectedIndexes[index] = true
 
-				totalWeight += getBlobberBlockRewardWeight(allBlobbers[randomIndex])
+				totalWeight += getBlobberBlockRewardWeight(allBlobbers[index])
 			}
 			return totalWeight
 		}
@@ -325,6 +339,10 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 			actualBlockRewardForBlobber := chimneyClient.GetRewardsByQuery(t, blockRewardQuery, client.HttpOkStatus)
 			actualBlockReward += actualBlockRewardForBlobber.TotalReward
 
+			t.Log("Blobber ID: ", blobber.ID)
+			t.Log("Expected Block Reward: ", expectedBlobberBlockReward)
+			t.Log("Actual Block Reward: ", actualBlockRewardForBlobber.TotalReward)
+
 			require.InEpsilon(t, expectedBlobberBlockReward, actualBlockRewardForBlobber.TotalReward, extraErrorMargin, "Expected block reward for blobber is not equal to actual")
 			require.InEpsilon(t, actualBlockRewardForBlobber.TotalReward*blobber.StakePoolSettings.ServiceCharge, actualBlockRewardForBlobber.TotalProviderReward, standardErrorMargin, "Expected provider reward is not equal to actual")
 			require.InEpsilon(t, actualBlockRewardForBlobber.TotalReward*(1.0-blobber.StakePoolSettings.ServiceCharge), actualBlockRewardForBlobber.TotalDelegateReward, standardErrorMargin, "Expected delegate reward is not equal to actual")
@@ -345,7 +363,7 @@ func sizeInGB(size int64) float64 {
 	return float64(size) / float64(1024*1024*1024)
 }
 
-func writePriceWeight(writePrice int64, totalWritePrice int64) float64 {
+func writePriceWeight(writePrice, totalWritePrice int64) float64 {
 	return float64(writePrice) / float64(totalWritePrice)
 }
 
