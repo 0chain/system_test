@@ -1502,6 +1502,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 200, resp.StatusCode())
 	require.Len(t, blobbers, 1)
+	require.NotNil(t, blobbers[0].ID)
 
 	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesPassed, blobbers[0].ID))
 
