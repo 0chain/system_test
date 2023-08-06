@@ -19,22 +19,19 @@ import (
 
 func TestBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till authorizers are re-enabled")
 	t.SetSmokeTests("Burning WZCN tokens on balance, should work")
 
 	t.Parallel()
 
-	t.Run("Burning WZCN tokens on balance, should work", func(t *test.SystemTest) {
-		t.Skip("Skip till runners are updated to newer ubuntu")
-		output, err := burnEth(t, "1", true)
+	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
+		output, err := burnEth(t, "10000000000", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
 	})
 
 	t.RunWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
-		t.Skip("Skip till runners are updated to newer ubuntu")
-		output, err := burnEth(t, "1", true)
+		output, err := burnEth(t, "10000000000", true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
@@ -51,7 +48,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		var amountInt int
 		amountInt, err = strconv.Atoi(amount)
 		require.Nil(t, err)
-		require.Equal(t, 1, amountInt)
+		require.Equal(t, 10000000000, amountInt)
 
 		nonce := strings.TrimSpace(strings.Split(output[len(output)-4], ":")[1])
 		var nonceInt int
@@ -78,7 +75,6 @@ func TestBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Get ZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
-		t.Skip("Skip till runners are updated to newer ubuntu")
 		output, err := executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
