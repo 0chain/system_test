@@ -646,10 +646,10 @@ func (c *APIClient) V1BlobberGetHashNodeRoot(t *test.SystemTest, blobberGetHashn
 		"ALLOCATION-ID":          blobberGetHashnodeRequest.AllocationID,
 	}
 
-	url := blobberGetHashnodeRequest.URL + "/" + strings.Replace(GetHashNodeRoot, ":allocation", blobberGetHashnodeRequest.AllocationID, 1)
+	blobberGetHashNodeRootURL := blobberGetHashnodeRequest.URL + "/" + strings.Replace(GetHashNodeRoot, ":allocation", blobberGetHashnodeRequest.AllocationID, 1)
 
 	resp, err := c.executeForServiceProvider(t,
-		url,
+		blobberGetHashNodeRootURL,
 		model.ExecutionRequest{
 			Headers:            headers,
 			Dst:                &hashnode,
@@ -2067,7 +2067,7 @@ func (c *APIClient) GetBlobber(t *test.SystemTest, blobberID string, requiredSta
 func (c *APIClient) V1BlobberGetFileRefs(t *test.SystemTest, blobberGetFileRefsRequest *model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
 	var blobberGetFileResponse *model.BlobberGetFileRefsResponse
 
-	url := blobberGetFileRefsRequest.URL + strings.Replace(GetFileRef, ":allocation_id", blobberGetFileRefsRequest.AllocationID, 1) + "?" + "path=" + blobberGetFileRefsRequest.RemotePath + "&" + "refType=" + blobberGetFileRefsRequest.RefType
+	blobberGetFileRefsURL := blobberGetFileRefsRequest.URL + strings.Replace(GetFileRef, ":allocation_id", blobberGetFileRefsRequest.AllocationID, 1) + "?" + "path=" + blobberGetFileRefsRequest.RemotePath + "&" + "refType=" + blobberGetFileRefsRequest.RefType
 
 	headers := map[string]string{
 		"X-App-Client-Id":        blobberGetFileRefsRequest.ClientID,
@@ -2077,7 +2077,7 @@ func (c *APIClient) V1BlobberGetFileRefs(t *test.SystemTest, blobberGetFileRefsR
 	}
 	resp, err := c.executeForServiceProvider(
 		t,
-		url,
+		blobberGetFileRefsURL,
 		model.ExecutionRequest{
 			Dst:                &blobberGetFileResponse,
 			RequiredStatusCode: requiredStatusCode,
@@ -2090,7 +2090,7 @@ func (c *APIClient) V1BlobberGetFileRefs(t *test.SystemTest, blobberGetFileRefsR
 func (c *APIClient) V1BlobberGetFileRefPaths(t *test.SystemTest, blobberFileRefPathRequest *model.BlobberFileRefPathRequest, requiredStatusCode int) (*model.BlobberFileRefPathResponse, *resty.Response, error) {
 	var blobberFileRefPathResponse *model.BlobberFileRefPathResponse
 
-	url := blobberFileRefPathRequest.URL + strings.Replace(GetFileRefPath, ":allocation_id", blobberFileRefPathRequest.AllocationID, 1) + "?" + "path=" + blobberFileRefPathRequest.Path
+	blobberGetFilePathURL := blobberFileRefPathRequest.URL + strings.Replace(GetFileRefPath, ":allocation_id", blobberFileRefPathRequest.AllocationID, 1) + "?" + "path=" + blobberFileRefPathRequest.Path
 
 	headers := map[string]string{
 		"X-App-Client-Id":        blobberFileRefPathRequest.ClientID,
@@ -2100,7 +2100,7 @@ func (c *APIClient) V1BlobberGetFileRefPaths(t *test.SystemTest, blobberFileRefP
 	}
 	resp, err := c.executeForServiceProvider(
 		t,
-		url,
+		blobberGetFilePathURL,
 		model.ExecutionRequest{
 			Dst:                &blobberFileRefPathResponse,
 			RequiredStatusCode: requiredStatusCode,
@@ -2162,7 +2162,7 @@ func (c *APIClient) GetLatestFinalizedBlock(t *test.SystemTest, requiredStatusCo
 func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeRequest *model.BlobberObjectTreeRequest, requiredStatusCode int) (*model.BlobberObjectTreePathResponse, *resty.Response, error) {
 	var blobberObjectTreePathResponse *model.BlobberObjectTreePathResponse
 
-	url := blobberObjectTreeRequest.URL + strings.Replace(GetObjectTree, ":allocation_id", blobberObjectTreeRequest.AllocationID, 1) + "?" + "path=" + blobberObjectTreeRequest.Path
+	blobberObjectTreeURL := blobberObjectTreeRequest.URL + strings.Replace(GetObjectTree, ":allocation_id", blobberObjectTreeRequest.AllocationID, 1) + "?" + "path=" + blobberObjectTreeRequest.Path
 
 	headers := map[string]string{
 		"X-App-Client-Id":        blobberObjectTreeRequest.ClientID,
@@ -2172,7 +2172,7 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 	}
 	resp, err := c.executeForServiceProvider(
 		t,
-		url,
+		blobberObjectTreeURL,
 		model.ExecutionRequest{
 			Dst:                &blobberObjectTreePathResponse,
 			RequiredStatusCode: requiredStatusCode,
@@ -2219,7 +2219,6 @@ func (c *APIClient) V1BlobberPartitionSelectionFrequency(t *test.SystemTest, req
 }
 
 func (c *APIClient) V1PartitionSizeFrequency(t *test.SystemTest, request model.BlockRewardsRequest, requiredStatusCode int) (map[float64]float64, *resty.Response, error) {
-
 	var response map[string]int
 
 	result := make(map[float64]float64)

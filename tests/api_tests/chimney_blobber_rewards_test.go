@@ -2,15 +2,16 @@ package api_tests
 
 import (
 	"fmt"
+	"math"
+	"math/rand"
+	"testing"
+	"time"
+
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
-	"math"
-	"math/rand"
-	"testing"
-	"time"
 )
 
 func TestChimneyBlobberRewards(testSetup *testing.T) {
@@ -20,7 +21,7 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 	const (
 		allocSize = 1073741824
 		fileSize  = 1024 * 1024 * 5
-		sleepTime = 15 * time.Minute
+		sleepTime = 10 * time.Minute
 
 		standardErrorMargin = 0.05
 		extraErrorMargin    = 0.1
@@ -113,7 +114,7 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 	chimneyClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 
 	alloc := chimneyClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-	require.Equal(t, true, alloc.Canceled, "Allocation should be cancelled")
+	require.Equal(t, true, alloc.Canceled, "Allocation should be canceled")
 	require.Equal(t, true, alloc.Finalized, "Allocation should be finalized")
 
 	alloc.Blobbers = prevAlloc.Blobbers
@@ -121,7 +122,6 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 	endBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
 
 	t.RunWithTimeout("Challenge Rewards", 1*time.Hour, func(t *test.SystemTest) {
-		t.Skip("Skipping challenge rewards test")
 		allocCreatedAt = alloc.StartTime
 		allocExpiredAt = alloc.Expiration
 		actualWritePoolBalance = float64(alloc.WritePool)
@@ -142,7 +142,7 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 		expectedCancellationCharge = expectedAllocationCost * 0.2
 		expectedWritePoolBalance = 5e13
 
-		//expectedMovedToChallenge = (expectedAllocationCost * fileSize) / allocSize
+		// expectedMovedToChallenge = (expectedAllocationCost * fileSize) / allocSize
 		for _, blobber := range alloc.Blobbers {
 			expectedMovedToChallenge += float64(blobber.Terms.WritePrice) * sizeInGB(int64(fileSize/alloc.DataShards))
 		}
@@ -245,7 +245,6 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 		expectedBlockReward = totalBlockRewardPerRound * float64(totalRounds/30)
 
 		getZeta := func(wp, rp float64) float64 {
-
 			i := 1.0
 			k := 0.9
 			mu := 0.2
