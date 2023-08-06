@@ -2163,10 +2163,12 @@ func createCsrfToken(t *test.SystemTest, phoneNumber string) string {
 
 func authenticateWithFirebase(t *test.SystemTest, phoneNumber string) *model.FirebaseToken {
 	session, response, err := zboxClient.FirebaseSendSms(t, "AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY", phoneNumber)
+	t.Log("Session", session, "response", response)
 	require.NoError(t, err, "Firebase send SMS failed: ", response.RawResponse)
 	token, response, err := zboxClient.FirebaseCreateToken(t, "AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY", session.SessionInfo)
+	t.Log("token", token, "repsonse", response)
 	require.NoError(t, err, "Firebase create token failed: ", response.RawResponse)
-
+	t.Log("")
 	return token
 }
 
