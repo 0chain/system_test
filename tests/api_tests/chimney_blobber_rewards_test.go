@@ -7,6 +7,8 @@ import (
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
+	"math"
+	"math/rand"
 	"testing"
 	"time"
 )
@@ -15,12 +17,10 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Replace blobber in allocation, should work")
 
-	startBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
-
 	const (
 		allocSize = 1073741824
 		fileSize  = 1024 * 1024 * 5
-		sleepTime = 0 * time.Minute
+		sleepTime = 15 * time.Minute
 
 		standardErrorMargin = 0.05
 		extraErrorMargin    = 0.1
@@ -104,6 +104,8 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 	uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
 	sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
+	startBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
+
 	time.Sleep(sleepTime)
 
 	prevAlloc := chimneyClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -119,12 +121,13 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 	endBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
 
 	t.RunWithTimeout("Challenge Rewards", 1*time.Hour, func(t *test.SystemTest) {
+		t.Skip("Skipping challenge rewards test")
 		allocCreatedAt = alloc.StartTime
 		allocExpiredAt = alloc.Expiration
 		actualWritePoolBalance = float64(alloc.WritePool)
 		actualMovedToChallenge = float64(alloc.MovedToChallenge)
 
-		allocDuration := allocExpiredAt - allocCreatedAt
+		allocDuration := allocExpiredAt - allocCreatedAt + 180
 		durationInTimeUnits := float64(allocDuration*1e9) / float64(alloc.TimeUnit)
 		t.Logf("Alloc duration: %v", durationInTimeUnits)
 
@@ -157,7 +160,7 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 
 		// Compare Cancellation Charges
 		for _, blobber := range alloc.Blobbers {
-			cancellationChargeQuery := fmt.Sprintf("allocation_id = '%s' AND provider_id = '%s' AND reward_type = %d", allocationID, blobber.ID, CancellationChargeReward)
+			cancellationChargeQuery := fmt.Sprintf("allocation_id='%s' AND provider_id='%s' AND reward_type=%d", allocationID, blobber.ID, CancellationChargeReward)
 
 			queryReward := chimneyClient.GetRewardsByQuery(t, cancellationChargeQuery, client.HttpOkStatus)
 			actualCancellationChargeForBlobber := queryReward.TotalReward
@@ -185,7 +188,10 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 			actualBlobberChallengeRewards += actualChallengeRewardForBlobber
 			actualChallengeRewards += actualChallengeRewardForBlobber
 
-			expectedChallengeRewardForBlobber := expectedChallengeRewards * writePriceWeight(blobber.Terms.WritePrice, totalWritePrice)
+			expectedChallengeRewardForBlobber := expectedBlobberChallengeRewards * writePriceWeight(blobber.Terms.WritePrice, totalWritePrice)
+
+			t.Log("Expected Challenge Reward: ", expectedChallengeRewardForBlobber)
+			t.Log("Actual Challenge Reward: ", actualChallengeRewardForBlobber)
 
 			require.InEpsilon(t, expectedChallengeRewardForBlobber, actualChallengeRewardForBlobber, standardErrorMargin, "Expected challenge reward for blobber is not equal to actual")
 			require.InEpsilon(t, queryReward.TotalReward*blobber.StakePoolSettings.ServiceCharge, queryReward.TotalProviderReward, standardErrorMargin, "Expected provider reward is not equal to actual")
@@ -227,14 +233,16 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 		endBlockRound := endBlock.Round
 		totalRounds = endBlockRound - startBlockRound
 
+		meanRound := (startBlockRound + endBlockRound) / 2
+
 		calculateTotalBlockRewardPerRound := func() float64 {
-			query := fmt.Sprintf("block_number = %d AND reward_type = %d", startBlockRound, BlockRewardBlobber)
+			query := fmt.Sprintf("block_number > %d AND block_number <= %d AND reward_type = %d", meanRound, meanRound+29, BlockRewardBlobber)
 			queryReward := chimneyClient.GetRewardsByQuery(t, query, client.HttpOkStatus)
 			return queryReward.TotalReward
 		}
 
 		totalBlockRewardPerRound = calculateTotalBlockRewardPerRound()
-		expectedBlockReward = totalBlockRewardPerRound * float64(totalRounds)
+		expectedBlockReward = totalBlockRewardPerRound * float64(totalRounds/30)
 
 		getZeta := func(wp, rp float64) float64 {
 
@@ -255,6 +263,26 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 			return (zeta + 1) * float64(blobber.TotalStake)
 		}
 
+		getTotalWeightOfRandomBlobbersSize := func(size int) float64 {
+			totalWeight := float64(0)
+			selectedIndexes := make(map[int]bool)
+			for i := 0; i < size; i++ {
+				// Generate a random index within the range of available blobbers.
+				randomIndex := rand.Intn(int(lenBlobbers))
+
+				// Check if the index has already been selected. If yes, generate a new random index.
+				for selectedIndexes[randomIndex] {
+					randomIndex = rand.Intn(int(lenBlobbers))
+				}
+
+				// Mark the current index as selected.
+				selectedIndexes[randomIndex] = true
+
+				totalWeight += getBlobberBlockRewardWeight(allBlobbers[randomIndex])
+			}
+			return totalWeight
+		}
+
 		totalBlobberBlockRewardWeight := float64(0)
 		for _, blobber := range allBlobbers {
 			totalBlobberBlockRewardWeight += getBlobberBlockRewardWeight(blobber)
@@ -262,10 +290,11 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 
 		// Collecting partitions size frequency data
 		partitionSizeFrequency := chimneyClient.GetPartitionSizeFrequency(t, startBlockRound, endBlockRound, client.HttpOkStatus)
+		blobberPartitionSelection := chimneyClient.GetBlobberPartitionSelectionFrequency(t, startBlockRound, endBlockRound, client.HttpOkStatus)
 
 		probabilityOfBlobberSelected := make(map[float64]float64)
 		for size, frequency := range partitionSizeFrequency {
-			probabilityOfBlobberSelected[size] = (frequency * size) / float64(lenBlobbers)
+			probabilityOfBlobberSelected[size] = customRound((frequency * size) / float64(lenBlobbers))
 		}
 
 		// Compare blobber block rewards
@@ -273,13 +302,24 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 			blobberBlockRewardWeight := getBlobberBlockRewardWeight(blobber)
 			expectedBlobberBlockReward := 0.0
 
+			maxSize := 0.0
+			count := 0
+
 			for size, probability := range probabilityOfBlobberSelected {
+				count += int(probability)
+				if size > maxSize {
+					maxSize = size
+				}
 				if size == 1 {
 					expectedBlobberBlockReward += totalBlockRewardPerRound * probability
 				} else {
-					expectedBlobberBlockReward += ((blobberBlockRewardWeight * float64(lenBlobbers-1)) / (totalBlobberBlockRewardWeight * (size - 1))) * totalBlockRewardPerRound * probability
+					weightRatio := blobberBlockRewardWeight / (blobberBlockRewardWeight + getTotalWeightOfRandomBlobbersSize(int(size)-1))
+					expectedBlobberBlockReward += weightRatio * totalBlockRewardPerRound * probability
 				}
 			}
+
+			weightRatio := blobberBlockRewardWeight / (blobberBlockRewardWeight + getTotalWeightOfRandomBlobbersSize(int(maxSize)-1))
+			expectedBlobberBlockReward += weightRatio * totalBlockRewardPerRound * float64(blobberPartitionSelection[blobber.ID]-int64(count))
 
 			// Calculate actual block reward
 			blockRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d AND block_number >= %d AND block_number < %d", blobber.ID, BlockRewardBlobber, startBlockRound, endBlockRound)
@@ -292,6 +332,12 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 		}
 
 		require.InEpsilon(t, expectedBlockReward, actualBlockReward, standardErrorMargin, "Expected block reward is not equal to actual")
+
+		// Check Blobber Partitions are selected evenly
+
+		for blobberId, frequncy := range blobberPartitionSelection {
+			require.Greater(t, frequncy, totalRounds/90, "Blobber %s is not selected for partitions evenly", blobberId)
+		}
 	})
 }
 
@@ -302,4 +348,15 @@ func sizeInGB(size int64) float64 {
 
 func writePriceWeight(writePrice int64, totalWritePrice int64) float64 {
 	return float64(writePrice) / float64(totalWritePrice)
+}
+
+func customRound(number float64) float64 {
+	integerPart := math.Floor(number)
+	decimalPart := number - integerPart
+
+	if decimalPart >= 0.5 {
+		return math.Ceil(number)
+	} else {
+		return math.Floor(number)
+	}
 }

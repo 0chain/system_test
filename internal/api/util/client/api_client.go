@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -54,6 +55,7 @@ const (
 	GetLatestFinalizedMagicBlock       = "/v1/block/get/latest_finalized_magic_block"
 	GetLatestFinalizedBlock            = "/v1/block/get/latest_finalized"
 	QueryRewards                       = "/v1/screst/:sc_address/query-rewards"
+	PartitionSizeFrequency             = "/v1/screst/:sc_address/parition-size-frequency"
 	BlobberPartitionSelectionFrequency = "/v1/screst/:sc_address/blobber-selection-frequency"
 )
 
@@ -258,6 +260,8 @@ func (c *APIClient) executeForGivenServiceProviders(
 			return nil, err
 		}
 		formattedURL := urlBuilder.String()
+
+		t.Log("Executing request for miner: ", formattedURL)
 
 		newResp, err := c.executeForServiceProvider(t, formattedURL, *executionRequest, method)
 		if err != nil {
@@ -1490,7 +1494,7 @@ func (c *APIClient) GetBlobberPartitionSelectionFrequency(t *test.SystemTest, st
 }
 
 func (c *APIClient) GetPartitionSizeFrequency(t *test.SystemTest, start, end int64, requiredStatusCode int) map[float64]float64 {
-	t.Log("Get blobber partition selection frequency...")
+	t.Log("Get partition size frequency...")
 
 	blobberPartitionSelectionFrequencyResponse, resp, err := c.V1PartitionSizeFrequency(
 		t,
@@ -2181,9 +2185,7 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 func (c *APIClient) V1QueryRewards(t *test.SystemTest, queryRewardsRequest model.QueryRewardsRequest, requiredStatusCode int) (*model.QueryRewardsResponse, *resty.Response, error) {
 	var queryRewardsResponse *model.QueryRewardsResponse
 
-	urlBuilder := NewURLBuilder().SetPath(QueryRewards).AddParams("query", queryRewardsRequest.Query).SetPathVariable("sc_address", StorageSmartContractAddress)
-
-	t.Log("Query rewards: ", urlBuilder.String())
+	urlBuilder := NewURLBuilder().SetPath(QueryRewards).AddParams("query", url.QueryEscape(queryRewardsRequest.Query)).SetPathVariable("sc_address", StorageSmartContractAddress)
 
 	resp, err := c.executeForAllServiceProviders(
 		t,
@@ -2217,19 +2219,27 @@ func (c *APIClient) V1BlobberPartitionSelectionFrequency(t *test.SystemTest, req
 }
 
 func (c *APIClient) V1PartitionSizeFrequency(t *test.SystemTest, request model.BlockRewardsRequest, requiredStatusCode int) (map[float64]float64, *resty.Response, error) {
-	var result map[float64]float64
 
-	urlBuilder := NewURLBuilder().SetPath(BlobberPartitionSelectionFrequency).AddParams("start", strconv.FormatInt(request.Start, 10)).AddParams("end", strconv.FormatInt(request.End, 10)).SetPathVariable("sc_address", StorageSmartContractAddress)
+	var response map[string]int
+
+	result := make(map[float64]float64)
+
+	urlBuilder := NewURLBuilder().SetPath(PartitionSizeFrequency).AddParams("start", strconv.FormatInt(request.Start, 10)).AddParams("end", strconv.FormatInt(request.End, 10)).SetPathVariable("sc_address", StorageSmartContractAddress).SetPathVariable("sc_address", StorageSmartContractAddress)
 
 	resp, err := c.executeForAllServiceProviders(
 		t,
 		urlBuilder,
 		&model.ExecutionRequest{
-			Dst:                &result,
+			Dst:                &response,
 			RequiredStatusCode: requiredStatusCode,
 		},
 		HttpGETMethod,
 		SharderServiceProvider)
+
+	for size, frequency := range response {
+		sizeInFloat, _ := strconv.ParseFloat(size, 64)
+		result[sizeInFloat] = float64(frequency)
+	}
 
 	return result, resp, err
 }
