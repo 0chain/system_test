@@ -40,24 +40,22 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 	bucketName := "dummybucketfortestsmigration"
 	fileKey := "sdfg" + ".txt"
 	t.TestSetup("Setup s3 bucket with relevant file", func() {
+		// Cleanup bucket before test
+		err := cleanupBucket(S3Client, bucketName)
+		if err != nil {
+			t.Log("Failed to cleanup bucket: ", err)
+		}
 		// Read file contents
 		fileContents := []byte("Hello, World!")
 
 		// Upload the file to S3
-		_, err := S3Client.PutObject(&s3.PutObjectInput{
+		_, err = S3Client.PutObject(&s3.PutObjectInput{
 			Bucket: aws.String(bucketName),
 			Key:    aws.String(fileKey),
 			Body:   bytes.NewReader(fileContents),
 		})
 		if err != nil {
 			t.Skip("S3 Bucket operatiion is not working properly")
-		}
-	})
-
-	t.Cleanup(func() {
-		err := cleanupBucket(S3Client, bucketName)
-		if err != nil {
-			t.Log("Failed to cleanup bucket: ", err)
 		}
 	})
 
@@ -85,7 +83,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remoteFilePath = path.Join(remoteFilePath, remotepath)
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate existing bucket to specified path successfully with encryption on", func(t *test.SystemTest) {
@@ -113,7 +111,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remoteFilePath = path.Join(remoteFilePath, "/")
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate as copy bucket successfully", func(t *test.SystemTest) {
@@ -154,7 +152,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		// fileKey_modified := parts[0]+ "_modified." + parts[1]
 		// remoteFilePath := path.Join(remotepath, fileKey_modified)
 		// uploadStats := checkStats(t, remoteFilePath, fileKey_modified, allocationID)
-		// require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		// require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate existing bucket successfully with encryption on", func(t *test.SystemTest) {
@@ -180,7 +178,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remoteFilePath := path.Join(remotepath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, true)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should skip migration with skip flag == 1 and migartion should be skipped", func(t *test.SystemTest) {
@@ -229,7 +227,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remotepath = path.Join(remotepath, bucketName)
 		remoteFilePath := path.Join(remotepath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate successfully with duplication files  with skip flag == 2 and dup-suffix", func(t *test.SystemTest) {
@@ -259,7 +257,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remotepath = path.Join(remotepath, bucketName)
 		remoteFilePath := path.Join(remotepath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should migrate successfully and delete the s3 bucket file and use custom workdir", func(t *test.SystemTest) {
@@ -292,7 +290,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		remoteFilePath := path.Join(remotepath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should error out if workdir is not default and not empty", func(t *test.SystemTest) {
@@ -327,6 +325,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 }
 
 func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string, encrypted bool) bool {
+	t.Log("remotepath: ", remoteFilePath)
 	output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
 		"allocation": allocationID,
 		"remotepath": remoteFilePath,
@@ -336,39 +335,49 @@ func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string, 
 	require.Len(t, output, 1)
 
 	var stats map[string]*climodel.FileStats
-
+	t.Log(output[0])
 	err = json.Unmarshal([]byte(output[0]), &stats)
 	require.Nil(t, err)
 
 	if len(stats) == 0 {
+		t.Logf("0. zero no files")
 		return false
 	}
 
 	for _, data := range stats {
 		if fname != data.Name {
+			t.Logf("1. %s != %s", fname, data.Name)
 			return false
 		}
 		if remoteFilePath != data.Path {
+			t.Logf("2. %s != %s", remoteFilePath, data.Path)
 			return false
 		}
-		if fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath))) != data.PathHash {
+		hash := fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath)))
+		if hash != data.PathHash {
+			t.Logf("3. %s != %s", hash, data.PathHash)
 			return false
 		}
 		if int64(0) != data.NumOfBlockDownloads {
+			t.Logf("4. %d != %d", int64(0), data.NumOfBlockDownloads)
 			return false
 		}
 		if int64(1) != data.NumOfUpdates {
+			t.Logf("5. %d != %d", int64(1), data.NumOfUpdates)
 			return false
 		}
 		if float64(data.NumOfBlocks) != math.Ceil(float64(data.Size)/float64(chunksize)) {
+			t.Logf("6. %f != %f", float64(data.NumOfBlocks), math.Ceil(float64(data.Size)/float64(chunksize)))
 			return false
 		}
 		if data.WriteMarkerTxn == "" {
 			if data.BlockchainAware != false {
+				t.Logf("7. %t", data.BlockchainAware)
 				return false
 			}
 		} else {
 			if data.BlockchainAware != true {
+				t.Logf("8. %t", data.BlockchainAware)
 				return false
 			}
 		}
