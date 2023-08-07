@@ -35,6 +35,9 @@ func InitSDK(wallet, configFile string) error {
 		return err
 	}
 	err = zcncore.Init(string(marshal))
+	if err != nil {
+		return err
+	}
 
 	err = sdk.InitStorageSDK(
 		walletJSON,
