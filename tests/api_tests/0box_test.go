@@ -2166,10 +2166,17 @@ func authenticateWithFirebase(t *test.SystemTest, phoneNumber string) *model.Fir
 	t.Log("Session", session, "response", response)
 	require.NoError(t, err, "Firebase send SMS failed: ", response.RawResponse)
 	token, response, err := zboxClient.FirebaseCreateToken(t, "AIzaSyAhySl9LVEFtCgnzbxtmB_T3hiLdECmAGY", session.SessionInfo)
-	t.Log("token", token, "repsonse", response)
+	t.Log("token", token, "response", response)
 	require.NoError(t, err, "Firebase create token failed: ", response.RawResponse)
 	t.Log("")
 	return token
+}
+
+func authenticateWithJwtToken(t *test.SystemTest, csrfToken, phoneNumber string) *string {
+	sessionId, response, err := zboxClient.CreateJwtToken(t, csrfToken, phoneNumber)
+	t.Log("Session", sessionId, "response", response)
+	require.NoError(t, err, "Creating jwt token failed", response.RawResponse)
+	return sessionId
 }
 
 func escapedTestName(t *test.SystemTest) string {

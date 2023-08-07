@@ -114,6 +114,26 @@ func (c *ZboxClient) CreateCSRFToken(t *test.SystemTest, phoneNumber string) (*m
 	return csrfToken, resp, err
 }
 
+func (c *ZboxClient) CreateJwtToken(t *test.SystemTest, csrfToken, phoneNumber string) (*string, *resty.Response, error) {
+	t.Logf("Creating Jwt Token using 0box...")
+	var sessionId *string
+
+	urlBuilder := NewURLBuilder().
+		SetPath("/v2/jwt/session")
+	parsedUrl := urlBuilder.String()
+
+	resp, err := c.executeForServiceProvider(t, parsedUrl, model.ExecutionRequest{
+		Dst: sessionId,
+		Headers: map[string]string{
+			"X-App-Phone-Number": phoneNumber,
+			"X-CSRF-TOKEN":       csrfToken,
+		},
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return sessionId, resp, err
+}
+
 func (c *ZboxClient) ListWallets(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletList, *resty.Response, error) {
 	t.Logf("Listing all wallets for [%v] using 0box...", phoneNumber)
 	var zboxWallets *model.ZboxWalletList
@@ -800,7 +820,7 @@ func (c *ZboxClient) GetWalletKeysForNumber(t *test.SystemTest, clientId, client
 			"X-App-Client-Key":       clientKey,
 			"X-App-Client-Signature": clientSignature,
 			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
+			"X-Jwt-Token":            idToken,
 			"X-App-Phone-Number":     phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             appType,

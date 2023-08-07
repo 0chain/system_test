@@ -3,8 +3,6 @@ package api_tests
 import (
 	"testing"
 
-	"github.com/0chain/system_test/internal/api/model"
-
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 )
@@ -14,13 +12,14 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("List allocation with zero allocation should work")
 
-	var firebaseToken *model.FirebaseToken
+	var jwtToken *string
 	t.TestSetup("Autenticate with firebase", func() {
-		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
+		jwtToken = authenticateWithJwtToken(t, csrfToken, zboxClient.DefaultPhoneNumber)
 	})
 
 	t.RunSequentially("List allocation with zero allocation should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -28,7 +27,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
@@ -38,14 +37,14 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationList, response, err := zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		allocationList, response, err := zboxClient.ListAllocation(t, *jwtToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Len(t, allocationList, 0)
 	})
 
 	t.RunSequentially("Post allocation with invalid phonenumber should not work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -53,7 +52,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
@@ -71,7 +70,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			"1234567890",
 			"blimp",
@@ -81,7 +80,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("List allocation with existing allocation should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -89,7 +88,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
@@ -108,7 +107,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
@@ -117,7 +116,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		allocationList, response, err := zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
+		allocationList, response, err := zboxClient.ListAllocation(t, *jwtToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Len(t, allocationList, 1, "Response status code does not match expected. Output: [%v]", response.String())
@@ -125,7 +124,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Post allocation with correct argument should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -133,7 +132,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
@@ -152,7 +151,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
@@ -163,7 +162,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Post allocation with correct argument for vult should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -171,7 +170,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"vult",
@@ -190,7 +189,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"vult",
@@ -201,7 +200,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Post multiple allocation for vult should not work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -209,7 +208,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"vult",
@@ -228,7 +227,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"vult",
@@ -239,7 +238,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Post multiple allocation for blimp should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -247,7 +246,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
@@ -266,7 +265,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
@@ -284,7 +283,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
@@ -295,7 +294,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Post multiple allocation for chalk should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -303,7 +302,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"chalk",
@@ -322,7 +321,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"chalk",
@@ -340,7 +339,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"chalk",
@@ -351,7 +350,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Post allocation for chimney should not work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -359,7 +358,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"chimney",
@@ -378,7 +377,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"chimney",
@@ -389,7 +388,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Post allocation for bolt should not work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -397,7 +396,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"bolt",
@@ -416,7 +415,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"bolt",
@@ -427,7 +426,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Post allocation for invalid app type should not work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -435,7 +434,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
@@ -454,7 +453,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"abc",
@@ -465,7 +464,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Post allocation with already existing allocation Id should not  work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -473,7 +472,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
@@ -492,7 +491,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
@@ -506,7 +505,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
@@ -516,7 +515,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get an allocation with allocation present should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -524,7 +523,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
@@ -543,7 +542,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
@@ -552,14 +551,14 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, allocationID, allocationName)
+		allocation, response, err := zboxClient.GetAllocation(t, *jwtToken, csrfToken, zboxClient.DefaultPhoneNumber, allocationID, allocationName)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, allocationID, allocation.Id)
 	})
 
 	t.RunSequentially("Get an allocation with allocation not present should not work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -567,7 +566,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
@@ -578,13 +577,13 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
 		allocationName := "allocation created as part of " + t.Name()
-		_, response, err = zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, zboxClient.DefaultAllocationId, allocationName)
+		_, response, err = zboxClient.GetAllocation(t, *jwtToken, csrfToken, zboxClient.DefaultPhoneNumber, zboxClient.DefaultAllocationId, allocationName)
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	t.RunSequentially("Update an allocation with allocation present should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -592,7 +591,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
@@ -611,7 +610,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			allocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
@@ -625,7 +624,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			updatedAllocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 		)
@@ -634,7 +633,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "updating allocation successful", allocationObjCreatedResponse.Message)
 
-		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, allocationID, allocationName)
+		allocation, response, err := zboxClient.GetAllocation(t, *jwtToken, csrfToken, zboxClient.DefaultPhoneNumber, allocationID, allocationName)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, allocationID, allocation.Id)
@@ -642,7 +641,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update an allocation with allocation not present should not work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, *jwtToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -650,7 +649,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
@@ -670,7 +669,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			updatedAllocationName,
 			allocationDescription,
 			allocationType,
-			firebaseToken.IdToken,
+			*jwtToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 		)
