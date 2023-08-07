@@ -627,9 +627,9 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":  filename,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 3)
 
-		require.Equal(t, "Upload failed. EOF", output[0])
+		require.Contains(t, strings.Join(output, "\n"), "No data to upload")
 	})
 
 	t.Run("Upload without any Parameter Should Fail", func(t *test.SystemTest) {
