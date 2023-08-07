@@ -627,7 +627,7 @@ func TestUpload(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		require.Contains(t, "No data to upload", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "No data to upload")
 	})
 
 	t.Run("Upload without any Parameter Should Fail", func(t *test.SystemTest) {
