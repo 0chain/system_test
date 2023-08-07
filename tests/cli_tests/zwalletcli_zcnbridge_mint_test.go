@@ -12,34 +12,40 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	TransactionHash = "0x607abfece03c42afb446c77ffc81783f2d8fb614774d3fe241eb54cb52943f95"
-)
-
-// todo: enable tests
 func TestBridgeMint(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till authorizers are re-enabled")
 	t.SetSmokeTests("Mint WZCN tokens")
 
 	t.Parallel()
 
-	t.Run("Mint WZCN tokens", func(t *test.SystemTest) {
-		t.Skip("Skipping due to deployment issue")
+	t.RunWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
+		output, err := executeFaucetWithTokens(t, configPath, 2.0)
+		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
-		output, err := mintWrappedZcnTokens(t, false)
+		output, err = burnZcn(t, "1", false)
+		require.Nil(t, err)
+		require.Greater(t, len(output), 0)
+		require.Contains(t, output[len(output)-1], "Transaction completed successfully:")
+
+		output, err = mintWrappedZcnTokens(t, true)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
-		require.Contains(t, output[len(output)-1], "Verification [OK]")
+		require.Contains(t, output[len(output)-1], "Done.")
 	})
 
-	t.Run("Mint ZCN tokens", func(t *test.SystemTest) {
-		t.Skip("Skipping due to deployment issue")
+	t.RunWithTimeout("Mint ZCN tokens", time.Minute*10, func(t *test.SystemTest) {
+		_, err := createWalletForName(t, configPath, escapedTestName(t))
+		require.NoError(t, err)
 
-		output, err := mintZcnTokens(t, false)
+		output, err := burnEth(t, "10000000000", true)
+		require.Nil(t, err)
+		require.Greater(t, len(output), 0)
+		require.Contains(t, output[len(output)-1], "Verification:")
+
+		output, err = mintZcnTokens(t, true)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
-		require.Contains(t, output[len(output)-1], "Verification [OK]")
+		require.Contains(t, output[len(output)-1], "Done.")
 	})
 }
 
@@ -48,9 +54,10 @@ func mintZcnTokens(t *test.SystemTest, retry bool) ([]string, error) {
 	t.Logf("Mint ZCN tokens using WZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-mint-zcn --silent "+
-			"--configDir ./config --config %s --path %s",
+			"--configDir ./config --config %s --path %s --wallet %s",
 		configPath,
 		configDir,
+		escapedTestName(t)+"_wallet.json",
 	)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
@@ -64,9 +71,10 @@ func mintWrappedZcnTokens(t *test.SystemTest, retry bool) ([]string, error) {
 	t.Logf("Mint WZCN tokens using ZCN burn ticket...")
 	cmd := fmt.Sprintf(
 		"./zwallet bridge-mint-wzcn --silent "+
-			"--configDir ./config --config %s --path %s",
+			"--configDir ./config --config %s --path %s --wallet %s",
 		configPath,
 		configDir,
+		escapedTestName(t)+"_wallet.json",
 	)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
