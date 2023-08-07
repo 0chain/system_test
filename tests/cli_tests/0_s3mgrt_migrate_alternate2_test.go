@@ -19,8 +19,6 @@ import (
 func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Skip()
-
 	if s3SecretKey == "" || s3AccessKey == "" {
 		t.Skip("s3SecretKey or s3AccessKey was missing")
 	}
@@ -29,11 +27,16 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 	bucketName := "dummybucketfortestsmigration"
 	fileKey := "OneMinNew" + ".txt"
 	t.TestSetup("Setup s3 bucket with relevant file", func() {
+		// Cleanup before test
+		err := cleanupBucket(S3Client, s3bucketName)
+		if err != nil {
+			t.Log("Failed to cleanup bucket: ", err)
+		}
 		// Read file contents
 		fileContents := []byte("Hello, World!")
 
 		// Upload the file to S3
-		_, err := S3Client.PutObject(&s3.PutObjectInput{
+		_, err = S3Client.PutObject(&s3.PutObjectInput{
 			Bucket: aws.String(bucketName),
 			Key:    aws.String(fileKey),
 			Body:   bytes.NewReader(fileContents),
@@ -175,9 +178,9 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		remoteFilePathPos := path.Join(remoteFilePath, fileKeyToBemigrated)
 		remoteFilePathNeg := path.Join(remoteFilePath, fileKeyNotToBeMigrated)
 		uploadStats := checkStats(t, remoteFilePathPos, fileKeyToBemigrated, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 		uploadStats = checkStats(t, remoteFilePathNeg, fileKeyNotToBeMigrated, allocationID, false)
-		require.Equal(t, uploadStats, false, "The file migrated doesnot match with with required file")
+		require.Equal(t, false, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should pass when allocation flag missing but allocation path is given", func(t *test.SystemTest) {
@@ -217,7 +220,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		remoteFilePath := path.Join(remotepath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, fileKeyNew)
 		uploadStats := checkStats(t, remoteFilePath, fileKeyNew, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should pass when access key and secret key is missing but aws-cred-path path is given", func(t *test.SystemTest) {
@@ -265,7 +268,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		remoteFilePath := path.Join(remotepath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, fileKeyNew)
 		uploadStats := checkStats(t, remoteFilePath, fileKeyNew, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should pass concurrency flag is set to 20", func(t *test.SystemTest) {
@@ -300,7 +303,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		remoteFilePath := path.Join(remotepath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, fileKeyNew)
 		uploadStats := checkStats(t, remoteFilePath, fileKeyNew, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should pass retry flag is set to 4", func(t *test.SystemTest) {
@@ -335,7 +338,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		remoteFilePath := path.Join(remotepath, bucketName)
 		remoteFilePath = path.Join(remoteFilePath, fileKeyNew)
 		uploadStats := checkStats(t, remoteFilePath, fileKeyNew, allocationID, false)
-		require.Equal(t, uploadStats, true, "The file migrated doesnot match with with required file")
+		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
 	t.RunSequentially("Should not pass when filename size is more than 100 character", func(t *test.SystemTest) {
