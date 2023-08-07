@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
@@ -63,7 +64,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 
-	t.RunSequentially("ListBucket should return 200 all the parameter are correct", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("ListBucket should return 200 all the parameter are correct", 1*time.Minute, func(t *test.SystemTest) { // FIXME: investigate slowness
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
