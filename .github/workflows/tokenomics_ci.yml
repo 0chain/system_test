@@ -99,6 +99,8 @@ jobs:
           echo "TOKENOMICS_SLASH_REWARD_TESTS=$(echo $(([ -z 'TestBlobberSlashPenalty' ] && echo '') || echo 'TestBlobberSlashPenalty'))" >> $GITHUB_ENV
           echo "TOKENOMICS_CHALLENGE_TIMINGS_TESTS=$(echo $(([ -z 'TestChallengeTimings' ] && echo '') || echo 'TestChallengeTimings'))" >> $GITHUB_ENV
           echo "TOKENOMICS_BLOCK_REWARD_TESTS=$(echo $(([ -z 'TestBlockRewardsForBlobbers' ] && echo '') || echo 'TestBlockRewardsForBlobbers'))" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=$(echo ${{github.event.inputs.repo_snapshots_branch}})" >> $GITHUB_E
 
 
       - name: "Deploy 0Chain"
