@@ -2112,7 +2112,7 @@ func graphBlobberEndpointTestCases(endpoint model.ZboxGraphBlobberEndpoint, blob
 		data, resp, err = endpoint(t, blobberId, &model.ZboxGraphRequest{From: strconv.FormatInt(latestRound-int64(20), 10), To: strconv.FormatInt(latestRound, 10), DataPoints: "10"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 9, len([]int64(*data)))
+		require.Equal(t, 10, len([]int64(*data)))
 	}
 }
 
