@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBlobberChallengesCount(testSetup *testing.T) {
+func TestChallengeProtocol(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)")
 
