@@ -177,8 +177,6 @@ func TestMinerStake(testSetup *testing.T) {
 
 	// todo rewards not transferred to wallet until a collect reward transaction
 	t.RunSequentially("Staking tokens against miner should return interest to wallet", func(t *test.SystemTest) {
-		t.Skip("rewards not transferred to wallet until a collect reward transaction")
-
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 

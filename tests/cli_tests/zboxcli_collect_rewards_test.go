@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Fixed
 func TestBlobberCollectRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Test collect reward with valid pool and blobber id should pass")
@@ -41,7 +42,7 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Upload and download a file so blobber can accumulate rewards
-		allocSize := int64(2048)
+		allocSize := int64(1 * GB)
 		filesize := int64(256)
 		remotepath := "/"
 
@@ -116,7 +117,6 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with invalid blobber id should fail", func(t *test.SystemTest) {
-		t.Skip("piers")
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
@@ -153,7 +153,6 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with invalid provider type should fail", func(t *test.SystemTest) {
-		t.Skip("piers")
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
@@ -190,7 +189,6 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with no provider id or type should fail", func(t *test.SystemTest) {
-		t.Skip("piers")
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
