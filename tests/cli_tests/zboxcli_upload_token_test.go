@@ -83,7 +83,7 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 
 func getUploadCostInUnit(t *test.SystemTest, cliConfigFilename, allocationID, localpath string) ([]string, error) {
 	t.Logf("Getting upload cost...")
-	output, err := cliutils.RunCommand(t, "./zbox get-upload-cost --allocation "+allocationID+" --localpath "+localpath+" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	output, err := cliutils.RunCommand(t, "./zbox get-upload-cost --allocation "+allocationID+" --end --localpath "+localpath+" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 	require.Nil(t, err, "error getting upload cost in unit", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 	return output, err
