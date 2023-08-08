@@ -1852,8 +1852,8 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		fpath, fsize := sdkClient.UploadFile(t, allocationID)
 
 		// Download the file
-		sdkClient.DownloadFile(t, allocationID, fpath, ".")
-		defer os.Remove(path.Join(".", fpath))
+		sdkClient.DownloadFile(t, allocationID, fpath, "temp/")
+		defer os.Remove(path.Join("temp/", fpath))
 
 		// Check increased for the same blobber
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {
