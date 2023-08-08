@@ -20,9 +20,9 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 	t.SetSmokeTests("Replace blobber in allocation, should work")
 
 	const (
-		allocSize = 1073741824
-		fileSize  = 1024 * 1024 * 5
-		sleepTime = 5 * time.Minute
+		allocSize = 107374182400
+		fileSize  = 1024 * 1024 * 1024 * 2
+		sleepTime = 10 * time.Minute
 
 		standardErrorMargin = 0.05
 		extraErrorMargin    = 0.15
@@ -71,7 +71,7 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 		actualBlockReward   float64
 	)
 
-	chimneyClient.ExecuteFaucetWithTokens(t, sdkWallet, 9000, client.TxSuccessfulStatus)
+	chimneyClient.ExecuteFaucetWithTokens(t, sdkWallet, 90000, client.TxSuccessfulStatus)
 
 	allBlobbers, resp, err := chimneyClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 	require.NoError(t, err)
