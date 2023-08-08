@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -1354,9 +1355,12 @@ func (c *APIClient) GetAllocationBlobbers(t *test.SystemTest, wallet *model.Wall
 			ClientKey:           wallet.PublicKey,
 			BlobberRequirements: *blobberRequirements,
 		}, requiredStatusCode)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, scRestGetAllocationBlobbersResponse)
+
+	if requiredStatusCode == http.StatusOK {
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocationBlobbersResponse)
+	}
 
 	return scRestGetAllocationBlobbersResponse
 }

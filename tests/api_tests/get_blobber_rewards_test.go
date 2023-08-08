@@ -19,8 +19,6 @@ func TestBlobberRewards(testSetup *testing.T) {
 	t.SetSmokeTests("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work")
 
 	t.RunSequentially("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work", func(t *test.SystemTest) {
-		t.Skip("wait for reward fixes")
-
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -36,6 +34,9 @@ func TestBlobberRewards(testSetup *testing.T) {
 
 		// TODO: replace with native "Upload API" call
 		sdkClient.UploadFile(t, allocationID)
+
+		walletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
+		balanceBefore := walletBalance.Balance
 
 		var rewards int64
 
@@ -52,20 +53,22 @@ func TestBlobberRewards(testSetup *testing.T) {
 			return rewards > 0
 		})
 
-		walletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
-		balanceBefore := walletBalance.Balance
+		collecRewardTxn, fee := apiClient.CollectRewards(t, sdkWallet, blobberID, 3, client.TxSuccessfulStatus)
+		formmattedTxnOutput := strings.ReplaceAll(collecRewardTxn.Transaction.TransactionOutput, `\"`, `"`)
 
-		_, fee := apiClient.CollectRewards(t, sdkWallet, blobberID, 3, client.TxSuccessfulStatus)
+		collectRewardTxnOutput := model.RewardTransactionOutput{}
+
+		err := json.Unmarshal([]byte(formmattedTxnOutput), &collectRewardTxnOutput)
+		require.Nil(t, err)
 
 		walletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		balanceAfter := walletBalance.Balance
 
-		require.Equal(t, balanceAfter, balanceBefore+rewards-fee)
+		require.Equal(t, balanceBefore+collectRewardTxnOutput.Amount-fee, balanceAfter)
 	})
 
 	t.RunSequentially("Check if the balance of the wallet has been changed without rewards being claimed, shouldn't work", func(t *test.SystemTest) {
-		t.Skip("wait for reward fixes")
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 100.0, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
@@ -86,7 +89,7 @@ func TestBlobberRewards(testSetup *testing.T) {
 
 		var rewards int64
 
-		wait.PoolImmediately(t, time.Minute*10, func() bool {
+		wait.PoolImmediately(t, time.Minute*2, func() bool {
 			stakePoolInfo := apiClient.GetStakePoolStat(t, blobberID, "3")
 
 			for _, poolDelegateInfo := range stakePoolInfo.Delegate {
