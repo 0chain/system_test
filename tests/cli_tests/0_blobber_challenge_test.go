@@ -15,6 +15,7 @@ import (
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,6 +25,8 @@ func TestBlobberChallengesCount(testSetup *testing.T) {
 
 	var blobberList []climodel.BlobberInfo
 	var sharderBaseURLs []string
+
+	cliutils.Wait(t, 1*time.Hour) // 1 hour wait for proper distribution
 
 	t.TestSetup("Get list of sharders and blobbers", func() {
 		output, err := createWallet(t, configPath)
