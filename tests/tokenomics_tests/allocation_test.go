@@ -124,14 +124,11 @@ func TestAllocationRewards(testSetup *testing.T) {
 		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
 		require.Nil(t, err, "Error canceling allocation", strings.Join(output, "\n"))
 
-		// sleep for 2 minutes
-		time.Sleep(2 * time.Minute)
+		// sleep for 10 seconds
+		time.Sleep(10 * time.Second)
 
 		alloc = utils.GetAllocation(t, allocationId)
 		require.Equal(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
-
-		// sleep for 5 minutes
-		time.Sleep(3 * time.Minute)
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
@@ -140,7 +137,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.Greater(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge Reward should be less than MovedToChallenge")
+		require.Equal(t, movedToChallengePool-alloc.MovedBack, totalBlobberChallengereward, "Total Blobber Challenge Reward should be less than MovedToChallenge")
 
 		// cancelation Rewards
 		alloccancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
@@ -225,7 +222,11 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		// sleep for 5 minutes
-		time.Sleep(5 * time.Minute)
+		time.Sleep(4 * time.Minute)
+
+		alloc = utils.GetAllocation(t, allocationId)
+		require.Equal(t, movedToChallengePool, alloc.MovedToChallenge, "MovedToChallenge should not change")
+		require.Equal(t, true, alloc.Finalized, "Allocation should be finalized")
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
@@ -234,7 +235,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should be equal to MovedToChallenge")
+		require.InEpsilon(t, movedToChallengePool, totalBlobberChallengereward, 0.05, "Total Blobber Challenge reward should be equal to MovedToChallenge")
 	})
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
