@@ -59,7 +59,38 @@ jobs:
           value: ${{ secrets.SEND_SLACK_NOTIFICATION }}
           default: false
 
+  notify_slack_on_failure:
+    runs-on: [self-hosted, arc-runner]
+    needs: [system-tests]
+    if: always() && (needs.system-tests.result == 'failure')
+    steps:
       - name: "Notify Slack"
-        if: failure() && steps.send-slack-notification.outputs.value == 'true'
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"<!here> 0Chain nightly run failed against staging. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+          payload='{
+          "text": "'"<!here> 0Chain Nightly Tests - Staging FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "attachments": [
+              {
+              "text": "0Chain Nightly Tests - Staging FAILED ⚠️",
+              "color": "#ff0000"
+              }
+          ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+          
+  notify_slack_on_success:
+    runs-on: [self-hosted, arc-runner]
+    needs: [system-tests]
+    if: always() && (needs.system-tests.result == 'success')
+    steps:
+      - name: "Notify Slack"
+        run: |
+          payload='{
+          "text": "'"<!here> 0Chain Nightly Tests - Staging PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "attachments": [
+              {
+              "text": "0Chain Nightly Tests - Staging PASSED ✅",
+              "color": "#22bb33"
+              }
+          ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}

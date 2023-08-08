@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -260,8 +261,6 @@ func (c *APIClient) executeForGivenServiceProviders(
 			return nil, err
 		}
 		formattedURL := urlBuilder.String()
-
-		t.Log("Executing request for miner: ", formattedURL)
 
 		newResp, err := c.executeForServiceProvider(t, formattedURL, *executionRequest, method)
 		if err != nil {
@@ -1362,9 +1361,12 @@ func (c *APIClient) GetAllocationBlobbers(t *test.SystemTest, wallet *model.Wall
 			ClientKey:           wallet.PublicKey,
 			BlobberRequirements: *blobberRequirements,
 		}, requiredStatusCode)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, scRestGetAllocationBlobbersResponse)
+
+	if requiredStatusCode == http.StatusOK {
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocationBlobbersResponse)
+	}
 
 	return scRestGetAllocationBlobbersResponse
 }
