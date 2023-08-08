@@ -63,7 +63,7 @@ jobs:
           "text": "'"<!here> Challenge Protocol Nightly Tests - Current Sprint FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
           "attachments": [
               {
-              "text": "0Chain Nightly Tests - Staging FAILED ⚠️",
+              "text": "Challenge Protocol Nightly Tests - Current sprint: FAILED ⚠️",
               "color": "#ff0000"
               }
           ]
@@ -81,7 +81,7 @@ jobs:
           "text": "'"<!here> Challenge Protocol Nightly Tests - Current Sprint PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
           "attachments": [
               {
-              "text": "0Chain Nightly Tests - Staging PASSED ✅",
+              "text": "Challenge Protocol Nightly Tests - Current sprint: PASSED ✅",
               "color": "#22bb33"
               }
           ]
