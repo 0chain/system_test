@@ -27,13 +27,10 @@ func TestGetBlobbersForNewAllocation(testSetup *testing.T) {
 		require.NotNil(t, allocationBlobbers.BlobberRequirements)
 	})
 
-	// FIXME lack of field validation leads to error see https://github.com/0chain/0chain/issues/1319
 	t.Run("BROKEN Alloc blobbers API call should fail gracefully given valid request but does not see 0chain/issues/1319", func(t *test.SystemTest) {
-		t.Skip("FIXME: lack of field validation leads to error see https://github.com/0chain/0chain/issues/1319")
-
 		wallet := apiClient.CreateWallet(t)
 
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &model.BlobberRequirements{}, client.HttpOkStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &model.BlobberRequirements{}, client.HttpBadRequestStatus)
 
 		require.NotNil(t, allocationBlobbers.Blobbers)
 	})
