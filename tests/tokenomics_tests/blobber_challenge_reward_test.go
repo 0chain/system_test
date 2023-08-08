@@ -20,19 +20,26 @@ import (
 func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-		"time_unit": "5m",
-	}, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
+	t.TestSetup("set storage config to use time_unit as 5 minutes", func() {
+		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "5m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+	})
 
-	utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
+	t.Cleanup(func() {
+		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "1h",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+	})
 
 	var blobberList []climodel.BlobberInfo
-	output, err = utils.ListBlobbers(t, configPath, "--json")
+	output, err := utils.ListBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-	require.Len(t, output, 1)
+	require.Len(t, output, 2)
 
-	err = json.Unmarshal([]byte(output[0]), &blobberList)
+	err = json.Unmarshal([]byte(output[1]), &blobberList)
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
