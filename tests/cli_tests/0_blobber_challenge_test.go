@@ -60,8 +60,6 @@ func TestBlobberChallengesCount(testSetup *testing.T) {
 			"tokens": 9,
 		})
 
-		startBlock := getLatestFinalizedBlock(t)
-
 		remotepath := "/dir/"
 		filesize := 2 * MB
 		filename := generateRandomTestFileName(t)
@@ -76,9 +74,11 @@ func TestBlobberChallengesCount(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		endBlock := getLatestFinalizedBlock(t)
+		startBlock := getLatestFinalizedBlock(t)
 
-		time.Sleep(30 * time.Second)
+		time.Sleep(2 * time.Minute)
+
+		endBlock := getLatestFinalizedBlock(t)
 
 		challengesCountQuery := fmt.Sprintf("round_created_at >= %d AND round_created_at < %d", startBlock.Round, endBlock.Round)
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
