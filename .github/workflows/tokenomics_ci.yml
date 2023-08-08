@@ -119,9 +119,9 @@ jobs:
       - name: "Run Allocation System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
+          repo_snapshots_branch: staging
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
@@ -154,9 +154,9 @@ jobs:
       - name: "Run Challenge Timings System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
+          repo_snapshots_branch: staging
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
@@ -187,9 +187,9 @@ jobs:
       - name: "Run Challenge Reward System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
+          repo_snapshots_branch: staging
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
@@ -220,9 +220,9 @@ jobs:
       - name: "Run Slash Rewards System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
+          repo_snapshots_branch: staging
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
@@ -254,9 +254,9 @@ jobs:
       - name: "Run Read Rewards System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
+          repo_snapshots_branch: staging
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: ${{ env.ZBOX_BRANCH }}
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
@@ -288,9 +288,9 @@ jobs:
       - name: "Run Allocation Add Or Replace Blobber System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
+          repo_snapshots_branch: staging
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
-          zbox_cli_branch: test/repair_complete
-          zwallet_cli_branch: ${{ env.ZWALLET_BRANCH }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
