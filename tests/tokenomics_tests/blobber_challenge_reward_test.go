@@ -332,7 +332,7 @@ func waitUntilAllocationIsFinalized(t *test.SystemTest, allocationID string) {
 	}
 }
 
-func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId string, blobberListString, validatorListString []string, filesize int64) {
+func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId string, blobberListString, validatorListString []string, filesize float64) {
 	t.Cleanup(func() {
 		waitUntilAllocationIsFinalized(t, allocationId)
 	})
@@ -351,7 +351,7 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 	remotepath := "/dir/"
 	filename := utils.GenerateRandomTestFileName(t)
 
-	err := utils.CreateFileWithSize(filename, filesize)
+	err := utils.CreateFileWithSize(filename, int64(filesize))
 	require.Nil(t, err)
 
 	output, err := utils.UploadFile(t, configPath, map[string]interface{}{
