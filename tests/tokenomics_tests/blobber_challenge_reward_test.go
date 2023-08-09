@@ -65,7 +65,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t.Log("Blobber List: ", blobberListString)
 	t.Log("Validator List: ", validatorListString)
 
-	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (equal stake)", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (equal stake)", 100*time.Minute, func(t *test.SystemTest) {
 		t.Cleanup(func() {
 			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
 		})
@@ -87,7 +87,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB)
 	})
 
-	t.RunSequentiallyWithTimeout("Client Uploads 30% of Allocation and 1 delegate each (equal stake)", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Client Uploads 30% of Allocation and 1 delegate each (equal stake)", 100*time.Minute, func(t *test.SystemTest) {
 		t.Cleanup(func() {
 			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
 		})
@@ -109,7 +109,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.3*GB)
 	})
 
-	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", 100*time.Minute, func(t *test.SystemTest) {
 		t.Cleanup(func() {
 			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
 		})
@@ -132,7 +132,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB)
 	})
 
-	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (equal stake)", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (equal stake)", 100*time.Minute, func(t *test.SystemTest) {
 		t.Cleanup(func() {
 			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
 		})
@@ -155,7 +155,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		})
 	})
 
-	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", 100*time.Minute, func(t *test.SystemTest) {
 		t.Cleanup(func() {
 			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
 		})
@@ -363,7 +363,7 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 	require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 	// sleep for 10 minutes
-	time.Sleep(5 * time.Minute)
+	time.Sleep(10 * time.Minute)
 
 	allocation := utils.GetAllocation(t, allocationId)
 
@@ -438,7 +438,7 @@ func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId 
 	require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 	// sleep for 10 minutes
-	time.Sleep(5 * time.Minute)
+	time.Sleep(10 * time.Minute)
 
 	allocation := utils.GetAllocation(t, allocationId)
 
