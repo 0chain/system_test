@@ -403,7 +403,7 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 	require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
 }
 
-func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId string, blobberListString, validatorListString []string, filesize int64, stakes []int64) {
+func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId string, blobberListString, validatorListString []string, filesize float64, stakes []int64) {
 	t.Cleanup(func() {
 		waitUntilAllocationIsFinalized(t, allocationId)
 	})
