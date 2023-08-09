@@ -314,13 +314,7 @@ func waitUntilAllocationIsFinalized(t *test.SystemTest, allocationID string) {
 }
 
 func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId string, blobberListString, validatorListString []string, filesize int64) {
-	waitToExpiryIsComplete := false
-
 	t.Cleanup(func() {
-		if !waitToExpiryIsComplete {
-			time.Sleep(5 * time.Minute)
-		}
-
 		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
@@ -351,7 +345,6 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 
 	// sleep for 10 minutes
 	time.Sleep(5 * time.Minute)
-	waitToExpiryIsComplete = true
 
 	allocation := utils.GetAllocation(t, allocationId)
 
@@ -392,13 +385,7 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 }
 
 func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId string, blobberListString, validatorListString []string, filesize int64, stakes []int64) {
-	waitToExpiryIsComplete := false
-
 	t.Cleanup(func() {
-		if !waitToExpiryIsComplete {
-			time.Sleep(5 * time.Minute)
-		}
-
 		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
 	})
 
@@ -433,7 +420,6 @@ func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId 
 
 	// sleep for 10 minutes
 	time.Sleep(5 * time.Minute)
-	waitToExpiryIsComplete = true
 
 	allocation := utils.GetAllocation(t, allocationId)
 
