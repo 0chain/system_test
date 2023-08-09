@@ -25,8 +25,9 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	var blobberList []climodel.BlobberInfo
 	var sharderBaseURLs []string
 
-	// cliutils.Wait(t, 1*time.Hour) // 1 hour wait for proper distribution
-
+	// These tests are supposed to run on a network after atleast 1 hour of deployment and some writes.
+	// Setup related to these tests is done in `0chain/actions/run-system-tests/action.yml`.
+	// The 1 hour wait after setup is also handled in CI.
 	t.TestSetup("Get list of sharders and blobbers", func() {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
