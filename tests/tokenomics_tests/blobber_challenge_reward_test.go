@@ -66,6 +66,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t.Log("Validator List: ", validatorListString)
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (equal stake)", 10*time.Minute, func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
+		})
+
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
@@ -84,6 +88,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 30% of Allocation and 1 delegate each (equal stake)", 10*time.Minute, func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
+		})
+
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
 		}, 1)
@@ -102,6 +110,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", 10*time.Minute, func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
+		})
+
 		// Staking Tokens to all blobbers and validators
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 2, 1, 2,
@@ -121,6 +133,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (equal stake)", 10*time.Minute, func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
+		})
+
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1, 1, 1, 1, 1,
 		}, 2)
@@ -140,6 +156,10 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", 10*time.Minute, func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
+		})
+
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 2, 2, 1, 1, 2, 2,
 		}, 2)
@@ -296,8 +316,7 @@ type ProviderAllocationRewards struct {
 	ProviderType    int64            `json:"provider_type"`
 }
 
-func tearDownRewardsTests(t *test.SystemTest, blobberList, validatorList []string, configPath, allocationID string, numDelegates int) {
-	waitUntilAllocationIsFinalized(t, allocationID)
+func tearDownRewardsTests(t *test.SystemTest, blobberList, validatorList []string, configPath string, numDelegates int) {
 	unstakeTokensForBlobbersAndValidators(t, blobberList, validatorList, configPath, numDelegates)
 }
 
@@ -315,7 +334,7 @@ func waitUntilAllocationIsFinalized(t *test.SystemTest, allocationID string) {
 
 func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId string, blobberListString, validatorListString []string, filesize int64) {
 	t.Cleanup(func() {
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+		waitUntilAllocationIsFinalized(t, allocationId)
 	})
 
 	blobber1 := blobberListString[0]
@@ -386,7 +405,7 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 
 func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId string, blobberListString, validatorListString []string, filesize int64, stakes []int64) {
 	t.Cleanup(func() {
-		tearDownRewardsTests(t, blobberListString, validatorListString, configPath, allocationId, 1)
+		waitUntilAllocationIsFinalized(t, allocationId)
 	})
 
 	blobber1 := blobberListString[0]
