@@ -191,7 +191,6 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 
 				require.InEpsilon(t, delegateStakePoolBalance/totalStakePoolBalance, delegateReward/totalDelegateReward, standardErrorMargin, "Expected delegate reward is not in proportion to stake pool balance")
 			}
-
 		}
 
 		require.InEpsilon(t, expectedCancellationCharge, actualCancellationCharge, standardErrorMargin, "Expected cancellation charge is not equal to actual")
