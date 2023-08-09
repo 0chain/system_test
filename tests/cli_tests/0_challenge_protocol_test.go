@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -15,7 +15,6 @@ import (
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,7 +25,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	var blobberList []climodel.BlobberInfo
 	var sharderBaseURLs []string
 
-	cliutils.Wait(t, 1*time.Hour) // 1 hour wait for proper distribution
+	// cliutils.Wait(t, 1*time.Hour) // 1 hour wait for proper distribution
 
 	t.TestSetup("Get list of sharders and blobbers", func() {
 		output, err := createWallet(t, configPath)
@@ -260,7 +259,7 @@ func countChallengesByQuery(t *test.SystemTest, query string, sharderBaseURLs []
 }
 
 func readLineFromFile(t *test.SystemTest, file string, line int) string {
-	output, err := ioutil.ReadFile(file)
+	output, err := os.ReadFile(file)
 	require.Nil(t, err, "error reading file", file)
 
 	lines := strings.Split(string(output), "\n")
