@@ -56,7 +56,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 	})
 
-	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)", 4*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)", 5*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 9,
@@ -81,6 +81,8 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		time.Sleep(2 * time.Minute)
 
 		endBlock := getLatestFinalizedBlock(t)
+
+		time.Sleep(1 * time.Minute)
 
 		challengesCountQuery := fmt.Sprintf("round_created_at >= %d AND round_created_at < %d", startBlock.Round, endBlock.Round)
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
