@@ -28,7 +28,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 	fileKey := "OneMinNew" + ".txt"
 	t.TestSetup("Setup s3 bucket with relevant file", func() {
 		// Cleanup before test
-		err := cleanupBucket(S3Client, s3bucketName)
+		err := cleanupBucket(S3Client, bucketName)
 		if err != nil {
 			t.Log("Failed to cleanup bucket: ", err)
 		}
