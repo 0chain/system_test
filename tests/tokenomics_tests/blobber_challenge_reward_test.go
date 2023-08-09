@@ -363,7 +363,7 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 	require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 	// sleep for 10 minutes
-	time.Sleep(10 * time.Minute)
+	time.Sleep(8 * time.Minute)
 
 	allocation := utils.GetAllocation(t, allocationId)
 
@@ -438,7 +438,7 @@ func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId 
 	require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 	// sleep for 10 minutes
-	time.Sleep(10 * time.Minute)
+	time.Sleep(8 * time.Minute)
 
 	allocation := utils.GetAllocation(t, allocationId)
 
