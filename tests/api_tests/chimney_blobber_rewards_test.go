@@ -164,6 +164,7 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 
 			queryReward := chimneyClient.GetRewardsByQuery(t, cancellationChargeQuery, client.HttpOkStatus)
 			actualCancellationChargeForBlobber := queryReward.TotalReward
+			totalDelegateReward := queryReward.TotalDelegateReward
 
 			// Updating total values
 			actualCancellationCharge += actualCancellationChargeForBlobber
@@ -173,6 +174,24 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 			require.InEpsilon(t, expectedCancellationChargeForBlobber, actualCancellationChargeForBlobber, standardErrorMargin, "Expected cancellation charge for blobber is not equal to actual")
 			require.InEpsilon(t, queryReward.TotalReward*blobber.StakePoolSettings.ServiceCharge, queryReward.TotalProviderReward, standardErrorMargin, "Expected provider reward is not equal to actual")
 			require.InEpsilon(t, queryReward.TotalReward*(1.0-blobber.StakePoolSettings.ServiceCharge), queryReward.TotalDelegateReward, standardErrorMargin, "Expected delegate reward is not equal to actual")
+
+			// Compare Stakepool Rewards
+			blobberStakePools, err := sdk.GetStakePoolInfo(sdk.ProviderBlobber, blobber.ID)
+			require.NoError(t, err, "Error while getting blobber stake pool info")
+
+			totalStakePoolBalance := float64(blobberStakePools.Balance)
+
+			blobberDelegateRewardsQuery := fmt.Sprintf("allocation_id='%s' AND provider_id='%s' AND reward_type=%d", allocationID, blobber.ID, CancellationChargeReward)
+			blobberDelegateRewards := chimneyClient.GetDelegateRewardsByQuery(t, blobberDelegateRewardsQuery, client.HttpOkStatus)
+
+			for _, blobberStakePool := range blobberStakePools.Delegate {
+				delegateID := blobberStakePool.DelegateID
+				delegateStakePoolBalance := float64(blobberStakePool.Balance)
+				delegateReward := float64(blobberDelegateRewards[string(delegateID)])
+
+				require.InEpsilon(t, delegateStakePoolBalance/totalStakePoolBalance, delegateReward/totalDelegateReward, standardErrorMargin, "Expected delegate reward is not in proportion to stake pool balance")
+			}
+
 		}
 
 		require.InEpsilon(t, expectedCancellationCharge, actualCancellationCharge, standardErrorMargin, "Expected cancellation charge is not equal to actual")
@@ -183,6 +202,7 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 
 			queryReward := chimneyClient.GetRewardsByQuery(t, challengeRewardQuery, client.HttpOkStatus)
 			actualChallengeRewardForBlobber := queryReward.TotalReward
+			totalDelegateReward := queryReward.TotalDelegateReward
 
 			// Updating total values
 			actualBlobberChallengeRewards += actualChallengeRewardForBlobber
@@ -196,6 +216,23 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 			require.InEpsilon(t, expectedChallengeRewardForBlobber, actualChallengeRewardForBlobber, standardErrorMargin, "Expected challenge reward for blobber is not equal to actual")
 			require.InEpsilon(t, queryReward.TotalReward*blobber.StakePoolSettings.ServiceCharge, queryReward.TotalProviderReward, standardErrorMargin, "Expected provider reward is not equal to actual")
 			require.InEpsilon(t, queryReward.TotalReward*(1.0-blobber.StakePoolSettings.ServiceCharge), queryReward.TotalDelegateReward, standardErrorMargin, "Expected delegate reward is not equal to actual")
+
+			// Compare Stakepool Rewards
+			blobberStakePools, err := sdk.GetStakePoolInfo(sdk.ProviderBlobber, blobber.ID)
+			require.NoError(t, err, "Error while getting blobber stake pool info")
+
+			totalStakePoolBalance := float64(blobberStakePools.Balance)
+
+			blobberDelegateRewardsQuery := fmt.Sprintf("allocation_id = '%s' AND provider_id = '%s' AND reward_type = %d", allocationID, blobber.ID, ChallengePassReward)
+			blobberDelegateRewards := chimneyClient.GetDelegateRewardsByQuery(t, blobberDelegateRewardsQuery, client.HttpOkStatus)
+
+			for _, blobberStakePool := range blobberStakePools.Delegate {
+				delegateID := blobberStakePool.DelegateID
+				delegateStakePoolBalance := float64(blobberStakePool.Balance)
+				delegateReward := float64(blobberDelegateRewards[string(delegateID)])
+
+				require.InEpsilon(t, delegateStakePoolBalance/totalStakePoolBalance, delegateReward/totalDelegateReward, standardErrorMargin, "Expected delegate reward is not in proportion to stake pool balance")
+			}
 		}
 
 		require.InEpsilon(t, expectedBlobberChallengeRewards, actualBlobberChallengeRewards, standardErrorMargin, "Expected challenge rewards is not equal to actual")
@@ -339,6 +376,7 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 			blockRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d AND block_number >= %d AND block_number < %d", blobber.ID, BlockRewardBlobber, startBlockRound, endBlockRound)
 			actualBlockRewardForBlobber := chimneyClient.GetRewardsByQuery(t, blockRewardQuery, client.HttpOkStatus)
 			actualBlockReward += actualBlockRewardForBlobber.TotalReward
+			totalDelegateReward := actualBlockRewardForBlobber.TotalDelegateReward
 
 			t.Log("Blobber ID: ", blobber.ID)
 			t.Log("Expected Block Reward: ", expectedBlobberBlockReward)
@@ -347,12 +385,28 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 			require.InEpsilon(t, expectedBlobberBlockReward, actualBlockRewardForBlobber.TotalReward, extraErrorMargin, "Expected block reward for blobber is not equal to actual")
 			require.InEpsilon(t, actualBlockRewardForBlobber.TotalReward*blobber.StakePoolSettings.ServiceCharge, actualBlockRewardForBlobber.TotalProviderReward, standardErrorMargin, "Expected provider reward is not equal to actual")
 			require.InEpsilon(t, actualBlockRewardForBlobber.TotalReward*(1.0-blobber.StakePoolSettings.ServiceCharge), actualBlockRewardForBlobber.TotalDelegateReward, standardErrorMargin, "Expected delegate reward is not equal to actual")
+
+			// Compare Stakepool Rewards
+			blobberStakePools, err := sdk.GetStakePoolInfo(sdk.ProviderBlobber, blobber.ID)
+			require.NoError(t, err, "Error while getting blobber stake pool info")
+
+			totalStakePoolBalance := float64(blobberStakePools.Balance)
+
+			blobberDelegateRewardsQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d AND block_number >= %d AND block_number < %d", blobber.ID, BlockRewardBlobber, startBlockRound, endBlockRound)
+			blobberDelegateRewards := chimneyClient.GetDelegateRewardsByQuery(t, blobberDelegateRewardsQuery, client.HttpOkStatus)
+
+			for _, blobberStakePool := range blobberStakePools.Delegate {
+				delegateID := blobberStakePool.DelegateID
+				delegateStakePoolBalance := float64(blobberStakePool.Balance)
+				delegateReward := float64(blobberDelegateRewards[string(delegateID)])
+
+				require.InEpsilon(t, delegateStakePoolBalance/totalStakePoolBalance, delegateReward/totalDelegateReward, standardErrorMargin, "Expected delegate reward is not in proportion to stake pool balance")
+			}
 		}
 
 		require.InEpsilon(t, expectedBlockReward, actualBlockReward, standardErrorMargin, "Expected block reward is not equal to actual")
 
 		// Check Blobber Partitions are selected evenly
-
 		for blobberId, frequncy := range blobberPartitionSelection {
 			require.Greater(t, frequncy, totalRounds/90, "Blobber %s is not selected for partitions evenly", blobberId)
 		}
