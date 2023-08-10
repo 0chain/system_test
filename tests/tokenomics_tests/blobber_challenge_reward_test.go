@@ -501,10 +501,10 @@ func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId 
 	require.InEpsilon(t, validator1DelegatesTotalReward, validator2DelegatesTotalReward, 0.05, "Validator 1 and Validator 2 delegate rewards are not equal")
 
 	// check if both blobber delegates got the same amount of reward with 5% error margin
-	require.InEpsilon(t, blobber1Delegate1TotalReward*stakes[1], blobber1Delegate2TotalReward*stakes[0], 0.05, "Blobber 1 Delegate 1 and Blobber 1 Delegate 2 rewards are not in correct proportion")
+	require.InEpsilon(t, blobber1Delegate1TotalReward*stakes[2], blobber1Delegate2TotalReward*stakes[0], 0.05, "Blobber 1 Delegate 1 and Blobber 1 Delegate 2 rewards are not in correct proportion")
 	require.InEpsilon(t, blobber2Delegate1TotalReward*stakes[3], blobber2Delegate2TotalReward*stakes[1], 0.05, "Blobber 2 Delegate 1 and Blobber 2 Delegate 2 rewards are not in correct proportion")
 
 	// check if both validator delegates got the same amount of reward with 5% error margin
-	require.InEpsilon(t, validator1Delegate1TotalReward*stakes[5], validator1Delegate2TotalReward*stakes[4], 0.05, "Validator 1 Delegate 1 and Validator 1 Delegate 2 rewards are not in correct proportion")
-	require.InEpsilon(t, validator2Delegate1TotalReward*stakes[7], validator2Delegate2TotalReward*stakes[6], 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not in correct proportion")
+	require.InEpsilon(t, validator1Delegate1TotalReward*stakes[6], validator1Delegate2TotalReward*stakes[4], 0.05, "Validator 1 Delegate 1 and Validator 1 Delegate 2 rewards are not in correct proportion")
+	require.InEpsilon(t, validator2Delegate1TotalReward*stakes[7], validator2Delegate2TotalReward*stakes[5], 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not in correct proportion")
 }
