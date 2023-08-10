@@ -383,70 +383,6 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.Run("Resume upload should work fine", func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
-		allocSize := int64(2 * GB)
-		fileSize := int64(1 * GB)
-
-		for i := 0; i < 6; i++ {
-			output, err := executeFaucetWithTokens(t, configPath, 9.0)
-			require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-		}
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"lock":   50,
-			"expire": "30m",
-		})
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-		defer func() {
-			os.Remove(filename) //nolint: errcheck
-		}()
-
-		param := map[string]interface{}{
-			"allocation":  allocationID,
-			"remotepath":  "/",
-			"localpath":   filename,
-			"chunknumber": 1024, // 64KB * 1024 = 64M
-		}
-		upload_param := createParams(param)
-		command := fmt.Sprintf(
-			"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
-			upload_param,
-			escapedTestName(t)+"_wallet.json",
-			configPath,
-		)
-
-		cmd, _ := cliutils.StartCommandWithoutRetry(command)
-		uploaded := waitPartialUploadAndInterrupt(t, cmd)
-		t.Logf("the uploaded is %v ", uploaded)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation":  allocationID,
-			"remotepath":  "/",
-			"localpath":   filename,
-			"chunknumber": 1024, // 64KB * 1024 = 64M
-		}, true)
-
-		require.Nil(t, err, strings.Join(output, "\n"))
-		pattern := `(\d+ / \d+)\s+(\d+\.\d+%)`
-		re := regexp.MustCompile(pattern)
-		matches := re.FindAllString(output[0], -1)
-		require.GreaterOrEqual(t, len(matches), 1)
-		a := matches[len(matches)-1]
-		first := strings.Fields(a)[0]
-		second := strings.Fields(a)[2]
-		require.Less(t, first, second)
-		require.Len(t, output, 2)
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
-
 	t.Run("Upload File with Encryption Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 10000,
@@ -495,6 +431,67 @@ func TestUpload(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 1, "Output length was less than expected")
 		require.True(t, strings.HasPrefix(output[len(output)-1], "Status completed callback"), "Expected success string to be present")
+	})
+
+	t.RunWithTimeout("Resume upload should work fine", 10*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
+		allocSize := int64(2 * GB)
+		fileSize := int64(1 * GB)
+
+		output, err := executeFaucetWithTokens(t, configPath, 100.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+			"lock": 50,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+		defer func() {
+			os.Remove(filename) //nolint: errcheck
+		}()
+
+		param := map[string]interface{}{
+			"allocation":  allocationID,
+			"remotepath":  "/",
+			"localpath":   filename,
+			"chunknumber": 1024, // 64KB * 1024 = 64M
+		}
+		upload_param := createParams(param)
+		command := fmt.Sprintf(
+			"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
+			upload_param,
+			escapedTestName(t)+"_wallet.json",
+			configPath,
+		)
+
+		cmd, _ := cliutils.StartCommandWithoutRetry(command)
+		uploaded := waitPartialUploadAndInterrupt(t, cmd)
+		t.Logf("the uploaded is %v ", uploaded)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"remotepath":  "/",
+			"localpath":   filename,
+			"chunknumber": 1024, // 64KB * 1024 = 64M
+		}, true)
+
+		require.Nil(t, err, strings.Join(output, "\n"))
+		pattern := `(\d+ / \d+)\s+(\d+\.\d+%)`
+		re := regexp.MustCompile(pattern)
+		matches := re.FindAllString(output[0], -1)
+		require.GreaterOrEqual(t, len(matches), 1)
+		a := matches[len(matches)-1]
+		first := strings.Fields(a)[0]
+		second := strings.Fields(a)[2]
+		require.Less(t, first, second)
+		require.Len(t, output, 2)
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
 	})
 
 	// Failure Scenarios
