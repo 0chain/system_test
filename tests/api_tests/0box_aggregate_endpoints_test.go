@@ -1934,9 +1934,9 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-offers-total )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalStake, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-stake-total )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalStake, blobbers[0].ID))
 
-	t.RunSequentially("test graph data ( test /v2/graph-blobber-offers-total )", func(t *test.SystemTest) {
+	t.RunSequentially("test graph data ( test /v2/graph-blobber-stake-total )", func(t *test.SystemTest) {
 		targetBlobber := blobbers[0].ID
 		data, resp, err := apiClient.V1SCRestGetStakePoolStat(t, model.SCRestGetStakePoolStatRequest{
 			ProviderType: "3",
@@ -1979,9 +1979,9 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-offers-total )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalRewards, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-total-rewards )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalRewards, blobbers[0].ID))
 
-	t.RunSequentially("test graph data ( test /v2/graph-blobber-offers-total )", func(t *test.SystemTest) {
+	t.RunSequentially("test graph data ( test /v2/graph-blobber-total-rewards )", func(t *test.SystemTest) {
 		// Get read data of all blobbers
 		blobberRewards := make(map[string]int64)
 
