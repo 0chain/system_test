@@ -2,12 +2,16 @@ package cli_tests
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -15,6 +19,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
@@ -492,9 +497,9 @@ func TestUpload(testSetup *testing.T) {
 		require.True(t, strings.HasPrefix(output[len(output)-1], "Status completed callback"), "Expected success string to be present")
 	})
 
-	Failure Scenarios
+	// Failure Scenarios
 
-	FIXME: the CLI could check allocation size before attempting an upload to save wasted time/bandwidth
+	// FIXME: the CLI could check allocation size before attempting an upload to save wasted time/bandwidth
 	t.Run("Upload File too large - file size larger than allocation should fail", func(t *test.SystemTest) {
 		allocSize := int64(1 * MB)
 		fileSize := int64(2 * MB)
@@ -686,7 +691,7 @@ func TestUpload(testSetup *testing.T) {
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
-		})rawOutput, err := cmd.CombinedOutput()
+		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 

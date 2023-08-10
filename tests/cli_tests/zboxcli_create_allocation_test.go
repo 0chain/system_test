@@ -78,7 +78,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation for locking negative cost should not work", func(t *test.SystemTest) {
-		t.Skip("Skipping until https://github.com/0chain/0chain/issues/2431 is fixed")
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{
@@ -93,21 +92,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 	})
 
-	t.Run("Create allocation with smallest expiry (5m) Should Work", func(t *test.SystemTest) {
-		_ = setupWallet(t, configPath)
-
-		options := map[string]interface{}{"size": "256000", "lock": "0.5"}
-		output, err := createNewAllocation(t, configPath, createParams(options))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
-
-		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-
-		createAllocationTestTeardown(t, allocationID)
-	})
-
 	t.Run("Create allocation with smallest possible size (1024) Should Work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
@@ -119,6 +103,54 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.Run("Create allocation for another owner should Work", func(t *test.SystemTest) {
+		_ = setupWallet(t, configPath)
+		targetWalletName := escapedTestName(t) + "_TARGET"
+		output, err := createWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
+
+		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
+
+		_, err = executeFaucetWithTokensForWallet(t, targetWalletName, configPath, 9)
+		require.Nil(t, err, "Error executing faucet with tokens", err)
+
+		options := map[string]interface{}{
+			"lock":             "0.5",
+			"owner":            targetWallet.ClientID,
+			"owner_public_key": targetWallet.ClientPublicKey,
+		}
+		output, err = createNewAllocation(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
+
+		allocationID, err := getAllocationID(output[0])
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
+
+		// upload file for designated owner should work
+		file := generateRandomTestFileName(t)
+		fileSize := int64(102400) // this is big enough to cause problem with download
+		err = createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		uploadParams := map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  file,
+			"remotepath": "/",
+			"encrypt":    "",
+		}
+		output, err = uploadFileForWallet(t, targetWalletName, configPath, uploadParams, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		// upload for creating wallet should fail
+		output, err = uploadFile(t, configPath, uploadParams, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, ""), "Operation needs to be performed by the owner or the payer of the allocation")
 
 		createAllocationTestTeardown(t, allocationID)
 	})
