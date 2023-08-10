@@ -114,12 +114,17 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 	})
 }
 
-func uploadRandomlyGeneratedFile(t *test.SystemTest, allocationID, remotePath string, fileSize int64) string {
-	return uploadRandomlyGeneratedFileWithWallet(t, escapedTestName(t), allocationID, remotePath, fileSize)
+func uploadRandomlyGeneratedFile(t *test.SystemTest, allocationID, remotePath string, fileSize int64, options ...string) string {
+	return uploadRandomlyGeneratedFileWithWallet(t, escapedTestName(t), allocationID, remotePath, fileSize, options...)
 }
 
-func uploadRandomlyGeneratedFileWithWallet(t *test.SystemTest, walletName, allocationID, remotePath string, fileSize int64) string {
+func uploadRandomlyGeneratedFileWithWallet(t *test.SystemTest, walletName, allocationID, remotePath string, fileSize int64, options ...string) string {
 	filename := generateRandomTestFileName(t)
+
+	if len(options) > 0 {
+		filename = options[0]
+	}
+
 	err := createFileWithSize(filename, fileSize)
 	require.Nil(t, err)
 
