@@ -149,7 +149,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.Greater(t, balanceBeforeAllocationUpdate, balanceAfterAllocationUpdate)
 	})
 
-	t.Run("Replace blobber in allocation with repair should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Replace blobber in allocation with repair should work", 1*time.Minute, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -167,6 +167,8 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 		apiClient.UpdateAllocationBlobbers(t, sdkWallet, newBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
+
+		time.Sleep(10 * time.Second)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.Nil(t, err)
