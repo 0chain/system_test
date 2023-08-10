@@ -222,7 +222,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		// sleep for 5 minutes
-		time.Sleep(4 * time.Minute)
+		time.Sleep(8 * time.Minute)
 
 		alloc = utils.GetAllocation(t, allocationId)
 		require.Equal(t, movedToChallengePool, alloc.MovedToChallenge, "MovedToChallenge should not change")
