@@ -1,27 +1,25 @@
-name: "0Chain Nightly Tests - Current Sprint"
+name: "Challenge Protocol Nightly Tests - Sprint"
 concurrency:
-  group: "sprint-nightly-tests-${{ github.ref }}-${{ github.event_name }}"
+  group: "challenge-nightly-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
 on:
   schedule:
-    # Runs every morning at 4am UTC
-    - cron: '0 4 * * *'
+    # Runs every morning at 2am UTC
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 jobs:
   system-tests:
-    name: "System Tests"
+    name: "Challenge System Tests"
     runs-on: [ tests-suite ]
-    timeout-minutes: 120
     steps:
-      - name: "Config: Deploy new 0Chain network then run tests against it"
+      - name: "Config: Deploy new 0Chain network then run challenge tests against it"
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
-
         uses: 0chain/actions/deploy-0chain@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
@@ -34,7 +32,7 @@ jobs:
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
-      - name: "Run System tests"
+      - name: "Run Challenge System tests"
         uses: 0chain/actions/run-system-tests@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
@@ -42,23 +40,17 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
-          run_flaky_tests: true
-          run_api_system_tests: true
-          run_cli_system_tests: true
-          run_tokenomics_system_tests: true
+          run_flaky_tests: false
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: false
           run_smoke_tests: false
+          run_s3mgrt_system_tests: false
+          run_challenge_system_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-
-      - name: "Check if should send slack notification"
-        if: failure()
-        id: send-slack-notification
-        uses: peter-murray/value-as-flag-action@0.0.1
-        with:
-          value: ${{ secrets.SEND_SLACK_NOTIFICATION }}
-          default: false
 
   notify_slack_on_failure:
     runs-on: [self-hosted, arc-runner]
@@ -68,16 +60,16 @@ jobs:
       - name: "Notify Slack"
         run: |
           payload='{
-          "text": "'"<!here> 0Chain Nightly Tests - Current Sprint FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "text": "'"<!here> Challenge Protocol Nightly Tests - Current Sprint FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
           "attachments": [
               {
-              "text": "0Chain Nightly Tests - Current Sprint FAILED ⚠️",
+              "text": "Challenge Protocol Nightly Tests - Current sprint: FAILED ⚠️",
               "color": "#ff0000"
               }
           ]
           }'
           curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
-          
+        
   notify_slack_on_success:
     runs-on: [self-hosted, arc-runner]
     needs: [system-tests]
@@ -86,10 +78,10 @@ jobs:
       - name: "Notify Slack"
         run: |
           payload='{
-          "text": "'"<!here> 0Chain Nightly Tests - Current Sprint PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "text": "'"<!here> Challenge Protocol Nightly Tests - Current Sprint PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
           "attachments": [
               {
-              "text": "0Chain Nightly Tests - Current Sprint PASSED ✅",
+              "text": "Challenge Protocol Nightly Tests - Current sprint: PASSED ✅",
               "color": "#22bb33"
               }
           ]

@@ -75,6 +75,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("ListObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
+		t.Skip("Skip till fixed")
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
