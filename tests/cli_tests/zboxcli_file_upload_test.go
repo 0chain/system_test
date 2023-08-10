@@ -445,7 +445,6 @@ func TestUpload(testSetup *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
-
 	})
 
 	t.Run("Upload File with Encryption Should Work", func(t *test.SystemTest) {
@@ -1117,12 +1116,12 @@ func waitPartialUploadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd) bool {
 
 			// Send interrupt signal to command
 			err := cmd.Process.Signal(os.Interrupt)
+			if err != nil {
+				return false
+			}
 			require.Nil(t, err)
-			rawOutput, err := cmd.CombinedOutput()
-			t.Log("output is v", rawOutput)
 			t.Log("Partial download successful, download has been interrupted")
 			return true
-
 		}
 	}
 }
