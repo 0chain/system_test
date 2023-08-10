@@ -20,7 +20,7 @@ jobs:
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
-        uses: 0chain/actions/deploy-0chain@feature/challenge_system_tests
+        uses: 0chain/actions/deploy-0chain@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
@@ -33,7 +33,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Challenge System tests"
-        uses: 0chain/actions/run-system-tests@feature/challenge_system_tests
+        uses: 0chain/actions/run-system-tests@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
@@ -45,6 +45,8 @@ jobs:
           run_cli_system_tests: false
           run_tokenomics_system_tests: false
           run_smoke_tests: false
+          run_s3mgrt_system_tests: false
+          run_challenge_system_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
