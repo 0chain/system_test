@@ -102,38 +102,6 @@ jobs:
           echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
 
 
-      - name: "Deploy 0Chain"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
-        with:
-          repo_snapshots_branch: current-sprint
-          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-          teardown_condition: "TESTS_PASSED"
-          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
-          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-
-      - name: "Run Challenge Reward System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
-        with:
-          repo_snapshots_branch: current-sprint
-          system_tests_branch: ${{ env.CURRENT_BRANCH }}
-          network: ${{ env.NETWORK_URL }}
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-          deploy_report_page: true
-          archive_results: true
-          run_flaky_tests: false
-          run_api_system_tests: false
-          run_cli_system_tests: false
-          run_tokenomics_system_tests: true
-          tokenomics_test_filter: ${{ env.TOKENOMICS_CHALLENGE_REWARD_TESTS }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          run_smoke_tests: ${{ inputs.run_smoke_tests }}
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
@@ -167,6 +135,43 @@ jobs:
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+
+
+      - name: "Deploy 0Chain"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
+        with:
+          repo_snapshots_branch: current-sprint
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+
+      - name: "Run Challenge Reward System tests"
+        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
+        with:
+          repo_snapshots_branch: current-sprint
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.TOKENOMICS_CHALLENGE_REWARD_TESTS }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+
 
 
 

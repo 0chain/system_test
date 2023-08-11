@@ -226,7 +226,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 
 		alloc = utils.GetAllocation(t, allocationId)
 		require.Equal(t, movedToChallengePool, alloc.MovedToChallenge, "MovedToChallenge should not change")
-		require.Equal(t, true, alloc.Finalized, "Allocation should be finalized")
+		require.Equal(t, true, alloc.Finalized, "Allocation should be finalized : ", alloc.ExpirationDate)
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
