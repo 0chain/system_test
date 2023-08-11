@@ -30,8 +30,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	ownerWallet.Nonce = int(ownerBalance.Nonce)
 	blobberOwnerWallet.Nonce = int(blobberOwnerBalance.Nonce)
 
-	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 1800, client.TxSuccessfulStatus) // 18 * 50 * 1e10
-	apiClient.ExecuteFaucetWithTokens(t, blobberOwnerWallet, 1800, client.TxSuccessfulStatus)
+	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 18000, client.TxSuccessfulStatus) // 18 * 50 * 1e10
+	apiClient.ExecuteFaucetWithTokens(t, blobberOwnerWallet, 18000, client.TxSuccessfulStatus)
 
 	// Stake 6 blobbers, each with 1 token
 	targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 6, client.HttpOkStatus)
@@ -119,8 +119,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		// Create a new allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -165,8 +166,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		// Create a new allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -270,8 +272,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		// Create a new allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -606,8 +609,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		// Create a new allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -890,8 +894,10 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		// Create allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.2, client.TxSuccessfulStatus)
 
@@ -1071,8 +1077,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		// Create an allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -1202,8 +1209,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		// Create a new allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.2, client.TxSuccessfulStatus)
 
@@ -1513,8 +1521,9 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", 3*time.Minute, func(t *test.SystemTest) {
 		// Create allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		targetBlobber := (*allocationBlobbers.Blobbers)[0]
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
@@ -1691,10 +1700,11 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 		// Create allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.1, client.TxSuccessfulStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 1, client.TxSuccessfulStatus)
 
 		// Value before allocation
 		targetBlobber := (*allocationBlobbers.Blobbers)[0]
@@ -1742,10 +1752,11 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 		// Create allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.1, client.TxSuccessfulStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 1, client.TxSuccessfulStatus)
 
 		// Value before allocation
 		targetBlobber := (*allocationBlobbers.Blobbers)[0]
@@ -1837,10 +1848,11 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 		// Create allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.1, client.TxSuccessfulStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 1, client.TxSuccessfulStatus)
 
 		apiClient.CreateReadPool(t, sdkWallet, 100, client.TxSuccessfulStatus)
 
@@ -1872,7 +1884,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-offers-total )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberOffersTotal, blobbers[0].ID))
 
-	t.RunSequentially("test graph data ( test /v2/graph-blobber-offers-total )", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-blobber-offers-total )", 500*time.Minute, func(t *test.SystemTest) {
 		// Get offers of all blobbers
 		blobberOffersTotal := make(map[string]int64)
 
@@ -1892,17 +1904,18 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 		// Create allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.1, client.TxSuccessfulStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 1, client.TxSuccessfulStatus)
 
 		// Value before allocation
 		targetBlobber := (*allocationBlobbers.Blobbers)[0]
 		offersTotal := blobberOffersTotal[targetBlobber]
 
 		// Check increased for the same blobber
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
+		wait.PoolImmediately(t, 200*time.Minute, func() bool {
 			data, resp, err := zboxClient.GetGraphBlobberOffersTotal(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
@@ -1920,7 +1933,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		require.NotEmpty(t, confHash)
 
 		// Check decreased for the same blobber
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
+		wait.PoolImmediately(t, 200*time.Minute, func() bool {
 			data, resp, err := zboxClient.GetGraphBlobberOffersTotal(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
@@ -2000,10 +2013,11 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 		// Create allocation
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+		blobberRequirements.Size = 1024 * 1024 * 1024
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.1, client.TxSuccessfulStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 1, client.TxSuccessfulStatus)
 
 		// Value before allocation
 		targetBlobber := (*allocationBlobbers.Blobbers)[0]
