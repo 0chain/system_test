@@ -1,12 +1,13 @@
 package api_tests
 
 import (
-	"github.com/0chain/gosdk/zboxcore/sdk"
 	"os"
 	"path"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/0chain/gosdk/zboxcore/sdk"
 
 	"github.com/0chain/system_test/internal/api/util/tokenomics"
 
