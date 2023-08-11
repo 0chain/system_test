@@ -483,9 +483,11 @@ func TestUpload(testSetup *testing.T) {
 		matches := re.FindAllString(output[0], -1)
 		require.GreaterOrEqual(t, len(matches), 1)
 		a := matches[len(matches)-1]
-		first := strings.Fields(a)[0]
+		first, err := strconv.ParseInt(strings.Fields(a)[0], 10, 64)
+		require.Nil(t, err, "error in extracting size from output, adjust the regex")
 		second := strings.Fields(a)[2]
-		require.Less(t, first, second)
+		require.Nil(t, err, "error in extracting size from output, adjust the regex")
+		require.Less(t, first, second) // Ensures upload didn't start from beginning
 		require.Len(t, output, 2)
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
@@ -1100,24 +1102,23 @@ func generateFileAndUploadWithParam(t *test.SystemTest, allocationID, remotepath
 }
 
 func waitPartialUploadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd) bool {
-	t.Log("Waiting till file is partially downloaded...")
+	t.Log("Waiting till file is partially uploaded...")
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
 	for {
 		select {
 		case <-ctx.Done():
-			t.Log("Timeout waiting for partial download")
+			t.Log("Timeout waiting for partial upload")
 			return false
 		case <-time.After(30 * time.Second):
-
 			// Send interrupt signal to command
 			err := cmd.Process.Signal(os.Interrupt)
 			if err != nil {
 				return false
 			}
 			require.Nil(t, err)
-			t.Log("Partial download successful, download has been interrupted")
+			t.Log("Partial upload successful, upload has been interrupted")
 			return true
 		}
 	}
