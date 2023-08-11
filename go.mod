@@ -26,13 +26,9 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )
 
-require (
-	github.com/aws/aws-sdk-go v1.44.289
-	github.com/fatih/structs v1.1.0
-)
+require github.com/aws/aws-sdk-go v1.44.289
 
 require (
 	github.com/0chain/common v0.0.6-0.20230127095721-8df4d1d72565 // indirect
