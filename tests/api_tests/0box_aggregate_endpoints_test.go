@@ -31,8 +31,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	ownerWallet.Nonce = int(ownerBalance.Nonce)
 	blobberOwnerWallet.Nonce = int(blobberOwnerBalance.Nonce)
 
-	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 18000, client.TxSuccessfulStatus) // 18 * 50 * 1e10
-	apiClient.ExecuteFaucetWithTokens(t, blobberOwnerWallet, 18000, client.TxSuccessfulStatus)
+	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 1800, client.TxSuccessfulStatus) // 18 * 50 * 1e10
+	apiClient.ExecuteFaucetWithTokens(t, blobberOwnerWallet, 1800, client.TxSuccessfulStatus)
 
 	// Stake 6 blobbers, each with 1 token
 	targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 6, client.HttpOkStatus)
