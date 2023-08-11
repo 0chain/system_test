@@ -485,7 +485,7 @@ func TestUpload(testSetup *testing.T) {
 		a := matches[len(matches)-1]
 		first, err := strconv.ParseInt(strings.Fields(a)[0], 10, 64)
 		require.Nil(t, err, "error in extracting size from output, adjust the regex")
-		second := strings.Fields(a)[2]
+		second, err := strconv.ParseInt(strings.Fields(a)[2], 10, 64)
 		require.Nil(t, err, "error in extracting size from output, adjust the regex")
 		require.Less(t, first, second) // Ensures upload didn't start from beginning
 		require.Len(t, output, 2)
