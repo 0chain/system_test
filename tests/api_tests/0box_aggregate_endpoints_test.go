@@ -1972,6 +1972,9 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 			require.Len(t, *data, 1)
 			afterValue := (*data)[0]
 			cond := afterValue > stakeTotal
+			if cond {
+				stakeTotal = afterValue
+			}
 			return cond
 		})
 
