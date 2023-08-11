@@ -1882,7 +1882,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-offers-total )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberOffersTotal, blobbers[0].ID))
 
-	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-blobber-offers-total )", 500*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentially("test graph data ( test /v2/graph-blobber-offers-total )", func(t *test.SystemTest) {
 		// Get offers of all blobbers
 		blobberOffersTotal := make(map[string]int64)
 
@@ -1915,7 +1915,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		offersTotal := blobberOffersTotal[targetBlobber]
 
 		// Check increased for the same blobber
-		wait.PoolImmediately(t, 200*time.Minute, func() bool {
+		wait.PoolImmediately(t, 2*time.Minute, func() bool {
 			data, resp, err := zboxClient.GetGraphBlobberOffersTotal(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
@@ -1933,7 +1933,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		require.NotEmpty(t, confHash)
 
 		// Check decreased for the same blobber
-		wait.PoolImmediately(t, 200*time.Minute, func() bool {
+		wait.PoolImmediately(t, 2*time.Minute, func() bool {
 			data, resp, err := zboxClient.GetGraphBlobberOffersTotal(t, targetBlobber, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
