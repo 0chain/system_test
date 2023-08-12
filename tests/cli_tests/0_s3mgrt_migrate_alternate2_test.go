@@ -351,6 +351,12 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should not pass when filename size is more than 100 character", func(t *test.SystemTest) {
+		// Cleanup before test
+		err := cleanupBucket(S3Client, s3BucketNameAlternate)
+		if err != nil {
+			t.Log("Failed to cleanup bucket: ", err)
+		}
+
 		allocSize := int64(50 * MB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -358,7 +364,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 
 		fileKeyNew := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbb.txt"
 		fileContents := []byte("Hello, World!")
-		_, err := S3Client.PutObject(&s3.PutObjectInput{
+		_, err = S3Client.PutObject(&s3.PutObjectInput{
 			Bucket: aws.String(s3BucketNameAlternate),
 			Key:    aws.String(fileKeyNew),
 			Body:   bytes.NewReader(fileContents),
@@ -373,7 +379,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 			"allocation": allocationID,
 		}))
 		// mssg can be changed
-		require.Nil(t, err, "Expected a Migration completed successfully but got error", strings.Join(output, "\n"))
+		require.NotNil(t, err, "Expected an error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, output[0], "invalid_parameter: filename is longer than 100 characters)", "Output was not as expected", strings.Join(output, "\n"))
 	})
