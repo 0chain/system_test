@@ -43,8 +43,8 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[1])
+		require.Len(t, output, 3)
+		require.Equal(t, fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filepath.Base(file)), output[2])
 
 		// locking 1 read tokens to readPool via wallet
 		createWalletForNameAndLockReadTokens(t, configPath, walletOwner)

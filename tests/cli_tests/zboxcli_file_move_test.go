@@ -48,13 +48,13 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		// move file
 		output, err = moveFile(t, configPath, map[string]interface{}{
@@ -200,13 +200,13 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
@@ -327,13 +327,13 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
@@ -395,13 +395,13 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		// upload file to another directory with same name.
 		output, err = uploadFile(t, configPath, map[string]interface{}{
@@ -410,13 +410,13 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected = fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		output, err = moveFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
@@ -505,13 +505,13 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		output, err = moveFileWithWallet(t, nonAllocOwnerWallet, configPath, map[string]interface{}{
 			"allocation": allocationID,

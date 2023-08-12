@@ -383,8 +383,8 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 			"localpath":  `"` + fileLocalPath + `"`,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, 2, len(output))
-		require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
+		require.Equal(t, 3, len(output))
+		require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[2])
 
 		// The folder structure tree
 		// Integer values will be consider as files with that size
@@ -460,8 +460,8 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 			"localpath":  `"` + fileLocalPath + `"`,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, 2, len(output))
-		require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
+		require.Equal(t, 3, len(output))
+		require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[2])
 
 		// The folder structure tree
 		// Integer values will be consider as files with that size

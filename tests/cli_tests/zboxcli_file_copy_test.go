@@ -48,13 +48,13 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		// copy file
 		output, err = copyFile(t, configPath, map[string]interface{}{
@@ -204,13 +204,13 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
@@ -276,13 +276,13 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
@@ -339,13 +339,13 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
@@ -406,13 +406,13 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		// upload file to another directory with same name.
 		output, err = uploadFile(t, configPath, map[string]interface{}{
@@ -421,13 +421,13 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected = fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
@@ -516,13 +516,13 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 
 		output, err = copyFileForWallet(t, configPath, nonAllocOwnerWallet, map[string]interface{}{
 			"allocation": allocationID,
@@ -531,7 +531,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "copy_failed")
+		require.Contains(t, output[0], "Error performing CopyObject")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -631,7 +631,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		output, err = copyFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,

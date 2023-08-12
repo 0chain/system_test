@@ -94,8 +94,8 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "upload file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Len(t, output, 3, "upload file - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[2],
 			"upload file - Unexpected output", strings.Join(output, "\n"))
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
@@ -161,8 +161,8 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "upload file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Len(t, output, 3, "upload file - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[2],
 			"upload file - Unexpected output", strings.Join(output, "\n"))
 
 		// share publicly
@@ -247,8 +247,8 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "upload file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Len(t, output, 3, "upload file - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[2],
 			"upload file - Unexpected output", strings.Join(output, "\n"))
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
@@ -439,8 +439,8 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "upload file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Len(t, output, 3, "upload file - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[2],
 			"upload file - Unexpected output", strings.Join(output, "\n"))
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"
@@ -525,8 +525,8 @@ func TestTransferAllocation(testSetup *testing.T) { // nolint:gocyclo // team pr
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "upload file - Unexpected output", strings.Join(output, "\n"))
-		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[1],
+		require.Len(t, output, 3, "upload file - Unexpected output", strings.Join(output, "\n"))
+		require.Equal(t, "Status completed callback. Type = application/octet-stream. Name = "+filepath.Base(file), output[2],
 			"upload file - Unexpected output", strings.Join(output, "\n"))
 
 		newOwner := escapedTestName(t) + "_NEW_OWNER"

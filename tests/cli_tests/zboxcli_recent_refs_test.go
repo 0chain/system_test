@@ -53,7 +53,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 			"encrypt":    "",
 		}, true)
 		require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		in := time.Since(t2).String()
 		t.Log("Recent refs in: ", in)
@@ -107,7 +107,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 		}, true)
 
 		require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		t1 := time.Now()
 		time.Sleep(time.Second * 30)
@@ -150,7 +150,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 		}, true)
 
 		require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 

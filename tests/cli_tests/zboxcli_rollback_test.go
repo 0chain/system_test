@@ -167,13 +167,13 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 		time.Sleep(1 * time.Second)
 		// move file
 		output, err = moveFile(t, configPath, map[string]interface{}{
@@ -272,13 +272,13 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf(
 			"Status completed callback. Type = application/octet-stream. Name = %s",
 			filepath.Base(file),
 		)
-		require.Equal(t, expected, output[1])
+		require.Equal(t, expected, output[2])
 		time.Sleep(1 * time.Second)
 		output, err = renameFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,

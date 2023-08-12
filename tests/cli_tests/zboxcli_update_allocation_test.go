@@ -157,7 +157,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		size := int64(-9000) // reducing it by 9000 should fail since 2048 is being used
 		params := createParams(map[string]interface{}{
@@ -898,7 +898,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 2.0
 	// Then create new allocation
-	options := map[string]interface{}{"size": "10000", "lock": "5"}
+	options := map[string]interface{}{"size": "1000000000", "lock": "5"}
 
 	// Add additional parameters if available
 	// Overwrite with new parameters when available

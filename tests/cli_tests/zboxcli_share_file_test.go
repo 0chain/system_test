@@ -44,9 +44,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -98,9 +98,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -151,9 +151,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -204,9 +204,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -240,9 +240,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -303,9 +303,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -359,9 +359,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -413,9 +413,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -508,9 +508,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err = uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -586,9 +586,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -663,9 +663,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -728,9 +728,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -790,9 +790,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -853,9 +853,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -916,9 +916,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		remoteOwnerPathSubfolder := "/subfolder2/subfolder3/" + filepath.Base(file)
 		uploadParams = map[string]interface{}{
@@ -929,9 +929,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err = uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
@@ -1085,9 +1085,9 @@ func TestShareFile(testSetup *testing.T) {
 		}
 		output, err := uploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
+		require.Len(t, output, 3)
+		require.Contains(t, output[2], StatusCompletedCB)
+		require.Contains(t, output[2], filepath.Base(file))
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"

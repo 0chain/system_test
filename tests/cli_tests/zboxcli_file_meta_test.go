@@ -238,10 +238,10 @@ func TestFileMetadata(testSetup *testing.T) {
 			"encrypt":    "",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		expected := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", fname)
-		require.Equal(t, expected, output[1], strings.Join(output, "\n"))
+		require.Equal(t, expected, output[2], strings.Join(output, "\n"))
 
 		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,

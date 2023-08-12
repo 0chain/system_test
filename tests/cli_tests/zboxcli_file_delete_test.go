@@ -97,7 +97,7 @@ func TestFileDelete(testSetup *testing.T) {
 			"encrypt":    "",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 
 		fname := filepath.Base(filename)
 		remoteFilePath := path.Join(remotepath, fname)
