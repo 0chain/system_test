@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"math/rand"
 	"os"
@@ -36,12 +35,10 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		t.Skip("s3SecretKey or s3AccessKey was missing")
 	}
 
-	// Specify the bucket name and file key
-	bucketName := "dummybucketfortestsmigration"
 	fileKey := "sdfg" + ".txt"
 	t.TestSetup("Setup s3 bucket with relevant file", func() {
 		// Cleanup bucket before test
-		err := cleanupBucket(S3Client, bucketName)
+		err := cleanupBucket(S3Client, s3BucketNameAlternate)
 		if err != nil {
 			t.Log("Failed to cleanup bucket: ", err)
 		}
@@ -50,7 +47,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 
 		// Upload the file to S3
 		_, err = S3Client.PutObject(&s3.PutObjectInput{
-			Bucket: aws.String(bucketName),
+			Bucket: aws.String(s3BucketNameAlternate),
 			Key:    aws.String(fileKey),
 			Body:   bytes.NewReader(fileContents),
 		})
@@ -68,7 +65,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
-			"bucket":     bucketName,
+			"bucket":     s3BucketNameAlternate,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"skip":       0,
@@ -79,7 +76,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
-		remoteFilePath := path.Join(remotepath, bucketName)
+		remoteFilePath := path.Join(remotepath, s3BucketNameAlternate)
 		remoteFilePath = path.Join(remoteFilePath, remotepath)
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
@@ -96,7 +93,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
-			"bucket":     bucketName,
+			"bucket":     s3BucketNameAlternate,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"migrate-to": remotepath,
@@ -107,7 +104,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
 		remoteFilePath := path.Join(remotepath, "/")
-		remoteFilePath = path.Join(remoteFilePath, bucketName)
+		remoteFilePath = path.Join(remoteFilePath, s3BucketNameAlternate)
 		remoteFilePath = path.Join(remoteFilePath, "/")
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
@@ -123,7 +120,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
-			"bucket":     bucketName,
+			"bucket":     s3BucketNameAlternate,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 		}))
@@ -135,7 +132,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		output, err = migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
-			"bucket":     bucketName,
+			"bucket":     s3BucketNameAlternate,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"skip":       2,
@@ -164,7 +161,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
-			"bucket":     bucketName,
+			"bucket":     s3BucketNameAlternate,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"encrypt":    "true",
@@ -175,7 +172,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
-		remoteFilePath := path.Join(remotepath, bucketName)
+		remoteFilePath := path.Join(remotepath, s3BucketNameAlternate)
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, true)
 		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
@@ -190,7 +187,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
-			"bucket":     bucketName,
+			"bucket":     s3BucketNameAlternate,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"skip":       1,
@@ -210,7 +207,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
-			"bucket":     bucketName,
+			"bucket":     s3BucketNameAlternate,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"skip":       2,
@@ -224,7 +221,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		// FIXME : copy extension is not there
 		// parts := strings.Split(fileKey, ".")
 		// fileKey_modified := parts[0]+ "_copy." + parts[1]
-		remotepath = path.Join(remotepath, bucketName)
+		remotepath = path.Join(remotepath, s3BucketNameAlternate)
 		remoteFilePath := path.Join(remotepath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
 		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
@@ -239,7 +236,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
-			"bucket":     bucketName,
+			"bucket":     s3BucketNameAlternate,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"skip":       2,
@@ -254,7 +251,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		// FIXME : dupl suffix is not working
 		// parts := strings.Split(fileKey, ".")
 		// fileKey_modified := parts[0]+ "_modified." + parts[1]
-		remotepath = path.Join(remotepath, bucketName)
+		remotepath = path.Join(remotepath, s3BucketNameAlternate)
 		remoteFilePath := path.Join(remotepath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
 		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
@@ -274,7 +271,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key":    s3AccessKey,
 			"secret-key":    s3SecretKey,
-			"bucket":        bucketName,
+			"bucket":        s3BucketNameAlternate,
 			"wallet":        escapedTestName(t) + "_wallet.json",
 			"allocation":    allocationID,
 			"skip":          0,
@@ -287,7 +284,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
 		remotepath := "/"
-		remoteFilePath := path.Join(remotepath, bucketName)
+		remoteFilePath := path.Join(remotepath, s3BucketNameAlternate)
 		remoteFilePath = path.Join(remoteFilePath, fileKey)
 		uploadStats := checkStats(t, remoteFilePath, fileKey, allocationID, false)
 		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
@@ -300,7 +297,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		})
 
 		workingDirName := createDirectoryForTestname(t)
-		file, _ := ioutil.TempFile(workingDirName, "prefix")
+		file, _ := os.CreateTemp(workingDirName, "prefix")
 		// remove the dir after use
 		defer func() {
 			_ = os.RemoveAll(workingDirName)
@@ -311,7 +308,7 @@ func Test0S3MigrationAlternate(testSetup *testing.T) {
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
-			"bucket":     bucketName,
+			"bucket":     s3BucketNameAlternate,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 			"migrate-to": remotepath,
@@ -405,10 +402,10 @@ func createDirectoryForTestname(t *test.SystemTest) (fullPath string) {
 	return fullPath
 }
 
-func cleanupBucket(svc *s3.S3, bucketName string) error {
+func cleanupBucket(svc *s3.S3, s3BucketNameAlternate string) error {
 	// List all objects within the bucket
 	resp, err := svc.ListObjectsV2(&s3.ListObjectsV2Input{
-		Bucket: aws.String(bucketName),
+		Bucket: aws.String(s3BucketNameAlternate),
 	})
 	if err != nil {
 		return err
@@ -417,7 +414,7 @@ func cleanupBucket(svc *s3.S3, bucketName string) error {
 	// Delete each object in the bucket
 	for _, obj := range resp.Contents {
 		_, err := svc.DeleteObject(&s3.DeleteObjectInput{
-			Bucket: aws.String(bucketName),
+			Bucket: aws.String(s3BucketNameAlternate),
 			Key:    obj.Key,
 		})
 		if err != nil {
