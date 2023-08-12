@@ -31,6 +31,7 @@ type Config struct {
 	S3AccessKey                 string `yaml:"s3_access_key"`
 	EthereumAddress             string `yaml:"ethereum_address"`
 	S3BucketName                string `yaml:"s3_bucket_name"`
+	S3BucketNameAlternate       string `yaml:"s3_bucket_name_alternate"`
 	BlobberOwnerWalletMnemonics string `yaml:"blobber_owner_wallet_mnemonics"`
 	OwnerWalletMnemonics        string `yaml:"owner_wallet_mnemonics"`
 }
