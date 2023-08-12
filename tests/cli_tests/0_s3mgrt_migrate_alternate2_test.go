@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/stretchr/testify/require"
@@ -116,24 +117,34 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
+		olderThanFileKey := "olderThanFile" + ".txt"
+		fileContents := []byte("Hello, World!")
+		_, err := S3Client.PutObject(&s3.PutObjectInput{
+			Bucket: aws.String(s3BucketNameAlternate),
+			Key:    aws.String(olderThanFileKey),
+			Body:   bytes.NewReader(fileContents),
+		})
+		require.Nil(t, err)
+
+		cliutils.Wait(t, 70*time.Second)
+
 		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
 			"access-key": s3AccessKey,
 			"secret-key": s3SecretKey,
 			"bucket":     s3BucketNameAlternate,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
-			"older-than": time.Now().Unix() + 60, // end timestamp
+			"older-than": time.Now().Unix() - 60, // end timestamp
 		}))
 
 		remotepath := "/"
-		fileKeyOld := "TenMinOldfile" + ".txt"
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 
 		remoteFilePath := path.Join(remotepath, s3BucketNameAlternate)
-		remoteFilePath = path.Join(remoteFilePath, fileKeyOld)
-		uploadStats := checkStats(t, remoteFilePath, fileKeyOld, allocationID, false)
+		remoteFilePath = path.Join(remoteFilePath, olderThanFileKey)
+		uploadStats := checkStats(t, remoteFilePath, olderThanFileKey, allocationID, false)
 		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
