@@ -381,6 +381,6 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		// mssg can be changed
 		require.NotNil(t, err, "Expected an error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, output[0], "invalid_parameter: filename is longer than 100 characters)", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "invalid_parameter: filename is longer than 100 characters", "Output was not as expected", strings.Join(output, "\n"))
 	})
 }
