@@ -1,10 +1,12 @@
 package cli_tests
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -431,9 +433,72 @@ func TestUpload(testSetup *testing.T) {
 		require.True(t, strings.HasPrefix(output[len(output)-1], "Status completed callback"), "Expected success string to be present")
 	})
 
+	t.RunWithTimeout("Resume upload should work fine", 10*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
+		allocSize := int64(2 * GB)
+		fileSize := int64(1 * GB)
+
+		output, err := executeFaucetWithTokens(t, configPath, 100.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+			"lock": 50,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+		defer func() {
+			os.Remove(filename) //nolint: errcheck
+		}()
+
+		param := map[string]interface{}{
+			"allocation":  allocationID,
+			"remotepath":  "/",
+			"localpath":   filename,
+			"chunknumber": 1024, // 64KB * 1024 = 64M
+		}
+		upload_param := createParams(param)
+		command := fmt.Sprintf(
+			"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
+			upload_param,
+			escapedTestName(t)+"_wallet.json",
+			configPath,
+		)
+
+		cmd, _ := cliutils.StartCommandWithoutRetry(command)
+		uploaded := waitPartialUploadAndInterrupt(t, cmd)
+		t.Logf("the uploaded is %v ", uploaded)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"remotepath":  "/",
+			"localpath":   filename,
+			"chunknumber": 1024, // 64KB * 1024 = 64M
+		}, true)
+
+		require.Nil(t, err, strings.Join(output, "\n"))
+		pattern := `(\d+ / \d+)\s+(\d+\.\d+%)`
+		re := regexp.MustCompile(pattern)
+		matches := re.FindAllString(output[0], -1)
+		require.GreaterOrEqual(t, len(matches), 1)
+		a := matches[len(matches)-1]
+		first, err := strconv.ParseInt(strings.Fields(a)[0], 10, 64)
+		require.Nil(t, err, "error in extracting size from output, adjust the regex")
+		second, err := strconv.ParseInt(strings.Fields(a)[2], 10, 64)
+		require.Nil(t, err, "error in extracting size from output, adjust the regex")
+		require.Less(t, first, second) // Ensures upload didn't start from beginning
+		require.Len(t, output, 2)
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+	})
+
 	// Failure Scenarios
 
-	//FIXME: the CLI could check allocation size before attempting an upload to save wasted time/bandwidth
+	// FIXME: the CLI could check allocation size before attempting an upload to save wasted time/bandwidth
 	t.Run("Upload File too large - file size larger than allocation should fail", func(t *test.SystemTest) {
 		allocSize := int64(1 * MB)
 		fileSize := int64(2 * MB)
@@ -1034,4 +1099,27 @@ func generateFileAndUploadWithParam(t *test.SystemTest, allocationID, remotepath
 	uploadWithParam(t, configPath, p)
 
 	return filename
+}
+
+func waitPartialUploadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd) bool {
+	t.Log("Waiting till file is partially uploaded...")
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+	defer cancel()
+
+	for {
+		select {
+		case <-ctx.Done():
+			t.Log("Timeout waiting for partial upload")
+			return false
+		case <-time.After(30 * time.Second):
+			// Send interrupt signal to command
+			err := cmd.Process.Signal(os.Interrupt)
+			if err != nil {
+				return false
+			}
+			require.Nil(t, err)
+			t.Log("Partial upload successful, upload has been interrupted")
+			return true
+		}
+	}
 }
