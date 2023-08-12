@@ -89,7 +89,7 @@ func TestResumeDownload(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		t.Log("Bytes downloaded after resuming:", actualDownloadedBytes)
-		require.InEpsilon(t, filesize-partialDownloadedBytes, actualDownloadedBytes, 0.05,
+		require.InEpsilon(t, filesize-partialDownloadedBytes, actualDownloadedBytes, 0.005,
 			fmt.Sprintf("Actual bytes downloaded after resume %v does not equal to expected amount of bytes %v",
 				actualDownloadedBytes, filesize-partialDownloadedBytes))
 
