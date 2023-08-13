@@ -20,9 +20,9 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 	t.SetSmokeTests("Replace blobber in allocation, should work")
 
 	const (
-		allocSize = 107374182400
-		fileSize  = 1024 * 1024 * 1024 * 2
-		sleepTime = 10 * time.Minute
+		allocSize = 1024 * 1024 * 1024 * 100
+		fileSize  = 1024 * 1024 * 1024 * 10
+		sleepTime = 20 * time.Minute
 
 		standardErrorMargin = 0.05
 		extraErrorMargin    = 0.15
@@ -265,7 +265,6 @@ func TestChimneyBlobberRewards(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Block Rewards", 1*time.Hour, func(t *test.SystemTest) {
-		t.Skip("Skipping block rewards test")
 		startBlockRound := startBlock.Round
 		endBlockRound := endBlock.Round
 		totalRounds = endBlockRound - startBlockRound
