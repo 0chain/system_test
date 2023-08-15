@@ -529,7 +529,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "rename_failed")
+		require.Contains(t, output[0], "Error performing RenameObject")
 	})
 
 	t.Run("rename file from someone else's allocation should fail", func(t *test.SystemTest) {
@@ -575,7 +575,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "rename_failed")
+		require.Contains(t, output[0], "Error performing RenameObject")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -733,7 +733,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}, true)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "this options for this file is not permitted for this allocation", output[0])
+		require.Equal(t, "prohibited_allocation_file_options", output[0])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
