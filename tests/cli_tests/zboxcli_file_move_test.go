@@ -342,7 +342,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "move_failed")
+		require.Contains(t, output[0], "Error performing MoveObject")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -425,7 +425,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "move_failed")
+		require.Contains(t, output[0], "Error performing MoveObject")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -475,7 +475,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "move_failed")
+		require.Contains(t, output[0], "Error performing MoveObject")
 	})
 
 	t.Run("move file from someone else's allocation should fail", func(t *test.SystemTest) {
@@ -520,7 +520,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, true)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "move_failed")
+		require.Contains(t, output[0], "Error performing MoveObject")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
