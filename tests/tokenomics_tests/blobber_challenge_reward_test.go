@@ -17,12 +17,39 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type Reward int
+
+const (
+	MinLockDemandReward Reward = iota
+	BlockRewardMiner
+	BlockRewardSharder
+	BlockRewardBlobber
+	FeeRewardMiner
+	FeeRewardAuthorizer
+	FeeRewardSharder
+	ValidationReward
+	FileDownloadReward
+	ChallengePassReward
+	ChallengeSlashPenalty
+	CancellationChargeReward
+	NumOfRewards
+)
+
+const (
+	allocSize = 1024 * 1024 * 1024 * 100
+	fileSize  = 1024 * 1024 * 1024 * 10
+	sleepTime = 20 * time.Minute
+
+	standardErrorMargin = 0.05
+	extraErrorMargin    = 0.15
+)
+
 func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.TestSetup("set storage config to use time_unit as 5 minutes", func() {
+	t.TestSetup("set storage config to use time_unit as 10 minutes", func() {
 		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "5m",
+			"time_unit": "10m",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
@@ -363,7 +390,7 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 	require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 	// sleep for 10 minutes
-	time.Sleep(8 * time.Minute)
+	time.Sleep(12 * time.Minute)
 
 	allocation := utils.GetAllocation(t, allocationId)
 
@@ -438,7 +465,7 @@ func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId 
 	require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 	// sleep for 10 minutes
-	time.Sleep(8 * time.Minute)
+	time.Sleep(12 * time.Minute)
 
 	allocation := utils.GetAllocation(t, allocationId)
 
@@ -508,3 +535,143 @@ func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId 
 	require.InEpsilon(t, validator1Delegate1TotalReward*stakes[6], validator1Delegate2TotalReward*stakes[4], 0.05, "Validator 1 Delegate 1 and Validator 1 Delegate 2 rewards are not in correct proportion")
 	require.InEpsilon(t, validator2Delegate1TotalReward*stakes[7], validator2Delegate2TotalReward*stakes[5], 0.05, "Validator 2 Delegate 1 and Validator 2 Delegate 2 rewards are not in correct proportion")
 }
+
+//
+//func assertCR(t *test.SystemTest, alloc *climodel.Allocation) {
+//	var (
+//		expectedAllocationCost            float64
+//		expectedCancellationCharge        float64
+//		expectedWritePoolBalance          float64
+//		expectedMovedToChallenge          float64
+//		expectedChallengeRewards          float64
+//		expectedBlobberChallengeRewards   float64
+//		expectedValidatorChallengeRewards float64
+//
+//		allocCreatedAt                  int64
+//		allocExpiredAt                  int64
+//		actualCancellationCharge        float64
+//		actualWritePoolBalance          float64
+//		actualMovedToChallenge          float64
+//		actualChallengeRewards          float64
+//		actualBlobberChallengeRewards   float64
+//		actualValidatorChallengeRewards float64
+//		actualMinLockDemandReward       float64
+//
+//		totalBlockRewardPerRound float64
+//		totalRounds              int64
+//
+//		expectedBlockReward float64
+//		actualBlockReward   float64
+//	)
+//
+//	// Calculating expected allocation cost
+//	totalWritePrice := int64(0)
+//	for _, blobber := range alloc.Blobbers {
+//		expectedAllocationCost += float64(blobber.Terms.WritePrice) * sizeInGB(int64(allocSize/alloc.DataShards))
+//		totalWritePrice += blobber.Terms.WritePrice
+//	}
+//
+//	for _, blobber := range alloc.Blobbers {
+//		challengeRewardQuery := fmt.Sprintf("allocation_id = '%s' AND provider_id = '%s' AND reward_type = %d", alloc.ID, blobber.ID, ChallengePassReward)
+//
+//		queryReward := getRewardByQuery(t, challengeRewardQuery)
+//		actualChallengeRewardForBlobber := queryReward.TotalReward
+//		totalDelegateReward := queryReward.TotalDelegateReward
+//
+//		// Updating total values
+//		actualBlobberChallengeRewards += actualChallengeRewardForBlobber
+//		actualChallengeRewards += actualChallengeRewardForBlobber
+//
+//		expectedChallengeRewardForBlobber := expectedBlobberChallengeRewards * writePriceWeight(blobber.Terms.WritePrice, totalWritePrice)
+//
+//		t.Log("Expected Challenge Reward: ", expectedChallengeRewardForBlobber)
+//		t.Log("Actual Challenge Reward: ", actualChallengeRewardForBlobber)
+//
+//		require.InEpsilon(t, expectedChallengeRewardForBlobber, actualChallengeRewardForBlobber, standardErrorMargin, "Expected challenge reward for blobber is not equal to actual")
+//		require.InEpsilon(t, queryReward.TotalReward*blobber.StakePoolSettings.ServiceCharge, queryReward.TotalProviderReward, standardErrorMargin, "Expected provider reward is not equal to actual")
+//		require.InEpsilon(t, queryReward.TotalReward*(1.0-blobber.StakePoolSettings.ServiceCharge), queryReward.TotalDelegateReward, standardErrorMargin, "Expected delegate reward is not equal to actual")
+//
+//		// Compare Stakepool Rewards
+//		blobberStakePools, err := sdk.GetStakePoolInfo(sdk.ProviderBlobber, blobber.ID)
+//		require.NoError(t, err, "Error while getting blobber stake pool info")
+//
+//		totalStakePoolBalance := float64(blobberStakePools.Balance)
+//
+//		blobberDelegateRewardsQuery := fmt.Sprintf("allocation_id = '%s' AND provider_id = '%s' AND reward_type = %d", alloc.ID, blobber.ID, ChallengePassReward)
+//		blobberDelegateRewards := getDelegateRewardByQuery(t, blobberDelegateRewardsQuery)
+//
+//		for _, blobberStakePool := range blobberStakePools.Delegate {
+//			delegateID := blobberStakePool.DelegateID
+//			delegateStakePoolBalance := float64(blobberStakePool.Balance)
+//			delegateReward := float64(blobberDelegateRewards[string(delegateID)])
+//
+//			require.InEpsilon(t, delegateStakePoolBalance/totalStakePoolBalance, delegateReward/totalDelegateReward, standardErrorMargin, "Expected delegate reward is not in proportion to stake pool balance")
+//		}
+//	}
+//}
+//
+//func getRewardByQuery(t *test.SystemTest, query string) *QueryRewardsResponse {
+//	var result *QueryRewardsResponse
+//
+//	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+//	sharderBaseUrl := utils.GetSharderUrl(t)
+//	queryRewardRequestURL := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/query-rewards?query=" + url.QueryEscape(query))
+//
+//	t.Log("Query Rewards URL: ", queryRewardRequestURL)
+//
+//	res, _ := http.Get(queryRewardRequestURL) //nolint:gosec
+//
+//	defer func(Body io.ReadCloser) {
+//		err := Body.Close()
+//		if err != nil {
+//			return
+//		}
+//	}(res.Body)
+//
+//	body, _ := io.ReadAll(res.Body)
+//
+//	err := json.Unmarshal(body, &result)
+//	if err != nil {
+//		return nil
+//	}
+//
+//	return result
+//}
+//
+//func getDelegateRewardByQuery(t *test.SystemTest, query string) map[string]int64 {
+//	var result map[string]int64
+//
+//	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+//	sharderBaseUrl := utils.GetSharderUrl(t)
+//	queryRewardRequestURL := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/query-delegate-rewards?query=" + url.QueryEscape(query))
+//
+//	t.Log("Query Rewards URL: ", queryRewardRequestURL)
+//
+//	res, _ := http.Get(queryRewardRequestURL) //nolint:gosec
+//
+//	defer func(Body io.ReadCloser) {
+//		err := Body.Close()
+//		if err != nil {
+//			return
+//		}
+//	}(res.Body)
+//
+//	body, _ := io.ReadAll(res.Body)
+//
+//	err := json.Unmarshal(body, &result)
+//	if err != nil {
+//		return nil
+//	}
+//
+//	return result
+//}
+//
+//type QueryRewardsResponse struct {
+//	TotalProviderReward float64 `json:"total_provider_reward"`
+//	TotalDelegateReward float64 `json:"total_delegate_reward"`
+//	TotalReward         float64 `json:"total_reward"`
+//}
+//
+//func writePriceWeight(writePrice, totalWritePrice int64) float64 {
+//	return float64(writePrice) / float64(totalWritePrice)
+//}

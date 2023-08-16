@@ -93,7 +93,7 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 		remainingTime := allocation.ExpirationDate - time.Now().Unix()
 
 		// sleep for half of the remaining time
-		time.Sleep(time.Duration(remainingTime/2) * time.Second)
+		time.Sleep(time.Duration(remainingTime/3) * time.Second)
 
 		// 2. Kill a blobber
 		_, err = killBlobber(t, configPath, utils.CreateParams(map[string]interface{}{
@@ -102,7 +102,7 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 		require.Nil(t, err, "error killing blobber", strings.Join(output, "\n"))
 
 		// 3. Sleep for the remaining time
-		time.Sleep(time.Duration(remainingTime/2) * time.Second)
+		time.Sleep(time.Duration(remainingTime) * time.Second)
 
 		allocation = utils.GetAllocation(t, allocationId)
 
@@ -117,7 +117,7 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 
 		t.Log(blobber1Reward, blobber2Reward)
 
-		require.Greater(t, blobber1Reward/blobber2Reward, 1.5, "Killed blobber should get approx half the rewards than other")
+		require.Greater(t, blobber1Reward/blobber2Reward, 2, "Killed blobber should get approx half the rewards than other")
 	})
 }
 
