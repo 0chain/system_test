@@ -592,9 +592,15 @@ func (c *ZboxClient) GetUserInfo(t *test.SystemTest, idToken, csrfToken, phoneNu
 		Dst:      &userInfo,
 		FormData: formData,
 		Headers: map[string]string{
-			"X-CSRF-TOKEN": csrfToken,
-			"X-APP-TYPE":   "blimp",
-		}, // TODO: this endpoint doesnt check signature!
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-APP-TYPE":             "blimp",
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -953,7 +959,7 @@ func (c *ZboxClient) CreateFCMToken(t *test.SystemTest, idToken, csrfToken, phon
 	return resp, err
 }
 
-func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToken, phoneNumber, createdBy, collectionName, collectionId, totalNfts, collectionType, allocationId, baseUrl, symbol string, pricePerPack, maxMints, currMints, batchSize int) (*model.ZboxNftCollection, *resty.Response, error) {
+func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToken, phoneNumber, createdBy, collectionName, collectionId, authTicket, totalNfts, collectionType, allocationId, baseUrl, symbol string, pricePerPack, maxMints, currMints, batchSize int) (*model.ZboxNftCollection, *resty.Response, error) {
 	t.Logf("Creating nft collection using 0box...")
 	var ZboxNftCollection *model.ZboxNftCollection
 
@@ -966,6 +972,7 @@ func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToke
 		"created_by":      createdBy,
 		"collection_name": collectionName,
 		"collection_id":   collectionId,
+		"auth_ticket":     authTicket,
 		"total_nfts":      totalNfts,
 		"collection_type": collectionType,
 		"allocation_id":   allocationId,
@@ -996,7 +1003,7 @@ func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToke
 	return ZboxNftCollection, resp, err
 }
 
-func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, stage_nft_upload, nft_reference, collectionId, owned_by, nft_activity, meta_data, allocationId, created_by, contract_address, token_id, token_standard, tx_hash string) (*model.ZboxNft, *resty.Response, error) {
+func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, stage_nft_upload, nft_reference, collectionId, authTicket, owned_by, nft_activity, meta_data, allocationId, created_by, contract_address, token_id, token_standard, tx_hash string) (*model.ZboxNft, *resty.Response, error) {
 	t.Logf("Posting nft using 0box...")
 	var ZboxNft *model.ZboxNft
 
@@ -1009,6 +1016,7 @@ func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, p
 		"stage":            stage_nft_upload,
 		"reference":        nft_reference,
 		"collection_id":    collectionId,
+		"auth_ticket":      authTicket,
 		"owned_by":         owned_by,
 		"nft_activity":     nft_activity,
 		"meta_data":        meta_data,
@@ -1039,7 +1047,7 @@ func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, p
 	return ZboxNft, resp, err
 }
 
-func (c *ZboxClient) UpdateNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, createdBy, collectionName, collectionId, totalNfts, collectionType, allocationId, baseUrl, symbol string, nftId, pricePerPack, maxMints, currMints, batchSize int) (*model.ZboxNft, *resty.Response, error) {
+func (c *ZboxClient) UpdateNftCollection(t *test.SystemTest, idToken, csrfToken, phoneNumber, createdBy, collectionName, collectionId, authTicket, totalNfts, collectionType, allocationId, baseUrl, symbol string, nftId, pricePerPack, maxMints, currMints, batchSize int) (*model.ZboxNft, *resty.Response, error) {
 	t.Logf("Updating nft using 0box...")
 	var ZboxNft *model.ZboxNft
 
@@ -1052,6 +1060,7 @@ func (c *ZboxClient) UpdateNftCollection(t *test.SystemTest, idToken, csrfToken,
 		"created_by":      createdBy,
 		"collection_name": collectionName,
 		"collection_id":   collectionId,
+		"auth_ticket":     authTicket,
 		"total_nfts":      totalNfts,
 		"collection_type": collectionType,
 		"allocation_id":   allocationId,
