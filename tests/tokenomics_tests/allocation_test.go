@@ -235,7 +235,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.InEpsilon(t, movedToChallengePool, totalBlobberChallengereward, 0.05, "Total Blobber Challenge reward should be equal to MovedToChallenge")
+		require.InEpsilon(t, movedToChallengePool-alloc.MovedBack, totalBlobberChallengereward, 0.05, "Total Blobber Challenge reward should be equal to MovedToChallenge")
 	})
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
