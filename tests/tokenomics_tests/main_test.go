@@ -174,10 +174,7 @@ func TestMain(m *testing.M) {
 
 	exitRun := m.Run()
 
-	err = tenderlyClient.Revert(snapshotHash)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	tenderlyClient.ShadowRevert(snapshotHash)
 	os.Exit(exitRun)
 }
 
