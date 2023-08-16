@@ -2,15 +2,16 @@ package cli_tests
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math/big"
 	"os"
 
+	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/fileref"
 	"github.com/0chain/gosdk/zboxcore/sdk"
-	"github.com/0chain/system_test/internal/api/util/config"
-	"github.com/0chain/system_test/internal/api/util/crypto"
+	"github.com/0chain/gosdk/zcncore"
 )
 
 func InitSDK(wallet, configFile string) error {
@@ -24,13 +25,25 @@ func InitSDK(wallet, configFile string) error {
 	}
 	walletJSON := string(clientBytes)
 
-	parsedConfig := config.Parse(configFile)
+	parsed, err := conf.LoadConfigFile(configFile)
+	if err != nil {
+		return err
+	}
+
+	marshal, err := json.Marshal(parsed)
+	if err != nil {
+		return err
+	}
+	err = zcncore.Init(string(marshal))
+	if err != nil {
+		return err
+	}
 
 	err = sdk.InitStorageSDK(
 		walletJSON,
-		parsedConfig.BlockWorker,
-		"",
-		crypto.BLS0Chain,
+		parsed.BlockWorker,
+		parsed.ChainID,
+		parsed.SignatureScheme,
 		nil,
 		0,
 	)

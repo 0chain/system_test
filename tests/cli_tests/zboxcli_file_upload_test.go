@@ -1,12 +1,16 @@
 package cli_tests
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -429,9 +433,72 @@ func TestUpload(testSetup *testing.T) {
 		require.True(t, strings.HasPrefix(output[len(output)-1], "Status completed callback"), "Expected success string to be present")
 	})
 
+	t.RunWithTimeout("Resume upload should work fine", 10*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
+		allocSize := int64(2 * GB)
+		fileSize := int64(1 * GB)
+
+		output, err := executeFaucetWithTokens(t, configPath, 100.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+			"lock": 50,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+		defer func() {
+			os.Remove(filename) //nolint: errcheck
+		}()
+
+		param := map[string]interface{}{
+			"allocation":  allocationID,
+			"remotepath":  "/",
+			"localpath":   filename,
+			"chunknumber": 1024, // 64KB * 1024 = 64M
+		}
+		upload_param := createParams(param)
+		command := fmt.Sprintf(
+			"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
+			upload_param,
+			escapedTestName(t)+"_wallet.json",
+			configPath,
+		)
+
+		cmd, _ := cliutils.StartCommandWithoutRetry(command)
+		uploaded := waitPartialUploadAndInterrupt(t, cmd)
+		t.Logf("the uploaded is %v ", uploaded)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"remotepath":  "/",
+			"localpath":   filename,
+			"chunknumber": 1024, // 64KB * 1024 = 64M
+		}, true)
+
+		require.Nil(t, err, strings.Join(output, "\n"))
+		pattern := `(\d+ / \d+)\s+(\d+\.\d+%)`
+		re := regexp.MustCompile(pattern)
+		matches := re.FindAllString(output[0], -1)
+		require.GreaterOrEqual(t, len(matches), 1)
+		a := matches[len(matches)-1]
+		first, err := strconv.ParseInt(strings.Fields(a)[0], 10, 64)
+		require.Nil(t, err, "error in extracting size from output, adjust the regex")
+		second, err := strconv.ParseInt(strings.Fields(a)[2], 10, 64)
+		require.Nil(t, err, "error in extracting size from output, adjust the regex")
+		require.Less(t, first, second) // Ensures upload didn't start from beginning
+		require.Len(t, output, 2)
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+	})
+
 	// Failure Scenarios
 
-	//FIXME: the CLI could check allocation size before attempting an upload to save wasted time/bandwidth
+	// FIXME: the CLI could check allocation size before attempting an upload to save wasted time/bandwidth
 	t.Run("Upload File too large - file size larger than allocation should fail", func(t *test.SystemTest) {
 		allocSize := int64(1 * MB)
 		fileSize := int64(2 * MB)
@@ -627,7 +694,7 @@ func TestUpload(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 3)
 
-		require.Equal(t, "No data to upload", output[0])
+		require.Contains(t, strings.Join(output, "\n"), "No data to upload")
 	})
 
 	t.Run("Upload without any Parameter Should Fail", func(t *test.SystemTest) {
@@ -713,6 +780,79 @@ func TestUpload(testSetup *testing.T) {
 		}), false)
 		require.Nil(t, err)
 		require.NotContains(t, output[0], filename)
+	})
+
+	t.RunWithTimeout("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", 10*time.Minute, func(t *test.SystemTest) {
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
+		output, err = executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
+
+		allocParam := createParams(map[string]interface{}{
+			"lock": 0.8,
+			"size": 10485760,
+		})
+		output, err = createNewAllocation(t, configPath, allocParam)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
+		require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
+
+		allocationID := strings.Fields(output[0])[2]
+
+		// Write pool balance should increment to 1
+		initialAllocation := getAllocation(t, allocationID)
+		require.Equal(t, 0.8, intToZCN(initialAllocation.WritePool))
+
+		// Get Challenge-Pool info after upload
+		output, err = challengePoolInfo(t, configPath, allocationID)
+		require.Nil(t, err, "Could not fetch challenge pool", strings.Join(output, "\n"))
+
+		challengePool := climodel.ChallengePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &challengePool)
+		require.Nil(t, err, "Error unmarshalling challenge pool info", strings.Join(output, "\n"))
+
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, 1024*1024*0.5)
+		require.Nil(t, err, "error while generating file: ", err)
+
+		// upload a dummy 5 MB file
+		uploadWithParam(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  filename,
+			"remotepath": "/",
+		})
+
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, filename)
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		cliutils.Wait(t, 30*time.Second)
+
+		finalAllocation := getAllocation(t, allocationID)
+
+		// Get Challenge-Pool info after upload
+		output, err = challengePoolInfo(t, configPath, allocationID)
+		require.Nil(t, err, "Could not fetch challenge pool", strings.Join(output, "\n"))
+
+		challengePool = climodel.ChallengePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &challengePool)
+		require.Nil(t, err, "Error unmarshalling challenge pool info", strings.Join(output, "\n"))
+
+		require.Regexp(t, regexp.MustCompile(fmt.Sprintf("([a-f0-9]{64}):challengepool:%s", allocationID)), challengePool.Id)
+		require.IsType(t, int64(1), challengePool.StartTime)
+		require.IsType(t, int64(1), challengePool.Expiration)
+		require.IsType(t, int64(1), challengePool.Balance)
+		require.False(t, challengePool.Finalized)
+
+		totalChangeInWritePool := intToZCN(initialAllocation.WritePool - finalAllocation.WritePool)
+
+		require.InEpsilon(t, expectedUploadCostInZCN, totalChangeInWritePool, 0.05, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", expectedUploadCostInZCN, totalChangeInWritePool)
+		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), 0.05, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 
 	sampleVideos := [][]string{
@@ -959,4 +1099,27 @@ func generateFileAndUploadWithParam(t *test.SystemTest, allocationID, remotepath
 	uploadWithParam(t, configPath, p)
 
 	return filename
+}
+
+func waitPartialUploadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd) bool {
+	t.Log("Waiting till file is partially uploaded...")
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+	defer cancel()
+
+	for {
+		select {
+		case <-ctx.Done():
+			t.Log("Timeout waiting for partial upload")
+			return false
+		case <-time.After(30 * time.Second):
+			// Send interrupt signal to command
+			err := cmd.Process.Signal(os.Interrupt)
+			if err != nil {
+				return false
+			}
+			require.Nil(t, err)
+			t.Log("Partial upload successful, upload has been interrupted")
+			return true
+		}
+	}
 }

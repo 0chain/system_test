@@ -55,6 +55,7 @@ func setupConfig() {
 	s3AccessKey = parsedConfig.S3AccessKey
 	s3SecretKey = parsedConfig.S3SecretKey
 	s3bucketName = parsedConfig.S3BucketName
+	s3BucketNameAlternate = parsedConfig.S3BucketNameAlternate
 
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
@@ -93,12 +94,13 @@ var (
 	sharder01ID string
 	sharder02ID string
 
-	ethereumNodeURL string
-	ethereumAddress string
-	s3SecretKey     string
-	s3AccessKey     string
-	s3bucketName    string
-	S3Client        *s3.S3
+	ethereumNodeURL       string
+	ethereumAddress       string
+	s3SecretKey           string
+	s3AccessKey           string
+	s3bucketName          string
+	s3BucketNameAlternate string
+	S3Client              *s3.S3
 )
 
 var (
@@ -181,11 +183,9 @@ func TestMain(m *testing.M) {
 		log.Fatalln(err)
 	}
 
+	tenderlyClient.ShadowRevert(snapshotHash)
+
 	exitRun := m.Run()
 
-	err = tenderlyClient.Revert(snapshotHash)
-	if err != nil {
-		log.Fatalln(err)
-	}
 	os.Exit(exitRun)
 }
