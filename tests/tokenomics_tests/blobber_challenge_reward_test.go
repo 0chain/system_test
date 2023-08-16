@@ -369,7 +369,7 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 
 	t.Log("Moved to Challenge", allocation.MovedToChallenge)
 
-	totalExpectedReward := allocation.MovedToChallenge
+	totalExpectedReward := allocation.MovedToChallenge - allocation.MovedBack
 
 	challengeRewards, err := getAllAllocationChallengeRewards(t, allocationId)
 	require.Nil(t, err, "Error getting challenge rewards", strings.Join(output, "\n"))
@@ -444,7 +444,7 @@ func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId 
 
 	t.Log(allocation.MovedToChallenge)
 
-	totalExpectedReward := float64(allocation.MovedToChallenge)
+	totalExpectedReward := float64(allocation.MovedToChallenge - allocation.MovedBack)
 
 	challengeRewards, err := getAllAllocationChallengeRewards(t, allocationId)
 	require.Nil(t, err, "Error getting challenge rewards", strings.Join(output, "\n"))
