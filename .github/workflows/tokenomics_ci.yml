@@ -9,7 +9,7 @@ on:
     inputs:
       repo_snapshots_branch:
         description: 'branch of repo-snapshots to derive images and branches from.'
-        default: 'current-sprint'
+        default: 'staging'
         required: true
       existing_network:
         description: '(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]'
@@ -107,7 +107,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -120,7 +120,7 @@ jobs:
       - name: "Run Allocation System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
@@ -142,7 +142,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -155,7 +155,7 @@ jobs:
       - name: "Run Challenge Reward System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
@@ -179,7 +179,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain@feature/tokenomics_suite
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -192,7 +192,7 @@ jobs:
       - name: "Run Challenge Timings System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
@@ -214,7 +214,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -227,7 +227,7 @@ jobs:
       - name: "Run Slash Rewards System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
@@ -248,7 +248,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -261,7 +261,7 @@ jobs:
       - name: "Run Read Rewards System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
@@ -282,7 +282,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain-3b3v@feature/tokenomics_suite
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -295,7 +295,7 @@ jobs:
       - name: "Run Allocation Add Or Replace Blobber System tests"
         uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}

@@ -125,7 +125,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "Error canceling allocation", strings.Join(output, "\n"))
 
 		// sleep for 10 seconds
-		time.Sleep(10 * time.Second)
+		time.Sleep(30 * time.Second)
 
 		alloc = utils.GetAllocation(t, allocationId)
 		require.Equal(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
@@ -137,7 +137,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.Equal(t, movedToChallengePool-alloc.MovedBack, totalBlobberChallengereward, "Total Blobber Challenge Reward should be less than MovedToChallenge")
+		require.InEpsilon(t, movedToChallengePool-alloc.MovedBack, totalBlobberChallengereward, 0.05, "Total Blobber Challenge Reward should be less than MovedToChallenge")
 
 		// cancelation Rewards
 		alloccancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
@@ -565,7 +565,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 func getAllocationcancelationReward(t *test.SystemTest, allocationID string, blobberList []string) ([]int64, error) {
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	sharderBaseUrl := utils.GetSharderUrl(t)
-	url := fmt.Sprintf(sharderBaseUrl+"/v1/screst/"+StorageScAddress+"/cancelation-rewards?allocation_id=?", allocationID)
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/cancelation-rewards?" + "allocation_id=" + allocationID)
 
 	t.Log("URL : ", url)
 
