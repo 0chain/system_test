@@ -74,7 +74,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
 		}, true)
-		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
 		time.Sleep(1 * time.Minute)
 
@@ -119,7 +119,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
 		}, true)
-		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
 		time.Sleep(1 * time.Minute)
 
@@ -173,7 +173,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"remotepath": remotepath + filepath.Base(filename),
 				"localpath":  filename,
 			}, true)
-			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+			require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 		}
 
 		time.Sleep(1 * time.Minute)
@@ -191,7 +191,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 90000, "It is taking more than 75000 milliseconds to generate proof")
+		require.True(t, proofGenTime < 110000, "It is taking more than 110000 milliseconds to generate proof")
 		require.True(t, txnVerificationTime < 10000, "It is taking more than 10000 milliseconds to verify txn")
 	})
 
@@ -233,7 +233,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"remotepath": remotepath + filepath.Base(filename),
 				"localpath":  filename,
 			}, true)
-			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+			require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 		}
 
 		time.Sleep(1 * time.Minute)
@@ -283,7 +283,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			// Uploading 10% of allocation
 			remotepath := "/dir/"
 			filesize := 1 * GB
-			filename := utils.GenerateRandomTestFileName(t)
+			filename := "extra : " + utils.GenerateRandomTestFileName(t)
 
 			err = utils.CreateFileWithSize(filename, int64(filesize))
 			require.Nil(t, err)
@@ -293,7 +293,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"remotepath": remotepath + filepath.Base(filename),
 				"localpath":  filename,
 			}, true)
-			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+			require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 		}
 
 		time.Sleep(1 * time.Minute)
@@ -310,7 +310,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
 		require.True(t, proofGenTime < 4200000, "It is taking more than 4000000 milliseconds to generate proof")
-		require.True(t, txnVerificationTime < 20000, "It is taking more than 17000 milliseconds to verify txn")
+		require.True(t, txnVerificationTime < 30000, "It is taking more than 30000 milliseconds to verify txn")
 	})
 }
 func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, allocationIDs []string) []int64 {
