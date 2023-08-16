@@ -149,7 +149,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.Greater(t, balanceBeforeAllocationUpdate, balanceAfterAllocationUpdate)
 	})
 
-	t.Run("Replace blobber in allocation with repair should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Replace blobber in allocation with repair should work", 90*time.Second, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -164,14 +164,26 @@ func TestReplaceBlobber(testSetup *testing.T) {
 
 		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
-
 		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
 		apiClient.UpdateAllocationBlobbers(t, sdkWallet, newBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
 
+		time.Sleep(10 * time.Second)
+
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.Nil(t, err)
-
+		// Check for blobber replacement
+		notFound := true
+		require.True(t, len(alloc.Blobbers) > 0)
+		// Check if new blobber is in the same position as old blobber
+		require.True(t, alloc.Blobbers[0].ID == newBlobberID)
+		for _, blobber := range alloc.Blobbers {
+			if blobber.ID == oldBlobberID {
+				notFound = false
+				break
+			}
+		}
+		require.True(t, notFound, "old blobber should not be in the list")
 		// check for repair
 		_, _, req, _, err := alloc.RepairRequired("/")
 		require.Nil(t, err)
