@@ -22,7 +22,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 
 	t.TestSetup("set storage config to use time_unit as 5 minutes", func() {
 		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "5m",
+			"time_unit": "10m",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
@@ -222,7 +222,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		// sleep for 5 minutes
-		time.Sleep(8 * time.Minute)
+		time.Sleep(15 * time.Minute)
 
 		alloc = utils.GetAllocation(t, allocationId)
 		require.Equal(t, movedToChallengePool, alloc.MovedToChallenge, "MovedToChallenge should not change")
@@ -286,10 +286,10 @@ func TestAllocationRewards(testSetup *testing.T) {
 			_, err := utils.ExecuteFaucetWithTokensForWallet(t, "wallets/blobber_owner", configPath, 99)
 			require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
-			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber_owner", utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": utils.IntToZCN(intialBlobberInfo.Terms.ReadPrice + 1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber_owner", utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": utils.IntToZCN(intialBlobberInfo.Terms.ReadPrice * 10)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 
-			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber_owner", utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": utils.IntToZCN(intialBlobberInfo.Terms.WritePrice + 1e9)}))
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber_owner", utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": utils.IntToZCN(intialBlobberInfo.Terms.WritePrice * 10)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 
@@ -303,7 +303,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
 
 		// sleep for 5 minutes
-		time.Sleep(5 * time.Minute)
+		time.Sleep(15 * time.Minute)
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
