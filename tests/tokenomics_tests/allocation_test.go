@@ -74,6 +74,83 @@ func TestAllocationRewards(testSetup *testing.T) {
 		1, 1, 1, 1,
 	}, 1)
 
+	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+
+		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+			"size":   10 * MB,
+			"data":   1,
+			"lock":   2,
+			"parity": 1,
+		}))
+		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
+
+		allocationId, err := utils.GetAllocationID(output[0])
+		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
+
+		alloc := utils.GetAllocation(t, allocationId)
+		movedToChallengePool := alloc.MovedToChallenge
+
+		// Uploading 10% of allocation
+
+		remotepath := "/dir/"
+		filesize := 2 * MB
+		filename := utils.GenerateRandomTestFileName(t)
+
+		err = utils.CreateFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		time.Sleep(1 * time.Minute)
+
+		alloc = utils.GetAllocation(t, allocationId)
+		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should increase")
+		movedToChallengePool = alloc.MovedToChallenge
+
+		for _, intialBlobberInfo := range blobberDetailList {
+			_, err := utils.ExecuteFaucetWithTokensForWallet(t, "wallets/blobber_owner", configPath, 99)
+			require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber_owner", utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": utils.IntToZCN(intialBlobberInfo.Terms.ReadPrice * 10)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+
+			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber_owner", utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": utils.IntToZCN(intialBlobberInfo.Terms.WritePrice * 10)}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		}
+
+		_, err = utils.UpdateAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+			"allocation": allocationId,
+			"size":       100 * MB,
+		}), true)
+		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
+
+		alloc = utils.GetAllocation(t, allocationId)
+		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
+
+		// sleep for 5 minutes
+		time.Sleep(15 * time.Minute)
+
+		rewards := getTotalAllocationChallengeRewards(t, allocationId)
+
+		totalBlobberChallengereward := int64(0)
+		for _, v := range rewards {
+			totalBlobberChallengereward += int64(v.(float64))
+		}
+
+		require.Equal(t, alloc.MovedToChallenge, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
+	})
+
 	t.RunSequentiallyWithTimeout("Create + Upload + Cancel equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -238,82 +315,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.InEpsilon(t, movedToChallengePool-alloc.MovedBack, totalBlobberChallengereward, 0.05, "Total Blobber Challenge reward should be equal to MovedToChallenge")
 	})
 
-	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
-		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
-
-		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
-			"size":   10 * MB,
-			"data":   1,
-			"lock":   2,
-			"parity": 1,
-		}))
-		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
-
-		allocationId, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
-
-		alloc := utils.GetAllocation(t, allocationId)
-		movedToChallengePool := alloc.MovedToChallenge
-
-		// Uploading 10% of allocation
-
-		remotepath := "/dir/"
-		filesize := 2 * MB
-		filename := utils.GenerateRandomTestFileName(t)
-
-		err = utils.CreateFileWithSize(filename, int64(filesize))
-		require.Nil(t, err)
-
-		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			// fetch the latest block in the chain
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
-		time.Sleep(1 * time.Minute)
-
-		alloc = utils.GetAllocation(t, allocationId)
-		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should increase")
-		movedToChallengePool = alloc.MovedToChallenge
-
-		for _, intialBlobberInfo := range blobberDetailList {
-			_, err := utils.ExecuteFaucetWithTokensForWallet(t, "wallets/blobber_owner", configPath, 99)
-			require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
-
-			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber_owner", utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": utils.IntToZCN(intialBlobberInfo.Terms.ReadPrice * 10)}))
-			require.Nil(t, err, strings.Join(output, "\n"))
-
-			output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber_owner", utils.CreateParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": utils.IntToZCN(intialBlobberInfo.Terms.WritePrice * 10)}))
-			require.Nil(t, err, strings.Join(output, "\n"))
-		}
-
-		_, err = utils.UpdateAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
-			"allocation": allocationId,
-			"size":       100 * MB,
-		}), true)
-		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
-
-		alloc = utils.GetAllocation(t, allocationId)
-		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
-
-		// sleep for 5 minutes
-		time.Sleep(15 * time.Minute)
-
-		rewards := getTotalAllocationChallengeRewards(t, allocationId)
-
-		totalBlobberChallengereward := int64(0)
-		for _, v := range rewards {
-			totalBlobberChallengereward += int64(v.(float64))
-		}
-
-		require.Equal(t, alloc.MovedToChallenge, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
-	})
 }
 
 func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
