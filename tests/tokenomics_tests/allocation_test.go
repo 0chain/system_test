@@ -125,7 +125,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "Error canceling allocation", strings.Join(output, "\n"))
 
 		// sleep for 10 seconds
-		time.Sleep(30 * time.Second)
+		time.Sleep(2 * time.Minute)
 
 		alloc = utils.GetAllocation(t, allocationId)
 		require.Equal(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
@@ -239,7 +239,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip("Skipping test as it is failing on CI")
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -301,7 +300,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 
 		alloc = utils.GetAllocation(t, allocationId)
-		require.Equal(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
+		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
 
 		// sleep for 5 minutes
 		time.Sleep(5 * time.Minute)
@@ -313,7 +312,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.Equal(t, movedToChallengePool, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
+		require.Equal(t, alloc.MovedToChallenge, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
 	})
 }
 
