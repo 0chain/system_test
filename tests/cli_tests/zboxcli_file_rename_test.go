@@ -735,7 +735,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}, true)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, "prohibited_allocation_file_options", output[0])
+		require.Equal(t, output[0], "Error performing RenameObject this options for this file is not permitted for this allocation")
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,

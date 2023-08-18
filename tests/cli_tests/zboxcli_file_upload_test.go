@@ -277,6 +277,7 @@ func TestUpload(testSetup *testing.T) {
 		})
 
 		thumbnail := escapedTestName(t) + "thumbnail.png"
+		_ = generateThumbnail(t, thumbnail) // nolint
 
 		filename := generateRandomTestFileName(t)
 		err := createFileWithSize(filename, fileSize)
@@ -648,7 +649,7 @@ func TestUpload(testSetup *testing.T) {
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t,
-			strings.Contains(strings.Join(output, ""), "upload_failed"), strings.Join(output, "\n"))
+			strings.Contains(strings.Join(output, ""), "Upload failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload Non-Existent File Should Fail", func(t *test.SystemTest) {
