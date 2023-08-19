@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -98,6 +99,26 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
 		require.Less(t, allocationBeforeUpdate.ExpirationDate, ac.ExpirationDate)
 		require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size)
+	})
+
+	t.Run("Update Negative Size Should Fail", func(t *test.SystemTest) {
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
+		size := int64(-256)
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       size,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+
+		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assert.Equal(t, "allocation can't be reduced", output[0])
+
+		alloc := getAllocation(t, allocationID)
+
+		require.Equal(t, allocationBeforeUpdate.Size, alloc.Size)
+		require.Equal(t, allocationBeforeUpdate.ExpirationDate, alloc.ExpirationDate)
 	})
 
 	// FIXME extend or size should be required params - should not bother sharders with an empty update
