@@ -133,7 +133,7 @@ jobs:
           archive_results: true
           run_flaky_tests: false
           run_api_system_tests: true
-          run_cli_system_tests: false
+          run_cli_system_tests: true
           run_tokenomics_system_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
