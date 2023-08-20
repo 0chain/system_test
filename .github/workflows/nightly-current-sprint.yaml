@@ -12,6 +12,7 @@ jobs:
   system-tests:
     name: "System Tests"
     runs-on: [ tests-suite ]
+    timeout-minutes: 120
     steps:
       - name: "Config: Deploy new 0Chain network then run tests against it"
         run: |
