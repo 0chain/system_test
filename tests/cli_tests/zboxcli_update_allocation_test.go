@@ -114,7 +114,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		assert.Equal(t, "allocation can't be reduced", output[0])
+		assert.Equal(t, "Error updating allocation:allocation_updating_failed: allocation can't be reduced", output[0])
 
 		alloc := getAllocation(t, allocationID)
 
