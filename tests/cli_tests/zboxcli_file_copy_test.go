@@ -25,6 +25,78 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	t.SetSmokeTests("copy file to existing directory")
 
 	t.Parallel()
+	t.Run("copy directory to another directry should work", func(t *test.SystemTest) {
+		allocSize := int64(2048)
+		fileSize := int64(256)
+
+		file := generateRandomTestFileName(t)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		filename := filepath.Base(file)
+		remotePath := "/child/" + filename
+		destpath := "/child2"
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = application/octet-stream. Name = %s",
+			filepath.Base(file),
+		)
+		require.Equal(t, expected, output[1])
+
+		// copy file
+		output, err = copyFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/child",
+			"destpath":   destpath,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf(remotePath+" copied"), output[0])
+
+		// list-all
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 3)
+
+		// check if expected file has been copied. both files should be there
+		foundAtSource := false
+		foundAtDest := false
+		for _, f := range files {
+			if f.Path == remotePath {
+				foundAtSource = true
+				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+			if f.Path == `\child2`+remotePath {
+				foundAtDest = true
+				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
+				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+	})
 
 	t.Run("copy file to existing directory", func(t *test.SystemTest) {
 		allocSize := int64(2048)
