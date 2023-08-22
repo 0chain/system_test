@@ -2,6 +2,8 @@ package cli_tests
 
 import (
 	"bytes"
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path"
@@ -384,5 +386,35 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
 		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
 		require.Equal(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
+
+		remotepath := "/"
+		remoteFilePath := path.Join(remotepath, s3BucketNameAlternate)
+		shortFileKey := getUniqueShortObjKey(fileKeyNew)
+		remoteFilePath = path.Join(remoteFilePath, shortFileKey)
+		uploadStats := checkStats(t, remoteFilePath, shortFileKey, allocationID, false)
+		require.Equal(t, true, uploadStats, "The file migrated does not match with expected file")
 	})
+}
+
+// This func is a copy of new file name generation logic in s3-migration from migration/migrate.go
+// This func needs to be in sync with the original func.
+func getUniqueShortObjKey(objectKey string) string {
+	//Max length to which objectKey would be trimmed to.
+	const maxLength = 100
+
+	if len(objectKey) > maxLength {
+		// Generate a SHA-1 hash of the object key
+		hash := sha1.New()
+		hash.Write([]byte(objectKey))
+		hashSum := hash.Sum(nil)
+
+		// Convert the hash to a hexadecimal string
+		hashString := hex.EncodeToString(hashSum)
+
+		// Combine the first 10 characters of the hash with a truncated object key
+		shortKey := fmt.Sprintf("%s_%s", hashString[:10], objectKey[11+len(objectKey)-maxLength:])
+		return shortKey
+	}
+
+	return objectKey
 }
