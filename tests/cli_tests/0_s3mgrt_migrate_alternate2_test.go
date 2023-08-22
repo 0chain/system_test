@@ -404,7 +404,7 @@ func getUniqueShortObjKey(objectKey string) string {
 
 	if len(objectKey) > maxLength {
 		// Generate a SHA-1 hash of the object key
-		hash := sha1.New()
+		hash := sha1.New() // #nosec
 		hash.Write([]byte(objectKey))
 		hashSum := hash.Sum(nil)
 
