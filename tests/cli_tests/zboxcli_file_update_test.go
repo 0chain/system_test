@@ -147,9 +147,9 @@ func TestFileUpdate(testSetup *testing.T) {
 		// Update with new thumbnail
 		os.Remove(localFilePath) //nolint: errcheck
 		newPath := generateRandomTestFileName(t)
-		err = createFileWithSize(newPath, filesize)
+		err = createFileWithSize(newPath, filesize+1024)
 		require.Nil(t, err)
-		newThumbnail, newThumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), newPath, int64(filesize))
+		newThumbnail, newThumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), newPath, int64(filesize+1024))
 
 		os.Remove(newThumbnail) //nolint: errcheck
 		os.Remove(newPath)      //nolint: errcheck
