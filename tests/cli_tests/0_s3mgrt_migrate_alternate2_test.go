@@ -2,7 +2,7 @@ package cli_tests
 
 import (
 	"bytes"
-	"crypto/sha1"
+	"crypto/sha1" // #nosec
 	"encoding/hex"
 	"fmt"
 	"os"
@@ -399,7 +399,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 // This func is a copy of new file name generation logic in s3-migration from migration/migrate.go
 // This func needs to be in sync with the original func.
 func getUniqueShortObjKey(objectKey string) string {
-	//Max length to which objectKey would be trimmed to.
+	// Max length to which objectKey would be trimmed to.
 	const maxLength = 100
 
 	if len(objectKey) > maxLength {
