@@ -38,10 +38,15 @@ func TestFileUpdate(testSetup *testing.T) {
 		filesize := int64(0.5 * MB)
 		remotepath := "/"
 		localFilePath := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		thumbnailFile, thumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(filesize))
-		os.Remove(thumbnailFile) //nolint: errcheck
 		os.Remove(localFilePath) //nolint: errcheck
+
+		newPath := generateRandomTestFileName(t)
+		err := createFileWithSize(newPath, filesize+1024)
+		require.Nil(t, err)
+
+		thumbnailFile, thumbnailSize := updateFileWithThumbnail(t, allocationID, "/"+filepath.Base(localFilePath), newPath, int64(filesize+1024))
+		os.Remove(thumbnailFile) //nolint: errcheck
+		os.Remove(newPath)       //nolint: errcheck
 
 		remotepath += filepath.Base(localFilePath)
 
