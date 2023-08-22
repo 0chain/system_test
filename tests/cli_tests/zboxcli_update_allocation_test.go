@@ -82,10 +82,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		size := int64(2048)
 
 		params := createParams(map[string]interface{}{
-			"allocation":   allocationID,
-			"extend":       true,
-			"size":         size,
-			"update_terms": true,
+			"allocation": allocationID,
+			"extend":     true,
+			"size":       size,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 
@@ -645,15 +644,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"allocation":     allocationID,
 			"add_blobber":    "new_blobber_id",
 			"remove_blobber": "blobber_id",
-		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
-		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
-
-		// set update_term should fail
-		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
-			"update_terms": false,
 		})
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
