@@ -350,7 +350,7 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 		require.Equal(t, true, uploadStats, "The file migrated doesnot match with with required file")
 	})
 
-	t.RunSequentially("Should not pass when filename size is more than 100 character", func(t *test.SystemTest) {
+	t.RunSequentially("Should pass when filename size is more than 100 character with renamed file names", func(t *test.SystemTest) {
 		// Cleanup before test
 		err := cleanupBucket(S3Client, s3BucketNameAlternate)
 		if err != nil {
@@ -362,6 +362,8 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
+		// As per the current logic in s3-migration even the longer file names would be migrated with file names
+		// trimmed to 100 chars.
 		fileKeyNew := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbb.txt"
 		fileContents := []byte("Hello, World!")
 		_, err = S3Client.PutObject(&s3.PutObjectInput{
@@ -379,8 +381,8 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 			"allocation": allocationID,
 		}))
 		// mssg can be changed
-		require.NotNil(t, err, "Expected an error", strings.Join(output, "\n"))
-		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, output[0], "invalid_parameter: filename is longer than 100 characters", "Output was not as expected", strings.Join(output, "\n"))
+		require.Nil(t, err, "Unexpected error", strings.Join(output, "\n"))
+		require.Contains(t, "Migration completed successfully", output[0], "Output was not as expected", strings.Join(output, "\n"))
+		require.Equal(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
 	})
 }
