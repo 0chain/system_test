@@ -74,6 +74,21 @@ func (c *ZS3Client) PutObject(t *test.SystemTest, queryParams, formData map[stri
 		t.Log(err)
 		return nil, err
 	}
+	resp, err := c.BaseHttpClient.HttpClient.R().SetBody(body).SetHeaders(map[string]string{"Content-Type": ct}).SetQueryParams(queryParams).Put(c.zs3ServerUrl)
+	if err != nil {
+		t.Log(err)
+		return nil, err
+	}
+	t.Logf("%s returned %s with status %s", c.zs3ServerUrl, resp.String(), resp.Status())
+	return resp, nil
+}
+
+func (c *ZS3Client) GetObject(t *test.SystemTest, queryParams, formData map[string]string) (*resty.Response, error) {
+	ct, body, err := createForm(formData)
+	if err != nil {
+		t.Log(err)
+		return nil, err
+	}
 	resp, err := c.BaseHttpClient.HttpClient.R().SetBody(body).SetHeaders(map[string]string{"Content-Type": ct}).SetQueryParams(queryParams).Get(c.zs3ServerUrl)
 	if err != nil {
 		t.Log(err)

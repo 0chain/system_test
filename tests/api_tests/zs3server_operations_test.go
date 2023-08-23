@@ -115,25 +115,14 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
-			"action":          "putObject",
+			"action":          "getObject",
 			"bucketName":      "system-test",
+			"objectName":	   "test-file.txt",
 		}
 		formData := map[string]string{
 			"file": "@test-file.txt",
 		}
-		resp, err := zs3Client.PutObject(t, queryParams, formData)
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		queryParams = map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "getObject",
-			"bucketName":      "system-test",
-		}
-		formData = map[string]string{
-			"file": "@test-file.txt",
-		}
-		t.Logf(resp.String())
+		resp, err := zs3Client.GetObject(t, queryParams, formData)
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
