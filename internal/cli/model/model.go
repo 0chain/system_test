@@ -749,6 +749,7 @@ var StorageFloatSettings = []string{
 var StorageCurrencySettigs = []string{
 	"max_mint",
 	"min_stake",
+	"min_stake_per_delegate",
 	"max_stake",
 	"readpool.min_lock",
 	"writepool.min_lock",
