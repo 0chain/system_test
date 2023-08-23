@@ -16,6 +16,14 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 	// FIXME: we should never return a 500 to the end user
+
+	t.SetSmokeTests("CreateBucket should return 200 when all the parameters are correct")
+	t.SetSmokeTests("ListBucket should return 200 all the parameter are correct")
+	t.SetSmokeTests("ListObjects should return 200 all the parameter are correct")
+	t.SetSmokeTests("PutObjects should return 200 all the parameter are correct")
+	t.SetSmokeTests("GetObjects should return 200 all the parameter are correct")
+	t.SetSmokeTests("RemoveObject should return 200 all the parameter are correct")
+
 	t.Run("Zs3 server should return 500 when the action doesn't exist", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
