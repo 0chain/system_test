@@ -148,7 +148,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.Equal(t, alloc.MovedToChallenge, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
+		require.Equal(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
 	})
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Cancel equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
