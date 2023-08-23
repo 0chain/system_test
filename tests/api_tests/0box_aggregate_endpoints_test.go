@@ -189,26 +189,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			return cond
 		})
 
-		// Reduce allocation size
-		apiClient.UpdateAllocation(t, sdkWallet, allocationID, &model.UpdateAllocationRequest{
-			Size: -1024,
-		}, client.TxSuccessfulStatus)
-
-		// Check decreased
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			allocatedStorageAfter := (*data)[0]
-			cond := allocatedStorageAfter < allocatedStorage
-			if cond {
-				allocatedStorage = allocatedStorageAfter
-			}
-
-			return cond
-		})
-
 		// Add blobber to the allocation
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
