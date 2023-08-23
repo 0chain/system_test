@@ -106,7 +106,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		formData := map[string]string{
 			"file": "@test-file.txt",
 		}
-		resp, err = zs3Client.PutObject(t, queryParams, formData)
+		resp, err = zs3Client.Zs3ServerRequest(t, queryParams, formData)
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
@@ -122,7 +122,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		formData := map[string]string{
 			"file": "@test-file.txt",
 		}
-		resp, err := zs3Client.GetObject(t, queryParams, formData)
+		resp, err := zs3Client.Zs3ServerRequest(t, queryParams, formData)
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
@@ -137,7 +137,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		formData := map[string]string{
 			"file": "@test-file.txt",
 		}
-		resp, err := zs3Client.PutObject(t, queryParams, formData)
+		resp, err := zs3Client.Zs3ServerRequest(t, queryParams, formData)
 		require.Nil(t, err)
 		require.Equal(t, 500, resp.StatusCode())
 		require.Equal(t, `{"error":"Bucket name contains invalid characters"}`, resp.String())
