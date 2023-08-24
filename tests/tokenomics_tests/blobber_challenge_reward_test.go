@@ -419,7 +419,7 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 
 	for i := 0; i < numDeletes; i++ {
 		remotepath := "/dir/"
-		filename := fileNames[i]
+		filename := fileNames[numFiles-i-1]
 
 		output, err := utils.DeleteFile(t, utils.EscapedTestName(t), utils.CreateParams(map[string]interface{}{
 			// fetch the latest block in the chain
