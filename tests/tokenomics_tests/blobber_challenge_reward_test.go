@@ -111,7 +111,29 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"parity": 1,
 		})
 
-		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB)
+		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, 1, 0)
+	})
+
+	t.RunSequentiallyWithTimeout("Client Uploads 20% of Allocation and delete 10% immediately and 1 delegate each (equal stake)", 100*time.Minute, func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
+		})
+
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
+			1, 1, 1, 1,
+		}, 1)
+
+		// Creating Allocation
+		_ = utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
+
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"tokens": 99,
+			"data":   1,
+			"parity": 1,
+		})
+
+		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, 2, 1)
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 30% of Allocation and 1 delegate each (equal stake)", 100*time.Minute, func(t *test.SystemTest) {
@@ -133,7 +155,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"parity": 1,
 		})
 
-		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.3*GB)
+		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.3*GB, 1, 0)
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", 100*time.Minute, func(t *test.SystemTest) {
@@ -156,7 +178,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 			"parity": 1,
 		})
 
-		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB)
+		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, 1, 0)
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (equal stake)", 100*time.Minute, func(t *test.SystemTest) {
@@ -359,7 +381,7 @@ func waitUntilAllocationIsFinalized(t *test.SystemTest, allocationID string) {
 	}
 }
 
-func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId string, blobberListString, validatorListString []string, filesize float64) {
+func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId string, blobberListString, validatorListString []string, filesize float64, numFiles, numDeletes int) {
 	t.Cleanup(func() {
 		waitUntilAllocationIsFinalized(t, allocationId)
 	})
@@ -375,19 +397,37 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 	v1D1Wallet, _ := utils.GetWalletForName(t, configPath, validator1Delegate1Wallet)
 	v2D1Wallet, _ := utils.GetWalletForName(t, configPath, validator2Delegate1Wallet)
 
-	remotepath := "/dir/"
-	filename := utils.GenerateRandomTestFileName(t)
+	var fileNames []string
 
-	err := utils.CreateFileWithSize(filename, int64(filesize))
-	require.Nil(t, err)
+	for i := 0; i < numFiles; i++ {
+		remotepath := "/dir/"
+		filename := utils.GenerateRandomTestFileName(t)
 
-	output, err := utils.UploadFile(t, configPath, map[string]interface{}{
-		// fetch the latest block in the chain
-		"allocation": allocationId,
-		"remotepath": remotepath + filepath.Base(filename),
-		"localpath":  filename,
-	}, true)
-	require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+		err := utils.CreateFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err := utils.UploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		fileNames = append(fileNames, filename)
+	}
+
+	for i := 0; i < numDeletes; i++ {
+		remotepath := "/dir/"
+		filename := fileNames[i]
+
+		output, err := utils.DeleteFile(t, utils.EscapedTestName(t), utils.CreateParams(map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+		}), true)
+		require.Nil(t, err, "error deleting file", strings.Join(output, "\n"))
+	}
 
 	// sleep for 10 minutes
 	time.Sleep(15 * time.Minute)
@@ -399,7 +439,7 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 	totalExpectedReward := allocation.MovedToChallenge - allocation.MovedBack
 
 	challengeRewards, err := getAllAllocationChallengeRewards(t, allocationId)
-	require.Nil(t, err, "Error getting challenge rewards", strings.Join(output, "\n"))
+	require.Nil(t, err, "Error getting challenge rewards")
 
 	blobber1TotalReward := challengeRewards[blobber1].Amount
 	blobber2TotalReward := challengeRewards[blobber2].Amount

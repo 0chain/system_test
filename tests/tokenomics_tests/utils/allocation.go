@@ -242,3 +242,19 @@ func UpdateAllocationWithWallet(t *test.SystemTest, wallet, cliConfigFilename, p
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
 }
+
+func DeleteFile(t *test.SystemTest, walletName, params string, retry bool) ([]string, error) {
+	t.Logf("Deleting file...")
+	cmd := fmt.Sprintf(
+		"./zbox delete %s --silent --wallet %s "+
+			"--configDir ./config --config %s",
+		params,
+		walletName+"_wallet.json",
+		configPath,
+	)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
