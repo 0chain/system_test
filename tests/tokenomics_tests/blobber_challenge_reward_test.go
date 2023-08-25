@@ -92,6 +92,52 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t.Log("Blobber List: ", blobberListString)
 	t.Log("Validator List: ", validatorListString)
 
+	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (equal stake)", 100*time.Minute, func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 2)
+		})
+
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
+			1, 1, 1, 1, 1, 1, 1, 1,
+		}, 2)
+
+		// Creating Allocation
+		utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"tokens": 99,
+			"data":   1,
+			"parity": 1,
+		})
+
+		assertChallengeRewardsForTwoDelegatesEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, []int64{
+			1, 1, 1, 1, 1, 1, 1, 1,
+		})
+	})
+
+	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", 100*time.Minute, func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 2)
+		})
+
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
+			1, 1, 2, 2, 1, 1, 2, 2,
+		}, 2)
+
+		// Creating Allocation
+		utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"tokens": 99,
+			"data":   1,
+			"parity": 1,
+		})
+
+		assertChallengeRewardsForTwoDelegatesEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, []int64{
+			1, 1, 2, 2, 1, 1, 2, 2,
+		})
+	})
+
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (equal stake)", 100*time.Minute, func(t *test.SystemTest) {
 		t.Cleanup(func() {
 			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
@@ -181,51 +227,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, 1, 0)
 	})
 
-	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (equal stake)", 100*time.Minute, func(t *test.SystemTest) {
-		t.Cleanup(func() {
-			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 2)
-		})
-
-		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 1, 1, 1, 1, 1, 1,
-		}, 2)
-
-		// Creating Allocation
-		utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
-			"tokens": 99,
-			"data":   1,
-			"parity": 1,
-		})
-
-		assertChallengeRewardsForTwoDelegatesEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, []int64{
-			1, 1, 1, 1, 1, 1, 1, 1,
-		})
-	})
-
-	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", 100*time.Minute, func(t *test.SystemTest) {
-		t.Cleanup(func() {
-			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 2)
-		})
-
-		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 2, 2, 1, 1, 2, 2,
-		}, 2)
-
-		// Creating Allocation
-		utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
-			"tokens": 99,
-			"data":   1,
-			"parity": 1,
-		})
-
-		assertChallengeRewardsForTwoDelegatesEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, []int64{
-			1, 1, 2, 2, 1, 1, 2, 2,
-		})
-	})
 }
 
 func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers, validators []string, configPath string, tokens []float64, numDelegates int) {
