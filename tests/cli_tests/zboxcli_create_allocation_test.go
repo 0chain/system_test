@@ -150,7 +150,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		// upload for creating wallet should fail
 		output, err = uploadFile(t, configPath, uploadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, ""), "consensus_not_met")
+		require.Contains(t, strings.Join(output, ""), "Operation needs to be performed by the owner or the payer of the allocation")
 
 		createAllocationTestTeardown(t, allocationID)
 	})

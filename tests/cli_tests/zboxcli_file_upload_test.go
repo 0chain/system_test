@@ -543,7 +543,7 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.False(t, strings.Contains(strings.Join(output, "\n"), "upload_failed"), strings.Join(output, "\n"))
+		require.False(t, strings.Contains(strings.Join(output, "\n"), "Upload failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *test.SystemTest) {
@@ -579,7 +579,7 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":  filename,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.Contains(strings.Join(output, ""), "upload_failed"), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, ""), "Upload failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
