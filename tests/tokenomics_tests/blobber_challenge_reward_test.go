@@ -160,28 +160,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, 1, 0)
 	})
 
-	t.RunSequentiallyWithTimeout("Client Uploads 20% of Allocation and delete 10% immediately and 1 delegate each (equal stake)", 100*time.Minute, func(t *test.SystemTest) {
-		t.Cleanup(func() {
-			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
-		})
-
-		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-			1, 1, 1, 1,
-		}, 1)
-
-		// Creating Allocation
-		_ = utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
-
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
-			"tokens": 99,
-			"data":   1,
-			"parity": 1,
-		})
-
-		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, 2, 1)
-	})
-
 	t.RunSequentiallyWithTimeout("Client Uploads 30% of Allocation and 1 delegate each (equal stake)", 100*time.Minute, func(t *test.SystemTest) {
 		t.Cleanup(func() {
 			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
@@ -225,6 +203,28 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		})
 
 		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, 1, 0)
+	})
+
+	t.RunSequentiallyWithTimeout("Client Uploads 20% of Allocation and delete 10% immediately and 1 delegate each (equal stake)", 100*time.Minute, func(t *test.SystemTest) {
+		t.Cleanup(func() {
+			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 1)
+		})
+
+		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
+			1, 1, 1, 1,
+		}, 1)
+
+		// Creating Allocation
+		_ = utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
+
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"tokens": 99,
+			"data":   1,
+			"parity": 1,
+		})
+
+		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, 2, 1)
 	})
 
 }
