@@ -812,6 +812,7 @@ var StorageBoolSettings = []string{
 }
 var StorageDurationSettings = []string{
 	"time_unit",
+	"max_challenge_completion_time",
 	"max_challenge_completion_rounds",
 	"stakepool.min_lock_period",
 	"health_check_period",
