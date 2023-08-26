@@ -104,7 +104,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
+        uses: 0chain/actions/deploy-0chain-2b2v@current-sprint
         with:
           repo_snapshots_branch: fix/unit-tests
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
@@ -117,7 +117,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Challenge Reward System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
+        uses: 0chain/actions/run-system-tests@current-sprint
         with:
           repo_snapshots_branch: fix/unit-tests
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
@@ -137,7 +137,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
+        uses: 0chain/actions/deploy-0chain-2b2v@current-sprint
         with:
           repo_snapshots_branch: fix/unit-tests
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
@@ -150,7 +150,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Allocation System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
+        uses: 0chain/actions/run-system-tests@current-sprint
         with:
           repo_snapshots_branch: fix/unit-tests
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
@@ -169,7 +169,7 @@ jobs:
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
 
       - name: "Run Read Rewards System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
+        uses: 0chain/actions/run-system-tests@current-sprint
         with:
           repo_snapshots_branch: fix/unit-tests
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
@@ -188,7 +188,7 @@ jobs:
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
 
       - name: "Run Slash Rewards System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
+        uses: 0chain/actions/run-system-tests@current-sprint
         with:
           repo_snapshots_branch: fix/unit-tests
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
@@ -213,7 +213,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-3b3v@feature/tokenomics_suite
+        uses: 0chain/actions/deploy-0chain-3b3v@current-sprint
         with:
           repo_snapshots_branch: fix/unit-tests
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
@@ -226,7 +226,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Allocation Add Or Replace Blobber System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
+        uses: 0chain/actions/run-system-tests@current-sprint
         with:
           repo_snapshots_branch: fix/unit-tests
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
@@ -246,7 +246,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain@feature/tokenomics_suite
+        uses: 0chain/actions/deploy-0chain@current-sprint
         with:
           repo_snapshots_branch: fix/unit-tests
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
@@ -259,7 +259,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Challenge Timings System tests"
-        uses: 0chain/actions/run-system-tests@feature/tokenomics_suite
+        uses: 0chain/actions/run-system-tests@current-sprint
         with:
           repo_snapshots_branch: fix/unit-tests
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
