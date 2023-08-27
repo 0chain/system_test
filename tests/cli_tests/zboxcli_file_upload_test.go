@@ -996,7 +996,7 @@ func TestUpload(testSetup *testing.T) {
 				"allocation":    allocationID,
 				"remotepath":    "/",
 				"localpath":     "./" + videoName + "." + videoFormat,
-				"web-streaming": "",
+				"web-streaming": true,
 			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2)
