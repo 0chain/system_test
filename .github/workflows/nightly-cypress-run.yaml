@@ -100,10 +100,10 @@ jobs:
           cd web-apps
           docker build -f ./packages/bolt/docker/dockerfile . -t ${{ secrets.BOLT_REGISTRY }}:latest
           echo $TAG-$SHORT_SHA
-          echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
+          echo "COMMIT_TAG=dev9-$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
 
-          docker tag ${{ secrets.BOLT_REGISTRY }}:latest ${{ secrets.BOLT_REGISTRY }}:$TAG-$SHORT_SHA
-          docker push ${{ secrets.BOLT_REGISTRY }}:$TAG-$SHORT_SHA
+          docker tag ${{ secrets.BOLT_REGISTRY }}:latest ${{ secrets.BOLT_REGISTRY }}:dev9-$TAG-$SHORT_SHA
+          docker push ${{ secrets.BOLT_REGISTRY }}:dev9-$TAG-$SHORT_SHA
 
       - name: Clean Up The Workspace.
         if: ${{ always() }}
@@ -298,10 +298,10 @@ jobs:
           cd web-apps
           docker build -f ./packages/explorer/docker/dockerfile . -t ${{ secrets.ATLUS_REGISTRY }}:latest
           echo $TAG-$SHORT_SHA
-          echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
+          echo "COMMIT_TAG=dev9-$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
 
-          docker tag ${{ secrets.ATLUS_REGISTRY }}:latest ${{ secrets.ATLUS_REGISTRY }}:$TAG-$SHORT_SHA
-          docker push ${{ secrets.ATLUS_REGISTRY }}:$TAG-$SHORT_SHA
+          docker tag ${{ secrets.ATLUS_REGISTRY }}:latest ${{ secrets.ATLUS_REGISTRY }}:dev9-$TAG-$SHORT_SHA
+          docker push ${{ secrets.ATLUS_REGISTRY }}:dev9-$TAG-$SHORT_SHA
 
       - name: Clean Up The Workspace.
         if: ${{ always() }}
@@ -497,10 +497,10 @@ jobs:
           cd web-apps
           docker build -f ./packages/chalk/docker/dockerfile . -t ${{ secrets.ZNFT_REGISTRY }}:latest
           echo $TAG-$SHORT_SHA
-          echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
+          echo "COMMIT_TAG=dev9-$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
 
-          docker tag ${{ secrets.ZNFT_REGISTRY }}:latest ${{ secrets.ZNFT_REGISTRY }}:$TAG-$SHORT_SHA
-          docker push ${{ secrets.ZNFT_REGISTRY }}:$TAG-$SHORT_SHA
+          docker tag ${{ secrets.ZNFT_REGISTRY }}:latest ${{ secrets.ZNFT_REGISTRY }}:dev9-$TAG-$SHORT_SHA
+          docker push ${{ secrets.ZNFT_REGISTRY }}:dev9-$TAG-$SHORT_SHA
 
       - name: Clean Up The Workspace.
         if: ${{ always() }}
@@ -697,10 +697,10 @@ jobs:
           cd web-apps
           docker build -f ./packages/chimney/docker/dockerfile . -t ${{ secrets.CHIMNEY_REGISTRY }}:latest
           echo $TAG-$SHORT_SHA
-          echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
+          echo "COMMIT_TAG=dev9-$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
 
-          docker tag ${{ secrets.CHIMNEY_REGISTRY }}:latest ${{ secrets.CHIMNEY_REGISTRY }}:$TAG-$SHORT_SHA
-          docker push ${{ secrets.CHIMNEY_REGISTRY }}:$TAG-$SHORT_SHA
+          docker tag ${{ secrets.CHIMNEY_REGISTRY }}:latest ${{ secrets.CHIMNEY_REGISTRY }}:dev9-$TAG-$SHORT_SHA
+          docker push ${{ secrets.CHIMNEY_REGISTRY }}:dev9-$TAG-$SHORT_SHA
 
       - name: Clean Up The Workspace.
         if: ${{ always() }}
@@ -896,10 +896,10 @@ jobs:
           cd web-apps
           docker build -f ./packages/blimp/docker/dockerfile . -t ${{ secrets.BLIMP_REGISTRY }}:latest
           echo $TAG-$SHORT_SHA
-          echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
+          echo "COMMIT_TAG=dev9-$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
 
-          docker tag ${{ secrets.BLIMP_REGISTRY }}:latest ${{ secrets.BLIMP_REGISTRY }}:$TAG-$SHORT_SHA
-          docker push ${{ secrets.BLIMP_REGISTRY }}:$TAG-$SHORT_SHA
+          docker tag ${{ secrets.BLIMP_REGISTRY }}:latest ${{ secrets.BLIMP_REGISTRY }}:dev9-$TAG-$SHORT_SHA
+          docker push ${{ secrets.BLIMP_REGISTRY }}:dev9-$TAG-$SHORT_SHA
 
       - name: Clean Up The Workspace.
         if: ${{ always() }}
@@ -1095,10 +1095,10 @@ jobs:
           cd web-apps
           docker build -f ./packages/vult/docker/dockerfile . -t ${{ secrets.VULT_REGISTRY }}:latest
           echo $TAG-$SHORT_SHA
-          echo "COMMIT_TAG=$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
+          echo "COMMIT_TAG=dev9-$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
 
-          docker tag ${{ secrets.VULT_REGISTRY }}:latest ${{ secrets.VULT_REGISTRY }}:$TAG-$SHORT_SHA
-          docker push ${{ secrets.VULT_REGISTRY }}:$TAG-$SHORT_SHA
+          docker tag ${{ secrets.VULT_REGISTRY }}:latest ${{ secrets.VULT_REGISTRY }}:dev9-$TAG-$SHORT_SHA
+          docker push ${{ secrets.VULT_REGISTRY }}:dev9-$TAG-$SHORT_SHA
 
       - name: Clean Up The Workspace.
         if: ${{ always() }}
