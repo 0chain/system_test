@@ -27,8 +27,22 @@ func RunCommandWithoutRetry(commandString string) ([]string, error) {
 
 	sanitizedArgs := sanitizeArgs(args)
 	rawOutput, err := executeCommand(commandName, sanitizedArgs)
+	var commandStringForLog string
 
-	Logger.Debugf("Command [%v] exited with error [%v] and output [%v]", commandString, err, sanitizeOutput(rawOutput))
+	// Redact keys before logging
+	if strings.Contains(commandString, "--access-key") {
+		index := strings.Index(commandString, "--access-key")
+		// get next single word after "--access-key"
+		accessKey := strings.Fields(commandString[index:])[1]
+		commandStringForLog = strings.ReplaceAll(commandString, accessKey, "****")
+	}
+	if strings.Contains(commandString, "--secret-key") {
+		index := strings.Index(commandString, "--secret-key")
+		// get next single word after "--secret-key"
+		secretKey := strings.Fields(commandString[index:])[1]
+		commandStringForLog = strings.ReplaceAll(commandString, secretKey, "****")
+	}
+	Logger.Debugf("Command [%v] exited with error [%v] and output [%v]", commandStringForLog, err, sanitizeOutput(rawOutput))
 
 	return sanitizeOutput(rawOutput), err
 }
@@ -52,6 +66,7 @@ func RunCommand(t *test.SystemTest, commandString string, maxAttempts int, backo
 	red := "\033[31m"
 	yellow := "\033[33m"
 	green := "\033[32m"
+	var commandStringForLog string
 
 	var count int
 	for {
@@ -72,15 +87,15 @@ func RunCommand(t *test.SystemTest, commandString string, maxAttempts int, backo
 				index := strings.Index(commandString, "--access-key")
 				// get next single word after "--access-key"
 				accessKey := strings.Fields(commandString[index:])[1]
-				commandString = strings.ReplaceAll(commandString, accessKey, "****")
+				commandStringForLog = strings.ReplaceAll(commandString, accessKey, "****")
 			}
 			if strings.Contains(commandString, "--secret-key") {
 				index := strings.Index(commandString, "--secret-key")
 				// get next single word after "--secret-key"
 				secretKey := strings.Fields(commandString[index:])[1]
-				commandString = strings.ReplaceAll(commandString, secretKey, "****")
+				commandStringForLog = strings.ReplaceAll(commandString, secretKey, "****")
 			}
-			t.Logf("%sCommand failed on final attempt [%v/%v] due to error [%v]. Command String: [%v] Output: [%v]\n", red, count, maxAttempts, err, commandString, strings.Join(output, " -<NEWLINE>- "))
+			t.Logf("%sCommand failed on final attempt [%v/%v] due to error [%v]. Command String: [%v] Output: [%v]\n", red, count, maxAttempts, err, commandStringForLog, strings.Join(output, " -<NEWLINE>- "))
 
 			if err != nil {
 				t.Logf("%sThe verbose output for the command is:", red)
