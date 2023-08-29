@@ -72,13 +72,13 @@ func RunCommand(t *test.SystemTest, commandString string, maxAttempts int, backo
 				index := strings.Index(commandString, "--access-key")
 				// get next single word after "--access-key"
 				accessKey := strings.Fields(commandString[index:])[1]
-				commandString = strings.Replace(commandString, accessKey, "****", -1)
+				commandString = strings.ReplaceAll(commandString, accessKey, "****")
 			}
 			if strings.Contains(commandString, "--secret-key") {
 				index := strings.Index(commandString, "--secret-key")
 				// get next single word after "--secret-key"
 				secretKey := strings.Fields(commandString[index:])[1]
-				commandString = strings.Replace(commandString, secretKey, "****", -1)
+				commandString = strings.ReplaceAll(commandString, secretKey, "****")
 			}
 			t.Logf("%sCommand failed on final attempt [%v/%v] due to error [%v]. Command String: [%v] Output: [%v]\n", red, count, maxAttempts, err, commandString, strings.Join(output, " -<NEWLINE>- "))
 
