@@ -1,0 +1,69 @@
+package cli_tests
+
+import (
+	"fmt"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/stretchr/testify/require"
+)
+
+func TestZCNBridgeAuthorizerRegisterAndDelete(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	t := test.NewSystemTest(testSetup)
+	output, err := createWallet(t, configPath)
+	require.NoError(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+
+	t.RunSequentially("Register authorizer to DEX smartcontract", func(t *test.SystemTest) {
+		output, err = scRegisterAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", false)
+		require.NoError(t, err, "error trying to register authorizer to DEX sc: %s", strings.Join(output, "\n"))
+		t.Log("register output successfully")
+	})
+
+	t.RunSequentially("Remove authorizer from DEX smartcontract", func(t *test.SystemTest) {
+		output, err = scRemoveAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", false)
+		require.NoError(t, err, strings.Join(output, "\n"))
+		t.Log("remove output successfully")
+	})
+}
+
+func scRegisterAuthorizer(t *test.SystemTest, authAddress string, retry bool) ([]string, error) {
+	t.Logf("Register authorizer to SC ...")
+	cmd := fmt.Sprintf(
+		"./zwallet auth-sc-register "+
+			"--ethereum_address=%s "+
+			"--silent "+
+			"--path %s "+
+			"--configDir ./config "+
+			"--wallet %s",
+		authAddress,
+		configDir,
+		escapedTestName(t)+"_wallet.json",
+	)
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
+func scRemoveAuthorizer(t *test.SystemTest, authAddress string, retry bool) ([]string, error) {
+	t.Logf("Remove authorizer to SC ...")
+	cmd := fmt.Sprintf(
+		"./zwallet auth-sc-delete --ethereum_address=%s "+
+			"--silent "+
+			"--configDir ./config "+
+			"--wallet %s",
+		authAddress,
+		escapedTestName(t)+"_wallet.json",
+	)
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
