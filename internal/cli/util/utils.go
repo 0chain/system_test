@@ -67,6 +67,19 @@ func RunCommand(t *test.SystemTest, commandString string, maxAttempts int, backo
 			t.Logf("%sCommand failed on attempt [%v/%v] due to error [%v]. Output: [%v]\n", yellow, count, maxAttempts, err, strings.Join(output, " -<NEWLINE>- "))
 			time.Sleep(backoff)
 		} else {
+			// Redact keys before logging
+			if strings.Contains(commandString, "--access-key") {
+				index := strings.Index(commandString, "--access-key")
+				// get next single word after "--access-key"
+				accessKey := strings.Fields(commandString[index:])[1]
+				commandString = strings.Replace(commandString, accessKey, "****", -1)
+			}
+			if strings.Contains(commandString, "--secret-key") {
+				index := strings.Index(commandString, "--secret-key")
+				// get next single word after "--secret-key"
+				secretKey := strings.Fields(commandString[index:])[1]
+				commandString = strings.Replace(commandString, secretKey, "****", -1)
+			}
 			t.Logf("%sCommand failed on final attempt [%v/%v] due to error [%v]. Command String: [%v] Output: [%v]\n", red, count, maxAttempts, err, commandString, strings.Join(output, " -<NEWLINE>- "))
 
 			if err != nil {
