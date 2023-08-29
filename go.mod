@@ -28,7 +28,7 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 )
 
-require github.com/aws/aws-sdk-go v1.44.289
+require github.com/aws/aws-sdk-go v1.44.331
 
 require (
 	github.com/0chain/common v0.0.6-0.20230127095721-8df4d1d72565 // indirect
