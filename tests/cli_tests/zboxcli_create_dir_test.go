@@ -106,9 +106,9 @@ func TestCreateDir(testSetup *testing.T) {
 		output, err := createDir(t, configPath, allocID, longDirName, false)
 		require.NotNil(t, err, "expected create dir failure command executed with output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		aggregatedOutput := strings.ToLower(strings.Join(output, " "))
-		require.Contains(t, aggregatedOutput, "directory creation failed")
-		require.Contains(t, aggregatedOutput, "consensus not met")
+		aggregatedOutput := strings.Join(output, " ")
+		require.Contains(t, aggregatedOutput, "Directory creation failed")
+		require.Contains(t, aggregatedOutput, "consensus_not_met")
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -238,7 +238,7 @@ func TestCreateDir(testSetup *testing.T) {
 		output, err := createDirForWallet(t, configPath, wallet, true, allocID, true, "", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "CreateDir failed:  invalid_name: Invalid name for dir", output[0])
+		require.Equal(t, "Directory creation failed. invalid_path: Path is not absolute", output[0])
 	})
 
 	t.Run("create attempt with missing allocation", func(t *test.SystemTest) {
@@ -298,7 +298,7 @@ func TestCreateDir(testSetup *testing.T) {
 		require.NotNil(t, err, "Expected create dir failure but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, `consensus not met`)
+		require.Contains(t, aggregatedOutput, `consensus_not_met`)
 	})
 }
 
