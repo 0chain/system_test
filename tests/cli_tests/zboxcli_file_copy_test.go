@@ -556,7 +556,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "copy_failed")
+		require.Contains(t, output[0], "Copy failed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -701,7 +701,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "copy_failed")
+		require.Contains(t, output[0], "Copy failed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -751,7 +751,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "copy_failed")
+		require.Contains(t, output[0], "Copy failed")
 	})
 
 	t.Run("copy file from someone else's allocation should fail", func(t *test.SystemTest) {
@@ -796,7 +796,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "copy_failed")
+		require.Contains(t, output[0], "Copy failed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
