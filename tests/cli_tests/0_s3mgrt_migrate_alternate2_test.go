@@ -400,7 +400,9 @@ func Test0S3MigrationAlternatePart2(testSetup *testing.T) {
 // This func needs to be in sync with the original func.
 func getUniqueShortObjKey(objectKey string) string {
 	// Max length to which objectKey would be trimmed to.
-	const maxLength = 100
+	// Keeping this less than 100 chars to prevent longer name in case of uploading duplicate
+	// files with `_copy` suffixes.
+	const maxLength = 90
 
 	if len(objectKey) > maxLength {
 		// Generate a SHA-1 hash of the object key
