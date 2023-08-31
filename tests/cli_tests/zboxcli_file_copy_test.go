@@ -149,7 +149,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 				require.Equal(t, "d", f.Type, strings.Join(output, "\n"))
 				// require.NotEmpty(t, f.Hash)
 			}
-			if f.Path == destpath+`\`+dirname {
+			if f.Path == filepath.Join(destpath, dirname) {
 				foundAtDest = true
 				require.Equal(t, "child1", f.Name, strings.Join(output, "\n"))
 				require.Equal(t, "d", f.Type, strings.Join(output, "\n"))
@@ -277,7 +277,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 				foundDirAtSource = true
 				require.Equal(t, "child1", f.Name, strings.Join(output, "\n"))
 				require.Equal(t, "d", f.Type, strings.Join(output, "\n"))
-			} else if f.Path == destpath+`\`+dirname {
+			} else if f.Path == filepath.Join(destpath, "/", dirname) {
 				foundDirAtDest = true
 				require.Equal(t, "child1", f.Name, strings.Join(output, "\n"))
 				require.Equal(t, "d", f.Type, strings.Join(output, "\n"))

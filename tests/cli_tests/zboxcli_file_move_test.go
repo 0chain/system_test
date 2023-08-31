@@ -33,20 +33,18 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
-		sourceDir := "child"
+		sourceDir := filepath.Join("/", "child")
 		filename := filepath.Base(file)
 		remotePath := filepath.Join(sourceDir, filename)
-		localPath := filepath.Join("/", filename)
 		destpath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
-		fmt.Printf("%v, %v", remotePath, localPath)
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
-			"localpath":  localPath,
+			"localpath":  file,
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
