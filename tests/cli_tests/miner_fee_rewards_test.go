@@ -55,7 +55,7 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 			output, err := sendTokens(t, configPath, wallet.ClientID, 0.5, escapedTestName(t), fee)
 			require.NoError(t, err, "error sending tokens", strings.Join(output, "\n"))
 		}
-		time.Sleep(10 * time.Second) // give time for last round to be saved
+		time.Sleep(time.Second) // give time for last round to be saved
 		// ------------------------------------
 
 		afterMiners := getNodes(t, minerIds, sharderUrl)
@@ -66,7 +66,7 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 			t, beforeMiners.Nodes, afterMiners.Nodes, nil, nil,
 		)
 
-		time.Sleep(10 * time.Second) // give time for last round to be saved
+		time.Sleep(time.Second) // give time for last round to be saved
 
 		history := cliutil.NewHistory(startRound, endRound)
 		history.Read(t, sharderUrl, true)
@@ -154,12 +154,6 @@ func checkMinerFeeAmounts(
 			}
 			// if this miner is the round miner check fees add up
 			if id == roundHistory.Block.MinerID {
-
-				if fees != recordedRoundRewards {
-					history.Transactions(round)
-					t.Logf("round %d, recorded rewards %v, fees %v", round, recordedRoundRewards, fees)
-				}
-
 				require.InDeltaf(
 					t, fees, recordedRoundRewards, delta,
 					"incorrect service charge %v for round %d"+
