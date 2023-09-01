@@ -79,6 +79,14 @@ func (ch *ChainHistory) FeesForRound(t *test.SystemTest, round int64) int64 {
 	return fee
 }
 
+func (ch *ChainHistory) Transactions(round int64) {
+	for _, tx := range ch.transactions {
+		if tx.Round == round {
+			fmt.Println("TXN VALUE : ", tx.Value)
+		}
+	}
+}
+
 func (ch *ChainHistory) Read(t *test.SystemTest, sharderBaseUrl string, includeTransactions bool) {
 	ch.readBlocks(t, sharderBaseUrl)
 	ch.readDelegateRewards(t, sharderBaseUrl)
