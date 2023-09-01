@@ -126,7 +126,7 @@ func checkMinerFeeAmounts(
 	t.Log("checking miner fee payment amounts...")
 	for i, id := range minerIds {
 		var blockRewards, feeRewards int64
-		for round := beforeMiners[i].RoundServiceChargeLastUpdated + 1; round <= afterMiners[i].RoundServiceChargeLastUpdated; round++ {
+		for round := beforeMiners[i].RoundServiceChargeLastUpdated + 1; round < afterMiners[i].RoundServiceChargeLastUpdated; round++ {
 			var recordedRoundRewards int64
 			var roundFees = history.FeesForRound(t, round)
 			roundHistory := history.RoundHistory(t, round)
