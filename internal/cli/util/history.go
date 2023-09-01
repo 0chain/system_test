@@ -122,7 +122,7 @@ func (ch *ChainHistory) readTransaction(t *test.SystemTest, sharderBaseUrl strin
 }
 
 func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
-	ch.roundHistories = make(map[int64]RoundHistory, ch.to-ch.from)
+	ch.roundHistories = make(map[int64]RoundHistory, ch.to-ch.from+1)
 
 	for i := range ch.blocks {
 		ch.roundHistories[ch.blocks[i].Round] = RoundHistory{
