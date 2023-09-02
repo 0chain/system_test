@@ -16,6 +16,14 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 	// FIXME: we should never return a 500 to the end user
+
+	t.SetSmokeTests("CreateBucket should return 200 when all the parameters are correct",
+		"ListBucket should return 200 all the parameter are correct",
+		"ListObjects should return 200 all the parameter are correct",
+		"PutObjects should return 200 all the parameter are correct",
+		"GetObjects should return 200 all the parameter are correct",
+		"RemoveObject should return 200 all the parameter are correct")
+
 	t.Run("Zs3 server should return 500 when the action doesn't exist", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
@@ -106,7 +114,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		formData := map[string]string{
 			"file": "@test-file.txt",
 		}
-		resp, err = zs3Client.PutObject(t, queryParams, formData)
+		resp, err = zs3Client.Zs3ServerRequest(t, queryParams, formData)
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
@@ -115,25 +123,14 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
-			"action":          "putObject",
+			"action":          "getObject",
 			"bucketName":      "system-test",
+			"objectName":      "test-file.txt",
 		}
 		formData := map[string]string{
 			"file": "@test-file.txt",
 		}
-		resp, err := zs3Client.PutObject(t, queryParams, formData)
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		queryParams = map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "getObject",
-			"bucketName":      "system-test",
-		}
-		formData = map[string]string{
-			"file": "@test-file.txt",
-		}
-		t.Logf(resp.String())
+		resp, err := zs3Client.Zs3ServerRequest(t, queryParams, formData)
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})
@@ -148,7 +145,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		formData := map[string]string{
 			"file": "@test-file.txt",
 		}
-		resp, err := zs3Client.PutObject(t, queryParams, formData)
+		resp, err := zs3Client.Zs3ServerRequest(t, queryParams, formData)
 		require.Nil(t, err)
 		require.Equal(t, 500, resp.StatusCode())
 		require.Equal(t, `{"error":"Bucket name contains invalid characters"}`, resp.String())

@@ -513,7 +513,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "invalid_operation: cannot rename root path", output[0])
+		require.Equal(t, "Rename failed. invalid_operation: cannot rename root path", output[0])
 	}) //todo: too slow
 
 	t.Run("rename non-existing file should fail", func(t *test.SystemTest) {
@@ -531,7 +531,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "rename_failed")
+		require.Contains(t, output[0], "Rename failed")
 	})
 
 	t.Run("rename file from someone else's allocation should fail", func(t *test.SystemTest) {
@@ -577,7 +577,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "rename_failed")
+		require.Contains(t, output[0], "Rename failed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -735,7 +735,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}, true)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "this options for this file is not permitted for this allocation", output[0])
+		require.Equal(t, output[0], "Rename failed. this options for this file is not permitted for this allocation")
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
