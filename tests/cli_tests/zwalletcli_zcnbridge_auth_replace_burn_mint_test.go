@@ -84,6 +84,9 @@ func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 	addAuth2 := auths[1]
 	output, err = registerAuthorizer(t, addAuth2.ID, authsIDKeys[addAuth2.ID], addAuth2.URL, false)
 	require.NoError(t, err, "Unexpected register authorizer failure", strings.Join(output, "\n"))
+
+	// TODO: test burn-wzcn and mint zcn, but thats require the grapnode and dex_subgraph setup for
+	// tenderly fork. So leave it for now. We have done the manual test to confirm the flow could work.
 }
 
 func burnZCNMintWZCN(t *test.SystemTest) {
