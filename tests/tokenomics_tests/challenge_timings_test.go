@@ -291,10 +291,11 @@ func TestChallengeTimings(testSetup *testing.T) {
 			// Uploading 10% of allocation
 			remotepath := "/dir/"
 			filesize := 1 * GB
-			filename := "extra : " + utils.GenerateRandomTestFileName(t)
+			filename := utils.GenerateRandomTestFileName(t)
 
 			err = utils.CreateFileWithSize(filename, int64(filesize))
 			require.Nil(t, err)
+
 			output, err = utils.UploadFile(t, configPath, map[string]interface{}{
 				// fetch the latest block in the chain
 				"allocation": allocationId,
