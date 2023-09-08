@@ -69,7 +69,7 @@ jobs:
 
   system-tests:
     name: "System Tests"
-    runs-on: [ tests-suite ]
+    runs-on: [ tests-suite04 ]
     timeout-minutes: 120
     steps:
       - name: "Get current PR"
@@ -112,7 +112,7 @@ jobs:
         uses: 0chain/actions/deploy-0chain@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          kube_config: ${{ secrets[format('DEV3KC', env.RUNNER_NUMBER)] }}
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
