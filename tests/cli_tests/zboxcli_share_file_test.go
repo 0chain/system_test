@@ -23,9 +23,318 @@ import (
 func TestShareFile(testSetup *testing.T) {
 	//TODO: all share operations take ~40s except for PRE which takes ~2mins 30s!
 	t := test.NewSystemTest(testSetup)
-	t.SetSmokeTests("Share to public a folder with no encrypted file using auth ticket with zero expiration")
+	// t.SetSmokeTests("Share to public a folder with no encrypted file using auth ticket with zero expiration")
 
-	t.Parallel()
+	// t.Parallel()
+	// "Share to private a folder with no  file using auth ticket with zero expiration"
+	// "Share to private a folder with single file using auth ticket with zero expiration"
+	// "Share to private a folder with multiple  file using auth ticket with zero expiration"
+	// "Share to private a folder with single encrypted file using auth ticket with zero expiration"
+	// "Share to private a folder with multiple encrypted file using auth ticket with zero expiration"
+	// make same 5 case for public folder and you are done
+
+	// t.Run("Share to public a folder with no file using auth ticket with zero expiration", func(t *test.SystemTest) {
+	// 	walletOwner := escapedTestName(t)
+	// 	allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+	// 	// upload Remote Dir
+	// 	remoteDir := "/folderToBeShared"
+	// 	output, err := createDir(t, configPath, allocationID, remoteDir, true)
+	// 	require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Equal(t, remoteDir+" directory created", output[0])
+
+	// 	// receiver wallet operations
+	// 	receiverWallet := escapedTestName(t) + "_second"
+
+	// 	createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+
+	// 	shareParams := map[string]interface{}{
+	// 		"allocation":         allocationID,
+	// 		"remotepath":         remoteDir,
+	// 		"expiration-seconds": 0,
+	// 	}
+	// 	output, err = shareFile(t, configPath, shareParams)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
+
+	// 	authTicket, err := extractAuthToken(output[0])
+	// 	require.Nil(t, err, "Error extracting auth token")
+	// 	require.NotEqual(t, "", authTicket)
+
+	// 	// list all file to verify
+	// 	listFileParams := createParams(map[string]interface{}{
+	// 		"authticket": authTicket,
+	// 		"remotepath": remoteDir,
+	// 		"allocation": allocationID,
+	// 	})
+	// 	output, err = listAllFilesFromBlobber(t, receiverWallet, configPath, listFileParams, true)
+	// 	var files []climodel.AllocationFile
+	// 	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, files, 0, "list file - Unexpected output", strings.Join(output, "\n"))
+
+	// })
+
+	// t.Run("Acessing UnShared folder with no file using auth ticket with zero expiration should not work", func(t *test.SystemTest) {
+	// 	walletOwner := escapedTestName(t)
+	// 	allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+	// 	// upload Remote Dir
+	// 	remoteDir := "/folderToBeShared"
+	// 	output, err := createDir(t, configPath, allocationID, remoteDir, true)
+	// 	require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1)
+	// 	require.Equal(t, remoteDir+" directory created", output[0])
+
+	// 	// receiver wallet operations
+	// 	receiverWallet := escapedTestName(t) + "_second"
+
+	// 	createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+
+	// 	authTicket := "random"
+
+	// 	// list all file to verify
+	// 	listFileParams := createParams(map[string]interface{}{
+	// 		"authticket": authTicket,
+	// 		"remotepath": remoteDir,
+	// 		"allocation": allocationID,
+	// 	})
+	// 	output, err = listAllFilesFromBlobber(t, receiverWallet, configPath, listFileParams, true)
+	// 	var files []climodel.AllocationFile
+	// 	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, files, 0, "list file - Unexpected output", strings.Join(output, "\n"))
+
+	// })
+
+	// t.Run("Share to public a folder with single unencrypted file using auth ticket with zero expiration should work", func(t *test.SystemTest) {
+	// 	walletOwner := escapedTestName(t)
+	// 	allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+	// 	// upload file
+	// 	file := generateRandomTestFileName(t)
+	// 	remoteOwnerPath := "/subfolder1/subfolder2/" + filepath.Base(file)
+	// 	fileSize := int64(256)
+	// 	err := createFileWithSize(file, fileSize)
+	// 	require.Nil(t, err)
+
+	// 	uploadParams := map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  file,
+	// 		"remotepath": remoteOwnerPath,
+	// 	}
+	// 	output, err := uploadFile(t, configPath, uploadParams, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
+	// 	require.Contains(t, output[1], StatusCompletedCB)
+	// 	require.Contains(t, output[1], filepath.Base(file))
+
+	// 	// receiver wallet operations
+	// 	receiverWallet := escapedTestName(t) + "_second"
+
+	// 	createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+
+	// 	shareParams := map[string]interface{}{
+	// 		"allocation":         allocationID,
+	// 		"remotepath":         "/subfolder1",
+	// 		"expiration-seconds": 0,
+	// 	}
+	// 	output, err = shareFile(t, configPath, shareParams)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
+
+	// 	authTicket, err := extractAuthToken(output[0])
+	// 	require.Nil(t, err, "Error extracting auth token")
+	// 	require.NotEqual(t, "", authTicket)
+
+	// 	// Download the file (delete local copy first)
+	// 	os.Remove(file)
+
+	// 	downloadParams := createParams(map[string]interface{}{
+	// 		"localpath":  file,
+	// 		"authticket": authTicket,
+	// 		"remotepath": remoteOwnerPath,
+	// 	})
+	// 	output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
+	// 	require.Contains(t, output[1], StatusCompletedCB)
+	// 	require.Contains(t, output[1], filepath.Base(file))
+	// })
+
+	// t.Run("Share to public a folder with multiple unencrypted file using auth ticket with zero expiration should work", func(t *test.SystemTest) {
+	// 	walletOwner := escapedTestName(t)
+	// 	allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+	// 	// upload Three files
+	// 	fileSize := int64(256)
+	// 	file1 := generateRandomTestFileName(t)
+	// 	remoteOwnerPath1 := "/subfolder1/subfolder2/" + filepath.Base(file1)
+
+	// 	err := createFileWithSize(file1, fileSize)
+	// 	require.Nil(t, err)
+
+	// 	uploadParams := map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  file1,
+	// 		"remotepath": remoteOwnerPath1,
+	// 	}
+	// 	output, err := uploadFile(t, configPath, uploadParams, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
+	// 	require.Contains(t, output[1], StatusCompletedCB)
+	// 	require.Contains(t, output[1], filepath.Base(file1))
+
+	// 	file2 := generateRandomTestFileName(t)
+	// 	remoteOwnerPath2 := "/subfolder1/subfolder2/" + filepath.Base(file2)
+
+	// 	err = createFileWithSize(file2, fileSize)
+	// 	require.Nil(t, err)
+
+	// 	uploadParams = map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  file2,
+	// 		"remotepath": remoteOwnerPath2,
+	// 	}
+	// 	output, err = uploadFile(t, configPath, uploadParams, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
+	// 	require.Contains(t, output[1], StatusCompletedCB)
+	// 	require.Contains(t, output[1], filepath.Base(file2))
+
+	// 	file3 := generateRandomTestFileName(t)
+	// 	remoteOwnerPath3 := "/subfolder1/subfolder2/" + filepath.Base(file3)
+
+	// 	err = createFileWithSize(file3, fileSize)
+	// 	require.Nil(t, err)
+
+	// 	uploadParams = map[string]interface{}{
+	// 		"allocation": allocationID,
+	// 		"localpath":  file3,
+	// 		"remotepath": remoteOwnerPath3,
+	// 	}
+	// 	output, err = uploadFile(t, configPath, uploadParams, true)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2)
+	// 	require.Contains(t, output[1], StatusCompletedCB)
+	// 	require.Contains(t, output[1], filepath.Base(file3))
+
+	// 	// receiver wallet operations
+	// 	receiverWallet := escapedTestName(t) + "_second"
+
+	// 	createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+
+	// 	shareParams := map[string]interface{}{
+	// 		"allocation":         allocationID,
+	// 		"remotepath":         "/subfolder1",
+	// 		"expiration-seconds": 0,
+	// 	}
+	// 	output, err = shareFile(t, configPath, shareParams)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
+
+	// 	authTicket, err := extractAuthToken(output[0])
+	// 	require.Nil(t, err, "Error extracting auth token")
+	// 	require.NotEqual(t, "", authTicket)
+
+	// 	// Download the file (delete local copy first)
+	// 	os.Remove(file1)
+	// 	os.Remove(file2)
+	// 	os.Remove(file3)
+
+	// 	downloadParams := createParams(map[string]interface{}{
+	// 		"localpath":  file1,
+	// 		"authticket": authTicket,
+	// 		"remotepath": remoteOwnerPath1,
+	// 	})
+	// 	output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
+	// 	require.Contains(t, output[1], StatusCompletedCB)
+	// 	require.Contains(t, output[1], filepath.Base(file1))
+
+	// 	downloadParams = createParams(map[string]interface{}{
+	// 		"localpath":  file2,
+	// 		"authticket": authTicket,
+	// 		"remotepath": remoteOwnerPath2,
+	// 	})
+	// 	output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
+	// 	require.Contains(t, output[1], StatusCompletedCB)
+	// 	require.Contains(t, output[1], filepath.Base(file2))
+
+	// 	downloadParams = createParams(map[string]interface{}{
+	// 		"localpath":  file3,
+	// 		"authticket": authTicket,
+	// 		"remotepath": remoteOwnerPath3,
+	// 	})
+	// 	output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
+	// 	require.Nil(t, err, strings.Join(output, "\n"))
+	// 	require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
+	// 	require.Contains(t, output[1], StatusCompletedCB)
+	// 	require.Contains(t, output[1], filepath.Base(file3))
+	// })
+
+	t.Run("Share to public a folder with single encrypted file using auth ticket with zero expiration", func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		// upload file
+		file := generateRandomTestFileName(t)
+		remoteOwnerPath := "/subfolder1/subfolder2/" + filepath.Base(file)
+		fileSize := int64(256)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		uploadParams := map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  file,
+			"remotepath": remoteOwnerPath,
+			"encryption": "",
+		}
+		output, err := uploadFile(t, configPath, uploadParams, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
+
+		// receiver wallet operations
+		receiverWallet := escapedTestName(t) + "_second"
+
+		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+
+		shareParams := map[string]interface{}{
+			"allocation":         allocationID,
+			"remotepath":         "/subfolder1",
+			"expiration-seconds": 0,
+		}
+		output, err = shareFile(t, configPath, shareParams)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
+
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err, "Error extracting auth token")
+		require.NotEqual(t, "", authTicket)
+
+		// Download the file (delete local copy first)
+		os.Remove(file)
+
+		downloadParams := createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+			"remotepath": remoteOwnerPath,
+		})
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(file))
+	})
+
 	t.Run("Share to public a folder with no encrypted file using auth ticket with zero expiration", func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
@@ -1264,4 +1573,20 @@ func RawHash(data string) []byte {
 // GetReferenceLookup hash(allocationID + ":" + path)
 func GetReferenceLookup(allocationID, path string) string {
 	return Hash(allocationID + ":" + path)
+}
+
+func listAllFilesFromBlobber(t *test.SystemTest, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
+	cliutils.Wait(t, 10*time.Second) // TODO replace with poller
+	t.Logf("Listing all files in allocation...")
+	cmd := fmt.Sprintf(
+		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",
+		param,
+		escapedTestName(t)+"_wallet.json",
+		cliConfigFilename,
+	)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
