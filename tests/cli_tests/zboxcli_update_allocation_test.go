@@ -82,10 +82,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		size := int64(2048)
 
 		params := createParams(map[string]interface{}{
-			"allocation":   allocationID,
-			"extend":       true,
-			"size":         size,
-			"update_terms": true,
+			"allocation": allocationID,
+			"extend":     true,
+			"size":       size,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 
@@ -100,7 +99,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size)
 	})
 
-	t.Run("Update Negative Size Should Work", func(t *test.SystemTest) {
+	t.Run("Update Negative Size Should Fail", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := int64(-256)
 
@@ -110,72 +109,14 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 
-		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
+		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		require.Equal(t, "Error updating allocation:allocation_updating_failed: allocation can't be reduced", output[0])
 
-		allocations := parseListAllocations(t, configPath)
-		ac, ok := allocations[allocationID]
-		require.True(t, ok, "current allocation not found", allocationID, allocations)
-		require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
-			fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, " After:", ac.Size),
-		)
-	})
+		alloc := getAllocation(t, allocationID)
 
-	t.Run("Update All Negative Parameters Should Work", func(t *test.SystemTest) {
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-		size := int64(-512)
-
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"size":       size,
-		})
-		output, err := updateAllocation(t, configPath, params, true)
-
-		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-
-		allocations := parseListAllocations(t, configPath)
-		ac, ok := allocations[allocationID]
-		require.True(t, ok, "current allocation not found", allocationID, allocations)
-		require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
-			fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, " After:", ac.Size),
-		)
-	})
-
-	t.Run("Update Size to less than occupied size should fail", func(t *test.SystemTest) {
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath) // alloc size is 10000
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, 2048) // uploading a file of size 2048
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/dir/",
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		size := int64(-9000) // reducing it by 9000 should fail since 2048 is being used
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"size":       size,
-		})
-		output, err = updateAllocation(t, configPath, params, false)
-
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, output[0], "Error updating allocation:allocation_updating_failed: new allocation size is too small: 1000 < 1024")
-
-		allocations := parseListAllocations(t, configPath)
-		ac, ok := allocations[allocationID]
-		require.True(t, ok, "current allocation not found", allocationID, allocations)
-		require.Equal(t, allocationBeforeUpdate.Size, ac.Size,
-			fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, " After:", ac.Size),
-		) // size should be unaffected
+		require.Equal(t, allocationBeforeUpdate.Size, alloc.Size)
+		require.Equal(t, allocationBeforeUpdate.ExpirationDate, alloc.ExpirationDate)
 	})
 
 	// FIXME extend or size should be required params - should not bother sharders with an empty update
@@ -209,23 +150,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.Equal(t, "Error updating allocation:couldnt_find_allocation: Couldn't find the allocation required for update", output[0])
-	})
-
-	t.Run("Update Size To Less Than 1024 Should Fail", func(t *test.SystemTest) {
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
-		size := -allocationBeforeUpdate.Size + 1023
-
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"size":       fmt.Sprintf("\"%d\"", size),
-		})
-		output, err := updateAllocation(t, configPath, params, false)
-
-		require.NotNil(t, err, "expected error updating "+
-			"allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output "+
-			"length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:allocation_updating_failed: new allocation size is too small: 1023 < 1024", output[0])
 	})
 
 	t.RunWithTimeout("Update Other's Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) { // todo: too slow
@@ -720,15 +644,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			"allocation":     allocationID,
 			"add_blobber":    "new_blobber_id",
 			"remove_blobber": "blobber_id",
-		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
-		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
-
-		// set update_term should fail
-		params = createParams(map[string]interface{}{
-			"allocation":   allocationID,
-			"update_terms": false,
 		})
 		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))

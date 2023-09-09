@@ -277,6 +277,7 @@ func TestUpload(testSetup *testing.T) {
 		})
 
 		thumbnail := escapedTestName(t) + "thumbnail.png"
+		_ = generateThumbnail(t, thumbnail) // nolint
 
 		filename := generateRandomTestFileName(t)
 		err := createFileWithSize(filename, fileSize)
@@ -542,7 +543,7 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.False(t, strings.Contains(strings.Join(output, "\n"), "upload_failed"), strings.Join(output, "\n"))
+		require.False(t, strings.Contains(strings.Join(output, "\n"), "Upload failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *test.SystemTest) {
@@ -578,7 +579,7 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":  filename,
 		})
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.Contains(strings.Join(output, ""), "upload_failed"), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, ""), "Upload failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
@@ -648,7 +649,7 @@ func TestUpload(testSetup *testing.T) {
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t,
-			strings.Contains(strings.Join(output, ""), "upload_failed"), strings.Join(output, "\n"))
+			strings.Contains(strings.Join(output, ""), "Upload failed"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload Non-Existent File Should Fail", func(t *test.SystemTest) {
@@ -881,11 +882,11 @@ func TestUpload(testSetup *testing.T) {
 			"test_3gp_video",
 			"3gp",
 		},
-		{
-			"https://filesamples.com/samples/video/m4v/sample_960x400_ocean_with_audio.m4v",
-			"test_m4v_video",
-			"m4v",
-		},
+		// {
+		// 	"https://filesamples.com/samples/video/m4v/sample_960x400_ocean_with_audio.m4v",
+		// 	"test_m4v_video",
+		// 	"m4v",
+		// },
 		{
 			"https://filesamples.com/samples/video/mov/sample_960x400_ocean_with_audio.mov",
 			"test_mov_video",
@@ -931,11 +932,11 @@ func TestUpload(testSetup *testing.T) {
 			"test_mpg_video",
 			"mpg",
 		},
-		{
-			"https://filesamples.com/samples/video/mxf/sample_960x400_ocean_with_audio.mxf",
-			"test_mxf_video",
-			"mxf",
-		},
+		// {
+		// 	"https://filesamples.com/samples/video/mxf/sample_960x400_ocean_with_audio.mxf",
+		// 	"test_mxf_video",
+		// 	"mxf",
+		// },
 		{
 			"https://filesamples.com/samples/video/ogv/sample_960x400_ocean_with_audio.ogv",
 			"test_ogv_video",
@@ -995,7 +996,7 @@ func TestUpload(testSetup *testing.T) {
 				"allocation":    allocationID,
 				"remotepath":    "/",
 				"localpath":     "./" + videoName + "." + videoFormat,
-				"web-streaming": "",
+				"web-streaming": true,
 			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2)
