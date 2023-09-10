@@ -33,6 +33,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
+		//nolint: gocritic
 		sourceDir := filepath.Join("/", "child")
 		filename := filepath.Base(file)
 		remotePath := filepath.Join(sourceDir, filename)

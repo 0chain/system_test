@@ -249,7 +249,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		foundDirAtDest := false
 		foundfile1AtDest := false
 		foundfile2AtDest := false
-
+		//nolint: gocritic
 		for _, f := range files {
 			if f.Path == remotefilePath1 {
 				foundfile1AtSource = true
