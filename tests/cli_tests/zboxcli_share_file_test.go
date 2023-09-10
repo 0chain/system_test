@@ -50,9 +50,9 @@ func TestShareFile(testSetup *testing.T) {
 		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
 
 		shareParams := map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remoteDir,
-			//"expiration-seconds": 0,
+			"allocation":         allocationID,
+			"remotepath":         remoteDir,
+			"expiration-seconds": 0,
 		}
 		output, err = shareFile(t, configPath, shareParams)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -73,7 +73,6 @@ func TestShareFile(testSetup *testing.T) {
 		// FIXME ISSUE
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, `error from server list response: {"code":"invalid_parameters","error":"invalid_parameters: Auth ticket is required"}`, output[0])
-
 	})
 
 	t.Run("Acessing UnShared folder with no file using auth ticket with zero expiration should not work", func(t *test.SystemTest) {
@@ -101,11 +100,11 @@ func TestShareFile(testSetup *testing.T) {
 			"allocation": allocationID,
 		})
 		output, err = listAllFilesFromBlobber(t, receiverWallet, configPath, listFileParams, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
 		var files []climodel.AllocationFile
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 		require.Equal(t, output[0], `error from server list response: {"code":"invalid_parameters","error":"invalid_parameters: Auth ticket is required"}`)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-
 	})
 
 	t.Run("Share to public a folder with single unencrypted file using auth ticket with zero expiration should work", func(t *test.SystemTest) {
@@ -384,12 +383,12 @@ func TestShareFile(testSetup *testing.T) {
 			"allocation": allocationID,
 		})
 		output, err = listAllFilesFromBlobber(t, receiverWallet, configPath, listFileParams, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
 		var files []climodel.AllocationFile
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, files, 0, "list file - Unexpected output", strings.Join(output, "\n"))
-
 	})
 
 	t.Run("Share a private folder with single unencrypted file using auth ticket with zero expiration should work", func(t *test.SystemTest) {
@@ -454,7 +453,7 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file))
 	})
 
-	t.Run("Share a privte folder with multiple unencrypted file using auth ticket with zero expiration should work", func(t *test.SystemTest) {
+	t.Run("Share a private folder with multiple unencrypted file using auth ticket with zero expiration should work", func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
@@ -1885,12 +1884,6 @@ func listAllFilesFromBlobber(t *test.SystemTest, wallet, cliConfigFilename, para
 		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",
 		param,
 		escapedTestName(t)+"_wallet.json",
-		cliConfigFilename,
-	)
-	cmd = fmt.Sprintf(
-		"./zbox list %s --silent --wallet %s --configDir ./config --config %s",
-		param,
-		wallet+"_wallet.json",
 		cliConfigFilename,
 	)
 	if retry {
