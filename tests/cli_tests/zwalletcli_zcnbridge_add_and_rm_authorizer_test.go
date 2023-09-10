@@ -85,9 +85,11 @@ func scRemoveAuthorizer(t *test.SystemTest, authAddress string, retry bool) ([]s
 	cmd := fmt.Sprintf(
 		"./zwallet auth-sc-delete --ethereum_address=%s "+
 			"--silent "+
+			"--path %s "+
 			"--configDir ./config "+
 			"--wallet %s",
 		authAddress,
+		configDir,
 		escapedTestName(t)+"_wallet.json",
 	)
 
