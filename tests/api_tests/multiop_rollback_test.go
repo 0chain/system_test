@@ -14,7 +14,7 @@ import (
 func TestMultiOperationRollback(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Multi different operations rollback should work")
-	t.RunSequentially("Multi upload operations rollback should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Multi upload operations rollback should work", 90*time.Second, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
