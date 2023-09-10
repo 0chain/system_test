@@ -17,13 +17,13 @@ func TestZCNBridgeAuthorizerRegisterAndDelete(testSetup *testing.T) { // nolint:
 	require.NoError(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
 
 	t.RunSequentially("Register authorizer to DEX smartcontract", func(t *test.SystemTest) {
-		output, err = scRegisterAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", false)
+		output, err = scRegisterAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", true)
 		require.NoError(t, err, "error trying to register authorizer to DEX sc: %s", strings.Join(output, "\n"))
 		t.Log("register authorizer DEX SC successfully")
 	})
 
 	t.RunSequentially("Remove authorizer from DEX smartcontract", func(t *test.SystemTest) {
-		output, err = scRemoveAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", false)
+		output, err = scRemoveAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", true)
 		require.NoError(t, err, strings.Join(output, "\n"))
 		t.Log("remove authorizer DEX SC successfully")
 	})
@@ -47,13 +47,13 @@ func TestZCNAuthorizerRegisterAndDelete(testSetup *testing.T) {
 	require.NoError(t, err, "Unexpected faucet execution failure", strings.Join(output, "\n"))
 
 	t.RunSequentially("Register authorizer to zcnsc smartcontract", func(t *test.SystemTest) {
-		output, err := registerAuthorizer(t, clientID, publicKey, authURL, false)
+		output, err := registerAuthorizer(t, clientID, publicKey, authURL, true)
 		require.NoError(t, err, "error trying to register authorizer to zcnsc: %s", strings.Join(output, "\n"))
 		t.Log("register authorizer zcnsc successfully")
 	})
 
 	t.RunSequentially("Remove authorizer from zcnsc smartcontract", func(t *test.SystemTest) {
-		output, err := removeAuthorizer(t, clientID, false)
+		output, err := removeAuthorizer(t, clientID, true)
 		require.NoError(t, err, strings.Join(output, "\n"))
 		t.Log("remove authorizer zcnsc successfully")
 	})
@@ -106,6 +106,7 @@ func registerAuthorizer(t *test.SystemTest, clientID, publicKey, authURL string,
 	cmd := fmt.Sprintf(`
 		./zwallet auth-register --silent
 		--configDir ./config
+		--path %s
 		--wallet wallets/sc_owner_wallet.json
 		--client_id %s
 		--client_key %s
@@ -114,7 +115,7 @@ func registerAuthorizer(t *test.SystemTest, clientID, publicKey, authURL string,
 		--max_stake 10
 		--service_charge 0.1
 		--num_delegates 5`,
-		clientID, publicKey, authURL)
+		configDir, clientID, publicKey, authURL)
 
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
@@ -129,9 +130,10 @@ func removeAuthorizer(t *test.SystemTest, clientID string, retry bool) ([]string
 	cmd := fmt.Sprintf(`
 		./zwallet bridge-auth-delete --silent
 		--configDir ./config
+		--path %s
 		--wallet wallets/sc_owner_wallet.json
 		--id %s`,
-		clientID)
+		configDir, clientID)
 
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
