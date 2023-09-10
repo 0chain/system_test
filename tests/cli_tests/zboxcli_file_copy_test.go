@@ -147,13 +147,11 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 				foundAtSource = true
 				require.Equal(t, "child1", f.Name, strings.Join(output, "\n"))
 				require.Equal(t, "d", f.Type, strings.Join(output, "\n"))
-				// require.NotEmpty(t, f.Hash)
 			}
 			if f.Path == filepath.Join(destpath, dirname) {
 				foundAtDest = true
 				require.Equal(t, "child1", f.Name, strings.Join(output, "\n"))
 				require.Equal(t, "d", f.Type, strings.Join(output, "\n"))
-				// require.NotEmpty(t, f.Hash)
 			}
 		}
 		require.True(t, foundAtSource, "file not found at source: ", strings.Join(output, "\n"))

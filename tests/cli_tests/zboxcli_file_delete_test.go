@@ -65,8 +65,6 @@ func TestFileDelete(testSetup *testing.T) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
-		const remotepath = "/"
-
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
@@ -74,7 +72,6 @@ func TestFileDelete(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, `Delete failed. consensus_not_met: Multioperation failed. Required consensus 3 got 0. Major error: delete_failed: Delete failed. response_error: unexpected response with status code 400, message: {"error":"file was deleted"}`, output[0])
-
 	})
 
 	t.Run("delete non-root directory with No existing file should work", func(t *test.SystemTest) {
