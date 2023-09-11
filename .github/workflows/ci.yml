@@ -70,7 +70,7 @@ jobs:
   system-tests:
     name: "System Tests"
     runs-on: [ tests-suite ]
-    timeout-minutes: 120
+    timeout-minutes: 150
     steps:
       - name: "Get current PR"
         uses: jwalton/gh-find-current-pr@v1
