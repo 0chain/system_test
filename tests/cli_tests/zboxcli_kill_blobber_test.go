@@ -19,7 +19,6 @@ import (
 
 func TestKillBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skipping test; need to fix the test")
 	// Commeneted till fixed: t.SetSmokeTests("killed blobber is not available for allocations")
 
 	// Killing a blobber should make it unavalable for any new allocations,

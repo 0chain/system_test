@@ -30,8 +30,8 @@ func TestCreateWallet(testSetup *testing.T) {
 		output, err := createWallet(t, configPath, withNoFaucetPour())
 
 		require.Nil(t, err, "An error occurred creating a wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 4, len(output))
-		require.Contains(t, output[2], "wallet saved in")
+		require.Len(t, output, 5, len(output))
+		require.Contains(t, strings.Join(output, "/n"), "wallet saved in")
 	})
 
 	t.Run("Get wallet outputs expected", func(t *test.SystemTest) {
