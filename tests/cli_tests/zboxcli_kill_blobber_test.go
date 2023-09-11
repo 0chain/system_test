@@ -76,6 +76,11 @@ func TestKillBlobber(testSetup *testing.T) {
 		killSlash := settings.Numeric["stakepool.kill_slash"]
 		require.True(t, deadBlobber.IsKilled)
 		for poolIndex := range spAfter.Delegate {
+			t.Log("poolIndex", poolIndex)
+			t.Log("delegateID", spAfter.Delegate[poolIndex].DelegateID)
+			t.Log("spBefore", spBefore.Delegate[poolIndex].Balance)
+			t.Log("spAfter", spAfter.Delegate[poolIndex].Balance)
+			t.Log("killSlash", killSlash)
 			require.InDeltaf(t, float64(spBefore.Delegate[poolIndex].Balance)*killSlash, float64(spAfter.Delegate[poolIndex].Balance), delta,
 				"stake pools should be slashed by %f", killSlash)
 		}
