@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -67,7 +68,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		require.NoError(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		cliutils.Wait(t, 10*time.Second)
+		time.Sleep(5 * time.Second)
 
 		spAfter := getStakePoolInfo(t, blobberToKill)
 		deadBlobber := getBlobber(t, blobberToKill)
@@ -166,6 +167,10 @@ func getStakePoolInfo(t *test.SystemTest, blobberId string) model.StakePoolInfo 
 	err = json.Unmarshal([]byte(output[0]), &stakePool)
 	require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 	require.NotEmpty(t, stakePool)
+
+	sort.Slice(stakePool.Delegate, func(i, j int) bool {
+		return stakePool.Delegate[i].DelegateID < stakePool.Delegate[j].DelegateID
+	})
 
 	return stakePool
 }
