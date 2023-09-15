@@ -734,7 +734,6 @@ var StorageFloatSettings = []string{
 	"cancellation_charge",
 	"min_lock_demand",
 	"free_allocation_settings.read_pool_fraction",
-	"max_challenge_completion_rounds",
 	"validator_reward",
 	"blobber_slash",
 	"block_reward.gamma.alpha",
@@ -768,6 +767,7 @@ var StorageCurrencySettigs = []string{
 }
 
 var StorageIntSettings = []string{
+	"max_challenge_completion_rounds",
 	"min_alloc_size",
 	"min_blobber_capacity",
 	"free_allocation_settings.data_shards",
