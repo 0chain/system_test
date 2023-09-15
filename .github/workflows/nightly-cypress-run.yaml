@@ -50,6 +50,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git checkout feature/add-env-support-to-webapps
 
       - name: Set Docker Image Tags.
         id: get_info
@@ -187,6 +188,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git checkout feature/add-env-support-to-webapps
 
       - name: Point to cypress.bolt.software webapp
         run: |
@@ -245,6 +247,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git checkout feature/add-env-support-to-webapps
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -383,6 +386,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git checkout feature/add-env-support-to-webapps
 
       - name: Point to cypress.atlus.cloud webapp
         run: |
@@ -441,6 +445,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git checkout feature/add-env-support-to-webapps
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -585,6 +590,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git checkout feature/add-env-support-to-webapps
 
       - name: Point to cypress.chalk.software webapp
         run: |
@@ -643,6 +649,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git checkout feature/add-env-support-to-webapps
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -783,6 +790,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git checkout feature/add-env-support-to-webapps
 
       - name: Point to cypress.chimney.software webapp
         run: |
@@ -841,6 +849,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git checkout feature/add-env-support-to-webapps
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -983,6 +992,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git checkout feature/add-env-support-to-webapps
 
       - name: Point to cypress.blimp.software webapp
         run: |
@@ -1041,6 +1051,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git checkout feature/add-env-support-to-webapps
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -1180,6 +1191,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git checkout feature/add-env-support-to-webapps
 
       - name: Point to cypress.vult.network webapp
         run: |
