@@ -26,18 +26,18 @@ jobs:
           echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
-      - name: "Deploy 0Chain"
-        uses: 0chain/actions/deploy-0chain@master
-        with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-          teardown_condition: "TESTS_PASSED"
-          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
-          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
-          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+#      - name: "Deploy 0Chain"
+#        uses: 0chain/actions/deploy-0chain@master
+#        with:
+#          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+#          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+#          teardown_condition: "TESTS_PASSED"
+#          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+#          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+#          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+#          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+#          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+#          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
   build-and-push-bolt-docker-image:
     runs-on: arc-runner
@@ -50,7 +50,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-          git checkout feature/add-env-support-to-webapps
+          cd web-apps && git checkout feature/add-env-support-to-webapps
 
       - name: Set Docker Image Tags.
         id: get_info
@@ -188,7 +188,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-          git checkout feature/add-env-support-to-webapps
+          cd web-apps && git checkout feature/add-env-support-to-webapps
 
       - name: Point to cypress.bolt.software webapp
         run: |
@@ -247,7 +247,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-          git checkout feature/add-env-support-to-webapps
+          cd web-apps && git checkout feature/add-env-support-to-webapps
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -386,7 +386,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-          git checkout feature/add-env-support-to-webapps
+          cd web-apps && git checkout feature/add-env-support-to-webapps
 
       - name: Point to cypress.atlus.cloud webapp
         run: |
@@ -445,7 +445,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-          git checkout feature/add-env-support-to-webapps
+          cd web-apps && git checkout feature/add-env-support-to-webapps
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -590,7 +590,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-          git checkout feature/add-env-support-to-webapps
+          cd web-apps && git checkout feature/add-env-support-to-webapps
 
       - name: Point to cypress.chalk.software webapp
         run: |
@@ -649,7 +649,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-          git checkout feature/add-env-support-to-webapps
+          cd web-apps && git checkout feature/add-env-support-to-webapps
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -790,7 +790,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-          git checkout feature/add-env-support-to-webapps
+          cd web-apps && git checkout feature/add-env-support-to-webapps
 
       - name: Point to cypress.chimney.software webapp
         run: |
@@ -849,7 +849,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-          git checkout feature/add-env-support-to-webapps
+          cd web-apps && git checkout feature/add-env-support-to-webapps
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -992,7 +992,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-          git checkout feature/add-env-support-to-webapps
+          cd web-apps && git checkout feature/add-env-support-to-webapps
 
       - name: Point to cypress.blimp.software webapp
         run: |
@@ -1051,7 +1051,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-          git checkout feature/add-env-support-to-webapps
+          cd web-apps && git checkout feature/add-env-support-to-webapps
 
       # - name: Cloning web-apps Repository.
       #   run: |
@@ -1191,7 +1191,7 @@ jobs:
       - name: Checkout
         run: |
           git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-          git checkout feature/add-env-support-to-webapps
+          cd web-apps && git checkout feature/add-env-support-to-webapps
 
       - name: Point to cypress.vult.network webapp
         run: |
