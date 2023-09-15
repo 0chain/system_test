@@ -68,7 +68,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		require.NoError(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		time.Sleep(5 * time.Second)
+		cliutils.Wait(t, 5 * time.Second)
 
 		spAfter := getStakePoolInfo(t, blobberToKill)
 		deadBlobber := getBlobber(t, blobberToKill)
