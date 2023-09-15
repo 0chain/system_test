@@ -734,6 +734,7 @@ var StorageFloatSettings = []string{
 	"cancellation_charge",
 	"min_lock_demand",
 	"free_allocation_settings.read_pool_fraction",
+	"max_challenge_completion_rounds",
 	"validator_reward",
 	"blobber_slash",
 	"block_reward.gamma.alpha",
@@ -812,7 +813,6 @@ var StorageBoolSettings = []string{
 }
 var StorageDurationSettings = []string{
 	"time_unit",
-	"max_challenge_completion_rounds",
 	"stakepool.min_lock_period",
 	"health_check_period",
 }
