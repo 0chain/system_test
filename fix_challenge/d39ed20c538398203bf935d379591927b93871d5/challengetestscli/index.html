@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain System test suite: Challenge tests [fix_challenge/d39ed20c] ran against [dev-5.devnet-0chain.net] at [2023-09-16_21.24.20]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain System test suite: Challenge tests [fix_challenge/d39ed20c] ran against [dev-5.devnet-0chain.net] at [2023-09-16_21.24.20]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>9</strong>Duration: <strong>2ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>4</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>5</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">September 16, 2023 22:29:42</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup failed " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup failed " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup failed " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup failed " id="8"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.19,"Output":["","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [09-16-2023 22:25:40] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [09-16-2023 22:25:40] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestProtocolChallenge_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  cb025c1acd1df38ff02ac405f34b451a7f6470ebd6d430616d1ccdbbcd5b5057]\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [09-16-2023 22:25:43]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [09-16-2023 22:29:08] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [09-16-2023 22:29:08] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestProtocolChallenge_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  bd9ec7f8c74d2442c08e380b6370d60ee75b6a31fffc28025960868c57f0815c]\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [09-16-2023 22:29:11]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [09-16-2023 22:29:12] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [09-16-2023 22:29:12] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestProtocolChallenge_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  ead9b455f01383fcd0c0913305e171bd8c1a4abdd44c4ad9a9262cb84646a8ce]\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [09-16-2023 22:29:15]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [09-16-2023 22:29:17] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [09-16-2023 22:29:17] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestProtocolChallenge_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  ceac1d8268028fc93834263b7e3bfcd28d35d53857e13601f275a832e5a308c8]\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [09-16-2023 22:29:20]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [09-16-2023 22:29:21] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [09-16-2023 22:29:21] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestProtocolChallenge_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  261c54d580a6244ea6dffebc1da1ca93bdf821f20b1970a02619d85221803e65]\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [09-16-2023 22:29:24]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [09-16-2023 22:29:25] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [09-16-2023 22:29:25] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestProtocolChallenge_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  996f7362ce83aa65a488510a232bb22aae1a87cf40651bd56ed8a8c3589bb837]\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [09-16-2023 22:29:29]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [09-16-2023 22:29:30] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [09-16-2023 22:29:30] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestProtocolChallenge_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  b8065b2366734ef674ec4b100ec58943083358c164e784c15fb17a0bba06d4cb]\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [09-16-2023 22:29:33]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [09-16-2023 22:29:34] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [09-16-2023 22:29:34] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestProtocolChallenge_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  c76b2b63dec7b7835e1943b69f78b1c20b93bd6ff7b558a56eff6a49ecae730b]\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [09-16-2023 22:29:37]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [09-16-2023 22:29:39] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [09-16-2023 22:29:39] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestProtocolChallenge_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  132a8d099ed95bfecfa3d230d1bfb0e908ff6d14d8abe96c5c9a58dc39a6df65]\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [09-16-2023 22:29:42]\n",""],"Passed":false,"Skipped":false,"TestFileName":"0_challenge_protocol_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Added_blobber_in_an_allocation_should_also_be_challenged_for_this_blobber_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.01,"Output":["","    0_challenge_protocol_test.go:138: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] scheduled at [09-16-2023 22:25:43] \n","","","    system_test_framework.go:149: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] start at [09-16-2023 22:25:43] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: allocation_id = '16d6a14a1a8bd62342ba6922b62e6ee1838131cd657ef407afbcedaca93e77c8' AND blobber_id = '76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d'\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:420 open:63 passed:0 total:483]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:154\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \tRelative error is too high: 0.05 (expected)\n","        \t            \t        \u003c 0.8695652173913043 (actual)\n","        \tTest:       \tTestProtocolChallenge/Added_blobber_in_an_allocation_should_also_be_challenged_for_this_blobber_allocation\n","        \tMessages:   \tfailure rate should not be more than 5 percent\n","    0_challenge_protocol_test.go:138: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] exit at [09-16-2023 22:25:43]\n","","","    0_challenge_protocol_test.go:138: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] scheduled at [09-16-2023 22:29:15] \n","","","    system_test_framework.go:149: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] start at [09-16-2023 22:29:15] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: allocation_id = '16d6a14a1a8bd62342ba6922b62e6ee1838131cd657ef407afbcedaca93e77c8' AND blobber_id = '76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d'\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:485 open:78 passed:0 total:563]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:154\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \tRelative error is too high: 0.05 (expected)\n","        \t            \t        \u003c 0.8614564831261101 (actual)\n","        \tTest:       \tTestProtocolChallenge/Added_blobber_in_an_allocation_should_also_be_challenged_for_this_blobber_allocation\n","        \tMessages:   \tfailure rate should not be more than 5 percent\n","    0_challenge_protocol_test.go:138: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] exit at [09-16-2023 22:29:15]\n","","","    0_challenge_protocol_test.go:138: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] scheduled at [09-16-2023 22:29:33] \n","","","    system_test_framework.go:149: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] start at [09-16-2023 22:29:33] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: allocation_id = '16d6a14a1a8bd62342ba6922b62e6ee1838131cd657ef407afbcedaca93e77c8' AND blobber_id = '76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d'\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:495 open:75 passed:0 total:570]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:154\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \tRelative error is too high: 0.05 (expected)\n","        \t            \t        \u003c 0.868421052631579 (actual)\n","        \tTest:       \tTestProtocolChallenge/Added_blobber_in_an_allocation_should_also_be_challenged_for_this_blobber_allocation\n","        \tMessages:   \tfailure rate should not be more than 5 percent\n","    0_challenge_protocol_test.go:138: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] exit at [09-16-2023 22:29:33]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Allocation_with_writes_and_deletes_should_not_get_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.03,"Output":["","    0_challenge_protocol_test.go:111: Test case [Allocation with writes and deletes should not get challenges] scheduled at [09-16-2023 22:25:43] \n","","","    system_test_framework.go:149: Test case [Allocation with writes and deletes should not get challenges] start at [09-16-2023 22:25:43] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: allocation_id = '34edc737e95305d96c9d22931becccae4cae49c2e3d02cc01548ebc373d9bf83'\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:0 open:14 passed:0 total:14]\n","    0_challenge_protocol_test.go:111: Test case [Allocation with writes and deletes should not get challenges] exit at [09-16-2023 22:25:43]\n","--- PASS: TestProtocolChallenge/Allocation_with_writes_and_deletes_should_not_get_challenges (0.03s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Allocation_with_writes_should_get_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.01,"Output":["","    0_challenge_protocol_test.go:97: Test case [Allocation with writes should get challenges] scheduled at [09-16-2023 22:25:43] \n","","","    system_test_framework.go:149: Test case [Allocation with writes should get challenges] start at [09-16-2023 22:25:43] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: allocation_id='dc5691acefc61b0026a4affcc46e36779ead77a91cb9361229df118c7d80cd3c'\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:3614 open:484 passed:2 total:4100]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:108\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \tRelative error is too high: 0.05 (expected)\n","        \t            \t        \u003c 0.8814634146341463 (actual)\n","        \tTest:       \tTestProtocolChallenge/Allocation_with_writes_should_get_challenges\n","        \tMessages:   \tfailure rate should not be more than 5 percent\n","    0_challenge_protocol_test.go:97: Test case [Allocation with writes should get challenges] exit at [09-16-2023 22:25:43]\n","","","    0_challenge_protocol_test.go:97: Test case [Allocation with writes should get challenges] scheduled at [09-16-2023 22:29:11] \n","","","    system_test_framework.go:149: Test case [Allocation with writes should get challenges] start at [09-16-2023 22:29:11] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: allocation_id='dc5691acefc61b0026a4affcc46e36779ead77a91cb9361229df118c7d80cd3c'\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:4110 open:419 passed:2 total:4531]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:108\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \tRelative error is too high: 0.05 (expected)\n","        \t            \t        \u003c 0.9070845288015891 (actual)\n","        \tTest:       \tTestProtocolChallenge/Allocation_with_writes_should_get_challenges\n","        \tMessages:   \tfailure rate should not be more than 5 percent\n","    0_challenge_protocol_test.go:97: Test case [Allocation with writes should get challenges] exit at [09-16-2023 22:29:11]\n","","","    0_challenge_protocol_test.go:97: Test case [Allocation with writes should get challenges] scheduled at [09-16-2023 22:29:29] \n","","","    system_test_framework.go:149: Test case [Allocation with writes should get challenges] start at [09-16-2023 22:29:29] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: allocation_id='dc5691acefc61b0026a4affcc46e36779ead77a91cb9361229df118c7d80cd3c'\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:4146 open:423 passed:2 total:4571]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:108\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \tRelative error is too high: 0.05 (expected)\n","        \t            \t        \u003c 0.9070225333625027 (actual)\n","        \tTest:       \tTestProtocolChallenge/Allocation_with_writes_should_get_challenges\n","        \tMessages:   \tfailure rate should not be more than 5 percent\n","    0_challenge_protocol_test.go:97: Test case [Allocation with writes should get challenges] exit at [09-16-2023 22:29:29]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Canceled_allocation_should_no_more_get_any_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.03,"Output":["","    0_challenge_protocol_test.go:188: Test case [Canceled allocation should no more get any challenges] scheduled at [09-16-2023 22:25:43] \n","","","    system_test_framework.go:149: Test case [Canceled allocation should no more get any challenges] start at [09-16-2023 22:25:43] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: allocation_id = 'c4a29c9f65a200ffb274d6df95accc84d1fd4d88f7499b95ec9fa993160dc6b8'\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:0 open:0 passed:11 total:11]\n","    0_challenge_protocol_test.go:188: Test case [Canceled allocation should no more get any challenges] exit at [09-16-2023 22:25:43]\n","--- PASS: TestProtocolChallenge/Canceled_allocation_should_no_more_get_any_challenges (0.03s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Challenges_success_rate_and_blobber_distribution_should_be_good","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.01,"Output":["","    0_challenge_protocol_test.go:202: Test case [Challenges success rate and blobber distribution should be good] scheduled at [09-16-2023 22:25:43] \n","","","    system_test_framework.go:149: Test case [Challenges success rate and blobber distribution should be good] start at [09-16-2023 22:25:43] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: \n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:7450 open:1016 passed:13 total:8479]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:206\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \tRelative error is too high: 0.05 (expected)\n","        \t            \t        \u003c 0.8786413492157094 (actual)\n","        \tTest:       \tTestProtocolChallenge/Challenges_success_rate_and_blobber_distribution_should_be_good\n","        \tMessages:   \tChallenge Failure rate should not be more than 5%\n","    0_challenge_protocol_test.go:202: Test case [Challenges success rate and blobber distribution should be good] exit at [09-16-2023 22:25:43]\n","","","    0_challenge_protocol_test.go:202: Test case [Challenges success rate and blobber distribution should be good] scheduled at [09-16-2023 22:29:24] \n","","","    system_test_framework.go:149: Test case [Challenges success rate and blobber distribution should be good] start at [09-16-2023 22:29:24] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: \n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:8541 open:1016 passed:13 total:9570]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:206\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \tRelative error is too high: 0.05 (expected)\n","        \t            \t        \u003c 0.8924764890282132 (actual)\n","        \tTest:       \tTestProtocolChallenge/Challenges_success_rate_and_blobber_distribution_should_be_good\n","        \tMessages:   \tChallenge Failure rate should not be more than 5%\n","    0_challenge_protocol_test.go:202: Test case [Challenges success rate and blobber distribution should be good] exit at [09-16-2023 22:29:24]\n","","","    0_challenge_protocol_test.go:202: Test case [Challenges success rate and blobber distribution should be good] scheduled at [09-16-2023 22:29:42] \n","","","    system_test_framework.go:149: Test case [Challenges success rate and blobber distribution should be good] start at [09-16-2023 22:29:42] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: \n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:8626 open:1017 passed:13 total:9656]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:206\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \tRelative error is too high: 0.05 (expected)\n","        \t            \t        \u003c 0.8933305716652858 (actual)\n","        \tTest:       \tTestProtocolChallenge/Challenges_success_rate_and_blobber_distribution_should_be_good\n","        \tMessages:   \tChallenge Failure rate should not be more than 5%\n","    0_challenge_protocol_test.go:202: Test case [Challenges success rate and blobber distribution should be good] exit at [09-16-2023 22:29:42]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Empty_Allocation_should_not_get_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.03,"Output":["","    0_challenge_protocol_test.go:125: Test case [Empty Allocation should not get challenges] scheduled at [09-16-2023 22:25:43] \n","","","    system_test_framework.go:149: Test case [Empty Allocation should not get challenges] start at [09-16-2023 22:25:43] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: allocation_id = '29f76df63d52352d3751c07443e68085da816df37fa0762fd6c006f576022592'\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:0 open:0 passed:0 total:0]\n","    0_challenge_protocol_test.go:125: Test case [Empty Allocation should not get challenges] exit at [09-16-2023 22:25:43]\n","--- PASS: TestProtocolChallenge/Empty_Allocation_should_not_get_challenges (0.03s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_(given_that_we_have_active_allocations)","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":203.18,"Output":["","    0_challenge_protocol_test.go:60: Test case [Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)] scheduled at [09-16-2023 22:25:43] \n","","","    system_test_framework.go:149: Test case [Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)] start at [09-16-2023 22:25:43] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestProtocolChallenge-Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_-given_that_we_have_active_allocations-_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  bfab94238fa58d19cbda9cfc98f171d0ff51fc879b98d994c2f16e744626e584]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_download_token_test.go:134: Locking read tokens...\n","    zboxcli_file_upload_test.go:1031: Uploading file...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  408eb55e991b38086ecb613f52defe5bf889abbc7a42d05bbba7abb4a43c9da9]\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  0e870d55bb523aebf69e0ac2c6f35eda5d3507701614ac2ae77815a74929be1a]\n","    miner_block_rewards_test.go:485: list sharder nodes...\n","    0_challenge_protocol_test.go:230: Counting challenges with query: round_created_at \u003e= 11383 AND round_created_at \u003c 11992\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:0 open:609 passed:0 total:609]\n","    0_challenge_protocol_test.go:60: Test case [Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)] exit at [09-16-2023 22:29:07]\n","--- PASS: TestProtocolChallenge/Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_(given_that_we_have_active_allocations) (203.18s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Replaced_blobber_in_an_allocation_should_not_be_challenged_for_this_blobber_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.01,"Output":["","    0_challenge_protocol_test.go:157: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] scheduled at [09-16-2023 22:25:43] \n","","","    system_test_framework.go:149: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] start at [09-16-2023 22:25:43] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: allocation_id = 'b23e93f37a5ca257eb56c84024edadb97dd7768c23ebc71001b604543db46eaf' AND blobber_id = '76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d'\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:400 open:54 passed:0 total:454]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:176\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \tRelative error is too high: 0.05 (expected)\n","        \t            \t        \u003c 0.8810572687224669 (actual)\n","        \tTest:       \tTestProtocolChallenge/Replaced_blobber_in_an_allocation_should_not_be_challenged_for_this_blobber_allocation\n","        \tMessages:   \tfailure rate should not be more than 5 percent\n","    0_challenge_protocol_test.go:157: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] exit at [09-16-2023 22:25:43]\n","","","    0_challenge_protocol_test.go:157: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] scheduled at [09-16-2023 22:29:20] \n","","","    system_test_framework.go:149: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] start at [09-16-2023 22:29:20] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: allocation_id = 'b23e93f37a5ca257eb56c84024edadb97dd7768c23ebc71001b604543db46eaf' AND blobber_id = '76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d'\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:457 open:67 passed:0 total:524]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:176\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \tRelative error is too high: 0.05 (expected)\n","        \t            \t        \u003c 0.8721374045801527 (actual)\n","        \tTest:       \tTestProtocolChallenge/Replaced_blobber_in_an_allocation_should_not_be_challenged_for_this_blobber_allocation\n","        \tMessages:   \tfailure rate should not be more than 5 percent\n","    0_challenge_protocol_test.go:157: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] exit at [09-16-2023 22:29:20]\n","","","    0_challenge_protocol_test.go:157: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] scheduled at [09-16-2023 22:29:37] \n","","","    system_test_framework.go:149: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] start at [09-16-2023 22:29:37] \n","    0_challenge_protocol_test.go:230: Counting challenges with query: allocation_id = 'b23e93f37a5ca257eb56c84024edadb97dd7768c23ebc71001b604543db46eaf' AND blobber_id = '76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d'\n","    0_challenge_protocol_test.go:255: Challenges count: map[failed:460 open:69 passed:0 total:529]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:176\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \tRelative error is too high: 0.05 (expected)\n","        \t            \t        \u003c 0.8695652173913043 (actual)\n","        \tTest:       \tTestProtocolChallenge/Replaced_blobber_in_an_allocation_should_not_be_challenged_for_this_blobber_allocation\n","        \tMessages:   \tfailure rate should not be more than 5 percent\n","    0_challenge_protocol_test.go:157: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] exit at [09-16-2023 22:29:37]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
