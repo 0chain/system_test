@@ -39,77 +39,6 @@ jobs:
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
-  build-and-push-bolt-docker-image:
-    runs-on: arc-runner
-    needs: [system-tests]
-
-    outputs:
-      output1: ${{ steps.docker_build.outputs.COMMIT_TAG }}
-
-    steps:
-      - name: Checkout
-        run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-
-      - name: Set Docker Image Tags.
-        id: get_info
-        run: |
-          cd web-apps
-          echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
-          echo "TAG=master" >> $GITHUB_ENV
-
-      - name: Login To Docker Repository.
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Setting Up Environment Variables.
-        run: |
-          cd web-apps
-          cd packages/bolt
-          touch .env
-          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
-          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
-          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
-          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
-          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
-          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
-          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
-          echo "TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
-          echo "BE_URL=https://lp-backend.zus.network" >> .env
-          echo "JWT_ENABLED=true" >> .env
-          echo "ZBOX_APP=bolt" >> .env
-          echo "ATLUS_URL=https://cypress.atlus.cloud" >> .env
-          echo "APP_ENV=test" >> .env
-          echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
-          echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
-          echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
-          echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
-          echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
-          echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
-          echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
-          echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
-          echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
-
-      - name: Build & Push Docker Image.
-        id: docker_build
-        run: |
-          cd web-apps
-          docker build -f ./packages/bolt/docker/dockerfile . -t ${{ secrets.BOLT_REGISTRY }}:latest
-          echo $TAG-$SHORT_SHA
-          echo "COMMIT_TAG=dev9-$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
-
-          docker tag ${{ secrets.BOLT_REGISTRY }}:latest ${{ secrets.BOLT_REGISTRY }}:dev9-$TAG-$SHORT_SHA
-          docker push ${{ secrets.BOLT_REGISTRY }}:dev9-$TAG-$SHORT_SHA
-
-      - name: Clean Up The Workspace.
-        if: ${{ always() }}
-        run: |
-          rm -rf ./*
-
   deploy-bolt-on-cypress:
     runs-on: cypress-webapps
 
@@ -130,7 +59,7 @@ jobs:
         echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
         echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
         echo "TRANSLATION_API_KEY=${{ secrets.TRANSLATION_API_KEY }}" >> .env
-        echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+        echo "DOMAIN_RUNTIME_ENVIRONMENT_VAR=${{ needs.system-tests.outputs.network_url }}" >> .env
         echo "BE_URL=https://lp-backend.zus.network" >> .env
         echo "JWT_ENABLED=true" >> .env
         echo "ZBOX_APP=bolt" >> .env
@@ -151,7 +80,7 @@ jobs:
         services:
           bolt-app:
             container_name: bolt_webapp
-            image: ${{ secrets.BOLT_REGISTRY }}:${{ needs.build-and-push-bolt-docker-image.outputs.output1 }}
+            image: ${{ secrets.BOLT_REGISTRY }}:master-latest
             env_file:
               - ./.env
             restart: "always"
@@ -234,80 +163,6 @@ jobs:
             /runner/_work/system_test/system_test/web-apps/packages/test/cypress/videos
           retention-days: 3
 
-  build-and-push-atlus-docker-image:
-    runs-on: arc-runner
-    needs: [system-tests]
-
-    outputs:
-      output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
-
-    steps:
-      - name: Checkout
-        run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-
-      # - name: Cloning web-apps Repository.
-      #   run: |
-      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
-      #     echo "Successfully cloned the web-apps repository"
-
-      - name: Set Docker Image Tags.
-        id: get_info
-        run: |
-          cd web-apps
-          echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
-          echo "TAG=master" >> $GITHUB_ENV
-
-      - name: Login To Docker Repository.
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Setting Up Environment Variables.
-        run: |
-          cd web-apps
-          cd packages/explorer
-          touch .env
-          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
-          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
-          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
-          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
-          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
-          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
-          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
-          echo "TRANSLATION_API_KEY=A7280aF1dfF458d1E60F0D28575C77A82Ac37391f0DeEEB7" >> .env
-          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
-          echo "ZBOX_APP=atlus" >> .env
-          echo "JWT_ENABLED=true" >> .env
-          echo "APP_ENV=test" >> .env
-          echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
-          echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
-          echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
-          echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
-          echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
-          echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
-          echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
-          echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
-          echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
-
-      - name: Build & Push Docker Image.
-        id: docker_build
-        run: |
-          cd web-apps
-          docker build -f ./packages/explorer/docker/dockerfile . -t ${{ secrets.ATLUS_REGISTRY }}:latest
-          echo $TAG-$SHORT_SHA
-          echo "COMMIT_TAG=dev9-$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
-
-          docker tag ${{ secrets.ATLUS_REGISTRY }}:latest ${{ secrets.ATLUS_REGISTRY }}:dev9-$TAG-$SHORT_SHA
-          docker push ${{ secrets.ATLUS_REGISTRY }}:dev9-$TAG-$SHORT_SHA
-
-      - name: Clean Up The Workspace.
-        if: ${{ always() }}
-        run: |
-          rm -rf ./*
-
   deploy-atlus-on-cypress:
     runs-on: cypress-webapps
 
@@ -328,7 +183,7 @@ jobs:
         echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
         echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
         echo "TRANSLATION_API_KEY=A7280aF1dfF458d1E60F0D28575C77A82Ac37391f0DeEEB7" >> .env
-        echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+        echo "DOMAIN_RUNTIME_ENVIRONMENT_VAR=${{ needs.system-tests.outputs.network_url }}" >> .env
         echo "ZBOX_APP=atlus" >> .env
         echo "JWT_ENABLED=true" >> .env
         echo "APP_ENV=test" >> .env
@@ -347,7 +202,7 @@ jobs:
         services:
           atlus-app:
             container_name: atlus_webapp
-            image: ${{ secrets.ATLUS_REGISTRY }}:${{ needs.build-and-push-atlus-docker-image.outputs.output2 }}
+            image: ${{ secrets.ATLUS_REGISTRY }}:master-latest
             env_file:
               - ./.env
             restart: "always"
@@ -430,83 +285,6 @@ jobs:
             /runner/_work/system_test/system_test/web-apps/packages/test/cypress/videos
           retention-days: 3
 
-  build-and-push-chalk-docker-image:
-    runs-on: arc-runner
-    needs: [system-tests]
-
-    outputs:
-      output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
-
-    steps:
-      - name: Checkout
-        run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-
-      # - name: Cloning web-apps Repository.
-      #   run: |
-      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
-      #     echo "Successfully cloned the web-apps repository"
-
-      - name: Set Docker Image Tags.
-        id: get_info
-        run: |
-          cd web-apps
-          echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
-          echo "TAG=master" >> $GITHUB_ENV
-
-      - name: Login To Docker Repository.
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Setting Up Environment Variables.
-        run: |
-          cd web-apps
-          cd packages/chalk
-          touch .env
-          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
-          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
-          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
-          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
-          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
-          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
-          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
-          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
-          echo "ZBOX_APP=chalk" >> .env
-          echo "JWT_ENABLED=true" >> .env
-          echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
-          echo "NEXT_PUBLIC_MONDAY_FORM=https://forms.monday.com/forms/66a8452f47fe1e157bdced96242f53b2?r=use1" >> .env
-          echo "DEFAULT_THEME=dark" >> .env
-          echo "APP_ENV=test" >> .env
-          echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
-          echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
-          echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
-          echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
-          echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
-          echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
-          echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
-          echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
-          echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
-
-      - name: Build & Push Docker Image.
-        id: docker_build
-        run: |
-          cd web-apps
-          docker build -f ./packages/chalk/docker/dockerfile . -t ${{ secrets.ZNFT_REGISTRY }}:latest
-          echo $TAG-$SHORT_SHA
-          echo "COMMIT_TAG=dev9-$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
-
-          docker tag ${{ secrets.ZNFT_REGISTRY }}:latest ${{ secrets.ZNFT_REGISTRY }}:dev9-$TAG-$SHORT_SHA
-          docker push ${{ secrets.ZNFT_REGISTRY }}:dev9-$TAG-$SHORT_SHA
-
-      - name: Clean Up The Workspace.
-        if: ${{ always() }}
-        run: |
-          rm -rf ./*
-
   deploy-chalk-on-cypress:
     runs-on: cypress-webapps
 
@@ -527,7 +305,7 @@ jobs:
         echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
         echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
         echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-        echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+        echo "DOMAIN_RUNTIME_ENVIRONMENT_VAR=${{ needs.system-tests.outputs.network_url }}" >> .env
         echo "ZBOX_APP=chalk" >> .env
         echo "JWT_ENABLED=true" >> .env
         echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
@@ -549,7 +327,7 @@ jobs:
         services:
           atlus-app:
             container_name: chalk_webapp
-            image: ${{ secrets.ZNFT_REGISTRY }}:${{ needs.build-and-push-chalk-docker-image.outputs.output2 }}
+            image: ${{ secrets.ZNFT_REGISTRY }}:master-latest
             env_file:
               - ./.env
             restart: "always"
@@ -632,81 +410,6 @@ jobs:
             /runner/_work/system_test/system_test/web-apps/packages/test/cypress/videos
           retention-days: 3
 
-  build-and-push-chimney-docker-image:
-    runs-on: arc-runner
-    needs: [system-tests]
-
-    outputs:
-      output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
-
-    steps:
-      - name: Checkout
-        run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-
-      # - name: Cloning web-apps Repository.
-      #   run: |
-      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
-      #     echo "Successfully cloned the web-apps repository"
-
-      - name: Set Docker Image Tags.
-        id: get_info
-        run: |
-          cd web-apps
-          echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
-          echo "TAG=master" >> $GITHUB_ENV
-
-      - name: Login To Docker Repository.
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Setting Up Environment Variables.
-        run: |
-          cd web-apps
-          cd packages/chimney
-          touch .env
-          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
-          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
-          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
-          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
-          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
-          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
-          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
-          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
-          echo "TRANSLATION_API_KEY=${{ secrets.CHIMNEY_TRANSLATION_API_KEY }}" >> .env
-          echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
-          echo "ATLUS_URL=https://cypress.atlus.cloud" >> .env
-          echo "APP_ENV=test" >> .env
-          echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
-          echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
-          echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
-          echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
-          echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
-          echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
-          echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
-          echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
-          echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
-
-      - name: Build & Push Docker Image.
-        id: docker_build
-        run: |
-          cd web-apps
-          docker build -f ./packages/chimney/docker/dockerfile . -t ${{ secrets.CHIMNEY_REGISTRY }}:latest
-          echo $TAG-$SHORT_SHA
-          echo "COMMIT_TAG=dev9-$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
-
-          docker tag ${{ secrets.CHIMNEY_REGISTRY }}:latest ${{ secrets.CHIMNEY_REGISTRY }}:dev9-$TAG-$SHORT_SHA
-          docker push ${{ secrets.CHIMNEY_REGISTRY }}:dev9-$TAG-$SHORT_SHA
-
-      - name: Clean Up The Workspace.
-        if: ${{ always() }}
-        run: |
-          rm -rf ./*
-
   deploy-chimney-on-cypress:
     runs-on: cypress-webapps
 
@@ -726,7 +429,7 @@ jobs:
         echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
         echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
         echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-        echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+        echo "DOMAIN_RUNTIME_ENVIRONMENT_VAR=${{ needs.system-tests.outputs.network_url }}" >> .env
         echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
         echo "TRANSLATION_API_KEY=${{ secrets.CHIMNEY_TRANSLATION_API_KEY }}" >> .env
         echo "BE_URL=https://dev-lpbackend.zus.network" >> .env
@@ -747,7 +450,7 @@ jobs:
         services:
           atlus-app:
             container_name: chimney_webapp
-            image: ${{ secrets.CHIMNEY_REGISTRY }}:${{ needs.build-and-push-chimney-docker-image.outputs.output2 }}
+            image: ${{ secrets.CHIMNEY_REGISTRY }}:master-latest
             env_file:
               - ./.env
             restart: "always"
@@ -830,82 +533,6 @@ jobs:
             /runner/_work/system_test/system_test/web-apps/packages/test/cypress/videos
           retention-days: 3
 
-  build-and-push-blimp-docker-image:
-    runs-on: arc-runner
-    needs: [system-tests]
-
-    outputs:
-      output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
-
-    steps:
-      - name: Checkout
-        run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-
-      # - name: Cloning web-apps Repository.
-      #   run: |
-      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
-      #     echo "Successfully cloned the web-apps repository"
-
-      - name: Set Docker Image Tags.
-        id: get_info
-        run: |
-          cd web-apps
-          echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
-          echo "TAG=master" >> $GITHUB_ENV
-
-      - name: Login To Docker Repository.
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Setting Up Environment Variables.
-        run: |
-          cd web-apps
-          cd packages/blimp
-          touch .env
-          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
-          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
-          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
-          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
-          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
-          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
-          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
-          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
-          echo "ZBOX_APP=blimp" >> .env
-          echo "JWT_ENABLED=true" >> .env
-          echo "BE_URL=https://lp-backend.zus.network" >> .env
-          echo "ETH_CHAIN_ID=0x13881" >> .env
-          echo "APP_ENV=test" >> .env
-          echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
-          echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
-          echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
-          echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
-          echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
-          echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
-          echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
-          echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
-          echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
-
-      - name: Build & Push Docker Image.
-        id: docker_build
-        run: |
-          cd web-apps
-          docker build -f ./packages/blimp/docker/dockerfile . -t ${{ secrets.BLIMP_REGISTRY }}:latest
-          echo $TAG-$SHORT_SHA
-          echo "COMMIT_TAG=dev9-$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
-
-          docker tag ${{ secrets.BLIMP_REGISTRY }}:latest ${{ secrets.BLIMP_REGISTRY }}:dev9-$TAG-$SHORT_SHA
-          docker push ${{ secrets.BLIMP_REGISTRY }}:dev9-$TAG-$SHORT_SHA
-
-      - name: Clean Up The Workspace.
-        if: ${{ always() }}
-        run: |
-          rm -rf ./*
-
   deploy-blimp-on-cypress:
     runs-on: cypress-webapps
 
@@ -926,7 +553,7 @@ jobs:
         echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
         echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
         echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-        echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+        echo "DOMAIN_RUNTIME_ENVIRONMENT_VAR=${{ needs.system-tests.outputs.network_url }}" >> .env
         echo "ZBOX_APP=blimp" >> .env
         echo "JWT_ENABLED=true" >> .env
         echo "BE_URL=https://lp-backend.zus.network" >> .env
@@ -947,7 +574,7 @@ jobs:
         services:
           atlus-app:
             container_name: blimp_webapp
-            image: ${{ secrets.BLIMP_REGISTRY }}:${{ needs.build-and-push-blimp-docker-image.outputs.output2 }}
+            image: ${{ secrets.BLIMP_REGISTRY }}:master-latest
             env_file:
               - ./.env
             restart: "always"
@@ -1030,81 +657,6 @@ jobs:
             /runner/_work/system_test/system_test/web-apps/packages/test/cypress/videos
           retention-days: 3
 
-  build-and-push-vult-docker-image:
-    runs-on: arc-runner
-    needs: [system-tests]
-
-    outputs:
-      output2: ${{ steps.docker_build.outputs.COMMIT_TAG }}
-
-    steps:
-      - name: Checkout
-        run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
-
-      # - name: Cloning web-apps Repository.
-      #   run: |
-      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
-      #     echo "Successfully cloned the web-apps repository"
-
-      - name: Set Docker Image Tags.
-        id: get_info
-        run: |
-          cd web-apps
-          echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> $GITHUB_ENV
-          echo "TAG=master" >> $GITHUB_ENV
-
-      - name: Login To Docker Repository.
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Setting Up Environment Variables.
-        run: |
-          cd web-apps
-          cd packages/vult/
-          touch .env
-          echo "FBASE_API_KEY=${{ secrets.FBASE_API_KEY }}" > .env
-          echo "FBASE_AUTH_DOMAIN=${{ secrets.FBASE_AUTH_DOMAIN }}" >> .env
-          echo "FBASE_DB_URL=${{ secrets.FBASE_DB_URL }}" >> .env
-          echo "FBASE_PROJECT_ID=${{ secrets.FBASE_PROJECT_ID }}" >> .env
-          echo "FBASE_STORAGE_BUCKET=${{ secrets.FBASE_STORAGE_BUCKET }}" >> .env
-          echo "FBASE_MESSAGING_SENDER_ID=${{ secrets.FBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
-          echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
-          echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-          echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
-          echo "ZBOX_APP=vult" >> .env
-          echo "JWT_ENABLED=true" >> .env
-          echo "BE_URL=https://lp-backend.zus.network" >> .env
-          echo "APP_ENV=test" >> .env
-          echo "ZCN_TOKEN=${{ secrets.ZCN_TOKEN }}" >> .env
-          echo "MOCK_ZCN_TOKEN=${{ secrets.MOCK_ZCN_TOKEN }}" >> .env
-          echo "ETH_TOKEN=${{ secrets.ETH_TOKEN }}" >> .env
-          echo "BANCOR_NETWORK=${{ secrets.BANCOR_NETWORK }}" >> .env
-          echo "BRIDGE=${{ secrets.BRIDGE }}" >> .env
-          echo "AUTHORIZER_ADDRESS=${{ secrets.AUTHORIZER_ADDRESS }}" >> .env
-          echo "ETH_NODE_URL=${{ secrets.ETH_NODE_URL }}" >> .env
-          echo "REVERSE_BRIDGE=${{ secrets.REVERSE_BRIDGE }}" >> .env
-          echo "OWLRACLE_API_KEY=${{ secrets.OWLRACLE_API_KEY }}" >> .env
-
-      - name: Build & Push Docker Image.
-        id: docker_build
-        run: |
-          cd web-apps
-          docker build -f ./packages/vult/docker/dockerfile . -t ${{ secrets.VULT_REGISTRY }}:latest
-          echo $TAG-$SHORT_SHA
-          echo "COMMIT_TAG=dev9-$TAG-$SHORT_SHA" >>$GITHUB_OUTPUT
-
-          docker tag ${{ secrets.VULT_REGISTRY }}:latest ${{ secrets.VULT_REGISTRY }}:dev9-$TAG-$SHORT_SHA
-          docker push ${{ secrets.VULT_REGISTRY }}:dev9-$TAG-$SHORT_SHA
-
-      - name: Clean Up The Workspace.
-        if: ${{ always() }}
-        run: |
-          rm -rf ./*
-
   deploy-vult-on-cypress:
     runs-on: cypress-webapps
 
@@ -1125,7 +677,7 @@ jobs:
         echo "FBASE_APP_ID=${{ secrets.FBASE_APP_ID }}" >> .env
         echo "WEBHOOK_API_TOKEN=${{ secrets.WEBHOOK_API_TOKEN }}" >> .env
         echo "ZENDESK_KEY=${{ secrets.ZENDESK_KEY }}" >> .env
-        echo "DOMAIN=${{ needs.system-tests.outputs.network_url }}" >> .env
+        echo "DOMAIN_RUNTIME_ENVIRONMENT_VAR=${{ needs.system-tests.outputs.network_url }}" >> .env
         echo "ZBOX_APP=vult" >> .env
         echo "JWT_ENABLED=true" >> .env
         echo "BE_URL=https://lp-backend.zus.network" >> .env
@@ -1144,7 +696,7 @@ jobs:
         services:
           atlus-app:
             container_name: vult_webapp
-            image: ${{ secrets.VULT_REGISTRY }}:${{ needs.build-and-push-vult-docker-image.outputs.output2 }}
+            image: ${{ secrets.VULT_REGISTRY }}:master-latest
             env_file:
               - ./.env
             restart: "always"
