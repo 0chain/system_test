@@ -369,7 +369,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 				txnSubmission := challengeTiming.TxnSubmission.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime()).Milliseconds()
 				txnSubmissions = append(txnSubmissions, txnSubmission)
 
-				txnVerification := challengeTiming.TxnVerification.ToTime().Sub(challengeTiming.TxnSubmission.ToTime()).Milliseconds()
+				txnVerification := challengeTiming.TxnVerification.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime()).Milliseconds()
 				txnVerifications = append(txnVerifications, txnVerification)
 			}
 		}
