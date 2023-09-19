@@ -78,7 +78,13 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
-		time.Sleep(5 * time.Minute)
+		time.Sleep(20 * time.Minute)
+
+		// cancel allocation
+		_, err = utils.CancelAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+			"allocation": allocationId,
+		}), true)
+		require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
 
 		result := getChallengeTimings(t, blobberList, []string{allocationId})
 
@@ -121,7 +127,11 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
-		time.Sleep(5 * time.Minute)
+		time.Sleep(20 * time.Minute)
+		_, err = utils.CancelAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+			"allocation": allocationId,
+		}), true)
+		require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
 
 		result := getChallengeTimings(t, blobberList, []string{allocationId})
 
@@ -170,7 +180,13 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 		}
 
-		time.Sleep(5 * time.Minute)
+		time.Sleep(20 * time.Minute)
+		for _, allocationId := range allocationIDs {
+			_, err = utils.CancelAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+				"allocation": allocationId,
+			}), true)
+			require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
+		}
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
 
@@ -224,7 +240,13 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 		}
 
-		time.Sleep(5 * time.Minute)
+		time.Sleep(20 * time.Minute)
+		for _, allocationId := range allocationIDs {
+			_, err = utils.CancelAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+				"allocation": allocationId,
+			}), true)
+			require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
+		}
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
 
@@ -277,7 +299,11 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
-		time.Sleep(5 * time.Minute)
+		time.Sleep(20 * time.Minute)
+		_, err = utils.CancelAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
+			"allocation": allocationId,
+		}), true)
+		require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
 
@@ -391,7 +417,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 	t.Log("Min Txn Verification:", minTxnVerification)
 
 	// Mean Timings
-	for i, _ := range proofGenTimes {
+	for i := range proofGenTimes {
 		floatProofGenTimes = append(floatProofGenTimes, float64(proofGenTimes[i]))
 		floatTxnSubmissions = append(floatTxnSubmissions, float64(txnSubmissions[i]))
 		floatTxnVerifications = append(floatTxnVerifications, float64(txnVerifications[i]))
