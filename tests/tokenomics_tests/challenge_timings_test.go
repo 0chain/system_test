@@ -49,6 +49,9 @@ func TestChallengeTimings(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
+	numData := 2
+	numParity := 10
+
 	t.RunWithTimeout("Case 1: 1 10mb allocation, 1mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -57,8 +60,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 99,
-			"data":   3,
-			"parity": 3,
+			"data":   numData,
+			"parity": numParity,
 		})
 
 		// Uploading 10% of allocation
@@ -104,8 +107,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   100 * MB,
 			"tokens": 99,
-			"data":   3,
-			"parity": 3,
+			"data":   numData,
+			"parity": numParity,
 		})
 
 		// Uploading 10% of allocation
@@ -153,8 +156,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   100 * MB,
 				"tokens": 99,
-				"data":   3,
-				"parity": 3,
+				"data":   numData,
+				"parity": numParity,
 			})
 
 			allocationIDs = append(allocationIDs, allocationId)
@@ -210,8 +213,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   1 * GB,
 				"tokens": 99,
-				"data":   1,
-				"parity": 1,
+				"data":   numData,
+				"parity": numParity,
 			})
 
 			allocationIDs = append(allocationIDs, allocationId)
@@ -270,8 +273,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * GB,
 			"tokens": 99,
-			"data":   1,
-			"parity": 1,
+			"data":   numData,
+			"parity": numParity,
 		})
 		allocationIDs = append(allocationIDs, allocationId)
 
