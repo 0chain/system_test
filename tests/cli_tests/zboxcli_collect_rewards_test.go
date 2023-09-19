@@ -203,7 +203,7 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Test collect reward with valid pool and validator id should pass")
 
-	t.TestSetup("Create temp dir", func() {
+	t.TestSetup("Reduce time unit", func() {
 		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			"time_unit": "7m",
 		}, true)
