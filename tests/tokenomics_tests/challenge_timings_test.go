@@ -329,7 +329,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 					continue // Skip this iteration and move to the next blobber
 				}
 
-				if challengeTiming.TxnSubmission == 0 {
+				if challengeTiming.TxnSubmission == 0 || challengeTiming.TxnVerification == 0 {
 					continue
 				}
 
