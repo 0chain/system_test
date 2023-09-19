@@ -89,7 +89,7 @@ jobs:
       - name: "Config: Deploy new 0Chain network then run tests against it"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         run: |
-          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
+          echo "NETWORK_URL=testnet.zus.network" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "TOKENOMICS_ALLOCATION_TESTS=$(echo $(([ -z 'TestAllocationRewards' ] && echo '') || echo 'TestAllocationRewards'))" >> $GITHUB_ENV
           echo "TOKENOMICS_ALLOCATION_ADD_OR_REPLACE_BLOBBER_TESTS=$(echo $(([ -z 'TestAddOrReplaceBlobberAllocationRewards' ] && echo '') || echo 'TestAddOrReplaceBlobberAllocationRewards'))" >> $GITHUB_ENV
