@@ -749,6 +749,7 @@ var StorageFloatSettings = []string{
 var StorageCurrencySettigs = []string{
 	"max_mint",
 	"min_stake",
+	"min_stake_per_delegate",
 	"max_stake",
 	"readpool.min_lock",
 	"writepool.min_lock",
@@ -766,6 +767,7 @@ var StorageCurrencySettigs = []string{
 }
 
 var StorageIntSettings = []string{
+	"max_challenge_completion_rounds",
 	"min_alloc_size",
 	"min_blobber_capacity",
 	"free_allocation_settings.data_shards",
@@ -811,7 +813,6 @@ var StorageBoolSettings = []string{
 }
 var StorageDurationSettings = []string{
 	"time_unit",
-	"max_challenge_completion_time",
 	"stakepool.min_lock_period",
 	"health_check_period",
 }
