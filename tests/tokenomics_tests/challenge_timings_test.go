@@ -307,6 +307,114 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		require.True(t, false)
 	})
+
+	t.RunWithTimeout("Case 6: 1 100gb allocation, 10gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "20m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		var allocationIDs []string
+
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 99)
+		require.Nil(t, err, "Error executing faucet with tokens", strings.Join(output, "\n"))
+
+		// range of 10 allocations
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   100 * GB,
+			"tokens": 99,
+			"data":   numData,
+			"parity": numParity,
+		})
+		allocationIDs = append(allocationIDs, allocationId)
+
+		// Uploading 10% of allocation
+		remotepath := "/dir/"
+		filesize := 30 * GB
+		filename := utils.GenerateRandomTestFileName(t)
+
+		err = utils.CreateFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
+
+		time.Sleep(20 * time.Minute)
+		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
+		require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
+
+		result := getChallengeTimings(t, blobberList, allocationIDs)
+
+		proofGenTime := result[0]
+		txnVerificationTime := result[2]
+		require.True(t, proofGenTime < 4200, "It is taking more than 4000000 milliseconds to generate proof")
+		require.True(t, txnVerificationTime < 30000, "It is taking more than 30000 milliseconds to verify txn")
+
+		require.True(t, false)
+	})
+
+	t.RunWithTimeout("Case 7: 1 1000gb allocation, 100gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "20m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		var allocationIDs []string
+
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 99)
+		require.Nil(t, err, "Error executing faucet with tokens", strings.Join(output, "\n"))
+
+		// range of 10 allocations
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1000 * GB,
+			"tokens": 99,
+			"data":   numData,
+			"parity": numParity,
+		})
+		allocationIDs = append(allocationIDs, allocationId)
+
+		// Uploading 10% of allocation
+		remotepath := "/dir/"
+		filesize := 300 * GB
+		filename := utils.GenerateRandomTestFileName(t)
+
+		err = utils.CreateFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
+
+		time.Sleep(20 * time.Minute)
+		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
+		require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
+
+		result := getChallengeTimings(t, blobberList, allocationIDs)
+
+		proofGenTime := result[0]
+		txnVerificationTime := result[2]
+		require.True(t, proofGenTime < 4200, "It is taking more than 4000000 milliseconds to generate proof")
+		require.True(t, txnVerificationTime < 30000, "It is taking more than 30000 milliseconds to verify txn")
+
+		require.True(t, false)
+	})
 }
 
 func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, allocationIDs []string) []int64 {
