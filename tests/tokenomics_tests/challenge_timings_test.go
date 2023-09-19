@@ -317,10 +317,11 @@ func TestChallengeTimings(testSetup *testing.T) {
 }
 
 func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, allocationIDs []string) []int64 {
-	blobberUrls := make([]string, len(blobbers))
+	blobberUrls := make(map[string]string)
+
 	for i := 0; i < len(blobbers); i++ {
 		blobber := blobbers[i]
-		blobberUrls[i] = blobber.Url
+		blobberUrls[blobber.Id] = blobber.Url
 	}
 
 	var proofGenTimes, txnSubmissions, txnVerifications []int64
@@ -333,41 +334,41 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 
 		for i := 0; i < len(challenges); i++ {
 			challenge := challenges[i]
-			for _, blobberUrl := range blobberUrls {
-				url := blobberUrl + "/challenge-timings-by-challengeId?challenge_id=" + challenge.ChallengeID
+			blobberUrl := blobberUrls[challenge.BlobberID]
 
-				resp, err := http.Get(url) //nolint:gosec
-				if err != nil {
-					t.Log("Error while getting challenge timings:", err)
-					continue // Skip this iteration and move to the next blobber
-				}
+			url := blobberUrl + "/challenge-timings-by-challengeId?challenge_id=" + challenge.ChallengeID
 
-				body, err := io.ReadAll(resp.Body)
-				if err != nil {
-					t.Log("Error while reading challenge timings response:", err)
-					continue // Skip this iteration and move to the next blobber
-				}
-
-				var challengeTiming ChallengeTiming
-				err = json.Unmarshal(body, &challengeTiming)
-				if err != nil {
-					t.Log("Error while unmarshalling challenge timings:", err)
-					continue // Skip this iteration and move to the next blobber
-				}
-
-				if challengeTiming.TxnSubmission == 0 || challengeTiming.TxnVerification == 0 {
-					continue
-				}
-
-				proofGenTimes = append(proofGenTimes, challengeTiming.ProofGenTime) // proof gen time in milliseconds
-
-				// Calculate the time difference in milliseconds
-				txnSubmission := challengeTiming.TxnSubmission.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime())
-				txnSubmissions = append(txnSubmissions, txnSubmission.Milliseconds())
-
-				txnVerification := challengeTiming.TxnVerification.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime())
-				txnVerifications = append(txnVerifications, txnVerification.Milliseconds())
+			resp, err := http.Get(url) //nolint:gosec
+			if err != nil {
+				t.Log("Error while getting challenge timings:", err)
+				continue // Skip this iteration and move to the next blobber
 			}
+
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				t.Log("Error while reading challenge timings response:", err)
+				continue // Skip this iteration and move to the next blobber
+			}
+
+			var challengeTiming ChallengeTiming
+			err = json.Unmarshal(body, &challengeTiming)
+			if err != nil {
+				t.Log("Error while unmarshalling challenge timings:", err)
+				continue // Skip this iteration and move to the next blobber
+			}
+
+			if challengeTiming.TxnSubmission == 0 || challengeTiming.TxnVerification == 0 {
+				continue
+			}
+
+			proofGenTimes = append(proofGenTimes, challengeTiming.ProofGenTime) // proof gen time in milliseconds
+
+			// Calculate the time difference in milliseconds
+			txnSubmission := challengeTiming.TxnSubmission.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime())
+			txnSubmissions = append(txnSubmissions, txnSubmission.Milliseconds())
+
+			txnVerification := challengeTiming.TxnVerification.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime())
+			txnVerifications = append(txnVerifications, txnVerification.Milliseconds())
 		}
 	}
 
