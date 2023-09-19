@@ -774,6 +774,7 @@ var StorageCurrencySettigs = []string{
 }
 
 var StorageIntSettings = []string{
+	"max_challenge_completion_rounds",
 	"min_alloc_size",
 	"min_blobber_capacity",
 	"free_allocation_settings.data_shards",
@@ -819,7 +820,6 @@ var StorageBoolSettings = []string{
 }
 var StorageDurationSettings = []string{
 	"time_unit",
-	"max_challenge_completion_time",
 	"stakepool.min_lock_period",
 	"health_check_period",
 }

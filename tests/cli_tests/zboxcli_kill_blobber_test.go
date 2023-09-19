@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -19,7 +20,6 @@ import (
 
 func TestKillBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skipping test; need to fix the test")
 	// Commeneted till fixed: t.SetSmokeTests("killed blobber is not available for allocations")
 
 	// Killing a blobber should make it unavalable for any new allocations,
@@ -68,7 +68,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		require.NoError(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		cliutils.Wait(t, time.Second)
+		cliutils.Wait(t, 5*time.Second)
 
 		spAfter := getStakePoolInfo(t, blobberToKill)
 		deadBlobber := getBlobber(t, blobberToKill)
@@ -77,8 +77,13 @@ func TestKillBlobber(testSetup *testing.T) {
 		killSlash := settings.Numeric["stakepool.kill_slash"]
 		require.True(t, deadBlobber.IsKilled)
 		for poolIndex := range spAfter.Delegate {
-			require.InDeltaf(t, float64(spBefore.Delegate[poolIndex].Balance)*killSlash, float64(spAfter.Delegate[poolIndex].Balance), delta,
-				"stake pools should be slashed by %f", killSlash)
+			t.Log("poolIndex", poolIndex)
+			t.Log("delegateID", spAfter.Delegate[poolIndex].DelegateID)
+			t.Log("spBefore", spBefore.Delegate[poolIndex].Balance)
+			t.Log("spAfter", spAfter.Delegate[poolIndex].Balance)
+			t.Log("killSlash", killSlash)
+			require.InEpsilon(t, float64(spBefore.Delegate[poolIndex].Balance)*killSlash, float64(spAfter.Delegate[poolIndex].Balance), 0.05,
+				"stake pools should be slashed by %f", killSlash) // 5% error margin because there can be challenge penalty
 		}
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
@@ -162,6 +167,10 @@ func getStakePoolInfo(t *test.SystemTest, blobberId string) model.StakePoolInfo 
 	err = json.Unmarshal([]byte(output[0]), &stakePool)
 	require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 	require.NotEmpty(t, stakePool)
+
+	sort.Slice(stakePool.Delegate, func(i, j int) bool {
+		return stakePool.Delegate[i].DelegateID < stakePool.Delegate[j].DelegateID
+	})
 
 	return stakePool
 }
