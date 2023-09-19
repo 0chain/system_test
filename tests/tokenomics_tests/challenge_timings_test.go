@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -55,8 +57,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 99,
-			"data":   1,
-			"parity": 1,
+			"data":   3,
+			"parity": 3,
 		})
 
 		// Uploading 10% of allocation
@@ -76,13 +78,9 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
-		time.Sleep(1 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		result := getChallengeTimings(t, blobberList, []string{allocationId})
-
-		t.Log("ProofGenTimes : ", result[0])
-		t.Log("TxnSubmissions : ", result[1])
-		t.Log("TxnVerifications : ", result[2])
 
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
@@ -102,8 +100,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   100 * MB,
 			"tokens": 99,
-			"data":   1,
-			"parity": 1,
+			"data":   3,
+			"parity": 3,
 		})
 
 		// Uploading 10% of allocation
@@ -123,17 +121,9 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
-		time.Sleep(1 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		result := getChallengeTimings(t, blobberList, []string{allocationId})
-
-		proofGenTimes := result[0]
-		txnSubmissions := result[1]
-		txnVerifications := result[2]
-
-		t.Log("proofGenTimes", proofGenTimes)
-		t.Log("txnSubmissions", txnSubmissions)
-		t.Log("txnVerifications", txnVerifications)
 
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
@@ -180,17 +170,9 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 		}
 
-		time.Sleep(1 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
-
-		proofGenTimes := result[0]
-		txnSubmissions := result[1]
-		txnVerifications := result[2]
-
-		t.Log("proofGenTimes", proofGenTimes)
-		t.Log("txnSubmissions", txnSubmissions)
-		t.Log("txnVerifications", txnVerifications)
 
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
@@ -242,17 +224,9 @@ func TestChallengeTimings(testSetup *testing.T) {
 			require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 		}
 
-		time.Sleep(1 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
-
-		proofGenTimes := result[0]
-		txnSubmissions := result[1]
-		txnVerifications := result[2]
-
-		t.Log("proofGenTimes", proofGenTimes)
-		t.Log("txnSubmissions", txnSubmissions)
-		t.Log("txnVerifications", txnVerifications)
 
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
@@ -263,7 +237,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunWithTimeout("Case 5: 10 10gb allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 5: 1 10gb allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			"time_unit": "20m",
 		}, true)
@@ -278,43 +252,34 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.Nil(t, err, "Error executing faucet with tokens", strings.Join(output, "\n"))
 
 		// range of 10 allocations
-		for i := 0; i < 10; i++ {
-			// 1. Create an allocation with 1 data shard and 1 parity shard.
-			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   10 * GB,
-				"tokens": 99,
-				"data":   1,
-				"parity": 1,
-			})
-			allocationIDs = append(allocationIDs, allocationId)
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   10 * GB,
+			"tokens": 99,
+			"data":   1,
+			"parity": 1,
+		})
+		allocationIDs = append(allocationIDs, allocationId)
 
-			// Uploading 10% of allocation
-			remotepath := "/dir/"
-			filesize := 1 * GB
-			filename := utils.GenerateRandomTestFileName(t)
+		// Uploading 10% of allocation
+		remotepath := "/dir/"
+		filesize := 1 * GB
+		filename := utils.GenerateRandomTestFileName(t)
 
-			err = utils.CreateFileWithSize(filename, int64(filesize))
-			require.Nil(t, err)
+		err = utils.CreateFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
 
-			output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-				// fetch the latest block in the chain
-				"allocation": allocationId,
-				"remotepath": remotepath + filepath.Base(filename),
-				"localpath":  filename,
-			}, true)
-			require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
-		}
+		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
-		time.Sleep(1 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
-		proofGenTimes := result[0]
-		txnSubmissions := result[1]
-		txnVerifications := result[2]
-
-		t.Log("proofGenTimes", proofGenTimes)
-		t.Log("txnSubmissions", txnSubmissions)
-		t.Log("txnVerifications", txnVerifications)
 
 		proofGenTime := result[0]
 		txnVerificationTime := result[2]
@@ -333,6 +298,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 	}
 
 	var proofGenTimes, txnSubmissions, txnVerifications []int64
+	var floatProofGenTimes, floatTxnSubmissions, floatTxnVerifications []float64
 
 	for i := 0; i < len(allocationIDs); i++ {
 		allocationID := allocationIDs[i]
@@ -363,14 +329,18 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 					continue // Skip this iteration and move to the next blobber
 				}
 
+				if challengeTiming.TxnSubmission == 0 {
+					continue
+				}
+
 				proofGenTimes = append(proofGenTimes, challengeTiming.ProofGenTime) // proof gen time in milliseconds
 
 				// Calculate the time difference in milliseconds
-				txnSubmission := challengeTiming.TxnSubmission.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime()).Milliseconds()
-				txnSubmissions = append(txnSubmissions, txnSubmission)
+				txnSubmission := challengeTiming.TxnSubmission.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime())
+				txnSubmissions = append(txnSubmissions, txnSubmission.Milliseconds())
 
-				txnVerification := challengeTiming.TxnVerification.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime()).Milliseconds()
-				txnVerifications = append(txnVerifications, txnVerification)
+				txnVerification := challengeTiming.TxnVerification.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime())
+				txnVerifications = append(txnVerifications, txnVerification.Milliseconds())
 			}
 		}
 	}
@@ -379,31 +349,119 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 	t.Log("Txn Submissions:", txnSubmissions)
 	t.Log("Txn Verifications:", txnVerifications)
 
-	// Find the maximum values from all the lists
-	maxProofGenTime := findMaxValue(proofGenTimes)
-	maxTxnSubmission := findMaxValue(txnSubmissions)
-	maxTxnVerification := findMaxValue(txnVerifications)
+	sort.Slice(proofGenTimes, func(i, j int) bool {
+		return proofGenTimes[i] < proofGenTimes[j]
+	})
 
+	sort.Slice(txnSubmissions, func(i, j int) bool {
+		return txnSubmissions[i] < txnSubmissions[j]
+	})
+
+	sort.Slice(txnVerifications, func(i, j int) bool {
+		return txnVerifications[i] < txnVerifications[j]
+	})
+
+	// Max timings
+	maxProofGenTime := proofGenTimes[len(proofGenTimes)-1]
+	maxTxnSubmission := txnSubmissions[len(txnSubmissions)-1]
+	maxTxnVerification := txnVerifications[len(txnVerifications)-1]
+
+	// Log max timings
 	t.Log("Max Proof Gen Time:", maxProofGenTime)
 	t.Log("Max Txn Submission:", maxTxnSubmission)
 	t.Log("Max Txn Verification:", maxTxnVerification)
 
+	// Median timings
+	medianProofGenTime := proofGenTimes[len(proofGenTimes)/2]
+	medianTxnSubmission := txnSubmissions[len(txnSubmissions)/2]
+	medianTxnVerification := txnVerifications[len(txnVerifications)/2]
+
+	// Log mean timings
+	t.Log("Mean Proof Gen Time:", medianProofGenTime)
+	t.Log("Mean Txn Submission:", medianTxnSubmission)
+	t.Log("Mean Txn Verification:", medianTxnVerification)
+
+	// Min Timings
+	minProofGenTime := proofGenTimes[0]
+	minTxnSubmission := txnSubmissions[0]
+	minTxnVerification := txnVerifications[0]
+
+	t.Log("Min Proof Gen Time:", minProofGenTime)
+	t.Log("Min Txn Submission:", minTxnSubmission)
+	t.Log("Min Txn Verification:", minTxnVerification)
+
+	// Mean Timings
+	for i, _ := range proofGenTimes {
+		floatProofGenTimes = append(floatProofGenTimes, float64(proofGenTimes[i]))
+		floatTxnSubmissions = append(floatTxnSubmissions, float64(txnSubmissions[i]))
+		floatTxnVerifications = append(floatTxnVerifications, float64(txnVerifications[i]))
+	}
+
+	t.Log("Mean Proof Gen Time:", calculateMean(floatProofGenTimes))
+	t.Log("Mean Txn Submission:", calculateMean(floatTxnSubmissions))
+	t.Log("Mean Txn Verification:", calculateMean(floatTxnVerifications))
+
+	// Standard Deviation
+	stdDevProofGenTime := calculateStandardDeviation(floatProofGenTimes)
+	stdDevTxnSubmission := calculateStandardDeviation(floatTxnSubmissions)
+	stdDevTxnVerification := calculateStandardDeviation(floatTxnVerifications)
+
+	t.Log("Standard Deviation Proof Gen Time:", stdDevProofGenTime)
+	t.Log("Standard Deviation Txn Submission:", stdDevTxnSubmission)
+	t.Log("Standard Deviation Txn Verification:", stdDevTxnVerification)
+
+	// Variance
+	varianceProofGenTime := calculateVariance(floatProofGenTimes)
+	varianceTxnSubmission := calculateVariance(floatTxnSubmissions)
+	varianceTxnVerification := calculateVariance(floatTxnVerifications)
+
+	t.Log("Variance Proof Gen Time:", varianceProofGenTime)
+	t.Log("Variance Txn Submission:", varianceTxnSubmission)
+	t.Log("Variance Txn Verification:", varianceTxnVerification)
+
 	return []int64{maxProofGenTime, maxTxnSubmission, maxTxnVerification}
 }
 
-// findMaxValue returns the maximum value from a given slice of integers.
-func findMaxValue(nums []int64) int64 {
-	if len(nums) == 0 {
-		return 0
+func calculateStandardDeviation(data []float64) float64 {
+	// Step 1: Calculate the mean
+	mean := calculateMean(data)
+
+	// Step 2: Calculate the sum of squared differences from the mean
+	var sumSquaredDiff float64
+	for _, value := range data {
+		diff := value - mean
+		sumSquaredDiff += diff * diff
 	}
 
-	max := nums[0]
-	for _, num := range nums {
-		if num > max {
-			max = num
-		}
+	// Step 3: Calculate the variance
+	variance := sumSquaredDiff / float64(len(data))
+
+	// Step 4: Take the square root to get the standard deviation
+	stdDev := math.Sqrt(variance)
+
+	return stdDev
+}
+
+func calculateMean(data []float64) float64 {
+	sum := 0.0
+	for _, value := range data {
+		sum += value
 	}
-	return max
+	return sum / float64(len(data))
+}
+
+func calculateVariance(data []float64) float64 {
+	mean := calculateMean(data)
+
+	var sumSquaredDiff float64
+	for _, value := range data {
+		diff := value - mean
+		sumSquaredDiff += diff * diff
+	}
+
+	variance := sumSquaredDiff / float64(len(data))
+
+	return variance
 }
 
 type ChallengeTiming struct {
