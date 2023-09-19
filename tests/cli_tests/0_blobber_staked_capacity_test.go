@@ -34,7 +34,7 @@ func TestStakePool(testSetup *testing.T) {
 		_, err := createWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", err)
 
-		// stake 1 token on this blobber
+		// stake 10 tokens on all blobbers
 		stakeTokensToAllBlobbers(t, 10)
 
 		// select the blobber with minimum available stake capacity
