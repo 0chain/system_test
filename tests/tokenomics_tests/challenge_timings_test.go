@@ -345,10 +345,6 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 		}
 	}
 
-	t.Log("Proof Gen Times:", proofGenTimes)
-	t.Log("Txn Submissions:", txnSubmissions)
-	t.Log("Txn Verifications:", txnVerifications)
-
 	sort.Slice(proofGenTimes, func(i, j int) bool {
 		return proofGenTimes[i] < proofGenTimes[j]
 	})
@@ -360,6 +356,10 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 	sort.Slice(txnVerifications, func(i, j int) bool {
 		return txnVerifications[i] < txnVerifications[j]
 	})
+
+	t.Log("Proof Gen Times:", proofGenTimes)
+	t.Log("Txn Submissions:", txnSubmissions)
+	t.Log("Txn Verifications:", txnVerifications)
 
 	// Max timings
 	maxProofGenTime := proofGenTimes[len(proofGenTimes)-1]
@@ -397,27 +397,27 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 		floatTxnVerifications = append(floatTxnVerifications, float64(txnVerifications[i]))
 	}
 
-	t.Log("Mean Proof Gen Time:", calculateMean(floatProofGenTimes))
-	t.Log("Mean Txn Submission:", calculateMean(floatTxnSubmissions))
-	t.Log("Mean Txn Verification:", calculateMean(floatTxnVerifications))
+	t.Log("Mean Proof Gen Time:", int64(calculateMean(floatProofGenTimes)))
+	t.Log("Mean Txn Submission:", int64(calculateMean(floatTxnSubmissions)))
+	t.Log("Mean Txn Verification:", int64(calculateMean(floatTxnVerifications)))
 
 	// Standard Deviation
 	stdDevProofGenTime := calculateStandardDeviation(floatProofGenTimes)
 	stdDevTxnSubmission := calculateStandardDeviation(floatTxnSubmissions)
 	stdDevTxnVerification := calculateStandardDeviation(floatTxnVerifications)
 
-	t.Log("Standard Deviation Proof Gen Time:", stdDevProofGenTime)
-	t.Log("Standard Deviation Txn Submission:", stdDevTxnSubmission)
-	t.Log("Standard Deviation Txn Verification:", stdDevTxnVerification)
+	t.Log("Standard Deviation Proof Gen Time:", int64(stdDevProofGenTime))
+	t.Log("Standard Deviation Txn Submission:", int64(stdDevTxnSubmission))
+	t.Log("Standard Deviation Txn Verification:", int64(stdDevTxnVerification))
 
 	// Variance
 	varianceProofGenTime := calculateVariance(floatProofGenTimes)
 	varianceTxnSubmission := calculateVariance(floatTxnSubmissions)
 	varianceTxnVerification := calculateVariance(floatTxnVerifications)
 
-	t.Log("Variance Proof Gen Time:", varianceProofGenTime)
-	t.Log("Variance Txn Submission:", varianceTxnSubmission)
-	t.Log("Variance Txn Verification:", varianceTxnVerification)
+	t.Log("Variance Proof Gen Time:", int64(varianceProofGenTime))
+	t.Log("Variance Txn Submission:", int64(varianceTxnSubmission))
+	t.Log("Variance Txn Verification:", int64(varianceTxnVerification))
 
 	return []int64{maxProofGenTime, maxTxnSubmission, maxTxnVerification}
 }
