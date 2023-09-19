@@ -64,7 +64,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 1 * MB
+		filesize := 3 * MB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -113,7 +113,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 10 * MB
+		filesize := 30 * MB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -157,15 +157,15 @@ func TestChallengeTimings(testSetup *testing.T) {
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"size":   100 * MB,
 				"tokens": 99,
-				"data":   1,
-				"parity": 1,
+				"data":   3,
+				"parity": 3,
 			})
 
 			allocationIDs = append(allocationIDs, allocationId)
 
 			// Uploading 10% of allocation
 			remotepath := "/dir/"
-			filesize := 10 * MB
+			filesize := 30 * MB
 			filename := utils.GenerateRandomTestFileName(t)
 
 			err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -225,7 +225,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			// Uploading 10% of allocation
 
 			remotepath := "/dir/"
-			filesize := 100 * MB
+			filesize := 300 * MB
 			filename := utils.GenerateRandomTestFileName(t)
 
 			err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -285,7 +285,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		// Uploading 10% of allocation
 		remotepath := "/dir/"
-		filesize := 1 * GB
+		filesize := 3 * GB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
