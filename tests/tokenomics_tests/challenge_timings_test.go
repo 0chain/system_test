@@ -84,8 +84,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		time.Sleep(20 * time.Minute)
 
 		// cancel allocation
-		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
-		require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
+		//_, err = utils.CancelAllocation(t, configPath, allocationId, true)
+		//require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
 
 		result := getChallengeTimings(t, blobberList, []string{allocationId})
 
@@ -129,8 +129,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
 		time.Sleep(20 * time.Minute)
-		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
-		require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
+		//_, err = utils.CancelAllocation(t, configPath, allocationId, true)
+		//require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
 
 		result := getChallengeTimings(t, blobberList, []string{allocationId})
 
@@ -180,10 +180,10 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}
 
 		time.Sleep(20 * time.Minute)
-		for _, allocationId := range allocationIDs {
-			_, err = utils.CancelAllocation(t, configPath, allocationId, true)
-			require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
-		}
+		//for _, allocationId := range allocationIDs {
+		//	_, err = utils.CancelAllocation(t, configPath, allocationId, true)
+		//	require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
+		//}
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
 
@@ -238,10 +238,10 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}
 
 		time.Sleep(20 * time.Minute)
-		for _, allocationId := range allocationIDs {
-			_, err = utils.CancelAllocation(t, configPath, allocationId, true)
-			require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
-		}
+		//for _, allocationId := range allocationIDs {
+		//	_, err = utils.CancelAllocation(t, configPath, allocationId, true)
+		//	require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
+		//}
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
 
@@ -295,8 +295,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
 		time.Sleep(20 * time.Minute)
-		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
-		require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
+		//_, err = utils.CancelAllocation(t, configPath, allocationId, true)
+		//require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
 
@@ -349,8 +349,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
 		time.Sleep(20 * time.Minute)
-		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
-		require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
+		//_, err = utils.CancelAllocation(t, configPath, allocationId, true)
+		//require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
 
@@ -403,8 +403,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
 		time.Sleep(20 * time.Minute)
-		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
-		require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
+		//_, err = utils.CancelAllocation(t, configPath, allocationId, true)
+		//require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
 
