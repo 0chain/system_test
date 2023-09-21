@@ -882,11 +882,11 @@ func TestUpload(testSetup *testing.T) {
 			"test_3gp_video",
 			"3gp",
 		},
-		// {
-		// 	"https://filesamples.com/samples/video/m4v/sample_960x400_ocean_with_audio.m4v",
-		// 	"test_m4v_video",
-		// 	"m4v",
-		// },
+		{
+			"https://filesamples.com/samples/video/m4v/sample_960x400_ocean_with_audio.m4v",
+			"test_m4v_video",
+			"m4v",
+		},
 		{
 			"https://filesamples.com/samples/video/mov/sample_960x400_ocean_with_audio.mov",
 			"test_mov_video",
@@ -932,11 +932,11 @@ func TestUpload(testSetup *testing.T) {
 			"test_mpg_video",
 			"mpg",
 		},
-		// {
-		// 	"https://filesamples.com/samples/video/mxf/sample_960x400_ocean_with_audio.mxf",
-		// 	"test_mxf_video",
-		// 	"mxf",
-		// },
+		{
+			"https://filesamples.com/samples/video/mxf/sample_960x400_ocean_with_audio.mxf",
+			"test_mxf_video",
+			"mxf",
+		},
 		{
 			"https://filesamples.com/samples/video/ogv/sample_960x400_ocean_with_audio.ogv",
 			"test_ogv_video",
