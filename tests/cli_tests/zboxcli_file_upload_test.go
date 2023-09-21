@@ -856,154 +856,156 @@ func TestUpload(testSetup *testing.T) {
 		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), 0.05, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 
-	sampleVideos := [][]string{
-		{
-			"https://filesamples.com/samples/video/wtv/sample_960x400_ocean_with_audio.wtv",
-			"test_wtv_video",
-			"wtv",
-		},
-		{
-			"https://filesamples.com/samples/video/mts/sample_960x400_ocean_with_audio.mts",
-			"test_mts_video",
-			"mts",
-		},
-		{
-			"https://filesamples.com/samples/video/f4v/sample_960x400_ocean_with_audio.f4v",
-			"test_f4v_video",
-			"f4v",
-		},
-		{
-			"https://filesamples.com/samples/video/flv/sample_960x400_ocean_with_audio.flv",
-			"test_flv_video",
-			"flv",
-		},
-		{
-			"https://filesamples.com/samples/video/3gp/sample_960x400_ocean_with_audio.3gp",
-			"test_3gp_video",
-			"3gp",
-		},
-		{
-			"https://filesamples.com/samples/video/m4v/sample_960x400_ocean_with_audio.m4v",
-			"test_m4v_video",
-			"m4v",
-		},
-		{
-			"https://filesamples.com/samples/video/mov/sample_960x400_ocean_with_audio.mov",
-			"test_mov_video",
-			"mov",
-		},
-		{
-			"https://filesamples.com/samples/video/mp4/sample_960x400_ocean_with_audio.mp4",
-			"test_mp4_video",
-			"mp4",
-		},
-		{
-			"https://filesamples.com/samples/video/mjpeg/sample_960x400_ocean_with_audio.mjpeg",
-			"test_mjpeg_video",
-			"mjpeg",
-		},
-		{
-			"https://filesamples.com/samples/video/mkv/sample_960x400_ocean_with_audio.mkv",
-			"test_mkv_video",
-			"mkv",
-		},
-		{
-			"https://filesamples.com/samples/video/hevc/sample_960x400_ocean_with_audio.hevc",
-			"test_hevc_video",
-			"hevc",
-		},
-		{
-			"https://filesamples.com/samples/video/m2ts/sample_960x400_ocean_with_audio.m2ts",
-			"test_m2ts_video",
-			"m2ts",
-		},
-		{
-			"https://filesamples.com/samples/video/m2v/sample_960x400_ocean_with_audio.m2v",
-			"test_m2v_video",
-			"m2v",
-		},
-		{
-			"https://filesamples.com/samples/video/mpeg/sample_960x400_ocean_with_audio.mpeg",
-			"test_mpeg_video",
-			"mpeg",
-		},
-		{
-			"https://filesamples.com/samples/video/mpg/sample_960x400_ocean_with_audio.mpg",
-			"test_mpg_video",
-			"mpg",
-		},
-		{
-			"https://filesamples.com/samples/video/mxf/sample_960x400_ocean_with_audio.mxf",
-			"test_mxf_video",
-			"mxf",
-		},
-		{
-			"https://filesamples.com/samples/video/ogv/sample_960x400_ocean_with_audio.ogv",
-			"test_ogv_video",
-			"ogv",
-		},
-		{
-			"https://filesamples.com/samples/video/rm/sample_960x400_ocean_with_audio.rm",
-			"test_rm_video",
-			"rm",
-		},
-		{
-			"https://filesamples.com/samples/video/ts/sample_960x400_ocean_with_audio.ts",
-			"test_ts_video",
-			"ts",
-		},
-		{
-			"https://filesamples.com/samples/video/vob/sample_960x400_ocean_with_audio.vob",
-			"test_vob_video",
-			"vob",
-		},
-		{
-			"https://filesamples.com/samples/video/asf/sample_960x400_ocean_with_audio.asf",
-			"test_asf_video",
-			"asf",
-		},
-		{
-			"https://filesamples.com/samples/video/avi/sample_960x400_ocean_with_audio.avi",
-			"test_avi_video",
-			"avi",
-		},
-		{
-			"https://filesamples.com/samples/video/webm/sample_960x400_ocean_with_audio.webm",
-			"test_webm_video",
-			"webm",
-		},
-		{
-			"https://filesamples.com/samples/video/wmv/sample_960x400_ocean_with_audio.wmv",
-			"test_wmv_video",
-			"wmv",
-		},
-	}
-	for _, sampleVideo := range sampleVideos {
-		videoLink := sampleVideo[0]
-		videoName := sampleVideo[1]
-		videoFormat := sampleVideo[2]
-		t.RunWithTimeout("Upload Video File "+videoFormat+" With Web Streaming Should Work", 2*time.Minute, func(t *test.SystemTest) {
-			allocSize := int64(400 * 1024 * 1024)
-			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size":   allocSize,
-				"tokens": 9,
-			})
-			downloadVideo := "wget " + videoLink + " -O " + videoName + "." + videoFormat
-			output, err := cliutils.RunCommand(t, downloadVideo, 3, 2*time.Second)
-			require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
+	t.RunSequentiallyWithTimeout("stream tests for different formats", 20*time.Minute, func(t *test.SystemTest) {
+		sampleVideos := [][]string{
+			{
+				"https://filesamples.com/samples/video/wtv/sample_960x400_ocean_with_audio.wtv",
+				"test_wtv_video",
+				"wtv",
+			},
+			{
+				"https://filesamples.com/samples/video/mts/sample_960x400_ocean_with_audio.mts",
+				"test_mts_video",
+				"mts",
+			},
+			{
+				"https://filesamples.com/samples/video/f4v/sample_960x400_ocean_with_audio.f4v",
+				"test_f4v_video",
+				"f4v",
+			},
+			{
+				"https://filesamples.com/samples/video/flv/sample_960x400_ocean_with_audio.flv",
+				"test_flv_video",
+				"flv",
+			},
+			{
+				"https://filesamples.com/samples/video/3gp/sample_960x400_ocean_with_audio.3gp",
+				"test_3gp_video",
+				"3gp",
+			},
+			{
+				"https://filesamples.com/samples/video/m4v/sample_960x400_ocean_with_audio.m4v",
+				"test_m4v_video",
+				"m4v",
+			},
+			{
+				"https://filesamples.com/samples/video/mov/sample_960x400_ocean_with_audio.mov",
+				"test_mov_video",
+				"mov",
+			},
+			{
+				"https://filesamples.com/samples/video/mp4/sample_960x400_ocean_with_audio.mp4",
+				"test_mp4_video",
+				"mp4",
+			},
+			{
+				"https://filesamples.com/samples/video/mjpeg/sample_960x400_ocean_with_audio.mjpeg",
+				"test_mjpeg_video",
+				"mjpeg",
+			},
+			{
+				"https://filesamples.com/samples/video/mkv/sample_960x400_ocean_with_audio.mkv",
+				"test_mkv_video",
+				"mkv",
+			},
+			{
+				"https://filesamples.com/samples/video/hevc/sample_960x400_ocean_with_audio.hevc",
+				"test_hevc_video",
+				"hevc",
+			},
+			{
+				"https://filesamples.com/samples/video/m2ts/sample_960x400_ocean_with_audio.m2ts",
+				"test_m2ts_video",
+				"m2ts",
+			},
+			{
+				"https://filesamples.com/samples/video/m2v/sample_960x400_ocean_with_audio.m2v",
+				"test_m2v_video",
+				"m2v",
+			},
+			{
+				"https://filesamples.com/samples/video/mpeg/sample_960x400_ocean_with_audio.mpeg",
+				"test_mpeg_video",
+				"mpeg",
+			},
+			{
+				"https://filesamples.com/samples/video/mpg/sample_960x400_ocean_with_audio.mpg",
+				"test_mpg_video",
+				"mpg",
+			},
+			{
+				"https://filesamples.com/samples/video/mxf/sample_960x400_ocean_with_audio.mxf",
+				"test_mxf_video",
+				"mxf",
+			},
+			{
+				"https://filesamples.com/samples/video/ogv/sample_960x400_ocean_with_audio.ogv",
+				"test_ogv_video",
+				"ogv",
+			},
+			{
+				"https://filesamples.com/samples/video/rm/sample_960x400_ocean_with_audio.rm",
+				"test_rm_video",
+				"rm",
+			},
+			{
+				"https://filesamples.com/samples/video/ts/sample_960x400_ocean_with_audio.ts",
+				"test_ts_video",
+				"ts",
+			},
+			{
+				"https://filesamples.com/samples/video/vob/sample_960x400_ocean_with_audio.vob",
+				"test_vob_video",
+				"vob",
+			},
+			{
+				"https://filesamples.com/samples/video/asf/sample_960x400_ocean_with_audio.asf",
+				"test_asf_video",
+				"asf",
+			},
+			{
+				"https://filesamples.com/samples/video/avi/sample_960x400_ocean_with_audio.avi",
+				"test_avi_video",
+				"avi",
+			},
+			{
+				"https://filesamples.com/samples/video/webm/sample_960x400_ocean_with_audio.webm",
+				"test_webm_video",
+				"webm",
+			},
+			{
+				"https://filesamples.com/samples/video/wmv/sample_960x400_ocean_with_audio.wmv",
+				"test_wmv_video",
+				"wmv",
+			},
+		}
+		for _, sampleVideo := range sampleVideos {
+			videoLink := sampleVideo[0]
+			videoName := sampleVideo[1]
+			videoFormat := sampleVideo[2]
+			t.RunSequentiallyWithTimeout("Upload Video File "+videoFormat+" With Web Streaming Should Work", 2*time.Minute, func(t *test.SystemTest) {
+				allocSize := int64(400 * 1024 * 1024)
+				allocationID := setupAllocation(t, configPath, map[string]interface{}{
+					"size":   allocSize,
+					"tokens": 9,
+				})
+				downloadVideo := "wget " + videoLink + " -O " + videoName + "." + videoFormat
+				output, err := cliutils.RunCommand(t, downloadVideo, 3, 2*time.Second)
+				require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
 
-			output, err = uploadFile(t, configPath, map[string]interface{}{
-				"allocation":    allocationID,
-				"remotepath":    "/",
-				"localpath":     "./" + videoName + "." + videoFormat,
-				"web-streaming": true,
-			}, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 2)
-			expected := "Status completed callback. Type = video/fmp4. Name = raw." + videoName + ".mp4"
-			require.Equal(t, expected, output[1])
-		})
-	}
+				output, err = uploadFile(t, configPath, map[string]interface{}{
+					"allocation":    allocationID,
+					"remotepath":    "/",
+					"localpath":     "./" + videoName + "." + videoFormat,
+					"web-streaming": true,
+				}, true)
+				require.Nil(t, err, strings.Join(output, "\n"))
+				require.Len(t, output, 2)
+				expected := "Status completed callback. Type = video/fmp4. Name = raw." + videoName + ".mp4"
+				require.Equal(t, expected, output[1])
+			})
+		}
+	})
 }
 
 func uploadWithParam(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}) {
