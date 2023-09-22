@@ -203,9 +203,21 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Test collect reward with valid pool and validator id should pass")
 
-	t.Parallel()
+	t.TestSetup("Reduce time unit", func() {
+		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "7m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+	})
 
-	t.RunWithTimeout("Test collect reward with valid pool and validator id should pass", 600*time.Second, func(t *test.SystemTest) { // TODO slow
+	t.Cleanup(func() {
+		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "1h",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+	})
+
+	t.RunWithTimeout("Test collect reward with valid pool and validator id should pass", 10*time.Minute, func(t *test.SystemTest) { // TODO slow
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
 
@@ -238,8 +250,8 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 		balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
 
 		// Upload and download a file so blobber can accumulate rewards
-		allocSize := 100 * MB
-		filesize := 10 * MB
+		allocSize := 1000 * MB
+		filesize := 200 * MB
 		remotepath := "/"
 
 		// Use all blobbers
