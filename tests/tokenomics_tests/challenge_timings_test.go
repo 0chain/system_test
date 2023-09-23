@@ -349,7 +349,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
 		time.Sleep(20 * time.Minute)
-		//_, err = utils.CancelAllocation(t, configPath, allocationId, true)
+		//_, err = utils.CancelAllocation(t, configPath, allocationId, true )
 		//require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
