@@ -29,3 +29,4 @@ jobs:
           run_chimney_blobber_tests: true
           run_smoke_tests: false
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
