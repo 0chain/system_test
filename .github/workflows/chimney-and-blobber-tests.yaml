@@ -1,0 +1,30 @@
+name: "Manual 0Chain Chimney and Blobber Tests"
+concurrency:
+  group: "manual-chimney-blobber-tests-${{ github.ref }}-${{ github.event_name }}"
+  cancel-in-progress: true
+on:
+  workflow_dispatch:
+    inputs:
+      NETWORK_URL:
+        description: "Network to run system tests against. [example: dev.0chain.net]"
+        default: demo.zus.network
+        required: false
+
+jobs:
+  system-tests:
+    name: "System Tests"
+    runs-on: [ tests-suite ]
+    steps:
+      - name: "Run System tests"
+        uses: 0chain/actions/run-system-tests@feature/chimney_blobber_rewards
+        with:
+          network: ${{ inputs.NETWORK_URL }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: false
+          run_chimney_blobber_tests: true
+          run_smoke_tests: false
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
