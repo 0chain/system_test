@@ -36,7 +36,7 @@ jobs:
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@feature/chimney_blobber_rewards
         with:
-          repo_snapshots_branch: "current-sprint"
+          repo_snapshots_branch: "feature/chimney_blobber_rewards"
           network: ${{ inputs.NETWORK_URL }}
           deploy_report_page: true
           archive_results: true
@@ -46,5 +46,7 @@ jobs:
           run_tokenomics_system_tests: false
           run_chimney_blobber_tests: true
           run_smoke_tests: false
+          run_s3mgrt_system_tests: false
+          run_challenge_system_tests: false
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
