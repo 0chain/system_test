@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,34 +26,39 @@ import (
 
 // Contains all used url paths in the client
 const (
-	GetHashNodeRoot              = "/v1/hashnode/root/:allocation"
-	GetBlobbers                  = "/v1/screst/:sc_address/getblobbers"
-	GetMiners                    = "/v1/screst/:sc_address/getMinerList"
-	GetSharders                  = "/v1/screst/:sc_address/getSharderList"
-	GetValidators                = "/v1/screst/:sc_address/validators"
-	GetStakePoolStat             = "/v1/screst/:sc_address/getStakePoolStat"
-	getUserStakePoolStat         = "/v1/screst/:sc_address/getUserStakePoolStat"
-	GetAllocationBlobbers        = "/v1/screst/:sc_address/alloc_blobbers"
-	GetFreeAllocationBlobbers    = "/v1/screst/:sc_address/free_alloc_blobbers"
-	SCRestGetOpenChallenges      = "/v1/screst/:sc_address/openchallenges"
-	MinerGetStatus               = "/v1/miner/get/stats"
-	SharderGetStatus             = "/v1/sharder/get/stats"
-	SCStateGet                   = "/v1/scstate/get"
-	SCRestGetAllocation          = "/v1/screst/:sc_address/allocation"
-	SCRestGetBlobbers            = "/v1/screst/:sc_address/getBlobber"
-	ChainGetStats                = "/v1/chain/get/stats"
-	BlobberGetStats              = "/_stats"
-	ClientPut                    = "/v1/client/put"
-	TransactionPut               = "/v1/transaction/put"
-	TransactionFeeGet            = "/v1/estimate_txn_fee"
-	TransactionGetConfirmation   = "/v1/transaction/get/confirmation"
-	ClientGetBalance             = "/v1/client/get/balance"
-	ClientReadPool               = "/v1/screst/:sc_address/getReadPoolStat"
-	GetNetworkDetails            = "/network"
-	GetFileRef                   = "/v1/file/refs/:allocation_id"
-	GetFileRefPath               = "/v1/file/referencepath/:allocation_id"
-	GetObjectTree                = "/v1/file/objecttree/:allocation_id"
-	GetLatestFinalizedMagicBlock = "/v1/block/get/latest_finalized_magic_block"
+	GetHashNodeRoot                    = "/v1/hashnode/root/:allocation"
+	GetBlobbers                        = "/v1/screst/:sc_address/getblobbers"
+	GetMiners                          = "/v1/screst/:sc_address/getMinerList"
+	GetSharders                        = "/v1/screst/:sc_address/getSharderList"
+	GetValidators                      = "/v1/screst/:sc_address/validators"
+	GetStakePoolStat                   = "/v1/screst/:sc_address/getStakePoolStat"
+	getUserStakePoolStat               = "/v1/screst/:sc_address/getUserStakePoolStat"
+	GetAllocationBlobbers              = "/v1/screst/:sc_address/alloc_blobbers"
+	GetFreeAllocationBlobbers          = "/v1/screst/:sc_address/free_alloc_blobbers"
+	SCRestGetOpenChallenges            = "/v1/screst/:sc_address/openchallenges"
+	MinerGetStatus                     = "/v1/miner/get/stats"
+	SharderGetStatus                   = "/v1/sharder/get/stats"
+	SCStateGet                         = "/v1/scstate/get"
+	SCRestGetAllocation                = "/v1/screst/:sc_address/allocation"
+	SCRestGetBlobbers                  = "/v1/screst/:sc_address/getBlobber"
+	ChainGetStats                      = "/v1/chain/get/stats"
+	BlobberGetStats                    = "/_stats"
+	ClientPut                          = "/v1/client/put"
+	TransactionPut                     = "/v1/transaction/put"
+	TransactionFeeGet                  = "/v1/estimate_txn_fee"
+	TransactionGetConfirmation         = "/v1/transaction/get/confirmation"
+	ClientGetBalance                   = "/v1/client/get/balance"
+	ClientReadPool                     = "/v1/screst/:sc_address/getReadPoolStat"
+	GetNetworkDetails                  = "/network"
+	GetFileRef                         = "/v1/file/refs/:allocation_id"
+	GetFileRefPath                     = "/v1/file/referencepath/:allocation_id"
+	GetObjectTree                      = "/v1/file/objecttree/:allocation_id"
+	GetLatestFinalizedMagicBlock       = "/v1/block/get/latest_finalized_magic_block"
+	GetLatestFinalizedBlock            = "/v1/block/get/latest_finalized"
+	QueryRewards                       = "/v1/screst/:sc_address/query-rewards"
+	QueryDelegateRewards               = "/v1/screst/:sc_address/query-delegate-rewards"
+	PartitionSizeFrequency             = "/v1/screst/:sc_address/parition-size-frequency"
+	BlobberPartitionSelectionFrequency = "/v1/screst/:sc_address/blobber-selection-frequency"
 )
 
 // Contains all used service providers
@@ -639,10 +646,10 @@ func (c *APIClient) V1BlobberGetHashNodeRoot(t *test.SystemTest, blobberGetHashn
 		"ALLOCATION-ID":          blobberGetHashnodeRequest.AllocationID,
 	}
 
-	url := blobberGetHashnodeRequest.URL + "/" + strings.Replace(GetHashNodeRoot, ":allocation", blobberGetHashnodeRequest.AllocationID, 1)
+	blobberGetHashNodeRootURL := blobberGetHashnodeRequest.URL + "/" + strings.Replace(GetHashNodeRoot, ":allocation", blobberGetHashnodeRequest.AllocationID, 1)
 
 	resp, err := c.executeForServiceProvider(t,
-		url,
+		blobberGetHashNodeRootURL,
 		model.ExecutionRequest{
 			Headers:            headers,
 			Dst:                &hashnode,
@@ -1454,6 +1461,76 @@ func (c *APIClient) GetReadPoolBalance(t *test.SystemTest, wallet *model.Wallet,
 	return clientGetReadPoolBalanceResponse
 }
 
+func (c *APIClient) GetRewardsByQuery(t *test.SystemTest, query string, requiredStatusCode int) *model.QueryRewardsResponse {
+	t.Log("Get rewards by query...")
+
+	queryRewardsResponse, resp, err := c.V1QueryRewards(
+		t,
+		model.QueryRewardsRequest{
+			Query: query,
+		},
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, queryRewardsResponse)
+
+	return queryRewardsResponse
+}
+
+func (c *APIClient) GetDelegateRewardsByQuery(t *test.SystemTest, query string, requiredStatusCode int) map[string]int64 {
+	t.Log("Get rewards by query...")
+
+	queryRewardsResponse, resp, err := c.V1QueryDelegateRewards(
+		t,
+		model.QueryRewardsRequest{
+			Query: query,
+		},
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, queryRewardsResponse)
+
+	return queryRewardsResponse
+}
+
+func (c *APIClient) GetBlobberPartitionSelectionFrequency(t *test.SystemTest, start, end int64, requiredStatusCode int) map[string]int64 {
+	t.Log("Get blobber partition selection frequency...")
+
+	blobberPartitionSelectionFrequencyResponse, resp, err := c.V1BlobberPartitionSelectionFrequency(
+		t,
+		model.BlockRewardsRequest{
+			Start: start,
+			End:   end,
+		},
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, blobberPartitionSelectionFrequencyResponse)
+
+	return blobberPartitionSelectionFrequencyResponse
+}
+
+func (c *APIClient) GetPartitionSizeFrequency(t *test.SystemTest, start, end int64, requiredStatusCode int) map[float64]float64 {
+	t.Log("Get partition size frequency...")
+
+	blobberPartitionSelectionFrequencyResponse, resp, err := c.V1PartitionSizeFrequency(
+		t,
+		model.BlockRewardsRequest{
+			Start: start,
+			End:   end,
+		},
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, blobberPartitionSelectionFrequencyResponse)
+
+	return blobberPartitionSelectionFrequencyResponse
+}
+
 func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRestGetBlobberResponse *model.SCRestGetBlobberResponse, requiredTransactionStatus int) {
 	updateBlobberTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
@@ -2010,7 +2087,7 @@ func (c *APIClient) GetBlobber(t *test.SystemTest, blobberID string, requiredSta
 func (c *APIClient) V1BlobberGetFileRefs(t *test.SystemTest, blobberGetFileRefsRequest *model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
 	var blobberGetFileResponse *model.BlobberGetFileRefsResponse
 
-	url := blobberGetFileRefsRequest.URL + strings.Replace(GetFileRef, ":allocation_id", blobberGetFileRefsRequest.AllocationID, 1) + "?" + "path=" + blobberGetFileRefsRequest.RemotePath + "&" + "refType=" + blobberGetFileRefsRequest.RefType
+	blobberGetFileRefsURL := blobberGetFileRefsRequest.URL + strings.Replace(GetFileRef, ":allocation_id", blobberGetFileRefsRequest.AllocationID, 1) + "?" + "path=" + blobberGetFileRefsRequest.RemotePath + "&" + "refType=" + blobberGetFileRefsRequest.RefType
 
 	headers := map[string]string{
 		"X-App-Client-Id":        blobberGetFileRefsRequest.ClientID,
@@ -2020,7 +2097,7 @@ func (c *APIClient) V1BlobberGetFileRefs(t *test.SystemTest, blobberGetFileRefsR
 	}
 	resp, err := c.executeForServiceProvider(
 		t,
-		url,
+		blobberGetFileRefsURL,
 		model.ExecutionRequest{
 			Dst:                &blobberGetFileResponse,
 			RequiredStatusCode: requiredStatusCode,
@@ -2033,7 +2110,7 @@ func (c *APIClient) V1BlobberGetFileRefs(t *test.SystemTest, blobberGetFileRefsR
 func (c *APIClient) V1BlobberGetFileRefPaths(t *test.SystemTest, blobberFileRefPathRequest *model.BlobberFileRefPathRequest, requiredStatusCode int) (*model.BlobberFileRefPathResponse, *resty.Response, error) {
 	var blobberFileRefPathResponse *model.BlobberFileRefPathResponse
 
-	url := blobberFileRefPathRequest.URL + strings.Replace(GetFileRefPath, ":allocation_id", blobberFileRefPathRequest.AllocationID, 1) + "?" + "path=" + blobberFileRefPathRequest.Path
+	blobberGetFilePathURL := blobberFileRefPathRequest.URL + strings.Replace(GetFileRefPath, ":allocation_id", blobberFileRefPathRequest.AllocationID, 1) + "?" + "path=" + blobberFileRefPathRequest.Path
 
 	headers := map[string]string{
 		"X-App-Client-Id":        blobberFileRefPathRequest.ClientID,
@@ -2043,7 +2120,7 @@ func (c *APIClient) V1BlobberGetFileRefPaths(t *test.SystemTest, blobberFileRefP
 	}
 	resp, err := c.executeForServiceProvider(
 		t,
-		url,
+		blobberGetFilePathURL,
 		model.ExecutionRequest{
 			Dst:                &blobberFileRefPathResponse,
 			RequiredStatusCode: requiredStatusCode,
@@ -2072,10 +2149,40 @@ func (c *APIClient) V1BlockGetLatestFinalizedMagicBlock(t *test.SystemTest, hash
 	return resp, err
 }
 
+func (c *APIClient) V1BlockGetLatestFinalizedBlock(t *test.SystemTest, requiredStatusCode int) (*model.LatestFinalizedBlock, *resty.Response, error) {
+	t.Log("Get latest finalized block")
+
+	var latestFinalizedBlock *model.LatestFinalizedBlock
+
+	urlBuilder := NewURLBuilder().SetPath(GetLatestFinalizedBlock)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			RequiredStatusCode: requiredStatusCode,
+			Dst:                &latestFinalizedBlock,
+		},
+		HttpPOSTMethod,
+		SharderServiceProvider)
+
+	return latestFinalizedBlock, resp, err
+}
+
+func (c *APIClient) GetLatestFinalizedBlock(t *test.SystemTest, requiredStatusCode int) *model.LatestFinalizedBlock {
+	latestFinalizedBlock, resp, err := c.V1BlockGetLatestFinalizedBlock(t, requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, latestFinalizedBlock)
+
+	return latestFinalizedBlock
+}
+
 func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeRequest *model.BlobberObjectTreeRequest, requiredStatusCode int) (*model.BlobberObjectTreePathResponse, *resty.Response, error) {
 	var blobberObjectTreePathResponse *model.BlobberObjectTreePathResponse
 
-	url := blobberObjectTreeRequest.URL + strings.Replace(GetObjectTree, ":allocation_id", blobberObjectTreeRequest.AllocationID, 1) + "?" + "path=" + blobberObjectTreeRequest.Path
+	blobberObjectTreeURL := blobberObjectTreeRequest.URL + strings.Replace(GetObjectTree, ":allocation_id", blobberObjectTreeRequest.AllocationID, 1) + "?" + "path=" + blobberObjectTreeRequest.Path
 
 	headers := map[string]string{
 		"X-App-Client-Id":        blobberObjectTreeRequest.ClientID,
@@ -2085,7 +2192,7 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 	}
 	resp, err := c.executeForServiceProvider(
 		t,
-		url,
+		blobberObjectTreeURL,
 		model.ExecutionRequest{
 			Dst:                &blobberObjectTreePathResponse,
 			RequiredStatusCode: requiredStatusCode,
@@ -2093,6 +2200,85 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 		},
 		HttpGETMethod)
 	return blobberObjectTreePathResponse, resp, err
+}
+
+func (c *APIClient) V1QueryRewards(t *test.SystemTest, queryRewardsRequest model.QueryRewardsRequest, requiredStatusCode int) (*model.QueryRewardsResponse, *resty.Response, error) {
+	var queryRewardsResponse *model.QueryRewardsResponse
+
+	urlBuilder := NewURLBuilder().SetPath(QueryRewards).AddParams("query", url.QueryEscape(queryRewardsRequest.Query)).SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &queryRewardsResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return queryRewardsResponse, resp, err
+}
+
+func (c *APIClient) V1QueryDelegateRewards(t *test.SystemTest, queryRewardsRequest model.QueryRewardsRequest, requiredStatusCode int) (map[string]int64, *resty.Response, error) {
+	var queryRewardsResponse map[string]int64
+
+	urlBuilder := NewURLBuilder().SetPath(QueryDelegateRewards).AddParams("query", url.QueryEscape(queryRewardsRequest.Query)).SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &queryRewardsResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return queryRewardsResponse, resp, err
+}
+
+func (c *APIClient) V1BlobberPartitionSelectionFrequency(t *test.SystemTest, request model.BlockRewardsRequest, requiredStatusCode int) (map[string]int64, *resty.Response, error) {
+	var result map[string]int64
+
+	urlBuilder := NewURLBuilder().SetPath(BlobberPartitionSelectionFrequency).AddParams("start", strconv.FormatInt(request.Start, 10)).AddParams("end", strconv.FormatInt(request.End, 10)).SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &result,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return result, resp, err
+}
+
+func (c *APIClient) V1PartitionSizeFrequency(t *test.SystemTest, request model.BlockRewardsRequest, requiredStatusCode int) (map[float64]float64, *resty.Response, error) {
+	var response map[string]int
+
+	result := make(map[float64]float64)
+
+	urlBuilder := NewURLBuilder().SetPath(PartitionSizeFrequency).AddParams("start", strconv.FormatInt(request.Start, 10)).AddParams("end", strconv.FormatInt(request.End, 10)).SetPathVariable("sc_address", StorageSmartContractAddress).SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &response,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	for size, frequency := range response {
+		sizeInFloat, _ := strconv.ParseFloat(size, 64)
+		result[sizeInFloat] = float64(frequency)
+	}
+
+	return result, resp, err
 }
 
 //----------------------------------------------------------
