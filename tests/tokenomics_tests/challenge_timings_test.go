@@ -197,11 +197,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 4: 10 1gb allocation, 100mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "20m",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -255,11 +250,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 5: 1 10gb allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "20m",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -309,11 +299,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 6: 1 100gb allocation, 10gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "20m",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -363,11 +348,6 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 7: 1 1000gb allocation, 100gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "20m",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
