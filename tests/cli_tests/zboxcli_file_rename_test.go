@@ -27,8 +27,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 
 	t.Parallel()
 
-	// Rename is not allowed for directories You should use move for that like linux
-	t.Run("rename folder should not work", func(t *test.SystemTest) {
+	t.Run("rename folder should work", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 
 		remotePath := "/child"
@@ -49,8 +48,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			"remotepath": remotePath,
 			"destname":   destPath,
 		}, true)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.NotEqual(t, fmt.Sprintf(remotePath+" renamed"), output[0])
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, fmt.Sprintf(remotePath+" renamed"), output[0])
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
