@@ -771,7 +771,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, fref) // not nil when the file exists
 	})
-
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
