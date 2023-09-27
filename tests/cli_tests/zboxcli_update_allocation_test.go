@@ -771,6 +771,57 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, fref) // not nil when the file exists
 	})
+
+	t.Run("Update allocation on forbid new allocation should work", func(t *test.SystemTest) {
+		_, err := createWallet(t, configPath)
+		require.NoError(t, err)
+
+		blobbers := getBlobbersList(t)
+		require.GreaterOrEqual(t, len(blobbers), 1)
+
+		lenBlobbers := len(blobbers)
+
+		t.Cleanup(func() {
+			output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
+				"blobber_id":    blobbers[0].Id,
+				"not_available": false,
+			}))
+			require.Nil(t, err, "error updating blobber info", strings.Join(output, "\n"))
+		})
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"data":   lenBlobbers - lenBlobbers/2,
+			"parity": lenBlobbers / 2,
+		})
+		require.Greater(t, len(allocationID), 0)
+
+		prevAlloc := getAllocation(t, allocationID)
+
+		_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 10)
+		require.NoError(t, err, "faucet execution failed")
+
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
+			"blobber_id":    blobbers[0].Id,
+			"not_available": true,
+		}))
+		require.Nil(t, err, "error updating blobber info", strings.Join(output, "\n"))
+
+		_, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"data":   lenBlobbers - lenBlobbers/2,
+			"parity": lenBlobbers / 2,
+			"lock":   1,
+		}))
+		require.Error(t, err, "expected error creating allocation", strings.Join(output, "\n"))
+
+		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"extend":     true,
+		}), true)
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+
+		afterAlloc := getAllocation(t, allocationID)
+		require.Greater(t, afterAlloc.ExpirationDate, prevAlloc.ExpirationDate)
+	})
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
