@@ -75,8 +75,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 				require.NotEmpty(t, f.Hash)
 			}
 		}
-		require.True(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
-		require.False(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
 	t.Run("rename file should work", func(t *test.SystemTest) {
