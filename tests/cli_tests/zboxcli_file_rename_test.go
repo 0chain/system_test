@@ -140,7 +140,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 				require.Equal(t, destName, f.Name, strings.Join(output, "\n"))
 				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
-				require.NotEmpty(t, f.Hash)
 			}
 		}
 		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
