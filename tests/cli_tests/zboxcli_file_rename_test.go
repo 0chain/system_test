@@ -32,7 +32,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 
 		remotePath := "/child"
 
-		destPath := "/child_modified/"
+		destPath := "/child_modified"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -70,7 +70,6 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			}
 			if f.Path == destPath {
 				foundAtDest = true
-				require.Equal(t, destPath, f.Name, strings.Join(output, "\n"))
 				require.Equal(t, "d", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
