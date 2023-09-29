@@ -310,7 +310,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		// range of 10 allocations
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   200 * GB,
+			"size":   20 * GB,
 			"tokens": 999,
 			"data":   numData,
 			"parity": numParity,
@@ -319,7 +319,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		// Uploading 10% of allocation
 		remotepath := "/dir/"
-		filesize := 100 * GB
+		filesize := 10 * GB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -348,6 +348,55 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 7: 1 1000gb allocation, 100gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		var allocationIDs []string
+
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 99)
+		require.Nil(t, err, "Error executing faucet with tokens", strings.Join(output, "\n"))
+
+		// range of 10 allocations
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   200 * GB,
+			"tokens": 9999,
+			"data":   numData,
+			"parity": numParity,
+		})
+		allocationIDs = append(allocationIDs, allocationId)
+
+		// Uploading 10% of allocation
+		remotepath := "/dir/"
+		filesize := 100 * GB
+		filename := utils.GenerateRandomTestFileName(t)
+
+		err = utils.CreateFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
+
+		time.Sleep(20 * time.Minute)
+		//_, err = utils.CancelAllocation(t, configPath, allocationId, true)
+		//require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
+
+		result := getChallengeTimings(t, blobberList, allocationIDs)
+
+		proofGenTime := result[0]
+		txnVerificationTime := result[2]
+		require.True(t, proofGenTime < 4200, "It is taking more than 4000000 milliseconds to generate proof")
+		require.True(t, txnVerificationTime < 30000, "It is taking more than 30000 milliseconds to verify txn")
+
+		require.True(t, false)
+	})
+
+	t.RunWithTimeout("Case 8: 1 1000gb allocation, 100gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
