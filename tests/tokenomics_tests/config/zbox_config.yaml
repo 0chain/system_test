@@ -1,4 +1,4 @@
-block_worker: https://dev-7.devnet-0chain.net/dns
+block_worker: https://blobber.devnet-0chain.net/dns
 confirmation_chain_length: 3
 ethereum_node_url: https://goerli.infura.io/v3/773bfe30452f40f998e5d0f2f8a29888
 min_confirmation: 50

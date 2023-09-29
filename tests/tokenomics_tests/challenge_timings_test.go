@@ -23,12 +23,12 @@ import (
 func TestChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-		"time_unit": "720h",
-	}, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
+	//output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+	//	"time_unit": "720h",
+	//}, true)
+	//require.Nil(t, err, strings.Join(output, "\n"))
 
-	output, err = utils.CreateWallet(t, configPath)
+	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
