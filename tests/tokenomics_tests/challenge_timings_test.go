@@ -49,8 +49,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
-	numData := 2
-	numParity := 10
+	numData := 1
+	numParity := 1
 
 	t.RunWithTimeout("Case 1: 1 10mb allocation, 1mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
@@ -58,7 +58,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
+			"size":   2 * MB,
 			"tokens": 99,
 			"data":   numData,
 			"parity": numParity,
@@ -67,7 +67,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 3 * MB
+		filesize := 1 * MB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -105,7 +105,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   100 * MB,
+			"size":   20 * MB,
 			"tokens": 99,
 			"data":   numData,
 			"parity": numParity,
@@ -114,7 +114,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		// Uploading 10% of allocation
 
 		remotepath := "/dir/"
-		filesize := 30 * MB
+		filesize := 10 * MB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -154,7 +154,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		for i := 0; i < 10; i++ {
 			// 1. Create an allocation with 1 data shard and 1 parity shard.
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   100 * MB,
+				"size":   20 * MB,
 				"tokens": 99,
 				"data":   numData,
 				"parity": numParity,
@@ -164,7 +164,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 			// Uploading 10% of allocation
 			remotepath := "/dir/"
-			filesize := 30 * MB
+			filesize := 10 * MB
 			filename := utils.GenerateRandomTestFileName(t)
 
 			err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -206,7 +206,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		for i := 0; i < 10; i++ {
 			// 1. Create an allocation with 1 data shard and 1 parity shard.
 			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   1 * GB,
+				"size":   200 * MB,
 				"tokens": 99,
 				"data":   numData,
 				"parity": numParity,
@@ -217,7 +217,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 			// Uploading 10% of allocation
 
 			remotepath := "/dir/"
-			filesize := 300 * MB
+			filesize := 100 * MB
 			filename := utils.GenerateRandomTestFileName(t)
 
 			err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -261,7 +261,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		// range of 10 allocations
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * GB,
+			"size":   2 * GB,
 			"tokens": 99,
 			"data":   numData,
 			"parity": numParity,
@@ -270,7 +270,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		// Uploading 10% of allocation
 		remotepath := "/dir/"
-		filesize := 3 * GB
+		filesize := 1 * GB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -310,7 +310,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		// range of 10 allocations
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   100 * GB,
+			"size":   200 * GB,
 			"tokens": 999,
 			"data":   numData,
 			"parity": numParity,
@@ -319,7 +319,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		// Uploading 10% of allocation
 		remotepath := "/dir/"
-		filesize := 30 * GB
+		filesize := 100 * GB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -359,7 +359,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		// range of 10 allocations
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1000 * GB,
+			"size":   2000 * GB,
 			"tokens": 9999,
 			"data":   numData,
 			"parity": numParity,
@@ -368,7 +368,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		// Uploading 10% of allocation
 		remotepath := "/dir/"
-		filesize := 300 * GB
+		filesize := 1000 * GB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
