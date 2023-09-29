@@ -6,6 +6,7 @@ import (
 	"io"
 	"math"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -81,6 +82,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
+		defer os.Remove(filename)
+
 		time.Sleep(20 * time.Minute)
 
 		// cancel allocation
@@ -127,6 +130,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
+
+		defer os.Remove(filename)
 
 		time.Sleep(20 * time.Minute)
 		//_, err = utils.CancelAllocation(t, configPath, allocationId, true)
@@ -177,6 +182,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"localpath":  filename,
 			}, true)
 			require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
+
+			defer os.Remove(filename)
 		}
 
 		time.Sleep(20 * time.Minute)
@@ -230,6 +237,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 				"localpath":  filename,
 			}, true)
 			require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
+
+			defer os.Remove(filename)
 		}
 
 		time.Sleep(20 * time.Minute)
@@ -284,6 +293,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
+		defer os.Remove(filename)
+
 		time.Sleep(20 * time.Minute)
 		//_, err = utils.CancelAllocation(t, configPath, allocationId, true)
 		//require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
@@ -332,6 +343,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
+
+		defer os.Remove(filename)
 
 		time.Sleep(20 * time.Minute)
 		//_, err = utils.CancelAllocation(t, configPath, allocationId, true )
@@ -382,6 +395,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
+		defer os.Remove(filename)
+
 		time.Sleep(20 * time.Minute)
 		//_, err = utils.CancelAllocation(t, configPath, allocationId, true)
 		//require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
@@ -431,6 +446,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 			"localpath":  filename,
 		}, true)
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
+
+		defer os.Remove(filename)
 
 		time.Sleep(20 * time.Minute)
 		//_, err = utils.CancelAllocation(t, configPath, allocationId, true)
