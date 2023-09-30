@@ -776,6 +776,7 @@ var StorageIntSettings = []string{
 	"max_blobbers_per_allocation",
 	"validators_per_challenge",
 	"num_validators_rewarded",
+	"max_blobber_select_for_challenge",
 	"max_delegates",
 	"cost.update_settings",
 	"cost.read_redeem",
