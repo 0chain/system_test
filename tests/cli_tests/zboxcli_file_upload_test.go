@@ -1000,7 +1000,7 @@ func TestUpload(testSetup *testing.T) {
 			}, true)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 2)
-			expected := "Status completed callback. Type = video/fmp4. Name = raw." + videoName + ".mp4"
+			expected := "Status completed callback. Type = video/mp4. Name = " + videoName + ".mp4"
 			require.Equal(t, expected, output[1])
 		})
 	}
