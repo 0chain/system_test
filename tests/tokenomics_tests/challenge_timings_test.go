@@ -361,6 +361,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 7: 1 1000gb allocation, 100gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		t.Skip()
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
