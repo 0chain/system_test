@@ -242,7 +242,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		}
 
 		time.Sleep(20 * time.Minute)
-		//for _, allocationId := range allocationIDs {
+		//for _, allocationId := range allocationIDs  {
 		//	_, err = utils.CancelAllocation(t, configPath, allocationId, true)
 		//	require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
 		//}
