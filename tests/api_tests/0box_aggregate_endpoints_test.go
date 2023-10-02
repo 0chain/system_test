@@ -45,12 +45,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		require.NotEmpty(t, confHash)
 	}
 
-	// Create the free allocation marker (ownerWallet -> sdkWallet)
-	apiClient.ExecuteFaucet(t, ownerWallet, client.TxSuccessfulStatus)
-	apiClient.AddFreeStorageAssigner(t, ownerWallet, client.TxSuccessfulStatus) // 0.1 ZCN 1 ZCN = 1e10 from owner wallet
-	marker := config.CreateFreeStorageMarker(t, sdkWallet.ToSdkWallet(sdkWalletMnemonics), ownerWallet.ToSdkWallet(ownerWalletMnemonics))
-	t.Logf("Free allocation marker: %v", marker)
-
 	t.RunSequentially("endpoint parameters ( test /v2/graph-write-price )", graphEndpointTestCases(zboxClient.GetGraphWritePrice))
 
 	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-write-price )", 5*time.Minute, func(t *test.SystemTest) {
