@@ -61,8 +61,8 @@ func TestChallengeTimings(testSetup *testing.T) {
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   2 * MB,
 			"tokens": 99,
-			"data":   2,
-			"parity": 10,
+			"data":   3,
+			"parity": 3,
 		})
 
 		// Uploading 10% of allocation
