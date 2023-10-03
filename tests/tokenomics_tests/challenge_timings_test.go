@@ -53,7 +53,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 	numData := 1
 	numParity := 1
 
-	t.RunWithTimeout("Case 0: Ignore", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Setup", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -83,9 +83,20 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
 		defer os.Remove(filename)
+
+		for _, blobber := range blobberList {
+			_, err := utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 10000)
+			require.Nil(t, err, "Error executing faucet with tokens", strings.Join(output, "\n"))
+
+			_, err = utils.StakeTokensForWallet(t, configPath, blobberOwnerWallet, utils.CreateParams(map[string]interface{}{
+				"blobber_id": blobber.Id,
+				"tokens":     10000,
+			}), true)
+			require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
+		}
 	})
 
-	t.RunWithTimeout("Case 1: 1 10mb allocation, 1mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 1: 1mb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -134,7 +145,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunWithTimeout("Case 2: 1 100mb allocation, 10mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 2: 10mb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -181,97 +192,40 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunWithTimeout("Case 3: 10 100mb allocation, 10mb file each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 3: 100 mb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		// range of 10 allocations
-		for i := 0; i < 10; i++ {
-			// 1. Create an allocation with 1 data shard and 1 parity shard.
-			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   20 * MB,
-				"tokens": 99,
-				"data":   numData,
-				"parity": numParity,
-			})
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   200 * MB,
+			"tokens": 99,
+			"data":   numData,
+			"parity": numParity,
+		})
 
-			allocationIDs = append(allocationIDs, allocationId)
+		allocationIDs = append(allocationIDs, allocationId)
 
-			// Uploading 10% of allocation
-			remotepath := "/dir/"
-			filesize := 10 * MB
-			filename := utils.GenerateRandomTestFileName(t)
+		// Uploading 10% of allocation
 
-			err = utils.CreateFileWithSize(filename, int64(filesize))
-			require.Nil(t, err)
+		remotepath := "/dir/"
+		filesize := 100 * MB
+		filename := utils.GenerateRandomTestFileName(t)
 
-			output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-				// fetch the latest block in the chain
-				"allocation": allocationId,
-				"remotepath": remotepath + filepath.Base(filename),
-				"localpath":  filename,
-			}, true)
-			require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
+		err = utils.CreateFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
 
-			defer os.Remove(filename)
-		}
+		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
 
-		time.Sleep(20 * time.Minute)
-		//for _, allocationId := range allocationIDs {
-		//	_, err = utils.CancelAllocation(t, configPath, allocationId, true)
-		//	require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
-		//}
-
-		result := getChallengeTimings(t, blobberList, allocationIDs)
-
-		proofGenTime := result[0]
-		txnVerificationTime := result[2]
-
-		require.True(t, proofGenTime < 110, "It is taking more than 110000 milliseconds to generate proof")
-		require.True(t, txnVerificationTime < 10000, "It is taking more than 10000 milliseconds to verify txn")
-
-		require.True(t, false)
-	})
-
-	t.RunWithTimeout("Case 4: 10 1gb allocation, 100mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		var allocationIDs []string
-
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		// range of 10 allocations
-		for i := 0; i < 10; i++ {
-			// 1. Create an allocation with 1 data shard and 1 parity shard.
-			allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   200 * MB,
-				"tokens": 99,
-				"data":   numData,
-				"parity": numParity,
-			})
-
-			allocationIDs = append(allocationIDs, allocationId)
-
-			// Uploading 10% of allocation
-
-			remotepath := "/dir/"
-			filesize := 100 * MB
-			filename := utils.GenerateRandomTestFileName(t)
-
-			err = utils.CreateFileWithSize(filename, int64(filesize))
-			require.Nil(t, err)
-
-			output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-				// fetch the latest block in the chain
-				"allocation": allocationId,
-				"remotepath": remotepath + filepath.Base(filename),
-				"localpath":  filename,
-			}, true)
-			require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
-
-			defer os.Remove(filename)
-		}
+		defer os.Remove(filename)
 
 		time.Sleep(20 * time.Minute)
 		//for _, allocationId := range allocationIDs  {
@@ -290,7 +244,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunWithTimeout("Case 5: 1 10gb allocation, 1gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 4: 1gb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -341,7 +295,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunWithTimeout("Case 6: 1 100gb allocation, 10gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 5: 10gb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -392,7 +346,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunWithTimeout("Case 7: 1 1000gb allocation, 100gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 6: 100gb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		t.Skip()
 		var allocationIDs []string
 
@@ -444,7 +398,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunWithTimeout("Case 8: 1 1000gb allocation, 100gb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunWithTimeout("Case 7: 1000gb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		t.Skip()
 		var allocationIDs []string
 
@@ -518,6 +472,8 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 			blobberUrl := blobberUrls[challenge.BlobberID]
 
 			url := blobberUrl + "/challenge-timings-by-challengeId?challenge_id=" + challenge.ChallengeID
+
+			t.Log("Challenge URL for alloc : "+allocationID+" : ", url)
 
 			resp, err := http.Get(url) //nolint:gosec
 			if err != nil {
