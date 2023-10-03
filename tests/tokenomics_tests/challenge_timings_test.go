@@ -473,8 +473,6 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 
 			url := blobberUrl + "/challenge-timings-by-challengeId?challenge_id=" + challenge.ChallengeID
 
-			t.Log("Challenge URL for alloc : "+allocationID+" : ", url)
-
 			resp, err := http.Get(url) //nolint:gosec
 			if err != nil {
 				t.Log("Error while getting challenge timings:", err)
@@ -502,10 +500,10 @@ func getChallengeTimings(t *test.SystemTest, blobbers []climodel.BlobberInfo, al
 
 			// Calculate the time difference in milliseconds
 			txnSubmission := challengeTiming.TxnSubmission.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime())
-			txnSubmissions = append(txnSubmissions, txnSubmission.Milliseconds())
+			txnSubmissions = append(txnSubmissions, int64(txnSubmission.Seconds()))
 
 			txnVerification := challengeTiming.TxnVerification.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime())
-			txnVerifications = append(txnVerifications, txnVerification.Milliseconds())
+			txnVerifications = append(txnVerifications, int64(txnVerification.Seconds()))
 		}
 	}
 
