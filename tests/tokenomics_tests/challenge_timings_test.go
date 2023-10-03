@@ -53,6 +53,38 @@ func TestChallengeTimings(testSetup *testing.T) {
 	numData := 1
 	numParity := 1
 
+	t.RunWithTimeout("Case 0: Ignore", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   2 * MB,
+			"tokens": 99,
+			"data":   2,
+			"parity": 10,
+		})
+
+		// Uploading 10% of allocation
+
+		remotepath := "/dir/"
+		filesize := 1 * MB
+		filename := utils.GenerateRandomTestFileName(t)
+
+		err = utils.CreateFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, fmt.Sprintf("error uploading file %s", allocationId), strings.Join(output, "\n"))
+
+		defer os.Remove(filename)
+	})
+
 	t.RunWithTimeout("Case 1: 1 10mb allocation, 1mb each", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
