@@ -90,7 +90,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 			_, err = utils.StakeTokensForWallet(t, configPath, blobberOwnerWallet, utils.CreateParams(map[string]interface{}{
 				"blobber_id": blobber.Id,
-				"tokens":     10000,
+				"tokens":     5000,
 			}), true)
 			require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		}
