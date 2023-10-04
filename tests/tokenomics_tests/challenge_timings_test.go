@@ -301,7 +301,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 99)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 999)
 		require.Nil(t, err, "Error executing faucet with tokens", strings.Join(output, "\n"))
 
 		// range of 10 allocations
@@ -347,13 +347,12 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 6: 100gb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 99)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9999)
 		require.Nil(t, err, "Error executing faucet with tokens", strings.Join(output, "\n"))
 
 		// range of 10 allocations
