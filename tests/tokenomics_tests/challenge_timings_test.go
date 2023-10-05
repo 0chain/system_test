@@ -351,15 +351,13 @@ func TestChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunWithTimeout("Case 6: 100gb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
-		t.Skip()
-		time.Sleep(20 * time.Minute)
+	t.RunWithTimeout("Case 5: 10gb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9999)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 999)
 		require.Nil(t, err, "Error executing faucet with tokens", strings.Join(output, "\n"))
 
 		// range of 10 allocations
@@ -391,7 +389,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 		defer os.Remove(filename)
 
 		time.Sleep(20 * time.Minute)
-		//_, err = utils.CancelAllocation(t, configPath, allocationId, true)
+		//_, err = utils.CancelAllocation(t, configPath, allocationId, true )
 		//require.Nil(t, err, fmt.Sprintf("error cancelling allocation %s", allocationId), strings.Join(output, "\n"))
 
 		result := getChallengeTimings(t, blobberList, allocationIDs)
