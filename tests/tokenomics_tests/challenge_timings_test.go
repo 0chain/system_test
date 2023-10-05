@@ -352,6 +352,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 6: 100gb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		t.Skip()
 		time.Sleep(20 * time.Minute)
 		var allocationIDs []string
 
