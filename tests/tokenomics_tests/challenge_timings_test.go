@@ -84,16 +84,19 @@ func TestChallengeTimings(testSetup *testing.T) {
 
 		defer os.Remove(filename)
 
-		for _, blobber := range blobberList {
-			_, err := utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 10000)
-			require.Nil(t, err, "Error executing faucet with tokens", strings.Join(output, "\n"))
+		for i := 0; i < 10; i++ {
+			for _, blobber := range blobberList {
+				_, err := utils.ExecuteFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 10000)
+				require.Nil(t, err, "Error executing faucet with tokens", strings.Join(output, "\n"))
 
-			_, err = utils.StakeTokensForWallet(t, configPath, blobberOwnerWallet, utils.CreateParams(map[string]interface{}{
-				"blobber_id": blobber.Id,
-				"tokens":     5000,
-			}), true)
-			require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
+				_, err = utils.StakeTokensForWallet(t, configPath, blobberOwnerWallet, utils.CreateParams(map[string]interface{}{
+					"blobber_id": blobber.Id,
+					"tokens":     5000,
+				}), true)
+				require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
+			}
 		}
+
 	})
 
 	t.RunWithTimeout("Case 1: 1mb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
@@ -245,6 +248,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 4: 1gb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		time.Sleep(20 * time.Minute)
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -296,6 +300,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 5: 10gb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		time.Sleep(20 * time.Minute)
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -347,6 +352,7 @@ func TestChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Case 6: 100gb file", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+		time.Sleep(20 * time.Minute)
 		var allocationIDs []string
 
 		output, err := utils.CreateWallet(t, configPath)
