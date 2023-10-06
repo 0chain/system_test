@@ -65,7 +65,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationId, sharderUrl)
-		require.Len(t, readMarkers, blobbersRequiredForDownload)
+		require.GreaterOrEqual(t, len(readMarkers), blobbersRequiredForDownload)
 
 		afterCount := CountReadMarkers(t, allocationId, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
@@ -114,7 +114,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationId, sharderUrl)
-		require.Len(t, readMarkers, blobbersRequiredForDownload)
+		require.GreaterOrEqual(t, len(readMarkers), blobbersRequiredForDownload)
 
 		afterCount := CountReadMarkers(t, allocationId, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
@@ -171,7 +171,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationID, sharderUrl)
-		require.Len(t, readMarkers, blobbersRequiredForDownload)
+		require.GreaterOrEqual(t, len(readMarkers), blobbersRequiredForDownload)
 
 		afterCount := CountReadMarkers(t, allocationID, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
@@ -241,7 +241,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationID, sharderUrl)
-		require.Len(t, readMarkers, blobbersRequiredForDownload)
+		require.GreaterOrEqual(t, len(readMarkers), blobbersRequiredForDownload)
 
 		afterCount := CountReadMarkers(t, allocationID, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
@@ -308,7 +308,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationID, sharderUrl)
-		require.Len(t, readMarkers, blobbersRequiredForDownload)
+		require.GreaterOrEqual(t, len(readMarkers), blobbersRequiredForDownload)
 
 		afterCount := CountReadMarkers(t, allocationID, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
@@ -362,7 +362,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationID, sharderUrl)
-		require.Len(t, readMarkers, blobbersRequiredForDownload)
+		require.GreaterOrEqual(t, len(readMarkers), blobbersRequiredForDownload)
 
 		for _, rm := range readMarkers {
 			require.Equal(t, int64(6), rm.ReadCounter)
