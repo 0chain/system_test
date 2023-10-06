@@ -69,7 +69,7 @@ jobs:
 
   system-tests:
     name: "System Tests"
-    runs-on: [ high-upload-download ]
+    runs-on: [ tests-suite ]
     timeout-minutes: 20000
     steps:
       - name: "Get current PR"
