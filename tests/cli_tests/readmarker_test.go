@@ -23,7 +23,7 @@ func TestReadMarker(testSetup *testing.T) {
 
 	t.Parallel()
 
-	const blobbersRequiredForDownload = 4 // download needs (data shards + 1) number of blobbers
+	const blobbersRequiredForDownload = 3 // download needs (data shards) number of blobbers
 
 	var sharderUrl string
 	t.TestSetup("Create wallet and temp directories, get sharder url", func() {
