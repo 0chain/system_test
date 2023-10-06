@@ -24,7 +24,7 @@ const (
 )
 
 // 1687440537
-func TestChallengeTimings(testSetup *testing.T) {
+func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 90000, client.TxSuccessfulStatus)
