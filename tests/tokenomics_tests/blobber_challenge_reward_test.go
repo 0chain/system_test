@@ -17,33 +17,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type Reward int
-
-const (
-	MinLockDemandReward Reward = iota
-	BlockRewardMiner
-	BlockRewardSharder
-	BlockRewardBlobber
-	FeeRewardMiner
-	FeeRewardAuthorizer
-	FeeRewardSharder
-	ValidationReward
-	FileDownloadReward
-	ChallengePassReward
-	ChallengeSlashPenalty
-	CancellationChargeReward
-	NumOfRewards
-)
-
-const (
-	allocSize = 1024 * 1024 * 1024 * 100
-	fileSize  = 1024 * 1024 * 1024 * 10
-	sleepTime = 20 * time.Minute
-
-	standardErrorMargin = 0.05
-	extraErrorMargin    = 0.15
-)
-
 func TestBlobberChallengeRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
