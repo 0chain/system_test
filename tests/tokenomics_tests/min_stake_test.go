@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -41,9 +42,9 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 	var blobberList []climodel.BlobberInfo
 	output, err := utils.ListBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-	require.Len(t, output, 2)
+	require.Len(t, output, 1)
 
-	err = json.Unmarshal([]byte(output[1]), &blobberList)
+	err = json.Unmarshal([]byte(output[0]), &blobberList)
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
@@ -70,6 +71,9 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 	t.Log("Validator List: ", validatorListString)
 
 	t.RunWithTimeout("miner rewards", 10*time.Minute, func(t *test.SystemTest) {
+		_, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet")
+
 		sharderUrl := utils.GetSharderUrl(t)
 		minerIds := utils.GetSortedMinerIds(t, sharderUrl)
 
@@ -115,12 +119,12 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 
 		// When there are stakes more than min stakes per delegate pool
 		for _, minerId := range minerIds {
-			_, err := utils.ExecuteFaucetWithTokens(t, configPath, 15.0)
+			_, err := utils.ExecuteFaucetWithTokens(t, configPath, 150.0)
 			require.Nil(t, err, "error executing faucet")
 
 			output, err = utils.MinerOrSharderLock(t, configPath, utils.CreateParams(map[string]interface{}{
 				"miner_id": minerId,
-				"tokens":   10.0,
+				"tokens":   100.0,
 			}), true)
 			require.Nil(t, err, "error staking tokens against a node")
 			require.Len(t, output, 1)
@@ -165,9 +169,10 @@ func getQueryRewards(t *test.SystemTest, query string) (QueryRewardsResponse, er
 
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	sharderBaseUrl := utils.GetSharderUrl(t)
-	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/query-rewards?query=" + query)
+	requestURL := fmt.Sprintf("%s/v1/screst/%s/query-rewards?query=%s",
+		sharderBaseUrl, StorageScAddress, url.QueryEscape(query))
 
-	res, _ := http.Get(url) //nolint:gosec
+	res, _ := http.Get(requestURL) //nolint:gosec
 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
