@@ -79,7 +79,7 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: "Set PR status as pending"
-        uses: 0chain/actions/set-pr-status@mastfeature/challenge-gap
+        uses: 0chain/actions/set-pr-status@feature/challenge-gap
         if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
