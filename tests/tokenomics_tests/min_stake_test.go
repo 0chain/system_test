@@ -38,20 +38,6 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 	_, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet")
 
-	t.TestSetup("set storage config to use time_unit as 10 minutes", func() {
-		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "10m",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-	})
-
-	t.Cleanup(func() {
-		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "1h",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-	})
-
 	var blobberList []climodel.BlobberInfo
 	output, err := utils.ListBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
