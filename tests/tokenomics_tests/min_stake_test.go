@@ -35,6 +35,9 @@ const (
 func TestMinStakeForProviders(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	_, err := utils.CreateWallet(t, configPath)
+	require.Nil(t, err, "Error registering wallet")
+
 	t.TestSetup("set storage config to use time_unit as 10 minutes", func() {
 		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			"time_unit": "10m",
