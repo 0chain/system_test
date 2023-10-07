@@ -380,9 +380,24 @@ type ClientGetReadPoolBalanceRequest struct {
 	ClientID string
 }
 
+type QueryRewardsRequest struct {
+	Query string
+}
+
+type BlockRewardsRequest struct {
+	Start int64
+	End   int64
+}
+
 type ClientGetReadPoolBalanceResponse struct {
 	UserID  string `json:"user_id" gorm:"uniqueIndex"`
 	Balance int64  `json:"balance"`
+}
+
+type QueryRewardsResponse struct {
+	TotalProviderReward float64 `json:"total_provider_reward"`
+	TotalDelegateReward float64 `json:"total_delegate_reward"`
+	TotalReward         float64 `json:"total_reward"`
 }
 
 type SCStateGetRequest struct {
@@ -642,23 +657,31 @@ type FreeAllocationRequest struct {
 }
 
 type SCRestGetAllocationResponse struct {
-	ID              string           `json:"id"`
-	Tx              string           `json:"tx"`
-	Name            string           `json:"name"`
-	DataShards      int              `json:"data_shards"`
-	ParityShards    int              `json:"parity_shards"`
-	Size            int64            `json:"size"`
-	Expiration      int64            `json:"expiration_date"`
-	Owner           string           `json:"owner_id"`
-	OwnerPublicKey  string           `json:"owner_public_key"`
-	Payer           string           `json:"payer_id"`
-	Blobbers        []*StorageNode   `json:"blobbers"`
-	Stats           *AllocationStats `json:"stats"`
-	TimeUnit        time.Duration    `json:"time_unit"`
-	IsImmutable     bool             `json:"is_immutable"`
-	WritePool       int64            `json:"write_pool"`
-	ReadPriceRange  PriceRange       `json:"read_price_range"`
-	WritePriceRange PriceRange       `json:"write_price_range"`
+	ID                string           `json:"id"`
+	Tx                string           `json:"tx"`
+	Name              string           `json:"name"`
+	DataShards        int              `json:"data_shards"`
+	ParityShards      int              `json:"parity_shards"`
+	Size              int64            `json:"size"`
+	CreatedAt         int64            `json:"created_at"`
+	Expiration        int64            `json:"expiration_date"`
+	Owner             string           `json:"owner_id"`
+	OwnerPublicKey    string           `json:"owner_public_key"`
+	Payer             string           `json:"payer_id"`
+	Blobbers          []*StorageNode   `json:"blobbers"`
+	Stats             *AllocationStats `json:"stats"`
+	TimeUnit          time.Duration    `json:"time_unit"`
+	IsImmutable       bool             `json:"is_immutable"`
+	StartTime         int64            `json:"start_time"`
+	Finalized         bool             `json:"finalized"`
+	Canceled          bool             `json:"canceled"`
+	WritePool         int64            `json:"write_pool"`
+	MovedToChallenge  int64            `json:"moved_to_challenge"`
+	MovedBack         int64            `json:"moved_back"`
+	MovedToValidators int64            `json:"moved_to_validators"`
+	MinLockDemand     float64          `json:"min_lock_demand"`
+	ReadPriceRange    PriceRange       `json:"read_price_range"`
+	WritePriceRange   PriceRange       `json:"write_price_range"`
 }
 
 type StorageNodes struct {
@@ -672,6 +695,7 @@ type StorageNode struct {
 	Terms             Terms                  `json:"terms"`     // terms
 	Capacity          int64                  `json:"capacity"`  // total blobber capacity
 	Allocated         int64                  `json:"allocated"` // allocated capacity
+	TotalStake        int64                  `json:"total_stake"`
 	LastHealthCheck   int64                  `json:"last_health_check"`
 	PublicKey         string                 `json:"-"`
 	StakePoolSettings StakePoolSettings      `json:"stake_pool_settings"`
@@ -977,3 +1001,13 @@ type SCRestBurnZcnRequest struct {
 //----------------------------------------------
 // End ZCN SC
 //----------------------------------------------
+
+type LatestFinalizedBlock struct {
+	CreationDate      int64  `json:"creation_date"`
+	Hash              string `json:"hash,omitempty"`
+	StateHash         string `json:"state_hash"`
+	MinerId           string `json:"miner_id"`
+	Round             int64  `json:"round"`
+	StateChangesCount int    `json:"state_changes_count"`
+	NumTxns           int    `json:"num_txns"`
+}
