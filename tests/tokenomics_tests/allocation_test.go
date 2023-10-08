@@ -135,11 +135,11 @@ func TestAllocationRewards(testSetup *testing.T) {
 		}), true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 
+		// sleep for 10 minutes
+		time.Sleep(10 * time.Minute)
+
 		alloc = utils.GetAllocation(t, allocationId)
 		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
-
-		// sleep for 5 minutes
-		time.Sleep(15 * time.Minute)
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 
@@ -172,6 +172,10 @@ func TestAllocationRewards(testSetup *testing.T) {
 		allocationId, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
 
+		alloc := utils.GetAllocation(t, allocationId)
+		beforeExpiry := alloc.ExpirationDate
+		beforeMovedToChallenge := alloc.MovedToChallenge
+
 		t.Log("allocationId", allocationId)
 
 		// Uploading 10% of allocation
@@ -195,9 +199,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 
 		time.Sleep(30 * time.Second)
 
-		alloc := utils.GetAllocation(t, allocationId)
-		movedToChallengePool := alloc.MovedToChallenge
-
 		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
 		require.Nil(t, err, "Error canceling allocation", strings.Join(output, "\n"))
 
@@ -205,16 +206,20 @@ func TestAllocationRewards(testSetup *testing.T) {
 		time.Sleep(2 * time.Minute)
 
 		alloc = utils.GetAllocation(t, allocationId)
-		require.Equal(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should not change")
+		afterExpiry := alloc.ExpirationDate
+
+		expectedChallengeRewards := float64(beforeMovedToChallenge) * (float64(afterExpiry-alloc.StartTime) / float64(beforeExpiry-alloc.StartTime))
+
+		require.Equal(t, alloc.MovedToChallenge, beforeMovedToChallenge, "MovedToChallenge should not change")
+		require.InEpsilon(t, int64(expectedChallengeRewards), alloc.MovedToChallenge-alloc.MovedBack, 0.05, "MovedToChallenge should not change")
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
-
 		totalBlobberChallengereward := int64(0)
 		for _, v := range rewards {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.InEpsilon(t, movedToChallengePool-alloc.MovedBack, totalBlobberChallengereward, 0.05, "Total Blobber Challenge Reward should be less than MovedToChallenge")
+		require.InEpsilon(t, beforeMovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, 0.05, "Total Blobber Challenge Reward should be less than MovedToChallenge")
 
 		// cancelation Rewards
 		alloccancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
@@ -273,13 +278,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 		alloc := utils.GetAllocation(t, allocationId)
 		movedToChallengePool := alloc.MovedToChallenge
 
-		// register a new wallet
-		nonAllocationOwnerWallet := "newwallet"
-		output, err = utils.CreateWalletForName(t, configPath, nonAllocationOwnerWallet)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-		_, err = utils.ExecuteFaucetWithTokensForWallet(t, nonAllocationOwnerWallet, configPath, 9)
-		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
-
 		// Setting allocation to third party extendable
 		params := utils.CreateParams(map[string]interface{}{
 			"allocation":                 allocationId,
@@ -287,6 +285,13 @@ func TestAllocationRewards(testSetup *testing.T) {
 		})
 		output, err = utils.UpdateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
+
+		// register a new wallet
+		nonAllocationOwnerWallet := "newwallet"
+		output, err = utils.CreateWalletForName(t, configPath, nonAllocationOwnerWallet)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+		_, err = utils.ExecuteFaucetWithTokensForWallet(t, nonAllocationOwnerWallet, configPath, 9)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		// Updating allocation with new wallet
 		_, err = utils.UpdateAllocationWithWallet(t, nonAllocationOwnerWallet, configPath, utils.CreateParams(map[string]interface{}{
