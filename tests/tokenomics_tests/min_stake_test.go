@@ -246,8 +246,8 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 10,
-			"data":   1,
-			"parity": 1,
+			"data":   3,
+			"parity": 3,
 		})
 
 		remotepath := "/dir/"
