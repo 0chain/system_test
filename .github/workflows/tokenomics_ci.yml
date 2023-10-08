@@ -104,7 +104,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain@feature/tokenomics_suite
+        uses: 0chain/actions/deploy-0chain-2b2v@feature/tokenomics_suite
         with:
           repo_snapshots_branch: current-sprint
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
