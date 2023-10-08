@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -242,14 +243,28 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 
 		time.Sleep(30 * time.Second)
 
-		utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 10,
 			"data":   1,
 			"parity": 1,
 		})
 
-		time.Sleep(1 * time.Minute)
+		remotepath := "/dir/"
+		filename := utils.GenerateRandomTestFileName(t)
+
+		err := utils.CreateFileWithSize(filename, 2*MB)
+		require.Nil(t, err)
+
+		output, err := utils.UploadFile(t, configPath, map[string]interface{}{
+			// fetch the latest block in the chain
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		time.Sleep(3 * time.Minute)
 
 		// When there are stakes less than min stakes per delegate pool
 		for _, blobberId := range blobberListString {
@@ -276,7 +291,7 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 			require.Nil(t, err, "Error staking tokens")
 		}
 
-		time.Sleep(30 * time.Second)
+		time.Sleep(2 * time.Minute)
 
 		for _, blobberId := range blobberListString {
 			challengeRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", blobberId, ChallengePassReward)
