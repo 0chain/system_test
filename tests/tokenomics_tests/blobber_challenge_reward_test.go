@@ -442,6 +442,10 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 	require.InEpsilon(t, blobber1TotalReward, blobber2TotalReward, 0.05, "Blobber 1 and Blobber 2 rewards are not equal")
 	require.InEpsilon(t, blobber1DelegatesTotalReward, blobber2DelegatesTotalReward, 0.05, "Blobber 1 and Blobber 2 delegate rewards are not equal")
 	require.InEpsilon(t, blobber1TotalReward+blobber1DelegatesTotalReward, blobber2TotalReward+blobber2DelegatesTotalReward, 0.05, "Blobber 1 Total and Blobber 2 Total rewards are not equal")
+
+	if numDeletes == 0 {
+		require.InEpsilon(t, validator1TotalReward, validator2TotalReward, 0.05, "Validator 1 and Validator 2 rewards are not equal")
+	}
 }
 
 func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId string, blobberListString, validatorListString []string, filesize float64, stakes []int64) {
