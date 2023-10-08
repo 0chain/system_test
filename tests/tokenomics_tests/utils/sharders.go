@@ -64,3 +64,7 @@ func getShardersForWallet(t *test.SystemTest, cliConfigFilename, wallet string) 
 	t.Logf("list sharder nodes...")
 	return cliutil.RunCommandWithRawOutput("./zwallet ls-sharders --active --json --silent --wallet " + wallet + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
+
+func GetSortedSharderIds(t *test.SystemTest, sharderBaseURL string) []string {
+	return getSortedNodeIds(t, "getSharderList", sharderBaseURL)
+}

@@ -150,7 +150,82 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("sharder rewards", 10*time.Minute, func(t *test.SystemTest) {
+		_, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet")
 
+		sharderUrl := utils.GetSharderUrl(t)
+		sharderIds := utils.GetSortedSharderIds(t, sharderUrl)
+
+		// When there are no stakes
+		for _, sharderId := range sharderIds {
+			blockRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", sharderId, BlockRewardSharder)
+			blockReward, err := getQueryRewards(t, blockRewardQuery)
+			require.Nil(t, err, "Error getting block reward", blockRewardQuery)
+			require.Equal(t, 0.0, blockReward.TotalReward, "Block reward should be 0 for miner %s", sharderId)
+
+			feeRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", sharderId, FeeRewardSharder)
+			feeReward, err := getQueryRewards(t, feeRewardQuery)
+			require.Nil(t, err, "Error getting fee reward", feeRewardQuery)
+			require.Equal(t, 0.0, feeReward.TotalReward, "Fee reward should be 0 for miner %s", sharderId)
+		}
+
+		// When there are stakes less than min stakes per delegate pool
+		for _, sharderId := range sharderIds {
+			_, err := utils.ExecuteFaucetWithTokens(t, configPath, 2.0)
+			require.Nil(t, err, "error executing faucet")
+
+			output, err = utils.MinerOrSharderLock(t, configPath, utils.CreateParams(map[string]interface{}{
+				"sharder_id": sharderId,
+				"tokens":     1.0,
+			}), true)
+			require.Nil(t, err, "error staking tokens against a node")
+			require.Len(t, output, 1)
+		}
+
+		time.Sleep(30 * time.Second)
+
+		for _, sharderId := range sharderIds {
+			blockRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", sharderId, BlockRewardSharder)
+			blockReward, err := getQueryRewards(t, blockRewardQuery)
+			require.Nil(t, err, "Error getting block reward", blockRewardQuery)
+			require.Equal(t, 0.0, blockReward.TotalReward, "Block reward should be 0 for miner %s", sharderId)
+
+			feeRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", sharderId, FeeRewardSharder)
+			feeReward, err := getQueryRewards(t, feeRewardQuery)
+			require.Nil(t, err, "Error getting fee reward", feeRewardQuery)
+			require.Equal(t, 0.0, feeReward.TotalReward, "Fee reward should be 0 for miner %s", sharderId)
+		}
+
+		// When there are stakes more than min stakes per delegate pool
+		for _, sharderId := range sharderIds {
+			_, err := utils.ExecuteFaucetWithTokens(t, configPath, 150.0)
+			require.Nil(t, err, "error executing faucet")
+
+			output, err = utils.MinerOrSharderLock(t, configPath, utils.CreateParams(map[string]interface{}{
+				"sharder_id": sharderId,
+				"tokens":     100.0,
+			}), true)
+			require.Nil(t, err, "error staking tokens against a node")
+			require.Len(t, output, 1)
+		}
+
+		time.Sleep(30 * time.Second)
+
+		for _, sharderId := range sharderIds {
+			blockRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", sharderId, BlockRewardSharder)
+			blockReward, err := getQueryRewards(t, blockRewardQuery)
+			require.Nil(t, err, "Error getting block reward", blockRewardQuery)
+			require.Greater(t, blockReward.TotalReward, 0.0, "Block reward should be greater than 0 for miner %s", sharderId)
+			require.Greater(t, blockReward.TotalProviderReward, 0.0, "Block reward should be greater than 0 for miner %s", sharderId)
+			require.Greater(t, blockReward.TotalDelegateReward, 0.0, "Block reward should be greater than 0 for miner %s", sharderId)
+
+			feeRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", sharderId, FeeRewardSharder)
+			feeReward, err := getQueryRewards(t, feeRewardQuery)
+			require.Nil(t, err, "Error getting fee reward", feeRewardQuery)
+			require.Greater(t, feeReward.TotalReward, 0.0, "Fee reward should be greater than 0 for miner %s", sharderId)
+			require.Greater(t, feeReward.TotalProviderReward, 0.0, "Fee reward should be greater than 0 for miner %s", sharderId)
+			require.Greater(t, feeReward.TotalDelegateReward, 0.0, "Fee reward should be greater than 0 for miner %s", sharderId)
+		}
 	})
 
 	t.RunWithTimeout("blobber and validator rewards", 10*time.Minute, func(t *test.SystemTest) {
