@@ -228,8 +228,71 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 		}
 	})
 
-	t.RunWithTimeout("blobber and validator rewards", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("blobber rewards", 10*time.Minute, func(t *test.SystemTest) {
+		for _, blobberId := range blobberListString {
+			_, err := utils.ExecuteFaucetWithTokens(t, configPath, 2)
+			require.Nil(t, err, "Error executing faucet")
 
+			_, err = utils.StakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{
+				"blobber_id": blobberId,
+				"tokens":     1,
+			}), true)
+			require.Nil(t, err, "Error staking tokens")
+		}
+
+		time.Sleep(30 * time.Second)
+
+		utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   10 * MB,
+			"tokens": 10,
+			"data":   1,
+			"parity": 1,
+		})
+
+		time.Sleep(1 * time.Minute)
+
+		// When there are stakes less than min stakes per delegate pool
+		for _, blobberId := range blobberListString {
+			challengeRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", blobberId, ChallengePassReward)
+			challengeReward, err := getQueryRewards(t, challengeRewardQuery)
+			require.Nil(t, err, "Error getting challenge reward", challengeRewardQuery)
+			require.Equal(t, 0.0, challengeReward.TotalReward, "Challenge reward should be 0 for miner %s", blobberId)
+
+			blockRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", blobberId, BlockRewardBlobber)
+			blockReward, err := getQueryRewards(t, blockRewardQuery)
+			require.Nil(t, err, "Error getting block reward", blockRewardQuery)
+			require.Equal(t, 0.0, blockReward.TotalReward, "Block reward should be 0 for miner %s", blobberId)
+		}
+
+		// When there are stakes more than min stakes per delegate pool
+		for _, blobberId := range blobberListString {
+			_, err := utils.ExecuteFaucetWithTokens(t, configPath, 150)
+			require.Nil(t, err, "Error executing faucet")
+
+			_, err = utils.StakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{
+				"blobber_id": blobberId,
+				"tokens":     100,
+			}), true)
+			require.Nil(t, err, "Error staking tokens")
+		}
+
+		time.Sleep(30 * time.Second)
+
+		for _, blobberId := range blobberListString {
+			challengeRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", blobberId, ChallengePassReward)
+			challengeReward, err := getQueryRewards(t, challengeRewardQuery)
+			require.Nil(t, err, "Error getting challenge reward", challengeRewardQuery)
+			require.Greater(t, challengeReward.TotalReward, 0.0, "Challenge reward should be greater than 0 for miner %s", blobberId)
+			require.Greater(t, challengeReward.TotalProviderReward, 0.0, "Challenge reward should be greater than 0 for miner %s", blobberId)
+			require.Greater(t, challengeReward.TotalDelegateReward, 0.0, "Challenge reward should be greater than 0 for miner %s", blobberId)
+
+			blockRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", blobberId, BlockRewardBlobber)
+			blockReward, err := getQueryRewards(t, blockRewardQuery)
+			require.Nil(t, err, "Error getting block reward", blockRewardQuery)
+			require.Greater(t, blockReward.TotalReward, 0.0, "Block reward should be greater than 0 for miner %s", blobberId)
+			require.Greater(t, blockReward.TotalProviderReward, 0.0, "Block reward should be greater than 0 for miner %s", blobberId)
+			require.Greater(t, blockReward.TotalDelegateReward, 0.0, "Block reward should be greater than 0 for miner %s", blobberId)
+		}
 	})
 }
 

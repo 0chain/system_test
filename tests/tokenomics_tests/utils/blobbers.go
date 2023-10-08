@@ -23,3 +23,7 @@ func UpdateBlobberInfoForWallet(t *test.SystemTest, cliConfigFilename, wallet, p
 	wallet = "wallets/blobber_owner"
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox bl-update %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second*2)
 }
+
+func StakeTokens(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return StakeTokensForWallet(t, cliConfigFilename, EscapedTestName(t), params, retry)
+}
