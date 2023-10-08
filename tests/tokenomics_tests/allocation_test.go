@@ -173,10 +173,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 		allocationId, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
 
-		alloc := utils.GetAllocation(t, allocationId)
-		beforeExpiry := alloc.ExpirationDate
-		beforeMovedToChallenge := alloc.MovedToChallenge
-
 		t.Log("allocationId", allocationId)
 
 		// Uploading 10% of allocation
@@ -199,6 +195,10 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
 		time.Sleep(30 * time.Second)
+
+		alloc := utils.GetAllocation(t, allocationId)
+		beforeExpiry := alloc.ExpirationDate
+		beforeMovedToChallenge := alloc.MovedToChallenge
 
 		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
 		require.Nil(t, err, "Error canceling allocation", strings.Join(output, "\n"))
