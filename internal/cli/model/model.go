@@ -90,11 +90,12 @@ type Allocation struct {
 }
 
 type AllocationFile struct {
-	Name string `json:"name"`
-	Path string `json:"path"`
-	Type string `json:"type"`
-	Size int    `json:"size"`
-	Hash string `json:"hash"`
+	Name       string `json:"name"`
+	Path       string `json:"path"`
+	Type       string `json:"type"`
+	Size       int    `json:"size"`
+	Hash       string `json:"hash"`
+	ActualSize int    `json:"actual_size"`
 }
 type Blobber struct {
 	ID                string            `json:"id"`
@@ -775,6 +776,7 @@ var StorageCurrencySettigs = []string{
 
 var StorageIntSettings = []string{
 	"max_challenge_completion_rounds",
+	"challenge_generation_gap",
 	"max_file_size",
 	"min_alloc_size",
 	"min_blobber_capacity",
