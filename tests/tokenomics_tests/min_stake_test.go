@@ -37,6 +37,20 @@ const (
 func TestMinStakeForProviders(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	t.TestSetup("set storage config to use time_unit as 10 minutes", func() {
+		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "30m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+	})
+
+	t.Cleanup(func() {
+		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "1h",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+	})
+
 	_, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet")
 
@@ -244,7 +258,7 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 		time.Sleep(30 * time.Second)
 
 		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
+			"size":   100 * MB,
 			"tokens": 10,
 			"data":   3,
 			"parity": 3,
@@ -253,7 +267,7 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 		remotepath := "/dir/"
 		filename := utils.GenerateRandomTestFileName(t)
 
-		err := utils.CreateFileWithSize(filename, 2*MB)
+		err := utils.CreateFileWithSize(filename, 80*MB)
 		require.Nil(t, err)
 
 		output, err := utils.UploadFile(t, configPath, map[string]interface{}{
@@ -271,12 +285,12 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 			challengeRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", blobberId, ChallengePassReward)
 			challengeReward, err := getQueryRewards(t, challengeRewardQuery)
 			require.Nil(t, err, "Error getting challenge reward", challengeRewardQuery)
-			require.Equal(t, 0.0, challengeReward.TotalReward, "Challenge reward should be 0 for miner %s", blobberId)
+			require.Equal(t, 0.0, challengeReward.TotalReward, "Challenge reward should be 0 for blobber %s", blobberId)
 
 			blockRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", blobberId, BlockRewardBlobber)
 			blockReward, err := getQueryRewards(t, blockRewardQuery)
 			require.Nil(t, err, "Error getting block reward", blockRewardQuery)
-			require.Equal(t, 0.0, blockReward.TotalReward, "Block reward should be 0 for miner %s", blobberId)
+			require.Equal(t, 0.0, blockReward.TotalReward, "Block reward should be 0 for blobber %s", blobberId)
 		}
 
 		// When there are stakes more than min stakes per delegate pool
@@ -291,22 +305,22 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 			require.Nil(t, err, "Error staking tokens")
 		}
 
-		time.Sleep(2 * time.Minute)
+		time.Sleep(5 * time.Minute)
 
 		for _, blobberId := range blobberListString {
 			challengeRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", blobberId, ChallengePassReward)
 			challengeReward, err := getQueryRewards(t, challengeRewardQuery)
 			require.Nil(t, err, "Error getting challenge reward", challengeRewardQuery)
-			require.Greater(t, challengeReward.TotalReward, 0.0, "Challenge reward should be greater than 0 for miner %s", blobberId)
-			require.Greater(t, challengeReward.TotalProviderReward, 0.0, "Challenge reward should be greater than 0 for miner %s", blobberId)
-			require.Greater(t, challengeReward.TotalDelegateReward, 0.0, "Challenge reward should be greater than 0 for miner %s", blobberId)
+			require.Greater(t, challengeReward.TotalReward, 0.0, "Total Challenge reward should be greater than 0 for blobber %s", blobberId)
+			require.Greater(t, challengeReward.TotalProviderReward, 0.0, "Provider Challenge reward should be greater than 0 for blobber %s", blobberId)
+			require.Greater(t, challengeReward.TotalDelegateReward, 0.0, "Delegates Challenge reward should be greater than 0 for blobber %s", blobberId)
 
 			blockRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d", blobberId, BlockRewardBlobber)
 			blockReward, err := getQueryRewards(t, blockRewardQuery)
 			require.Nil(t, err, "Error getting block reward", blockRewardQuery)
-			require.Greater(t, blockReward.TotalReward, 0.0, "Block reward should be greater than 0 for miner %s", blobberId)
-			require.Greater(t, blockReward.TotalProviderReward, 0.0, "Block reward should be greater than 0 for miner %s", blobberId)
-			require.Greater(t, blockReward.TotalDelegateReward, 0.0, "Block reward should be greater than 0 for miner %s", blobberId)
+			require.Greater(t, blockReward.TotalReward, 0.0, "Total Block reward should be greater than 0 for blobber %s", blobberId)
+			require.Greater(t, blockReward.TotalProviderReward, 0.0, "Provider Block reward should be greater than 0 for blobber %s", blobberId)
+			require.Greater(t, blockReward.TotalDelegateReward, 0.0, "Delegates Block reward should be greater than 0 for blobber %s", blobberId)
 		}
 	})
 }
