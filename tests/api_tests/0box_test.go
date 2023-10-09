@@ -118,7 +118,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationId := "allocation id created as a part of" + t.Name()
@@ -253,7 +253,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationId := "allocation id created as a part of" + t.Name()
@@ -363,7 +363,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationId := "allocation id created as a part of" + t.Name()
@@ -522,7 +522,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationId := "allocation id created as a part of" + t.Name()
@@ -585,7 +585,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationId := "allocation id created as a part of" + t.Name()
@@ -674,7 +674,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationId := "allocation id created as a part of" + t.Name()

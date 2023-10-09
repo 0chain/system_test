@@ -63,7 +63,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		_, response, err = zboxClient.PostAllocation(t,
@@ -99,7 +99,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationId := "allocation id created as part of " + t.Name()
@@ -143,7 +143,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationId := "allocation id  created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
@@ -181,7 +181,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationId := "allocation id created as part of " + t.Name()
@@ -257,7 +257,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationID := "allocation id created as part of " + t.Name()
@@ -313,7 +313,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationID := "allocation id created as part of " + t.Name()
@@ -369,7 +369,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationID := "allocation id created as part of " + t.Name()
@@ -407,7 +407,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationID := "allocation id created as part of " + t.Name()
@@ -445,7 +445,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationID := "allocation id created as part of " + t.Name()
@@ -483,7 +483,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationID := "allocation id created as part of " + t.Name()
@@ -534,7 +534,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationID := "allocation id created as part of " + t.Name()
@@ -577,7 +577,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		_, response, err = zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, zboxClient.DefaultAllocationId, allocationName)
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -602,7 +602,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationID := "allocation id created as part of " + t.Name()
