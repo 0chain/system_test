@@ -768,6 +768,7 @@ var StorageCurrencySettigs = []string{
 
 var StorageIntSettings = []string{
 	"max_challenge_completion_rounds",
+	"challenge_generation_gap",
 	"max_file_size",
 	"min_alloc_size",
 	"min_blobber_capacity",
