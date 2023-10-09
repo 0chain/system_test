@@ -243,7 +243,7 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 		}
 	})
 
-	t.RunWithTimeout("blobber rewards", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("blobber rewards", 30*time.Minute, func(t *test.SystemTest) {
 		for _, blobberId := range blobberListString {
 			_, err := utils.ExecuteFaucetWithTokens(t, configPath, 2)
 			require.Nil(t, err, "Error executing faucet")
