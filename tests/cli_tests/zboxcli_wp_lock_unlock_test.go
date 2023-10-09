@@ -71,13 +71,14 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		balanceAfterCancel, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
-		// Unlock pool
-		output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-		}), true)
-		require.Nil(t, err)
-		require.Len(t, output, 1)
-		require.Equal(t, "unlocked", output[0])
+		// Unlock pool: Note: cancel allocation will do unlock automatically
+		//
+		// output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
+		// 	"allocation": allocationID,
+		// }), true)
+		// require.Nil(t, err)
+		// require.Len(t, output, 1)
+		// require.Equal(t, "unlocked", output[0])
 
 		balanceAfterUnlock, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
