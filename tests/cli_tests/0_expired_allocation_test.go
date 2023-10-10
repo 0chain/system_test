@@ -180,6 +180,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 			allocationCost += sizeInGB(1024) * float64(blobber.Terms.Write_price)
 		}
 		allocationCancellationCharge := allocationCost * 0.2 // 20% of total allocation cost
+		allocationCancellationChargeInZCN := allocationCancellationCharge / 1e10
 
 		// get balance before finalize
 		balanceBeforeFinalize, err := getBalanceZCN(t, configPath)
@@ -198,7 +199,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		// assert after unlock, balance is greater than before finalize, but need to pay fee
-		require.InEpsilon(t, balanceAfterFinalize, balanceBeforeFinalize+2.0-allocationCancellationCharge, 0.05)
+		require.InEpsilon(t, balanceAfterFinalize, balanceBeforeFinalize+2.0-allocationCancellationChargeInZCN, 0.05)
 	})
 }
 

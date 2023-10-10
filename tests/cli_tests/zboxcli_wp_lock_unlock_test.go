@@ -67,6 +67,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 			allocationCost += sizeInGB(1024) * float64(blobber.Terms.Write_price)
 		}
 		allocationCancellationCharge := allocationCost * 0.2
+		allocationCancellationChargeInZCN := allocationCancellationCharge / 1e10
 
 		// get balance before cancel
 		balanceBeforeCancel, err := getBalanceZCN(t, configPath)
@@ -79,7 +80,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 
 		balanceAfterCancel, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.InEpsilon(t, balanceAfterCancel, balanceBeforeCancel+2.0-allocationCancellationCharge, 0.05)
+		require.InEpsilon(t, balanceAfterCancel, balanceBeforeCancel+2.0-allocationCancellationChargeInZCN, 0.05)
 	})
 
 	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *test.SystemTest) {
