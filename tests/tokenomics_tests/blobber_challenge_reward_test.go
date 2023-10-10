@@ -656,7 +656,7 @@ func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId 
 //	return result
 //}
 //
-//func getDelegateRewardByQuery(t *test.SystemTest, query string) map[string]int64 {
+// func getDelegateRewardByQuery(t *test.SystemTest, query string) map[string]int64 {
 //	var result map[string]int64
 //
 //	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
@@ -684,7 +684,7 @@ func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId 
 //	return result
 //}
 //
-//type QueryRewardsResponse struct {
+// type QueryRewardsResponse struct {
 //	TotalProviderReward float64 `json:"total_provider_reward"`
 //	TotalDelegateReward float64 `json:"total_delegate_reward"`
 //	TotalReward         float64 `json:"total_reward"`
