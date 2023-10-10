@@ -1253,11 +1253,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		// Cancel the allocation
 		apiClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 
-		// Unlock the write pool
-		confHash = apiClient.UnlockWritePool(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
-		require.NotEmpty(t, confHash)
-
-		// Check increased
+		// Check increased (Cancel txn automatically refunds remaining locked tokens)
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {
 			data, resp, err := zboxClient.GetGraphTokenSupply(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
