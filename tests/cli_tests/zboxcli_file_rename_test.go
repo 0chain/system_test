@@ -159,7 +159,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			_, ok := cliutils.Contains(destFileNames, file.Name)
 
 			require.True(t, ok, strings.Join(output, "\n"))
-			require.GreaterOrEqual(t, file.Size, int(fileSize), strings.Join(output, "\n"))
+			require.Equal(t, file.ActualSize, int(fileSize), strings.Join(output, "\n"))
 			require.Equal(t, "f", file.Type, strings.Join(output, "\n"))
 			require.NotEmpty(t, file.Hash, "File hash is empty")
 		}
