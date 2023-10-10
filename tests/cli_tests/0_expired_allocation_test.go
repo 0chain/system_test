@@ -178,7 +178,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		// Wait for allocation and challenge completion time to expire
 		cliutils.Wait(t, time.Minute*5)
 
-		// get balance after finalize
+		// get balance before finalize
 		balanceBeforeFinalize, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 

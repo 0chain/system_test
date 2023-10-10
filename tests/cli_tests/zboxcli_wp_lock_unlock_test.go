@@ -62,7 +62,7 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		allocation := getAllocation(t, allocationID)
 		require.Equal(t, 1.5, intToZCN(allocation.WritePool))
 
-		// get balance after cancel
+		// get balance before cancel
 		balanceBeforeCancel, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
