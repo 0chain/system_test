@@ -30,7 +30,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 	defaultCurrMint := 1
 	defaultPricePerPack := 1
 	defaultTotalNFT := "1"
-	collection_id := "collection id created as a part of testing nft collection"
+	collection_id := "collectionId1"
 
 	t.RunSequentially("List NFT collection id with zero nft collection id  should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
@@ -272,7 +272,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		collection_name := "collection"
-		collection_id := "collectionId"
+		collection_id := "collectionId2"
 
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 			firebaseToken.IdToken,
@@ -604,7 +604,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		collection_name := "collection"
-		collection_id := "collection id"
+		collection_id := "collectionId3"
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 			firebaseToken.IdToken,
 			csrfToken,
@@ -693,7 +693,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
 		collection_name := "collection"
-		collection_id := "collectionId"
+		collection_id := "collectionId4"
 
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 			firebaseToken.IdToken,
