@@ -102,9 +102,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as part of " + t.Name()
+		allocationID := "allocationID1"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			allocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -121,7 +121,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Len(t, allocationList, 1, "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, allocationId, allocationList[0].Id)
+		require.Equal(t, allocationID, allocationList[0].Id)
 	})
 
 	t.RunSequentially("Post allocation with correct argument should work", func(t *test.SystemTest) {
@@ -145,10 +145,10 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationId := "allocation id  created as part of " + t.Name()
+		allocationID := "allocationID2"
 		allocationType := "allocation type created as part of " + t.Name()
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			allocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -184,9 +184,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as part of " + t.Name()
+		allocationID := "allocationID3"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			allocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -260,7 +260,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationID := "allocationID4"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -316,7 +316,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationID := "allocationID5"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -372,7 +372,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationID := "allocationID6"
 		_, response, err = zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -410,7 +410,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationID := "allocationID7"
 		_, response, err = zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -448,7 +448,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationID := "allocationID8"
 		_, response, err = zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -486,7 +486,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationID := "allocationID9"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -537,7 +537,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationID := "allocationID10"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -605,7 +605,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationID := "allocationID11"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -662,11 +662,11 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation ID created as part of " + t.Name()
+		allocationID := "allocationID12"
 
 		updatedAllocationName := "update allocation name"
 		allocationObjCreatedResponse, response, err := zboxClient.UpdateAllocation(t,
-			allocationId,
+			allocationID,
 			updatedAllocationName,
 			allocationDescription,
 			allocationType,
