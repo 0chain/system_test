@@ -121,7 +121,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as a part of" + t.Name()
+		allocationId := "allocationid1"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationId,
 			allocationName,
@@ -256,7 +256,7 @@ func Test0boxNft(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as a part of" + t.Name()
+		allocationId := "allocationid2"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationId,
 			allocationName,
@@ -366,7 +366,7 @@ func Test0boxNft(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as a part of" + t.Name()
+		allocationId := "allocationid3"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationId,
 			allocationName,
@@ -525,7 +525,7 @@ func Test0boxNft(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as a part of" + t.Name()
+		allocationId := "allocationid4"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationId,
 			allocationName,
@@ -588,7 +588,7 @@ func Test0boxNft(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as a part of" + t.Name()
+		allocationId := "allocationid5"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationId,
 			allocationName,
@@ -677,7 +677,7 @@ func Test0boxNft(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as a part of" + t.Name()
+		allocationId := "allocationid6"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationId,
 			allocationName,
