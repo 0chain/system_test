@@ -82,6 +82,17 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 		validatorListString = append(validatorListString, validator.ID)
 	}
 
+	for _, validatorId := range validatorListString {
+		_, err := utils.ExecuteFaucetWithTokens(t, configPath, 150)
+		require.Nil(t, err, "Error executing faucet")
+
+		_, err = utils.StakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{
+			"validator_id": validatorId,
+			"tokens":       100,
+		}), true)
+		require.Nil(t, err, "Error staking tokens")
+	}
+
 	t.Log("Blobber List: ", blobberListString)
 	t.Log("Validator List: ", validatorListString)
 
