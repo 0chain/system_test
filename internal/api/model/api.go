@@ -2,9 +2,10 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/0chain/gosdk/core/common"
 	"io"
 	"time"
+
+	"github.com/0chain/gosdk/core/common"
 
 	"github.com/0chain/gosdk/core/zcncrypto"
 	climodel "github.com/0chain/system_test/internal/cli/model"

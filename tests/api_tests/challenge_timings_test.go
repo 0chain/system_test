@@ -2,16 +2,17 @@ package api_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/gosdk/zboxcore/blockchain"
-	"github.com/0chain/gosdk/zboxcore/sdk"
-	"github.com/0chain/system_test/internal/api/model"
-	"github.com/0chain/system_test/internal/api/util/client"
 	"io"
 	"math"
 	"net/http"
 	"sort"
 	"testing"
 	"time"
+
+	"github.com/0chain/gosdk/zboxcore/blockchain"
+	"github.com/0chain/gosdk/zboxcore/sdk"
+	"github.com/0chain/system_test/internal/api/model"
+	"github.com/0chain/system_test/internal/api/util/client"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
