@@ -1,9 +1,8 @@
 name: "Zus Tokenomics System Tests"
 run-name: "System tests [${{ github.ref_name }}] - [${{ github.event.head_commit.message }}]"
 concurrency:
-  group: "system-tests-${{ github.ref }}-${{ github.event_name }}"
+  group: "tokenomics-nightly-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
-
 on:
   schedule:
     # Runs every morning at 2am UTC
@@ -233,8 +232,6 @@ jobs:
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-
-
 
   notify_slack_on_failure:
     runs-on: [self-hosted, arc-runner]
