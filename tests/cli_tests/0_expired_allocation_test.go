@@ -173,7 +173,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 		// Write pool balance should increment by 1
 		allocation := getAllocation(t, allocationID)
-		require.Equal(t, 2, intToZCN(allocation.WritePool))
+		require.Equal(t, 2.0, intToZCN(allocation.WritePool))
 
 		allocationCost := 0.0
 		for _, blobber := range allocation.BlobberDetails {
