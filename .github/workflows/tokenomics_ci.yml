@@ -1,4 +1,4 @@
-name: "Zus Tokenomics System Tests"
+name: "Tokenomics Nightly Tests - Sprint"
 concurrency:
   group: "tokenomics-nightly-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
