@@ -278,23 +278,38 @@ jobs:
 
 
 
-  set-build-conclusion:
-    name: "Set build conclusion"
-    if: ${{ always() && github.ref == 'refs/heads/master' &&  github.event_name != 'workflow_dispatch' }}
-    needs: [ golangci, system-tests ]
-    runs-on: self-hosted
+  notify_slack_on_failure:
+    runs-on: [self-hosted, arc-runner]
+    needs: [system-tests]
+    if: always() && (needs.system-tests.result == 'failure')
     steps:
-      - uses: technote-space/workflow-conclusion-action@v3
-      - name: "Parse status of ${{ env.WORKFLOW_CONCLUSION }}"
+      - name: "Notify Slack"
         run: |
-          if [ "${{ env.WORKFLOW_CONCLUSION }}" != "success" ]; then
-            echo "WORKFLOW_CONCLUSION=failure" >> $GITHUB_ENV
-          fi
-      - name: "Set build status to ${{ env.WORKFLOW_CONCLUSION }}"
-        uses: Sibz/github-status-action@v1
-        with:
-          authToken: ${{secrets.GITHUB_TOKEN}}
-          context: '0Chain System Tests CI'
-          description: "Build status: ${{ env.WORKFLOW_CONCLUSION }}"
-          state: ${{ env.WORKFLOW_CONCLUSION }}
-          sha: ${{github.event.pull_request.head.sha || github.sha}}
+          payload='{
+          "text": "'"<!here> Tokenomics Nightly Tests - Current Sprint FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "attachments": [
+              {
+              "text": "Tokenomics Nightly Tests - Current sprint: FAILED ⚠️",
+              "color": "#ff0000"
+              }
+          ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+
+  notify_slack_on_success:
+    runs-on: [self-hosted, arc-runner]
+    needs: [system-tests]
+    if: always() && (needs.system-tests.result == 'success')
+    steps:
+      - name: "Notify Slack"
+        run: |
+          payload='{
+          "text": "'"<!here> Tokenomics Nightly Tests - Current Sprint PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "attachments": [
+              {
+              "text": "Tokenomics Nightly Tests - Current sprint: PASSED ✅",
+              "color": "#22bb33"
+              }
+          ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
