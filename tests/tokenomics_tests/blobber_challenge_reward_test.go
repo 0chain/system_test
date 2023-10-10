@@ -365,7 +365,6 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 		require.Nil(t, err)
 
 		output, err := utils.UploadFile(t, configPath, map[string]interface{}{
-			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
@@ -380,7 +379,6 @@ func assertChallengeRewardsForOneDelegateEach(t *test.SystemTest, allocationId s
 		filename := fileNames[numFiles-i-1]
 
 		output, err := utils.DeleteFile(t, utils.EscapedTestName(t), utils.CreateParams(map[string]interface{}{
-			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 		}), true)
@@ -460,7 +458,6 @@ func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId 
 	require.Nil(t, err)
 
 	output, err := utils.UploadFile(t, configPath, map[string]interface{}{
-		//
 		"allocation": allocationId,
 		"remotepath": remotepath + filepath.Base(filename),
 		"localpath":  filename,

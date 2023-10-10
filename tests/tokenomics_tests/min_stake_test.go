@@ -283,7 +283,6 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		output, err := utils.UploadFile(t, configPath, map[string]interface{}{
-			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,

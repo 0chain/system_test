@@ -105,7 +105,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
@@ -187,7 +186,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 		t.Log("Uploading file ", filename)
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
@@ -267,7 +265,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
@@ -428,7 +425,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
@@ -524,7 +520,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
