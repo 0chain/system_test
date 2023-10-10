@@ -275,7 +275,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		allocationName = "second allocation created as part of " + t.Name()
+		allocationName = "second allocation"
 		allocationDescription = "second allocation description created as part of " + t.Name()
 		allocationType = "second allocation type created as part of " + t.Name()
 		allocation_id := "new allocation id for blimp"
@@ -331,7 +331,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		allocationName = "second allocation created as part of " + t.Name()
+		allocationName = "second allocation"
 		allocationDescription = "second allocation description created as part of " + t.Name()
 		allocationType = "second allocation type created as part of " + t.Name()
 		allocation_id := "new allocation for chalk"
