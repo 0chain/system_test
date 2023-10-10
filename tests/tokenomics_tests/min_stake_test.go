@@ -3,10 +3,6 @@ package tokenomics_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"net/url"
@@ -14,6 +10,11 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
+	"github.com/stretchr/testify/require"
 )
 
 type Reward int

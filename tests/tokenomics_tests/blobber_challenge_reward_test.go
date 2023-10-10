@@ -199,7 +199,6 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, 2, 1)
 	})
-
 }
 
 func stakeTokensToBlobbersAndValidators(t *test.SystemTest, blobbers, validators []string, configPath string, tokens []float64, numDelegates int) {
@@ -556,7 +555,7 @@ func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId 
 }
 
 //
-//func assertCR(t *test.SystemTest, alloc *climodel.Allocation) {
+// func assertCR(t *test.SystemTest, alloc *climodel.Allocation) {
 //	var (
 //		expectedAllocationCost            float64
 //		expectedCancellationCharge        float64
@@ -629,7 +628,7 @@ func assertChallengeRewardsForTwoDelegatesEach(t *test.SystemTest, allocationId 
 //	}
 //}
 //
-//func getRewardByQuery(t *test.SystemTest, query string) *QueryRewardsResponse {
+// func getRewardByQuery(t *test.SystemTest, query string) *QueryRewardsResponse {
 //	var result *QueryRewardsResponse
 //
 //	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"

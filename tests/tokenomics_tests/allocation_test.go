@@ -320,7 +320,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 
 		require.InEpsilon(t, movedToChallengePool-alloc.MovedBack, totalBlobberChallengereward, 0.05, "Total Blobber Challenge reward should be equal to MovedToChallenge")
 	})
-
 }
 
 func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
