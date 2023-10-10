@@ -154,7 +154,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		}), false)
 		require.NotNil(t, err, "Expected error when blobber to stake tokens to is not specified", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
-		require.Equal(t, "missing flag: one of 'blobber_id' or 'validator_id' is required", output[0])
+		require.Equal(t, "missing flag: one of 'miner_id', 'sharder_id', 'blobber_id', 'validator_id', 'authorizer_id' is required", output[0])
 	})
 
 	t.Run("Staking more tokens than in wallet should fail", func(t *test.SystemTest) {
