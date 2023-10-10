@@ -62,26 +62,18 @@ func TestWritePoolLockUnlock(testSetup *testing.T) {
 		allocation := getAllocation(t, allocationID)
 		require.Equal(t, 1.5, intToZCN(allocation.WritePool))
 
+		// get balance after cancel
+		balanceBeforeCancel, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err)
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 
-		// get balance after cancel
 		balanceAfterCancel, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-
-		// Unlock pool
-		output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-		}), true)
-		require.Nil(t, err)
-		require.Len(t, output, 1)
-		require.Equal(t, "unlocked", output[0])
-
-		balanceAfterUnlock, err := getBalanceZCN(t, configPath)
-		require.NoError(t, err)
-		require.Greater(t, balanceAfterUnlock, balanceAfterCancel)
+		require.Greater(t, balanceAfterCancel, balanceBeforeCancel)
 	})
 
 	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *test.SystemTest) {

@@ -178,28 +178,20 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		// Wait for allocation and challenge completion time to expire
 		cliutils.Wait(t, time.Minute*5)
 
+		// get balance after finalize
+		balanceBeforeFinalize, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
 		output, err = finalizeAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Regexp(t, regexp.MustCompile("Allocation finalized with txId .*$"), output[0])
 
-		// get balance after finalize
+		// get balance after unlock
 		balanceAfterFinalize, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
-		// Unlock pool
-		output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-		}), true)
-		require.Nil(t, err)
-		require.Len(t, output, 1)
-		require.Equal(t, "unlocked", output[0])
-
-		// get balance after unlock
-		balanceAfterUnlock, err := getBalanceZCN(t, configPath)
-		require.NoError(t, err)
-
-		// assert after unlock, balance is greater than after finalize, but need to pay fee
-		require.Greater(t, balanceAfterUnlock, balanceAfterFinalize)
+		// assert after unlock, balance is greater than before finalize, but need to pay fee
+		require.Greater(t, balanceAfterFinalize, balanceBeforeFinalize)
 	})
 }
