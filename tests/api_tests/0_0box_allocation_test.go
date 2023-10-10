@@ -65,7 +65,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		_, response, err = zboxClient.PostAllocation(t,
 			zboxClient.DefaultAllocationId,
 			allocationName,
@@ -101,7 +101,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		allocationID := "allocationID1"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
@@ -146,7 +146,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
 		allocationID := "allocationID2"
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -183,7 +183,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		allocationID := "allocationID3"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
@@ -221,7 +221,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "second allocation created as part of " + t.Name()
 		allocationDescription := "second allocation description created as part of " + t.Name()
-		allocationType := "second allocation type created as part of " + t.Name()
+		allocationType := "s3_server"
 		allocation_id := "new allocation for vult"
 		_, response, err = zboxClient.PostAllocation(t,
 			allocation_id,
@@ -259,7 +259,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		allocationID := "allocationID4"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
@@ -315,7 +315,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		allocationID := "allocationID5"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
@@ -371,7 +371,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		allocationID := "allocationID6"
 		_, response, err = zboxClient.PostAllocation(t,
 			allocationID,
@@ -409,7 +409,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		allocationID := "allocationID7"
 		_, response, err = zboxClient.PostAllocation(t,
 			allocationID,
@@ -447,7 +447,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		allocationID := "allocationID8"
 		_, response, err = zboxClient.PostAllocation(t,
 			allocationID,
@@ -485,7 +485,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		allocationID := "allocationID9"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
@@ -536,7 +536,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		allocationID := "allocationID10"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
@@ -604,7 +604,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		allocationID := "allocationID11"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
@@ -661,7 +661,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		allocationID := "allocationID12"
 
 		updatedAllocationName := "update allocation name"
