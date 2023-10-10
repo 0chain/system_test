@@ -21,12 +21,7 @@ import (
 func TestBlobberReadReward(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-		"time_unit": "10m",
-	}, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
-
-	output, err = utils.CreateWallet(t, configPath)
+	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
@@ -64,7 +59,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 		1, 1, 1, 1,
 	}, 1)
 
-	t.RunSequentiallyWithTimeout("download one time, equal from both blobbers", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("download one time, equal from both blobbers", 30*time.Minute, func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -134,7 +129,7 @@ func TestBlobberReadReward(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1TotalDownloadRewards, blobber2TotalDownloadRewards, 0.05, "Blobber 1 total download rewards and Blobber 2 total download rewards are not equal")
 	})
 
-	t.RunSequentiallyWithTimeout("test download rewards and checking if downloading fails after allocation expiry", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test download rewards and checking if downloading fails after allocation expiry", 30*time.Minute, func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 

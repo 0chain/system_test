@@ -74,7 +74,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		1, 1, 1, 1,
 	}, 1)
 
-	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", 1*time.Hour, func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -105,7 +105,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			// fetch the latest block in the chain
+			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
@@ -152,7 +152,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Equal(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
 	})
 
-	t.RunSequentiallyWithTimeout("Create + Upload + Cancel equal read price 0.1", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Create + Upload + Cancel equal read price 0.1", 1*time.Hour, func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -187,7 +187,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		t.Log("Uploading file ", filename)
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			// fetch the latest block in the chain
+			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
@@ -242,7 +242,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 	})
 
-	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", 1*time.Hour, func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -267,7 +267,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			// fetch the latest block in the chain
+			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
@@ -374,7 +374,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		1, 1, 1, 1, 1, 1,
 	}, 1)
 
-	t.RunSequentiallyWithTimeout("Add Blobber to Increase Parity", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Add Blobber to Increase Parity", 1*time.Hour, func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -402,7 +402,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		newBlobberID := ""
 
 		for _, blobber := range blobberList {
-			if !contains(allocationBlobbers, blobber.Id) {
+			if !stringListContains(allocationBlobbers, blobber.Id) {
 				newBlobberID = blobber.Id
 				allocationBlobbers = append(allocationBlobbers, newBlobberID)
 				break
@@ -428,7 +428,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			// fetch the latest block in the chain
+			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
@@ -473,7 +473,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
 		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 	})
-	t.RunSequentiallyWithTimeout("Replace Blobber", (500*time.Minute)+(40*time.Second), func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Replace Blobber", 1*time.Hour, func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
@@ -497,7 +497,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		newBlobberID := ""
 
 		for _, blobber := range blobberList {
-			if !contains(allocationBlobbers, blobber.Id) {
+			if !stringListContains(allocationBlobbers, blobber.Id) {
 				newBlobberID = blobber.Id
 				allocationBlobbers = append(allocationBlobbers, newBlobberID)
 				break
@@ -524,7 +524,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			// fetch the latest block in the chain
+			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
@@ -682,7 +682,7 @@ func getTotalAllocationChallengeRewards(t *test.SystemTest, allocationID string)
 	return challengeRewards
 }
 
-func contains(s []string, e string) bool {
+func stringListContains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
 			return true

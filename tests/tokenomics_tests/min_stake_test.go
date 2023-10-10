@@ -38,7 +38,7 @@ const (
 func TestMinStakeForProviders(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.TestSetup("set storage config to use time_unit as 10 minutes", func() {
+	t.TestSetup("config to use time_unit as 30 minutes", func() {
 		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			"time_unit": "30m",
 		}, true)
@@ -283,7 +283,7 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		output, err := utils.UploadFile(t, configPath, map[string]interface{}{
-			// fetch the latest block in the chain
+			//
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
