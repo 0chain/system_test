@@ -140,8 +140,8 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"size": "1024",
-			"lock": "0.5",
+			"size": "2048",
+			"lock": "1",
 		})
 		output, err = createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
@@ -173,33 +173,36 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 		// Write pool balance should increment by 1
 		allocation := getAllocation(t, allocationID)
-		require.Equal(t, 1.5, intToZCN(allocation.WritePool))
+		require.Equal(t, 2.0, intToZCN(allocation.WritePool))
 
-		// Wait for allocation and challenge completion time to expire
-		cliutils.Wait(t, time.Minute*5)
+		allocationCost := 0.0
+		for _, blobber := range allocation.BlobberDetails {
+			allocationCost += sizeInGB(1024) * float64(blobber.Terms.Write_price)
+		}
+		allocationCancellationCharge := allocationCost * 0.2 // 20% of total allocation cost
+		allocationCancellationChargeInZCN := allocationCancellationCharge / 1e10
+
+		// get balance before finalize
+		balanceBeforeFinalize, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
+		// Wait for allocation to expire
+		cliutils.Wait(t, time.Minute*2)
 
 		output, err = finalizeAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Regexp(t, regexp.MustCompile("Allocation finalized with txId .*$"), output[0])
 
-		// get balance after finalize
+		// get balance after unlock
 		balanceAfterFinalize, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
-		// Unlock pool
-		output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-		}), true)
-		require.Nil(t, err)
-		require.Len(t, output, 1)
-		require.Equal(t, "unlocked", output[0])
-
-		// get balance after unlock
-		balanceAfterUnlock, err := getBalanceZCN(t, configPath)
-		require.NoError(t, err)
-
-		// assert after unlock, balance is greater than after finalize, but need to pay fee
-		require.Greater(t, balanceAfterUnlock, balanceAfterFinalize)
+		// assert after unlock, balance is greater than before finalize, but need to pay fee
+		require.InEpsilon(t, balanceAfterFinalize, balanceBeforeFinalize+2.0-allocationCancellationChargeInZCN, 0.05)
 	})
+}
+
+func sizeInGB(size int64) float64 {
+	return float64(size) / (1024 * 1024 * 1024)
 }
