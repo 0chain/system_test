@@ -3,13 +3,14 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	cliutil "github.com/0chain/system_test/internal/cli/util"
 	"io"
 	"net/http"
 	"reflect"
 	"sort"
 	"strings"
 	"time"
+
+	cliutil "github.com/0chain/system_test/internal/cli/util"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
