@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subset of 0Chain System test suite [fix_unlock/95dde957] ran against [dev-3.devnet-0chain.net] at [2023-10-11_00.45.42]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">Subset of 0Chain System test suite [fix_unlock/95dde957] ran against [dev-3.devnet-0chain.net] at [2023-10-11_00.45.42]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>13</strong>Duration: <strong>1ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>13</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">October 11, 2023 00:50:54</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestExpiredAllocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":6.14,"Output":["","    system_test_framework.go:70: Test setup [register wallet and get blobbers] scheduled at [10-11-2023 00:45:47] \n","    system_test_framework.go:80: Test setup [register wallet and get blobbers] start at [10-11-2023 00:45:47] \n","    zwalletcli_storage_update_config_test.go:231: Updating storage config...\n","    system_test_framework.go:93: Test setup [register wallet and get blobbers] exit at [10-11-2023 00:45:50]\n","    zwalletcli_storage_update_config_test.go:231: Updating storage config...\n","--- PASS: TestExpiredAllocation (6.14s)",""],"Passed":true,"Skipped":false,"TestFileName":"0_expired_allocation_test.go","TestFunctionDetail":{"Line":17,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestExpiredAllocation/Cancel_Expired_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":155.58,"Output":["","    0_expired_allocation_test.go:60: Test case [Cancel Expired Allocation Should Fail] scheduled at [10-11-2023 00:45:50] \n","","","    system_test_framework.go:149: Test case [Cancel Expired Allocation Should Fail] start at [10-11-2023 00:45:50] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestExpiredAllocation-Cancel_Expired_Allocation_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  63c76d9a3b47f5aeaa6e5dcdf510d9c75d21bd118ec3ee720d902d2d0cefbff4]\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  f1326abddb5b334bb2d8197c99b83e24d435dcd0d0300759346631a014caa725]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_update_allocation_test.go:931: Listing allocations...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_update_allocation_test.go:931: Listing allocations...\n","    zboxcli_cancel_allocation_test.go:84: Canceling allocation...\n","    0_expired_allocation_test.go:60: Test case [Cancel Expired Allocation Should Fail] exit at [10-11-2023 00:48:25]\n","--- PASS: TestExpiredAllocation/Cancel_Expired_Allocation_Should_Fail (155.58s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestExpiredAllocation/Download_File_using_Expired_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":151.48,"Output":["","    0_expired_allocation_test.go:80: Test case [Download File using Expired Allocation Should Fail] scheduled at [10-11-2023 00:45:50] \n","","","    system_test_framework.go:149: Test case [Download File using Expired Allocation Should Fail] start at [10-11-2023 00:45:50] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestExpiredAllocation-Download_File_using_Expired_Allocation_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  315ddded72c79a71aea1646019425d8e611aee05766d8b40dc49110e38d033f4]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_download_token_test.go:134: Locking read tokens...\n","    zboxcli_file_upload_test.go:1075: Uploading file /tmp/bjduNbdpDC_test.txt to allocation be4aa57fe2e619945d382d806c8404ef77d2ab35e3774e21c4dcda802b99cb6f with remotepath /bjduNbdpDC_test.txt\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    utils.go:166: Waiting 15s...\n","    zboxcli_file_download_test.go:1343: Downloading file...\n","    0_expired_allocation_test.go:80: Test case [Download File using Expired Allocation Should Fail] exit at [10-11-2023 00:48:21]\n","--- PASS: TestExpiredAllocation/Download_File_using_Expired_Allocation_Should_Fail (151.48s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestExpiredAllocation/Finalize_Expired_Allocation_Should_Work_after_challenge_completion_time_+_expiry","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":248.64,"Output":["","    0_expired_allocation_test.go:35: Test case [Finalize Expired Allocation Should Work after challenge completion time + expiry] scheduled at [10-11-2023 00:45:50] \n","","","    system_test_framework.go:149: Test case [Finalize Expired Allocation Should Work after challenge completion time + expiry] start at [10-11-2023 00:45:50] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestExpiredAllocation-Finalize_Expired_Allocation_Should_Work_after_challenge_completion_time_+_expiry_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  2cf083d9d01e3767a28a06f9adf6cbc15abefb06dcb82dceb64ca263e0f49fab]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  1a12dace91b178a94c84b14ed674fb26ec0fd320568007df44650626f79e5ff5]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_update_allocation_test.go:931: Listing allocations...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_update_allocation_test.go:931: Listing allocations...\n","    utils.go:166: Waiting 2m0s...\n","    zboxcli_finalize_allocation_test.go:66: Finalizing allocation...\n","    0_expired_allocation_test.go:35: Test case [Finalize Expired Allocation Should Work after challenge completion time + expiry] exit at [10-11-2023 00:49:58]\n","--- PASS: TestExpiredAllocation/Finalize_Expired_Allocation_Should_Work_after_challenge_completion_time_+_expiry (248.64s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestExpiredAllocation/Unlocking_tokens_from_finalized_allocation_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":158.75,"Output":["","    0_expired_allocation_test.go:137: Test case [Unlocking tokens from finalized allocation should work] scheduled at [10-11-2023 00:45:50] \n","","","    system_test_framework.go:149: Test case [Unlocking tokens from finalized allocation should work] start at [10-11-2023 00:45:50] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestExpiredAllocation-Unlocking_tokens_from_finalized_allocation_should_work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  d67630854a1e6b72651affcd1ff6bd4a9d1c557551b6061e1c93678c43c0b5a1]\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_wp_lock_unlock_test.go:271: Locking write tokens...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_common_user_functions_test.go:231: Get Allocation...\n","    utils.go:166: Waiting 5s...\n","    utils.go:166: Waiting 2m0s...\n","    zboxcli_finalize_allocation_test.go:66: Finalizing allocation...\n","    utils.go:166: Waiting 5s...\n","    0_expired_allocation_test.go:137: Test case [Unlocking tokens from finalized allocation should work] exit at [10-11-2023 00:48:29]\n","--- PASS: TestExpiredAllocation/Unlocking_tokens_from_finalized_allocation_should_work (158.75s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestExpiredAllocation/Update_Expired_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":152.54,"Output":["","    0_expired_allocation_test.go:108: Test case [Update Expired Allocation Should Fail] scheduled at [10-11-2023 00:45:50] \n","","","    system_test_framework.go:149: Test case [Update Expired Allocation Should Fail] start at [10-11-2023 00:45:50] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestExpiredAllocation-Update_Expired_Allocation_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  9eaa00e8dbd61ca2a13fbc09ada3d4136778e13407139732a6bd51f576f00a92]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_update_allocation_test.go:931: Listing allocations...\n","    zboxcli_update_allocation_test.go:914: Updating allocation...\n","    zboxcli_update_allocation_test.go:914: Updating allocation...\n","    0_expired_allocation_test.go:108: Test case [Update Expired Allocation Should Fail] exit at [10-11-2023 00:48:22]\n","--- PASS: TestExpiredAllocation/Update_Expired_Allocation_Should_Fail (152.54s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestWritePoolLockUnlock","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","","--- PASS: TestWritePoolLockUnlock (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"zboxcli_wp_lock_unlock_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestWritePoolLockUnlock/Creating_allocation_should_move_tokens_from_wallet_to_write_pool,_write_lock_and_unlock_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":51.86,"Output":["","    zboxcli_wp_lock_unlock_test.go:22: Test case [Creating allocation should move tokens from wallet to write pool, write lock and unlock should work] scheduled at [10-11-2023 00:50:02] \n","","","    system_test_framework.go:149: Test case [Creating allocation should move tokens from wallet to write pool, write lock and unlock should work] start at [10-11-2023 00:50:02] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestWritePoolLockUnlock-Creating_allocation_should_move_tokens_from_wallet_to_write_pool,_write_lock_and_unlock_should_work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  e9470fad84d8f5c51f0aff7eb93186c8684740e2922683d8b0d402990f1b87c2]\n","    utils.go:166: Waiting 5s...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_wp_lock_unlock_test.go:37: new allocation: [Allocation created: 0a158033b8d5beb93b80e5dac672d6b1a92769447fc1c059b75a66bf45feec7d]\n","    utils.go:166: Waiting 5s...\n","    zboxcli_wp_lock_unlock_test.go:271: Locking write tokens...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_common_user_functions_test.go:231: Get Allocation...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_cancel_allocation_test.go:84: Canceling allocation...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_wp_lock_unlock_test.go:22: Test case [Creating allocation should move tokens from wallet to write pool, write lock and unlock should work] exit at [10-11-2023 00:50:53]\n","--- PASS: TestWritePoolLockUnlock/Creating_allocation_should_move_tokens_from_wallet_to_write_pool,_write_lock_and_unlock_should_work (51.86s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestWritePoolLockUnlock/Missing_tokens_flag_should_result_in_error","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.18,"Output":["","    zboxcli_wp_lock_unlock_test.go:197: Test case [Missing tokens flag should result in error] scheduled at [10-11-2023 00:50:02] \n","","","    system_test_framework.go:149: Test case [Missing tokens flag should result in error] start at [10-11-2023 00:50:02] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestWritePoolLockUnlock-Missing_tokens_flag_should_result_in_error_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  e94c5dc38262bebdc835ef12193ba8e6e214a27c0faa88dce6c92242d1f2a772]\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_wp_lock_unlock_test.go:271: Locking write tokens...\n","    zboxcli_wp_lock_unlock_test.go:197: Test case [Missing tokens flag should result in error] exit at [10-11-2023 00:50:10]\n","--- PASS: TestWritePoolLockUnlock/Missing_tokens_flag_should_result_in_error (8.18s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestWritePoolLockUnlock/Should_not_be_able_to_lock_more_write_tokens_than_wallet_balance","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":29.01,"Output":["","    zboxcli_wp_lock_unlock_test.go:86: Test case [Should not be able to lock more write tokens than wallet balance] scheduled at [10-11-2023 00:50:02] \n","","","    system_test_framework.go:149: Test case [Should not be able to lock more write tokens than wallet balance] start at [10-11-2023 00:50:02] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestWritePoolLockUnlock-Should_not_be_able_to_lock_more_write_tokens_than_wallet_balance_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  ea90cc767534be66eb99363bd9082d1126a6648b3ce184ae957342095905d7cb]\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_wp_lock_unlock_test.go:271: Locking write tokens...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_wp_lock_unlock_test.go:86: Test case [Should not be able to lock more write tokens than wallet balance] exit at [10-11-2023 00:50:31]\n","--- PASS: TestWritePoolLockUnlock/Should_not_be_able_to_lock_more_write_tokens_than_wallet_balance (29.01s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestWritePoolLockUnlock/Should_not_be_able_to_lock_negative_write_tokens","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.34,"Output":["","    zboxcli_wp_lock_unlock_test.go:123: Test case [Should not be able to lock negative write tokens] scheduled at [10-11-2023 00:50:02] \n","","","    system_test_framework.go:149: Test case [Should not be able to lock negative write tokens] start at [10-11-2023 00:50:02] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestWritePoolLockUnlock-Should_not_be_able_to_lock_negative_write_tokens_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  e33d652e523892584a96d8e1e87d74debe8386658c040527c9c23e9e9fd81f00]\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_wp_lock_unlock_test.go:271: Locking write tokens...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_wp_lock_unlock_test.go:123: Test case [Should not be able to lock negative write tokens] exit at [10-11-2023 00:50:22]\n","--- PASS: TestWritePoolLockUnlock/Should_not_be_able_to_lock_negative_write_tokens (20.34s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestWritePoolLockUnlock/Should_not_be_able_to_lock_zero_write_tokens","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":25.4,"Output":["","    zboxcli_wp_lock_unlock_test.go:160: Test case [Should not be able to lock zero write tokens] scheduled at [10-11-2023 00:50:02] \n","","","    system_test_framework.go:149: Test case [Should not be able to lock zero write tokens] start at [10-11-2023 00:50:02] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestWritePoolLockUnlock-Should_not_be_able_to_lock_zero_write_tokens_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  8401391246f11acb10b617ba2f7d3003a84628a7ec137fdb7fb5efc078b919b8]\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_wp_lock_unlock_test.go:271: Locking write tokens...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_wp_lock_unlock_test.go:160: Test case [Should not be able to lock zero write tokens] exit at [10-11-2023 00:50:27]\n","--- PASS: TestWritePoolLockUnlock/Should_not_be_able_to_lock_zero_write_tokens (25.40s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestWritePoolLockUnlock/Should_not_be_able_to_unlock_unexpired_write_tokens","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.3,"Output":["","    zboxcli_wp_lock_unlock_test.go:223: Test case [Should not be able to unlock unexpired write tokens] scheduled at [10-11-2023 00:50:02] \n","","","    system_test_framework.go:149: Test case [Should not be able to unlock unexpired write tokens] start at [10-11-2023 00:50:02] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestWritePoolLockUnlock-Should_not_be_able_to_unlock_unexpired_write_tokens_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  181ac9d0fca26290db0ac1cbbad8ed319bca4099f758085f77074151bfdd864f]\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_wp_lock_unlock_test.go:271: Locking write tokens...\n","    utils.go:166: Waiting 5s...\n","    zboxcli_common_user_functions_test.go:231: Get Allocation...\n","    zboxcli_wp_lock_unlock_test.go:281: Unlocking write tokens...\n","    zboxcli_wp_lock_unlock_test.go:223: Test case [Should not be able to unlock unexpired write tokens] exit at [10-11-2023 00:50:25]\n","--- PASS: TestWritePoolLockUnlock/Should_not_be_able_to_unlock_unexpired_write_tokens (23.30s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
