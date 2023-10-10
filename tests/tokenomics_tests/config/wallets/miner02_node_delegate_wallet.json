@@ -1,0 +1,14 @@
+{
+    "client_id": "b8b25d509afbe8f68f1342a2fa719acf312915a6f5a5bb0918cad6598e01325f",
+    "client_key": "e88949ab4fdfa724459fe41bb2c2e9ce5467ddb6911469614a4201b741933e157a1423853cb9426c3360b970ad8d9d6e07b93a60ba8531b268d1377f5804d103",
+    "keys": [
+        {
+            "public_key": "e88949ab4fdfa724459fe41bb2c2e9ce5467ddb6911469614a4201b741933e157a1423853cb9426c3360b970ad8d9d6e07b93a60ba8531b268d1377f5804d103",
+            "private_key": "b7c415c17659b198de177e95d15345a9c576cd2522ea14a0c20399fdb7731c0b"
+        }
+    ],
+    "mnemonics": "lock olive another scare idea awesome hat chaos general gauge immense near torch magic tomato ancient mule release know siege few twin donor race",
+    "version": "1.0",
+    "date_created": "1661370970",
+    "nonce": 0
+}
