@@ -16,11 +16,11 @@ jobs:
       - name: "Config: Deploy new 0Chain network then run challenge tests against it"
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=feature/challenge-timings" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
-        uses: 0chain/actions/deploy-0chain@feature/challenge-timings
+        uses: 0chain/actions/deploy-0chain@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
@@ -33,7 +33,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Challenge System tests"
-        uses: 0chain/actions/run-system-tests@feature/challenge-timings
+        uses: 0chain/actions/run-system-tests@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
