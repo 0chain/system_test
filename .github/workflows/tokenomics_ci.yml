@@ -1,0 +1,269 @@
+name: "Tokenomics Nightly Tests - Sprint"
+concurrency:
+  group: "tokenomics-nightly-tests-${{ github.ref }}-${{ github.event_name }}"
+  cancel-in-progress: true
+on:
+  schedule:
+    # Runs every morning at 2am UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  system-tests:
+    name: "System Tests"
+    runs-on: [ tests-suite ]
+    timeout-minutes: 3600
+    steps:
+      - name: "Get current PR"
+        uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+        with:
+          github-token: ${{ github.token }}
+
+      - name: "Config: Run tests against existing 0Chain network"
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
+        run: |
+          echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
+          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
+
+      - name: "Config: Deploy new 0Chain network then run tests against it"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        run: |
+          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
+          echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
+          echo "TOKENOMICS_ALLOCATION_TESTS=$(echo $(([ -z 'TestAllocationRewards' ] && echo '') || echo 'TestAllocationRewards'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_ALLOCATION_ADD_OR_REPLACE_BLOBBER_TESTS=$(echo $(([ -z 'TestAddOrReplaceBlobberAllocationRewards' ] && echo '') || echo 'TestAddOrReplaceBlobberAllocationRewards'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_CHALLENGE_REWARD_TESTS=$(echo $(([ -z 'TestBlobberChallengeRewards' ] && echo '') || echo 'TestBlobberChallengeRewards'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_READ_REWARD_TESTS=$(echo $(([ -z 'TestBlobberReadReward' ] && echo '') || echo 'TestBlobberReadReward'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_SLASH_REWARD_TESTS=$(echo $(([ -z 'TestBlobberSlashPenalty' ] && echo '') || echo 'TestBlobberSlashPenalty'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_BLOCK_REWARD_TESTS=$(echo $(([ -z 'TestBlockRewardsForBlobbers' ] && echo '') || echo 'TestBlockRewardsForBlobbers'))" >> $GITHUB_ENV
+          echo "TOKENOMICS_MIN_STAKE_TESTS=$(echo $(([ -z 'TestMinStakeForProviders' ] && echo '') || echo 'TestMinStakeForProviders'))" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
+
+
+      - name: "Deploy 0Chain"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-0chain-minstake@master
+        with:
+          repo_snapshots_branch: current-sprint
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+
+      - name: "Run Min Stake System tests"
+        uses: 0chain/actions/run-system-tests-tokenomics@master
+        with:
+          repo_snapshots_branch: current-sprint
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.TOKENOMICS_MIN_STAKE_TESTS }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+
+      - name: "Deploy 0Chain"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-0chain-2b2v@master
+        with:
+          repo_snapshots_branch: current-sprint
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+
+      - name: "Run Challenge Reward System tests"
+        uses: 0chain/actions/run-system-tests-tokenomics@master
+        with:
+          repo_snapshots_branch: current-sprint
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.TOKENOMICS_CHALLENGE_REWARD_TESTS }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+      - name: "Deploy 0Chain"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-0chain-3b3v@master
+        with:
+          repo_snapshots_branch: current-sprint
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+
+      - name: "Run Allocation Add Or Replace Blobber System tests"
+        uses: 0chain/actions/run-system-tests-tokenomics@master
+        with:
+          repo_snapshots_branch: current-sprint
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.TOKENOMICS_ALLOCATION_ADD_OR_REPLACE_BLOBBER_TESTS }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+      - name: "Deploy 0Chain"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-0chain-2b2v@master
+        with:
+          repo_snapshots_branch: current-sprint
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+
+      - name: "Run Read Rewards System tests"
+        uses: 0chain/actions/run-system-tests-tokenomics@master
+        with:
+          repo_snapshots_branch: current-sprint
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.TOKENOMICS_READ_REWARD_TESTS }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+      - name: "Run Slash Rewards System tests"
+        uses: 0chain/actions/run-system-tests-tokenomics@master
+        with:
+          repo_snapshots_branch: current-sprint
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.TOKENOMICS_SLASH_REWARD_TESTS }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+
+
+
+      - name: "Deploy 0Chain"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-0chain-2b2v@master
+        with:
+          repo_snapshots_branch: current-sprint
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+
+      - name: "Run Allocation System tests"
+        uses: 0chain/actions/run-system-tests-tokenomics@master
+        with:
+          repo_snapshots_branch: current-sprint
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.TOKENOMICS_ALLOCATION_TESTS }}
+          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+  notify_slack_on_failure:
+    runs-on: [self-hosted, arc-runner]
+    needs: [system-tests]
+    if: always() && (needs.system-tests.result == 'failure')
+    steps:
+      - name: "Notify Slack"
+        run: |
+          payload='{
+          "text": "'"<!here> Tokenomics Nightly Tests - Current Sprint FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "attachments": [
+              {
+              "text": "Tokenomics Nightly Tests - Current sprint: FAILED ⚠️",
+              "color": "#ff0000"
+              }
+          ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+
+  notify_slack_on_success:
+    runs-on: [self-hosted, arc-runner]
+    needs: [system-tests]
+    if: always() && (needs.system-tests.result == 'success')
+    steps:
+      - name: "Notify Slack"
+        run: |
+          payload='{
+          "text": "'"<!here> Tokenomics Nightly Tests - Current Sprint PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "attachments": [
+              {
+              "text": "Tokenomics Nightly Tests - Current sprint: PASSED ✅",
+              "color": "#22bb33"
+              }
+          ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}

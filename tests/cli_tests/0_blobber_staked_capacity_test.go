@@ -115,7 +115,7 @@ func getMinStakedCapacityBlobber(t *test.SystemTest) (climodel.BlobberInfo, int6
 		err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
 		require.Nil(t, err, "error unmarshalling blobber info")
 
-		stakedCapacity := int64(float64(blInfo.TotalStake-1e10) * GB / float64(blInfo.Terms.Write_price)) // Here we remove 1e10 tokens from total stake to avoid challenge penalties
+		stakedCapacity := int64(float64(blInfo.TotalStake-1e10) * GB / float64(blInfo.Terms.WritePrice)) // Here we remove 1e10 tokens from total stake to avoid challenge penalties
 
 		require.GreaterOrEqual(t, stakedCapacity, blobber.Allocated, "Staked capacity should be greater than allocated capacity")
 
