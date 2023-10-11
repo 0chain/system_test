@@ -1825,55 +1825,6 @@ func (c *APIClient) CreateWritePool(t *test.SystemTest, wallet *model.Wallet, al
 	return createWritePoolTransactionGetConfirmationResponse.Hash
 }
 
-func (c *APIClient) UnlockWritePool(t *test.SystemTest, wallet *model.Wallet, allocationId string, requiredTransactionStatus int) string {
-	t.Log("Unlock Write pool...")
-
-	unlockWritePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:     wallet,
-			ToClientID: StorageSmartContractAddress,
-			TransactionData: model.NewUnlockWritePoolTransactionData(
-				model.CreateWritePoolRequest{
-					AllocationID: allocationId,
-				}),
-			Value:   tokenomics.IntToZCN(0.1),
-			TxnType: SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, unlockWritePoolTransactionPutResponse)
-
-	var unlockWritePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		unlockWritePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: unlockWritePoolTransactionPutResponse.Entity.Hash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if unlockWritePoolTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return unlockWritePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	wallet.IncNonce()
-
-	return unlockWritePoolTransactionGetConfirmationResponse.Hash
-}
-
 // CreateReadPoolWrapper does not provide deep test of used components
 func (c *APIClient) CreateReadPool(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) string {
 	t.Log("Create Read pool...")
