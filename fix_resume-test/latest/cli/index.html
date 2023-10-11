@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subset of 0Chain System test suite [fix_resume-test/76b322cc] ran against [dev-1.devnet-0chain.net] at [2023-10-11_15.51.28]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">Subset of 0Chain System test suite [fix_resume-test/76b322cc] ran against [dev-1.devnet-0chain.net] at [2023-10-11_15.51.28]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>53</strong>Duration: <strong>3ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>51</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>2</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">October 11, 2023 16:07:11</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup failed " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+                <div class="testResultGroup  " id="17"></div>
+            
+                <div class="testResultGroup  " id="18"></div>
+            
+                <div class="testResultGroup  " id="19"></div>
+            
+                <div class="testResultGroup  " id="20"></div>
+            
+                <div class="testResultGroup  " id="21"></div>
+            
+                <div class="testResultGroup  " id="22"></div>
+            
+                <div class="testResultGroup  " id="23"></div>
+            
+                <div class="testResultGroup  " id="24"></div>
+            
+                <div class="testResultGroup  " id="25"></div>
+            
+                <div class="testResultGroup  " id="26"></div>
+            
+                <div class="testResultGroup  " id="27"></div>
+            
+                <div class="testResultGroup  " id="28"></div>
+            
+                <div class="testResultGroup  " id="29"></div>
+            
+                <div class="testResultGroup  " id="30"></div>
+            
+                <div class="testResultGroup  " id="31"></div>
+            
+                <div class="testResultGroup  " id="32"></div>
+            
+                <div class="testResultGroup  " id="33"></div>
+            
+                <div class="testResultGroup  " id="34"></div>
+            
+                <div class="testResultGroup  " id="35"></div>
+            
+                <div class="testResultGroup  " id="36"></div>
+            
+                <div class="testResultGroup  " id="37"></div>
+            
+                <div class="testResultGroup  " id="38"></div>
+            
+                <div class="testResultGroup  " id="39"></div>
+            
+                <div class="testResultGroup  " id="40"></div>
+            
+                <div class="testResultGroup  " id="41"></div>
+            
+                <div class="testResultGroup  " id="42"></div>
+            
+                <div class="testResultGroup  " id="43"></div>
+            
+                <div class="testResultGroup  " id="44"></div>
+            
+                <div class="testResultGroup  " id="45"></div>
+            
+                <div class="testResultGroup  " id="46"></div>
+            
+                <div class="testResultGroup  " id="47"></div>
+            
+                <div class="testResultGroup  " id="48"></div>
+            
+                <div class="testResultGroup  " id="49"></div>
+            
+                <div class="testResultGroup  " id="50"></div>
+            
+                <div class="testResultGroup  " id="51"></div>
+            
+                <div class="testResultGroup  " id="52"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","","","","","","","","","","",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_file_upload_test.go","TestFunctionDetail":{"Line":27,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Data_shards_do_not_require_more_allocation_space","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.3,"Output":["","    zboxcli_file_upload_test.go:413: Test case [Data shards do not require more allocation space] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Data shards do not require more allocation space] start at [10-11-2023 16:01:12] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Data_shards_do_not_require_more_allocation_space_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  e6e32d7518376646c0682e7d207e414581eac22d1581e8b45ad1394577593068]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:413: Test case [Data shards do not require more allocation space] exit at [10-11-2023 16:01:25]\n","--- PASS: TestUpload/Data_shards_do_not_require_more_allocation_space (12.30s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Resume_upload_should_work_fine","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":112.68,"Output":["","    zboxcli_file_upload_test.go:437: Test case [Resume upload should work fine] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Resume upload should work fine] start at [10-11-2023 16:01:12] \n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  bbb22580e97d663b1baf069349ee43d39e43e043b02b1d22e1b8291db530417c]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1108: Waiting till file is partially uploaded...\n","    zboxcli_file_upload_test.go:1124: Partial upload successful, upload has been interrupted\n","    zboxcli_file_upload_test.go:472: the uploaded is true \n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    utils.go:82: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [0 / 1073741824    0.00% 134217728 / 1073741824   12.50% 00m45s 134217728 / 1073741824   12.50% 00m44s 134217728 / 1073741824   12.50% 00m43s 268435456 / 1073741824   25.00% 00m24s 268435456 / 1073741824   25.00% 00m23s 402653184 / 1073741824   37.50% 00m16s 402653184 / 1073741824   37.50% 00m15s 402653184 / 1073741824   37.50% 00m14s 402653184 / 1073741824   37.50% 00m13s 402653184 / 1073741824   37.50% 00m12s 536870912 / 1073741824   50.00% 00m14s 536870912 / 1073741824   50.00% 00m13s 536870912 / 1073741824   50.00% 00m12s 536870912 / 1073741824   50.00% 00m11s 536870912 / 1073741824   50.00% 00m10s 536870912 / 1073741824   50.00% 00m09s 671088640 / 1073741824   62.50% 00m11s 671088640 / 1073741824   62.50% 00m10s 671088640 / 1073741824   62.50% 00m09s 671088640 / 1073741824   62.50% 00m08s 671088640 / 1073741824   62.50% 00m07s 671088640 / 1073741824   62.50% 00m06s 671088640 / 1073741824   62.50% 00m05s 671088640 ","/ 1073741824   62.50% 00m04s 671088640 / 1073741824   62.50% 00m03s 671088640 / 1073741824   62.50% 00m02s 671088640 / 1073741824   62.50% 00m01s 671088640 / 1073741824   62.50% 671088640 / 1073741824   62.50% 34s -\u003cNEWLINE\u003e- Error in file operation: upload_failed: Upload failed. bad request: {\"code\":\"upload_error\",\"error\":\"upload_error: Failed to write file. file_read_error: data size overflow. expected 536870912, got 542638080\"} -\u003cNEWLINE\u003e- Upload failed. consensus_not_met: Multioperation failed. Required consensus 3 got 0. Major error: upload_failed: Upload failed. bad request: {\"code\":\"upload_error\",\"error\":\"upload_error: Failed to write file. file_read_error: data size overflow. expected 536870912, got 542638080\"}]\n","    utils.go:78: \u001b[32mCommand passed on retry [2/3]. Output: [0 / 1073741824    0.00% 134217728 / 1073741824   12.50% 00m09s 134217728 / 1073741824   12.50% 00m08s 134217728 / 1073741824   12.50% 00m07s 268435456 / 1073741824   25.00% 00m08s 268435456 / 1073741824   25.00% 00m07s 402653184 / 1073741824   37.50% 00m07s 402653184 / 1073741824   37.50% 00m06s 402653184 / 1073741824   37.50% 00m05s 402653184 / 1073741824   37.50% 00m04s 536870912 / 1073741824   50.00% 00m06s 536870912 / 1073741824   50.00% 00m05s 536870912 / 1073741824   50.00% 00m04s 671088640 / 1073741824   62.50% 00m05s 671088640 / 1073741824   62.50% 00m04s 671088640 / 1073741824   62.50% 00m03s 671088640 / 1073741824   62.50% 00m02s 805306368 / 1073741824   75.00% 00m04s 805306368 / 1073741824   75.00% 00m03s 805306368 / 1073741824   75.00% 00m02s 805306368 / 1073741824   75.00% 00m01s 939524096 / 1073741824   87.50% 00m02s 939524096 / 1073741824   87.50% 00m01s 939524096 / 1073741824   87.50% 1073741824 / 1073741824  100.00% 1073741824 / 10","73741824  100.00% 26s -\u003cNEWLINE\u003e- Status completed callback. Type = application/octet-stream. Name = aaI20btJlU_test.txt]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/zboxcli_file_upload_test.go:491\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"1073741824\" is not less than \"1073741824\"\n","        \tTest:       \tTestUpload/Resume_upload_should_work_fine\n","    zboxcli_file_upload_test.go:437: Test case [Resume upload should work fine] exit at [10-11-2023 16:03:19]\n","","","    zboxcli_file_upload_test.go:437: Test case [Resume upload should work fine] scheduled at [10-11-2023 16:03:22] \n","","","    system_test_framework.go:149: Test case [Resume upload should work fine] start at [10-11-2023 16:03:22] \n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  50b192e2b36b16bf78d438912e8e142661407f3f19ae609b04d5e4bb3cf08f79]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1108: Waiting till file is partially uploaded...\n","    zboxcli_file_upload_test.go:1124: Partial upload successful, upload has been interrupted\n","    zboxcli_file_upload_test.go:472: the uploaded is true \n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    utils.go:82: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [0 / 1073741824    0.00% 134217728 / 1073741824   12.50% 01m06s 134217728 / 1073741824   12.50% 01m05s 268435456 / 1073741824   25.00% 00m33s 268435456 / 1073741824   25.00% 00m32s 402653184 / 1073741824   37.50% 00m20s 402653184 / 1073741824   37.50% 00m19s 402653184 / 1073741824   37.50% 00m18s 402653184 / 1073741824   37.50% 00m17s 402653184 / 1073741824   37.50% 00m16s 402653184 / 1073741824   37.50% 00m15s 402653184 / 1073741824   37.50% 00m14s 402653184 / 1073741824   37.50% 00m13s 402653184 / 1073741824   37.50% 20s -\u003cNEWLINE\u003e- Error in file operation: upload_failed: Upload failed. bad request: {\"code\":\"upload_error\",\"error\":\"upload_error: Failed to finalize the hasher. invalid size. Expected 536870912 got 497811456\"} -\u003cNEWLINE\u003e- Upload failed. consensus_not_met: Multioperation failed. Required consensus 3 got 0. Major error: upload_failed: Upload failed. bad request: {\"code\":\"upload_error\",\"error\":\"upload_error",": Failed to finalize the hasher. invalid size. Expected 536870912 got 497811456\"}]\n","    utils.go:78: \u001b[32mCommand passed on retry [2/3]. Output: [0 / 1073741824    0.00% 134217728 / 1073741824   12.50% 00m09s 134217728 / 1073741824   12.50% 00m08s 268435456 / 1073741824   25.00% 00m08s 268435456 / 1073741824   25.00% 00m07s 402653184 / 1073741824   37.50% 00m06s 402653184 / 1073741824   37.50% 00m05s 402653184 / 1073741824   37.50% 00m04s 402653184 / 1073741824   37.50% 00m03s 536870912 / 1073741824   50.00% 00m06s 536870912 / 1073741824   50.00% 00m05s 536870912 / 1073741824   50.00% 00m04s 536870912 / 1073741824   50.00% 00m03s 671088640 / 1073741824   62.50% 00m05s 671088640 / 1073741824   62.50% 00m04s 671088640 / 1073741824   62.50% 00m03s 805306368 / 1073741824   75.00% 00m03s 805306368 / 1073741824   75.00% 00m02s 805306368 / 1073741824   75.00% 00m01s 939524096 / 1073741824   87.50% 00m02s 939524096 / 1073741824   87.50% 00m01s 939524096 / 1073741824   87.50% 1073741824 / 1073741824  100.00% 1073741824 / 1073741824  100.00% 23s -\u003cNEWLINE\u003e- Status completed callback. Type = applicatio","n/octet-stream. Name = -SD4CkklB3_test.txt]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/zboxcli_file_upload_test.go:491\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"1073741824\" is not less than \"1073741824\"\n","        \tTest:       \tTestUpload/Resume_upload_should_work_fine\n","    zboxcli_file_upload_test.go:437: Test case [Resume upload should work fine] exit at [10-11-2023 16:05:17]\n","","","    zboxcli_file_upload_test.go:437: Test case [Resume upload should work fine] scheduled at [10-11-2023 16:05:18] \n","","","    system_test_framework.go:149: Test case [Resume upload should work fine] start at [10-11-2023 16:05:18] \n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  8bf6c9c034a395caa059692eace5d137fefe6837026bace06a87db1565cebf63]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1108: Waiting till file is partially uploaded...\n","    zboxcli_file_upload_test.go:1124: Partial upload successful, upload has been interrupted\n","    zboxcli_file_upload_test.go:472: the uploaded is true \n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    utils.go:82: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [0 / 1073741824    0.00% 134217728 / 1073741824   12.50% 01m08s 134217728 / 1073741824   12.50% 01m07s 268435456 / 1073741824   25.00% 00m33s 268435456 / 1073741824   25.00% 00m32s 402653184 / 1073741824   37.50% 00m20s 402653184 / 1073741824   37.50% 00m19s 402653184 / 1073741824   37.50% 00m18s 402653184 / 1073741824   37.50% 00m17s 402653184 / 1073741824   37.50% 00m16s 402653184 / 1073741824   37.50% 00m15s 402653184 / 1073741824   37.50% 00m14s 402653184 / 1073741824   37.50% 00m13s 402653184 / 1073741824   37.50% 00m12s 402653184 / 1073741824   37.50% 00m11s 402653184 / 1073741824   37.50% 00m10s 402653184 / 1073741824   37.50% 22s -\u003cNEWLINE\u003e- Error in file operation: upload_failed: Upload failed. bad request: {\"code\":\"upload_error\",\"error\":\"upload_error: Failed to finalize the hasher. invalid size. Expected 536870912 got 497811456\"} -\u003cNEWLINE\u003e- Upload failed. consensus_not_met: Multioperation failed. Required co","nsensus 3 got 0. Major error: upload_failed: Upload failed. bad request: {\"code\":\"upload_error\",\"error\":\"upload_error: Failed to finalize the hasher. invalid size. Expected 536870912 got 497811456\"}]\n","    utils.go:78: \u001b[32mCommand passed on retry [2/3]. Output: [0 / 1073741824    0.00% 134217728 / 1073741824   12.50% 00m09s 134217728 / 1073741824   12.50% 00m08s 268435456 / 1073741824   25.00% 00m07s 268435456 / 1073741824   25.00% 00m06s 268435456 / 1073741824   25.00% 00m05s 402653184 / 1073741824   37.50% 00m07s 402653184 / 1073741824   37.50% 00m06s 402653184 / 1073741824   37.50% 00m05s 402653184 / 1073741824   37.50% 00m04s 536870912 / 1073741824   50.00% 00m06s 536870912 / 1073741824   50.00% 00m05s 536870912 / 1073741824   50.00% 00m04s 671088640 / 1073741824   62.50% 00m05s 671088640 / 1073741824   62.50% 00m04s 671088640 / 1073741824   62.50% 00m03s 671088640 / 1073741824   62.50% 00m02s 805306368 / 1073741824   75.00% 00m04s 805306368 / 1073741824   75.00% 00m03s 805306368 / 1073741824   75.00% 00m02s 805306368 / 1073741824   75.00% 00m01s 939524096 / 1073741824   87.50% 00m02s 939524096 / 1073741824   87.50% 00m01s 939524096 / 1073741824   87.50% 1073741824 / 1073741824  100.00% 1073741824 / 10","73741824  100.00% 24s -\u003cNEWLINE\u003e- Status completed callback. Type = application/octet-stream. Name = EsSt7FKdTY_test.txt]\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner1/_work/system_test/system_test/tests/cli_tests/zboxcli_file_upload_test.go:491\n","        \t            \t\t\t\t/root/actions-runner1/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/usr/local/go/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"1073741824\" is not less than \"1073741824\"\n","        \tTest:       \tTestUpload/Resume_upload_should_work_fine\n","    zboxcli_file_upload_test.go:437: Test case [Resume upload should work fine] exit at [10-11-2023 16:07:11]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":42.49,"Output":["","    zboxcli_file_upload_test.go:786: Test case [Tokens should move from write pool balance to challenge pool acc. to expected upload cost] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Tokens should move from write pool balance to challenge pool acc. to expected upload cost] start at [10-11-2023 16:01:12] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  874e02832343a1511d3ea86a32b555ee7a4f9fd93f856a187e2718a4cf76dd64]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_common_user_functions_test.go:231: Get Allocation...\n","    zboxcli_upload_token_test.go:93: Getting challenge pool info...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_upload_token_test.go:85: Getting upload cost...\n","    utils.go:166: Waiting 30s...\n","    zboxcli_common_user_functions_test.go:231: Get Allocation...\n","    zboxcli_upload_token_test.go:93: Getting challenge pool info...\n","    zboxcli_file_upload_test.go:786: Test case [Tokens should move from write pool balance to challenge pool acc. to expected upload cost] exit at [10-11-2023 16:01:55]\n","--- PASS: TestUpload/Tokens_should_move_from_write_pool_balance_to_challenge_pool_acc._to_expected_upload_cost (42.49s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_100%_of_the_allocation_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.21,"Output":["","    zboxcli_file_upload_test.go:526: Test case [Upload 100% of the allocation should work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload 100% of the allocation should work] start at [10-11-2023 16:01:24] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_100%_of_the_allocation_should_work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  b619386e10680306efca31d35aa2ceb387cd08f90c1be215c4229ca85846dc91]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:526: Test case [Upload 100% of the allocation should work] exit at [10-11-2023 16:01:38]\n","--- PASS: TestUpload/Upload_100%_of_the_allocation_should_work (13.21s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_Blank_File_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.52,"Output":["","    zboxcli_file_upload_test.go:678: Test case [Upload Blank File Should Fail] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload Blank File Should Fail] start at [10-11-2023 16:01:36] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_Blank_File_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  cdd658a26afd7f2e3d9709dabcf1d4b2d4c9be874f422d91c1eda59f16f9be02]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1051: Uploading file...\n","    zboxcli_file_upload_test.go:678: Test case [Upload Blank File Should Fail] exit at [10-11-2023 16:01:47]\n","--- PASS: TestUpload/Upload_Blank_File_Should_Fail (11.52s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_With_half_Size_of_the_Allocation_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.45,"Output":["","    zboxcli_file_upload_test.go:35: Test case [Upload File With half Size of the Allocation Should Work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File With half Size of the Allocation Should Work] start at [10-11-2023 16:01:12] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_With_half_Size_of_the_Allocation_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  6b4c5bf37f3530f1fea58d1d1740ae1fd5b49a4cba3951a4039fd0a975eec06a]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:35: Test case [Upload File With half Size of the Allocation Should Work] exit at [10-11-2023 16:01:24]\n","--- PASS: TestUpload/Upload_File_With_half_Size_of_the_Allocation_Should_Work (11.45s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_longer_than_100_chars_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.44,"Output":["","    zboxcli_file_upload_test.go:728: Test case [Upload File longer than 100 chars should fail] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File longer than 100 chars should fail] start at [10-11-2023 16:01:28] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_longer_than_100_chars_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  2e256b9e06d82c462415bf0cca59b199ddb48f09e7235e6e545245cdf3484705]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:728: Test case [Upload File longer than 100 chars should fail] exit at [10-11-2023 16:01:39]\n","--- PASS: TestUpload/Upload_File_longer_than_100_chars_should_fail (11.44s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_should_fail_if_upload_file_option_is_forbidden","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.41,"Output":["","    zboxcli_file_upload_test.go:754: Test case [Upload File should fail if upload file option is forbidden] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File should fail if upload file option is forbidden] start at [10-11-2023 16:01:12] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_should_fail_if_upload_file_option_is_forbidden_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  e740ed646143caf6329425954aab335107c58b83fe9776599bf8388bde813f17]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    utils.go:166: Waiting 10s...\n","    zboxcli_list_file_test.go:638: Listing individual file in allocation...\n","    zboxcli_file_upload_test.go:754: Test case [Upload File should fail if upload file option is forbidden] exit at [10-11-2023 16:01:34]\n","--- PASS: TestUpload/Upload_File_should_fail_if_upload_file_option_is_forbidden (21.41s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_to_Existing_File_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":13.26,"Output":["","    zboxcli_file_upload_test.go:549: Test case [Upload File to Existing File Should Fail] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File to Existing File Should Fail] start at [10-11-2023 16:01:24] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_to_Existing_File_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  a0af64cb3d3e59373748ceb101e6c690a6d3e04fb356562c7a5baeef541f3c20]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:1051: Uploading file...\n","    zboxcli_file_upload_test.go:549: Test case [Upload File to Existing File Should Fail] exit at [10-11-2023 16:01:37]\n","--- PASS: TestUpload/Upload_File_to_Existing_File_Should_Fail (13.26s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_to_Nested_Directory_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12,"Output":["","    zboxcli_file_upload_test.go:244: Test case [Upload File to Nested Directory Should Work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File to Nested Directory Should Work] start at [10-11-2023 16:01:12] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_to_Nested_Directory_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  9bf8d5797c7f938aff88228f4379b6cfbb48d3022a434f3ab9c1ecf125faeb53]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:244: Test case [Upload File to Nested Directory Should Work] exit at [10-11-2023 16:01:24]\n","--- PASS: TestUpload/Upload_File_to_Nested_Directory_Should_Work (12.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_to_Non-Existent_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.36,"Output":["","    zboxcli_file_upload_test.go:585: Test case [Upload File to Non-Existent Allocation Should Fail] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File to Non-Existent Allocation Should Fail] start at [10-11-2023 16:01:24] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_to_Non-Existent_Allocation_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3572ca6f6faa938a050c02617bc75af2916ec4721af1f81df8457ad4cc82bec9]\n","    zboxcli_file_upload_test.go:1051: Uploading file...\n","    zboxcli_file_upload_test.go:585: Test case [Upload File to Non-Existent Allocation Should Fail] exit at [10-11-2023 16:01:28]\n","--- PASS: TestUpload/Upload_File_to_Non-Existent_Allocation_Should_Fail (3.36s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_to_Other's_Allocation_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.8,"Output":["","    zboxcli_file_upload_test.go:608: Test case [Upload File to Other's Allocation Should Fail] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File to Other's Allocation Should Fail] start at [10-11-2023 16:01:24] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_to_Other's_Allocation_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  a886ce218304a7da54de5608a0ac5f59bebbb7e7d3c26bc2debdb9d0947d9478]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:1051: Uploading file...\n","    zboxcli_file_upload_test.go:608: Test case [Upload File to Other's Allocation Should Fail] exit at [10-11-2023 16:01:48]\n","--- PASS: TestUpload/Upload_File_to_Other's_Allocation_Should_Fail (23.80s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_to_Other's_Allocation_Should_Fail/Get_Other_Allocation_ID","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.23,"Output":["","    zboxcli_file_upload_test.go:622: Test case [Get Other Allocation ID] scheduled at [10-11-2023 16:01:36] \n","    zboxcli_file_upload_test.go:622: [WARN] Not running test case [Get Other Allocation ID] in parallel as it is a child test. Use t.Unwrap.run() then t.Parallel() if you wish to do this.\n","    system_test_framework.go:149: Test case [Get Other Allocation ID] start at [10-11-2023 16:01:36] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_to_Other's_Allocation_Should_Fail-Get_Other_Allocation_ID_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  001cbe6c0c3debe1a88db9ad717bf3be1526d71ffd93fb455f22fe4e33343b8b]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:622: Test case [Get Other Allocation ID] exit at [10-11-2023 16:01:47]\n","--- PASS: TestUpload/Upload_File_to_Other's_Allocation_Should_Fail/Get_Other_Allocation_ID (11.23s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_to_Root_Directory_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.9,"Output":["","    zboxcli_file_upload_test.go:95: Test case [Upload File to Root Directory Should Work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File to Root Directory Should Work] start at [10-11-2023 16:01:34] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_to_Root_Directory_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  c80b3641b464178e78ed42416d78209ca5f6e35d96ddee6f4553a22c20efc06d]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:95: Test case [Upload File to Root Directory Should Work] exit at [10-11-2023 16:01:46]\n","--- PASS: TestUpload/Upload_File_to_Root_Directory_Should_Work (11.90s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_to_a_Directory_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.1,"Output":["","    zboxcli_file_upload_test.go:172: Test case [Upload File to a Directory Should Work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File to a Directory Should Work] start at [10-11-2023 16:01:12] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_to_a_Directory_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  b54a3a720c78195f9ca91616a9f2ee7b26996cbcfcc3d86a2e8b1cd347bd9fba]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:172: Test case [Upload File to a Directory Should Work] exit at [10-11-2023 16:01:24]\n","--- PASS: TestUpload/Upload_File_to_a_Directory_Should_Work (12.10s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_to_a_Directory_without_Filename_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.8,"Output":["","    zboxcli_file_upload_test.go:199: Test case [Upload File to a Directory without Filename Should Work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File to a Directory without Filename Should Work] start at [10-11-2023 16:01:24] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_to_a_Directory_without_Filename_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  239b87fd3b90f1d57186f0a2616df3a72ed1ff866a5d7f04aa4194356371c17c]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    utils.go:166: Waiting 10s...\n","    zboxcli_list_file_test.go:638: Listing individual file in allocation...\n","    zboxcli_file_upload_test.go:199: Test case [Upload File to a Directory without Filename Should Work] exit at [10-11-2023 16:01:47]\n","--- PASS: TestUpload/Upload_File_to_a_Directory_without_Filename_Should_Work (23.80s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_too_large_-_file_size_larger_than_allocation_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.59,"Output":["","    zboxcli_file_upload_test.go:503: Test case [Upload File too large - file size larger than allocation should fail] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File too large - file size larger than allocation should fail] start at [10-11-2023 16:01:24] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_too_large_-_file_size_larger_than_allocation_should_fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  802eb98fbad2be0075fbdf770521d5f9d9d8142792cd376be04203dec91fe5e1]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:503: Test case [Upload File too large - file size larger than allocation should fail] exit at [10-11-2023 16:01:36]\n","--- PASS: TestUpload/Upload_File_too_large_-_file_size_larger_than_allocation_should_fail (11.59s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_with_Encryption_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.92,"Output":["","    zboxcli_file_upload_test.go:387: Test case [Upload File with Encryption Should Work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File with Encryption Should Work] start at [10-11-2023 16:01:12] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_with_Encryption_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  6d44c2f2ee0fcdc61131dfc710bb78b36f33c81f4279edae0c4c63abb1e93acd]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:387: Test case [Upload File with Encryption Should Work] exit at [10-11-2023 16:01:24]\n","--- PASS: TestUpload/Upload_File_with_Encryption_Should_Work (11.92s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_File_with_Thumbnail_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":12.2,"Output":["","    zboxcli_file_upload_test.go:271: Test case [Upload File with Thumbnail Should Work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload File with Thumbnail Should Work] start at [10-11-2023 16:01:12] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_File_with_Thumbnail_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  13ae8c206c664117bd25f83b41e6787ecaf23c93ce63f86d08729e120adb1813]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:271: Test case [Upload File with Thumbnail Should Work] exit at [10-11-2023 16:01:24]\n","--- PASS: TestUpload/Upload_File_with_Thumbnail_Should_Work (12.20s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_Image_File_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.44,"Output":["","    zboxcli_file_upload_test.go:302: Test case [Upload Image File Should Work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload Image File Should Work] start at [10-11-2023 16:01:39] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_Image_File_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  9f52b1517aa1defaf5533c60b1149a0c610deee8f6f4e63e108b99449328edac]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:302: Test case [Upload Image File Should Work] exit at [10-11-2023 16:01:51]\n","--- PASS: TestUpload/Upload_Image_File_Should_Work (11.44s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_Large_File_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":70.89,"Output":["","    zboxcli_file_upload_test.go:353: Test case [Upload Large File Should Work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload Large File Should Work] start at [10-11-2023 16:01:12] \n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [Execute faucet smart contract success with txn :  23b8bdb385acd491ba594868f0e725962d4218cbea88858cd0833229b75ccc81]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:353: Test case [Upload Large File Should Work] exit at [10-11-2023 16:02:23]\n","--- PASS: TestUpload/Upload_Large_File_Should_Work (70.89s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_Non-Existent_File_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.33,"Output":["","    zboxcli_file_upload_test.go:655: Test case [Upload Non-Existent File Should Fail] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload Non-Existent File Should Fail] start at [10-11-2023 16:01:12] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_Non-Existent_File_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  0e5b572b74fb6a44ec22fe98edf3628f73f6259905c071827ddb0affc67151f2]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1051: Uploading file...\n","    zboxcli_file_upload_test.go:655: Test case [Upload Non-Existent File Should Fail] exit at [10-11-2023 16:01:24]\n","--- PASS: TestUpload/Upload_Non-Existent_File_Should_Fail (11.33s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_Video_File_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":81.91,"Output":["","    zboxcli_file_upload_test.go:330: Test case [Upload Video File Should Work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload Video File Should Work] start at [10-11-2023 16:01:12] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_Video_File_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  b1408ebb38dea0a38b060a2cc5c3fd37656aa5bf290957807618e18a634f2456]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:330: Test case [Upload Video File Should Work] exit at [10-11-2023 16:02:34]\n","--- PASS: TestUpload/Upload_Video_File_Should_Work (81.91s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_file_concurrently_to_root_directory,_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":16.3,"Output":["","    zboxcli_file_upload_test.go:122: Test case [Upload file concurrently to root directory, should work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload file concurrently to root directory, should work] start at [10-11-2023 16:01:36] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_file_concurrently_to_root_directory,_should_work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  159b3970c2303acc578aac6084e68ec9eb7316fdcb47c989b6aafc93c51d4e5d]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:122: Test case [Upload file concurrently to root directory, should work] exit at [10-11-2023 16:01:52]\n","--- PASS: TestUpload/Upload_file_concurrently_to_root_directory,_should_work (16.30s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_multiple_files_less_than_size_of_the_Allocation_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":15.95,"Output":["","    zboxcli_file_upload_test.go:64: Test case [Upload multiple files less than size of the Allocation Should Work] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload multiple files less than size of the Allocation Should Work] start at [10-11-2023 16:01:38] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_multiple_files_less_than_size_of_the_Allocation_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  bfa552d9b8de1f6435f692f3de3fbf11788913aa419bf5069cea805bb3223fe2]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:64: Test case [Upload multiple files less than size of the Allocation Should Work] exit at [10-11-2023 16:01:54]\n","--- PASS: TestUpload/Upload_multiple_files_less_than_size_of_the_Allocation_Should_Work (15.95s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_to_Allocation_without_remotepath_and_authticket_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":11.23,"Output":["","    zboxcli_file_upload_test.go:713: Test case [Upload to Allocation without remotepath and authticket Should Fail] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload to Allocation without remotepath and authticket Should Fail] start at [10-11-2023 16:01:25] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_to_Allocation_without_remotepath_and_authticket_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  6fa6c9f9f43b71a011fe9b22a5285ea2830b4d92eebc88c34c8afcb504da91a5]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1051: Uploading file...\n","    zboxcli_file_upload_test.go:713: Test case [Upload to Allocation without remotepath and authticket Should Fail] exit at [10-11-2023 16:01:36]\n","--- PASS: TestUpload/Upload_to_Allocation_without_remotepath_and_authticket_Should_Fail (11.23s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/Upload_without_any_Parameter_Should_Fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.16,"Output":["","    zboxcli_file_upload_test.go:701: Test case [Upload without any Parameter Should Fail] scheduled at [10-11-2023 15:51:33] \n","","","    system_test_framework.go:149: Test case [Upload without any Parameter Should Fail] start at [10-11-2023 16:01:37] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-Upload_without_any_Parameter_Should_Fail_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  cbc18c44b1aef506a246def241aa567ff74abb88a8ef729e8f16ed537a5658e8]\n","    zboxcli_file_upload_test.go:1051: Uploading file...\n","    zboxcli_file_upload_test.go:701: Test case [Upload without any Parameter Should Fail] exit at [10-11-2023 16:01:40]\n","--- PASS: TestUpload/Upload_without_any_Parameter_Should_Fail (3.16s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":579.7,"Output":["","    zboxcli_file_upload_test.go:859: Test case [stream tests for different formats] scheduled at [10-11-2023 15:51:33] \n","    system_test_framework.go:149: Test case [stream tests for different formats] start at [10-11-2023 15:51:33] \n","    zboxcli_file_upload_test.go:859: Test case [stream tests for different formats] exit at [10-11-2023 16:01:12]\n","--- PASS: TestUpload/stream_tests_for_different_formats (579.70s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_3gp_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":35.23,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File 3gp With Web Streaming Should Work] scheduled at [10-11-2023 15:53:00] \n","    system_test_framework.go:149: Test case [Upload Video File 3gp With Web Streaming Should Work] start at [10-11-2023 15:53:00] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_3gp_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  b2cb60075d06ba083edfbc2eecef2a3695d0322e56855933528f1c035418ccc1]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File 3gp With Web Streaming Should Work] exit at [10-11-2023 15:53:36]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_3gp_With_Web_Streaming_Should_Work (35.23s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_asf_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.51,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File asf With Web Streaming Should Work] scheduled at [10-11-2023 15:59:52] \n","    system_test_framework.go:149: Test case [Upload Video File asf With Web Streaming Should Work] start at [10-11-2023 15:59:52] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_asf_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  8d262310efde08801a38633bd30ab29c2647ff8450e9cbea309f3d317ae3bc03]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File asf With Web Streaming Should Work] exit at [10-11-2023 16:00:13]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_asf_With_Web_Streaming_Should_Work (20.51s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_avi_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":19.95,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File avi With Web Streaming Should Work] scheduled at [10-11-2023 16:00:13] \n","    system_test_framework.go:149: Test case [Upload Video File avi With Web Streaming Should Work] start at [10-11-2023 16:00:13] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_avi_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  5ca2d20d8dc2445c65daea50b233ea9d6221d03507e3b924837d38cef283b455]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File avi With Web Streaming Should Work] exit at [10-11-2023 16:00:33]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_avi_With_Web_Streaming_Should_Work (19.95s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_f4v_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":27.1,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File f4v With Web Streaming Should Work] scheduled at [10-11-2023 15:52:14] \n","    system_test_framework.go:149: Test case [Upload Video File f4v With Web Streaming Should Work] start at [10-11-2023 15:52:14] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_f4v_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  53dcb5ac7e8b20ba95f2a04934591c260c967edfcaaf175143fedb0e6c6fdc96]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File f4v With Web Streaming Should Work] exit at [10-11-2023 15:52:41]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_f4v_With_Web_Streaming_Should_Work (27.10s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_flv_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":19.15,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File flv With Web Streaming Should Work] scheduled at [10-11-2023 15:52:41] \n","    system_test_framework.go:149: Test case [Upload Video File flv With Web Streaming Should Work] start at [10-11-2023 15:52:41] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_flv_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  2a99c2fa643aec8090c99a825ea852868d541ef03a08640c07913085a090c8cf]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File flv With Web Streaming Should Work] exit at [10-11-2023 15:53:00]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_flv_With_Web_Streaming_Should_Work (19.15s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_hevc_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.33,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File hevc With Web Streaming Should Work] scheduled at [10-11-2023 15:56:22] \n","    system_test_framework.go:149: Test case [Upload Video File hevc With Web Streaming Should Work] start at [10-11-2023 15:56:22] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_hevc_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  b5760934771d8738c8210a5355dfbd12e90a6eff45b4609b3a97422f6bafd33f]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File hevc With Web Streaming Should Work] exit at [10-11-2023 15:56:42]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_hevc_With_Web_Streaming_Should_Work (20.33s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_m2ts_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.48,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File m2ts With Web Streaming Should Work] scheduled at [10-11-2023 15:56:42] \n","    system_test_framework.go:149: Test case [Upload Video File m2ts With Web Streaming Should Work] start at [10-11-2023 15:56:42] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_m2ts_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  421e98ee31b0a74c6e0a9d243dcd6057db32ec074c15f0f7a6000644a57b595b]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File m2ts With Web Streaming Should Work] exit at [10-11-2023 15:57:03]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_m2ts_With_Web_Streaming_Should_Work (20.48s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_m2v_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":19.17,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File m2v With Web Streaming Should Work] scheduled at [10-11-2023 15:57:03] \n","    system_test_framework.go:149: Test case [Upload Video File m2v With Web Streaming Should Work] start at [10-11-2023 15:57:03] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_m2v_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  9beb37529863cfe037f5af0b3b6417f54a885a81c4de000d2c63a51671358024]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File m2v With Web Streaming Should Work] exit at [10-11-2023 15:57:22]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_m2v_With_Web_Streaming_Should_Work (19.17s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_m4v_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":24.71,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File m4v With Web Streaming Should Work] scheduled at [10-11-2023 15:53:36] \n","    system_test_framework.go:149: Test case [Upload Video File m4v With Web Streaming Should Work] start at [10-11-2023 15:53:36] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_m4v_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  06ef1dbda14edda1cd86bb9ce617717f21fd58e4614d7f40a0bc9b8348f384dc]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File m4v With Web Streaming Should Work] exit at [10-11-2023 15:54:00]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_m4v_With_Web_Streaming_Should_Work (24.71s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_mjpeg_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":36.91,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mjpeg With Web Streaming Should Work] scheduled at [10-11-2023 15:55:03] \n","    system_test_framework.go:149: Test case [Upload Video File mjpeg With Web Streaming Should Work] start at [10-11-2023 15:55:03] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_mjpeg_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  edc27456bdfad63866bc57767c40ff7284f24a7a7c3e00b8ce39dc9773321763]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mjpeg With Web Streaming Should Work] exit at [10-11-2023 15:55:40]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_mjpeg_With_Web_Streaming_Should_Work (36.91s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_mkv_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":41.35,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mkv With Web Streaming Should Work] scheduled at [10-11-2023 15:55:40] \n","    system_test_framework.go:149: Test case [Upload Video File mkv With Web Streaming Should Work] start at [10-11-2023 15:55:40] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_mkv_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  8bab90d83933ee21de4261160673eeaad3afc0e76513bfb555b482f3fffb95b3]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mkv With Web Streaming Should Work] exit at [10-11-2023 15:56:22]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_mkv_With_Web_Streaming_Should_Work (41.35s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_mov_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":23.4,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mov With Web Streaming Should Work] scheduled at [10-11-2023 15:54:00] \n","    system_test_framework.go:149: Test case [Upload Video File mov With Web Streaming Should Work] start at [10-11-2023 15:54:00] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_mov_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  bbe5b71df072d31d07f81cb0d4dd657146f271a870041d8451aace391e677e7f]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mov With Web Streaming Should Work] exit at [10-11-2023 15:54:24]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_mov_With_Web_Streaming_Should_Work (23.40s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_mp4_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":39.8,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mp4 With Web Streaming Should Work] scheduled at [10-11-2023 15:54:24] \n","    system_test_framework.go:149: Test case [Upload Video File mp4 With Web Streaming Should Work] start at [10-11-2023 15:54:24] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_mp4_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  a0c2073d4c3221a0f92d06220dfa02e931321f599c5fc21346781f51aa72876f]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mp4 With Web Streaming Should Work] exit at [10-11-2023 15:55:03]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_mp4_With_Web_Streaming_Should_Work (39.80s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_mpeg_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.68,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mpeg With Web Streaming Should Work] scheduled at [10-11-2023 15:57:22] \n","    system_test_framework.go:149: Test case [Upload Video File mpeg With Web Streaming Should Work] start at [10-11-2023 15:57:22] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_mpeg_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3f037bba5bab859daf7877600cdb1f4f7464dad17a43f031a9f4158bb65f9a7b]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mpeg With Web Streaming Should Work] exit at [10-11-2023 15:57:42]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_mpeg_With_Web_Streaming_Should_Work (20.68s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_mpg_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":19.73,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mpg With Web Streaming Should Work] scheduled at [10-11-2023 15:57:42] \n","    system_test_framework.go:149: Test case [Upload Video File mpg With Web Streaming Should Work] start at [10-11-2023 15:57:42] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_mpg_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  74ff5c9ea3bd6676a54aea8684fcbec1bf93ad440ea7a68d5e344a8fab744b0f]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mpg With Web Streaming Should Work] exit at [10-11-2023 15:58:02]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_mpg_With_Web_Streaming_Should_Work (19.73s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_mts_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.41,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mts With Web Streaming Should Work] scheduled at [10-11-2023 15:51:53] \n","    system_test_framework.go:149: Test case [Upload Video File mts With Web Streaming Should Work] start at [10-11-2023 15:51:53] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_mts_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  43c3374363f19f4fdbc20a0d6bfca8ed1e7aaf32c90ad71dc4610f484aa6fd29]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mts With Web Streaming Should Work] exit at [10-11-2023 15:52:14]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_mts_With_Web_Streaming_Should_Work (21.41s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_mxf_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":28,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mxf With Web Streaming Should Work] scheduled at [10-11-2023 15:58:02] \n","    system_test_framework.go:149: Test case [Upload Video File mxf With Web Streaming Should Work] start at [10-11-2023 15:58:02] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_mxf_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  b4296e46e0fe27cc1a4cba51d5bf90b7e16b5203ed730cae1af34f9a8ce9792e]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File mxf With Web Streaming Should Work] exit at [10-11-2023 15:58:30]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_mxf_With_Web_Streaming_Should_Work (28.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_ogv_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.33,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File ogv With Web Streaming Should Work] scheduled at [10-11-2023 15:58:30] \n","    system_test_framework.go:149: Test case [Upload Video File ogv With Web Streaming Should Work] start at [10-11-2023 15:58:30] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_ogv_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  cb060b7c5b288f465e2f8af121ca315383177c85122872a50eb0dafc96961ec9]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File ogv With Web Streaming Should Work] exit at [10-11-2023 15:58:48]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_ogv_With_Web_Streaming_Should_Work (18.33s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_rm_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.71,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File rm With Web Streaming Should Work] scheduled at [10-11-2023 15:58:48] \n","    system_test_framework.go:149: Test case [Upload Video File rm With Web Streaming Should Work] start at [10-11-2023 15:58:48] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_rm_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  406d733b5c3fa07007e19de7b0eb55773ce5fd387a90c9612caf20c1d4f9150a]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File rm With Web Streaming Should Work] exit at [10-11-2023 15:59:10]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_rm_With_Web_Streaming_Should_Work (21.71s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_ts_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":21.15,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File ts With Web Streaming Should Work] scheduled at [10-11-2023 15:59:10] \n","    system_test_framework.go:149: Test case [Upload Video File ts With Web Streaming Should Work] start at [10-11-2023 15:59:10] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_ts_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3d2693fa38c6334918a8d993f9a28dfcd1f4513e812bbc1d7fb92c0b88ead1f3]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File ts With Web Streaming Should Work] exit at [10-11-2023 15:59:31]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_ts_With_Web_Streaming_Should_Work (21.15s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_vob_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.73,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File vob With Web Streaming Should Work] scheduled at [10-11-2023 15:59:31] \n","    system_test_framework.go:149: Test case [Upload Video File vob With Web Streaming Should Work] start at [10-11-2023 15:59:31] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_vob_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  d0f10080a7b70828bc795ea901df55724de0be0129544dfa9c52bac8ef2b16ed]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File vob With Web Streaming Should Work] exit at [10-11-2023 15:59:52]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_vob_With_Web_Streaming_Should_Work (20.73s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_webm_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.58,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File webm With Web Streaming Should Work] scheduled at [10-11-2023 16:00:33] \n","    system_test_framework.go:149: Test case [Upload Video File webm With Web Streaming Should Work] start at [10-11-2023 16:00:33] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_webm_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3d2c5d73f7bca613350ed1ebfc090c413eade09c7cac6c2f577702c6a9fed1fb]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File webm With Web Streaming Should Work] exit at [10-11-2023 16:00:53]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_webm_With_Web_Streaming_Should_Work (20.58s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_wmv_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":19.17,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File wmv With Web Streaming Should Work] scheduled at [10-11-2023 16:00:53] \n","    system_test_framework.go:149: Test case [Upload Video File wmv With Web Streaming Should Work] start at [10-11-2023 16:00:53] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_wmv_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  69c6cf44aa3d1d31c3462a4556e266030167fb576f314d648483268b73f9d6ca]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File wmv With Web Streaming Should Work] exit at [10-11-2023 16:01:12]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_wmv_With_Web_Streaming_Should_Work (19.17s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestUpload/stream_tests_for_different_formats/Upload_Video_File_wtv_With_Web_Streaming_Should_Work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":20.11,"Output":["","    zboxcli_file_upload_test.go:986: Test case [Upload Video File wtv With Web Streaming Should Work] scheduled at [10-11-2023 15:51:33] \n","    system_test_framework.go:149: Test case [Upload Video File wtv With Web Streaming Should Work] start at [10-11-2023 15:51:33] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestUpload-stream_tests_for_different_formats-Upload_Video_File_wtv_With_Web_Streaming_Should_Work_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3408042d94c8a521062cfa3c304d28020e0c9495152caadd08861ef9533da201]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_file_upload_test.go:1033: Uploading file...\n","    zboxcli_file_upload_test.go:986: Test case [Upload Video File wtv With Web Streaming Should Work] exit at [10-11-2023 15:51:53]\n","--- PASS: TestUpload/stream_tests_for_different_formats/Upload_Video_File_wtv_With_Web_Streaming_Should_Work (20.11s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
