@@ -457,7 +457,7 @@ func TestUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/",
 			"localpath":   filename,
-			"chunknumber": 1024, // 64KB * 1024 = 64M
+			"chunknumber": 500, // 64KB * 500 = 32M
 		}
 		upload_param := createParams(param)
 		command := fmt.Sprintf(
@@ -1114,7 +1114,7 @@ func waitPartialUploadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd) bool {
 		case <-ctx.Done():
 			t.Log("Timeout waiting for partial upload")
 			return false
-		case <-time.After(30 * time.Second):
+		case <-time.After(10 * time.Second):
 			// Send interrupt signal to command
 			err := cmd.Process.Signal(os.Interrupt)
 			if err != nil {
