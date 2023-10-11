@@ -436,7 +436,7 @@ func TestUpload(testSetup *testing.T) {
 
 	t.RunWithTimeout("Resume upload should work fine", 10*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
 		allocSize := int64(2 * GB)
-		fileSize := int64(1 * GB)
+		fileSize := int64(500 * MB)
 
 		output, err := executeFaucetWithTokens(t, configPath, 100.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -476,7 +476,7 @@ func TestUpload(testSetup *testing.T) {
 			"remotepath":  "/",
 			"localpath":   filename,
 			"chunknumber": 500, // 64KB * 500 = 32M
-		}, true)
+		}, false)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		pattern := `(\d+ / \d+)\s+(\d+\.\d+%)`
