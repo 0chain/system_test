@@ -277,7 +277,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName = "second allocation"
 		allocationDescription = "second allocation description created as part of " + t.Name()
-		allocationType = "second allocation type created as part of " + t.Name()
+		allocationType = "s3_server"
 		allocation_id := "new allocation id for blimp"
 		allocationObjCreatedResponse, response, err = zboxClient.PostAllocation(t,
 			allocation_id,
@@ -333,7 +333,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		allocationName = "second allocation"
 		allocationDescription = "second allocation description created as part of " + t.Name()
-		allocationType = "second allocation type created as part of " + t.Name()
+		allocationType = "s3_server"
 		allocation_id := "new allocation for chalk"
 		allocationObjCreatedResponse, response, err = zboxClient.PostAllocation(t,
 			allocation_id,
