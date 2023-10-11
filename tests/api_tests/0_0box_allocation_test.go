@@ -219,7 +219,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "second allocation created as part of " + t.Name()
+		allocationName := "allocation name"
 		allocationDescription := "second allocation description created as part of " + t.Name()
 		allocationType := "s3_server"
 		allocation_id := "new allocation for vult"
