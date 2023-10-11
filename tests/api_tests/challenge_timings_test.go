@@ -27,7 +27,7 @@ const (
 func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 9000, client.TxSuccessfulStatus)
+	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 900, client.TxSuccessfulStatus)
 
 	allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 	require.NoError(t, err)
