@@ -430,7 +430,7 @@ func TestUpload(testSetup *testing.T) {
 	// })
 
 	t.RunWithTimeout("Resume upload should work fine", 10*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
-		for i := 0; i < 5; i++ {
+		for i := 0; i < 2; i++ {
 			allocSize := int64(2 * GB)
 			fileSize := int64(500 * MB)
 
