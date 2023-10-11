@@ -20,7 +20,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	t.SetSmokeTests("Replace blobber in allocation, should work")
 
 	const (
-		allocSize = 1024 * 1024 * 1024 * 100
+		allocSize = 1024 * 1024 * 1024 * 20
 		fileSize  = 1024 * 1024 * 1024 * 10
 		sleepTime = 20 * time.Minute
 
