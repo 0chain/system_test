@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subset of 0Chain System test suite [fix-stakepool-test/2e74e20a] ran against [dev-5.devnet-0chain.net] at [2023-10-11_16.20.06]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">Subset of 0Chain System test suite [fix-stakepool-test/2e74e20a] ran against [dev-5.devnet-0chain.net] at [2023-10-11_16.20.06]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>2</strong>Duration: <strong>0s</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>2</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">October 11, 2023 16:22:36</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestStakePool","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":145.29,"Output":["","    system_test_framework.go:70: Test setup [register wallet and get blobbers] scheduled at [10-11-2023 16:20:10] \n","    system_test_framework.go:80: Test setup [register wallet and get blobbers] start at [10-11-2023 16:20:10] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestStakePool_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  0118e4a6bf79cea054ad125f93858cc3d59cab69f78c060dfb2a46f2cb00243e]\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [register wallet and get blobbers] exit at [10-11-2023 16:20:14]\n","--- PASS: TestStakePool (145.29s)",""],"Passed":true,"Skipped":false,"TestFileName":"0_blobber_staked_capacity_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestStakePool/Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":142.16,"Output":["","    0_blobber_staked_capacity_test.go:33: Test case [Total stake in a blobber can never be less than it's used capacity] scheduled at [10-11-2023 16:20:14] \n","    system_test_framework.go:149: Test case [Total stake in a blobber can never be less than it's used capacity] start at [10-11-2023 16:20:14] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestStakePool-Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  7bff80561330ec19d19ba5c7d445e839ae79abd41eaff2b491e5e6b42c178996]\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/newStakeWallet_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  c4f2705f25b9b4a0a353a46c219512f80d557043ce02b63ef718433e6bc2ee75]\n","    zboxcli_update_allocation_test.go:950: Executing faucet...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_stake_unstake_token_test.go:308: Unlocking tokens from stake pool...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_stake_unstake_token_test.go:308: Unlocking tokens from stake pool...\n","    utils.go:82: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Failed to unlock tokens in stake pool: stake_pool_unlock_failed: unlocking tokens: insufficent stake to cover offers: existing stake 200000000000, unlock balance 100000000000, offers 189999999999]\n","    utils.go:82: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Failed to unlock tokens in stake pool: stake_pool_unlock_failed: unlocking tokens: insufficent stake to cover offers: existing stake 200000000000, unlock balance 100000000000, offers 189999999999]\n","    utils.go:98: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [Failed to unlock tokens in stake pool: stake_pool_unlock_failed: unlocking tokens: insufficent stake to cover offers: existing stake 200000000000, unlock balance 100000000000, offers 189999999999]\n","    utils.go:101: \u001b[31mThe verbose output for the command is:\n","    utils.go:105: \u001b[31m0chain-core-sdk [INFO]   2023/10/11 16:21:56.657594 wallet_base.go:327: ******* Wallet SDK Version:v1.10.0-70-g7f7e89b4 ******* (SetLogFile)\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2023/10/11 16:21:56.657668 sdk.go:79: ******* Storage SDK Version: v1.10.0-70-g7f7e89b4 *******\n","    utils.go:105: \u001b[31m0chain-core-sdk [INFO]   2023/10/11 16:21:56.680927 transaction_base.go:143: ******* Wallet SDK Version:v1.10.0-70-g7f7e89b4 ******* (InitZCNSDK)\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2023/10/11 16:21:56.689442 networkworker.go:119: Get network result:{\"miners\":[\"https://dev-5.devnet-0chain.net/miner02\",\"https://dev-5.devnet-0chain.net/miner01\",\"https://dev-5.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-5.devnet-0chain.net/sharder02\",\"https://dev-5.devnet-0chain.net/sharder01\"]}\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2023/10/11 16:21:56.692352 node.go:192: Query from https://dev-5.devnet-0chain.net/sharder01/v1/client/get/balance?client_id=18b7d7aede51811b17531217c36446e6a7da6ad9db204688d5ae470ad7fd5d0c\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2023/10/11 16:21:56.692361 node.go:192: Query from https://dev-5.devnet-0chain.net/sharder02/v1/client/get/balance?client_id=18b7d7aede51811b17531217c36446e6a7da6ad9db204688d5ae470ad7fd5d0c\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2023/10/11 16:21:56.693389 node.go:145: https://dev-5.devnet-0chain.net/sharder01/v1/client/get/balance?client_id=18b7d7aede51811b17531217c36446e6a7da6ad9db204688d5ae470ad7fd5d0c200 OK\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2023/10/11 16:21:56.693407 node.go:150: {\"txn\":\"ca30e7b8e1dfbd430ffcb952473a2eb72c5707ec495588df60596d39ba35e3bc\",\"round\":3340,\"balance\":154574582503319,\"nonce\":20}\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2023/10/11 16:21:56.693452 node.go:145: https://dev-5.devnet-0chain.net/sharder02/v1/client/get/balance?client_id=18b7d7aede51811b17531217c36446e6a7da6ad9db204688d5ae470ad7fd5d0c200 OK\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2023/10/11 16:21:56.693466 node.go:150: {\"txn\":\"ca30e7b8e1dfbd430ffcb952473a2eb72c5707ec495588df60596d39ba35e3bc\",\"round\":3340,\"balance\":154574582503319,\"nonce\":20}\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2023/10/11 16:21:56.693768 sdk.go:1447: executing transaction 'stake_pool_unlock' with hash 5e270f7fe0c9ff485076ddca5cc0c92f3fd27189b6c9cc59227ae6eac0191d83\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2023/10/11 16:21:56.693780 sdk.go:1448: estimated txn fee: 100000000\n","    utils.go:105: \u001b[31mFailed to unlock tokens in stake pool: stake_pool_unlock_failed: unlocking tokens: insufficent stake to cover offers: existing stake 200000000000, unlock balance 100000000000, offers 189999999999\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_cancel_allocation_test.go:84: Canceling allocation...\n","    zboxcli_stake_unstake_token_test.go:308: Unlocking tokens from stake pool...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    0_blobber_staked_capacity_test.go:33: Test case [Total stake in a blobber can never be less than it's used capacity] exit at [10-11-2023 16:22:11]\n","--- PASS: TestStakePool/Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity (142.16s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
