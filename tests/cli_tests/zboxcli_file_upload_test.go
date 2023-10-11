@@ -472,7 +472,7 @@ func TestUpload(testSetup *testing.T) {
 				"remotepath":  "/",
 				"localpath":   filename,
 				"chunknumber": 500, // 64KB * 500 = 32M
-			}, false)
+			}, true)
 
 			require.Nil(t, err, strings.Join(output, "\n"))
 			pattern := `(\d+ / \d+)\s+(\d+\.\d+%)`
@@ -1038,7 +1038,7 @@ func uploadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename string, p
 	)
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*40)
+		return cliutils.RunCommand(t, cmd, 1, time.Second*40)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
