@@ -1,0 +1,14 @@
+{
+    "client_id": "9636ab821fd93a37740ab4c6a27d9e2cf3a4072b4bc8fd1c6048f9c3ef9cf2a8",
+    "client_key": "02237d7edafc8c648b1e2ff64ad5d4e6a7cea949a40448e15a55f0a90c71bc1928d8f1409d8985757cc1f59f13d82d83fe6757e4a510d9b47c6385d91ea5d59b",
+    "keys": [
+        {
+            "public_key": "02237d7edafc8c648b1e2ff64ad5d4e6a7cea949a40448e15a55f0a90c71bc1928d8f1409d8985757cc1f59f13d82d83fe6757e4a510d9b47c6385d91ea5d59b",
+            "private_key": "17627154df3d2a77a273c6b5caf71ca552d26addce0198c1126331eb71ef5c0a"
+        }
+    ],
+    "mnemonics": "family admit sound girl recall another rule hawk equip soccer action dance tumble style prepare face cluster endorse wonder raven unit vital hybrid mass",
+    "version": "1.0",
+    "date_created": "1661370959",
+    "nonce": 0
+}

@@ -558,7 +558,7 @@ func Test0boxNft(testSetup *testing.T) {
 			"token_standard",
 			"tx_hash",
 		)
-		errMssg := `{\"error\":\"400: collectionID not valid\"}`
+		errMssg := `{"error":"400: collectionID not valid"}`
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, errMssg, response.String())
@@ -650,7 +650,7 @@ func Test0boxNft(testSetup *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, `{\"error\":\"400: allocationID not valid\"}`, response.String())
+		require.Equal(t, `{"error":"400: allocationID not valid"}`, response.String())
 	})
 
 	t.RunSequentially("Update NFT collection with valid argument should work", func(t *test.SystemTest) {
@@ -804,7 +804,7 @@ func Test0boxNft(testSetup *testing.T) {
 			defaultCurrMint,
 			defaultBatchSize,
 		)
-		errMssg := `{\"error\":\"400: allocationID not valid\"}`
+		errMssg := `{"error":"400: allocationID not valid"}`
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, errMssg, response.String())

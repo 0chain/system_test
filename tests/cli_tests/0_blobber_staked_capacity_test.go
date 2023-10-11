@@ -16,10 +16,10 @@ const (
 	newStakeWallet = "newStakeWallet"
 )
 
+var blobbersList []climodel.BlobberInfo
+
 func TestStakePool(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-
-	var blobbersList []climodel.BlobberInfo
 
 	t.TestSetup("register wallet and get blobbers", func() {
 		_, err := createWallet(t, configPath)
@@ -38,7 +38,7 @@ func TestStakePool(testSetup *testing.T) {
 		stakeTokensToAllBlobbers(t, 10)
 
 		// select the blobber with minimum available stake capacity
-		minAvailableCapacityBlobber, minAvailableCapacity, err := getMinStakedCapacityBlobber(t, blobbersList)
+		minAvailableCapacityBlobber, minAvailableCapacity, err := getMinStakedCapacityBlobber(t)
 		require.Nil(t, err, "Error fetching blobber with minimum available capacity")
 
 		// Tracking total offers
@@ -96,14 +96,15 @@ func TestStakePool(testSetup *testing.T) {
 	})
 }
 
-func getMinStakedCapacityBlobber(t *test.SystemTest, blobberList []climodel.BlobberInfo) (climodel.BlobberInfo, int64, error) {
+func getMinStakedCapacityBlobber(t *test.SystemTest) (climodel.BlobberInfo, int64, error) {
 	var minAvailableCapacityBlobber climodel.BlobberInfo
 	minAvailableCapacity := int64(math.MaxInt64)
 
-	for i := range blobberList {
-		blobber := blobberList[i]
+	for i := range blobbersList {
+		blobber := blobbersList[i]
 
 		if blobber.IsKilled || blobber.IsShutdown {
+			blobbersList = removeFromBlobberList(blobbersList, i)
 			continue
 		}
 
@@ -114,7 +115,7 @@ func getMinStakedCapacityBlobber(t *test.SystemTest, blobberList []climodel.Blob
 		err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
 		require.Nil(t, err, "error unmarshalling blobber info")
 
-		stakedCapacity := int64(float64(blInfo.TotalStake-1e10) * GB / float64(blInfo.Terms.Write_price)) // Here we remove 1e10 tokens from total stake to avoid challenge penalties
+		stakedCapacity := int64(float64(blInfo.TotalStake-1e10) * GB / float64(blInfo.Terms.WritePrice)) // Here we remove 1e10 tokens from total stake to avoid challenge penalties
 
 		require.GreaterOrEqual(t, stakedCapacity, blobber.Allocated, "Staked capacity should be greater than allocated capacity")
 
@@ -228,4 +229,8 @@ func stakeTokensToAllBlobbers(t *test.SystemTest, tokens int64) {
 		_, err := stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id, "tokens": tokens}), true)
 		require.Nil(t, err, "Error staking tokens", err)
 	}
+}
+
+func removeFromBlobberList(slice []climodel.BlobberInfo, s int) []climodel.BlobberInfo {
+	return append(slice[:s], slice[s+1:]...)
 }
