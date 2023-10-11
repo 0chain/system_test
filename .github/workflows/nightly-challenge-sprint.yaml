@@ -35,7 +35,6 @@ jobs:
       - name: "Run Challenge System tests"
         uses: 0chain/actions/run-system-tests@feature/challenge-timings
         with:
-          system_tests_branch: feature/challenge-timings
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
