@@ -96,8 +96,8 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	lenBlobbers := int64(len(allBlobbers))
 
 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	blobberRequirements.DataShards = (lenBlobbers + 1) / 2
-	blobberRequirements.ParityShards = lenBlobbers / 2
+	blobberRequirements.DataShards = 2
+	blobberRequirements.ParityShards = 2
 	blobberRequirements.Size = allocSize
 
 	allocationBlobbers := chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
