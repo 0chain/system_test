@@ -55,7 +55,7 @@ func TestFreeReads(testSetup *testing.T) {
 	// revert read prices irrespective of test results
 	t.Cleanup(func() {
 		for _, blobber := range blobberList {
-			output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.ID, "read_price": intToZCN(blobber.Terms.Read_price)}))
+			output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.ID, "read_price": intToZCN(blobber.Terms.ReadPrice)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 	})
