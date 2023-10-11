@@ -29,7 +29,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 
 	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 90000, client.TxSuccessfulStatus)
 
-	allBlobbers, resp, err := chimneyClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
+	allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 	require.NoError(t, err)
 	require.Equal(t, 200, resp.StatusCode())
 
@@ -41,16 +41,16 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t.TestSetup("Setup", func() {
 		for _, blobber := range allBlobbers {
 			// stake tokens to this blobber
-			chimneyClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus)
+			apiClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus)
 		}
 
-		allBlobbers, resp, err = chimneyClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
+		allBlobbers, resp, err = apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 
 		blobberRequirements.Size = 10 * MB
-		allocationBlobbers := chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := chimneyClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
 
 		fileSize := int64(1 * MB)
 		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
@@ -60,14 +60,14 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t.Cleanup(func() {
 		for _, blobber := range allBlobbers {
 			// unstake tokens from this blobber
-			chimneyClient.UnlockStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus)
+			apiClient.UnlockStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus)
 		}
 	})
 
 	t.RunWithTimeout("1mb file", 1*time.Hour, func(t *test.SystemTest) {
 		blobberRequirements.Size = 2 * MB
-		allocationBlobbers := chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := chimneyClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -92,8 +92,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 
 	t.RunWithTimeout("10mb file", 1*time.Hour, func(t *test.SystemTest) {
 		blobberRequirements.Size = 20 * MB
-		allocationBlobbers := chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := chimneyClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -118,8 +118,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 
 	t.RunWithTimeout("100mb file", 1*time.Hour, func(t *test.SystemTest) {
 		blobberRequirements.Size = 200 * MB
-		allocationBlobbers := chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := chimneyClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -144,8 +144,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 
 	t.RunWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
 		blobberRequirements.Size = 2 * GB
-		allocationBlobbers := chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := chimneyClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
