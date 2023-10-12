@@ -103,7 +103,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	allocationBlobbers := chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 	allocationID := chimneyClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
 
-	uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
+	uploadOp := sdkClient.AddUploadOperationForBigFile(t, allocationID, 10) // 10gb
 	sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 	startBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
