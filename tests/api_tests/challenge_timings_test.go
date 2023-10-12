@@ -76,8 +76,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
-		//time.Sleep(20 * time.Minute)
-		time.Sleep(1 * time.Minute)
+		time.Sleep(20 * time.Minute)
 
 		result := getChallengeTimings(t, alloc.Blobbers, allocationID)
 
@@ -92,7 +91,6 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("10mb file", 1*time.Hour, func(t *test.SystemTest) {
-		t.Skip()
 		blobberRequirements.Size = 20 * MB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 10, client.TxSuccessfulStatus)
@@ -119,8 +117,6 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("100mb file", 1*time.Hour, func(t *test.SystemTest) {
-		t.Skip()
-
 		blobberRequirements.Size = 200 * MB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 100, client.TxSuccessfulStatus)
@@ -147,8 +143,6 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
-		t.Skip()
-
 		blobberRequirements.Size = 2 * GB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 100, client.TxSuccessfulStatus)
