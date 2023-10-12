@@ -1,11 +1,8 @@
-name: "Tokenomics Nightly Tests - Sprint"
+name: "Tokenomics Tests - Sprint"
 concurrency:
-  group: "tokenomics-nightly-tests-${{ github.ref }}-${{ github.event_name }}"
+  group: "tokenomics-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
 on:
-  schedule:
-    # Runs every morning at 2am UTC
-    - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
       repo_snapshots_branch:
