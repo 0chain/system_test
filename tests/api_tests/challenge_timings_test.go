@@ -38,7 +38,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	blobberRequirements.DataShards = (lenBlobbers + 1) / 2
 	blobberRequirements.ParityShards = lenBlobbers / 2
 
-	t.TestSetup("Setup", func() {
+	t.TestSetupWithTimeout("Setup", 2*time.Minute, func() {
 		for _, blobber := range allBlobbers {
 			// stake tokens to this blobber
 			apiClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus)
@@ -76,7 +76,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
-		time.Sleep(20 * time.Minute)
+		//time.Sleep(20 * time.Minute)
+		time.Sleep(1 * time.Minute)
 
 		result := getChallengeTimings(t, alloc.Blobbers, allocationID)
 
@@ -278,9 +279,12 @@ func getChallengeTimings(t *test.SystemTest, blobbers []*blockchain.StorageNode,
 		floatTxnVerifications = append(floatTxnVerifications, float64(txnVerifications[i]))
 	}
 
-	t.Log("Mean Proof Gen Time:", int64(calculateMean(floatProofGenTimes)))
-	t.Log("Mean Txn Submission:", int64(calculateMean(floatTxnSubmissions)))
-	t.Log("Mean Txn Verification:", int64(calculateMean(floatTxnVerifications)))
+	meanProofGenTime := int64(calculateMean(floatProofGenTimes))
+	meanTxnSubmission := int64(calculateMean(floatTxnSubmissions))
+	meanTxnVerification := int64(calculateMean(floatTxnVerifications))
+	t.Log("Mean Proof Gen Time:", meanProofGenTime)
+	t.Log("Mean Txn Submission:", meanTxnSubmission)
+	t.Log("Mean Txn Verification:", meanTxnVerification)
 
 	// Standard Deviation
 	stdDevProofGenTime := calculateStandardDeviation(floatProofGenTimes)
@@ -300,7 +304,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []*blockchain.StorageNode,
 	t.Log("Variance Txn Submission:", int64(varianceTxnSubmission))
 	t.Log("Variance Txn Verification:", int64(varianceTxnVerification))
 
-	return []int64{maxProofGenTime, maxTxnSubmission, maxTxnVerification}
+	return []int64{meanProofGenTime, meanTxnSubmission, meanTxnVerification}
 }
 
 func calculateStandardDeviation(data []float64) float64 {

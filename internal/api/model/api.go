@@ -447,20 +447,19 @@ type SCRestOpenChallengeResponse struct {
 }
 
 type Challenge struct {
-	ChallengeID             string   `json:"id"`
-	PrevChallengeID         string   `json:"prev_id"`
-	RandomNumber            int64    `json:"seed"`
-	BlobberID               string   `json:"blobber_id"`
-	AllocationID            string   `json:"allocation_id"`
-	AllocationRoot          string   `json:"allocation_root"`
-	RespondedAllocationRoot string   `json:"responded_allocation_root"`
-	Status                  int      `json:"status"`
-	Result                  int      `json:"result"`
-	StatusMessage           string   `json:"status_message"`
-	CommitTxnID             string   `json:"commit_txn_id"`
-	BlockNum                int64    `json:"block_num"`
-	RefID                   int64    `json:"-"`
-	LastCommitTxnIDs        []string `json:"last_commit_txn_ids"`
+	ChallengeID    string `json:"challenge_id"`
+	CreatedAt      int64  `json:"created_at"`
+	AllocationID   string `json:"allocation_id"`
+	BlobberID      string `json:"blobber_id"`
+	ValidatorsID   string `json:"validators_id"`
+	Seed           int64  `json:"seed"`
+	AllocationRoot string `json:"allocation_root"`
+	Responded      int64  `json:"responded"`
+	Passed         bool   `json:"passed"`
+	RoundResponded int64  `json:"round_responded"`
+	RoundCreatedAt int64  `json:"round_created_at"`
+	ExpiredN       int    `json:"expired_n"`
+	Timestamp      int64  `json:"timestamp"`
 }
 
 type ChallengeTiming struct {
