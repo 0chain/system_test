@@ -67,7 +67,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		}
 	})
 
-	t.RunWithTimeout("1mb file", 1*time.Hour, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("1mb file", 1*time.Hour, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 100, client.TxSuccessfulStatus)
 
 		blobberRequirements.DataShards = 1
@@ -97,7 +97,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunWithTimeout("10mb file", 1*time.Hour, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("10mb file", 1*time.Hour, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 100, client.TxSuccessfulStatus)
 
 		blobberRequirements.DataShards = 1
@@ -127,7 +127,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunWithTimeout("100mb file", 1*time.Hour, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("100mb file", 1*time.Hour, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 200, client.TxSuccessfulStatus)
 
 		blobberRequirements.DataShards = 1
@@ -157,7 +157,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 1000, client.TxSuccessfulStatus)
 
 		blobberRequirements.DataShards = 1
