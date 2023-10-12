@@ -67,7 +67,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentiallyWithTimeout("1mb file", 1*time.Hour, func(t *test.SystemTest) {
+	t.RunWithTimeout("1mb file", 1*time.Hour, func(t *test.SystemTest) {
 		sdkWalletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		sdkWallet.Nonce = int(sdkWalletBalance.Nonce)
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 100, client.TxSuccessfulStatus)
@@ -103,7 +103,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunSequentiallyWithTimeout("10mb file", 1*time.Hour, func(t *test.SystemTest) {
+	t.RunWithTimeout("10mb file", 1*time.Hour, func(t *test.SystemTest) {
 		sdkWalletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		sdkWallet.Nonce = int(sdkWalletBalance.Nonce)
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 100, client.TxSuccessfulStatus)
@@ -139,7 +139,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunSequentiallyWithTimeout("100mb file", 1*time.Hour, func(t *test.SystemTest) {
+	t.RunWithTimeout("100mb file", 1*time.Hour, func(t *test.SystemTest) {
 		sdkWalletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		sdkWallet.Nonce = int(sdkWalletBalance.Nonce)
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 200, client.TxSuccessfulStatus)
@@ -175,7 +175,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		require.True(t, false)
 	})
 
-	t.RunSequentiallyWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
+	t.RunWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
 		sdkWalletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		sdkWallet.Nonce = int(sdkWalletBalance.Nonce)
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 1000, client.TxSuccessfulStatus)
