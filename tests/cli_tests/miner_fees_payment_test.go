@@ -280,7 +280,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
 			"fee":        fee,
-		}))
+		}), true)
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)

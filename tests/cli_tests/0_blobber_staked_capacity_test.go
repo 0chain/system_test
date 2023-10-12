@@ -73,13 +73,13 @@ func TestStakePool(testSetup *testing.T) {
 		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates+1)
 
 		// Unstake tokens from new wallet and check if number of delegates decreases
-		_, err = unstakeTokensForWallet(t, configPath, newStakeWallet, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}))
+		_, err = unstakeTokensForWallet(t, configPath, newStakeWallet, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}), true)
 		require.NoErrorf(t, err, "error unstaking tokens from new wallet for blobber %s", minAvailableCapacityBlobber.Id)
 
 		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates-1)
 
 		// Unstake tokens from old wallet (should return error and number of delegate should not decrease)
-		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}))
+		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}), false)
 		require.Error(t, err, "No error in unstaking tokens from old wallet for blobber %s", minAvailableCapacityBlobber.Id)
 
 		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates)
@@ -89,7 +89,7 @@ func TestStakePool(testSetup *testing.T) {
 		require.Nil(t, err, "error canceling allocation")
 
 		// Unstake tokens from old wallet (should be successful and number of delegate should decrease)
-		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}))
+		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}), true)
 		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", minAvailableCapacityBlobber.Id)
 
 		assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates-1)
@@ -156,7 +156,7 @@ func countDelegates(t *test.SystemTest, blobberId string) (int, error) {
 }
 
 func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailableCapacity int64, numBlobbers int) string {
-	allocSize := minAvailableCapacity * 3
+	allocSize := minAvailableCapacity * 2
 	output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 		"cost":        "",
 		"data":        numBlobbers - 1,
