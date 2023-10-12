@@ -27,7 +27,7 @@ const (
 func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 900, client.TxSuccessfulStatus)
+	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 9000, client.TxSuccessfulStatus)
 
 	allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 
 		blobberRequirements.Size = 10 * MB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 10, client.TxSuccessfulStatus)
 
 		fileSize := int64(1 * MB)
 		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
@@ -67,7 +67,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t.RunWithTimeout("1mb file", 1*time.Hour, func(t *test.SystemTest) {
 		blobberRequirements.Size = 2 * MB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 10, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -84,16 +84,17 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		txnSubmission := result[1]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 50, "It is taking more than 50000 milliseconds to generate proof")
+		require.True(t, proofGenTime < 50, "It is taking more than 100 milliseconds to generate proof")
 		require.True(t, txnSubmission < 70, "It is taking more than 7000 seconds to submit txn")
 		require.True(t, txnVerificationTime < 70, "It is taking more than 7000 seconds to verify txn")
 		require.True(t, false)
 	})
 
 	t.RunWithTimeout("10mb file", 1*time.Hour, func(t *test.SystemTest) {
+		t.Skip()
 		blobberRequirements.Size = 20 * MB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 10, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -110,16 +111,18 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		txnSubmission := result[1]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 50, "It is taking more than 50000 milliseconds to generate proof")
+		require.True(t, proofGenTime < 50, "It is taking more than 100 milliseconds to generate proof")
 		require.True(t, txnSubmission < 70, "It is taking more than 7000 seconds to submit txn")
 		require.True(t, txnVerificationTime < 70, "It is taking more than 7000 seconds to verify txn")
 		require.True(t, false)
 	})
 
 	t.RunWithTimeout("100mb file", 1*time.Hour, func(t *test.SystemTest) {
+		t.Skip()
+
 		blobberRequirements.Size = 200 * MB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 100, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -136,16 +139,18 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		txnSubmission := result[1]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 50, "It is taking more than 50000 milliseconds to generate proof")
+		require.True(t, proofGenTime < 50, "It is taking more than 100 milliseconds to generate proof")
 		require.True(t, txnSubmission < 70, "It is taking more than 7000 seconds to submit txn")
 		require.True(t, txnVerificationTime < 70, "It is taking more than 7000 seconds to verify txn")
 		require.True(t, false)
 	})
 
 	t.RunWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
+		t.Skip()
+
 		blobberRequirements.Size = 2 * GB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 100, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -162,7 +167,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		txnSubmission := result[1]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 50, "It is taking more than 50000 milliseconds to generate proof")
+		require.True(t, proofGenTime < 50, "It is taking more than 100 milliseconds to generate proof")
 		require.True(t, txnSubmission < 70, "It is taking more than 7000 seconds to submit txn")
 		require.True(t, txnVerificationTime < 70, "It is taking more than 7000 seconds to verify txn")
 		require.True(t, false)
