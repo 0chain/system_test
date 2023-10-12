@@ -27,21 +27,22 @@ const (
 func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 9000, client.TxSuccessfulStatus)
+	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 200, client.TxSuccessfulStatus)
 
 	allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 	require.NoError(t, err)
 	require.Equal(t, 200, resp.StatusCode())
 
-	lenBlobbers := int64(len(allBlobbers))
 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	blobberRequirements.DataShards = (lenBlobbers + 1) / 2
-	blobberRequirements.ParityShards = lenBlobbers / 2
+	blobberRequirements.DataShards = 3
+	blobberRequirements.ParityShards = 3
 
 	t.TestSetupWithTimeout("Setup", 2*time.Minute, func() {
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 200, client.TxSuccessfulStatus)
+
 		for _, blobber := range allBlobbers {
 			// stake tokens to this blobber
-			apiClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus)
+			apiClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus, 10.0)
 		}
 
 		allBlobbers, resp, err = apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
@@ -65,6 +66,10 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("1mb file", 1*time.Hour, func(t *test.SystemTest) {
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 100, client.TxSuccessfulStatus)
+
+		blobberRequirements.DataShards = 1
+		blobberRequirements.ParityShards = 1
 		blobberRequirements.Size = 2 * MB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 10, client.TxSuccessfulStatus)
@@ -91,6 +96,10 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("10mb file", 1*time.Hour, func(t *test.SystemTest) {
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 100, client.TxSuccessfulStatus)
+
+		blobberRequirements.DataShards = 1
+		blobberRequirements.ParityShards = 1
 		blobberRequirements.Size = 20 * MB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 10, client.TxSuccessfulStatus)
@@ -117,6 +126,10 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("100mb file", 1*time.Hour, func(t *test.SystemTest) {
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 100, client.TxSuccessfulStatus)
+
+		blobberRequirements.DataShards = 1
+		blobberRequirements.ParityShards = 1
 		blobberRequirements.Size = 200 * MB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 100, client.TxSuccessfulStatus)
@@ -143,6 +156,10 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 100, client.TxSuccessfulStatus)
+
+		blobberRequirements.DataShards = 1
+		blobberRequirements.ParityShards = 1
 		blobberRequirements.Size = 2 * GB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 100, client.TxSuccessfulStatus)

@@ -1028,6 +1028,7 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 			HttpOkStatus)
 
 		if err != nil {
+			t.Log("Error Creating Alloc : ", err)
 			return false
 		}
 
@@ -1590,8 +1591,13 @@ func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRe
 }
 
 // CreateStakePoolWrapper does not provide deep test of used components
-func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID string, requiredTransactionStatus int) string {
+func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID string, requiredTransactionStatus int, options ...float64) string {
 	t.Log("Create stake pool...")
+
+	tokens := 1.0
+	if len(options) > 0 {
+		tokens = options[0]
+	}
 
 	createStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
@@ -1603,7 +1609,7 @@ func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 					ProviderType: providerType,
 					ProviderID:   providerID,
 				}),
-			Value:   tokenomics.IntToZCN(1.0),
+			Value:   tokenomics.IntToZCN(tokens),
 			TxnType: SCTxType,
 		},
 		HttpOkStatus)
