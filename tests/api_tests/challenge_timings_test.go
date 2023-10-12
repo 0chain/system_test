@@ -27,6 +27,8 @@ const (
 func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	waitTime := 1 * time.Minute
+
 	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 200, client.TxSuccessfulStatus)
 
 	allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
@@ -81,7 +83,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
-		time.Sleep(20 * time.Minute)
+		time.Sleep(waitTime)
 
 		result := getChallengeTimings(t, alloc.Blobbers, allocationID)
 
@@ -111,7 +113,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
-		time.Sleep(20 * time.Minute)
+		time.Sleep(waitTime)
 
 		result := getChallengeTimings(t, alloc.Blobbers, allocationID)
 
@@ -141,7 +143,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
-		time.Sleep(20 * time.Minute)
+		time.Sleep(waitTime)
 
 		result := getChallengeTimings(t, alloc.Blobbers, allocationID)
 
@@ -171,7 +173,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
-		time.Sleep(20 * time.Minute)
+		time.Sleep(waitTime)
 
 		result := getChallengeTimings(t, alloc.Blobbers, allocationID)
 
