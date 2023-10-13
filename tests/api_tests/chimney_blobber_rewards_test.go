@@ -71,7 +71,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		actualBlockReward   float64
 	)
 
-	chimneyClient.ExecuteFaucetWithTokens(t, sdkWallet, 90000, client.TxSuccessfulStatus)
+	chimneyClient.ExecuteFaucetWithTokens(t, sdkWallet, 9000, client.TxSuccessfulStatus)
 
 	allBlobbers, resp, err := chimneyClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 	require.NoError(t, err)
