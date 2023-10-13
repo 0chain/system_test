@@ -396,6 +396,9 @@ func (c *SDKClient) AddUploadOperationForBigFile(t *test.SystemTest, allocationI
 		FileMeta:      fileMeta,
 		Workdir:       homeDir,
 		RemotePath:    fileMeta.RemotePath,
+		Opts: []sdk.ChunkedUploadOption{
+			sdk.WithChunkNumber(500),
+		},
 	}
 
 }
