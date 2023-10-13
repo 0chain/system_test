@@ -208,7 +208,6 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		require.True(t, proofGenTime < 1000, "It is taking more than 100 milliseconds to generate proof")
 		require.True(t, txnSubmission < 10, "It is taking more than 7000 seconds to submit txn")
 		require.True(t, txnVerificationTime < 15, "It is taking more than 7000 seconds to verify txn")
-		require.True(t, false)
 	})
 }
 
