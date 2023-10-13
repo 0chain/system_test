@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-resty/resty/v2"
+
 	"github.com/0chain/gosdk/zboxcore/blockchain"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
@@ -19,27 +21,33 @@ import (
 )
 
 const (
-	KB = 1024      // kilobyte
-	MB = 1024 * KB // megabyte
-	GB = 1024 * MB // gigabyte
+	KB       = 1024      // kilobyte
+	MB       = 1024 * KB // megabyte
+	GB       = 1024 * MB // gigabyte
+	waitTime = 20 * time.Minute
 )
 
 func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	waitTime := 20 * time.Minute
-
-	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 200, client.TxSuccessfulStatus)
-
-	allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
-	require.NoError(t, err)
-	require.Equal(t, 200, resp.StatusCode())
-
-	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	blobberRequirements.DataShards = 3
-	blobberRequirements.ParityShards = 3
+	var (
+		allBlobbers         []*model.SCRestGetBlobberResponse
+		resp                *resty.Response
+		err                 error
+		blobberRequirements model.BlobberRequirements
+	)
 
 	t.TestSetupWithTimeout("Setup", 2*time.Minute, func() {
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 200, client.TxSuccessfulStatus)
+
+		allBlobbers, resp, err = apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements.DataShards = 3
+		blobberRequirements.ParityShards = 3
+
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 200, client.TxSuccessfulStatus)
 
 		for _, blobber := range allBlobbers {
