@@ -55,7 +55,7 @@ jobs:
   notify_slack_on_failure:
     runs-on: [self-hosted, arc-runner]
     needs: [system-tests]
-    if: always() && (needs.system-tests.result == 'failure')
+    if: always() && github.event_name == 'schedule' && (needs.system-tests.result == 'failure')
     steps:
       - name: "Notify Slack"
         run: |
@@ -73,7 +73,7 @@ jobs:
   notify_slack_on_success:
     runs-on: [self-hosted, arc-runner]
     needs: [system-tests]
-    if: always() && (needs.system-tests.result == 'success')
+    if: always() && github.event_name == 'schedule' && (needs.system-tests.result == 'success')
     steps:
       - name: "Notify Slack"
         run: |
