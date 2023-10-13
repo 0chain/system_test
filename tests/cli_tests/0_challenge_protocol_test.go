@@ -20,7 +20,6 @@ import (
 
 func TestProtocolChallenge(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("Skipping challenge protocol tests")
 	t.SetSmokeTests("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)")
 
 	var blobberList []climodel.BlobberInfo
