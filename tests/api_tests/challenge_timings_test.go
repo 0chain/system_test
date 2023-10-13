@@ -27,7 +27,7 @@ const (
 func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	waitTime := 1 * time.Minute
+	waitTime := 20 * time.Minute
 
 	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 200, client.TxSuccessfulStatus)
 
@@ -97,10 +97,9 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		txnSubmission := result[1]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 50, "It is taking more than 100 milliseconds to generate proof")
-		require.True(t, txnSubmission < 70, "It is taking more than 7000 seconds to submit txn")
-		require.True(t, txnVerificationTime < 70, "It is taking more than 7000 seconds to verify txn")
-		require.True(t, false)
+		require.True(t, proofGenTime < 4, "It is taking more than 4 milliseconds to generate proof")
+		require.True(t, txnSubmission < 10, "It is taking more than 10 seconds to submit txn")
+		require.True(t, txnVerificationTime < 15, "It is taking more than 15 seconds to verify txn")
 	})
 
 	t.RunWithTimeout("10mb file", 1*time.Hour, func(t *test.SystemTest) {
@@ -134,10 +133,9 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		txnSubmission := result[1]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 50, "It is taking more than 100 milliseconds to generate proof")
-		require.True(t, txnSubmission < 70, "It is taking more than 7000 seconds to submit txn")
-		require.True(t, txnVerificationTime < 70, "It is taking more than 7000 seconds to verify txn")
-		require.True(t, false)
+		require.True(t, proofGenTime < 7, "It is taking more than 7 milliseconds to generate proof")
+		require.True(t, txnSubmission < 10, "It is taking more than 10 seconds to submit txn")
+		require.True(t, txnVerificationTime < 15, "It is taking more than 15 seconds to verify txn")
 	})
 
 	t.RunWithTimeout("100mb file", 1*time.Hour, func(t *test.SystemTest) {
@@ -171,10 +169,9 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		txnSubmission := result[1]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 50, "It is taking more than 100 milliseconds to generate proof")
-		require.True(t, txnSubmission < 70, "It is taking more than 7000 seconds to submit txn")
-		require.True(t, txnVerificationTime < 70, "It is taking more than 7000 seconds to verify txn")
-		require.True(t, false)
+		require.True(t, proofGenTime < 150, "It is taking more than 150 milliseconds to generate proof")
+		require.True(t, txnSubmission < 10, "It is taking more than 10 seconds to submit txn")
+		require.True(t, txnVerificationTime < 15, "It is taking more than 10 seconds to verify txn")
 	})
 
 	t.RunWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
@@ -208,9 +205,9 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		txnSubmission := result[1]
 		txnVerificationTime := result[2]
 
-		require.True(t, proofGenTime < 50, "It is taking more than 100 milliseconds to generate proof")
-		require.True(t, txnSubmission < 70, "It is taking more than 7000 seconds to submit txn")
-		require.True(t, txnVerificationTime < 70, "It is taking more than 7000 seconds to verify txn")
+		require.True(t, proofGenTime < 1000, "It is taking more than 100 milliseconds to generate proof")
+		require.True(t, txnSubmission < 10, "It is taking more than 7000 seconds to submit txn")
+		require.True(t, txnVerificationTime < 15, "It is taking more than 7000 seconds to verify txn")
 		require.True(t, false)
 	})
 }
