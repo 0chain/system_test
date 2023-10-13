@@ -605,17 +605,19 @@ type SCRestGetValidatorResponse struct {
 type SCRestGetValidatorsResponse []SCRestGetValidatorResponse
 
 type SCRestGetBlobberResponse struct {
-	ID                string            `json:"id"`
-	BaseURL           string            `json:"url"`
-	Terms             Terms             `json:"terms"`
-	Capacity          int64             `json:"capacity"`
-	Allocated         int64             `json:"allocated"`
-	LastHealthCheck   int64             `json:"last_health_check"`
-	PublicKey         string            `json:"-"`
-	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
-	TotalStake        int64             `json:"total_stake"`
-	SavedData         int64             `json:"saved_data"`
-	ReadData          int64             `json:"read_data"`
+	ID                  string            `json:"id"`
+	BaseURL             string            `json:"url"`
+	Terms               Terms             `json:"terms"`
+	Capacity            int64             `json:"capacity"`
+	Allocated           int64             `json:"allocated"`
+	LastHealthCheck     int64             `json:"last_health_check"`
+	PublicKey           string            `json:"-"`
+	StakePoolSettings   StakePoolSettings `json:"stake_pool_settings"`
+	TotalStake          int64             `json:"total_stake"`
+	SavedData           int64             `json:"saved_data"`
+	ReadData            int64             `json:"read_data"`
+	ChallengesPassed    int64             `json:"challenges_passed"`
+	ChallengesCompleted int64             `json:"challenges_completed"`
 }
 
 type SCRestGetBlobbersResponse struct {

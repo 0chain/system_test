@@ -93,8 +93,6 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		}
 	})
 
-	lenBlobbers := int64(len(allBlobbers))
-
 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 	blobberRequirements.DataShards = 2
 	blobberRequirements.ParityShards = 2
@@ -265,6 +263,21 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Block Rewards", 1*time.Hour, func(t *test.SystemTest) {
+
+		totalChallengesPassedInRoundsDiff := float64(0)
+
+		var eligibleBlobbers []*model.SCRestGetBlobberResponse
+		for _, blobber := range allBlobbers {
+			updatedBlobber := chimneyClient.GetBlobber(t, blobber.ID, client.HttpOkStatus)
+
+			if updatedBlobber.ChallengesPassed > blobber.ChallengesPassed {
+				updatedBlobber.ChallengesPassed -= blobber.ChallengesPassed
+				totalChallengesPassedInRoundsDiff += float64(updatedBlobber.ChallengesPassed)
+
+				eligibleBlobbers = append(eligibleBlobbers, updatedBlobber)
+			}
+		}
+
 		startBlockRound := startBlock.Round
 		endBlockRound := endBlock.Round
 		totalRounds = endBlockRound - startBlockRound
@@ -295,13 +308,13 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		getBlobberBlockRewardWeight := func(blobber *model.SCRestGetBlobberResponse) float64 {
 			zeta := getZeta(float64(blobber.Terms.WritePrice), float64(blobber.Terms.ReadPrice))
 
-			return (zeta + 1) * float64(blobber.TotalStake)
+			return (zeta + 1) * float64(blobber.TotalStake) * float64(blobber.ChallengesPassed)
 		}
 
 		getTotalWeightOfRandomBlobbersSize := func(size int) float64 {
 			totalWeight := float64(0)
 			selectedIndexes := make(map[int]bool)
-			lenBlobbers := len(allBlobbers)
+			lenBlobbers := len(eligibleBlobbers)
 
 			for i := 0; i < size; i++ {
 				// Generate a random index within the range of available blobbers.
@@ -327,13 +340,13 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 				// Mark the current index as selected.
 				selectedIndexes[index] = true
 
-				totalWeight += getBlobberBlockRewardWeight(allBlobbers[index])
+				totalWeight += getBlobberBlockRewardWeight(eligibleBlobbers[index])
 			}
 			return totalWeight
 		}
 
 		totalBlobberBlockRewardWeight := float64(0)
-		for _, blobber := range allBlobbers {
+		for _, blobber := range eligibleBlobbers {
 			totalBlobberBlockRewardWeight += getBlobberBlockRewardWeight(blobber)
 		}
 
@@ -343,11 +356,11 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 		probabilityOfBlobberSelected := make(map[float64]float64)
 		for size, frequency := range partitionSizeFrequency {
-			probabilityOfBlobberSelected[size] = customRound((frequency * size) / float64(lenBlobbers))
+			probabilityOfBlobberSelected[size] = customRound(frequency * size)
 		}
 
 		// Compare blobber block rewards
-		for _, blobber := range allBlobbers {
+		for _, blobber := range eligibleBlobbers {
 			blobberBlockRewardWeight := getBlobberBlockRewardWeight(blobber)
 			expectedBlobberBlockReward := 0.0
 
@@ -355,6 +368,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			count := 0
 
 			for size, probability := range probabilityOfBlobberSelected {
+				probability = probability * (float64(blobber.ChallengesPassed) / totalChallengesPassedInRoundsDiff)
 				count += int(probability)
 				if size > maxSize {
 					maxSize = size
