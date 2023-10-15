@@ -59,6 +59,7 @@ const (
 	QueryDelegateRewards               = "/v1/screst/:sc_address/query-delegate-rewards"
 	PartitionSizeFrequency             = "/v1/screst/:sc_address/parition-size-frequency"
 	BlobberPartitionSelectionFrequency = "/v1/screst/:sc_address/blobber-selection-frequency"
+	GetAllChallenges                   = "/v1/screst/:sc_address/all-challenges"
 )
 
 // Contains all used service providers
@@ -1027,6 +1028,7 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 			HttpOkStatus)
 
 		if err != nil {
+			t.Log("Error Creating Alloc : ", err)
 			return false
 		}
 
@@ -1478,6 +1480,21 @@ func (c *APIClient) GetRewardsByQuery(t *test.SystemTest, query string, required
 	return queryRewardsResponse
 }
 
+func (c *APIClient) GetAllChallengesForAllocation(t *test.SystemTest, allocationID string, requiredStatusCode int) []*model.Challenge {
+	t.Log("Get all challenges for allocation...")
+
+	getAllChallengesForAllocationResponse, resp, err := c.V1SCRestGetAllChallengesForAllocation(
+		t,
+		allocationID,
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, getAllChallengesForAllocationResponse)
+
+	return getAllChallengesForAllocationResponse
+}
+
 func (c *APIClient) GetDelegateRewardsByQuery(t *test.SystemTest, query string, requiredStatusCode int) map[string]int64 {
 	t.Log("Get rewards by query...")
 
@@ -1574,8 +1591,13 @@ func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRe
 }
 
 // CreateStakePoolWrapper does not provide deep test of used components
-func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID string, requiredTransactionStatus int) string {
+func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID string, requiredTransactionStatus int, options ...float64) string {
 	t.Log("Create stake pool...")
+
+	tokens := 1.0
+	if len(options) > 0 {
+		tokens = options[0]
+	}
 
 	createStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
@@ -1587,7 +1609,7 @@ func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 					ProviderType: providerType,
 					ProviderID:   providerID,
 				}),
-			Value:   tokenomics.IntToZCN(1.0),
+			Value:   tokenomics.IntToZCN(tokens),
 			TxnType: SCTxType,
 		},
 		HttpOkStatus)
@@ -1823,55 +1845,6 @@ func (c *APIClient) CreateWritePool(t *test.SystemTest, wallet *model.Wallet, al
 	wallet.IncNonce()
 
 	return createWritePoolTransactionGetConfirmationResponse.Hash
-}
-
-func (c *APIClient) UnlockWritePool(t *test.SystemTest, wallet *model.Wallet, allocationId string, requiredTransactionStatus int) string {
-	t.Log("Unlock Write pool...")
-
-	unlockWritePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:     wallet,
-			ToClientID: StorageSmartContractAddress,
-			TransactionData: model.NewUnlockWritePoolTransactionData(
-				model.CreateWritePoolRequest{
-					AllocationID: allocationId,
-				}),
-			Value:   tokenomics.IntToZCN(0.1),
-			TxnType: SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, unlockWritePoolTransactionPutResponse)
-
-	var unlockWritePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		unlockWritePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: unlockWritePoolTransactionPutResponse.Entity.Hash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if unlockWritePoolTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return unlockWritePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	wallet.IncNonce()
-
-	return unlockWritePoolTransactionGetConfirmationResponse.Hash
 }
 
 // CreateReadPoolWrapper does not provide deep test of used components
@@ -2279,6 +2252,27 @@ func (c *APIClient) V1PartitionSizeFrequency(t *test.SystemTest, request model.B
 	}
 
 	return result, resp, err
+}
+
+func (c *APIClient) V1SCRestGetAllChallengesForAllocation(t *test.SystemTest, allocationID string, requiredStatusCode int) ([]*model.Challenge, *resty.Response, error) { //nolint
+	var scRestGetAllChallengesForAllocationResponse []*model.Challenge
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetAllChallenges).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("allocation_id", allocationID)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &scRestGetAllChallengesForAllocationResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return scRestGetAllChallengesForAllocationResponse, resp, err
 }
 
 //----------------------------------------------------------

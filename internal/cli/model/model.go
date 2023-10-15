@@ -90,15 +90,23 @@ type Allocation struct {
 }
 
 type AllocationFile struct {
-	Name string `json:"name"`
-	Path string `json:"path"`
-	Type string `json:"type"`
-	Size int    `json:"size"`
-	Hash string `json:"hash"`
+	Name       string `json:"name"`
+	Path       string `json:"path"`
+	Type       string `json:"type"`
+	Size       int    `json:"size"`
+	Hash       string `json:"hash"`
+	ActualSize int    `json:"actual_size"`
 }
 type Blobber struct {
-	ID      string `json:"id"`
-	Baseurl string `json:"url"`
+	ID                string            `json:"id"`
+	BaseURL           string            `json:"url"`
+	Terms             Terms             `json:"terms"`     // terms
+	Capacity          int64             `json:"capacity"`  // total blobber capacity
+	Allocated         int64             `json:"allocated"` // allocated capacity
+	TotalStake        int64             `json:"total_stake"`
+	LastHealthCheck   int64             `json:"last_health_check"`
+	PublicKey         string            `json:"-"`
+	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 }
 
 type ReadPoolInfo struct {
@@ -153,8 +161,8 @@ type ListFileResult struct {
 }
 
 type Terms struct {
-	Read_price  int64 `json:"read_price"`
-	Write_price int64 `json:"write_price"`
+	ReadPrice  int64 `json:"read_price"`
+	WritePrice int64 `json:"write_price"`
 }
 
 type Settings struct {
@@ -768,6 +776,8 @@ var StorageCurrencySettigs = []string{
 
 var StorageIntSettings = []string{
 	"max_challenge_completion_rounds",
+	"challenge_generation_gap",
+	"max_file_size",
 	"min_alloc_size",
 	"min_blobber_capacity",
 	"free_allocation_settings.data_shards",

@@ -137,7 +137,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			if f.Path == destPath {
 				foundAtDest = true
 				require.Equal(t, destName, f.Name, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -209,7 +209,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			_, ok := cliutils.Contains(destFileNames, file.Name)
 
 			require.True(t, ok, strings.Join(output, "\n"))
-			require.GreaterOrEqual(t, file.Size, int(fileSize), strings.Join(output, "\n"))
+			require.Equal(t, file.ActualSize, int(fileSize), strings.Join(output, "\n"))
 			require.Equal(t, "f", file.Type, strings.Join(output, "\n"))
 			require.NotEmpty(t, file.Hash, "File hash is empty")
 		}
@@ -268,7 +268,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			if f.Path == remotePath { // nolint:gocritic // this is better than inverted if cond
 				found = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -339,7 +339,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			if f.Path == remotePath {
 				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -413,7 +413,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			if f.Path == remotePath {
 				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -486,7 +486,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			if f.Path == destPath {
 				foundAtDest = true
 				require.Equal(t, destName, f.Name, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -646,7 +646,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			if f.Path == remotePath {
 				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}

@@ -77,6 +77,22 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		)
 	})
 
+	t.Run("Update Size beyond blobber capacity should fail", func(t *test.SystemTest) {
+		allocationID, _ := setupAndParseAllocation(t, configPath)
+		size := int64(1099511627776000) // 1000 TiB
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       size,
+		})
+		output, err := updateAllocation(t, configPath, params, false)
+
+		require.NotNil(t, err, "Could not update allocation "+
+			"due to error", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Contains(t, output[0], "doesn't have enough free space")
+	})
+
 	t.Run("Update All Parameters Should Work", func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := int64(2048)
@@ -813,7 +829,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 2.0
 	// Then create new allocation
-	options := map[string]interface{}{"size": "10000", "lock": "5"}
+	options := map[string]interface{}{"size": "10000000", "lock": "5"}
 
 	// Add additional parameters if available
 	// Overwrite with new parameters when available
