@@ -457,7 +457,7 @@ func TestUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/",
 			"localpath":   filename,
-			"chunknumber": 500, // 64KB * 1024 = 64M
+			"chunknumber": 500, // 64KB * 500 = 32M
 		}
 		upload_param := createParams(param)
 		command := fmt.Sprintf(
@@ -475,7 +475,7 @@ func TestUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/",
 			"localpath":   filename,
-			"chunknumber": 500, // 64KB * 1024 = 64M
+			"chunknumber": 500, // 64KB * 500 = 32M
 		}, false)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
