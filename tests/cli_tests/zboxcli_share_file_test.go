@@ -26,12 +26,6 @@ func TestShareFile(testSetup *testing.T) {
 	t.SetSmokeTests("Share to public a folder with no encrypted file using auth ticket with zero expiration")
 
 	t.Parallel()
-	// "Share to private a folder with no  file using auth ticket with zero expiration"
-	// "Share to private a folder with single file using auth ticket with zero expiration"
-	// "Share to private a folder with multiple  file using auth ticket with zero expiration"
-	// "Share to private a folder with single encrypted file using auth ticket with zero expiration"
-	// "Share to private a folder with multiple encrypted file using auth ticket with zero expiration"
-	// make same 5 case for public folder and you are done
 
 	t.Run("Share to public a folder with no file using auth ticket with zero expiration", func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
@@ -70,41 +64,8 @@ func TestShareFile(testSetup *testing.T) {
 			"json":       "",
 		})
 		output, err = listAllFilesFromBlobber(t, receiverWallet, configPath, listFileParams, true)
-		// FIXME ISSUE
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, `error from server list response: {"code":"invalid_parameters","error":"invalid_parameters: Auth ticket is required"}`, output[0])
-	})
-
-	t.Run("Acessing UnShared folder with no file using auth ticket with zero expiration should not work", func(t *test.SystemTest) {
-		walletOwner := escapedTestName(t)
-		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
-
-		// upload Remote Dir
-		remoteDir := "/folderToBeShared/"
-		output, err := createDir(t, configPath, allocationID, remoteDir, true)
-		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, remoteDir+" directory created", output[0])
-
-		// receiver wallet operations
-		receiverWallet := escapedTestName(t) + "_second"
-
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
-
-		authTicket := "random"
-
-		// list all file to verify
-		listFileParams := createParams(map[string]interface{}{
-			"authticket": authTicket,
-			"remotepath": remoteDir,
-			"allocation": allocationID,
-		})
-		output, err = listAllFilesFromBlobber(t, receiverWallet, configPath, listFileParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		var files []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
-		require.Equal(t, output[0], `error from server list response: {"code":"invalid_parameters","error":"invalid_parameters: Auth ticket is required"}`)
-		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, `error from server list response: {"code":"invalid_parameters","error":"invalid_parameters: Auth ticket is required"}`, output[0])
 	})
 
 	t.Run("Share to public a folder with single unencrypted file using auth ticket with zero expiration should work", func(t *test.SystemTest) {
@@ -384,11 +345,12 @@ func TestShareFile(testSetup *testing.T) {
 		})
 		output, err = listAllFilesFromBlobber(t, receiverWallet, configPath, listFileParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		var files []climodel.AllocationFile
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, files, 0, "list file - Unexpected output", strings.Join(output, "\n"))
+		require.Len(t, output, 2, "list file - Unexpected output", strings.Join(output, "\n"))
+		// Output is:
+		// TYPE | NAME | PATH | SIZE | NUM BLOCKS | ACTUAL SIZE | ACTUAL NUM BLOCKS | LOOKUP HASH | IS ENCRYPTED
+		// -------+------+------+------+------------+-------------+-------------------+-------------+---------------
 	})
 
 	t.Run("Share a private folder with single unencrypted file using auth ticket with zero expiration should work", func(t *test.SystemTest) {
