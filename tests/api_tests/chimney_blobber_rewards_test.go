@@ -368,7 +368,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			count := 0
 
 			for size, probability := range probabilityOfBlobberSelected {
-				probability = probability * (float64(blobber.ChallengesPassed) / totalChallengesPassedInRoundsDiff)
+				probability *= float64(blobber.ChallengesPassed) / totalChallengesPassedInRoundsDiff
 				count += int(probability)
 				if size > maxSize {
 					maxSize = size
