@@ -397,7 +397,6 @@ func (c *SDKClient) AddUploadOperationForBigFile(t *test.SystemTest, allocationI
 		Workdir:       homeDir,
 		RemotePath:    fileMeta.RemotePath,
 	}
-
 }
 
 func (c *SDKClient) AddDeleteOperation(t *test.SystemTest, allocationID, remotePath string) sdk.OperationRequest {

@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -44,6 +45,7 @@ func TestMain(m *testing.M) {
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
 	zs3Client = client.NewZS3Client(parsedConfig.ZS3ServerUrl)
 	zboxClient = client.NewZboxClient(parsedConfig.ZboxUrl, parsedConfig.ZboxPhoneNumber)
+	fmt.Println("JayashURL", parsedConfig.ChimneyTestNetwork)
 	chimneyClient = client.NewAPIClient(parsedConfig.ChimneyTestNetwork)
 
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
