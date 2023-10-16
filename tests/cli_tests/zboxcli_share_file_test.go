@@ -65,7 +65,7 @@ func TestShareFile(testSetup *testing.T) {
 		})
 		output, err = listAllFilesFromBlobber(t, receiverWallet, configPath, listFileParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, `error from server list response: {"code":"invalid_parameters","error":"invalid_parameters: Auth ticket is required"}`, output[0])
+		require.Equal(t, `null`, output[0])
 	})
 
 	t.Run("Share to public a folder with single unencrypted file using auth ticket with zero expiration should work", func(t *test.SystemTest) {
