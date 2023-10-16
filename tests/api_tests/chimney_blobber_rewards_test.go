@@ -103,8 +103,8 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 	time.Sleep(1 * time.Minute)
 
-	uploadOp := sdkClient.AddUploadOperationForBigFile(t, allocationID, 10) // 10gb
-	sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
+	uploadOp := chimneySdkClient.AddUploadOperationForBigFile(t, allocationID, 10) // 10gb
+	chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 	startBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
 
