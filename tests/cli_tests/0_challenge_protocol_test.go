@@ -205,14 +205,17 @@ func TestProtocolChallenge(testSetup *testing.T) {
 
 		require.InEpsilonf(t, allChallengesCount["total"], allChallengesCount["passed"]+allChallengesCount["open"], 0.05, "Challenge Failure rate should not be more than 5%")
 
-		lenBlobberList := int64(len(blobberList))
+		totalUsed := int64(0)
+		for _, blobber := range blobberList {
+			totalUsed += blobber.UsedAllocation
+		}
 
 		for _, blobber := range blobberList {
 			challengesCountQuery := fmt.Sprintf("blobber_id = '%s'", blobber.Id)
 			blobberChallengeCount, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 			require.Nil(t, err, "error counting challenges")
 
-			require.InEpsilon(t, allChallengesCount["total"]/lenBlobberList, blobberChallengeCount["total"], 0.15, "blobber distribution should within tolerance")
+			require.InEpsilon(t, (allChallengesCount["total"]*blobber.UsedAllocation)/totalUsed, blobberChallengeCount["total"], 0.15, "blobber distribution should within tolerance")
 			require.InEpsilon(t, blobberChallengeCount["total"], blobberChallengeCount["passed"]+blobberChallengeCount["open"], 0.05, "failure rate should not be more than 5 percent")
 		}
 	})
