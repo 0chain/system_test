@@ -265,7 +265,6 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Block Rewards", 1*time.Hour, func(t *test.SystemTest) {
-
 		totalChallengesPassedInRoundsDiff := float64(0)
 
 		var eligibleBlobbers []*model.SCRestGetBlobberResponse
