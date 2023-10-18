@@ -80,6 +80,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 100, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		t.Log("Blobber Requirements:", blobberRequirements)
 		blobberRequirements.DataShards = 1
 		blobberRequirements.ParityShards = 1
 		blobberRequirements.Size = 2 * MB
