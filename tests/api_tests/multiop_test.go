@@ -325,6 +325,24 @@ func TestMultiOperation(testSetup *testing.T) {
 		listResult := sdkClient.GetFileList(t, allocationID, "/child/")
 		require.Equal(t, 1, len(listResult.Children), "files count mismatch expected %v actual %v", 1, len(listResult.Children))
 	})
+
+	t.RunSequentially("Nested rename directory operation should work", func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		nestedDir := sdkClient.AddCreateDirOperation(t, allocationID, "/new/nested/nested1")
+
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{nestedDir})
+		renameOp := sdkClient.AddRenameOperation(t, allocationID, "/new", "rename")
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{renameOp})
+
+		listResult := sdkClient.GetFileList(t, allocationID, "/rename/")
+		require.Equal(t, 1, len(listResult.Children), "files count mismatch expected %v actual %v", 1, len(listResult.Children))
+		listResult = sdkClient.GetFileList(t, allocationID, "/rename/nested")
+		require.Equal(t, 1, len(listResult.Children), "files count mismatch expected %v actual %v", 1, len(listResult.Children))
+	})
 }
 
 func randName() string {
