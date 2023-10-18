@@ -31,10 +31,9 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	var (
-		allBlobbers         []*model.SCRestGetBlobberResponse
-		resp                *resty.Response
-		err                 error
-		blobberRequirements model.BlobberRequirements
+		allBlobbers []*model.SCRestGetBlobberResponse
+		resp        *resty.Response
+		err         error
 	)
 
 	t.TestSetupWithTimeout("Setup", 2*time.Minute, func() {
@@ -80,6 +79,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		sdkWallet.Nonce = int(sdkWalletBalance.Nonce)
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 100, client.TxSuccessfulStatus)
 
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		blobberRequirements.DataShards = 1
 		blobberRequirements.ParityShards = 1
 		blobberRequirements.Size = 2 * MB
@@ -116,6 +116,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		sdkWallet.Nonce = int(sdkWalletBalance.Nonce)
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 100, client.TxSuccessfulStatus)
 
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		blobberRequirements.DataShards = 1
 		blobberRequirements.ParityShards = 1
 		blobberRequirements.Size = 20 * MB
@@ -152,6 +153,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		sdkWallet.Nonce = int(sdkWalletBalance.Nonce)
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 200, client.TxSuccessfulStatus)
 
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		blobberRequirements.DataShards = 1
 		blobberRequirements.ParityShards = 1
 		blobberRequirements.Size = 200 * MB
@@ -188,6 +190,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		sdkWallet.Nonce = int(sdkWalletBalance.Nonce)
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 1000, client.TxSuccessfulStatus)
 
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		blobberRequirements.DataShards = 1
 		blobberRequirements.ParityShards = 1
 		blobberRequirements.Size = 2 * GB
