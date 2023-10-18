@@ -94,11 +94,18 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	})
 
 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-	blobberRequirements.DataShards = 2
-	blobberRequirements.ParityShards = 2
+	blobberRequirements.DataShards = 1
+	blobberRequirements.ParityShards = 1
 	blobberRequirements.Size = allocSize
 
 	allocationBlobbers := chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+
+	lenAvailableBlobbers := len(*allocationBlobbers.Blobbers)
+
+	blobberRequirements.DataShards = int64((lenAvailableBlobbers-1)/2 + 1)
+	blobberRequirements.ParityShards = int64(lenAvailableBlobbers) - blobberRequirements.DataShards
+
+	allocationBlobbers = chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 	allocationID := chimneyClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
 
 	time.Sleep(1 * time.Minute)
