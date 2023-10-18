@@ -382,7 +382,7 @@ type ClientGetReadPoolBalanceRequest struct {
 	ClientID string
 }
 
-type QueryRewardsRequest struct {
+type QueryRequest struct {
 	Query string
 }
 
