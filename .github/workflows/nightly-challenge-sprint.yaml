@@ -16,13 +16,13 @@ jobs:
       - name: "Config: Deploy new 0Chain network then run challenge tests against it"
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=fix/generate_challenge" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
         uses: 0chain/actions/deploy-0chain@fix/challenge-based-on-weight
         with:
-          repo_snapshots_branch: fix/challenge-based-on-weight
+          repo_snapshots_branch: fix/generate_challenge
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -36,7 +36,7 @@ jobs:
         uses: 0chain/actions/run-system-tests@fix/challenge-based-on-weight
         with:
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
-          repo_snapshots_branch: fix/challenge-based-on-weight
+          repo_snapshots_branch: fix/generate_challenge
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
