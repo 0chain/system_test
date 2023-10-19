@@ -55,6 +55,32 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &blobberList)
 		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 		require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
+
+		for i := 0; i < 40; i++ {
+			allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+				"data":   1,
+				"parity": 1,
+				"size":   10 * MB,
+				"tokens": 9,
+			})
+
+			remotepath := "/dir/"
+			filesize := 1 * MB
+			filename := generateRandomTestFileName(t)
+
+			err := createFileWithSize(filename, int64(filesize))
+			require.Nil(t, err)
+
+			output, err := uploadFile(t, configPath, map[string]interface{}{
+				"allocation": allocationId,
+				"remotepath": remotepath + filepath.Base(filename),
+				"localpath":  filename,
+			}, true)
+			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+		}
+
+		t.Log("Waiting for 1 hour to let the challenge protocol run")
+		time.Sleep(30 * time.Minute)
 	})
 
 	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)", 5*time.Minute, func(t *test.SystemTest) {

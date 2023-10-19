@@ -122,6 +122,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		blobberRequirements.ParityShards = 1
 		blobberRequirements.Size = 20 * MB
 
+		t.Log("Blobber Requirements:", blobberRequirements)
+
 		// Update wallet nonce
 		sdkWalletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		sdkWallet.Nonce = int(sdkWalletBalance.Nonce)
@@ -159,6 +161,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		blobberRequirements.ParityShards = 1
 		blobberRequirements.Size = 200 * MB
 
+		t.Log("Blobber Requirements:", blobberRequirements)
+
 		// Update wallet nonce
 		sdkWalletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		sdkWallet.Nonce = int(sdkWalletBalance.Nonce)
@@ -195,6 +199,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		blobberRequirements.DataShards = 1
 		blobberRequirements.ParityShards = 1
 		blobberRequirements.Size = 2 * GB
+
+		t.Log("Blobber Requirements:", blobberRequirements)
 
 		// Update wallet nonce
 		sdkWalletBalance = apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
