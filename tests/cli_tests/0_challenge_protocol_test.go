@@ -28,7 +28,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	// These tests are supposed to run on a network after atleast 1 hour of deployment and some writes.
 	// Setup related to these tests is done in `0chain/actions/run-system-tests/action.yml`.
 	// The 1 hour wait after setup is also handled in CI.
-	t.TestSetup("Get list of sharders and blobbers", func() {
+	t.TestSetupWithTimeout("Get list of sharders and blobbers", 2*time.Hour, func() {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
