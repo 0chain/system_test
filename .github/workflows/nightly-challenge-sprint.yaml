@@ -35,7 +35,7 @@ jobs:
       - name: "Run Challenge System tests"
         uses: 0chain/actions/run-system-tests@fix/challenge-based-on-weight
         with:
-          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          system_tests_branch: fix/challenge-based-on-weight
           repo_snapshots_branch: fix/generate_challenge
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
