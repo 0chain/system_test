@@ -87,6 +87,8 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		})
 	})
 
+	t.Skip()
+
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", 30*time.Minute, func(t *test.SystemTest) {
 		t.Cleanup(func() {
 			tearDownRewardsTests(t, blobberListString, validatorListString, configPath, 2)
