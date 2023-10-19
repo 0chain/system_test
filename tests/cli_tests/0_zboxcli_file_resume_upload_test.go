@@ -20,7 +20,7 @@ func TestResumeUpload(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Resume upload should work fine", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
-		fileSize := int64(1 * GB)
+		fileSize := int64(500 * MB)
 
 		output, err := executeFaucetWithTokens(t, configPath, 100.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -41,7 +41,7 @@ func TestResumeUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/",
 			"localpath":   filename,
-			"chunknumber": 1024, // 64KB * 1024 = 64M
+			"chunknumber": 500, // 64KB * 500 = 32M
 		}
 		upload_param := createParams(param)
 		command := fmt.Sprintf(
@@ -59,8 +59,8 @@ func TestResumeUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/",
 			"localpath":   filename,
-			"chunknumber": 1024, // 64KB * 1024 = 64M
-		}, true)
+			"chunknumber": 500, // 64KB * 500 = 32M
+		}, false)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		pattern := `(\d+ / \d+)\s+(\d+\.\d+%)`

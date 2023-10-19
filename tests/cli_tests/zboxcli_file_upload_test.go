@@ -435,7 +435,6 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	// Failure Scenarios
-
 	// FIXME: the CLI could check allocation size before attempting an upload to save wasted time/bandwidth
 	t.Run("Upload File too large - file size larger than allocation should fail", func(t *test.SystemTest) {
 		allocSize := int64(1 * MB)
