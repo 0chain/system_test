@@ -173,7 +173,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			actualCancellationChargeForBlobber := queryReward.TotalReward
 			totalDelegateReward := queryReward.TotalDelegateReward
 
-			challengesCountQuery := fmt.Sprintf("blobber_id = '%s' AND allocation_id = '%s", blobber.ID, allocationID)
+			challengesCountQuery := fmt.Sprintf("blobber_id='%s' AND allocation_id='%s'", blobber.ID, allocationID)
 			blobberChallengeCount := chimneyClient.GetChallengesCountByQuery(t, challengesCountQuery, client.HttpOkStatus)
 
 			// Updating total values
@@ -213,7 +213,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			actualChallengeRewardForBlobber := queryReward.TotalReward
 			totalDelegateReward := queryReward.TotalDelegateReward
 
-			challengesCountQuery := fmt.Sprintf("blobber_id = '%s' AND allocation_id = '%s", blobber.ID, allocationID)
+			challengesCountQuery := fmt.Sprintf("blobber_id='%s' AND allocation_id='%s'", blobber.ID, allocationID)
 			blobberChallengeCount := chimneyClient.GetChallengesCountByQuery(t, challengesCountQuery, client.HttpOkStatus)
 
 			// Updating total values
