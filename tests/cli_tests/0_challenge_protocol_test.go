@@ -56,7 +56,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 		require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
-		for i := 0; i < 4; i++ {
+		for i := 0; i < 20; i++ {
 			allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"data":   1,
 				"parity": 1,
@@ -80,7 +80,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		}
 
 		t.Log("Waiting for 10 minutes to let the challenge protocol run")
-		time.Sleep(10 * time.Minute)
+		time.Sleep(30 * time.Minute)
 	})
 
 	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)", 5*time.Minute, func(t *test.SystemTest) {
