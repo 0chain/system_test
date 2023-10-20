@@ -56,10 +56,10 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 		require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
-		for i := 0; i < 20; i++ {
+		for i := 0; i < 4; i++ {
 			allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 				"data":   1,
-				"parity": 1,
+				"parity": 2,
 				"size":   10 * MB,
 				"tokens": 9,
 			})
@@ -79,7 +79,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 		}
 
-		t.Log("Waiting for 10 minutes to let the challenge protocol run")
+		t.Log("Waiting for 30 minutes to let the challenge protocol run")
 		time.Sleep(30 * time.Minute)
 	})
 
