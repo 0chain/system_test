@@ -79,8 +79,8 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 		}
 
-		t.Log("Waiting for 1 hour to let the challenge protocol run")
-		time.Sleep(30 * time.Minute)
+		t.Log("Waiting for 10 minutes to let the challenge protocol run")
+		time.Sleep(10 * time.Minute)
 	})
 
 	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)", 5*time.Minute, func(t *test.SystemTest) {
