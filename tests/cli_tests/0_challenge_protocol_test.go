@@ -28,7 +28,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	// These tests are supposed to run on a network after atleast 1 hour of deployment and some writes.
 	// Setup related to these tests is done in `0chain/actions/run-system-tests/action.yml`.
 	// The 1 hour wait after setup is also handled in CI.
-	t.TestSetupWithTimeout("Get list of sharders and blobbers", 2*time.Hour, func() {
+	t.TestSetup("Get list of sharders and blobbers", func() {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
 
@@ -55,8 +55,6 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &blobberList)
 		require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 		require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
-
-		time.Sleep(30 * time.Minute)
 	})
 
 	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)", 5*time.Minute, func(t *test.SystemTest) {
@@ -205,19 +203,16 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		allChallengesCount, err := countChallengesByQuery(t, "", sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		require.InEpsilonf(t, allChallengesCount["total"], allChallengesCount["passed"]+allChallengesCount["open"], 0.1, "Challenge Failure rate should not be more than 5%")
+		require.InEpsilonf(t, allChallengesCount["total"], allChallengesCount["passed"]+allChallengesCount["open"], 0.05, "Challenge Failure rate should not be more than 5%")
 
-		totalUsed := int64(0)
-		for _, blobber := range blobberList {
-			totalUsed += blobber.UsedAllocation
-		}
+		lenBlobberList := int64(len(blobberList))
 
 		for _, blobber := range blobberList {
 			challengesCountQuery := fmt.Sprintf("blobber_id = '%s'", blobber.Id)
 			blobberChallengeCount, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 			require.Nil(t, err, "error counting challenges")
 
-			require.InEpsilon(t, (allChallengesCount["total"]*blobber.UsedAllocation)/totalUsed, blobberChallengeCount["total"], 0.15, "blobber distribution should within tolerance")
+			require.InEpsilon(t, allChallengesCount["total"]/lenBlobberList, blobberChallengeCount["total"], 0.15, "blobber distribution should within tolerance")
 			require.InEpsilon(t, blobberChallengeCount["total"], blobberChallengeCount["passed"]+blobberChallengeCount["open"], 0.05, "failure rate should not be more than 5 percent")
 		}
 	})
