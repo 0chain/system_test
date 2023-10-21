@@ -21,6 +21,20 @@ import (
 func TestBlobberReadReward(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	t.TestSetup("set storage config to use time_unit as 5 minutes", func() {
+		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "10m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+	})
+
+	t.Cleanup(func() {
+		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "1h",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+	})
+
 	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
