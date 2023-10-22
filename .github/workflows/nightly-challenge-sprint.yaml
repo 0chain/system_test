@@ -16,7 +16,6 @@ jobs:
       - name: "Config: Deploy new 0Chain network then run challenge tests against it"
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
-          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
           echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
@@ -36,7 +35,6 @@ jobs:
       - name: "Run Challenge System tests"
         uses: 0chain/actions/run-system-tests@master
         with:
-          system_tests_branch: ${{ env.CURRENT_BRANCH }}
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
