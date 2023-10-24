@@ -170,7 +170,6 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		teardown(t, firebaseToken2.IdToken, "+919876543210")
 
-		firebaseToken = authenticateWithFirebase(t, "+919876543210")
 		description = "wallet created as part of " + t.Name()
 		walletName = "wallet_name1"
 		referralMnemonic := "total today fortune output enjoy season desert tool transfer awkward post disease junk offer wedding wire brown broccoli size banana harsh stove raise skull"
