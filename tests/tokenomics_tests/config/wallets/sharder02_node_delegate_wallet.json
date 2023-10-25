@@ -1,0 +1,14 @@
+{
+    "client_id": "b3e3f587dd65aaf4118adf87878a138dbb3163a3b169a0d1872aa9a7a0fa5c50",
+    "client_key": "1f7d5b5d96b5f97d4dd6d421b9fa69dc9b9fd11768d71b387ec4c0607092f608f3f13481062a0dc3536f980e2962a52ca6a3bac6ad90cabd1d29b83d3a32a19f",
+    "keys": [
+        {
+            "public_key": "1f7d5b5d96b5f97d4dd6d421b9fa69dc9b9fd11768d71b387ec4c0607092f608f3f13481062a0dc3536f980e2962a52ca6a3bac6ad90cabd1d29b83d3a32a19f",
+            "private_key": "2ba53541de3cb2ed6d1fc1489ef94479794f2180c052c7f7002d5db45f39f624"
+        }
+    ],
+    "mnemonics": "secret mansion motor tissue grid host scorpion pill doll burger noble replace menu caution uniform clock long secret install pencil lock yellow coach dream",
+    "version": "1.0",
+    "date_created": "1661371000",
+    "nonce": 0
+}

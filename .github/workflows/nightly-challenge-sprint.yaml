@@ -69,7 +69,7 @@ jobs:
           ]
           }'
           curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
-        
+
   notify_slack_on_success:
     runs-on: [self-hosted, arc-runner]
     needs: [system-tests]

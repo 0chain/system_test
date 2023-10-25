@@ -30,7 +30,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 	defaultCurrMint := 1
 	defaultPricePerPack := 1
 	defaultTotalNFT := "1"
-	collection_id := "collection id created as a part of testing nft collection"
+	collection_id := "collectionId1"
 
 	t.RunSequentially("List NFT collection id with zero nft collection id  should work", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
@@ -118,10 +118,10 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		// require.Equal(t, description, zboxWallet.Description, "Description does not match expected") // FIXME: Description is not persisted see: https://github.com/0chain/0box/issues/377
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as a part of" + t.Name()
+		allocationType := "direct_storage"
+		allocationId := "allocationid1"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationId,
 			allocationName,
@@ -136,7 +136,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		collection_name := "collection as a part of" + t.Name()
+		collection_name := "collection"
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 			firebaseToken.IdToken,
 			csrfToken,
@@ -253,10 +253,10 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as a part of" + t.Name()
+		allocationType := "direct_storage"
+		allocationId := "allocationid2"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationId,
 			allocationName,
@@ -271,8 +271,8 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		collection_name := "collection as a part of " + t.Name()
-		collection_id := "collectionId as a part of " + t.Name()
+		collection_name := "collection"
+		collection_id := "collectionId2"
 
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 			firebaseToken.IdToken,
@@ -363,10 +363,10 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as a part of" + t.Name()
+		allocationType := "direct_storage"
+		allocationId := "allocationid3"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationId,
 			allocationName,
@@ -381,7 +381,7 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		collection_name := "collection as a part of" + t.Name()
+		collection_name := "collection"
 
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 			firebaseToken.IdToken,
@@ -522,10 +522,10 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as a part of" + t.Name()
+		allocationType := "direct_storage"
+		allocationId := "allocationid4"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationId,
 			allocationName,
@@ -585,10 +585,10 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as a part of" + t.Name()
+		allocationType := "direct_storage"
+		allocationId := "allocationid5"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationId,
 			allocationName,
@@ -603,8 +603,8 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		collection_name := "collection as a part of" + t.Name()
-		collection_id := "collection id as a part of" + t.Name()
+		collection_name := "collection"
+		collection_id := "collectionId3"
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 			firebaseToken.IdToken,
 			csrfToken,
@@ -674,10 +674,10 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as a part of" + t.Name()
+		allocationType := "direct_storage"
+		allocationId := "allocationid6"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationId,
 			allocationName,
@@ -692,8 +692,8 @@ func Test0boxNft(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		collection_name := "collection as a part of " + t.Name()
-		collection_id := "collectionId as a part of " + t.Name()
+		collection_name := "collection"
+		collection_id := "collectionId4"
 
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
 			firebaseToken.IdToken,
