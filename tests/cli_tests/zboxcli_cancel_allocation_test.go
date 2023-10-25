@@ -36,6 +36,32 @@ func TestCancelAllocation(testSetup *testing.T) {
 		assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 	})
 
+	t.RunWithTimeout("Cancel allocation after upload should work", 5*time.Minute, func(t *test.SystemTest) {
+		output, err := executeFaucetWithTokens(t, configPath, 10)
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		allocationID := setupAllocation(t, configPath)
+
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, 1*MB)
+		require.Nil(t, err)
+
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		time.Sleep(1 * time.Minute)
+
+		output, err = cancelAllocation(t, configPath, allocationID, true)
+		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
+	})
+
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
 		// create wallet
 		_, err := createWallet(t, configPath)
