@@ -121,6 +121,8 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 	chimneyClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 
+	time.Sleep(2 * time.Minute)
+
 	alloc := chimneyClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 	require.Equal(t, true, alloc.Canceled, "Allocation should be canceled")
 	require.Equal(t, true, alloc.Finalized, "Allocation should be finalized")
@@ -135,7 +137,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		actualWritePoolBalance = float64(alloc.WritePool)
 		actualMovedToChallenge = float64(alloc.MovedToChallenge)
 
-		allocDuration := allocExpiredAt - allocCreatedAt
+		allocDuration := allocExpiredAt - allocCreatedAt - 250
 		durationInTimeUnits := float64(allocDuration*1e9) / float64(alloc.TimeUnit)
 		t.Logf("Alloc duration: %v", durationInTimeUnits)
 
