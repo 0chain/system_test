@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"crypto/rand"
+	"io"
 	"os"
 	"path/filepath"
 	"sync"
@@ -300,6 +301,9 @@ func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops 
 	defer func() {
 		for i := 0; i < len(ops); i++ {
 			if ops[i].OperationType == constants.FileOperationInsert || ops[i].OperationType == constants.FileOperationUpdate {
+				if closer, ok := ops[i].FileReader.(io.Closer); ok {
+					_ = closer.Close()
+				}
 				_ = os.RemoveAll(ops[i].FileMeta.Path)
 			}
 		}
@@ -354,6 +358,47 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string, 
 		FileMeta:      fileMeta,
 		Workdir:       homeDir,
 		RemotePath:    fileMeta.RemotePath,
+	}
+}
+
+// fileSize in GB number, eg for 1GB file, fileSize = 1
+func (c *SDKClient) AddUploadOperationForBigFile(t *test.SystemTest, allocationID string, fileSize int) sdk.OperationRequest {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	tmpFile, err := os.CreateTemp("", "*")
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	for i := 0; i < fileSize; i++ {
+		buf := make([]byte, 1024*1024*1024)
+		_, err = rand.Read(buf)
+		require.NoError(t, err)
+		_, err = tmpFile.Write(buf)
+		require.NoError(t, err)
+	}
+	_, err = tmpFile.Seek(0, 0)
+	require.NoError(t, err)
+	fileMeta := sdk.FileMeta{
+		Path:       tmpFile.Name(),
+		ActualSize: 1024 * 1024 * 1024 * int64(fileSize),
+		RemoteName: filepath.Base(tmpFile.Name()),
+		RemotePath: "/" + filepath.Join("", filepath.Base(tmpFile.Name())),
+	}
+
+	homeDir, err := config.GetHomeDir()
+	require.NoError(t, err)
+
+	return sdk.OperationRequest{
+		OperationType: constants.FileOperationInsert,
+		FileReader:    tmpFile,
+		FileMeta:      fileMeta,
+		Workdir:       homeDir,
+		RemotePath:    fileMeta.RemotePath,
+		Opts: []sdk.ChunkedUploadOption{
+			sdk.WithChunkNumber(500),
+		},
 	}
 }
 
