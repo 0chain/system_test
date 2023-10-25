@@ -400,7 +400,6 @@ func (c *SDKClient) AddUploadOperationForBigFile(t *test.SystemTest, allocationI
 			sdk.WithChunkNumber(500),
 		},
 	}
-
 }
 
 func (c *SDKClient) AddDeleteOperation(t *test.SystemTest, allocationID, remotePath string) sdk.OperationRequest {
