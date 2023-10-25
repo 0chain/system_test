@@ -93,7 +93,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		// Unstake the tokens
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-		}))
+		}), true)
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "tokens unlocked: 10000000000, pool deleted", output[0])
@@ -300,13 +300,18 @@ func stakePoolInfo(t *test.SystemTest, cliConfigFilename, params string) ([]stri
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
-func unstakeTokens(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	return unstakeTokensForWallet(t, cliConfigFilename, escapedTestName(t), params)
+func unstakeTokens(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return unstakeTokensForWallet(t, cliConfigFilename, escapedTestName(t), params, retry)
 }
 
-func unstakeTokensForWallet(t *test.SystemTest, cliConfigFilename, wallet, params string) ([]string, error) {
+func unstakeTokensForWallet(t *test.SystemTest, cliConfigFilename, wallet, params string, retry bool) ([]string, error) {
 	t.Log("Unlocking tokens from stake pool...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second*2)
+	cmd := fmt.Sprintf("./zbox sp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func getBlobbersList(t *test.SystemTest) []climodel.BlobberInfo {

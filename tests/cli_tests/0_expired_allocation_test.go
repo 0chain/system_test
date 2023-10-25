@@ -177,7 +177,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 		allocationCost := 0.0
 		for _, blobber := range allocation.BlobberDetails {
-			allocationCost += sizeInGB(1024) * float64(blobber.Terms.Write_price)
+			allocationCost += sizeInGB(1024) * float64(blobber.Terms.WritePrice)
 		}
 		allocationCancellationCharge := allocationCost * 0.2 // 20% of total allocation cost
 		allocationCancellationChargeInZCN := allocationCancellationCharge / 1e10
