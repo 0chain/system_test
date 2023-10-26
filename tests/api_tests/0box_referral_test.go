@@ -12,18 +12,20 @@ func Test0BoxReferral(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Post referrals with correct CSRF should work properly")
 
-	var firebaseToken *model.FirebaseToken
+	var firebaseToken1 *model.FirebaseToken
+	var firebaseToken2 *model.FirebaseToken
+
 	t.TestSetup("Autenticate with firebase", func() {
-		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+		firebaseToken1 = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 	})
 
 	t.RunSequentially("Get referral code with correct CSRF and private auth should work properly", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, firebaseToken1.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
 		zboxRferral, response, err := zboxClient.GetReferralCode(t,
 			csrfToken,
-			firebaseToken.IdToken,
+			firebaseToken1.IdToken,
 			zboxClient.DefaultPhoneNumber,
 		)
 
@@ -35,12 +37,12 @@ func Test0BoxReferral(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Rank referrals with correct CSRF should work properly", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, firebaseToken1.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
 		zboxRferral, response, err := zboxClient.GetReferralRank(t,
 			csrfToken,
-			firebaseToken.IdToken,
+			firebaseToken1.IdToken,
 			zboxClient.DefaultPhoneNumber,
 		)
 
@@ -54,10 +56,10 @@ func Test0BoxReferral(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create wallet for first time with the referral code should work", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, firebaseToken1.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
-		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+		firebaseToken1 = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
@@ -65,7 +67,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			firebaseToken1.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
@@ -77,7 +79,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 
 		zboxRferral, response, err := zboxClient.GetReferralCode(t,
 			csrfToken,
-			firebaseToken.IdToken,
+			firebaseToken1.IdToken,
 			zboxClient.DefaultPhoneNumber,
 		)
 
@@ -85,18 +87,16 @@ func Test0BoxReferral(testSetup *testing.T) {
 		require.NotNil(t, zboxRferral)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
-
 		description = "wallet created as part of " + t.Name()
 		walletName = "wallet_name1"
-		firebaseToken = authenticateWithFirebase(t, "+919876543210")
+		firebaseToken2 = authenticateWithFirebase(t, "+919876543210")
 		referralMnemonic := "total today fortune output enjoy season desert tool transfer awkward post disease junk offer wedding wire brown broccoli size banana harsh stove raise skull"
 
 		zboxWallet, response, err = zboxClient.PostWalletWithReferralCode(t,
 			referralMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			firebaseToken2.IdToken,
 			csrfToken,
 			"+919876543210",
 			"blimp",
@@ -110,7 +110,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 
 		zboxRferrals, responses, errs := zboxClient.GetReferralCount(t,
 			csrfToken,
-			firebaseToken.IdToken,
+			firebaseToken1.IdToken,
 			zboxClient.DefaultPhoneNumber,
 		)
 
@@ -127,15 +127,15 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Testing LeaderBoard")
 
-	var firebaseToken *model.FirebaseToken
+	var firebaseToken1 *model.FirebaseToken
 	var firebaseToken2 *model.FirebaseToken
 	t.TestSetup("Autenticate with firebase", func() {
-		firebaseToken = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
+		firebaseToken1 = authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber)
 		firebaseToken2 = authenticateWithFirebase(t, "+919876543210")
 	})
 
 	t.RunSequentially("Testing LeaderBoard", func(t *test.SystemTest) {
-		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
+		teardown(t, firebaseToken1.IdToken, zboxClient.DefaultPhoneNumber)
 		teardown(t, firebaseToken2.IdToken, "+919876543210")
 
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
@@ -146,7 +146,7 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
-			firebaseToken.IdToken,
+			firebaseToken1.IdToken,
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
@@ -157,7 +157,7 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 
 		zboxRferral, response, err := zboxClient.GetReferralCode(t,
 			csrfToken,
-			firebaseToken.IdToken,
+			firebaseToken1.IdToken,
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, err)
@@ -184,7 +184,7 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 
 		zboxRferrals, responses, errs := zboxClient.GetLeaderBoard(t,
 			csrfToken,
-			firebaseToken.IdToken,
+			firebaseToken1.IdToken,
 			zboxClient.DefaultPhoneNumber,
 		)
 		require.NoError(t, errs)
