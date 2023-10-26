@@ -39,7 +39,7 @@ func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 
 	require.Len(t, auths, 3, "There should be 3 authorizers in the network")
 
-	// Remove 1 authorizers from zcnsc smartcontract
+	// Remove 1 authorizer from zcnsc smartcontract
 	removeAuth := auths[0]
 	output, err = removeAuthorizer(t, removeAuth.ID, false)
 	require.NoError(t, err, "Unexpected remove authorizer failure", strings.Join(output, "\n"))
@@ -54,7 +54,7 @@ func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 	require.NoError(t, err, "Unexpected remove authorizer failure", strings.Join(output, "\n"))
 	t.Logf("remove authorizer: %s zcnsc successfully", auth2.ID)
 
-	// add back the first removed authorizer
+	// add back the authorizer removed previously, the auths[0]
 	addAuth := auths[0]
 	output, err = registerAuthorizer(t, addAuth.ID, authsIDKeys[addAuth.ID], addAuth.URL, false)
 	require.NoError(t, err, "Unexpected register authorizer failure", strings.Join(output, "\n"))
