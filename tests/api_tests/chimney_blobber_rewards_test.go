@@ -22,7 +22,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	const (
 		allocSize = 1024 * 1024 * 1024 * 100
 		fileSize  = 1024 * 1024 * 1024 * 50
-		sleepTime = 40 * time.Minute
+		sleepTime = 20 * time.Minute
 
 		standardErrorMargin = 0.05
 		extraErrorMargin    = 0.15
