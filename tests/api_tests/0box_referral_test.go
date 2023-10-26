@@ -109,7 +109,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 
 		zboxRferrals, responses, errs := zboxClient.GetReferralCount(t,
 			csrfToken,
-			firebaseTokens[1].IdToken,
+			firebaseTokens[0].IdToken,
 			zboxClient.DefaultPhoneNumber,
 		)
 
