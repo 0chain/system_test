@@ -129,8 +129,7 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 	var firebaseTokens []*model.FirebaseToken
 
 	t.TestSetup("Autenticate with firebase", func() {
-		firebaseTokens = append(firebaseTokens, authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber))
-		firebaseTokens = append(firebaseTokens, authenticateWithFirebase(t, "+919876543210"))
+		firebaseTokens = append(firebaseTokens, authenticateWithFirebase(t, zboxClient.DefaultPhoneNumber), authenticateWithFirebase(t, "+919876543210"))
 	})
 
 	t.RunSequentially("Testing LeaderBoard", func(t *test.SystemTest) {
