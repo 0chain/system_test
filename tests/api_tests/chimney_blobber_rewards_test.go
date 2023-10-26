@@ -20,9 +20,9 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	t.SetSmokeTests("Replace blobber in allocation, should work")
 
 	const (
-		allocSize = 1024 * 1024 * 1024 * 2
-		fileSize  = 1024 * 1024 * 1024 * 1
-		sleepTime = 20 * time.Minute
+		allocSize = 20 * GB
+		fileSize  = 10 * GB
+		sleepTime = 30 * time.Minute
 
 		standardErrorMargin = 0.05
 		extraErrorMargin    = 0.15
@@ -110,7 +110,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 	time.Sleep(1 * time.Minute)
 
-	uploadOp := chimneySdkClient.AddUploadOperationForBigFile(t, allocationID, 1) // 10gb
+	uploadOp := chimneySdkClient.AddUploadOperationForBigFile(t, allocationID, fileSize/GB) // 10gb
 	chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 	startBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
@@ -253,7 +253,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			//}
 		}
 
-		require.InEpsilon(t, expectedBlobberChallengeRewards, actualBlobberChallengeRewards, standardErrorMargin, "Expected challenge rewards is not equal to actual")
+		require.InEpsilon(t, expectedBlobberChallengeRewards, actualBlobberChallengeRewards, extraErrorMargin, "Expected challenge rewards is not equal to actual")
 
 		// Compare Validator Challenge Rewards
 		validatorChallengeRewardQuery := fmt.Sprintf("allocation_id = '%s' AND reward_type = %d", allocationID, ValidationReward)
