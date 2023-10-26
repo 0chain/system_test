@@ -1232,7 +1232,30 @@ jobs:
     runs-on: [ tests-suite ]
     needs: [ vult-cypress-run, blimp-cypress-run, chimney-cypress-run, chalk-cypress-run, atlus-cypress-run, bolt-cypress-run ]
     steps:
-      - name: "notify slack"
-        if: always() && (needs.vult-cypress-run.result != 'success' || needs.blimp-cypress-run.result != 'success' || needs.chimney-cypress-run.result != 'success' || needs.chalk-cypress-run.result != 'success' || needs.atlus-cypress-run.result != 'success' || needs.bolt-cypress-run.result != 'success')
+      - name: "notify slack: failed"
+        if: always() && !(needs.vult-cypress-run.result == 'success' && needs.blimp-cypress-run.result == 'success' && needs.chimney-cypress-run.result == 'success' && needs.chalk-cypress-run.result == 'success' && needs.atlus-cypress-run.result == 'success' && needs.bolt-cypress-run.result == 'success')
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"<!here> 0Chain nightly cypress run failed against current-sprint. View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"}' ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+          payload='{
+          "text": "'"<!here> 0Chain Nightly Cypress Tests - FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "attachments": [
+              {
+              "text": "0Chain Nightly Cypress Tests - FAILED ⚠️",
+              "color": "#ff0000"
+              }
+          ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+      
+      - name: "notify slack: success"
+        if: always() && needs.vult-cypress-run.result == 'success' && needs.blimp-cypress-run.result == 'success' && needs.chimney-cypress-run.result == 'success' && needs.chalk-cypress-run.result == 'success' && needs.atlus-cypress-run.result == 'success' && needs.bolt-cypress-run.result == 'success'
+        run: |
+          payload='{
+          "text": "'"<!here> 0Chain Nightly Cypress Tests - PASSED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "attachments": [
+              {
+              "text": "0Chain Nightly Cypress Tests - PASSED ✅",
+              "color": "#ff0000"
+              }
+          ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
