@@ -138,7 +138,8 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		actualMovedToChallenge = float64(alloc.MovedToChallenge)
 
 		allocDuration := allocExpiredAt - allocCreatedAt - 180
-		durationInTimeUnits := float64(allocDuration*1e9) / float64(alloc.TimeUnit)
+		prevAllocDuration := prevAlloc.Expiration - prevAlloc.StartTime
+		durationInTimeUnits := float64(allocDuration) / float64(prevAllocDuration)
 		t.Logf("Alloc duration: %v", durationInTimeUnits)
 
 		// Calculating expected allocation cost
