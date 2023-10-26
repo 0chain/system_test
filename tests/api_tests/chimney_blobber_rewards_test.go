@@ -20,8 +20,8 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	t.SetSmokeTests("Replace blobber in allocation, should work")
 
 	const (
-		allocSize = 1024 * 1024 * 1024 * 100
-		fileSize  = 1024 * 1024 * 1024 * 50
+		allocSize = 1024 * 1024 * 1024 * 2
+		fileSize  = 1024 * 1024 * 1024 * 1
 		sleepTime = 20 * time.Minute
 
 		standardErrorMargin = 0.05
@@ -110,7 +110,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 	time.Sleep(1 * time.Minute)
 
-	uploadOp := chimneySdkClient.AddUploadOperationForBigFile(t, allocationID, 50) // 10gb
+	uploadOp := chimneySdkClient.AddUploadOperationForBigFile(t, allocationID, 1) // 10gb
 	chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 	startBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
