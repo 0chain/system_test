@@ -130,10 +130,8 @@ func removeAuthorizer(t *test.SystemTest, clientID string, retry bool) ([]string
 	cmd := fmt.Sprintf(`
 		./zwallet bridge-auth-delete --silent
 		--configDir ./config
-		--path %s
 		--wallet wallets/sc_owner_wallet.json
-		--id %s`,
-		configDir, clientID)
+		--id %s`, clientID)
 
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
