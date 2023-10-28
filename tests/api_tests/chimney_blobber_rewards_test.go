@@ -214,7 +214,6 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 			queryReward := chimneyClient.GetRewardsByQuery(t, challengeRewardQuery, client.HttpOkStatus)
 			actualChallengeRewardForBlobber := queryReward.TotalReward
-			// totalDelegateReward := queryReward.TotalDelegateReward
 
 			challengesCountQuery := fmt.Sprintf("blobber_id='%s' AND allocation_id='%s'", blobber.ID, allocationID)
 			blobberChallengeCount := chimneyClient.GetChallengesCountByQuery(t, challengesCountQuery, client.HttpOkStatus)
@@ -391,7 +390,6 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			blockRewardQuery := fmt.Sprintf("provider_id = '%s' AND reward_type = %d AND block_number >= %d AND block_number < %d", blobber.ID, BlockRewardBlobber, startBlockRound, endBlockRound)
 			actualBlockRewardForBlobber := chimneyClient.GetRewardsByQuery(t, blockRewardQuery, client.HttpOkStatus)
 			actualBlockReward += actualBlockRewardForBlobber.TotalReward
-			// totalDelegateReward := actualBlockRewardForBlobber.TotalDelegateReward
 
 			t.Log("Blobber ID: ", blobber.ID)
 			t.Log("Expected Block Reward: ", expectedBlobberBlockReward)
