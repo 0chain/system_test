@@ -214,7 +214,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 			queryReward := chimneyClient.GetRewardsByQuery(t, challengeRewardQuery, client.HttpOkStatus)
 			actualChallengeRewardForBlobber := queryReward.TotalReward
-			//totalDelegateReward := queryReward.TotalDelegateReward
+			// totalDelegateReward := queryReward.TotalDelegateReward
 
 			challengesCountQuery := fmt.Sprintf("blobber_id='%s' AND allocation_id='%s'", blobber.ID, allocationID)
 			blobberChallengeCount := chimneyClient.GetChallengesCountByQuery(t, challengesCountQuery, client.HttpOkStatus)
