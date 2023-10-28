@@ -34,10 +34,9 @@ jobs:
           go env
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@fix/chimney-blobber-rewards
+        uses: 0chain/actions/run-system-tests@master
         with:
           repo_snapshots_branch: "current-sprint"
-          system_tests_branch: fix/chimney-blobber-rewards
           network: ${{ inputs.NETWORK_URL }}
           deploy_report_page: true
           archive_results: true
