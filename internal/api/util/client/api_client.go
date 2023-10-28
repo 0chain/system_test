@@ -56,6 +56,7 @@ const (
 	GetLatestFinalizedMagicBlock       = "/v1/block/get/latest_finalized_magic_block"
 	GetLatestFinalizedBlock            = "/v1/block/get/latest_finalized"
 	QueryRewards                       = "/v1/screst/:sc_address/query-rewards"
+	QueryChallengesCount               = "/v1/screst/:sc_address/count-challenges"
 	QueryDelegateRewards               = "/v1/screst/:sc_address/query-delegate-rewards"
 	PartitionSizeFrequency             = "/v1/screst/:sc_address/parition-size-frequency"
 	BlobberPartitionSelectionFrequency = "/v1/screst/:sc_address/blobber-selection-frequency"
@@ -1468,7 +1469,24 @@ func (c *APIClient) GetRewardsByQuery(t *test.SystemTest, query string, required
 
 	queryRewardsResponse, resp, err := c.V1QueryRewards(
 		t,
-		model.QueryRewardsRequest{
+		model.QueryRequest{
+			Query: query,
+		},
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, queryRewardsResponse)
+
+	return queryRewardsResponse
+}
+
+func (c *APIClient) GetChallengesCountByQuery(t *test.SystemTest, query string, requiredStatusCode int) map[string]int64 {
+	t.Log("Get rewards by query...")
+
+	queryRewardsResponse, resp, err := c.V1QueryChallengesCount(
+		t,
+		model.QueryRequest{
 			Query: query,
 		},
 		requiredStatusCode)
@@ -1500,7 +1518,7 @@ func (c *APIClient) GetDelegateRewardsByQuery(t *test.SystemTest, query string, 
 
 	queryRewardsResponse, resp, err := c.V1QueryDelegateRewards(
 		t,
-		model.QueryRewardsRequest{
+		model.QueryRequest{
 			Query: query,
 		},
 		requiredStatusCode)
@@ -2175,7 +2193,25 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 	return blobberObjectTreePathResponse, resp, err
 }
 
-func (c *APIClient) V1QueryRewards(t *test.SystemTest, queryRewardsRequest model.QueryRewardsRequest, requiredStatusCode int) (*model.QueryRewardsResponse, *resty.Response, error) {
+func (c *APIClient) V1QueryChallengesCount(t *test.SystemTest, queryRequest model.QueryRequest, requiredStatusCode int) (map[string]int64, *resty.Response, error) {
+	var queryResponse map[string]int64
+
+	urlBuilder := NewURLBuilder().SetPath(QueryChallengesCount).AddParams("query", url.QueryEscape(queryRequest.Query)).SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &queryResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return queryResponse, resp, err
+}
+
+func (c *APIClient) V1QueryRewards(t *test.SystemTest, queryRewardsRequest model.QueryRequest, requiredStatusCode int) (*model.QueryRewardsResponse, *resty.Response, error) {
 	var queryRewardsResponse *model.QueryRewardsResponse
 
 	urlBuilder := NewURLBuilder().SetPath(QueryRewards).AddParams("query", url.QueryEscape(queryRewardsRequest.Query)).SetPathVariable("sc_address", StorageSmartContractAddress)
@@ -2193,7 +2229,7 @@ func (c *APIClient) V1QueryRewards(t *test.SystemTest, queryRewardsRequest model
 	return queryRewardsResponse, resp, err
 }
 
-func (c *APIClient) V1QueryDelegateRewards(t *test.SystemTest, queryRewardsRequest model.QueryRewardsRequest, requiredStatusCode int) (map[string]int64, *resty.Response, error) {
+func (c *APIClient) V1QueryDelegateRewards(t *test.SystemTest, queryRewardsRequest model.QueryRequest, requiredStatusCode int) (map[string]int64, *resty.Response, error) {
 	var queryRewardsResponse map[string]int64
 
 	urlBuilder := NewURLBuilder().SetPath(QueryDelegateRewards).AddParams("query", url.QueryEscape(queryRewardsRequest.Query)).SetPathVariable("sc_address", StorageSmartContractAddress)
