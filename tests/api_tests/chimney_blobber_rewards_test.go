@@ -137,7 +137,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		actualWritePoolBalance = float64(alloc.WritePool)
 		actualMovedToChallenge = float64(alloc.MovedToChallenge)
 
-		allocDuration := allocExpiredAt - allocCreatedAt - 150
+		allocDuration := allocExpiredAt - allocCreatedAt - 240
 		prevAllocDuration := prevAlloc.Expiration - prevAlloc.StartTime
 		durationInTimeUnits := float64(allocDuration) / float64(prevAllocDuration)
 		t.Logf("Alloc duration: %v", durationInTimeUnits)
