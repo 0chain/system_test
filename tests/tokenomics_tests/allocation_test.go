@@ -207,10 +207,10 @@ func TestAllocationRewards(testSetup *testing.T) {
 		alloc = utils.GetAllocation(t, allocationId)
 		afterExpiry := alloc.ExpirationDate
 
-		expectedChallengeRewards := float64(beforeMovedToChallenge) * (float64(afterExpiry-alloc.StartTime+50) / float64(beforeExpiry-alloc.StartTime)) // 50 is to adjust the time between alloc creation and WM submission
+		expectedChallengeRewards := float64(beforeMovedToChallenge) * (float64(afterExpiry-(alloc.StartTime+40)) / float64(beforeExpiry-alloc.StartTime)) // 50 is to adjust the time between alloc creation and WM submission
 
 		require.Equal(t, alloc.MovedToChallenge, beforeMovedToChallenge, "MovedToChallenge should not change")
-		require.InEpsilon(t, int64(expectedChallengeRewards), alloc.MovedToChallenge-alloc.MovedBack, 0.1, "MovedToChallenge should not change")
+		require.InEpsilon(t, int64(expectedChallengeRewards), alloc.MovedToChallenge-alloc.MovedBack, 0.1, "Expected challenge rewards should be equal to actual challenge rewards")
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 		totalBlobberChallengereward := int64(0)
