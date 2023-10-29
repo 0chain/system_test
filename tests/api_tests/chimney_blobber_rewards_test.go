@@ -86,13 +86,6 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 200, resp.StatusCode())
 
-	t.Cleanup(func() {
-		for _, blobber := range allBlobbers {
-			// unstake tokens from this blobber
-			chimneyClient.UnlockStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus)
-		}
-	})
-
 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 	blobberRequirements.DataShards = 1
 	blobberRequirements.ParityShards = 1
