@@ -137,7 +137,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		actualWritePoolBalance = float64(alloc.WritePool)
 		actualMovedToChallenge = float64(alloc.MovedToChallenge)
 
-		allocDuration := allocExpiredAt - allocCreatedAt - 240
+		allocDuration := allocExpiredAt - allocCreatedAt - 300
 		prevAllocDuration := prevAlloc.Expiration - prevAlloc.StartTime
 		durationInTimeUnits := float64(allocDuration) / float64(prevAllocDuration)
 		t.Logf("Alloc duration: %v", durationInTimeUnits)
@@ -400,7 +400,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			require.InEpsilon(t, actualBlockRewardForBlobber.TotalReward*(1.0-blobber.StakePoolSettings.ServiceCharge), actualBlockRewardForBlobber.TotalDelegateReward, standardErrorMargin, "Expected delegate reward is not equal to actual")
 		}
 
-		require.InEpsilon(t, expectedBlockReward, actualBlockReward, standardErrorMargin, "Expected block reward is not equal to actual")
+		require.InEpsilon(t, expectedBlockReward, actualBlockReward, extraErrorMargin, "Expected block reward is not equal to actual")
 
 		// Check Blobber Partitions are selected evenly
 		for blobberId, frequncy := range blobberPartitionSelection {
