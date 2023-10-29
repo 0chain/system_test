@@ -24,6 +24,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	// Faucet the used wallets
 
+	t.SetSmokeTests("test multi allocation overall graph data")
+
 	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
 	t.Logf("Owner balance: %v", ownerBalance)
 	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
@@ -51,7 +53,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	marker := config.CreateFreeStorageMarker(t, sdkWallet.ToSdkWallet(sdkWalletMnemonics), ownerWallet.ToSdkWallet(ownerWalletMnemonics))
 	t.Logf("Free allocation marker: %v", marker)
 
-	t.RunSequentiallyWithTimeout("test multi allocation overall graph data ( test /v2/graph-allocated-storage )", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test multi allocation overall graph data", 10*time.Minute, func(t *test.SystemTest) {
 		// Get initial total challenge pools
 		PrintBalance(t, ownerWallet, blobberOwnerWallet, sdkWallet)
 		data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
@@ -59,6 +61,25 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 		require.Equal(t, 1, len([]int64(*data)))
 		allocatedStorage := (*data)[0]
+
+		data, resp, err = zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+		require.Equal(t, 1, len([]int64(*data)))
+		totalChallengePools := (*data)[0]
+
+		data, resp, err = zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+		require.Equal(t, 1, len([]int64(*data)))
+		usedStorage := (*data)[0]
+
+		challengeData, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+		require.Equal(t, 1, len([]int64(challengeData.TotalChallenges)))
+		require.Equal(t, 1, len([]int64(challengeData.SuccessfulChallenges)))
+		totalChallenges, _ := challengeData.TotalChallenges[0], challengeData.SuccessfulChallenges[0]
 
 		type GraphAllocTestCase struct {
 			DataShards               int64
@@ -83,6 +104,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 			allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 			allocationIds = append(allocationIds, allocationID)
+			fpath, fsize := sdkClient.UploadFile(t, allocationID)
 
 			wait.PoolImmediately(t, 2*time.Minute, func() bool {
 				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
@@ -99,56 +121,183 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				}
 				return cond
 			})
+
+			// Add blobber to the allocation
+			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+			require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
+			apiClient.UpdateAllocationBlobbers(t, sdkWallet, newBlobberID, "", allocationID, client.TxSuccessfulStatus)
+
+			// Check increased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				allocatedStorageAfter := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := allocatedStorageAfter > allocatedStorage && allocatedStorageAfter == int64(*latest)
+				if cond {
+					allocatedStorage = allocatedStorageAfter
+				}
+				return cond
+			})
+
+			var totalChallengePoolsAfterAllocation int64
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				// Get total challenge pools
+				data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				totalChallengePoolsAfterAllocation = (*data)[0]
+				cond := totalChallengePoolsAfterAllocation == totalChallengePools+1
+				if cond {
+					totalChallengePools = totalChallengePoolsAfterAllocation
+				}
+
+				return cond
+			})
+
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				usedStorageAfter := (*data)[0]
+				cond := (usedStorageAfter - usedStorage) == fsize*2
+
+				if cond {
+					usedStorage = usedStorageAfter
+				}
+				return cond
+			})
+
+			// Update with a bigger file
+			fpath, newFsize := sdkClient.UpdateFileBigger(t, allocationID, fpath, fsize)
+			t.Logf("Filename after update bigger : %v", fpath)
+
+			// Check increased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				usedStorageAfter := (*data)[0]
+				cond := (usedStorageAfter - usedStorage) == (newFsize-fsize)*2
+
+				if cond {
+					usedStorage = usedStorageAfter
+					fsize = newFsize
+				}
+				return cond
+			})
+
+			// Update with a smaller file
+			fpath, newFsize = sdkClient.UpdateFileSmaller(t, allocationID, fpath, newFsize)
+			t.Logf("Filename after update smaller : %v", fpath)
+
+			// Check decreased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				usedStorageAfter := (*data)[0]
+				cond := (usedStorage - usedStorageAfter) == (fsize-newFsize)*2
+
+				if cond {
+					usedStorage = usedStorageAfter
+					fsize = newFsize
+				}
+
+				return cond
+			})
+
+			// Remove a file
+			sdkClient.DeleteFile(t, allocationID, fpath)
+
+			// Check decreased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				usedStorageAfter := (*data)[0]
+				cond := (usedStorage - usedStorageAfter) == fsize*2
+				if cond {
+					usedStorage = usedStorageAfter
+				}
+				return cond
+			})
+
+			// Upload another file
+			_, fsize = sdkClient.UploadFile(t, allocationID)
+
+			// Check increased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				usedStorageAfter := (*data)[0]
+				cond := (usedStorageAfter - usedStorage) == fsize*2
+				if cond {
+					usedStorage = usedStorageAfter
+				}
+				return cond
+			})
+
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(data.TotalChallenges)))
+				totalChallengesAfter := data.TotalChallenges[0]
+				successfulChallengesAfter := data.SuccessfulChallenges[0]
+				latestTotal, resp, err := zboxClient.GetTotalChallenges(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				latestSuccessful, resp, err := zboxClient.GetSuccessfulChallenges(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := totalChallengesAfter > totalChallenges && int64(*latestTotal) == totalChallengesAfter && int64(*latestSuccessful) == successfulChallengesAfter
+				if cond {
+					totalChallenges = totalChallengesAfter
+				}
+
+				return cond
+			})
 		}
 
-		// Add blobber to the allocation
-		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
-		apiClient.UpdateAllocationBlobbers(t, sdkWallet, newBlobberID, "", allocationID, client.TxSuccessfulStatus)
+		for _, allocationID := range allocationIds {
+			apiClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 
-		// Check increased
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			allocatedStorageAfter := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := allocatedStorageAfter > allocatedStorage && allocatedStorageAfter == int64(*latest)
-			if cond {
+			// Check decreased + consistency
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				allocatedStorageAfter := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := (allocatedStorageAfter == allocatedStorage) && (allocatedStorageAfter == int64(*latest)) //nolint
 				allocatedStorage = allocatedStorageAfter
-			}
-			return cond
-		})
 
-		// Cancel allocation
-		apiClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
+				// get all blobbers
+				allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				expectedAllocatedStorage := calculateExpectedAllocated(allBlobbers)
+				cond = cond && (allocatedStorageAfter == expectedAllocatedStorage)
 
-		// Check decreased + consistency
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			allocatedStorageAfter := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := (allocatedStorageAfter == allocatedStorage) && (allocatedStorageAfter == int64(*latest)) //nolint
-			allocatedStorage = allocatedStorageAfter
-
-			// get all blobbers
-			allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			expectedAllocatedStorage := calculateExpectedAllocated(allBlobbers)
-			cond = cond && (allocatedStorageAfter == expectedAllocatedStorage)
-
-			return cond
-		})
+				return cond
+			})
+		}
 	})
 
 	t.Skip()
