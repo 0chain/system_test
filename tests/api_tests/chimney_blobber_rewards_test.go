@@ -79,7 +79,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 	for _, blobber := range allBlobbers {
 		// stake tokens to this blobber
-		chimneyClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus)
+		chimneyClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus, 20.0)
 	}
 
 	allBlobbers, resp, err = chimneyClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
