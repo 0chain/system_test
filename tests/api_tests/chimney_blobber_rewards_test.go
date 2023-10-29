@@ -273,7 +273,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		require.InEpsilon(t, afterWallet.Balance-beforeWallet.Balance, expectedWritePoolBalance, extraErrorMargin, "Expected write pool balance is not equal to actual")
 
 		// Compare Write Pool Balance
-		require.InEpsilon(t, 0, actualWritePoolBalance, standardErrorMargin, "Expected write pool balance is not equal to actual")
+		require.Equal(t, 0, actualWritePoolBalance, "Writepool should be 0")
 	})
 
 	t.RunWithTimeout("Block Rewards", 1*time.Hour, func(t *test.SystemTest) {
