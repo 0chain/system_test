@@ -215,7 +215,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 
 		require.Equal(t, alloc.MovedToChallenge, beforeMovedToChallenge, "MovedToChallenge should not change")
 
-		expectedChallengeRewards := float64(beforeMovedToChallenge) * (float64(afterExpiry-(alloc.StartTime+50)) / float64(beforeExpiry-(alloc.StartTime+50))) // 50 is to adjust the time between alloc creation and WM submission
+		expectedChallengeRewards := float64(beforeMovedToChallenge) * (float64(afterExpiry-alloc.StartTime) / float64(beforeExpiry-alloc.StartTime))
 
 		require.Equal(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, "Total Blobber Challenge Reward should be less than MovedToChallenge")
 		require.InEpsilon(t, int64(expectedChallengeRewards), totalBlobberChallengereward, 0.1, "Expected challenge rewards should be equal to actual challenge rewards")

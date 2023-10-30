@@ -122,6 +122,8 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 	chimneyClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 
+	endBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
+
 	time.Sleep(2 * time.Minute)
 
 	alloc := chimneyClient.GetAllocation(t, allocationID, client.HttpOkStatus)
@@ -129,8 +131,6 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	require.Equal(t, true, alloc.Finalized, "Allocation should be finalized")
 
 	alloc.Blobbers = prevAlloc.Blobbers
-
-	endBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
 
 	t.RunWithTimeout("Challenge Rewards", 1*time.Hour, func(t *test.SystemTest) {
 		allocCreatedAt = alloc.StartTime
