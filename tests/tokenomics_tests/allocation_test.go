@@ -192,7 +192,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		time.Sleep(30 * time.Second)
+		time.Sleep(2 * time.Minute)
 
 		alloc := utils.GetAllocation(t, allocationId)
 		beforeExpiry := alloc.ExpirationDate
@@ -201,16 +201,11 @@ func TestAllocationRewards(testSetup *testing.T) {
 		_, err = utils.CancelAllocation(t, configPath, allocationId, true)
 		require.Nil(t, err, "Error canceling allocation", strings.Join(output, "\n"))
 
-		// sleep for 10 seconds
-		time.Sleep(2 * time.Minute)
+		// sleep for 30 seconds
+		time.Sleep(30 * time.Second)
 
 		alloc = utils.GetAllocation(t, allocationId)
 		afterExpiry := alloc.ExpirationDate
-
-		expectedChallengeRewards := float64(beforeMovedToChallenge) * (float64(afterExpiry-alloc.StartTime+50) / float64(beforeExpiry-alloc.StartTime)) // 50 is to adjust the time between alloc creation and WM submission
-
-		require.Equal(t, alloc.MovedToChallenge, beforeMovedToChallenge, "MovedToChallenge should not change")
-		require.InEpsilon(t, int64(expectedChallengeRewards), alloc.MovedToChallenge-alloc.MovedBack, 0.1, "MovedToChallenge should not change")
 
 		rewards := getTotalAllocationChallengeRewards(t, allocationId)
 		totalBlobberChallengereward := int64(0)
@@ -218,7 +213,12 @@ func TestAllocationRewards(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.InEpsilon(t, beforeMovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, 0.05, "Total Blobber Challenge Reward should be less than MovedToChallenge")
+		require.Equal(t, alloc.MovedToChallenge, beforeMovedToChallenge, "MovedToChallenge should not change")
+
+		expectedChallengeRewards := float64(beforeMovedToChallenge) * (float64(afterExpiry-(alloc.StartTime+50)) / float64(beforeExpiry-(alloc.StartTime+50))) // 50 is to adjust the time between alloc creation and WM submission
+
+		require.Equal(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, "Total Blobber Challenge Reward should be less than MovedToChallenge")
+		require.InEpsilon(t, int64(expectedChallengeRewards), totalBlobberChallengereward, 0.1, "Expected challenge rewards should be equal to actual challenge rewards")
 
 		// cancelation Rewards
 		alloccancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
@@ -236,8 +236,9 @@ func TestAllocationRewards(testSetup *testing.T) {
 		t.Log("blobber1cancelationReward", blobber1cancelationReward)
 		t.Log("blobber2cancelationReward", blobber2cancelationReward)
 
-		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
-		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
+		require.Equal(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), "Total cancelation Reward should be equal to total expected cancelation reward")
+		require.Equal(t, blobber1cancelationReward, blobber1cancelationReward, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
+		require.Equal(t, blobber1cancelationReward, blobber2cancelationReward, "Blobber 2 cancelation Reward should be equal to total expected cancelation reward")
 	})
 
 	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", 1*time.Hour, func(t *test.SystemTest) {
