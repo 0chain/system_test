@@ -237,9 +237,9 @@ func TestAllocationRewards(testSetup *testing.T) {
 		t.Log("blobber1cancelationReward", blobber1cancelationReward)
 		t.Log("blobber2cancelationReward", blobber2cancelationReward)
 
-		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
-		require.InEpsilon(t, blobber1cancelationReward, blobber1cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
-		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 2 cancelation Reward should be equal to total expected cancelation reward")
+		require.Equal(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), "Total cancelation Reward should be equal to total expected cancelation reward")
+		require.Equal(t, blobber1cancelationReward, blobber1cancelationReward, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
+		require.Equal(t, blobber1cancelationReward, blobber2cancelationReward, "Blobber 2 cancelation Reward should be equal to total expected cancelation reward")
 	})
 
 	t.Skip()
