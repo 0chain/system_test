@@ -75,7 +75,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 	}, 1)
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", 1*time.Hour, func(t *test.SystemTest) {
-		t.Skip()
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -241,8 +240,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Equal(t, blobber1cancelationReward, blobber1cancelationReward, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 		require.Equal(t, blobber1cancelationReward, blobber2cancelationReward, "Blobber 2 cancelation Reward should be equal to total expected cancelation reward")
 	})
-
-	t.Skip()
 
 	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", 1*time.Hour, func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
