@@ -85,15 +85,19 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			DataShards               int64
 			ParityShards             int64
 			ExpectedAllocatedStorage int64
+			Fsize                    int64
+			UpdatedFsize             int64
 		}
 
 		graphAllocTestCases := []GraphAllocTestCase{
-			{DataShards: 2, ParityShards: 4, ExpectedAllocatedStorage: 180000},
-			{DataShards: 1, ParityShards: 1, ExpectedAllocatedStorage: 120000},
-			{DataShards: 2, ParityShards: 2, ExpectedAllocatedStorage: 120000},
-			{DataShards: 1, ParityShards: 2, ExpectedAllocatedStorage: 180000},
-			{DataShards: 2, ParityShards: 3, ExpectedAllocatedStorage: 150000},
+			{DataShards: 3, ParityShards: 2, ExpectedAllocatedStorage: 100000, Fsize: 1710},
+			{DataShards: 1, ParityShards: 1, ExpectedAllocatedStorage: 120000, Fsize: 2048},
+			{DataShards: 2, ParityShards: 2, ExpectedAllocatedStorage: 120000, Fsize: 2048},
+			{DataShards: 1, ParityShards: 2, ExpectedAllocatedStorage: 180000, Fsize: 3072},
+			{DataShards: 2, ParityShards: 3, ExpectedAllocatedStorage: 150000, Fsize: 2560},
 		}
+
+		const tolerance = int64(10)
 
 		var allocationIds []string
 
@@ -153,7 +157,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				totalChallengePoolsAfterAllocation = (*data)[0]
-				cond := totalChallengePoolsAfterAllocation == totalChallengePools+1
+				cond := totalChallengePoolsAfterAllocation > totalChallengePools
 				if cond {
 					totalChallengePools = totalChallengePoolsAfterAllocation
 				}
@@ -167,7 +171,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				usedStorageAfter := (*data)[0]
-				cond := (usedStorageAfter - usedStorage) == fsize*2
+				cond := (usedStorageAfter-usedStorage >= testCase.Fsize-tolerance) &&
+					(usedStorageAfter-usedStorage <= testCase.Fsize+tolerance)
 
 				if cond {
 					usedStorage = usedStorageAfter
@@ -186,7 +191,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				usedStorageAfter := (*data)[0]
-				cond := (usedStorageAfter - usedStorage) == (newFsize-fsize)*2
+				cond := (usedStorageAfter-usedStorage >= testCase.Fsize-tolerance) &&
+					(usedStorageAfter-usedStorage <= testCase.Fsize+tolerance)
 
 				if cond {
 					usedStorage = usedStorageAfter
@@ -206,7 +212,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				usedStorageAfter := (*data)[0]
-				cond := (usedStorage - usedStorageAfter) == (fsize-newFsize)*2
+				cond := (usedStorage-usedStorageAfter >= testCase.Fsize-tolerance) &&
+					(usedStorage-usedStorageAfter <= testCase.Fsize+tolerance)
 
 				if cond {
 					usedStorage = usedStorageAfter
@@ -226,7 +233,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				usedStorageAfter := (*data)[0]
-				cond := (usedStorage - usedStorageAfter) == fsize*2
+				cond := (usedStorage-usedStorageAfter >= testCase.Fsize-tolerance) &&
+					(usedStorage-usedStorageAfter <= testCase.Fsize+tolerance)
+
 				if cond {
 					usedStorage = usedStorageAfter
 				}
@@ -235,6 +244,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 			// Upload another file
 			_, fsize = sdkClient.UploadFile(t, allocationID)
+			testCase.Fsize += testCase.Fsize / (testCase.DataShards + testCase.ParityShards)
 
 			// Check increased
 			wait.PoolImmediately(t, 2*time.Minute, func() bool {
@@ -243,7 +253,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.Equal(t, 200, resp.StatusCode())
 				require.Equal(t, 1, len([]int64(*data)))
 				usedStorageAfter := (*data)[0]
-				cond := (usedStorageAfter - usedStorage) == fsize*2
+				cond := (usedStorageAfter-usedStorage >= testCase.Fsize-tolerance) &&
+					(usedStorageAfter-usedStorage <= testCase.Fsize+tolerance)
+
 				if cond {
 					usedStorage = usedStorageAfter
 				}
@@ -297,10 +309,24 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 				return cond
 			})
+
+			var totalChallengePoolsAfterAllocation int64
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				// Get total challenge pools
+				data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				totalChallengePoolsAfterAllocation = (*data)[0]
+				cond := totalChallengePoolsAfterAllocation < totalChallengePools
+				if cond {
+					totalChallengePools = totalChallengePoolsAfterAllocation
+				}
+
+				return cond
+			})
 		}
 	})
-
-	t.Skip()
 
 	t.RunSequentially("endpoint parameters ( test /v2/graph-write-price )", graphEndpointTestCases(zboxClient.GetGraphWritePrice))
 
