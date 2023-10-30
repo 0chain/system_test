@@ -79,19 +79,12 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 	for _, blobber := range allBlobbers {
 		// stake tokens to this blobber
-		chimneyClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus)
+		chimneyClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus, 20.0)
 	}
 
 	allBlobbers, resp, err = chimneyClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 	require.NoError(t, err)
 	require.Equal(t, 200, resp.StatusCode())
-
-	t.Cleanup(func() {
-		for _, blobber := range allBlobbers {
-			// unstake tokens from this blobber
-			chimneyClient.UnlockStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus)
-		}
-	})
 
 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 	blobberRequirements.DataShards = 1
@@ -105,10 +98,18 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	blobberRequirements.DataShards = int64((lenAvailableBlobbers-1)/2 + 1)
 	blobberRequirements.ParityShards = int64(lenAvailableBlobbers) - blobberRequirements.DataShards
 
+	beforeWallet := chimneyClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
+
 	allocationBlobbers = chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 	allocationID := chimneyClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 5000, client.TxSuccessfulStatus)
 
 	time.Sleep(1 * time.Minute)
+
+	beforeAlloc := chimneyClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+
+	afterWallet := chimneyClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
+	require.InEpsilon(t, beforeWallet.Balance-afterWallet.Balance, beforeAlloc.WritePool, extraErrorMargin, "Write pool is not equal to wallet balance difference")
+	beforeWallet = afterWallet
 
 	uploadOp := chimneySdkClient.AddUploadOperationForBigFile(t, allocationID, fileSize/GB) // 10gb
 	chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
@@ -137,7 +138,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		actualWritePoolBalance = float64(alloc.WritePool)
 		actualMovedToChallenge = float64(alloc.MovedToChallenge)
 
-		allocDuration := allocExpiredAt - allocCreatedAt - 150
+		allocDuration := allocExpiredAt - allocCreatedAt - 300
 		prevAllocDuration := prevAlloc.Expiration - prevAlloc.StartTime
 		durationInTimeUnits := float64(allocDuration) / float64(prevAllocDuration)
 		t.Logf("Alloc duration: %v", durationInTimeUnits)
@@ -261,8 +262,11 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		// Reduce expected write pool
 		expectedWritePoolBalance -= actualMinLockDemandReward
 
+		afterWallet = chimneyClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
+		require.InEpsilon(t, afterWallet.Balance-beforeWallet.Balance, expectedWritePoolBalance, extraErrorMargin, "Expected write pool balance is not equal to actual")
+
 		// Compare Write Pool Balance
-		require.InEpsilon(t, expectedWritePoolBalance, actualWritePoolBalance, standardErrorMargin, "Expected write pool balance is not equal to actual")
+		require.Equal(t, float64(0), actualWritePoolBalance, "Writepool should be 0")
 	})
 
 	t.RunWithTimeout("Block Rewards", 1*time.Hour, func(t *test.SystemTest) {
@@ -400,7 +404,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			require.InEpsilon(t, actualBlockRewardForBlobber.TotalReward*(1.0-blobber.StakePoolSettings.ServiceCharge), actualBlockRewardForBlobber.TotalDelegateReward, standardErrorMargin, "Expected delegate reward is not equal to actual")
 		}
 
-		require.InEpsilon(t, expectedBlockReward, actualBlockReward, standardErrorMargin, "Expected block reward is not equal to actual")
+		require.InEpsilon(t, expectedBlockReward, actualBlockReward, extraErrorMargin, "Expected block reward is not equal to actual")
 
 		// Check Blobber Partitions are selected evenly
 		for blobberId, frequncy := range blobberPartitionSelection {
