@@ -43,11 +43,33 @@ func SetupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, ex
 	return allocationID
 }
 
-func ReadPoolLock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
-	return readPoolLockWithWallet(t, EscapedTestName(t), cliConfigFilename, params, retry)
+func SetupAllocationAndReadLockForWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParam map[string]interface{}) string {
+	tokens := float64(1)
+	if tok, ok := extraParam["tokens"]; ok {
+		token, err := strconv.ParseFloat(fmt.Sprintf("%v", tok), 64)
+		require.Nil(t, err)
+		tokens = token
+	}
+
+	allocationID := setupAllocationWithWallet(t, walletName, cliConfigFilename, extraParam)
+
+	// Lock half the tokens for read pool
+	readPoolParams := CreateParams(map[string]interface{}{
+		"tokens": tokens / 2,
+	})
+	output, err := ReadPoolLockWithWallet(t, walletName, cliConfigFilename, readPoolParams, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+	require.Equal(t, "locked", output[0])
+
+	return allocationID
 }
 
-func readPoolLockWithWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
+func ReadPoolLock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return ReadPoolLockWithWallet(t, EscapedTestName(t), cliConfigFilename, params, retry)
+}
+
+func ReadPoolLockWithWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Locking read tokens...")
 	cmd := fmt.Sprintf("./zbox rp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
 	if retry {
@@ -106,10 +128,10 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 }
 
 func DownloadFile(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
-	return downloadFileForWallet(t, EscapedTestName(t), cliConfigFilename, param, retry)
+	return DownloadFileForWallet(t, EscapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func downloadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
+func DownloadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename, param string, retry bool) ([]string, error) {
 	cliutils.Wait(t, 15*time.Second) // TODO replace with pollers
 	t.Logf("Downloading file...")
 	cmd := fmt.Sprintf(
@@ -183,10 +205,10 @@ func GetAllocationID(str string) (string, error) {
 }
 
 func UploadFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
-	return uploadFileForWallet(t, EscapedTestName(t), cliConfigFilename, param, retry)
+	return UploadFileForWallet(t, EscapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func uploadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+func UploadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Uploading file...")
 
 	p := CreateParams(param)
