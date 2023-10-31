@@ -119,7 +119,9 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
-				cond := allocatedStorageAfterAllocation == allocatedStorage+testCase.ExpectedAllocatedStorage && allocatedStorageAfterAllocation == int64(*latest)
+				expectedTotalAllocationStorage := allocatedStorage + testCase.ExpectedAllocatedStorage
+				cond := allocatedStorageAfterAllocation == expectedTotalAllocationStorage
+				cond = cond && (allocatedStorageAfterAllocation == int64(*latest))
 				if cond {
 					allocatedStorage = allocatedStorageAfterAllocation
 				}
