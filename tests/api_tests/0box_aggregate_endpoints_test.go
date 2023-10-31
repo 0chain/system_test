@@ -101,7 +101,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 		var allocationIds []string
 
-		for _, testCase := range graphAllocTestCases {
+		for i, testCase := range graphAllocTestCases {
 			blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 			blobberRequirements.DataShards = testCase.DataShards
 			blobberRequirements.ParityShards = testCase.ParityShards
@@ -245,6 +245,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			// Upload another file
 			_, fsize = sdkClient.UploadFile(t, allocationID)
 			testCase.Fsize += testCase.Fsize / (testCase.DataShards + testCase.ParityShards)
+			graphAllocTestCases[i].Fsize = testCase.Fsize
 
 			// Check increased
 			wait.PoolImmediately(t, 2*time.Minute, func() bool {
