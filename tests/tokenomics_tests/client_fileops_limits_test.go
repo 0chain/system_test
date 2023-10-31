@@ -2,20 +2,20 @@ package tokenomics_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/test"
-	climodel "github.com/0chain/system_test/internal/cli/model"
-	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
+	"github.com/stretchr/testify/require"
 )
 
 const (
 	downloadLimits = 102400 // 100KB
-	uploadLimits   = 102400 // 100KB
 )
 
 func TestClientThrottling(testSetup *testing.T) {
@@ -138,7 +138,7 @@ func TestClientThrottling(testSetup *testing.T) {
 		err = utils.CreateFileWithSize(filename, int64(filesize))
 		require.Nil(t, err)
 
-		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
@@ -187,7 +187,7 @@ func TestClientThrottling(testSetup *testing.T) {
 			err = os.Remove(filename)
 			require.Nil(t, err)
 
-			output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+			_, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
 				"allocation": allocationId,
 				"remotepath": remoteFilepath,
 				"localpath":  os.TempDir() + string(os.PathSeparator),
@@ -198,7 +198,7 @@ func TestClientThrottling(testSetup *testing.T) {
 
 		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
 
-		output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+		_, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
 			"allocation": allocationId,
 			"remotepath": remoteFilepath,
 			"localpath":  os.TempDir() + string(os.PathSeparator),
@@ -233,7 +233,7 @@ func TestClientThrottling(testSetup *testing.T) {
 		err = utils.CreateFileWithSize(filename, int64(filesize))
 		require.Nil(t, err)
 
-		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
