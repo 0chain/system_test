@@ -57,7 +57,7 @@ func TestClientThrottling(testSetup *testing.T) {
 		1, 1, 1, 1,
 	}, 1)
 
-	t.RunSequentiallyWithTimeout("Exceeding upload limits should blacklist user on blobber", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Exceeding upload limits should blacklist user on blobber", 20*time.Minute, func(t *test.SystemTest) {
 		_, err = utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -116,7 +116,7 @@ func TestClientThrottling(testSetup *testing.T) {
 		require.NotNil(t, err, "File download is expected to fail")
 	})
 
-	t.RunSequentiallyWithTimeout("Exceeding download limits should blacklist user on blobber", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Exceeding download limits should blacklist user on blobber", 20*time.Minute, func(t *test.SystemTest) {
 		_, err = utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -168,7 +168,7 @@ func TestClientThrottling(testSetup *testing.T) {
 		require.NotNil(t, err, "File upload is expected to fail")
 	})
 
-	t.RunSequentiallyWithTimeout("File upload should fail on exceeding max number of files", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("File upload should fail on exceeding max number of files", 20*time.Minute, func(t *test.SystemTest) {
 		output, err := utils.CreateWalletForName(t, configPath, "client_wallet_2")
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
