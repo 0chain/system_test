@@ -88,7 +88,7 @@ func TestMaxFileSize(testSetup *testing.T) {
 		err = utils.CreateFileWithSize(filename, int64(filesize))
 		require.Nil(t, err)
 
-		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
+		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
