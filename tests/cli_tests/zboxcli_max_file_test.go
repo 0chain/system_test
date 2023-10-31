@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestMaxFileSize(testSetup *testing.T) {
@@ -17,6 +18,8 @@ func TestMaxFileSize(testSetup *testing.T) {
 			"max_file_size": "1024",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
+
+		time.Sleep(2 * time.Minute) // Wait for config to take effect on blobber
 	})
 
 	t.Cleanup(func() {
