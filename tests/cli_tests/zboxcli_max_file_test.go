@@ -1,13 +1,14 @@
 package cli_tests
 
 import (
-	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
-	"github.com/stretchr/testify/require"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMaxFileSize(testSetup *testing.T) {
