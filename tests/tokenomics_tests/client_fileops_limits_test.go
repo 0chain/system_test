@@ -114,7 +114,7 @@ func TestClientThrottling(testSetup *testing.T) {
 		totalDownloadedDataPerBlobber += 1024
 	})
 
-	t.RunSequentially("Upload limits should not allow upload blocks more than limits", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Upload limits should not allow upload blocks more than limits", 10*time.Minute, func(t *test.SystemTest) {
 		// Max upload blocks set in config is 6400KB
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -146,7 +146,7 @@ func TestClientThrottling(testSetup *testing.T) {
 		require.NotNil(t, err, "File upload is expected to fail")
 	})
 
-	t.RunSequentially("Upload and download limits should allow blocks less than limits", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Upload and download limits should allow blocks less than limits", 10*time.Minute, func(t *test.SystemTest) {
 		// Max upload blocks set in config is 6400KB
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -206,7 +206,7 @@ func TestClientThrottling(testSetup *testing.T) {
 		require.NotNil(t, err, "File download is expected to fail")
 	})
 
-	t.RunSequentially("File upload should fail on exceeding max number of files", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("File upload should fail on exceeding max number of files", 10*time.Minute, func(t *test.SystemTest) {
 		// Max upload blocks set in config is 6400KB
 
 		output, err := utils.CreateWallet(t, configPath)
