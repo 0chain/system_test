@@ -57,22 +57,39 @@ func TestClientThrottling(testSetup *testing.T) {
 		1, 1, 1, 1,
 	}, 1)
 
-	walletName := "client_wallet_1"
-
-	t.RunSequentiallyWithTimeout("Upload and download limits should allow blocks less than limits", 10*time.Minute, func(t *test.SystemTest) {
-		output, err := utils.CreateWalletForName(t, configPath, walletName)
+	t.RunSequentiallyWithTimeout("Exceeding upload limits should blacklist user on blobber", 10*time.Minute, func(t *test.SystemTest) {
+		_, err = utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokensForWallet(t, walletName, configPath, 9)
-		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
-
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		allocationId := utils.SetupAllocationAndReadLockForWallet(t, walletName, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 1,
 			"data":   1,
 			"parity": 1,
 		})
+
+		var successfullyUploadedFileName string
+
+		for i := 0; i < 2; i++ {
+			remotepath := "/dir/"
+			filesize := 64 * KB
+			filename := utils.GenerateRandomTestFileName(t)
+
+			err = utils.CreateFileWithSize(filename, int64(filesize))
+			require.Nil(t, err)
+
+			_, err = utils.UploadFile(t, configPath, map[string]interface{}{
+				"allocation": allocationId,
+				"remotepath": remotepath + filepath.Base(filename),
+				"localpath":  filename,
+			}, false)
+			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+			successfullyUploadedFileName = filename
+		}
+
+		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
 
 		remotepath := "/dir/"
 		filesize := 64 * KB
@@ -81,103 +98,67 @@ func TestClientThrottling(testSetup *testing.T) {
 		err = utils.CreateFileWithSize(filename, int64(filesize))
 		require.Nil(t, err)
 
-		output, err = utils.UploadFileForWallet(t, walletName, configPath, map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
-		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
-
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
-		remoteFilepath := remotepath + filepath.Base(filename)
-
-		output, err = utils.DownloadFileForWallet(t, walletName, configPath, utils.CreateParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remoteFilepath,
-			"localpath":  os.TempDir() + string(os.PathSeparator),
-		}), true)
-		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-	})
-
-	t.RunSequentiallyWithTimeout("Download should fail on exceeding block limits", 10*time.Minute, func(t *test.SystemTest) {
-		_, err = utils.ExecuteFaucetWithTokensForWallet(t, walletName, configPath, 9)
-		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
-
-		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		allocationId := utils.SetupAllocationAndReadLockForWallet(t, walletName, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 1,
-			"data":   1,
-			"parity": 1,
-		})
-
-		remotepath := "/dir/"
-		filesize := 64 * KB
-		filename := utils.GenerateRandomTestFileName(t)
-
-		err = utils.CreateFileWithSize(filename, int64(filesize))
-		require.Nil(t, err)
-
-		output, err = utils.UploadFileForWallet(t, walletName, configPath, map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
-		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
-
-		remoteFilepath := remotepath + filepath.Base(filename)
-
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
-		_, err = utils.DownloadFileForWallet(t, walletName, configPath, utils.CreateParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remoteFilepath,
-			"localpath":  os.TempDir() + string(os.PathSeparator),
-		}), true)
-		require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-
-		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
-
-		_, err = utils.DownloadFileForWallet(t, walletName, configPath, utils.CreateParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remoteFilepath,
-			"localpath":  os.TempDir() + string(os.PathSeparator),
-		}), false)
-		require.NotNil(t, err, "File download is expected to fail")
-	})
-
-	t.RunSequentiallyWithTimeout("Upload limits should not allow upload blocks more than limits", 10*time.Minute, func(t *test.SystemTest) {
-		_, err = utils.ExecuteFaucetWithTokensForWallet(t, walletName, configPath, 9)
-		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
-
-		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		allocationId := utils.SetupAllocationAndReadLockForWallet(t, walletName, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 1,
-			"data":   1,
-			"parity": 1,
-		})
-
-		remotepath := "/dir/"
-		filesize := 64 * KB
-		filename := utils.GenerateRandomTestFileName(t)
-
-		err = utils.CreateFileWithSize(filename, int64(filesize))
-		require.Nil(t, err)
-
-		_, err = utils.UploadFileForWallet(t, walletName, configPath, map[string]interface{}{
+		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, "File upload is expected to fail")
+
+		err = os.Remove(successfullyUploadedFileName)
+		require.Nil(t, err)
+
+		_, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(successfullyUploadedFileName),
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), false)
+		require.NotNil(t, err, "File download is expected to fail")
+	})
+
+	t.RunSequentiallyWithTimeout("Exceeding download limits should blacklist user on blobber", 10*time.Minute, func(t *test.SystemTest) {
+		_, err = utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   10 * MB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+		})
+
+		remotepath := "/dir/"
+		filesize := 64 * KB
+		filename := utils.GenerateRandomTestFileName(t)
+
+		err = utils.CreateFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, false)
+		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
+
+		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
+
+		for i := 0; i < 2; i++ {
+			_, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+				"allocation": allocationId,
+				"remotepath": remotepath + filepath.Base(filename),
+				"localpath":  os.TempDir() + string(os.PathSeparator),
+			}), false)
+			require.Nil(t, err, "File download is expected to succeed")
+		}
+
+		_, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  os.TempDir() + string(os.PathSeparator),
+		}), false)
+		require.NotNil(t, err, "File download is expected to fail")
 	})
 
 	t.RunSequentiallyWithTimeout("File upload should fail on exceeding max number of files", 10*time.Minute, func(t *test.SystemTest) {
