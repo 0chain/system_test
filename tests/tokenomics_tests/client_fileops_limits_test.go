@@ -145,12 +145,12 @@ func TestClientThrottling(testSetup *testing.T) {
 		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
 
 		for i := 0; i < 2; i++ {
-			_, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
+			output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
 				"allocation": allocationId,
 				"remotepath": remotepath + filepath.Base(filename),
 				"localpath":  os.TempDir() + string(os.PathSeparator),
 			}), false)
-			require.Nil(t, err, "File download is expected to succeed")
+			require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 		}
 
 		_, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
@@ -158,14 +158,14 @@ func TestClientThrottling(testSetup *testing.T) {
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  os.TempDir() + string(os.PathSeparator),
 		}), false)
-		require.NotNil(t, err, "File download is expected to fail")
+		require.NotNil(t, err, "File download is expected to fail but succeeded")
 
 		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
 		}, false)
-		require.NotNil(t, err, "File upload is expected to fail")
+		require.NotNil(t, err, "File upload is expected to fail but succeeded")
 	})
 
 	t.RunWithTimeout("File upload should fail on exceeding max number of files", 20*time.Minute, func(t *test.SystemTest) {
@@ -194,12 +194,12 @@ func TestClientThrottling(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		for i := 0; i < 3; i++ {
-			_, err = utils.UploadFile(t, configPath, map[string]interface{}{
+			output, err = utils.UploadFile(t, configPath, map[string]interface{}{
 				"allocation": allocationId,
 				"remotepath": remotepath + filepath.Base(filename),
 				"localpath":  filename,
 			}, false)
-			require.Nil(t, err, "File upload is expected to succeed")
+			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 		}
 
 		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
