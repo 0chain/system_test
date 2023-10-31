@@ -68,7 +68,7 @@ func TestClientThrottling(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Upload and download limits should allow blocks less than limits", 10*time.Minute, func(t *test.SystemTest) {
 		// Max upload blocks set in config is 6400KB
 
-		output, err := utils.CreateWallet(t, configPath)
+		output, err := utils.CreateWalletForName(t, configPath, "client_wallet_1")
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
@@ -117,7 +117,7 @@ func TestClientThrottling(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Upload and download limits should allow blocks less than limits", 10*time.Minute, func(t *test.SystemTest) {
 		// Max upload blocks set in config is 6400KB
 
-		output, err := utils.CreateWallet(t, configPath)
+		output, err := utils.CreateWalletForName(t, configPath, "client_wallet_1")
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
@@ -177,7 +177,7 @@ func TestClientThrottling(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("File upload should fail on exceeding max number of files", 10*time.Minute, func(t *test.SystemTest) {
 		// Max upload blocks set in config is 6400KB
 
-		output, err := utils.CreateWallet(t, configPath)
+		output, err := utils.CreateWalletForName(t, configPath, "client_wallet_1")
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
@@ -212,7 +212,7 @@ func TestClientThrottling(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Upload limits should not allow upload blocks more than limits", 10*time.Minute, func(t *test.SystemTest) {
 		// Max upload blocks set in config is 6400KB
 
-		output, err := utils.CreateWallet(t, configPath)
+		output, err := utils.CreateWalletForName(t, configPath, "client_wallet_1")
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
