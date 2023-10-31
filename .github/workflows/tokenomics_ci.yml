@@ -64,7 +64,7 @@ jobs:
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ secrets.TENDERLY_FORK_ID }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
-      - name: "Run Min Stake System tests"
+      - name: "Run Client throttling tests "
         uses: 0chain/actions/run-system-tests-tokenomics@feature/max-file-size
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
