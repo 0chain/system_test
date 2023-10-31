@@ -142,7 +142,7 @@ func TestClientThrottling(testSetup *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
-		}, true)
+		}, false)
 		require.NotNil(t, err, "File upload is expected to fail")
 	})
 
@@ -202,7 +202,7 @@ func TestClientThrottling(testSetup *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remoteFilepath,
 			"localpath":  os.TempDir() + string(os.PathSeparator),
-		}), true)
+		}), false)
 		require.NotNil(t, err, "File download is expected to fail")
 	})
 
@@ -237,7 +237,7 @@ func TestClientThrottling(testSetup *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
-		}, true)
+		}, false)
 		require.NotNil(t, err, "File upload is expected to fail as we already uploaded max files allowed")
 	})
 }
