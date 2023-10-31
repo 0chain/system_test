@@ -189,15 +189,11 @@ func TestClientThrottling(testSetup *testing.T) {
 		}, false)
 		require.NotNil(t, err, "File upload is expected to fail")
 	})
-}
-
-func TestMaxFilesPerAllocation(testSetup *testing.T) {
-	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentiallyWithTimeout("File upload should fail on exceeding max number of files", 10*time.Minute, func(t *test.SystemTest) {
 		// Max upload blocks set in config is 6400KB
 
-		output, err := utils.CreateWalletForName(t, configPath, "client_wallet_1")
+		output, err := utils.CreateWalletForName(t, configPath, "client_wallet_2")
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
@@ -220,6 +216,15 @@ func TestMaxFilesPerAllocation(testSetup *testing.T) {
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
 		require.Nil(t, err)
+
+		for i := 0; i < 4; i++ {
+			_, err = utils.UploadFile(t, configPath, map[string]interface{}{
+				"allocation": allocationId,
+				"remotepath": remotepath + filepath.Base(filename),
+				"localpath":  filename,
+			}, false)
+			require.Nil(t, err, "File upload is expected to succeed")
+		}
 
 		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
