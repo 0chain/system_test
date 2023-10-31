@@ -34,8 +34,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	ownerWallet.Nonce = int(ownerBalance.Nonce)
 	blobberOwnerWallet.Nonce = int(blobberOwnerBalance.Nonce)
 
-	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 1800, client.TxSuccessfulStatus) // 18 * 50 * 1e10
-	apiClient.ExecuteFaucetWithTokens(t, blobberOwnerWallet, 1800, client.TxSuccessfulStatus)
+	apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 3000, client.TxSuccessfulStatus) // 18 * 50 * 1e10
+	apiClient.ExecuteFaucetWithTokens(t, blobberOwnerWallet, 3000, client.TxSuccessfulStatus)
 
 	// Stake 6 blobbers, each with 1 token
 	targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 6, client.HttpOkStatus)
@@ -43,7 +43,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	require.Equal(t, 200, resp.StatusCode())
 	require.Len(t, targetBlobbers, 6)
 	for _, blobber := range targetBlobbers {
-		confHash := apiClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus) // 3zcn from sdkwallet
+		confHash := apiClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus, 10.0) // 3zcn from sdkwallet
 		require.NotEmpty(t, confHash)
 	}
 
@@ -284,7 +284,10 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			})
 		}
 
-		for _, allocationID := range allocationIds {
+		totalChallengesForAllocations := 0
+
+		for i, allocationID := range allocationIds {
+			testCase := graphAllocTestCases[i]
 			apiClient.CancelAllocation(t, sdkWallet, allocationID, client.TxSuccessfulStatus)
 
 			// Check decreased + consistency
@@ -325,7 +328,33 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 				return cond
 			})
+
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				usedStorageAfter := (*data)[0]
+				cond := (usedStorage-usedStorageAfter >= testCase.Fsize-tolerance) &&
+					(usedStorage-usedStorageAfter <= testCase.Fsize+tolerance)
+
+				if cond {
+					usedStorage = usedStorageAfter
+				}
+				return cond
+			})
+
+			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			totalChallengesForAllocations += int(allocation.Stats.TotalChallenges)
 		}
+
+		challengeData, resp, err = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+		require.Equal(t, 1, len([]int64(challengeData.TotalChallenges)))
+		totalGraphChallenges := challengeData.TotalChallenges[0]
+
+		require.InEpsilon(t, totalChallengesForAllocations, totalGraphChallenges, 0.05, "Total challenges for allocations and total challenges from graph should be equal")
 	})
 
 	t.RunSequentially("endpoint parameters ( test /v2/graph-write-price )", graphEndpointTestCases(zboxClient.GetGraphWritePrice))
