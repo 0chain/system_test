@@ -61,7 +61,7 @@ func TestClientThrottling(testSetup *testing.T) {
 		output, err := utils.CreateWalletForName(t, configPath, "client_wallet_1")
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
+		_, err = utils.ExecuteFaucetWithTokensForWallet(t, "client_wallet_1", configPath, 9)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
@@ -102,10 +102,7 @@ func TestClientThrottling(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Download should fail on exceeding block limits", 10*time.Minute, func(t *test.SystemTest) {
-		output, err := utils.CreateWalletForName(t, configPath, "client_wallet_1")
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
+		_, err = utils.ExecuteFaucetWithTokensForWallet(t, "client_wallet_1", configPath, 9)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
@@ -155,10 +152,7 @@ func TestClientThrottling(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Upload limits should not allow upload blocks more than limits", 10*time.Minute, func(t *test.SystemTest) {
-		output, err := utils.CreateWalletForName(t, configPath, "client_wallet_1")
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
+		_, err = utils.ExecuteFaucetWithTokensForWallet(t, "client_wallet_1", configPath, 9)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
