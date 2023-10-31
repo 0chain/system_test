@@ -181,12 +181,12 @@ func TestClientThrottling(testSetup *testing.T) {
 
 		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
 
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
 		remoteFilepath := remotepath + filepath.Base(filename)
 
 		for totalDownloadedDataPerBlobber <= downloadLimits {
+			err = os.Remove(filename)
+			require.Nil(t, err)
+
 			output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
 				"allocation": allocationId,
 				"remotepath": remoteFilepath,
