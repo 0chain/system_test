@@ -91,7 +91,7 @@ func TestMaxFileSize(testSetup *testing.T) {
 			"allocation": allocationId,
 			"remotepath": remotepath + filepath.Base(filename),
 			"localpath":  filename,
-		}, true)
+		}, false)
 		require.Error(t, err, "Upload should fail")
 	})
 }
