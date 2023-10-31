@@ -159,6 +159,13 @@ func TestClientThrottling(testSetup *testing.T) {
 			"localpath":  os.TempDir() + string(os.PathSeparator),
 		}), false)
 		require.NotNil(t, err, "File download is expected to fail")
+
+		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, false)
+		require.NotNil(t, err, "File upload is expected to fail")
 	})
 
 	t.RunSequentiallyWithTimeout("File upload should fail on exceeding max number of files", 10*time.Minute, func(t *test.SystemTest) {
