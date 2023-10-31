@@ -73,16 +73,13 @@ func TestClientThrottling(testSetup *testing.T) {
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
-		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
-			"size":   10 * MB,
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   500 * MB,
+			"tokens": 1,
 			"data":   1,
-			"lock":   2,
 			"parity": 1,
-		}))
-		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
-
-		allocationId, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
+		})
 
 		remotepath := "/dir/"
 		filesize := 1024
@@ -123,16 +120,13 @@ func TestClientThrottling(testSetup *testing.T) {
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
-		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
-			"size":   10 * MB,
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   500 * MB,
+			"tokens": 1,
 			"data":   1,
-			"lock":   2,
 			"parity": 1,
-		}))
-		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
-
-		allocationId, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
+		})
 
 		remotepath := "/dir/"
 		filesize := 1024 * 7
@@ -158,16 +152,13 @@ func TestClientThrottling(testSetup *testing.T) {
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
-		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
-			"size":   10 * MB,
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   500 * MB,
+			"tokens": 1,
 			"data":   1,
-			"lock":   2,
 			"parity": 1,
-		}))
-		require.Nil(t, err, "Error creating allocation", strings.Join(output, "\n"))
-
-		allocationId, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
+		})
 
 		remotepath := "/dir/"
 		filesize := 1024
