@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 const (
@@ -64,7 +65,7 @@ func TestClientThrottling(testSetup *testing.T) {
 	totalDownloadedDataPerBlobber := 0
 	totalFilesUploaded := 0
 
-	t.RunSequentially("Upload and download limits should allow blocks less than limits", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Upload and download limits should allow blocks less than limits", 10*time.Minute, func(t *test.SystemTest) {
 		// Max upload blocks set in config is 6400KB
 
 		output, err := utils.CreateWallet(t, configPath)
@@ -96,6 +97,8 @@ func TestClientThrottling(testSetup *testing.T) {
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 		totalUploadedDataPerBlobber += 1024
 		totalFilesUploaded += 1
+
+		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
 
 		err = os.Remove(filename)
 		require.Nil(t, err)
@@ -176,6 +179,8 @@ func TestClientThrottling(testSetup *testing.T) {
 		totalUploadedDataPerBlobber += 1024
 		totalFilesUploaded += 1
 
+		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
+
 		err = os.Remove(filename)
 		require.Nil(t, err)
 
@@ -190,6 +195,8 @@ func TestClientThrottling(testSetup *testing.T) {
 			require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 			totalDownloadedDataPerBlobber += 1024
 		}
+
+		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
 
 		output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
 			"allocation": allocationId,
