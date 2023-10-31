@@ -114,38 +114,6 @@ func TestClientThrottling(testSetup *testing.T) {
 		totalDownloadedDataPerBlobber += 1024
 	})
 
-	t.RunSequentiallyWithTimeout("Upload limits should not allow upload blocks more than limits", 10*time.Minute, func(t *test.SystemTest) {
-		// Max upload blocks set in config is 6400KB
-
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
-		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
-
-		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   500 * MB,
-			"tokens": 1,
-			"data":   1,
-			"parity": 1,
-		})
-
-		remotepath := "/dir/"
-		filesize := 1024 * 7
-		filename := utils.GenerateRandomTestFileName(t)
-
-		err = utils.CreateFileWithSize(filename, int64(filesize))
-		require.Nil(t, err)
-
-		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
-		}, false)
-		require.NotNil(t, err, "File upload is expected to fail")
-	})
-
 	t.RunSequentiallyWithTimeout("Upload and download limits should allow blocks less than limits", 10*time.Minute, func(t *test.SystemTest) {
 		// Max upload blocks set in config is 6400KB
 
@@ -239,5 +207,37 @@ func TestClientThrottling(testSetup *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, "File upload is expected to fail as we already uploaded max files allowed")
+	})
+
+	t.RunSequentiallyWithTimeout("Upload limits should not allow upload blocks more than limits", 10*time.Minute, func(t *test.SystemTest) {
+		// Max upload blocks set in config is 6400KB
+
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+
+		// 1. Create an allocation with 1 data shard and 1 parity shard.
+		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   500 * MB,
+			"tokens": 1,
+			"data":   1,
+			"parity": 1,
+		})
+
+		remotepath := "/dir/"
+		filesize := 1024 * 7
+		filename := utils.GenerateRandomTestFileName(t)
+
+		err = utils.CreateFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
+
+		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationId,
+			"remotepath": remotepath + filepath.Base(filename),
+			"localpath":  filename,
+		}, false)
+		require.NotNil(t, err, "File upload is expected to fail")
 	})
 }
