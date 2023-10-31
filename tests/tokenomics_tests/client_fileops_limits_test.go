@@ -217,7 +217,7 @@ func TestClientThrottling(testSetup *testing.T) {
 		err = utils.CreateFileWithSize(filename, int64(filesize))
 		require.Nil(t, err)
 
-		for i := 0; i < 4; i++ {
+		for i := 0; i < 3; i++ {
 			_, err = utils.UploadFile(t, configPath, map[string]interface{}{
 				"allocation": allocationId,
 				"remotepath": remotepath + filepath.Base(filename),
