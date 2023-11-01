@@ -792,10 +792,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
 	allocationID := setupAllocation(t, cliConfigFilename, extraParams...)
 
-	for i := 0; i < 2; i++ {
-		_, err := executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed")
-	}
+	_, err := executeFaucetWithTokens(t, configPath, 20)
+	require.NoError(t, err, "faucet execution failed")
 
 	allocations := parseListAllocations(t, cliConfigFilename)
 	allocation, ok := allocations[allocationID]
