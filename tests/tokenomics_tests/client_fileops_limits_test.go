@@ -89,7 +89,7 @@ func TestClientThrottling(testSetup *testing.T) {
 			successfullyUploadedFileName = filename
 		}
 
-		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
+		time.Sleep(1 * time.Minute) // Wait for blacklist worker to run
 
 		remotepath := "/dir/"
 		filesize := 64 * KB
@@ -129,7 +129,7 @@ func TestClientThrottling(testSetup *testing.T) {
 		})
 
 		remotepath := "/dir/"
-		filesize := 64 * KB
+		filesize := 128 * KB
 		filename := utils.GenerateRandomTestFileName(t)
 
 		err = utils.CreateFileWithSize(filename, int64(filesize))
@@ -142,9 +142,10 @@ func TestClientThrottling(testSetup *testing.T) {
 		}, false)
 		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 
-		time.Sleep(2 * time.Minute) // Wait for blacklist worker to run
+		for i := 0; i < 3; i++ {
+			err = os.Remove(filename)
+			require.Nil(t, err)
 
-		for i := 0; i < 2; i++ {
 			output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
 				"allocation": allocationId,
 				"remotepath": remotepath + filepath.Base(filename),
@@ -152,6 +153,9 @@ func TestClientThrottling(testSetup *testing.T) {
 			}), false)
 			require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
 		}
+
+		err = os.Remove(filename)
+		require.Nil(t, err)
 
 		_, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
 			"allocation": allocationId,
@@ -186,14 +190,14 @@ func TestClientThrottling(testSetup *testing.T) {
 		allocationId, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err, "Error getting allocation ID", strings.Join(output, "\n"))
 
-		remotepath := "/dir/"
-		filesize := 1024
-		filename := utils.GenerateRandomTestFileName(t)
+		for i := 0; i < 2; i++ {
+			remotepath := "/dir/"
+			filesize := 1024
+			filename := utils.GenerateRandomTestFileName(t)
 
-		err = utils.CreateFileWithSize(filename, int64(filesize))
-		require.Nil(t, err)
+			err = utils.CreateFileWithSize(filename, int64(filesize))
+			require.Nil(t, err)
 
-		for i := 0; i < 3; i++ {
 			output, err = utils.UploadFile(t, configPath, map[string]interface{}{
 				"allocation": allocationId,
 				"remotepath": remotepath + filepath.Base(filename),
@@ -201,6 +205,13 @@ func TestClientThrottling(testSetup *testing.T) {
 			}, false)
 			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
 		}
+
+		remotepath := "/dir/"
+		filesize := 1024
+		filename := utils.GenerateRandomTestFileName(t)
+
+		err = utils.CreateFileWithSize(filename, int64(filesize))
+		require.Nil(t, err)
 
 		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationId,
