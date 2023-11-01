@@ -38,7 +38,7 @@ func TestAuthorizerRewards(testSetup *testing.T) {
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Transaction completed successfully:")
 
-		output, err = mintWrappedZcnTokens(t, true)
+		output, err = mintZcnTokens(t, true)
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Done.")
