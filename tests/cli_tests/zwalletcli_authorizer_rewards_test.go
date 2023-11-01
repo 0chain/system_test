@@ -3,16 +3,17 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/0chain/system_test/internal/cli/model"
-	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/internal/cli/model"
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAuthorizerRewards(testSetup *testing.T) {
@@ -44,7 +45,7 @@ func TestAuthorizerRewards(testSetup *testing.T) {
 		feeRewardAuthorizerAfterMint, err := getQueryRewards(t, feeRewardAuthorizerQuery)
 		require.Nil(t, err)
 
-		require.Greater(t, feeRewardAuthorizerAfterMint.TotalReward, feeRewardAuthorizer.TotalReward)
+		require.InEpsilon(t, feeRewardAuthorizerAfterMint.TotalReward+(33.33*1e10), feeRewardAuthorizer.TotalReward, 0.05, "Fee reward authorizer should be increased by 33.33 ZCN")
 	})
 }
 
