@@ -23,11 +23,14 @@ func TestAuthorizerRewards(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {
+		output, err := createWallet(t, configPath)
+		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
 		feeRewardAuthorizerQuery := fmt.Sprintf("reward_type = %d", model.FeeRewardAuthorizer)
 		feeRewardAuthorizer, err := getQueryRewards(t, feeRewardAuthorizerQuery)
 		require.Nil(t, err)
 
-		output, err := executeFaucetWithTokens(t, configPath, 2.0)
+		output, err = executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		output, err = burnZcn(t, "1", false)
