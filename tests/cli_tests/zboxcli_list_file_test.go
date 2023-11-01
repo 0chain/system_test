@@ -609,7 +609,6 @@ func createFileWithSize(name string, size int64) error {
 func generateRandomTestFileName(t *test.SystemTest) string {
 	path := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
 
-	//FIXME: Filenames longer than 100 characters are rejected see https://github.com/0chain/zboxcli/issues/249
 	randomFilename := cliutils.RandomAlphaNumericString(10)
 	return fmt.Sprintf("%s%s%s_test.txt", path, string(os.PathSeparator), randomFilename)
 }
