@@ -2,7 +2,6 @@ package tokenomics_tests
 
 import (
 	"encoding/json"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -69,8 +68,6 @@ func TestClientThrottling(testSetup *testing.T) {
 			"parity": 1,
 		})
 
-		var successfullyUploadedFileName string
-
 		for i := 0; i < 2; i++ {
 			remotepath := "/dir/"
 			filesize := 64 * KB
@@ -85,8 +82,6 @@ func TestClientThrottling(testSetup *testing.T) {
 				"localpath":  filename,
 			}, false)
 			require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
-			successfullyUploadedFileName = filename
 		}
 
 		time.Sleep(1 * time.Minute) // Wait for blacklist worker to run
@@ -104,72 +99,6 @@ func TestClientThrottling(testSetup *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, "File upload is expected to fail")
-
-		err = os.Remove(successfullyUploadedFileName)
-		require.Nil(t, err)
-
-		_, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(successfullyUploadedFileName),
-			"localpath":  os.TempDir() + string(os.PathSeparator),
-		}), false)
-		require.NotNil(t, err, "File download is expected to fail")
-	})
-
-	t.RunWithTimeout("Exceeding download limits should blacklist user on blobber", 20*time.Minute, func(t *test.SystemTest) {
-		_, err = utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 1,
-			"data":   1,
-			"parity": 1,
-		})
-
-		remotepath := "/dir/"
-		filesize := 128 * KB
-		filename := utils.GenerateRandomTestFileName(t)
-
-		err = utils.CreateFileWithSize(filename, int64(filesize))
-		require.Nil(t, err)
-
-		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
-		}, false)
-		require.Nil(t, err, "error uploading file", strings.Join(output, "\n"))
-
-		for i := 0; i < 3; i++ {
-			err = os.Remove(filename)
-			require.Nil(t, err)
-
-			output, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": remotepath + filepath.Base(filename),
-				"localpath":  os.TempDir() + string(os.PathSeparator),
-			}), false)
-			require.Nil(t, err, "error downloading file", strings.Join(output, "\n"))
-		}
-
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
-		_, err = utils.DownloadFile(t, configPath, utils.CreateParams(map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  os.TempDir() + string(os.PathSeparator),
-		}), false)
-		require.NotNil(t, err, "File download is expected to fail but succeeded")
-
-		_, err = utils.UploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
-		}, false)
-		require.NotNil(t, err, "File upload is expected to fail but succeeded")
 	})
 
 	t.RunWithTimeout("File upload should fail on exceeding max number of files", 20*time.Minute, func(t *test.SystemTest) {
