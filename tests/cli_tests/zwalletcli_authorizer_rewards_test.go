@@ -26,12 +26,6 @@ func TestAuthorizerRewards(testSetup *testing.T) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		wallet, err := getWallet(t, configPath)
-		t.Log("wallet", wallet.ClientID)
-
 		feeRewardAuthorizerQuery := fmt.Sprintf("reward_type = %d", model.FeeRewardAuthorizer)
 		feeRewardAuthorizer, err := getQueryRewards(t, feeRewardAuthorizerQuery)
 		require.Nil(t, err)
