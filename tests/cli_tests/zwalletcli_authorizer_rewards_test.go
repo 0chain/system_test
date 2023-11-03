@@ -51,7 +51,7 @@ func TestAuthorizerRewards(testSetup *testing.T) {
 		feeRewardAuthorizerAfterMint, err := getQueryRewards(t, feeRewardAuthorizerQuery)
 		require.Nil(t, err)
 
-		require.InEpsilon(t, feeRewardAuthorizerAfterMint.TotalReward+(33.33*1e10), feeRewardAuthorizer.TotalReward, 0.05, "Fee reward authorizer should be increased by 33.33 ZCN")
+		require.InEpsilon(t, feeRewardAuthorizerAfterMint.TotalReward+33, feeRewardAuthorizer.TotalReward, 0.05, "Fee reward authorizer should be increased by 33.33 ZCN")
 	})
 }
 
