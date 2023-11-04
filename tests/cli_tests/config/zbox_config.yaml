@@ -1,6 +1,6 @@
-block_worker: https://dev-6.devnet-0chain.net/dns
+block_worker: https://dev-2.devnet-0chain.net/dns
 confirmation_chain_length: 3
-ethereum_node_url: "https://rpc.tenderly.co/fork/6fa6588c-d0b0-4807-9be7-02e462bde9fc"
+ethereum_node_url: "https://rpc.tenderly.co/fork/ffecb5a0-d2f4-4ade-800f-5ded26c0141e"
 min_confirmation: 50
 min_submit: 50
 signature_scheme: bls0chain
