@@ -175,16 +175,6 @@ func TestMain(m *testing.M) {
 	// Create an S3 client
 	S3Client = s3.New(sess)
 
-	err = tenderlyClient.InitBalance(ethereumAddress)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	exitRun := m.Run()
 
 	os.Exit(exitRun)
