@@ -183,6 +183,8 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 			challengesCountQuery := fmt.Sprintf("blobber_id='%s' AND allocation_id='%s'", blobber.ID, allocationID)
 			blobberChallengeCount := chimneyClient.GetChallengesCountByQuery(t, challengesCountQuery, client.HttpOkStatus)
+			t.Log("Blobber ID: ", blobber.ID)
+			t.Log("Blobber Challenge Count: ", blobberChallengeCount)
 
 			// Updating total values
 			actualCancellationCharge += actualCancellationChargeForBlobber
