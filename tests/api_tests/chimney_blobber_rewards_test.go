@@ -190,8 +190,9 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			actualCancellationCharge += actualCancellationChargeForBlobber
 
 			expectedCancellationChargeForBlobber := expectedCancellationCharge * writePriceWeight(blobber.Terms.WritePrice, totalWritePrice)
+			expectedCancellationChargeForBlobber *= float64(blobberChallengeCount["passed"]+blobberChallengeCount["open"]) / float64(blobberChallengeCount["total"])
 
-			require.InEpsilon(t, expectedCancellationChargeForBlobber*(float64(blobberChallengeCount["passed"]+blobberChallengeCount["open"])/float64(blobberChallengeCount["total"])), actualCancellationChargeForBlobber, standardErrorMargin, "Expected cancellation charge for blobber is not equal to actual")
+			require.InEpsilon(t, expectedCancellationChargeForBlobber, actualCancellationChargeForBlobber, standardErrorMargin, "Expected cancellation charge for blobber is not equal to actual")
 
 			if blobber.StakePoolSettings.ServiceCharge == 0 {
 				require.Equal(t, float64(0), queryReward.TotalProviderReward, "Total delegate reward should be 0")
@@ -240,11 +241,12 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			actualChallengeRewards += actualChallengeRewardForBlobber
 
 			expectedChallengeRewardForBlobber := expectedBlobberChallengeRewards * writePriceWeight(blobber.Terms.WritePrice, totalWritePrice)
+			expectedChallengeRewardForBlobber *= float64(blobberChallengeCount["passed"]+blobberChallengeCount["open"]) / float64(blobberChallengeCount["total"])
 
 			t.Log("Expected Challenge Reward: ", expectedChallengeRewardForBlobber)
 			t.Log("Actual Challenge Reward: ", actualChallengeRewardForBlobber)
 
-			require.InEpsilon(t, expectedChallengeRewardForBlobber*(float64(blobberChallengeCount["passed"]+blobberChallengeCount["open"])/float64(blobberChallengeCount["total"])), actualChallengeRewardForBlobber, extraErrorMargin, "Expected challenge reward for blobber is not equal to actual")
+			require.InEpsilon(t, expectedChallengeRewardForBlobber, actualChallengeRewardForBlobber, extraErrorMargin, "Expected challenge reward for blobber is not equal to actual")
 
 			if blobber.StakePoolSettings.ServiceCharge == 0 {
 				require.Equal(t, float64(0), queryReward.TotalProviderReward, "Total delegate reward should be 0")
