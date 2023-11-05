@@ -9,8 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/0chain/system_test/internal/api/util/tenderly"
-
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -64,9 +62,6 @@ func setupConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalln(fmt.Errorf("fatal error config file: %s", err))
 	}
-
-	ethereumNodeURL = viper.GetString("ethereum_node_url")
-	ethereumAddress = viper.GetString("ethereum_address")
 }
 
 const (
@@ -89,18 +84,11 @@ const (
 )
 
 var (
-	ethereumNodeURL string
-	ethereumAddress string
-)
-
-var (
 	configPath             string
 	configDir              string
 	bridgeClientConfigFile string
 	bridgeOwnerConfigFile  string
 )
-
-var tenderlyClient *tenderly.Client
 
 func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
@@ -160,21 +148,8 @@ func TestMain(m *testing.M) {
 
 	setupConfig()
 
-	tenderlyClient = tenderly.NewClient(ethereumNodeURL)
-
-	snapshotHash, err := tenderlyClient.CreateSnapshot()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = tenderlyClient.InitBalance(ethereumAddress)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	exitRun := m.Run()
 
-	tenderlyClient.ShadowRevert(snapshotHash)
 	os.Exit(exitRun)
 }
 
