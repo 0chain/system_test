@@ -24,13 +24,34 @@ func TestBridgeBurn(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
+		snapshotHash, err := tenderlyClient.CreateSnapshot()
+		require.NoError(t, err)
+
+		err = tenderlyClient.InitBalance(ethereumAddress)
+		require.NoError(t, err)
+
+		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
+		require.NoError(t, err)
+
 		output, err := burnEth(t, "10000000000", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
+
+		err = tenderlyClient.Revert(snapshotHash)
+		require.NoError(t, err)
 	})
 
 	t.RunWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
+		snapshotHash, err := tenderlyClient.CreateSnapshot()
+		require.NoError(t, err)
+
+		err = tenderlyClient.InitBalance(ethereumAddress)
+		require.NoError(t, err)
+
+		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
+		require.NoError(t, err)
+
 		output, err := burnEth(t, "10000000000", true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
@@ -55,6 +76,9 @@ func TestBridgeBurn(testSetup *testing.T) {
 		nonceInt, err = strconv.Atoi(nonce)
 		require.Nil(t, err)
 		require.GreaterOrEqual(t, nonceInt, 0)
+
+		err = tenderlyClient.Revert(snapshotHash)
+		require.NoError(t, err)
 	})
 
 	t.RunWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*10, func(t *test.SystemTest) {
