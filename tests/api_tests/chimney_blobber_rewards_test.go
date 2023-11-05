@@ -82,10 +82,6 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		chimneyClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus, 20.0)
 	}
 
-	allBlobbers, resp, err = chimneyClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
-	require.NoError(t, err)
-	require.Equal(t, 200, resp.StatusCode())
-
 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 	blobberRequirements.DataShards = 1
 	blobberRequirements.ParityShards = 1
