@@ -116,6 +116,10 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 	startBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
 
+	allBlobbers, resp, err = chimneyClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
+	require.NoError(t, err)
+	require.Equal(t, 200, resp.StatusCode())
+
 	time.Sleep(sleepTime)
 
 	prevAlloc := chimneyClient.GetAllocation(t, allocationID, client.HttpOkStatus)
