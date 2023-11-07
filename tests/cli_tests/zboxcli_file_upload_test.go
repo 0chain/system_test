@@ -5,8 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
-	"math/rand"
 	"os"
 	"os/exec"
 	"path"
@@ -17,6 +15,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -1115,14 +1115,4 @@ func waitPartialUploadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd) bool {
 			return true
 		}
 	}
-}
-
-func generateRandomString(length int) string {
-	rand.Seed(time.Now().UnixNano())
-	charSet := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	result := make([]byte, length)
-	for i := range result {
-		result[i] = charSet[rand.Intn(len(charSet))]
-	}
-	return string(result)
 }
