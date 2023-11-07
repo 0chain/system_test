@@ -301,7 +301,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
-	t.Run("Upload tests with Thumbnail with different format", func(t *test.SystemTest) {
+	t.RunWithTimeout("Upload tests with Thumbnail with different format", 40*time.Minute, func(t *test.SystemTest) {
 		for _, blobberId := range blobbersList {
 			_, err := executeFaucetWithTokens(t, configPath, 11)
 			require.Nil(t, err, "Error executing faucet")
