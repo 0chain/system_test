@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path"
@@ -297,6 +299,62 @@ func TestUpload(testSetup *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+	})
+
+	t.Run("Upload tests with Thumbnail with different format", func(t *test.SystemTest) {
+		for _, blobberId := range blobbersList {
+			_, err := executeFaucetWithTokens(t, configPath, 11)
+			require.Nil(t, err, "Error executing faucet")
+
+			t.Log("Staking tokens for blobber: ", blobberId)
+
+			// stake tokens
+			_, err = stakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{
+				"blobber_id": blobberId,
+				"tokens":     10,
+			}), true)
+			require.Nil(t, err, "Error staking tokens")
+		}
+
+		allocSize := int64(10 * GB)
+
+		var fileExtensions = []string{".txt", ".docx", ".pdf", ".jpg", ".png", ".mp3", ".mp4", ".xlsx", ".html", ".json", ".csv", ".xml", ".zip", ".rar", ".gz", ".tar", ".avi", ".mov", ".wav", ".ogg", ".bmp", ".gif", ".svg", ".tiff", ".ico", ".py", ".c", ".java", ".php", ".js", ".css", ".scss", ".yaml", ".sql", ".md", ".go", ".rb", ".cpp", ".h", ".sh", ".bat", ".dll", ".class", ".jar", ".exe", ".psd", ".pptx", ".xls", ".ppt", ".key", ".numbers"}
+		fileSize := int64(5 * MB) // 5MB
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"data":   3,
+			"parity": 3,
+		})
+
+		// Generate random files
+		for _, ext := range fileExtensions {
+			filename := generateRandomTestFileName(t) + ext
+			err := createFileWithSize(filename, fileSize)
+			require.Nil(t, err)
+		}
+
+		// Upload files
+		for _, ext := range fileExtensions {
+			thumbnail := escapedTestName(t) + "thumbnail.png"
+			_ = generateThumbnail(t, thumbnail) // nolint
+
+			filename := generateRandomTestFileName(t) + ext
+			output, err := uploadFile(t, configPath, map[string]interface{}{
+				"allocation":    allocationID,
+				"remotepath":    "/",
+				"localpath":     filename,
+				"thumbnailpath": thumbnail,
+			}, true)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 2)
+
+			expected := fmt.Sprintf(
+				"Status completed callback. Type = application/octet-stream. Name = %s",
+				filepath.Base(filename),
+			)
+			require.Equal(t, expected, output[1], "Failed to upload file with extension: "+ext)
+		}
 	})
 
 	t.Run("Upload Image File Should Work", func(t *test.SystemTest) {
@@ -1061,4 +1119,14 @@ func waitPartialUploadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd) bool {
 			return true
 		}
 	}
+}
+
+func generateRandomString(length int) string {
+	rand.Seed(time.Now().UnixNano())
+	charSet := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	result := make([]byte, length)
+	for i := range result {
+		result[i] = charSet[rand.Intn(len(charSet))]
+	}
+	return string(result)
 }
