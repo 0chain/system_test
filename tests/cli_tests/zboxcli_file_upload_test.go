@@ -349,7 +349,7 @@ func TestUpload(testSetup *testing.T) {
 				"Status completed callback. Type = application/octet-stream. Name = %s",
 				filepath.Base(filename),
 			)
-			require.Equal(t, expected, output[1], "Failed to upload file with extension: "+ext)
+			require.Equal(t, expected, output[1], "Failed to upload file with extension: "+ext+" output : "+strings.Join(output, "\n"))
 		}
 	})
 
