@@ -327,19 +327,15 @@ func TestUpload(testSetup *testing.T) {
 			"parity": 3,
 		})
 
-		// Generate random files
+		// Upload files
 		for _, ext := range fileExtensions {
 			filename := generateRandomTestFileName(t) + ext
 			err := createFileWithSize(filename, fileSize)
 			require.Nil(t, err)
-		}
 
-		// Upload files
-		for _, ext := range fileExtensions {
 			thumbnail := escapedTestName(t) + "thumbnail.png"
 			_ = generateThumbnail(t, thumbnail) // nolint
 
-			filename := generateRandomTestFileName(t) + ext
 			output, err := uploadFile(t, configPath, map[string]interface{}{
 				"allocation":    allocationID,
 				"remotepath":    "/",
