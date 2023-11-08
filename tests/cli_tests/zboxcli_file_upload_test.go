@@ -306,8 +306,6 @@ func TestUpload(testSetup *testing.T) {
 			_, err := executeFaucetWithTokens(t, configPath, 11)
 			require.Nil(t, err, "Error executing faucet")
 
-			t.Log("Staking tokens for blobber: ", blobberId)
-
 			// stake tokens
 			_, err = stakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{
 				"blobber_id": blobberId,
