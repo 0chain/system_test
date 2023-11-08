@@ -135,7 +135,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Equal(t, allocationBeforeUpdate.ExpirationDate, alloc.ExpirationDate)
 	})
 
-	// FIXME extend or size should be required params - should not bother sharders with an empty update
 	t.Run("Update Nothing Should Fail", func(t *test.SystemTest) {
 		_, err := executeFaucetWithTokens(t, configPath, 10)
 		require.NoError(t, err, "faucet execution failed")
