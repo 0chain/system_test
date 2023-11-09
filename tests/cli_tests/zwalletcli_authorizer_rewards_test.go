@@ -40,6 +40,8 @@ func TestAuthorizerRewards(testSetup *testing.T) {
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Done.")
 
+		t.Log(output)
+
 		time.Sleep(20 * time.Second)
 
 		feeRewardAuthorizerAfterMint, err := getQueryRewards(t, feeRewardAuthorizerQuery)
