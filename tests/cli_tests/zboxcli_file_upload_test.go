@@ -16,6 +16,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/stretchr/testify/require"
@@ -297,6 +299,56 @@ func TestUpload(testSetup *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+	})
+
+	t.RunWithTimeout("Upload tests with Thumbnail with different format", 40*time.Minute, func(t *test.SystemTest) {
+		for _, blobberId := range blobbersList {
+			_, err := executeFaucetWithTokens(t, configPath, 11)
+			require.Nil(t, err, "Error executing faucet")
+
+			// stake tokens
+			_, err = stakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{
+				"blobber_id": blobberId,
+				"tokens":     10,
+			}), true)
+			require.Nil(t, err, "Error staking tokens")
+		}
+
+		allocSize := int64(10 * GB)
+
+		var fileExtensions = []string{".txt", ".docx", ".pdf", ".jpg", ".png", ".mp3", ".mp4", ".xlsx", ".html", ".json", ".csv", ".xml", ".zip", ".rar", ".gz", ".tar", ".avi", ".mov", ".wav", ".ogg", ".bmp", ".gif", ".svg", ".tiff", ".ico", ".py", ".c", ".java", ".php", ".js", ".css", ".scss", ".yaml", ".sql", ".md", ".go", ".rb", ".cpp", ".h", ".sh", ".bat", ".dll", ".class", ".jar", ".exe", ".psd", ".pptx", ".xls", ".ppt", ".key", ".numbers"}
+		fileSize := int64(5 * MB) // 5MB
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"data":   3,
+			"parity": 3,
+		})
+
+		// Upload files
+		for _, ext := range fileExtensions {
+			filename := generateRandomTestFileName(t) + ext
+			err := createFileWithSize(filename, fileSize)
+			require.Nil(t, err)
+
+			thumbnail := escapedTestName(t) + "thumbnail.png"
+			_ = generateThumbnail(t, thumbnail) // nolint
+
+			output, err := uploadFile(t, configPath, map[string]interface{}{
+				"allocation":    allocationID,
+				"remotepath":    "/",
+				"localpath":     filename,
+				"thumbnailpath": thumbnail,
+			}, true)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 2)
+
+			expected := fmt.Sprintf(
+				"Status completed callback. Type = application/octet-stream. Name = %s",
+				filepath.Base(filename),
+			)
+			require.Equal(t, expected, output[1], "Failed to upload file with extension: "+ext+" output : "+strings.Join(output, "\n"))
+		}
 	})
 
 	t.Run("Upload Image File Should Work", func(t *test.SystemTest) {
