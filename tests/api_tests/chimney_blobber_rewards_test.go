@@ -82,10 +82,6 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		chimneyClient.CreateStakePool(t, sdkWallet, 3, blobber.ID, client.TxSuccessfulStatus, 20.0)
 	}
 
-	allBlobbers, resp, err = chimneyClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
-	require.NoError(t, err)
-	require.Equal(t, 200, resp.StatusCode())
-
 	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 	blobberRequirements.DataShards = 1
 	blobberRequirements.ParityShards = 1
@@ -115,6 +111,10 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 	startBlock := chimneyClient.GetLatestFinalizedBlock(t, client.HttpOkStatus)
+
+	allBlobbers, resp, err = chimneyClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
+	require.NoError(t, err)
+	require.Equal(t, 200, resp.StatusCode())
 
 	time.Sleep(sleepTime)
 
@@ -179,13 +179,27 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 			challengesCountQuery := fmt.Sprintf("blobber_id='%s' AND allocation_id='%s'", blobber.ID, allocationID)
 			blobberChallengeCount := chimneyClient.GetChallengesCountByQuery(t, challengesCountQuery, client.HttpOkStatus)
+			t.Log("Blobber ID: ", blobber.ID)
+			t.Log("Blobber Challenge Count: ", blobberChallengeCount)
 
 			// Updating total values
 			actualCancellationCharge += actualCancellationChargeForBlobber
 
 			expectedCancellationChargeForBlobber := expectedCancellationCharge * writePriceWeight(blobber.Terms.WritePrice, totalWritePrice)
+			expectedCancellationChargeForBlobber *= float64(blobberChallengeCount["passed"]+blobberChallengeCount["open"]) / float64(blobberChallengeCount["total"])
 
-			require.InEpsilon(t, expectedCancellationChargeForBlobber*(float64(blobberChallengeCount["passed"]+blobberChallengeCount["open"])/float64(blobberChallengeCount["total"])), actualCancellationChargeForBlobber, standardErrorMargin, "Expected cancellation charge for blobber is not equal to actual")
+			t.Log("Expected Challenge Reward: ", expectedCancellationChargeForBlobber)
+			t.Log("Actual Challenge Reward: ", actualCancellationChargeForBlobber)
+
+			require.InEpsilon(t, expectedCancellationChargeForBlobber, actualCancellationChargeForBlobber, standardErrorMargin, "Expected cancellation charge for blobber is not equal to actual")
+
+			t.Log("Service Charge : ", blobber.StakePoolSettings.ServiceCharge)
+			if blobber.StakePoolSettings.ServiceCharge == 0.0 {
+				require.Equal(t, float64(0), queryReward.TotalProviderReward, "Total delegate reward should be 0")
+				require.Equal(t, queryReward.TotalReward, queryReward.TotalDelegateReward, "Total delegate reward should be equal to total reward")
+				continue
+			}
+
 			require.InEpsilon(t, queryReward.TotalReward*blobber.StakePoolSettings.ServiceCharge, queryReward.TotalProviderReward, standardErrorMargin, "Expected provider reward is not equal to actual")
 			require.InEpsilon(t, queryReward.TotalReward*(1.0-blobber.StakePoolSettings.ServiceCharge), queryReward.TotalDelegateReward, standardErrorMargin, "Expected delegate reward is not equal to actual")
 
@@ -227,11 +241,20 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			actualChallengeRewards += actualChallengeRewardForBlobber
 
 			expectedChallengeRewardForBlobber := expectedBlobberChallengeRewards * writePriceWeight(blobber.Terms.WritePrice, totalWritePrice)
+			expectedChallengeRewardForBlobber *= float64(blobberChallengeCount["passed"]+blobberChallengeCount["open"]) / float64(blobberChallengeCount["total"])
 
 			t.Log("Expected Challenge Reward: ", expectedChallengeRewardForBlobber)
 			t.Log("Actual Challenge Reward: ", actualChallengeRewardForBlobber)
 
-			require.InEpsilon(t, expectedChallengeRewardForBlobber*(float64(blobberChallengeCount["passed"]+blobberChallengeCount["open"])/float64(blobberChallengeCount["total"])), actualChallengeRewardForBlobber, extraErrorMargin, "Expected challenge reward for blobber is not equal to actual")
+			require.InEpsilon(t, expectedChallengeRewardForBlobber, actualChallengeRewardForBlobber, extraErrorMargin, "Expected challenge reward for blobber is not equal to actual")
+
+			t.Log("Service Charge : ", blobber.StakePoolSettings.ServiceCharge)
+			if blobber.StakePoolSettings.ServiceCharge == 0.0 {
+				require.Equal(t, float64(0), queryReward.TotalProviderReward, "Total delegate reward should be 0")
+				require.Equal(t, queryReward.TotalReward, queryReward.TotalDelegateReward, "Total delegate reward should be equal to total reward")
+				continue
+			}
+
 			require.InEpsilon(t, queryReward.TotalReward*blobber.StakePoolSettings.ServiceCharge, queryReward.TotalProviderReward, standardErrorMargin, "Expected provider reward is not equal to actual")
 			require.InEpsilon(t, queryReward.TotalReward*(1.0-blobber.StakePoolSettings.ServiceCharge), queryReward.TotalDelegateReward, standardErrorMargin, "Expected delegate reward is not equal to actual")
 		}
@@ -400,6 +423,14 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			t.Log("Actual Block Reward: ", actualBlockRewardForBlobber.TotalReward)
 
 			require.InEpsilon(t, expectedBlobberBlockReward, actualBlockRewardForBlobber.TotalReward, extraErrorMargin, "Expected block reward for blobber is not equal to actual")
+
+			t.Log("Service Charge : ", blobber.StakePoolSettings.ServiceCharge)
+			if blobber.StakePoolSettings.ServiceCharge == 0.0 {
+				require.Equal(t, float64(0), actualBlockRewardForBlobber.TotalProviderReward, "Total delegate reward should be 0")
+				require.Equal(t, actualBlockRewardForBlobber.TotalReward, actualBlockRewardForBlobber.TotalDelegateReward, "Total delegate reward should be equal to total reward")
+				continue
+			}
+
 			require.InEpsilon(t, actualBlockRewardForBlobber.TotalReward*blobber.StakePoolSettings.ServiceCharge, actualBlockRewardForBlobber.TotalProviderReward, standardErrorMargin, "Expected provider reward is not equal to actual")
 			require.InEpsilon(t, actualBlockRewardForBlobber.TotalReward*(1.0-blobber.StakePoolSettings.ServiceCharge), actualBlockRewardForBlobber.TotalDelegateReward, standardErrorMargin, "Expected delegate reward is not equal to actual")
 		}
