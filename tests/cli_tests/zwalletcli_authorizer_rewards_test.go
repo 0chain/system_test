@@ -30,7 +30,7 @@ func TestAuthorizerRewards(testSetup *testing.T) {
 		feeRewardAuthorizer, err := getQueryRewards(t, feeRewardAuthorizerQuery)
 		require.Nil(t, err)
 
-		output, err = burnEth(t, "10000000000", true)
+		output, err = burnEth(t, "1000000000000", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
