@@ -28,7 +28,7 @@ func TestBridgeVerify(testSetup *testing.T) {
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
 		require.NoError(t, err)
 
-		output, err := burnEth(t, "10000000000", true)
+		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")

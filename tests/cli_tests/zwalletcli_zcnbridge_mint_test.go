@@ -55,7 +55,7 @@ func TestBridgeMint(testSetup *testing.T) {
 		_, err = createWalletForName(t, configPath, escapedTestName(t))
 		require.NoError(t, err)
 
-		output, err := burnEth(t, "10000000000", true)
+		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")

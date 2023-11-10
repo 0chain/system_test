@@ -33,7 +33,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
 		require.NoError(t, err)
 
-		output, err := burnEth(t, "10000000000", true)
+		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
@@ -52,7 +52,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
 		require.NoError(t, err)
 
-		output, err := burnEth(t, "10000000000", true)
+		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
@@ -69,7 +69,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		var amountInt int
 		amountInt, err = strconv.Atoi(amount)
 		require.Nil(t, err)
-		require.Equal(t, 10000000000, amountInt)
+		require.Equal(t, 1000000000000, amountInt)
 
 		nonce := strings.TrimSpace(strings.Split(output[len(output)-4], ":")[1])
 		var nonceInt int
