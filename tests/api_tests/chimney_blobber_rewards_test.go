@@ -71,6 +71,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		actualBlockReward   float64
 	)
 
+	fmt.Println("Running chimney blobber rewards test")
 	sdkWallet = &model.Wallet{
 		Id:           "c8ab6c9fd4c2b0193b946e83789625ad8f041d36b79bab164bc52a97c251b109",
 		Version:      "",
