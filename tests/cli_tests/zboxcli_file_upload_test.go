@@ -302,13 +302,13 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Upload tests with Thumbnail with different format", 40*time.Minute, func(t *test.SystemTest) {
-		for _, blobberId := range blobbersList {
+		for _, blobber := range blobbersList {
 			_, err := executeFaucetWithTokens(t, configPath, 11)
 			require.Nil(t, err, "Error executing faucet")
 
 			// stake tokens
 			_, err = stakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{
-				"blobber_id": blobberId,
+				"blobber_id": blobber.Id,
 				"tokens":     10,
 			}), true)
 			require.Nil(t, err, "Error staking tokens")
