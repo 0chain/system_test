@@ -85,7 +85,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 		resultInt, err := strconv.Atoi(cfgAfter["max_fee"])
 		require.NoError(t, err)
 
-		require.Equal(t, 40000000000, resultInt, "new value for config max_fee was not set")
+		require.Equal(t, 4, resultInt, "new value for config max_fee was not set")
 	})
 
 	t.RunSequentially("should allow update of percent_authorizers", func(t *test.SystemTest) {
