@@ -1,5 +1,7 @@
 # The following users own all code in the system_tests repo
-# Ryan        Kishan
-* @stewartie4 @Kishan-Dhakan
+# Ryan       
+* @stewartie4 
                  # Ryan      #Jayash   
-*.go|*.mod|*.sum @stewartie4 @Jayashsatolia403
+*.go @Jayashsatolia403
+*.mod @Jayashsatolia403
+*.sum @Jayashsatolia403
