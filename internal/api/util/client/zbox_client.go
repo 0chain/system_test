@@ -362,7 +362,7 @@ func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, wallet
 		"mnemonic":    mnemonic,
 		"name":        walletName,
 		"description": walletDescription,
-		"user_name": userName,
+		"user_name":   userName,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1983,7 +1983,7 @@ func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, wa
 		"name":        walletName,
 		"description": walletDescription,
 		"refcode":     refCode,
-		"user_name": userName,
+		"user_name":   userName,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
