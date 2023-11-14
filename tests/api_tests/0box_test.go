@@ -38,7 +38,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -73,7 +73,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -107,7 +107,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -212,7 +212,7 @@ func Test0boxNft(testSetup *testing.T) {
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -246,7 +246,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -325,7 +325,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -360,7 +360,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -521,7 +521,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -586,7 +586,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -677,7 +677,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -790,7 +790,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -846,7 +846,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -917,7 +917,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -970,7 +970,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1052,7 +1052,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1133,7 +1133,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1201,7 +1201,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1276,7 +1276,7 @@ func Test0Box(testSetup *testing.T) {
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1312,7 +1312,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-_, response, err := zboxClient.PostWallet(t,
+		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1486,7 +1486,7 @@ _, response, err := zboxClient.PostWallet(t,
 		walletName := "wallet_name"
 		description := "wallet created as part of " + t.Name()
 		userName := "user_name"
-_, response, err := zboxClient.PostWallet(t,
+		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1571,7 +1571,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-_, response, err := zboxClient.PostWallet(t,
+		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1623,7 +1623,7 @@ _, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-_, response, err := zboxClient.PostWallet(t,
+		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1703,7 +1703,7 @@ _, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-_, response, err := zboxClient.PostWallet(t,
+		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1742,7 +1742,7 @@ _, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-_, response, err := zboxClient.PostWallet(t,
+		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1780,7 +1780,7 @@ _, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-_, response, err := zboxClient.PostWallet(t,
+		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1818,7 +1818,7 @@ _, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-_, response, err := zboxClient.PostWallet(t,
+		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1857,7 +1857,7 @@ _, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-_, response, err := zboxClient.PostWallet(t,
+		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -1912,7 +1912,7 @@ func TestDexState(testSetup *testing.T) {
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -2019,7 +2019,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
@@ -2072,7 +2072,7 @@ zboxWallet, response, err := zboxClient.PostWallet(t,
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
-zboxWallet, response, err := zboxClient.PostWallet(t,
+		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
 			description,
