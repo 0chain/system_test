@@ -37,6 +37,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -45,6 +46,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -70,6 +72,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -78,6 +81,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -102,6 +106,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -110,6 +115,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -205,6 +211,7 @@ func Test0boxNft(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -213,6 +220,7 @@ func Test0boxNft(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -237,6 +245,7 @@ func Test0boxNft(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -245,6 +254,7 @@ func Test0boxNft(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -314,6 +324,7 @@ func Test0boxNft(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -322,6 +333,7 @@ func Test0boxNft(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -347,6 +359,7 @@ func Test0boxNft(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -355,6 +368,7 @@ func Test0boxNft(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -506,6 +520,7 @@ func Test0boxNft(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -514,6 +529,7 @@ func Test0boxNft(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -569,6 +585,7 @@ func Test0boxNft(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -577,6 +594,7 @@ func Test0boxNft(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -658,6 +676,7 @@ func Test0boxNft(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -666,6 +685,7 @@ func Test0boxNft(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -769,6 +789,7 @@ func Test0boxNft(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -777,6 +798,7 @@ func Test0boxNft(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -823,6 +845,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -831,6 +854,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -892,6 +916,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -900,6 +925,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -943,6 +969,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -951,6 +978,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -1023,6 +1051,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1031,6 +1060,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -1102,6 +1132,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1110,6 +1141,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -1168,6 +1200,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1176,6 +1209,7 @@ func Test0Box_share_info(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -1241,6 +1275,7 @@ func Test0Box(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1249,6 +1284,7 @@ func Test0Box(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -1275,6 +1311,7 @@ func Test0Box(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1283,6 +1320,7 @@ func Test0Box(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1446,8 +1484,8 @@ func Test0Box(testSetup *testing.T) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		walletName := "wallet_name"
-
 		description := "wallet created as part of " + t.Name()
+		userName := "user_name"
 		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1456,6 +1494,7 @@ func Test0Box(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1531,6 +1570,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1539,6 +1579,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1581,6 +1622,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 		// Create Wallet
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1589,6 +1631,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1618,6 +1661,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 		// Create Wallet
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		wallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1626,6 +1670,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1657,6 +1702,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 		// create wallet
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1665,6 +1711,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1694,6 +1741,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 		// create wallet
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1702,6 +1750,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1730,6 +1779,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 		// create wallet
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1738,6 +1788,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1766,6 +1817,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 		// create wallet
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1774,6 +1826,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1803,6 +1856,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 		// create wallet
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		_, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1811,6 +1865,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -1856,6 +1911,7 @@ func TestDexState(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1864,6 +1920,7 @@ func TestDexState(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -1961,6 +2018,7 @@ func TestDexState(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -1969,6 +2027,7 @@ func TestDexState(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
@@ -2012,6 +2071,7 @@ func TestDexState(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -2020,6 +2080,7 @@ func TestDexState(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NoError(t, err)
