@@ -191,13 +191,13 @@ func TestMain(m *testing.M) {
 	// Create an S3 client
 	S3Client = s3.New(sess)
 
-	resetUserNonceExecutor.Do(func() {
-		err = resetUserNonce()
-		if err != nil {
-			log.Fatalln(err)
-			return
-		}
-	})
+	//resetUserNonceExecutor.Do(func() {
+	//	err = resetUserNonce()
+	//	if err != nil {
+	//		log.Fatalln(err)
+	//		return
+	//	}
+	//})
 
 	exitRun := m.Run()
 

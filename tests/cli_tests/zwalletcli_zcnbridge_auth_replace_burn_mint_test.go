@@ -15,6 +15,12 @@ import (
 func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	snapshotHash, err := tenderlyClient.CreateSnapshot()
+	require.NoError(t, err)
+
+	err = tenderlyClient.InitBalance(ethereumAddress)
+	require.NoError(t, err)
+
 	authsIDKeys := map[string]string{
 		"d6e9b3222434faa043c683d1a939d6a0fa2818c4d56e794974d64a32005330d3": "b41d6232f11e0feefe895483688410216b3b1101e5db55044b22f0342fc18718b96b3124c9373dd116c50bd9b60512f28930a0e5771e58ecdc7d5bc2b570111a",
 		"7b07c0489e2f35d7c13160f4da2866b4aa69aa4e8d2b2cd9c4fc002693dca5d7": "aa6b6a16ae362189008cd4e7b4573174460965ab8d9c18515f0142cee4d8ba0708584cfbb8074120586998157ccb808954cde6c68443f22aab0b5ca72175c79d",
@@ -85,6 +91,8 @@ func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 	output, err = registerAuthorizer(t, addAuth2.ID, authsIDKeys[addAuth2.ID], addAuth2.URL, false)
 	require.NoError(t, err, "Unexpected register authorizer failure", strings.Join(output, "\n"))
 
+	err = tenderlyClient.Revert(snapshotHash)
+	require.NoError(t, err)
 	// TODO: test burn-wzcn and mint zcn, but thats require the grapnode and dex_subgraph setup for
 	// tenderly fork. So leave it for now. We have done the manual test to confirm the flow could work.
 }
