@@ -62,6 +62,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -70,6 +71,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 
 		require.NotNil(t, zboxWallet)
@@ -91,6 +93,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 		firebaseTokens = append(firebaseTokens, authenticateWithFirebase(t, "+919876543210"))
 		referralMnemonic := "total today fortune output enjoy season desert tool transfer awkward post disease junk offer wedding wire brown broccoli size banana harsh stove raise skull"
 
+		userName2 := "user_name2"
 		zboxWallet, response, err = zboxClient.PostWalletWithReferralCode(t,
 			referralMnemonic,
 			walletName,
@@ -99,6 +102,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 			csrfToken,
 			"+919876543210",
 			"blimp",
+			userName2,
 			zboxRferral.ReferrerCode,
 		)
 
@@ -140,6 +144,7 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -148,6 +153,7 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NotNil(t, zboxWallet)
 		require.NoError(t, err)
@@ -165,6 +171,7 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 		description = "wallet created as part of " + t.Name()
 		walletName = "wallet_name1"
 		referralMnemonic := "total today fortune output enjoy season desert tool transfer awkward post disease junk offer wedding wire brown broccoli size banana harsh stove raise skull"
+		userName2 := "user_name2"
 		zboxWallet, response, err = zboxClient.PostWalletWithReferralCode(t,
 			referralMnemonic,
 			walletName,
@@ -173,6 +180,7 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 			csrfToken,
 			"+919876543210",
 			"blimp",
+			userName2,
 			zboxRferral.ReferrerCode,
 		)
 		require.NoError(t, err)
