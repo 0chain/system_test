@@ -16,9 +16,7 @@ func TestBridgeVerify(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Verify ethereum transaction")
 
-	t.Parallel()
-
-	t.RunWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {
 		err := tenderlyClient.InitBalance(ethereumAddress)
 		require.NoError(t, err)
 

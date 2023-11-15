@@ -20,9 +20,7 @@ func TestAuthorizerRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Mint WZCN tokens")
 
-	t.Parallel()
-
-	t.RunWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {
 		err := tenderlyClient.InitBalance(ethereumAddress)
 		require.NoError(t, err)
 

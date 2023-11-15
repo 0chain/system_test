@@ -16,9 +16,7 @@ func TestBridgeMint(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Mint WZCN tokens")
 
-	t.Parallel()
-
-	t.RunWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
 		err := tenderlyClient.InitBalance(ethereumAddress)
 		require.NoError(t, err)
 
@@ -39,7 +37,7 @@ func TestBridgeMint(testSetup *testing.T) {
 		require.Contains(t, output[len(output)-1], "Done.")
 	})
 
-	t.RunWithTimeout("Mint ZCN tokens", time.Minute*10, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Mint ZCN tokens", time.Minute*10, func(t *test.SystemTest) {
 		err := tenderlyClient.InitBalance(ethereumAddress)
 		require.NoError(t, err)
 
