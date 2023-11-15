@@ -23,10 +23,7 @@ func TestAuthorizerRewards(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {
-		snapshotHash, err := tenderlyClient.CreateSnapshot()
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitBalance(ethereumAddress)
+		err := tenderlyClient.InitBalance(ethereumAddress)
 		require.NoError(t, err)
 
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
@@ -55,9 +52,6 @@ func TestAuthorizerRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		require.Equal(t, feeRewardAuthorizerAfterMint.TotalReward, feeRewardAuthorizer.TotalReward+33, "Fee reward authorizer should be increased by 33.33 ZCN")
-
-		err = tenderlyClient.Revert(snapshotHash)
-		require.NoError(t, err)
 	})
 }
 

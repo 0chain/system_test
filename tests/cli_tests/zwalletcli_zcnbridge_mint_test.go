@@ -19,10 +19,10 @@ func TestBridgeMint(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
-		snapshotHash, err := tenderlyClient.CreateSnapshot()
+		err := tenderlyClient.InitBalance(ethereumAddress)
 		require.NoError(t, err)
 
-		err = tenderlyClient.InitBalance(ethereumAddress)
+		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
 		require.NoError(t, err)
 
 		output, err := executeFaucetWithTokens(t, configPath, 2.0)
@@ -37,16 +37,10 @@ func TestBridgeMint(testSetup *testing.T) {
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Done.")
-
-		err = tenderlyClient.Revert(snapshotHash)
-		require.NoError(t, err)
 	})
 
 	t.RunWithTimeout("Mint ZCN tokens", time.Minute*10, func(t *test.SystemTest) {
-		snapshotHash, err := tenderlyClient.CreateSnapshot()
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitBalance(ethereumAddress)
+		err := tenderlyClient.InitBalance(ethereumAddress)
 		require.NoError(t, err)
 
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
@@ -64,9 +58,6 @@ func TestBridgeMint(testSetup *testing.T) {
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Done.")
-
-		err = tenderlyClient.Revert(snapshotHash)
-		require.NoError(t, err)
 	})
 }
 

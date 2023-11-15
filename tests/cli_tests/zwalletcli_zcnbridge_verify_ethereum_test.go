@@ -19,10 +19,7 @@ func TestBridgeVerify(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {
-		snapshotHash, err := tenderlyClient.CreateSnapshot()
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitBalance(ethereumAddress)
+		err := tenderlyClient.InitBalance(ethereumAddress)
 		require.NoError(t, err)
 
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
@@ -39,9 +36,6 @@ func TestBridgeVerify(testSetup *testing.T) {
 		require.Nil(t, err, "error trying to verify transaction", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 		require.Equal(t, "Transaction verification success: "+ethTxHash, output[len(output)-1])
-
-		err = tenderlyClient.Revert(snapshotHash)
-		require.NoError(t, err)
 	})
 }
 
