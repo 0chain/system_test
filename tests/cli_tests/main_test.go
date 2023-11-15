@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -113,21 +112,6 @@ var (
 
 var tenderlyClient *tenderly.Client
 
-var resetUserNonceExecutor sync.Once
-
-func resetUserNonce() error {
-	cmd := fmt.Sprintf(
-		"./zwallet reset-user-nonce --silent "+
-			"--configDir ./config --config %s --wallet %s --path %s",
-		configPath,
-		zcnscOwner+"_wallet.json",
-		configDir,
-	)
-
-	_, err := cliutils.RunCommandWithoutRetry(cmd)
-	return err
-}
-
 func TestMain(m *testing.M) {
 	configPath = os.Getenv("CONFIG_PATH")
 	configDir = os.Getenv("CONFIG_DIR")
@@ -190,14 +174,6 @@ func TestMain(m *testing.M) {
 
 	// Create an S3 client
 	S3Client = s3.New(sess)
-
-	//resetUserNonceExecutor.Do(func() {
-	//	err = resetUserNonce()
-	//	if err != nil {
-	//		log.Fatalln(err)
-	//		return
-	//	}
-	//})
 
 	exitRun := m.Run()
 
