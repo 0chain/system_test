@@ -21,13 +21,8 @@ func TestBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Burning WZCN tokens on balance, should work")
 
-	t.Parallel()
-
-	t.RunWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
-		snapshotHash, err := tenderlyClient.CreateSnapshot()
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitBalance(ethereumAddress)
+	t.RunSequentiallyWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
+		err := tenderlyClient.InitBalance(ethereumAddress)
 		require.NoError(t, err)
 
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
@@ -37,16 +32,10 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
-
-		err = tenderlyClient.Revert(snapshotHash)
-		require.NoError(t, err)
 	})
 
-	t.RunWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
-		snapshotHash, err := tenderlyClient.CreateSnapshot()
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitBalance(ethereumAddress)
+	t.RunSequentiallyWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
+		err := tenderlyClient.InitBalance(ethereumAddress)
 		require.NoError(t, err)
 
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
@@ -76,12 +65,9 @@ func TestBridgeBurn(testSetup *testing.T) {
 		nonceInt, err = strconv.Atoi(nonce)
 		require.Nil(t, err)
 		require.GreaterOrEqual(t, nonceInt, 0)
-
-		err = tenderlyClient.Revert(snapshotHash)
-		require.NoError(t, err)
 	})
 
-	t.RunWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*10, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := burnZcn(t, "1", false)
 		require.NotNil(t, err)
 		require.Greater(t, len(output), 0)
@@ -98,7 +84,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.Contains(t, output[len(output)-1], "Transaction completed successfully:")
 	})
 
-	t.RunWithTimeout("Get ZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get ZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 

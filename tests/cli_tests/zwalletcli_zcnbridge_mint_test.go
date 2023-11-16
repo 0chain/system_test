@@ -16,17 +16,19 @@ func TestBridgeMint(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Mint WZCN tokens")
 
-	t.Parallel()
-
-	t.RunWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
-		snapshotHash, err := tenderlyClient.CreateSnapshot()
+	t.RunSequentiallyWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
+		err := tenderlyClient.InitBalance(ethereumAddress)
 		require.NoError(t, err)
 
-		err = tenderlyClient.InitBalance(ethereumAddress)
+		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
 		require.NoError(t, err)
 
 		output, err := executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		output, err = resetUserNonce(t, true)
+		require.Nil(t, err)
+		require.Greater(t, len(output), 0)
 
 		output, err = burnZcn(t, "1", false)
 		require.Nil(t, err)
@@ -37,16 +39,10 @@ func TestBridgeMint(testSetup *testing.T) {
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Done.")
-
-		err = tenderlyClient.Revert(snapshotHash)
-		require.NoError(t, err)
 	})
 
-	t.RunWithTimeout("Mint ZCN tokens", time.Minute*10, func(t *test.SystemTest) {
-		snapshotHash, err := tenderlyClient.CreateSnapshot()
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitBalance(ethereumAddress)
+	t.RunSequentiallyWithTimeout("Mint ZCN tokens", time.Minute*10, func(t *test.SystemTest) {
+		err := tenderlyClient.InitBalance(ethereumAddress)
 		require.NoError(t, err)
 
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
@@ -64,9 +60,6 @@ func TestBridgeMint(testSetup *testing.T) {
 		require.Nil(t, err, "error: %s", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Done.")
-
-		err = tenderlyClient.Revert(snapshotHash)
-		require.NoError(t, err)
 	})
 }
 
@@ -99,6 +92,24 @@ func mintWrappedZcnTokens(t *test.SystemTest, retry bool) ([]string, error) {
 	)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
+// nolint
+func resetUserNonce(t *test.SystemTest, retry bool) ([]string, error) {
+	t.Logf("Reset user nonce...")
+	cmd := fmt.Sprintf(
+		"./zwallet reset-user-nonce --silent "+
+			"--configDir ./config --config %s --wallet %s --path %s",
+		configPath,
+		escapedTestName(t)+"_wallet.json",
+		configDir,
+	)
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
