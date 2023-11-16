@@ -26,6 +26,10 @@ func TestBridgeMint(testSetup *testing.T) {
 		output, err := executeFaucetWithTokens(t, configPath, 2.0)
 		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
+		output, err = resetUserNonce(t, true)
+		require.Nil(t, err)
+		require.Greater(t, len(output), 0)
+
 		output, err = burnZcn(t, "1", false)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
@@ -88,6 +92,24 @@ func mintWrappedZcnTokens(t *test.SystemTest, retry bool) ([]string, error) {
 	)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
+// nolint
+func resetUserNonce(t *test.SystemTest, retry bool) ([]string, error) {
+	t.Logf("Reset user nonce...")
+	cmd := fmt.Sprintf(
+		"./zwallet reset-user-nonce --silent "+
+			"--configDir ./config --config %s --wallet %s --path %s",
+		configPath,
+		escapedTestName(t)+"_wallet.json",
+		configDir,
+	)
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
