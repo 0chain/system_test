@@ -1070,6 +1070,58 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 	return createAllocationTransactionPutResponse.Entity.Hash
 }
 
+func (c *APIClient) RegisterBlobber(t *test.SystemTest,
+	wallet *model.Wallet,
+	storageNode *model.StorageNode,
+	requiredTransactionStatus int,
+	expectedResponse string) string {
+	t.Log("Registering blobber...")
+
+	registerBlobberTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewRegisterBlobberTransactionData(storageNode),
+			Value:           tokenomics.IntToZCN(0),
+			TxnType:         SCTxType,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, registerBlobberTransactionPutResponse)
+
+	var registerBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		registerBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: registerBlobberTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+
+		if err != nil {
+			t.Log("Error registering blobber : ", err)
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if registerBlobberTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return registerBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus && registerBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput == expectedResponse
+	})
+
+	wallet.IncNonce()
+
+	return registerBlobberTransactionPutResponse.Entity.Hash
+}
+
 func (c *APIClient) CreateFreeAllocation(t *test.SystemTest,
 	wallet *model.Wallet,
 	scRestGetFreeAllocationBlobbersResponse *model.SCRestGetFreeAllocationBlobbersResponse,
