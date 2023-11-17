@@ -349,17 +349,27 @@ func (c *APIClient) V1ClientPut(t *test.SystemTest, clientPutRequest model.Walle
 func (c *APIClient) V1TransactionPut(
 	t *test.SystemTest,
 	internalTransactionPutRequest model.InternalTransactionPutRequest,
-	requiredStatusCode int,
+	requiredStatusCode int, options ...float64,
 ) (*model.TransactionPutResponse, *resty.Response, error) { //nolint
 
-	return c.V1TransactionPutWithNonceAndServiceProviders(t, internalTransactionPutRequest, requiredStatusCode, 0, nil)
+	t.Log(options)
+
+	return c.V1TransactionPutWithNonceAndServiceProviders(t, internalTransactionPutRequest, requiredStatusCode, 0, nil, options...)
 }
 
 func (c *APIClient) V1TransactionPutWithNonceAndServiceProviders(
 	t *test.SystemTest,
 	internalTransactionPutRequest model.InternalTransactionPutRequest,
-	requiredStatusCode, withNonce int, withProviders []string,
+	requiredStatusCode, withNonce int, withProviders []string, options ...float64,
 ) (*model.TransactionPutResponse, *resty.Response, error) { //nolint
+
+	txnFee := TxFee
+
+	if len(options) > 0 {
+		txnFee = options[0] * 1e10
+	}
+
+	t.Log(options, txnFee)
 
 	var transactionPutResponse *model.TransactionPutResponse
 
@@ -376,7 +386,7 @@ func (c *APIClient) V1TransactionPutWithNonceAndServiceProviders(
 		TxnOutputHash:    TxOutput,
 		TransactionValue: *TxValue,
 		TransactionType:  internalTransactionPutRequest.TxnType,
-		TransactionFee:   TxFee,
+		TransactionFee:   int64(txnFee),
 		TransactionData:  string(data),
 		CreationDate:     time.Now().Unix(),
 		Version:          TxVersion,
@@ -386,11 +396,13 @@ func (c *APIClient) V1TransactionPutWithNonceAndServiceProviders(
 		transactionPutRequest.TransactionNonce = withNonce
 	}
 
-	if internalTransactionPutRequest.TransactionData.Name == "pour" {
-		transactionPutRequest.TransactionFee = 0
-	} else {
-		fee := estimateTxnFee(t, c, &transactionPutRequest)
-		transactionPutRequest.TransactionFee = fee
+	if len(options) < 0 {
+		if internalTransactionPutRequest.TransactionData.Name == "pour" {
+			transactionPutRequest.TransactionFee = 0
+		} else {
+			fee := estimateTxnFee(t, c, &transactionPutRequest)
+			transactionPutRequest.TransactionFee = fee
+		}
 	}
 
 	if internalTransactionPutRequest.Value != nil {
@@ -910,6 +922,23 @@ func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wa
 	})
 
 	wallet.IncNonce()
+}
+
+func (c *APIClient) ExecuteFaucetWithTokensWithFee(t *test.SystemTest, wallet *model.Wallet, tokens float64, options ...float64) (*model.TransactionPutResponse, *resty.Response, error) {
+	t.Log("Execute faucet...")
+
+	pourZCN := tokenomics.IntToZCN(tokens)
+	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      FaucetSmartContractAddress,
+			TransactionData: model.NewFaucetTransactionData(),
+			Value:           pourZCN,
+			TxnType:         SCTxType,
+		},
+		HttpOkStatus)
+	return faucetTransactionPutResponse, resp, err
 }
 
 // ExecuteFaucetWithAssertions provides deep assertions
