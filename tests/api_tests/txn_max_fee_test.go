@@ -1,8 +1,9 @@
 package api_tests
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 )
