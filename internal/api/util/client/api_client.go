@@ -363,14 +363,6 @@ func (c *APIClient) V1TransactionPutWithNonceAndServiceProviders(
 	requiredStatusCode, withNonce int, withProviders []string, options ...float64,
 ) (*model.TransactionPutResponse, *resty.Response, error) { //nolint
 
-	txnFee := TxFee
-
-	if len(options) > 0 {
-		txnFee = options[0] * 1e10
-	}
-
-	t.Log(options, txnFee)
-
 	var transactionPutResponse *model.TransactionPutResponse
 
 	data, err := json.Marshal(internalTransactionPutRequest.TransactionData)
@@ -386,7 +378,7 @@ func (c *APIClient) V1TransactionPutWithNonceAndServiceProviders(
 		TxnOutputHash:    TxOutput,
 		TransactionValue: *TxValue,
 		TransactionType:  internalTransactionPutRequest.TxnType,
-		TransactionFee:   int64(txnFee),
+		TransactionFee:   int64(TxFee),
 		TransactionData:  string(data),
 		CreationDate:     time.Now().Unix(),
 		Version:          TxVersion,
@@ -396,13 +388,15 @@ func (c *APIClient) V1TransactionPutWithNonceAndServiceProviders(
 		transactionPutRequest.TransactionNonce = withNonce
 	}
 
-	if len(options) < 0 {
+	if len(options) <= 0 {
 		if internalTransactionPutRequest.TransactionData.Name == "pour" {
 			transactionPutRequest.TransactionFee = 0
 		} else {
 			fee := estimateTxnFee(t, c, &transactionPutRequest)
 			transactionPutRequest.TransactionFee = fee
 		}
+	} else {
+		transactionPutRequest.TransactionFee = int64(options[0] * 1e10)
 	}
 
 	if internalTransactionPutRequest.Value != nil {
