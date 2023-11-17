@@ -168,6 +168,13 @@ func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse *SCR
 	}
 }
 
+func NewRegisterBlobberTransactionData(scRegisterBlobberRequest *StorageNode) TransactionData {
+	return TransactionData{
+		Name:  "add_blobber",
+		Input: *scRegisterBlobberRequest,
+	}
+}
+
 func NewCreateFreeAllocationTransactionData(scRestGetFreeAllocationBlobbersResponse *SCRestGetFreeAllocationBlobbersResponse) TransactionData {
 	return TransactionData{
 		Name:  "free_allocation_request",
