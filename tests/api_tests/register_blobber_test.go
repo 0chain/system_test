@@ -1,10 +1,10 @@
 package api_tests
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -130,12 +130,13 @@ func TestRegisterBlobber(testSetup *testing.T) {
 func generateRandomString(length int) string {
 	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-	source := rand.NewSource(time.Now().UnixNano())
-	random := rand.New(source)
-
 	result := make([]byte, length)
 	for i := range result {
-		result[i] = charset[random.Intn(len(charset))]
+		randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		if err != nil {
+			panic(err)
+		}
+		result[i] = charset[randomIndex.Int64()]
 	}
 	return string(result)
 }
