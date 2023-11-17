@@ -352,8 +352,6 @@ func (c *APIClient) V1TransactionPut(
 	requiredStatusCode int, options ...float64,
 ) (*model.TransactionPutResponse, *resty.Response, error) { //nolint
 
-	t.Log(options)
-
 	return c.V1TransactionPutWithNonceAndServiceProviders(t, internalTransactionPutRequest, requiredStatusCode, 0, nil, options...)
 }
 
@@ -388,7 +386,7 @@ func (c *APIClient) V1TransactionPutWithNonceAndServiceProviders(
 		transactionPutRequest.TransactionNonce = withNonce
 	}
 
-	if len(options) <= 0 {
+	if len(options) == 0 {
 		if internalTransactionPutRequest.TransactionData.Name == "pour" {
 			transactionPutRequest.TransactionFee = 0
 		} else {
@@ -931,7 +929,7 @@ func (c *APIClient) ExecuteFaucetWithTokensWithFee(t *test.SystemTest, wallet *m
 			Value:           pourZCN,
 			TxnType:         SCTxType,
 		},
-		HttpOkStatus)
+		HttpOkStatus, options...)
 	return faucetTransactionPutResponse, resp, err
 }
 
