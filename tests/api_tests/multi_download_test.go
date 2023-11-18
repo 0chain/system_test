@@ -28,7 +28,7 @@ func TestMultiDownload(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID, "")
+			op := sdkClient.AddUploadOperation(t, "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
