@@ -156,7 +156,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		uploadOp := sdkClient.AddUploadOperation(t, allocationID)
+		uploadOp := sdkClient.AddUploadOperation(t, allocationID, "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)

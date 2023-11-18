@@ -17,7 +17,7 @@ import (
 
 func TestMultiOperation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.SetSmokeTests("Multi upload operations should work with 50 large and 50 small files")
+	t.SetSmokeTests("Multi upload operations should work")
 
 	t.RunSequentially("Multi upload operations should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
@@ -29,7 +29,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID)
+			op := sdkClient.AddUploadOperation(t, allocationID, "")
 			ops = append(ops, op)
 		}
 		start := time.Now()
@@ -42,7 +42,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		require.Equal(t, 10, len(listResult.Children), "files count mismatch expected %v actual %v", 10, len(listResult.Children))
 	})
 
-	t.RunSequentiallyWithTimeout("Multi upload operations should work with 50 large and 50 small files", 500*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Multi upload operations of single format should work with 50 large and 50 small files", 500*time.Minute, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
 		blobberRequirements.Size = 2 * GB
@@ -50,11 +50,11 @@ func TestMultiOperation(testSetup *testing.T) {
 		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
 		ops := make([]sdk.OperationRequest, 0, 100)
 		for i := 0; i < 50; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID, 1*KB)
+			op := sdkClient.AddUploadOperation(t, allocationID, "", 1*KB)
 			ops = append(ops, op)
 		}
 		for i := 0; i < 50; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID, 40*MB)
+			op := sdkClient.AddUploadOperation(t, allocationID, "", 40*MB)
 			ops = append(ops, op)
 		}
 		start := time.Now()
@@ -68,7 +68,44 @@ func TestMultiOperation(testSetup *testing.T) {
 		require.Equal(t, 100, len(listResult.Children), "files count mismatch expected %v actual %v", 100, len(listResult.Children))
 	})
 
-	t.Skip()
+	t.RunSequentiallyWithTimeout("Multi upload operations of multiple formats should work with 50 large and 50 small files", 500*time.Minute, func(t *test.SystemTest) {
+		var fileExtensions = []string{
+			".txt", ".docx", ".pdf", ".jpg", ".png", ".mp3", ".mp4", ".xlsx", ".html", ".json",
+			".csv", ".xml", ".zip", ".rar", ".gz", ".tar", ".avi", ".mov", ".wav", ".ogg", ".bmp",
+			".gif", ".svg", ".tiff", ".ico", ".py", ".c", ".java", ".php", ".js", ".css", ".scss",
+			".yaml", ".sql", ".md", ".go", ".rb", ".cpp", ".h", ".sh", ".bat", ".dll", ".class",
+			".jar", ".exe", ".psd", ".pptx", ".xls", ".ppt", ".key", ".numbers", ".m4a", ".flv",
+			".html", ".jsp", ".jspf", ".jspx", ".wma", ".wmv", ".asf", ".mov", ".qt", ".fla",
+			".swf", ".ai", ".indd", ".dwg", ".dxf", ".eps", ".rtf", ".aac", ".ac3", ".m4v", ".vob",
+			".3gp", ".webm", ".tif", ".jfif", ".jp2", ".jpx", ".jb2", ".j2k", ".jpf", ".dds", ".raw",
+			".webp", ".svgz", ".eps", ".ai", ".odt", ".ott", ".sxw", ".stw", ".odp", ".otp", ".sxi",
+			".sti", ".odg", ".otg", ".sxd",
+		}
+
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements.Size = 2 * GB
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		ops := make([]sdk.OperationRequest, 0, 100)
+		for i := 0; i < 50; i++ {
+			op := sdkClient.AddUploadOperation(t, allocationID, fileExtensions[i], 1*KB)
+			ops = append(ops, op)
+		}
+		for i := 0; i < 50; i++ {
+			op := sdkClient.AddUploadOperation(t, allocationID, fileExtensions[50+i], 40*MB)
+			ops = append(ops, op)
+		}
+		start := time.Now()
+
+		t.Log("Multi upload operations started")
+
+		sdkClient.MultiOperation(t, allocationID, ops)
+		end := time.Since(start)
+		t.Logf("Multi upload operations took %v", end)
+		listResult := sdkClient.GetFileList(t, allocationID, "/")
+		require.Equal(t, 100, len(listResult.Children), "files count mismatch expected %v actual %v", 100, len(listResult.Children))
+	})
 
 	t.RunSequentially("Multi upload operations should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
@@ -80,7 +117,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID)
+			op := sdkClient.AddUploadOperation(t, allocationID, "")
 			ops = append(ops, op)
 		}
 		start := time.Now()
@@ -103,7 +140,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID)
+			op := sdkClient.AddUploadOperation(t, allocationID, "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -134,7 +171,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID)
+			op := sdkClient.AddUploadOperation(t, allocationID, "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -165,7 +202,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID)
+			op := sdkClient.AddUploadOperation(t, allocationID, "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -196,7 +233,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID)
+			op := sdkClient.AddUploadOperation(t, allocationID, "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -236,7 +273,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID)
+			op := sdkClient.AddUploadOperation(t, allocationID, "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -279,7 +316,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID)
+			op := sdkClient.AddUploadOperation(t, allocationID, "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)

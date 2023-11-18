@@ -320,11 +320,11 @@ func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops 
 	require.NoError(t, err)
 }
 
-func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string, opts ...int64) sdk.OperationRequest {
+func (c *SDKClient) AddUploadOperation(t *test.SystemTest, allocationID string, format string, opts ...int64) sdk.OperationRequest {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
-	tmpFile, err := os.CreateTemp("", "*")
+	tmpFile, err := os.CreateTemp("", "*"+format)
 	if err != nil {
 		require.NoError(t, err)
 	}
