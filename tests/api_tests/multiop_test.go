@@ -17,7 +17,7 @@ import (
 
 func TestMultiOperation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.SetSmokeTests("Multi different operations should work")
+	t.SetSmokeTests("Multi upload operations should work with 50 large and 50 small files")
 
 	t.RunSequentially("Multi upload operations should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
