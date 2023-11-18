@@ -340,6 +340,11 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, format string, opts .
 		require.NoError(t, err)
 	} //nolint:gosec,revive
 
+	_, err = tmpFile.Write(rawBuf)
+	require.NoError(t, err)
+	_, err = tmpFile.Seek(0, 0)
+	require.NoError(t, err)
+
 	fileMeta := sdk.FileMeta{
 		Path:       tmpFile.Name(),
 		ActualSize: actualSize,
@@ -347,14 +352,12 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, format string, opts .
 		RemotePath: "/" + filepath.Join("", filepath.Base(tmpFile.Name())),
 	}
 
-	buf := bytes.NewBuffer(rawBuf)
-
 	homeDir, err := config.GetHomeDir()
 	require.NoError(t, err)
 
 	return sdk.OperationRequest{
 		OperationType: constants.FileOperationInsert,
-		FileReader:    buf,
+		FileReader:    tmpFile,
 		FileMeta:      fileMeta,
 		Workdir:       homeDir,
 		RemotePath:    fileMeta.RemotePath,
