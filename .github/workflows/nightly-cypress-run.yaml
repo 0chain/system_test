@@ -3,9 +3,9 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 on:
-  schedule:
-    # Runs every morning at 4am UTC
-    - cron: '0 4 * * *'
+  # schedule:
+  #   # Runs every morning at 4am UTC
+  #   - cron: '0 4 * * *'
   workflow_dispatch:
 
 jobs:
