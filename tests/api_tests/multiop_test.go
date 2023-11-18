@@ -19,6 +19,28 @@ func TestMultiOperation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Multi different operations should work")
 
+	t.RunSequentiallyWithTimeout("Multi upload operations should work with 50 large and 50 small files", 5*time.Minute, func(t *test.SystemTest) {
+		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		ops := make([]sdk.OperationRequest, 0, 100)
+		for i := 0; i < 50; i++ {
+			op := sdkClient.AddUploadOperation(t, allocationID, 1*KB)
+			ops = append(ops, op)
+		}
+		for i := 0; i < 50; i++ {
+			op := sdkClient.AddUploadOperation(t, allocationID, 40*MB)
+			ops = append(ops, op)
+		}
+		start := time.Now()
+		sdkClient.MultiOperation(t, allocationID, ops)
+		end := time.Since(start)
+		t.Logf("Multi upload operations took %v", end)
+		listResult := sdkClient.GetFileList(t, allocationID, "/")
+		require.Equal(t, 100, len(listResult.Children), "files count mismatch expected %v actual %v", 100, len(listResult.Children))
+	})
+
 	t.RunSequentially("Multi upload operations should work", func(t *test.SystemTest) {
 		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
