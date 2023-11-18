@@ -33,7 +33,7 @@ func TestMultiOperation(testSetup *testing.T) {
 	t.SetSmokeTests("Multi upload operations should work")
 
 	t.RunSequentially("Multi upload operations should work", func(t *test.SystemTest) {
-		createAllocationAndPerformMultiOperation(t, 1*KB, 10, 10, false, []int64{}, "")
+		createAllocationAndPerformMultiOperation(t, 0, 10, 10, false, []int64{}, "")
 	})
 
 	t.RunSequentiallyWithTimeout("Multi upload operations of single format should work with 50 large and 50 small files", 500*time.Minute, func(t *test.SystemTest) {
@@ -45,15 +45,15 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi delete operations should work", func(t *test.SystemTest) {
-		createAllocationAndPerformMultiOperation(t, 1*KB, 10, 0, false, []int64{}, "delete")
+		createAllocationAndPerformMultiOperation(t, 0, 10, 0, false, []int64{}, "delete")
 	})
 
 	t.RunSequentially("Multi update operations should work", func(t *test.SystemTest) {
-		createAllocationAndPerformMultiOperation(t, 1*KB, 10, 10, false, []int64{}, "update")
+		createAllocationAndPerformMultiOperation(t, 0, 10, 10, false, []int64{}, "update")
 	})
 
 	t.RunSequentially("Multi rename operations should work", func(t *test.SystemTest) {
-		createAllocationAndPerformMultiOperation(t, 1*KB, 10, 10, false, []int64{}, "rename")
+		createAllocationAndPerformMultiOperation(t, 0, 10, 10, false, []int64{}, "rename")
 	})
 
 	t.RunSequentially("Multi different operations should work", func(t *test.SystemTest) {
