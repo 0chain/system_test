@@ -63,7 +63,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 10, client.TxSuccessfulStatus)
 
 		fileSize := int64(1 * MB)
-		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
+		uploadOp := sdkClient.AddUploadOperation(t, "", fileSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 	})
 
@@ -95,7 +95,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		fileSize := int64(1 * MB)
-		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
+		uploadOp := sdkClient.AddUploadOperation(t, "", fileSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 		time.Sleep(waitTime)
@@ -134,7 +134,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		fileSize := int64(10 * MB)
-		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
+		uploadOp := sdkClient.AddUploadOperation(t, "", fileSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 		time.Sleep(waitTime)
@@ -173,7 +173,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		fileSize := int64(100 * MB)
-		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
+		uploadOp := sdkClient.AddUploadOperation(t, "", fileSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 		time.Sleep(waitTime)
@@ -212,7 +212,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		fileSize := int64(1 * GB)
-		uploadOp := sdkClient.AddUploadOperation(t, allocationID, fileSize)
+		uploadOp := sdkClient.AddUploadOperation(t, "", fileSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 		time.Sleep(waitTime)
