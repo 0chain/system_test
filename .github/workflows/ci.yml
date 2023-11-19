@@ -5,6 +5,8 @@ concurrency:
   cancel-in-progress: true
 on:
   push:
+    branches: [ master, staging, sprint* ]
+  pull_request:
   workflow_dispatch:
     inputs:
       repo_snapshots_branch:
