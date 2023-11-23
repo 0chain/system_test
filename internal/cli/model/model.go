@@ -58,7 +58,6 @@ type Allocation struct {
 	Owner          string    `json:"owner_id"`
 	OwnerPublicKey string    `json:"owner_public_key"`
 	Payer          string    `json:"payer_id"`
-	MinLockDemand  float64   `json:"min_lock_demand"`
 	Blobbers       []Blobber `json:"blobbers"`
 	// Stats          *AllocationStats          `json:"stats"`
 	TimeUnit    time.Duration `json:"time_unit"`
@@ -252,7 +251,6 @@ type BlobberAllocation struct {
 	BlobberID       string `json:"blobber_id"`
 	Size            int64  `json:"size"`
 	Terms           Terms  `json:"terms"`
-	MinLockDemand   int64  `json:"min_lock_demand"`
 	Spent           int64  `json:"spent"`
 	Penalty         int64  `json:"penalty"`
 	ReadReward      int64  `json:"read_reward"`
@@ -640,8 +638,7 @@ type EventDBTransaction struct {
 type Reward int
 
 const (
-	MinLockDemandReward Reward = iota
-	BlockRewardMiner
+	BlockRewardMiner Reward = iota
 	BlockRewardSharder
 	BlockRewardBlobber
 	FeeRewardMiner
@@ -740,7 +737,6 @@ var StorageKeySettings = []string{
 
 var StorageFloatSettings = []string{
 	"cancellation_charge",
-	"min_lock_demand",
 	"free_allocation_settings.read_pool_fraction",
 	"validator_reward",
 	"blobber_slash",
