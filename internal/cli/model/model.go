@@ -638,8 +638,7 @@ type EventDBTransaction struct {
 type Reward int
 
 const (
-	MinLockDemandReward Reward = iota
-	BlockRewardMiner
+	BlockRewardMiner Reward = iota
 	BlockRewardSharder
 	BlockRewardBlobber
 	FeeRewardMiner

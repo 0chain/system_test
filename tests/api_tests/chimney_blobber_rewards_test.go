@@ -30,8 +30,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 	type Reward int
 	const (
-		MinLockDemandReward Reward = iota
-		BlockRewardMiner
+		BlockRewardMiner Reward = iota
 		BlockRewardSharder
 		BlockRewardBlobber
 		FeeRewardMiner
@@ -62,7 +61,6 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		actualChallengeRewards          float64
 		actualBlobberChallengeRewards   float64
 		actualValidatorChallengeRewards float64
-		actualMinLockDemandReward       float64
 
 		totalBlockRewardPerRound float64
 		totalRounds              int64
@@ -276,14 +274,6 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 		// Reduce expected write pool
 		expectedWritePoolBalance -= actualChallengeRewards
-
-		// Total Min Lock Demand Reward
-		minLockDemandQuery := fmt.Sprintf("allocation_id = '%s' AND reward_type = %d", allocationID, MinLockDemandReward)
-		queryMinLockDemand := chimneyClient.GetRewardsByQuery(t, minLockDemandQuery, client.HttpOkStatus)
-		actualMinLockDemandReward = queryMinLockDemand.TotalReward
-
-		// Reduce expected write pool
-		expectedWritePoolBalance -= actualMinLockDemandReward
 
 		afterWallet = chimneyClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 		require.InEpsilon(t, afterWallet.Balance-beforeWallet.Balance, expectedWritePoolBalance, extraErrorMargin, "Expected write pool balance is not equal to actual")
