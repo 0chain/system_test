@@ -60,7 +60,7 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 		// Stake tokens against this blobber
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobberID,
-			"tokens":     5.0,
+			"tokens":     1.0,
 		}), true)
 		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
