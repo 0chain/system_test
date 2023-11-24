@@ -149,7 +149,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 		}
 
 		// Calculating expected cancellation charge
-		expectedCancellationCharge = expectedAllocationCost * 0.2
+		expectedCancellationCharge = expectedAllocationCost*0.2 - float64(alloc.MovedToChallenge-alloc.MovedBack)
 		expectedWritePoolBalance = 5e13
 
 		for _, blobber := range alloc.Blobbers {
