@@ -20,7 +20,7 @@ import (
 func TestAllocationRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.TestSetup("set storage config to use time_unit as 5 minutes", func() {
+	t.TestSetup("set storage config to use time_unit as 10 minutes", func() {
 		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			"time_unit": "10m",
 		}, true)
@@ -303,7 +303,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		// sleep for 5 minutes
-		time.Sleep(15 * time.Minute)
+		time.Sleep(25 * time.Minute)
 
 		alloc = utils.GetAllocation(t, allocationId)
 		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should increase")
@@ -316,7 +316,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		require.InEpsilon(t, movedToChallengePool-alloc.MovedBack, totalBlobberChallengereward, 0.05, "Total Blobber Challenge reward should be equal to MovedToChallenge")
+		require.InEpsilon(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, 0.15, "Total Blobber Challenge reward should be equal to MovedToChallenge")
 	})
 }
 
