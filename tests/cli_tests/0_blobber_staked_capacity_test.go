@@ -79,7 +79,7 @@ func TestStakePool(testSetup *testing.T) {
 		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates-1)
 
 		// Unstake tokens from old wallet (should return error and number of delegate should not decrease)
-		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}), false)
+		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}), false)
 		require.Error(t, err, "No error in unstaking tokens from old wallet for blobber %s", minAvailableCapacityBlobber.Id)
 
 		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates)
