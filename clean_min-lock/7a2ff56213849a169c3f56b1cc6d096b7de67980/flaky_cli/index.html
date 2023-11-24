@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Subset of 0Chain System test suite [clean_min-lock/7a2ff562] ran against [dev-5.devnet-0chain.net] at [2023-11-24_15.54.14]</title>
+    <title>0Chain Flaky system test suite [clean_min-lock/7a2ff562] ran against [dev-5.devnet-0chain.net] at [2023-11-24_15.54.14]</title>
     <style type="text/css">
         body {
             font-family: sans-serif;
@@ -234,24 +234,20 @@
 </head>
 <body>
 <div class="pageHeader">
-    <span class="projectTitle">Subset of 0Chain System test suite [clean_min-lock/7a2ff562] ran against [dev-5.devnet-0chain.net] at [2023-11-24_15.54.14]</span>
+    <span class="projectTitle">0Chain Flaky system test suite [clean_min-lock/7a2ff562] ran against [dev-5.devnet-0chain.net] at [2023-11-24_15.54.14]</span>
     <div class="testStats">
-        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>2</strong>Duration: <strong>0s</strong>
-        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>2</strong>
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>0</strong>Duration: <strong>0s</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>0</strong>
         </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
         </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
         </span>
     </div>
     <span class="testGroupsTitle">Test Groups:</span>
-    <span class="testExecutionDate">November 24, 2023 15:56:07</span>
+    <span class="testExecutionDate">November 24, 2023 15:56:15</span>
 </div>
 <div class="testReportContainer">
     <div class="cardContainer">
         <div id="testResults">
-            
-                <div class="testResultGroup  " id="0"></div>
-            
-                <div class="testResultGroup  " id="1"></div>
             
         </div>
     </div>
@@ -456,7 +452,7 @@ window.GoTestReport = function (elements) {
 
     
 
-    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestStakePool","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":107.43,"Output":["","    system_test_framework.go:70: Test setup [register wallet and get blobbers] scheduled at [11-24-2023 15:54:19] \n","    system_test_framework.go:80: Test setup [register wallet and get blobbers] start at [11-24-2023 15:54:19] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:963: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestStakePool_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  d6aa985239689dab6642fc5d56adee2f43fb25d8b198ce9afeae80ee86015060]\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    system_test_framework.go:93: Test setup [register wallet and get blobbers] exit at [11-24-2023 15:54:22]\n","--- PASS: TestStakePool (107.43s)",""],"Passed":true,"Skipped":false,"TestFileName":"0_blobber_staked_capacity_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestStakePool/Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":104.32,"Output":["","    0_blobber_staked_capacity_test.go:33: Test case [Total stake in a blobber can never be less than it's used capacity] scheduled at [11-24-2023 15:54:22] \n","    system_test_framework.go:149: Test case [Total stake in a blobber can never be less than it's used capacity] start at [11-24-2023 15:54:22] \n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:963: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/TestStakePool-Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  c387c6c51e8adfbb54ce015faac16ba2d844439950098047bab9646ebb391889]\n","    zboxcli_stake_unstake_token_test.go:275: Requesting blobber list...\n","    zboxcli_update_allocation_test.go:963: Executing faucet...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_update_allocation_test.go:963: Executing faucet...\n","    zboxcli_update_allocation_test.go:963: Executing faucet...\n","    zboxcli_create_allocation_test.go:457: Creating new allocation...\n","    zboxcli_blobber_config_update_test.go:273: Requesting blobber info...\n","    zwalletcli_register_wallet_test.go:123: creating wallet...\n","    zboxcli_update_allocation_test.go:963: Executing faucet...\n","    zwalletcli_register_wallet_test.go:140: faucet output: [No wallet in path  config/newStakeWallet_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  166173c94cf684120ee5f5bdd202ae65540d44a1036a684e9d5bf2d621fca74f]\n","    zboxcli_update_allocation_test.go:963: Executing faucet...\n","    zboxcli_stake_unstake_token_test.go:289: Staking tokens...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_stake_unstake_token_test.go:308: Unlocking tokens from stake pool...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_stake_unstake_token_test.go:308: Unlocking tokens from stake pool...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    zboxcli_cancel_allocation_test.go:110: Canceling allocation...\n","    zboxcli_stake_unstake_token_test.go:308: Unlocking tokens from stake pool...\n","    zboxcli_stake_unstake_token_test.go:299: Fetching stake pool info...\n","    0_blobber_staked_capacity_test.go:33: Test case [Total stake in a blobber can never be less than it's used capacity] exit at [11-24-2023 15:55:42]\n","--- PASS: TestStakePool/Total_stake_in_a_blobber_can_never_be_less_than_it's_used_capacity (104.32s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+    const data =  null 
 
     const report = window.GoTestReport({
                                          data: data,
