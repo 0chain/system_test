@@ -1,13 +1,14 @@
 package api_tests
 
 import (
+	"testing"
+	"time"
+
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestAllocationUpdateLockAmount(testSetup *testing.T) {
@@ -302,4 +303,4 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 	})
 }
 
-//https://dev-4.devnet-0chain.net/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/allocation-update-min-lock?data=%7B%22add_blobber_id%22%3A%22%22%2C%22extend%22%3Afalse%2C%22id%22%3A%2274613ab72f1cfb671994eec8ec9bde9181b273a62908afc955a3efc73ce5d4dd%22%2C%22owner_id%22%3A%226d02a02cb9cbddd76f7e3981eae473b86dc488e558cbaffbe0549b31926605b3%22%2C%22owner_public_key%22%3A%22%22%2C%22remove_blobber_id%22%3A%22%22%2C%22size%22%3A0%7D
+//https://dev-1.devnet-0chain.net/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/allocation-update-min-lock?data=%7B%22add_blobber_id%22%3A%22%22%2C%22extend%22%3Afalse%2C%22id%22%3A%22a50b5e9e0b24569b04b3f8c45a67730e11a0b9fe1840a88c130efa7ec34c6a73%22%2C%22owner_id%22%3A%226d02a02cb9cbddd76f7e3981eae473b86dc488e558cbaffbe0549b31926605b3%22%2C%22owner_public_key%22%3A%22%22%2C%22remove_blobber_id%22%3A%22%22%2C%22size%22%3A0%7D
