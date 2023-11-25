@@ -108,7 +108,7 @@ jobs:
           echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
 
       - name: 'Setup jq'
-        uses: dcarbone/install-jq-action@v2
+        uses: dcarbone/install-jq-action@v2.1.0
         with:
           version: '1.7'
           force: 'false'
