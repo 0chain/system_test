@@ -115,11 +115,11 @@ jobs:
             
       - name: "Create Tenderly fork"
         run: |
-          export TENDERLY_FORK_ID=$(curl -X POST \
+          echo $(curl -X POST \
               -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
               -H "Content-Type: application/json" \
               -d '{"alias":"", "description":"", "network_id":"1"}' \
-              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork | jq '.simulation_fork.id')
+              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork | jq '.simulation_fork.id') >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
@@ -165,6 +165,14 @@ jobs:
           status_name: "0Chain System Tests"
           target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           github_token: ${{ github.token }}
+        
+      - name: "Remove Tenderly fork"
+        if: always()
+        run: |
+          curl -X DELETE \
+            -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
+            -H "Content-Type: application/json" \
+            https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_FORK_ID }}
 
   set-build-conclusion:
     name: "Set build conclusion"
