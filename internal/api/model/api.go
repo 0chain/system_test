@@ -724,7 +724,6 @@ type SCRestGetAllocationResponse struct {
 	MovedToChallenge  int64            `json:"moved_to_challenge"`
 	MovedBack         int64            `json:"moved_back"`
 	MovedToValidators int64            `json:"moved_to_validators"`
-	MinLockDemand     float64          `json:"min_lock_demand"`
 	ReadPriceRange    PriceRange       `json:"read_price_range"`
 	WritePriceRange   PriceRange       `json:"write_price_range"`
 }
