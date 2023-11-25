@@ -7,12 +7,13 @@ import (
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 	"testing"
+	"time"
 )
 
 func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.RunSequentially("Extend Allocation Size", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Extend Allocation Size", 1*time.Minute, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 10, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -31,6 +32,42 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 1*GB, false, "", "")
 		require.NoError(t, err)
 
+		minLockRequiredInZcn := float64(minLockRequired) / 1e10
+
+		require.Equal(t, 0.2, minLockRequiredInZcn, "Min lock required is not correct")
+
+		t.Logf("Min lock required: %v", minLockRequired)
+
+		apiClient.UpdateAllocation(t, sdkWallet, allocationID, uar, minLockRequiredInZcn, client.TxSuccessfulStatus)
+		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+
+		require.Equal(t, int64(2*GB), alloc.Size, "Allocation size is not updated")
+	})
+
+	t.RunSequentiallyWithTimeout("Extend Allocation Size where used size is greater than 0", 5*time.Minute, func(t *test.SystemTest) {
+		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 10, client.TxSuccessfulStatus)
+
+		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements.Size = 1 * GB
+		blobberRequirements.DataShards = 1
+		blobberRequirements.ParityShards = 1
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.2, client.TxSuccessfulStatus)
+		t.Log("Allocation ID: ", allocationID)
+
+		uploadOp := sdkClient.AddUploadOperation(t, "", 10*MB)
+		chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
+
+		time.Sleep(2 * time.Minute)
+
+		uar := &model.UpdateAllocationRequest{
+			ID:   allocationID,
+			Size: 1 * GB,
+		}
+
+		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 1*GB, false, "", "")
+		require.NoError(t, err)
+
 		//minLockRequiredInZcn := float64(minLockRequired) / 1e10
 
 		//require.Equal(t, 0.2, minLockRequiredInZcn, "Min lock required is not correct")
@@ -40,12 +77,10 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		apiClient.UpdateAllocation(t, sdkWallet, allocationID, uar, 0.2, client.TxSuccessfulStatus)
 		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
-		require.Equal(t, 1*GB, alloc.Size, "Allocation size is not updated")
+		require.Equal(t, int64(2*GB), alloc.Size, "Allocation size is not updated")
 	})
 
-	t.Skip()
-
-	t.RunSequentially("Extend Allocation Duration", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Extend Allocation Duration", 1*time.Minute, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 10, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -67,10 +102,10 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		apiClient.UpdateAllocation(t, sdkWallet, allocationID, uar, float64(minLockRequired), client.TxSuccessfulStatus)
 		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
-		require.Equal(t, 1*GB, alloc.Size, "Allocation size is not updated")
+		require.Equal(t, int64(1*GB), alloc.Size, "Allocation size is not updated")
 	})
 
-	t.RunSequentially("Add blobber to allocation", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Add blobber to allocation", 1*time.Minute, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 10, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -97,10 +132,10 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		apiClient.UpdateAllocation(t, sdkWallet, allocationID, uar, float64(minLockRequired), client.TxSuccessfulStatus)
 		alloc = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
-		require.Equal(t, 1*GB, alloc.Size, "Allocation size is not updated")
+		require.Equal(t, int64(1*GB), alloc.Size, "Allocation size is not updated")
 	})
 
-	t.RunSequentially("Replace blobber", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Replace blobber", 1*time.Minute, func(t *test.SystemTest) {
 		apiClient.ExecuteFaucetWithTokens(t, sdkWallet, 10, client.TxSuccessfulStatus)
 
 		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
@@ -130,7 +165,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		apiClient.UpdateAllocation(t, sdkWallet, allocationID, uar, float64(minLockRequired), client.TxSuccessfulStatus)
 		alloc = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
-		require.Equal(t, 1*GB, alloc.Size, "Allocation size is not updated")
+		require.Equal(t, int64(1*GB), alloc.Size, "Allocation size is not updated")
 	})
 }
 
