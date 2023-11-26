@@ -121,6 +121,8 @@ jobs:
               -d '{"alias":"", "description":"", "network_id":"1"}' \
               https://api.tenderly.co/api/v1/account/zus_network/project/project/fork | jq -r '.simulation_fork.id')" >> $GITHUB_ENV
 
+      - name: "Transfer ownership in Tenderly fork"
+        run: |
           curl -X POST \
               -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
               -H "Content-Type: application/json" \
@@ -167,8 +169,6 @@ jobs:
                 "description": ""
             }' \
               https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_FORK_ID }}/simulate
-
-          echo "https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_FORK_ID }}/simulate"
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
