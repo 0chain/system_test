@@ -551,7 +551,7 @@ type UpdateAllocationRequest struct {
 	Name                 string `json:"name"`
 	OwnerID              string `json:"owner_id"`
 	Size                 int64  `json:"size"`
-	Expiration           int64  `json:"expiration_date"`
+	Extend               bool   `json:"extend"`
 	SetImmutable         bool   `json:"set_immutable"`
 	AddBlobberId         string `json:"add_blobber_id"`
 	RemoveBlobberId      string `json:"remove_blobber_id"`

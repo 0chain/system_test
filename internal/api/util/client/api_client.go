@@ -1177,6 +1177,7 @@ func (c *APIClient) UpdateAllocation(
 	wallet *model.Wallet,
 	allocationID string,
 	uar *model.UpdateAllocationRequest,
+	lock float64,
 	requiredTransactionStatus int) {
 	t.Log("Update allocation...")
 	uar.ID = allocationID
@@ -1186,7 +1187,7 @@ func (c *APIClient) UpdateAllocation(
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewUpdateAllocationTransactionData(uar),
-			Value:           tokenomics.IntToZCN(0.1),
+			Value:           tokenomics.IntToZCN(lock),
 			TxnType:         SCTxType,
 		},
 		HttpOkStatus)
