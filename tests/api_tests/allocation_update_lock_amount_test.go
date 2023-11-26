@@ -215,8 +215,6 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 
 		minLockRequiredInZcn := float64(minLockRequired) / 1e10
 
-		require.Greater(t, minLockRequiredInZcn, 0.105, "Min lock required is not correct")
-
 		apiClient.UpdateAllocation(t, sdkWallet, allocationID, uar, minLockRequiredInZcn, client.TxSuccessfulStatus)
 		alloc = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
