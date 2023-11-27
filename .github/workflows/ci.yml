@@ -121,6 +121,8 @@ jobs:
               -d '{"alias":"${{ env.sha_short }}", "description":"", "network_id":"1"}' \
               https://api.tenderly.co/api/v1/account/zus_network/project/project/fork)" >> $GITHUB_ENV
 
+      - name: "Parse Tenderly fork creation transaction result"
+        run: |
           echo "TENDERLY_FORK_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.simulation_fork.id')"
           echo "TENDERLY_ROOT_TRANSACTION_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.root_transaction.id')"
 
