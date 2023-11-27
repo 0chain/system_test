@@ -115,11 +115,14 @@ jobs:
             
       - name: "Create Tenderly fork"
         run: |
-          echo "TENDERLY_FORK_ID=$(curl -X POST \
+          echo "TENDERLY_CREATION_INFO=$(curl -X POST \
               -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
               -H "Content-Type: application/json" \
               -d '{"alias":"${{ env.sha_short }}", "description":"", "network_id":"1"}' \
-              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork | jq -r '.simulation_fork.id')" >> $GITHUB_ENV
+              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork)" >> $GITHUB_ENV
+
+          echo "TENDERLY_FORK_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.simulation_fork.id')"
+          echo "TENDERLY_ROOT_TRANSACTION_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.root_transaction.id')"
 
       - name: "Retrieve Tenderly fork block number"
         run: |
@@ -150,7 +153,7 @@ jobs:
                 "save": true,
                 "source": "dashboard",
                 "block_header": null,
-                "root": "${{ env.TENDERLY_FORK_ID }}",
+                "root": "${{ env.TENDERLY_ROOT_TRANSACTION_ID }}",
                 "skip_fork_head_update": false,
                 "alias": "${{ env.sha_short }}",
                 "description": "Transfer ownership to 0x8E25cfd9bd6c0ca67a5522cd920b3c66D39d6E97"
