@@ -123,8 +123,8 @@ jobs:
 
       - name: "Parse Tenderly fork creation transaction result"
         run: |
-          echo "TENDERLY_FORK_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.simulation_fork.id')"
-          echo "TENDERLY_ROOT_TRANSACTION_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.root_transaction.id')"
+          echo "TENDERLY_FORK_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.simulation_fork.id')" >> $GITHUB_ENV
+          echo "TENDERLY_ROOT_TRANSACTION_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.root_transaction.id')" >> $GITHUB_ENV
 
       - name: "Retrieve Tenderly fork block number"
         run: |
