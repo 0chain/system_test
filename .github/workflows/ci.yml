@@ -128,6 +128,8 @@ jobs:
               -H "Content-Type: application/json" \
               https://api.tenderly.co/api/v1/network/1/block-number | jq -r '.block_number')" >> $GITHUB_ENV
 
+          echo "TENDERLY_FORK_BLOCK_NUMBER=$((${{ env.TENDERLY_FORK_BLOCK_NUMBER }} + 1))" >> GITHUB_ENV
+
       - name: "Transfer ownership in Tenderly fork"
         run: |
           curl -X POST \
@@ -135,7 +137,7 @@ jobs:
               -H "Content-Type: application/json" \
               -d '{
                 "network_id": "1",
-                "block_number": $((${{ env.TENDERLY_FORK_BLOCK_NUMBER }} + 1)),
+                "block_number": ${{ env.TENDERLY_FORK_BLOCK_NUMBER }},
                 "transaction_index": null,
                 "from": "0xed8f3170db6d1a71c8fa6d8d73cc2c51db95d5a4",
                 "input": "0xf2fde38b0000000000000000000000008e25cfd9bd6c0ca67a5522cd920b3c66d39d6e97",
