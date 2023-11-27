@@ -121,6 +121,13 @@ jobs:
               -d '{"alias":"", "description":"", "network_id":"1"}' \
               https://api.tenderly.co/api/v1/account/zus_network/project/project/fork | jq -r '.simulation_fork.id')" >> $GITHUB_ENV
 
+      - name: "Retrieve Tenderly fork block number"
+        run: |
+          echo "TENDERLY_FORK_BLOCK_NUMBER=$(curl -X GET \
+              -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
+              -H "Content-Type: application/json" \
+              https://api.tenderly.co/api/v1/network/1/block-number | jq -r '.block_number')" >> $GITHUB_ENV
+
       - name: "Transfer ownership in Tenderly fork"
         run: |
           curl -X POST \
@@ -128,8 +135,8 @@ jobs:
               -H "Content-Type: application/json" \
               -d '{
                 "network_id": "1",
-                "block_number": 18656387,
-                "transaction_index": 0,
+                "block_number": ${{ env.TENDERLY_FORK_BLOCK_NUMBER }},
+                "transaction_index": null,
                 "from": "0xed8f3170db6d1a71c8fa6d8d73cc2c51db95d5a4",
                 "input": "0xf2fde38b0000000000000000000000008e25cfd9bd6c0ca67a5522cd920b3c66d39d6e97",
                 "to": "0x7700d773022b19622095118fadf46f7b9448be9b",
@@ -140,30 +147,8 @@ jobs:
                 "generate_access_list": true,
                 "save": true,
                 "source": "dashboard",
-                "block_header": {
-                    "number": "0x11cac84",
-                    "hash": "0xe99a741abb254a804cfd81984ebbcd9fc56ca6551802e7a80cffda31869be8e8",
-                    "stateRoot": "0x944b2901bbdcb215dd4fbb465bb3e0a3607cbd527b9b15961718f5211b8212df",
-                    "parentHash": "0xf161f651128b7d413d70b2ad8bdeba68a537933c4d4a465de8f37d5a60ed819f",
-                    "sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
-                    "transactionsRoot": "0xabd37a8a708635dbc788c3f484471ac6e28d50dfc6568902e2109a0e9f89262c",
-                    "receiptsRoot": "0x2bd0553298599bee8726295f3c6352cfb8def4c9daa9ad4c1e5bbaa2e517c086",
-                    "logsBloom": "0x102b194241e0b689d238d53cb01156515bf85a116495575ca589100b54b6fc57e090b249c18d5028c212cd22c05a155006a5962cba10eb383dc49768a82e21300575dc8aef7621bd6b59762af42d08e8c48200950b76685651bd3054987103f0deb518293730488d1a48db651d203d4ee5f028281aa3171af71dc4b22c6aa34d4e80c2c62e11cb2508789cc1b3611426a0c89c01eb2019484cd21dd906504fab1ec71163e8206ac03a56fcb6a457022096fa8d0fea82a09429373e28096c3a6d9b8597a720be6c401ac1c4072f183a8400d0a30fd608a456a86f154e789afe32bcfeb809abcccaead4235fa00a78f6bc80cdde5501040048004e107be56f4c9d",
-                    "timestamp": "0x656353c1",
-                    "difficulty": "0x0",
-                    "gasLimit": "0x1c9c380",
-                    "gasUsed": "0xdccfab",
-                    "baseFeePerGas": "0x1",
-                    "miner": "0x95222290dd7278aa3ddd389cc1e1d165cc4bafe5",
-                    "extraData": "0x6265617665726275696c642e6f7267",
-                    "mixHash": "0xcb996fa30a75a63fc0daa415bc9fb04caa60649a426d4a4d0c2ceb1eb12ce1d9",
-                    "nonce": "0x0000000000000000",
-                    "size": "0x0",
-                    "totalDifficulty": "0x0",
-                    "transactions": null,
-                    "uncles": null
-                },
-                "root": "98d1b820-4e3e-4833-99f7-770d6794aab7",
+                "block_header": null,
+                "root": "${{ env.TENDERLY_FORK_ID }}",
                 "skip_fork_head_update": true,
                 "alias": "",
                 "description": ""
