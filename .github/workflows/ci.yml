@@ -135,7 +135,7 @@ jobs:
               -H "Content-Type: application/json" \
               -d '{
                 "network_id": "1",
-                "block_number": ${{ env.TENDERLY_FORK_BLOCK_NUMBER }},
+                "block_number": $((${{ env.TENDERLY_FORK_BLOCK_NUMBER }} + 1)),
                 "transaction_index": null,
                 "from": "0xed8f3170db6d1a71c8fa6d8d73cc2c51db95d5a4",
                 "input": "0xf2fde38b0000000000000000000000008e25cfd9bd6c0ca67a5522cd920b3c66d39d6e97",
