@@ -137,7 +137,7 @@ jobs:
 
       - name: "Transfer Bridge ownership in Tenderly fork"
         run: |
-          curl -X POST \
+          echo "TENDERLY_ROOT_TRANSACTION_ID=$(curl -X POST \
               -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
               -H "Content-Type: application/json" \
               -d '{
@@ -160,7 +160,7 @@ jobs:
                 "alias": "${{ env.sha_short }}",
                 "description": "Transfer ownership to 0x8E25cfd9bd6c0ca67a5522cd920b3c66D39d6E97"
             }' \
-              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_FORK_ID }}/simulate
+              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_FORK_ID }}/simulate | jq -r '.simulation.id')" >> $GITHUB_ENV
 
           echo "TENDERLY_FORK_BLOCK_NUMBER=$((${{ env.TENDERLY_FORK_BLOCK_NUMBER }} + 1))" >> GITHUB_ENV
 
