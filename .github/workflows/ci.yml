@@ -162,6 +162,8 @@ jobs:
             }' \
               https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_FORK_ID }}/simulate
 
+          echo "TENDERLY_FORK_BLOCK_NUMBER=$((${{ env.TENDERLY_FORK_BLOCK_NUMBER }} + 1))" >> GITHUB_ENV
+
       - name: "Transfer Authorizers ownership in Tenderly fork"
         run: |
           curl -X POST \
