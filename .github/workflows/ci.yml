@@ -135,7 +135,7 @@ jobs:
 
           echo "TENDERLY_FORK_BLOCK_NUMBER=$((${{ env.TENDERLY_FORK_BLOCK_NUMBER }} + 1))" >> GITHUB_ENV
 
-      - name: "Transfer ownership in Tenderly fork"
+      - name: "Transfer Bridge ownership in Tenderly fork"
         run: |
           curl -X POST \
               -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
@@ -147,6 +147,33 @@ jobs:
                 "from": "0xed8f3170db6d1a71c8fa6d8d73cc2c51db95d5a4",
                 "input": "0xf2fde38b0000000000000000000000008e25cfd9bd6c0ca67a5522cd920b3c66d39d6e97",
                 "to": "0x7700d773022b19622095118fadf46f7b9448be9b",
+                "gas": 8000000,
+                "gas_price": "0",
+                "value": "0",
+                "access_list": [],
+                "generate_access_list": true,
+                "save": true,
+                "source": "dashboard",
+                "block_header": null,
+                "root": "${{ env.TENDERLY_ROOT_TRANSACTION_ID }}",
+                "skip_fork_head_update": false,
+                "alias": "${{ env.sha_short }}",
+                "description": "Transfer ownership to 0x8E25cfd9bd6c0ca67a5522cd920b3c66D39d6E97"
+            }' \
+              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_FORK_ID }}/simulate
+
+      - name: "Transfer Authorizers ownership in Tenderly fork"
+        run: |
+          curl -X POST \
+              -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "network_id": "1",
+                "block_number": ${{ env.TENDERLY_FORK_BLOCK_NUMBER }},
+                "transaction_index": null,
+                "from": "0xed8f3170db6d1a71c8fa6d8d73cc2c51db95d5a4",
+                "input": "0xf2fde38b0000000000000000000000008e25cfd9bd6c0ca67a5522cd920b3c66d39d6e97",
+                "to": "0x481dab4407b9880de0a68dc62e6af611c4949e42",
                 "gas": 8000000,
                 "gas_price": "0",
                 "value": "0",
