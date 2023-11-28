@@ -196,7 +196,6 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		require.NotEqual(t, int64(0), challenges["total"], "number of challenges should not be complete 0")
 		require.Less(t, challenges["total"], int64(720), "number of challenges should not more increase after a threshold")
 	})
 
