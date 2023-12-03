@@ -3,9 +3,9 @@ concurrency:
   group: "nightly-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
 on:
-  schedule:
-    # Runs every morning at 2am UTC
-    - cron: '0 2 * * *'
+  # schedule:
+  #   # Runs every morning at 2am UTC
+  #   - cron: '0 2 * * *'
   workflow_dispatch:
 
 jobs:
