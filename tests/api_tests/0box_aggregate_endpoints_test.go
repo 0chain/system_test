@@ -884,8 +884,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	//t.RunSequentially("endpoint parameters ( test /v2/graph-total-minted )", graphEndpointTestCases(zboxClient.GetGraphTotalMinted))
-
 	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-total-minted )", 5*time.Minute, func(t *test.SystemTest) {
 		t.Skip()
 		data, resp, err := zboxClient.GetGraphTotalMinted(t, &model.ZboxGraphRequest{DataPoints: "1"})
@@ -1454,8 +1452,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			return cond
 		})
 	})
-
-	//t.RunSequentially("endpoint parameters ( test /v2/graph-token-supply )", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
 
 	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-token-supply )", 5*time.Minute, func(t *test.SystemTest) {
 		t.Skip()
