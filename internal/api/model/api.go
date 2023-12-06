@@ -189,13 +189,6 @@ func NewCreateWritePoolTransactionData(createWritePoolRequest CreateWritePoolReq
 	}
 }
 
-func NewUnlockWritePoolTransactionData(createWritePoolRequest CreateWritePoolRequest) TransactionData {
-	return TransactionData{
-		Name:  "write_pool_unlock",
-		Input: &createWritePoolRequest,
-	}
-}
-
 func NewCreateReadPoolTransactionData() TransactionData {
 	return TransactionData{
 		Name: "read_pool_lock",

@@ -804,7 +804,6 @@ var StorageIntSettings = []string{
 	"cost.read_pool_lock",
 	"cost.read_pool_unlock",
 	"cost.write_pool_lock",
-	"cost.write_pool_unlock",
 	"cost.stake_pool_lock",
 	"cost.stake_pool_unlock",
 	"cost.commit_settings_changes",
