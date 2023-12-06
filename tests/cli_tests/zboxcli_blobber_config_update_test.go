@@ -206,7 +206,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
 		oldWritePrice := intialBlobberInfo.Terms.WritePrice
-		newWritePrice := intToZCN(oldWritePrice) + 1
+		newWritePrice := intToZCN(oldWritePrice) + 0.01
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice}))
 		require.Nil(t, err, strings.Join(output, "\n"))
