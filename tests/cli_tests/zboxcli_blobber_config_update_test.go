@@ -228,7 +228,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-		newWritePrice := intToZCN(intialBlobberInfo.Terms.WritePrice) + 1
+		newWritePrice := intToZCN(intialBlobberInfo.Terms.WritePrice) + 0.01
 		newServiceCharge := intialBlobberInfo.StakePoolSettings.ServiceCharge + 0.1
 		newReadPrice := intToZCN(intialBlobberInfo.Terms.ReadPrice) + 1
 		newNumberOfDelegates := intialBlobberInfo.StakePoolSettings.MaxNumDelegates + 1
