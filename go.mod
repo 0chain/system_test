@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.10.1-0.20231124141610-5a931d29f60a
+	github.com/0chain/gosdk v1.10.1-0.20231205220003-223ba2ce5f3a
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
@@ -24,7 +24,6 @@ require (
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/remeh/sizedwaitgroup v1.0.0 // indirect
-	github.com/zeebo/blake3 v0.2.3 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
