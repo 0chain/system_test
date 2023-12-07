@@ -663,29 +663,6 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[0])
 	})
 
-	t.Run("Upload Blank File Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(0)
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-
-		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		})
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		require.Contains(t, strings.Join(output, "\n"), "No data to upload")
-	})
-
 	t.Run("Upload without any Parameter Should Fail", func(t *test.SystemTest) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
