@@ -5,6 +5,8 @@ concurrency:
   cancel-in-progress: true
 on:
   push:
+    branches: [ master, staging, sprint* ]
+  pull_request:
   workflow_dispatch:
     inputs:
       repo_snapshots_branch:
@@ -112,7 +114,7 @@ jobs:
         with:
           version: '1.7'
           force: 'false'
-            
+
       - name: "Create Tenderly fork"
         run: |
           echo "TENDERLY_CREATION_INFO=$(curl -X POST \
@@ -224,6 +226,14 @@ jobs:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
 
+      - name: "Remove Tenderly fork"
+        if: always()
+        run: |
+          curl -X DELETE \
+            -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
+            -H "Content-Type: application/json" \
+            https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_FORK_ID }}
+
       - name: "Set PR status as ${{ job.status }}"
         if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
         uses: 0chain/actions/set-pr-status@master
@@ -235,14 +245,6 @@ jobs:
           status_name: "0Chain System Tests"
           target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           github_token: ${{ github.token }}
-        
-      - name: "Remove Tenderly fork"
-        if: always()
-        run: |
-          curl -X DELETE \
-            -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
-            -H "Content-Type: application/json" \
-            https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_FORK_ID }}
 
   set-build-conclusion:
     name: "Set build conclusion"

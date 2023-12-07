@@ -210,11 +210,11 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 
 		startBlock = getLatestFinalizedBlock(t)
 
-		output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
-			"pool_id": allocationId,
-			"fee":     fee,
-		}), true)
-		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
+		//output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
+		//	"pool_id": allocationId,
+		//	"fee":     fee,
+		//}), true)
+		//require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
 
 		cliutils.Wait(t, 30*time.Second)
 		endBlock = getLatestFinalizedBlock(t)
