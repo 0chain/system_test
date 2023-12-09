@@ -210,7 +210,7 @@ func TestMinerFeesPayment(testSetup *testing.T) {
 
 		startBlock = getLatestFinalizedBlock(t)
 
-		//output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
+		// output, err = writePoolUnlock(t, configPath, createParams(map[string]interface{}{
 		//	"pool_id": allocationId,
 		//	"fee":     fee,
 		//}), true)
