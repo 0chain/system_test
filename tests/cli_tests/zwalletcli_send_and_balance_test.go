@@ -3,8 +3,6 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -303,26 +301,6 @@ func sendTokensFromWallet(t *test.SystemTest, cliConfigFilename, toClientID stri
 
 	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", wallet+"_wallet.json", cliConfigFilename)
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
-}
-
-func getRoundBlockFromASharder(t *test.SystemTest, round int64) climodel.Block {
-	sharders := getShardersList(t)
-	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
-	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
-
-	// Get round details
-	res, err := apiGetBlock(t, sharderBaseUrl, round)
-	require.Nil(t, err, "Error retrieving block %d", round)
-	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
-	require.NotNil(t, res.Body, "Balance API response must not be nil")
-
-	resBody, err := io.ReadAll(res.Body)
-	require.Nil(t, err, "Error reading response body: %v", err)
-
-	var block climodel.Block
-	err = json.Unmarshal(resBody, &block)
-	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
-	return block
 }
 
 func getShardersList(t *test.SystemTest) map[string]climodel.Sharder {
