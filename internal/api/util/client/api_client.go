@@ -1275,58 +1275,6 @@ func (c *APIClient) AddFreeStorageAssigner(
 	wallet.IncNonce()
 }
 
-func (c *APIClient) MakeAllocationFree(
-	t *test.SystemTest,
-	wallet *model.Wallet,
-	allocationID, marker string,
-	requiredTransactionStatus int) {
-	t.Log("Update allocation...")
-	freeAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:     wallet,
-			ToClientID: StorageSmartContractAddress,
-			TransactionData: model.NewFreeAllocationTransactionData(&model.FreeAllocationRequest{
-
-				AllocationID: allocationID,
-				Marker:       marker,
-			}),
-			Value:   tokenomics.IntToZCN(0.1),
-			TxnType: SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, freeAllocationTransactionPutResponse)
-	txnHash := freeAllocationTransactionPutResponse.Request.Hash
-
-	var freeAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		freeAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: txnHash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if freeAllocationTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return freeAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	wallet.IncNonce()
-}
-
 func (c *APIClient) UpdateAllocationBlobbers(t *test.SystemTest, wallet *model.Wallet, newBlobberID, oldBlobberID, allocationID string, requiredTransactionStatus int) {
 	t.Log("Update allocation...")
 

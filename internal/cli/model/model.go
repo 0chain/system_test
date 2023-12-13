@@ -792,7 +792,6 @@ var StorageIntSettings = []string{
 	"cost.cancel_allocation",
 	"cost.add_free_storage_assigner",
 	"cost.free_allocation_request",
-	"cost.free_update_allocation",
 	"cost.blobber_health_check",
 	"cost.update_blobber_settings",
 	"cost.pay_blobber_block_rewards",
