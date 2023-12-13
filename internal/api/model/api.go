@@ -229,13 +229,6 @@ func NewUnlockMinerStackPoolTransactionData(createStakePoolRequest CreateStakePo
 	}
 }
 
-func NewFreeAllocationTransactionData(freeAllocationRequest *FreeAllocationRequest) TransactionData {
-	return TransactionData{
-		Name:  "free_update_allocation",
-		Input: freeAllocationRequest,
-	}
-}
-
 func NewFreeStorageAssignerTransactionData(freeStorageAssignerRequest *FreeStorageAssignerRequest) TransactionData {
 	return TransactionData{
 		Name:  "add_free_storage_assigner",
