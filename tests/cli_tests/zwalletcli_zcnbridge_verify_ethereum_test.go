@@ -16,10 +16,14 @@ func TestBridgeVerify(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Verify ethereum transaction")
 
-	t.Parallel()
+	t.RunSequentiallyWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {
+		err := tenderlyClient.InitBalance(ethereumAddress)
+		require.NoError(t, err)
 
-	t.RunWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {
-		output, err := burnEth(t, "10000000000", true)
+		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
+		require.NoError(t, err)
+
+		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")

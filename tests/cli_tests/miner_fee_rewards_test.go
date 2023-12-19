@@ -1,6 +1,10 @@
 package cli_tests
 
 import (
+	"encoding/json"
+	"io"
+	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -274,4 +278,31 @@ func checkMinerDelegatePoolFeeAmounts(
 
 func delegateFeeRewards(total int64, share, serviceCharge float64, numProvidersPaid int) int64 {
 	return int64(float64(total) * share * (1 - serviceCharge) / float64(numProvidersPaid))
+}
+
+func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {
+	return http.Get(sharderBaseURL + "/v1/block/get/latest_finalized")
+}
+
+func getLatestFinalizedBlock(t *test.SystemTest) *climodel.LatestFinalizedBlock {
+	output, err := createWallet(t, configPath)
+	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+
+	sharders := getShardersList(t)
+	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
+	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
+
+	res, err := apiGetLatestFinalized(sharderBaseUrl)
+	require.Nil(t, err, "Error retrieving latest block")
+	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get latest block: %d", res.StatusCode)
+	require.NotNil(t, res.Body, "Latest block API response must not be nil")
+
+	resBody, err := io.ReadAll(res.Body)
+	require.Nil(t, err, "Error reading response body")
+
+	var block climodel.LatestFinalizedBlock
+	err = json.Unmarshal(resBody, &block)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+
+	return &block
 }

@@ -1,14 +1,14 @@
 block_worker: https://dev.zus.network/dns
 confirmation_chain_length: 3
-ethereum_node_url: "https://rpc.tenderly.co/fork/dcf1ae29-309c-41e1-ae3d-7f66bc814b82"
+ethereum_node_url: "https://rpc.tenderly.co/fork/5b7ffac9-50cc-4169-b0ca-6fd203d26ef6"
 min_confirmation: 50
 min_submit: 50
 signature_scheme: bls0chain
 store_unlock_duration_sec: 2
 
 bridge:
-  bridge_address: 0x7bbbEa24ac1751317D7669f05558632c4A9113D7
-  token_address: 0x2ec8F26ccC678c9faF0Df20208aEE3AF776160CD
-  authorizers_address: 0xEAe8229c0E457efBA1A1769e7F8c20110fF68E61
-  ethereum_address: 0xD8c9156e782C68EE671C09b6b92de76C97948432
-  password: "\"02289b9\""
+  bridge_address: 0x7700D773022b19622095118Fadf46f7B9448Be9b
+  token_address: 0xb9EF770B6A5e12E45983C5D80545258aA38F3B78
+  authorizers_address: 0x481daB4407b9880DE0A68dc62E6aF611c4949E42
+  ethereum_address: 0x8E25cfd9bd6c0ca67a5522cd920b3c66D39d6E97
+  password: "12345678"

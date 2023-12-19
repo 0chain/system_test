@@ -500,10 +500,6 @@ func apiGetBalance(t *test.SystemTest, sharderBaseURL, clientID string) (*http.R
 	return http.Get(sharderBaseURL + "/v1/client/get/balance?client_id=" + clientID)
 }
 
-func apiGetBlock(t *test.SystemTest, sharderBaseURL string, round int64) (*http.Response, error) {
-	t.Logf("Gert block for round %d...", round)
-	return http.Get(fmt.Sprintf(sharderBaseURL+"/v1/block/get?content=full&round=%d", round))
-}
 func getMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	t.Log("Get miners...")
 	return cliutil.RunCommand(t, "./zwallet ls-miners --active --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)

@@ -38,6 +38,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -46,6 +47,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -79,6 +81,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -87,6 +90,7 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())

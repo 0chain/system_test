@@ -29,7 +29,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		lastBlobber := alloc.Blobbers[0]
 		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
-		op := sdkClient.AddUploadOperation(t, allocationID)
+		op := sdkClient.AddUploadOperation(t, "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op}, client.WithRepair(alloc.Blobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
@@ -53,7 +53,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 		ops := make([]sdk.OperationRequest, 0, 4)
 		for i := 0; i < 4; i++ {
-			op := sdkClient.AddUploadOperation(t, allocationID)
+			op := sdkClient.AddUploadOperation(t, "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
@@ -80,7 +80,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		firstBlobber := alloc.Blobbers[0]
 		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
 
-		op := sdkClient.AddUploadOperation(t, allocationID)
+		op := sdkClient.AddUploadOperation(t, "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
 		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
@@ -111,7 +111,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
 
-		op := sdkClient.AddUploadOperation(t, allocationID)
+		op := sdkClient.AddUploadOperation(t, "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
@@ -137,7 +137,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
 
-		op := sdkClient.AddUploadOperation(t, allocationID)
+		op := sdkClient.AddUploadOperation(t, "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
@@ -164,7 +164,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
 
-		op := sdkClient.AddUploadOperation(t, allocationID)
+		op := sdkClient.AddUploadOperation(t, "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
@@ -193,7 +193,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
 
-		op := sdkClient.AddUploadOperation(t, allocationID)
+		op := sdkClient.AddUploadOperation(t, "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"

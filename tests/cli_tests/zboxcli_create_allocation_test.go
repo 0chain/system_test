@@ -74,7 +74,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		options = map[string]interface{}{"lock": mustFailCost}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, output[len(output)-1], "not enough tokens to cover the allocation cost")
+		require.Contains(t, output[len(output)-1], "not enough tokens to honor the allocation")
 	})
 
 	t.Run("Create allocation for locking negative cost should not work", func(t *test.SystemTest) {

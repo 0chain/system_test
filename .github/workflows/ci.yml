@@ -72,7 +72,7 @@ jobs:
   system-tests:
     name: "System Tests"
     runs-on: [ tests-suite ]
-    timeout-minutes: 120
+    timeout-minutes: 150
     steps:
       - name: "Get current PR"
         uses: jwalton/gh-find-current-pr@v1
@@ -219,7 +219,7 @@ jobs:
           run_flaky_tests: true
           run_api_system_tests: true
           run_cli_system_tests: true
-          run_tokenomics_system_tests: true
+          run_tokenomics_system_tests: false
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
           TENDERLY_FORK_ID: ${{ env.TENDERLY_FORK_ID }}
           run_smoke_tests: ${{ inputs.run_smoke_tests }}

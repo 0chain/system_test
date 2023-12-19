@@ -27,6 +27,7 @@ type Config struct {
 	ZboxPhoneNumber             string `yaml:"0box_phone_number"`
 	DefaultTestCaseTimeout      string `yaml:"default_test_case_timeout"`
 	ZS3ServerUrl                string `yaml:"zs3_server_url"`
+	ChimneyTestNetwork          string `yaml:"chimney_test_network"`
 	S3SecretKey                 string `yaml:"s3_secret_key"`
 	S3AccessKey                 string `yaml:"s3_access_key"`
 	EthereumAddress             string `yaml:"ethereum_address"`

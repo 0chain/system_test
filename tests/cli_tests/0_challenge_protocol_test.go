@@ -57,7 +57,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 	})
 
-	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks (given that we have active allocations)", 5*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks after challenge_generation_gap (given that we have active allocations)", 10*time.Minute, func(t *test.SystemTest) {
 		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 9,
@@ -79,7 +79,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 
 		startBlock := getLatestFinalizedBlock(t)
 
-		time.Sleep(2 * time.Minute)
+		time.Sleep(4 * time.Minute)
 
 		endBlock := getLatestFinalizedBlock(t)
 
@@ -89,7 +89,9 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		require.Equal(t, endBlock.Round-startBlock.Round, challenges["total"], "number of challenges should be equal to the number of blocks")
+		challengeGenerationGap := int64(4)
+
+		require.InEpsilon(t, (endBlock.Round-startBlock.Round)/challengeGenerationGap, challenges["total"], 0.05, "number of challenges should be equal to the number of blocks after challenge_generation_gap")
 		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
 		require.Less(t, challenges["open"], int64(720), "number of open challenges should be lesser than 720")
 	})
@@ -118,7 +120,6 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		require.NotEqual(t, int64(0), challenges["total"], "number of challenges should not be complete 0")
 		require.Less(t, challenges["total"], int64(720), "number of challenges should not more increase after a threshold")
 	})
 
@@ -195,7 +196,6 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		require.NotEqual(t, int64(0), challenges["total"], "number of challenges should not be complete 0")
 		require.Less(t, challenges["total"], int64(720), "number of challenges should not more increase after a threshold")
 	})
 

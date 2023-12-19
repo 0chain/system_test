@@ -23,7 +23,7 @@ func TestReadMarker(testSetup *testing.T) {
 
 	t.Parallel()
 
-	const blobbersRequiredForDownload = 4 // download needs (data shards + 1) number of blobbers
+	const blobbersRequiredForDownload = 3 // download needs (data shards) number of blobbers
 
 	var sharderUrl string
 	t.TestSetup("Create wallet and temp directories, get sharder url", func() {
@@ -65,7 +65,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationId, sharderUrl)
-		require.Len(t, readMarkers, blobbersRequiredForDownload)
+		require.Equal(t, len(readMarkers), blobbersRequiredForDownload+1) // Sends data+1 readmarkers. Needs only len(data), 1 is a failover.
 
 		afterCount := CountReadMarkers(t, allocationId, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
@@ -114,7 +114,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationId, sharderUrl)
-		require.Len(t, readMarkers, blobbersRequiredForDownload)
+		require.Equal(t, len(readMarkers), blobbersRequiredForDownload+1) // Sends data+1 readmarkers. Needs only len(data), 1 is a failover.
 
 		afterCount := CountReadMarkers(t, allocationId, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
@@ -171,7 +171,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationID, sharderUrl)
-		require.Len(t, readMarkers, blobbersRequiredForDownload)
+		require.Equal(t, len(readMarkers), blobbersRequiredForDownload+1) // Sends data+1 readmarkers. Needs only len(data), 1 is a failover.
 
 		afterCount := CountReadMarkers(t, allocationID, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
@@ -241,7 +241,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationID, sharderUrl)
-		require.Len(t, readMarkers, blobbersRequiredForDownload)
+		require.Equal(t, len(readMarkers), blobbersRequiredForDownload+1) // Sends data+1 readmarkers. Needs only len(data), 1 is a failover.
 
 		afterCount := CountReadMarkers(t, allocationID, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
@@ -308,7 +308,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationID, sharderUrl)
-		require.Len(t, readMarkers, blobbersRequiredForDownload)
+		require.Equal(t, len(readMarkers), blobbersRequiredForDownload+1) // Sends data+1 readmarkers. Needs only len(data), 1 is a failover.
 
 		afterCount := CountReadMarkers(t, allocationID, sharderUrl)
 		require.EqualValuesf(t, afterCount.ReadMarkersCount, len(readMarkers), "should equal length of read-markers", len(readMarkers))
@@ -362,7 +362,7 @@ func TestReadMarker(testSetup *testing.T) {
 		time.Sleep(time.Second * 20)
 
 		readMarkers := GetReadMarkers(t, allocationID, sharderUrl)
-		require.Len(t, readMarkers, blobbersRequiredForDownload)
+		require.Equal(t, len(readMarkers), blobbersRequiredForDownload+1) // Sends data+1 readmarkers. Needs only len(data), 1 is a failover.
 
 		for _, rm := range readMarkers {
 			require.Equal(t, int64(6), rm.ReadCounter)
