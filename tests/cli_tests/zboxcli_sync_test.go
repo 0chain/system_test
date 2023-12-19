@@ -514,7 +514,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 			}
 		}
 		require.NotNil(t, foundItem, "The original file doesn't exist anymore", files)
-		require.Equal(t, 128*KB, foundItem.Size, "The original file doesn't exist anymore", files)
+		require.Equal(t, 128*KB, foundItem.ActualSize, "The original file doesn't exist anymore", files)
 	})
 
 	t.Run("Sync path with chunk number specified should work", func(t *test.SystemTest) {

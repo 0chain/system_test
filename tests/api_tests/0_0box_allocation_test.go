@@ -24,6 +24,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -32,6 +33,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"blimp",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -49,6 +51,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -57,15 +60,16 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationType := "direct_storage"
 		_, response, err = zboxClient.PostAllocation(t,
 			zboxClient.DefaultAllocationId,
 			allocationName,
@@ -85,6 +89,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -93,18 +98,19 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as part of " + t.Name()
+		allocationType := "direct_storage"
+		allocationID := "allocationID1"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			allocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -121,7 +127,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Len(t, allocationList, 1, "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, allocationId, allocationList[0].Id)
+		require.Equal(t, allocationID, allocationList[0].Id)
 	})
 
 	t.RunSequentially("Post allocation with correct argument should work", func(t *test.SystemTest) {
@@ -129,6 +135,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -137,18 +144,19 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationId := "allocation id  created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
+		allocationID := "allocationID2"
+		allocationType := "direct_storage"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			allocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -167,6 +175,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -175,18 +184,19 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"vult",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation id created as part of " + t.Name()
+		allocationType := "direct_storage"
+		allocationID := "allocationID3"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
-			allocationId,
+			allocationID,
 			allocationName,
 			allocationDescription,
 			allocationType,
@@ -205,6 +215,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -213,15 +224,16 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"vult",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "second allocation created as part of " + t.Name()
+		allocationName := "allocation name"
 		allocationDescription := "second allocation description created as part of " + t.Name()
-		allocationType := "second allocation type created as part of " + t.Name()
+		allocationType := "s3_server"
 		allocation_id := "new allocation for vult"
 		_, response, err = zboxClient.PostAllocation(t,
 			allocation_id,
@@ -243,6 +255,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -251,16 +264,17 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationType := "direct_storage"
+		allocationID := "allocationID4"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -275,9 +289,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		allocationName = "second allocation created as part of " + t.Name()
+		allocationName = "second allocation"
 		allocationDescription = "second allocation description created as part of " + t.Name()
-		allocationType = "second allocation type created as part of " + t.Name()
+		allocationType = "s3_server"
 		allocation_id := "new allocation id for blimp"
 		allocationObjCreatedResponse, response, err = zboxClient.PostAllocation(t,
 			allocation_id,
@@ -299,6 +313,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -307,16 +322,17 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"chalk",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationType := "direct_storage"
+		allocationID := "allocationID5"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -331,9 +347,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
 
-		allocationName = "second allocation created as part of " + t.Name()
+		allocationName = "second allocation"
 		allocationDescription = "second allocation description created as part of " + t.Name()
-		allocationType = "second allocation type created as part of " + t.Name()
+		allocationType = "s3_server"
 		allocation_id := "new allocation for chalk"
 		allocationObjCreatedResponse, response, err = zboxClient.PostAllocation(t,
 			allocation_id,
@@ -355,6 +371,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -363,16 +380,17 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"chimney",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationType := "direct_storage"
+		allocationID := "allocationID6"
 		_, response, err = zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -393,6 +411,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -401,16 +420,17 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			"bolt",
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationType := "direct_storage"
+		allocationID := "allocationID7"
 		_, response, err = zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -431,6 +451,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -439,16 +460,17 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationType := "direct_storage"
+		allocationID := "allocationID8"
 		_, response, err = zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -469,6 +491,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -477,16 +500,17 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationType := "direct_storage"
+		allocationID := "allocationID9"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -520,6 +544,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -528,16 +553,17 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationType := "direct_storage"
+		allocationID := "allocationID10"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -563,6 +589,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -571,13 +598,14 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		_, response, err = zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, zboxClient.DefaultAllocationId, allocationName)
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -588,6 +616,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -596,16 +625,17 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxWallet)
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
-		allocationName := "allocation created as part of " + t.Name()
+		allocationName := "allocation_name"
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationID := "allocation id created as part of " + t.Name()
+		allocationType := "direct_storage"
+		allocationID := "allocationID11"
 		allocationObjCreatedResponse, response, err := zboxClient.PostAllocation(t,
 			allocationID,
 			allocationName,
@@ -646,6 +676,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
+		userName := "user_name"
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -654,6 +685,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			csrfToken,
 			zboxClient.DefaultPhoneNumber,
 			zboxClient.DefaultAppType,
+			userName,
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -661,12 +693,12 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, walletName, zboxWallet.Name, "Wallet name does not match expected")
 
 		allocationDescription := "allocation description created as part of " + t.Name()
-		allocationType := "allocation type created as part of " + t.Name()
-		allocationId := "allocation ID created as part of " + t.Name()
+		allocationType := "direct_storage"
+		allocationID := "allocationID12"
 
 		updatedAllocationName := "update allocation name"
 		allocationObjCreatedResponse, response, err := zboxClient.UpdateAllocation(t,
-			allocationId,
+			allocationID,
 			updatedAllocationName,
 			allocationDescription,
 			allocationType,

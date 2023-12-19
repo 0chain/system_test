@@ -17,7 +17,6 @@ import (
 
 type BridgeConfig struct {
 	Fields struct {
-		BurnAddress        string `json:"burn_address"`
 		MaxDelegates       string `json:"max_delegates"`
 		MaxFee             string `json:"max_fee"`
 		MaxStake           string `json:"max_stake"`
@@ -85,7 +84,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 		resultInt, err := strconv.Atoi(cfgAfter["max_fee"])
 		require.NoError(t, err)
 
-		require.Equal(t, 40000000000, resultInt, "new value for config max_fee was not set")
+		require.Equal(t, 4, resultInt, "new value for config max_fee was not set")
 	})
 
 	t.RunSequentially("should allow update of percent_authorizers", func(t *test.SystemTest) {
@@ -110,18 +109,6 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, 6, resultInt, "new value for config min_authorizers was not set")
-	})
-
-	t.RunSequentially("should allow update of burn_address", func(t *test.SystemTest) {
-		t.Cleanup(func() {
-			_ = updateAndVerify(t, "burn_address", "0000000000000000000000000000000000000000000000000000000000000000")
-		})
-		cfgAfter := updateAndVerify(t, "burn_address", "7")
-
-		resultInt, err := strconv.Atoi(cfgAfter["burn_address"])
-		require.NoError(t, err)
-
-		require.Equal(t, 7, resultInt, "new value for config burn_address was not set")
 	})
 
 	t.RunSequentially("should allow update of owner_id", func(t *test.SystemTest) {

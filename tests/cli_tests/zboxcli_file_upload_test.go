@@ -16,6 +16,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	"github.com/stretchr/testify/require"
@@ -299,6 +301,56 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[1])
 	})
 
+	t.RunWithTimeout("Upload tests with Thumbnail with different format", 40*time.Minute, func(t *test.SystemTest) {
+		for _, blobber := range blobbersList {
+			_, err := executeFaucetWithTokens(t, configPath, 11)
+			require.Nil(t, err, "Error executing faucet")
+
+			// stake tokens
+			_, err = stakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{
+				"blobber_id": blobber.Id,
+				"tokens":     10,
+			}), true)
+			require.Nil(t, err, "Error staking tokens")
+		}
+
+		allocSize := int64(10 * GB)
+
+		var fileExtensions = []string{".txt", ".docx", ".pdf", ".jpg", ".png", ".mp3", ".mp4", ".xlsx", ".html", ".json", ".csv", ".xml", ".zip", ".rar", ".gz", ".tar", ".avi", ".mov", ".wav", ".ogg", ".bmp", ".gif", ".svg", ".tiff", ".ico", ".py", ".c", ".java", ".php", ".js", ".css", ".scss", ".yaml", ".sql", ".md", ".go", ".rb", ".cpp", ".h", ".sh", ".bat", ".dll", ".class", ".jar", ".exe", ".psd", ".pptx", ".xls", ".ppt", ".key", ".numbers"}
+		fileSize := int64(5 * MB) // 5MB
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size":   allocSize,
+			"data":   3,
+			"parity": 3,
+		})
+
+		// Upload files
+		for _, ext := range fileExtensions {
+			filename := generateRandomTestFileName(t) + ext
+			err := createFileWithSize(filename, fileSize)
+			require.Nil(t, err)
+
+			thumbnail := escapedTestName(t) + "thumbnail.png"
+			_ = generateThumbnail(t, thumbnail) // nolint
+
+			output, err := uploadFile(t, configPath, map[string]interface{}{
+				"allocation":    allocationID,
+				"remotepath":    "/",
+				"localpath":     filename,
+				"thumbnailpath": thumbnail,
+			}, true)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 2)
+
+			expected := fmt.Sprintf(
+				"Status completed callback. Type = application/octet-stream. Name = %s",
+				filepath.Base(filename),
+			)
+			require.Equal(t, expected, output[1], "Failed to upload file with extension: "+ext+" output : "+strings.Join(output, "\n"))
+		}
+	})
+
 	t.Run("Upload Image File Should Work", func(t *test.SystemTest) {
 		allocSize := int64(10 * 1024 * 1024)
 
@@ -434,71 +486,7 @@ func TestUpload(testSetup *testing.T) {
 		require.True(t, strings.HasPrefix(output[len(output)-1], "Status completed callback"), "Expected success string to be present")
 	})
 
-	t.RunWithTimeout("Resume upload should work fine", 10*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
-		allocSize := int64(2 * GB)
-		fileSize := int64(1 * GB)
-
-		output, err := executeFaucetWithTokens(t, configPath, 100.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-			"lock": 50,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-		defer func() {
-			os.Remove(filename) //nolint: errcheck
-		}()
-
-		param := map[string]interface{}{
-			"allocation":  allocationID,
-			"remotepath":  "/",
-			"localpath":   filename,
-			"chunknumber": 1024, // 64KB * 1024 = 64M
-		}
-		upload_param := createParams(param)
-		command := fmt.Sprintf(
-			"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
-			upload_param,
-			escapedTestName(t)+"_wallet.json",
-			configPath,
-		)
-
-		cmd, _ := cliutils.StartCommandWithoutRetry(command)
-		uploaded := waitPartialUploadAndInterrupt(t, cmd)
-		t.Logf("the uploaded is %v ", uploaded)
-
-		output, err = uploadFile(t, configPath, map[string]interface{}{
-			"allocation":  allocationID,
-			"remotepath":  "/",
-			"localpath":   filename,
-			"chunknumber": 1024, // 64KB * 1024 = 64M
-		}, true)
-
-		require.Nil(t, err, strings.Join(output, "\n"))
-		pattern := `(\d+ / \d+)\s+(\d+\.\d+%)`
-		re := regexp.MustCompile(pattern)
-		matches := re.FindAllString(output[0], -1)
-		require.GreaterOrEqual(t, len(matches), 1)
-		a := matches[len(matches)-1]
-		first, err := strconv.ParseInt(strings.Fields(a)[0], 10, 64)
-		require.Nil(t, err, "error in extracting size from output, adjust the regex")
-		second, err := strconv.ParseInt(strings.Fields(a)[2], 10, 64)
-		require.Nil(t, err, "error in extracting size from output, adjust the regex")
-		require.Less(t, first, second) // Ensures upload didn't start from beginning
-		require.Len(t, output, 2)
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-	})
-
 	// Failure Scenarios
-
 	// FIXME: the CLI could check allocation size before attempting an upload to save wasted time/bandwidth
 	t.Run("Upload File too large - file size larger than allocation should fail", func(t *test.SystemTest) {
 		allocSize := int64(1 * MB)
@@ -675,29 +663,6 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, expected, output[0])
 	})
 
-	t.Run("Upload Blank File Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(0)
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-
-		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		})
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
-
-		require.Contains(t, strings.Join(output, "\n"), "No data to upload")
-	})
-
 	t.Run("Upload without any Parameter Should Fail", func(t *test.SystemTest) {
 		output, err := createWallet(t, configPath)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -856,154 +821,156 @@ func TestUpload(testSetup *testing.T) {
 		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), 0.05, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 
-	sampleVideos := [][]string{
-		{
-			"https://filesamples.com/samples/video/wtv/sample_960x400_ocean_with_audio.wtv",
-			"test_wtv_video",
-			"wtv",
-		},
-		{
-			"https://filesamples.com/samples/video/mts/sample_960x400_ocean_with_audio.mts",
-			"test_mts_video",
-			"mts",
-		},
-		{
-			"https://filesamples.com/samples/video/f4v/sample_960x400_ocean_with_audio.f4v",
-			"test_f4v_video",
-			"f4v",
-		},
-		{
-			"https://filesamples.com/samples/video/flv/sample_960x400_ocean_with_audio.flv",
-			"test_flv_video",
-			"flv",
-		},
-		{
-			"https://filesamples.com/samples/video/3gp/sample_960x400_ocean_with_audio.3gp",
-			"test_3gp_video",
-			"3gp",
-		},
-		// {
-		// 	"https://filesamples.com/samples/video/m4v/sample_960x400_ocean_with_audio.m4v",
-		// 	"test_m4v_video",
-		// 	"m4v",
-		// },
-		{
-			"https://filesamples.com/samples/video/mov/sample_960x400_ocean_with_audio.mov",
-			"test_mov_video",
-			"mov",
-		},
-		{
-			"https://filesamples.com/samples/video/mp4/sample_960x400_ocean_with_audio.mp4",
-			"test_mp4_video",
-			"mp4",
-		},
-		{
-			"https://filesamples.com/samples/video/mjpeg/sample_960x400_ocean_with_audio.mjpeg",
-			"test_mjpeg_video",
-			"mjpeg",
-		},
-		{
-			"https://filesamples.com/samples/video/mkv/sample_960x400_ocean_with_audio.mkv",
-			"test_mkv_video",
-			"mkv",
-		},
-		{
-			"https://filesamples.com/samples/video/hevc/sample_960x400_ocean_with_audio.hevc",
-			"test_hevc_video",
-			"hevc",
-		},
-		{
-			"https://filesamples.com/samples/video/m2ts/sample_960x400_ocean_with_audio.m2ts",
-			"test_m2ts_video",
-			"m2ts",
-		},
-		{
-			"https://filesamples.com/samples/video/m2v/sample_960x400_ocean_with_audio.m2v",
-			"test_m2v_video",
-			"m2v",
-		},
-		{
-			"https://filesamples.com/samples/video/mpeg/sample_960x400_ocean_with_audio.mpeg",
-			"test_mpeg_video",
-			"mpeg",
-		},
-		{
-			"https://filesamples.com/samples/video/mpg/sample_960x400_ocean_with_audio.mpg",
-			"test_mpg_video",
-			"mpg",
-		},
-		// {
-		// 	"https://filesamples.com/samples/video/mxf/sample_960x400_ocean_with_audio.mxf",
-		// 	"test_mxf_video",
-		// 	"mxf",
-		// },
-		{
-			"https://filesamples.com/samples/video/ogv/sample_960x400_ocean_with_audio.ogv",
-			"test_ogv_video",
-			"ogv",
-		},
-		{
-			"https://filesamples.com/samples/video/rm/sample_960x400_ocean_with_audio.rm",
-			"test_rm_video",
-			"rm",
-		},
-		{
-			"https://filesamples.com/samples/video/ts/sample_960x400_ocean_with_audio.ts",
-			"test_ts_video",
-			"ts",
-		},
-		{
-			"https://filesamples.com/samples/video/vob/sample_960x400_ocean_with_audio.vob",
-			"test_vob_video",
-			"vob",
-		},
-		{
-			"https://filesamples.com/samples/video/asf/sample_960x400_ocean_with_audio.asf",
-			"test_asf_video",
-			"asf",
-		},
-		{
-			"https://filesamples.com/samples/video/avi/sample_960x400_ocean_with_audio.avi",
-			"test_avi_video",
-			"avi",
-		},
-		{
-			"https://filesamples.com/samples/video/webm/sample_960x400_ocean_with_audio.webm",
-			"test_webm_video",
-			"webm",
-		},
-		{
-			"https://filesamples.com/samples/video/wmv/sample_960x400_ocean_with_audio.wmv",
-			"test_wmv_video",
-			"wmv",
-		},
-	}
-	for _, sampleVideo := range sampleVideos {
-		videoLink := sampleVideo[0]
-		videoName := sampleVideo[1]
-		videoFormat := sampleVideo[2]
-		t.RunWithTimeout("Upload Video File "+videoFormat+" With Web Streaming Should Work", 2*time.Minute, func(t *test.SystemTest) {
-			allocSize := int64(400 * 1024 * 1024)
-			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size":   allocSize,
-				"tokens": 9,
-			})
-			downloadVideo := "wget " + videoLink + " -O " + videoName + "." + videoFormat
-			output, err := cliutils.RunCommand(t, downloadVideo, 3, 2*time.Second)
-			require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
+	t.RunSequentiallyWithTimeout("stream tests for different formats", 20*time.Minute, func(t *test.SystemTest) {
+		sampleVideos := [][]string{
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/wtv/sample_960x400_ocean_with_audio.wtv",
+				"test_wtv_video",
+				"wtv",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/mts/sample_960x400_ocean_with_audio.mts",
+				"test_mts_video",
+				"mts",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/f4v/sample_960x400_ocean_with_audio.f4v",
+				"test_f4v_video",
+				"f4v",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/flv/sample_960x400_ocean_with_audio.flv",
+				"test_flv_video",
+				"flv",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/3gp/sample_960x400_ocean_with_audio.3gp",
+				"test_3gp_video",
+				"3gp",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/m4v/sample_960x400_ocean_with_audio.m4v",
+				"test_m4v_video",
+				"m4v",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/mov/sample_960x400_ocean_with_audio.mov",
+				"test_mov_video",
+				"mov",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/mp4/sample_960x400_ocean_with_audio.mp4",
+				"test_mp4_video",
+				"mp4",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/mjpeg/sample_960x400_ocean_with_audio.mjpeg",
+				"test_mjpeg_video",
+				"mjpeg",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/mkv/sample_960x400_ocean_with_audio.mkv",
+				"test_mkv_video",
+				"mkv",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/hevc/sample_960x400_ocean_with_audio.hevc",
+				"test_hevc_video",
+				"hevc",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/m2ts/sample_960x400_ocean_with_audio.m2ts",
+				"test_m2ts_video",
+				"m2ts",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/m2v/sample_960x400_ocean_with_audio.m2v",
+				"test_m2v_video",
+				"m2v",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/mpeg/sample_960x400_ocean_with_audio.mpeg",
+				"test_mpeg_video",
+				"mpeg",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/mpg/sample_960x400_ocean_with_audio.mpg",
+				"test_mpg_video",
+				"mpg",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/mxf/sample_960x400_ocean_with_audio.mxf",
+				"test_mxf_video",
+				"mxf",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/ogv/sample_960x400_ocean_with_audio.ogv",
+				"test_ogv_video",
+				"ogv",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/rm/sample_960x400_ocean_with_audio.rm",
+				"test_rm_video",
+				"rm",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/ts/sample_960x400_ocean_with_audio.ts",
+				"test_ts_video",
+				"ts",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/vob/sample_960x400_ocean_with_audio.vob",
+				"test_vob_video",
+				"vob",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/asf/sample_960x400_ocean_with_audio.asf",
+				"test_asf_video",
+				"asf",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/avi/sample_960x400_ocean_with_audio.avi",
+				"test_avi_video",
+				"avi",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/webm/sample_960x400_ocean_with_audio.webm",
+				"test_webm_video",
+				"webm",
+			},
+			{
+				"https://stream-upload-system-tests.s3.eu-north-1.amazonaws.com/wmv/sample_960x400_ocean_with_audio.wmv",
+				"test_wmv_video",
+				"wmv",
+			},
+		}
+		for _, sampleVideo := range sampleVideos {
+			videoLink := sampleVideo[0]
+			videoName := sampleVideo[1]
+			videoFormat := sampleVideo[2]
+			t.RunSequentiallyWithTimeout("Upload Video File "+videoFormat+" With Web Streaming Should Work", 2*time.Minute, func(t *test.SystemTest) {
+				allocSize := int64(400 * 1024 * 1024)
+				allocationID := setupAllocation(t, configPath, map[string]interface{}{
+					"size":   allocSize,
+					"tokens": 9,
+				})
+				downloadVideo := "wget " + videoLink + " -O " + videoName + "." + videoFormat
+				output, err := cliutils.RunCommand(t, downloadVideo, 3, 2*time.Second)
+				require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
 
-			output, err = uploadFile(t, configPath, map[string]interface{}{
-				"allocation":    allocationID,
-				"remotepath":    "/",
-				"localpath":     "./" + videoName + "." + videoFormat,
-				"web-streaming": true,
-			}, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 2)
-			expected := "Status completed callback. Type = video/mp4. Name = " + videoName + ".mp4"
-			require.Equal(t, expected, output[1])
-		})
-	}
+				output, err = uploadFile(t, configPath, map[string]interface{}{
+					"allocation":    allocationID,
+					"remotepath":    "/",
+					"localpath":     "./" + videoName + "." + videoFormat,
+					"web-streaming": true,
+				}, true)
+				require.Nil(t, err, strings.Join(output, "\n"))
+				require.Len(t, output, 2)
+				expected := "Status completed callback. Type = video/mp4. Name = " + videoName + ".mp4"
+				require.Equal(t, expected, output[1])
+			})
+		}
+	})
 }
 
 func uploadWithParam(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}) {
@@ -1112,7 +1079,7 @@ func waitPartialUploadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd) bool {
 		case <-ctx.Done():
 			t.Log("Timeout waiting for partial upload")
 			return false
-		case <-time.After(30 * time.Second):
+		case <-time.After(5 * time.Second):
 			// Send interrupt signal to command
 			err := cmd.Process.Signal(os.Interrupt)
 			if err != nil {

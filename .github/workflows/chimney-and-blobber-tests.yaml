@@ -15,9 +15,28 @@ jobs:
     name: "System Tests"
     runs-on: [ tests-suite ]
     steps:
+      - name: "Setup Go"
+        shell: 'script --return --quiet --command "bash {0}"'
+        run: |
+          if ! go env &> /dev/null; then
+              [ -f ./https://go.dev/dl/go1.20.3.linux-amd64.tar.gz ] || wget https://go.dev/dl/go1.20.3.linux-amd64.tar.gz
+              [ -d /usr/local/go ] &&  rm -rf /usr/local/go
+              [ -f /usr/local/bin/go ] &&  rm -rf /usr/local/bin/go
+              tar -C /usr/local -xzf ./go1.20.3.linux-amd64.tar.gz
+          else
+              echo "go already exists"
+          fi
+  
+          echo "PATH=$PATH:/usr/local/go/bin" >> $GITHUB_ENV
+          export PATH=$PATH:/usr/local/go/bin
+          export HOME="/root"
+          which go
+          go env
+
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@feature/chimney_blobber_rewards
+        uses: 0chain/actions/run-system-tests@master
         with:
+          repo_snapshots_branch: "current-sprint"
           network: ${{ inputs.NETWORK_URL }}
           deploy_report_page: true
           archive_results: true
@@ -27,4 +46,7 @@ jobs:
           run_tokenomics_system_tests: false
           run_chimney_blobber_tests: true
           run_smoke_tests: false
+          run_s3mgrt_system_tests: false
+          run_challenge_system_tests: false
           TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}

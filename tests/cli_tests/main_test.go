@@ -73,6 +73,7 @@ func setupConfig() {
 	}
 
 	ethereumNodeURL = viper.GetString("ethereum_node_url")
+	tokenAddress = viper.GetString("bridge.token_address")
 	ethereumAddress = viper.GetString("bridge.ethereum_address")
 }
 
@@ -95,6 +96,7 @@ var (
 	sharder02ID string
 
 	ethereumNodeURL       string
+	tokenAddress          string
 	ethereumAddress       string
 	s3SecretKey           string
 	s3AccessKey           string
@@ -172,18 +174,6 @@ func TestMain(m *testing.M) {
 
 	// Create an S3 client
 	S3Client = s3.New(sess)
-
-	snapshotHash, err := tenderlyClient.CreateSnapshot()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = tenderlyClient.InitBalance(ethereumAddress)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	tenderlyClient.ShadowRevert(snapshotHash)
 
 	exitRun := m.Run()
 

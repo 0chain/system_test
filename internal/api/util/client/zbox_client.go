@@ -349,7 +349,7 @@ func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, 
 	return zboxFundingResponse, resp, err
 }
 
-func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType string) (*model.ZboxWallet, *resty.Response, error) {
+func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Posting wallet using 0box...")
 	var zboxWallet *model.ZboxWallet
 
@@ -362,6 +362,7 @@ func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, wallet
 		"mnemonic":    mnemonic,
 		"name":        walletName,
 		"description": walletDescription,
+		"user_name":   userName,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1968,7 +1969,7 @@ func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, idToken, pho
 	return ReferralRankOfUser, resp, err
 }
 
-func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, refCode string) (*model.ZboxWallet, *resty.Response, error) {
+func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, userName, refCode string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Posting wallet with referral code using 0box...")
 	var zboxWallet *model.ZboxWallet
 
@@ -1982,6 +1983,7 @@ func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, wa
 		"name":        walletName,
 		"description": walletDescription,
 		"refcode":     refCode,
+		"user_name":   userName,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{

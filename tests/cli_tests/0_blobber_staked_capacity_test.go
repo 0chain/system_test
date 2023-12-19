@@ -16,10 +16,10 @@ const (
 	newStakeWallet = "newStakeWallet"
 )
 
+var blobbersList []climodel.BlobberInfo
+
 func TestStakePool(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-
-	var blobbersList []climodel.BlobberInfo
 
 	t.TestSetup("register wallet and get blobbers", func() {
 		_, err := createWallet(t, configPath)
@@ -34,11 +34,11 @@ func TestStakePool(testSetup *testing.T) {
 		_, err := createWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", err)
 
-		// stake 1 token on this blobber
+		// stake 10 tokens on all blobbers
 		stakeTokensToAllBlobbers(t, 1)
 
 		// select the blobber with minimum available stake capacity
-		minAvailableCapacityBlobber, minAvailableCapacity, err := getMinStakedCapacityBlobber(t, blobbersList)
+		minAvailableCapacityBlobber, minAvailableCapacity, err := getMinStakedCapacityBlobber(t)
 		require.Nil(t, err, "Error fetching blobber with minimum available capacity")
 
 		// Tracking total offers
@@ -72,15 +72,15 @@ func TestStakePool(testSetup *testing.T) {
 
 		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates+1)
 
-		// Unstake 1 token from new wallet and check if number of delegates decreases
-		_, err = unstakeTokensForWallet(t, configPath, newStakeWallet, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}))
-		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", minAvailableCapacityBlobber.Id)
+		// Unstake tokens from new wallet and check if number of delegates decreases
+		_, err = unstakeTokensForWallet(t, configPath, newStakeWallet, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}), true)
+		require.NoErrorf(t, err, "error unstaking tokens from new wallet for blobber %s", minAvailableCapacityBlobber.Id)
 
 		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates-1)
 
-		// Unstake 1 token from new wallet (should return error and number of delegate should not decrease)
-		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}))
-		require.Error(t, err, "error unstaking tokens from blobber %s", minAvailableCapacityBlobber.Id)
+		// Unstake tokens from old wallet (should return error and number of delegate should not decrease)
+		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}), false)
+		require.Error(t, err, "No error in unstaking tokens from old wallet for blobber %s", minAvailableCapacityBlobber.Id)
 
 		lenDelegates = assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates)
 
@@ -88,22 +88,23 @@ func TestStakePool(testSetup *testing.T) {
 		_, err = cancelAllocation(t, configPath, allocationId, true)
 		require.Nil(t, err, "error canceling allocation")
 
-		// Unstake 1 token from new wallet (should be successful and number of delegate should decrease)
-		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}))
+		// Unstake tokens from old wallet (should be successful and number of delegate should decrease)
+		_, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": minAvailableCapacityBlobber.Id}), true)
 		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", minAvailableCapacityBlobber.Id)
 
 		assertNumberOfDelegates(t, minAvailableCapacityBlobber.Id, lenDelegates-1)
 	})
 }
 
-func getMinStakedCapacityBlobber(t *test.SystemTest, blobberList []climodel.BlobberInfo) (climodel.BlobberInfo, int64, error) {
+func getMinStakedCapacityBlobber(t *test.SystemTest) (climodel.BlobberInfo, int64, error) {
 	var minAvailableCapacityBlobber climodel.BlobberInfo
 	minAvailableCapacity := int64(math.MaxInt64)
 
-	for i := range blobberList {
-		blobber := blobberList[i]
+	for i := range blobbersList {
+		blobber := blobbersList[i]
 
 		if blobber.IsKilled || blobber.IsShutdown {
+			blobbersList = removeFromBlobberList(blobbersList, i)
 			continue
 		}
 
@@ -114,11 +115,9 @@ func getMinStakedCapacityBlobber(t *test.SystemTest, blobberList []climodel.Blob
 		err = json.Unmarshal([]byte(output[len(output)-1]), &blInfo)
 		require.Nil(t, err, "error unmarshalling blobber info")
 
-		stakedCapacity := int64(float64(blInfo.TotalStake) * GB / float64(blInfo.Terms.Write_price))
+		stakedCapacity := int64(float64(blInfo.TotalStake-blInfo.TotalOffers) * GB / float64(blInfo.Terms.WritePrice))
 
 		require.GreaterOrEqual(t, stakedCapacity, blobber.Allocated, "Staked capacity should be greater than allocated capacity")
-
-		stakedCapacity -= blobber.Allocated
 
 		if stakedCapacity < minAvailableCapacity {
 			minAvailableCapacity = stakedCapacity
@@ -155,11 +154,11 @@ func countDelegates(t *test.SystemTest, blobberId string) (int, error) {
 }
 
 func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailableCapacity int64, numBlobbers int) string {
-	allocSize := minAvailableCapacity * 3
+	allocSize := minAvailableCapacity - 10*MB
 	output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 		"cost":        "",
-		"data":        numBlobbers - 1,
-		"parity":      1,
+		"data":        1,
+		"parity":      numBlobbers - 1,
 		"size":        allocSize,
 		"read_price":  "0-0.1",
 		"write_price": "0-0.1",
@@ -177,8 +176,8 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 	// Create an allocation of maximum size that all blobbers can honor.
 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 		"size":        allocSize,
-		"data":        3,
-		"parity":      3,
+		"data":        1,
+		"parity":      numBlobbers - 1,
 		"lock":        allocationCost,
 		"read_price":  "0-0.1",
 		"write_price": "0-0.1",
@@ -196,7 +195,7 @@ func createWalletAndStakeTokensForWallet(t *test.SystemTest, blobber *climodel.B
 	_, err := createWalletForName(t, configPath, newStakeWallet)
 	require.Nil(t, err, "Error registering wallet", err)
 
-	_, err = executeFaucetWithTokensForWallet(t, newStakeWallet, configPath, 9)
+	_, err = executeFaucetWithTokensForWallet(t, newStakeWallet, configPath, 90)
 	require.Nil(t, err, "Error executing faucet with tokens", err)
 
 	_, err = stakeTokensForWallet(t, configPath, newStakeWallet, createParams(map[string]interface{}{"blobber_id": blobber.Id, "tokens": 1}), true)
@@ -217,7 +216,7 @@ func stakeTokensToAllBlobbers(t *test.SystemTest, tokens int64) {
 	blobbers := getBlobbersList(t)
 	require.Greater(t, len(blobbers), 0, "No blobbers found")
 
-	_, err := executeFaucetWithTokens(t, configPath, 9)
+	_, err := executeFaucetWithTokens(t, configPath, 90)
 	require.Nil(t, err, "Error executing faucet with tokens", err)
 
 	for i := range blobbers {
@@ -228,4 +227,8 @@ func stakeTokensToAllBlobbers(t *test.SystemTest, tokens int64) {
 		_, err := stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.Id, "tokens": tokens}), true)
 		require.Nil(t, err, "Error staking tokens", err)
 	}
+}
+
+func removeFromBlobberList(slice []climodel.BlobberInfo, s int) []climodel.BlobberInfo {
+	return append(slice[:s], slice[s+1:]...)
 }
