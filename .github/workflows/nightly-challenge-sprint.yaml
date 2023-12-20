@@ -7,10 +7,11 @@ on:
     # Runs every morning at 2am UTC
     - cron: '0 2 * * *'
   workflow_dispatch:
-    repo_snapshots_branch:
-      description: 'branch of repo-snapshots to derive images and branches from.'
-      default: 'current-sprint'
-      required: true
+    inputs:
+      repo_snapshots_branch:
+        description: 'branch of repo-snapshots to derive images and branches from.'
+        default: 'current-sprint'
+        required: true
 
 jobs:
   system-tests:
