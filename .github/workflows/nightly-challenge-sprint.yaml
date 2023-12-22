@@ -7,11 +7,6 @@ on:
     # Runs every morning at 2am UTC
     - cron: '0 2 * * *'
   workflow_dispatch:
-    inputs:
-      repo_snapshots_branch:
-        description: 'branch of repo-snapshots to derive images and branches from.'
-        default: 'current-sprint'
-        required: true
 
 jobs:
   system-tests:
@@ -22,8 +17,6 @@ jobs:
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
 
       - name: 'Setup jq'
         uses: dcarbone/install-jq-action@v2.1.0
@@ -112,7 +105,7 @@ jobs:
       - name: "Deploy 0Chain"
         uses: 0chain/actions/deploy-0chain@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          repo_snapshots_branch: current-sprint
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -125,8 +118,7 @@ jobs:
       - name: "Run Challenge System tests"
         uses: 0chain/actions/run-system-tests@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          repo_snapshots_branch: current-sprint
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
