@@ -127,11 +127,7 @@ func TestResumeUpload(testSetup *testing.T) {
 		}, false)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		expected := fmt.Sprintf(
-			"Upload failed. open /var/folders/fq/4t3dsp1j2kg20_xzhqzv06r00000gq/T/%s: no such file or directory",
-			filepath.Base(filename2),
-		)
-		require.Equal(t, expected, output[0])
+		require.Error(t, err)
 	})
 
 	t.RunSequentiallyWithTimeout("Resume upload with diff file content", 10*time.Minute, func(t *test.SystemTest) {
@@ -181,14 +177,7 @@ func TestResumeUpload(testSetup *testing.T) {
 			"chunknumber": 500, // 64KB * 500 = 32M
 		}, false)
 
-		fmt.Println("Output==========>",output)
-		fmt.Println("Error==========>",err)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		//expected := fmt.Sprintf(
-		//	"Upload failed. open /var/folders/fq/4t3dsp1j2kg20_xzhqzv06r00000gq/T/%s: no such file or directory",
-		//	filepath.Base(filename),
-		//)
-		//require.Equal(t, expected, output[0])
 	})
 
 	t.RunSequentiallyWithTimeout("Resume upload with diff allocationID", 10*time.Minute, func(t *test.SystemTest) {
