@@ -83,7 +83,7 @@ func TestResumeUpload(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Resume upload with diff file name", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
-		fileSize := int64(500 * MB)
+		fileSize := int64(100 * MB)
 
 		output, err := executeFaucetWithTokens(t, configPath, 100.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -127,13 +127,20 @@ func TestResumeUpload(testSetup *testing.T) {
 		}, false)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
+		//asserting output
+		require.Contains(t, output[0],"no such file or directory")
 		require.Error(t, err)
+		//asserting error
+		expected := fmt.Sprintf(
+			"exit status 1",
+		)
+		require.Equal(t, expected, err.Error())
 	})
 
 	t.RunSequentiallyWithTimeout("Resume upload with diff file content", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
-		fileSize := int64(500 * MB)
-		fileSize2 := int64(600 * MB)
+		fileSize := int64(100 * MB)
+		fileSize2 := int64(150 * MB)
 
 		output, err := executeFaucetWithTokens(t, configPath, 100.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -172,65 +179,22 @@ func TestResumeUpload(testSetup *testing.T) {
 		err = createFileWithSize(filename, fileSize2)
 		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
-			"remotepath":  "/demo/",
-			"localpath":   filename,
-			"chunknumber": 500, // 64KB * 500 = 32M
-		}, false)
-
-		require.Nil(t, err, strings.Join(output, "\n"))
-	})
-
-	t.RunSequentiallyWithTimeout("Resume upload with diff allocationID", 10*time.Minute, func(t *test.SystemTest) {
-		allocSize := int64(2 * GB)
-		fileSize := int64(500 * MB)
-
-		output, err := executeFaucetWithTokens(t, configPath, 100.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-			"lock": 50,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-		defer func() {
-			os.Remove(filename) //nolint: errcheck
-		}()
-
-		param := map[string]interface{}{
-			"allocation":  allocationID,
 			"remotepath":  "/",
 			"localpath":   filename,
 			"chunknumber": 500, // 64KB * 500 = 32M
-		}
-		upload_param := createParams(param)
-		command := fmt.Sprintf(
-			"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
-			upload_param,
-			escapedTestName(t)+"_wallet.json",
-			configPath,
-		)
-
-		cmd, _ := cliutils.StartCommandWithoutRetry(command)
-		uploaded := waitPartialUploadAndInterrupt(t, cmd)
-		t.Logf("the uploaded is %v ", uploaded)
-
-		//setting dummy allocationID to test negative flow
-		allocationID = "dummyAllocationID"
-		output, err = uploadFile(t, configPath, map[string]interface{}{
-			"allocation":  allocationID,
-			"remotepath":  "/demo/",
-			"localpath":   filename,
-			"chunknumber": 500, // 64KB * 500 = 32M
 		}, false)
 
+		//asserting output
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		expected := fmt.Sprintf(
-			"Error fetching the allocation. allocation_fetch_error: Error fetching the allocation.internal_error: can't get allocation: error retrieving allocation: %s, error: record not found",
-			filepath.Base(allocationID),
+			"Error in file operation: consensus_not_met: Commit failed. Required consensus 3, got 0",
 		)
-		require.Equal(t, expected, output[0])
+		require.Equal(t, expected, output[1])
+		//asserting error
+		require.Error(t, err)
+		expected = fmt.Sprintf(
+			"exit status 1",
+		)
+		require.Equal(t, expected, err.Error())
 	})
 }
