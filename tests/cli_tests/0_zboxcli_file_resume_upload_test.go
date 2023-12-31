@@ -104,7 +104,7 @@ func TestResumeUpload(testSetup *testing.T) {
 
 		param := map[string]interface{}{
 			"allocation":  allocationID,
-			"remotepath":  "/",
+			"remotepath":  "/dummy",
 			"localpath":   filename,
 			"chunknumber": 500, // 64KB * 500 = 32M
 		}
@@ -122,7 +122,7 @@ func TestResumeUpload(testSetup *testing.T) {
 
 		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
-			"remotepath":  "/",
+			"remotepath":  "/dummy",
 			"localpath":   filename2,
 			"chunknumber": 500, // 64KB * 500 = 32M
 		}, false)
@@ -160,7 +160,7 @@ func TestResumeUpload(testSetup *testing.T) {
 
 		param := map[string]interface{}{
 			"allocation":  allocationID,
-			"remotepath":  "/",
+			"remotepath":  "/dummy",
 			"localpath":   filename,
 			"chunknumber": 500, // 64KB * 500 = 32M
 		}
@@ -180,7 +180,7 @@ func TestResumeUpload(testSetup *testing.T) {
 		err = createFileWithSize(filename, fileSize2)
 		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
-			"remotepath":  "/",
+			"remotepath":  "/dummy",
 			"localpath":   filename,
 			"chunknumber": 500, // 64KB * 500 = 32M
 		}, false)
@@ -201,8 +201,8 @@ func TestResumeUpload(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Resume upload with diff filesize and diff filename (Negative)", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
-		fileSize := int64(200 * MB)
-		fileSize2 := int64(300 * MB)
+		fileSize := int64(100 * MB)
+		fileSize2 := int64(150 * MB)
 
 		output, err := executeFaucetWithTokens(t, configPath, 100.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -248,9 +248,6 @@ func TestResumeUpload(testSetup *testing.T) {
 			"chunknumber": 500, // 64KB * 500 = 32M
 		}, false)
 
-		fmt.Println("Output=======>>>>>>", output)
-		fmt.Println("Output0=======>>>>>>", output[0])
-		fmt.Println("Err===========>>>>>", err)
 		//asserting output
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		expected := fmt.Sprintf(
