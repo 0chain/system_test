@@ -94,12 +94,10 @@ func TestResumeUpload(testSetup *testing.T) {
 		})
 
 		filename := generateRandomTestFileName(t)
-		filename2 := generateRandomTestFileName(t)
 		err = createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 		defer func() {
 			os.Remove(filename) //nolint: errcheck
-			os.Remove(filename2) //nolint: errcheck
 		}()
 
 		param := map[string]interface{}{
@@ -120,10 +118,12 @@ func TestResumeUpload(testSetup *testing.T) {
 		uploaded := waitPartialUploadAndInterrupt(t, cmd)
 		t.Logf("the uploaded is %v ", uploaded)
 
+		//renaming the same file
+		filename = generateRandomTestFileName(t)
 		output, err = uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
-			"localpath":   filename2,
+			"localpath":   filename,
 			"chunknumber": 500, // 64KB * 500 = 32M
 		}, false)
 
@@ -138,7 +138,7 @@ func TestResumeUpload(testSetup *testing.T) {
 		require.Equal(t, expected, err.Error())
 	})
 
-	t.RunSequentiallyWithTimeout("Resume upload with diff filesize having same filename (Negative)", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Resume upload with same file having diff size (Negative)", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
 		fileSize := int64(100 * MB)
 		fileSize2 := int64(150 * MB)
@@ -199,7 +199,7 @@ func TestResumeUpload(testSetup *testing.T) {
 		require.Equal(t, expected, err.Error())
 	})
 
-	t.RunSequentiallyWithTimeout("Resume upload with diff filesize and diff filename (Negative)", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Resume upload with diff file of diff size (Negative)", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
 		fileSize := int64(100 * MB)
 		fileSize2 := int64(150 * MB)
