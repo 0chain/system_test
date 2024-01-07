@@ -39,7 +39,7 @@ func TestZCNAuthorizerRegisterAndDelete(testSetup *testing.T) {
 
 	var (
 		publicKey = w.ClientPublicKey
-		clientID  = w.ClientID
+		clientID  = "7751e91d8bf5e9c8cc2991ad80fc326b83a1bf02afed2d4ea7c030d1c5932ff0"
 		authURL   = "http://systemtest.network/authorizer01"
 	)
 	// faucet pour to sc owner wallet
@@ -53,7 +53,7 @@ func TestZCNAuthorizerRegisterAndDelete(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Remove authorizer from zcnsc smartcontract", func(t *test.SystemTest) {
-		output, err := removeAuthorizer(t, clientID, true)
+		output, err := removeAuthorizer(t, w.ClientID, true)
 		require.NoError(t, err, strings.Join(output, "\n"))
 		t.Log("remove authorizer zcnsc successfully")
 	})
