@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -604,6 +605,15 @@ func createFileWithSize(name string, size int64) error {
 	buffer := make([]byte, size)
 	rand.Read(buffer) //nolint:gosec,revive
 	return os.WriteFile(name, buffer, os.ModePerm)
+}
+
+func createFileWithSize2(name string, sourceFileName string) error {
+	content, err := ioutil.ReadFile(sourceFileName)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(name, content, os.ModePerm)
 }
 
 func generateRandomTestFileName(t *test.SystemTest) string {

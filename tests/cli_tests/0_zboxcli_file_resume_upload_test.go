@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -79,6 +80,72 @@ func TestResumeUpload(testSetup *testing.T) {
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
+	})
+
+	t.RunSequentiallyWithTimeout("Resume upload with same filename having same filesize with diff content(Negative)", 10*time.Minute, func(t *test.SystemTest) {
+		allocSize := int64(2 * GB)
+		fileSize := int64(100 * MB)
+
+		output, err := executeFaucetWithTokens(t, configPath, 100.0)
+		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+			"lock": 50,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, fileSize)
+		content1, err := readFileContent(filename)
+		require.Nil(t, err)
+		defer func() {
+			os.Remove(filename) //nolint: errcheck
+		}()
+
+		param := map[string]interface{}{
+			"allocation":  allocationID,
+			"remotepath":  "/dummy",
+			"localpath":   filename,
+			"chunknumber": 500, // 64KB * 500 = 32M
+		}
+		upload_param := createParams(param)
+		command := fmt.Sprintf(
+			"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
+			upload_param,
+			escapedTestName(t)+"_wallet.json",
+			configPath,
+		)
+
+		cmd, _ := cliutils.StartCommandWithoutRetry(command)
+		uploaded := waitPartialUploadAndInterrupt(t, cmd)
+		t.Logf("the uploaded is %v ", uploaded)
+
+		//creating file with samename & size but with new content
+		err = createFileWithSize(filename, fileSize)
+		content2, err := readFileContent(filename)
+		fmt.Println("filename======>>>>", filename)
+		if !bytes.Equal(content1, content2) {
+			t.Errorf("Contents of the file after the second run are different")
+		}
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation":  allocationID,
+			"remotepath":  "/dummy",
+			"localpath":   filename,
+			"chunknumber": 500, // 64KB * 500 = 32M
+		}, false)
+
+		fmt.Println("output=====>>>>", output)
+		fmt.Println("error=====>>>>", err)
+
+		//require.NotNil(t, err, strings.Join(output, "\n"))
+		//asserting output
+		//require.Contains(t, output[0],"no such file or directory")
+		//require.Error(t, err)
+		////asserting error
+		//expected := fmt.Sprintf(
+		//	"exit status 1",
+		//)
+		//require.Equal(t, expected, err.Error())
 	})
 
 	t.RunSequentiallyWithTimeout("Resume upload with diff filename having same filesize (Negative)", 10*time.Minute, func(t *test.SystemTest) {
