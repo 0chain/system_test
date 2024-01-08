@@ -47,7 +47,7 @@ func TestZCNAuthorizerRegisterAndDelete(testSetup *testing.T) {
 	require.NoError(t, err, "Unexpected faucet execution failure", strings.Join(output, "\n"))
 
 	t.RunSequentially("Register authorizer to zcnsc smartcontract", func(t *test.SystemTest) {
-		output, err := registerAuthorizer(t, clientID, publicKey, authURL, true)
+		output, err := registerAuthorizer(t, "random_delegate_wallet", publicKey, authURL, true)
 		require.NoError(t, err, "error trying to register authorizer to zcnsc: %s", strings.Join(output, "\n"))
 		t.Log("register authorizer zcnsc successfully")
 	})
