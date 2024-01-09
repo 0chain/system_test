@@ -1079,7 +1079,7 @@ func waitPartialUploadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd) bool {
 		case <-ctx.Done():
 			t.Log("Timeout waiting for partial upload")
 			return false
-		case <-time.After(10 * time.Second):
+		case <-time.After(5 * time.Second):
 			// Send interrupt signal to command
 			err := cmd.Process.Signal(os.Interrupt)
 			if err != nil {
