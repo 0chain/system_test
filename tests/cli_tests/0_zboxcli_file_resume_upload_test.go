@@ -83,7 +83,7 @@ func TestResumeUpload(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Resume upload with same filename having same filesize with diff content(Negative)", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
-		fileSize := int64(200 * MB)
+		fileSize := int64(300 * MB)
 	
 		output, err := executeFaucetWithTokens(t, configPath, 100.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -197,8 +197,8 @@ func TestResumeUpload(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Resume upload with same file having diff size (Negative)", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
-		fileSize := int64(100 * MB)
-		fileSize2 := int64(150 * MB)
+		fileSize := int64(300 * MB)
+		fileSize2 := int64(350 * MB)
 
 		output, err := executeFaucetWithTokens(t, configPath, 100.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -258,8 +258,8 @@ func TestResumeUpload(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Resume upload with diff file of diff size (Negative)", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
-		fileSize := int64(100 * MB)
-		fileSize2 := int64(150 * MB)
+		fileSize := int64(300 * MB)
+		fileSize2 := int64(300 * MB)
 
 		output, err := executeFaucetWithTokens(t, configPath, 100.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
