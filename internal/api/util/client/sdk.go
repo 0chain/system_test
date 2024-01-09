@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"io"
 	"os"
@@ -144,7 +145,7 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) (tmpFile
 	homeDir, err := config.GetHomeDir()
 	require.NoError(t, err)
 
-	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
+	chunkedUpload, err := sdk.CreateChunkedUpload(context.TODO(), homeDir, sdkAllocation,
 		fileMeta, buf, false, false, false, zboxutil.NewConnectionId())
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
@@ -200,7 +201,7 @@ func (c *SDKClient) UpdateFileBigger(t *test.SystemTest, allocationID, fpath str
 	homeDir, err := config.GetHomeDir()
 	require.NoError(t, err)
 
-	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
+	chunkedUpload, err := sdk.CreateChunkedUpload(context.TODO(), homeDir, sdkAllocation,
 		fileMeta, buf, true, false, false, zboxutil.NewConnectionId())
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
@@ -246,7 +247,7 @@ func (c *SDKClient) UpdateFileSmaller(t *test.SystemTest, allocationID, fpath st
 	homeDir, err := config.GetHomeDir()
 	require.NoError(t, err)
 
-	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
+	chunkedUpload, err := sdk.CreateChunkedUpload(context.TODO(), homeDir, sdkAllocation,
 		fileMeta, buf, true, false, false, zboxutil.NewConnectionId())
 	require.NoError(t, err)
 	require.Nil(t, chunkedUpload.Start())
