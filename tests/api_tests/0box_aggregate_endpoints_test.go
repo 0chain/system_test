@@ -182,7 +182,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 			// Update with a bigger file
 			fpath, newFsize := sdkClient.UploadFileWithParams(t, allocationID, fsize, fpath)
-			t.Logf("Filename after update bigger : %v", fpath)
+			t.Logf("Filename after update bigger  : %v", fpath)
 
 			// Check increased
 			wait.PoolImmediately(t, 2*time.Minute, func() bool {
