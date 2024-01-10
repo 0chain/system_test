@@ -28,7 +28,7 @@ on:
 
 jobs:
   golangci:
-    if: github.event_name == 'push'
+    # if: github.event_name == 'push'
     name: "lint"
     runs-on: [ arc-runner ]
     steps:
