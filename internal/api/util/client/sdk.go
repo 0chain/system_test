@@ -12,7 +12,6 @@ import (
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/blockchain"
 	"github.com/0chain/gosdk/zboxcore/sdk"
-	"github.com/0chain/gosdk/zboxcore/zboxutil"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/crypto"
@@ -141,52 +140,6 @@ func (c *SDKClient) DeleteFile(t *test.SystemTest, allocationID, fpath string) {
 
 	err = sdkAllocation.DeleteFile("/" + filepath.Join("", filepath.Base(fpath)))
 	require.NoError(t, err)
-}
-
-func (c *SDKClient) UpdateFileSmaller(t *test.SystemTest, allocationID, fpath string, fsize int64) (tmpFilePath string, actualSizeUploaded int64) {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
-
-	require.Greater(t, fsize, int64(0), "Cannot create a file with size less than 0")
-
-	tmpFile, err := os.CreateTemp("", "*")
-	if err != nil {
-		require.NoError(t, err)
-	}
-
-	defer func(name string) {
-		_ = os.RemoveAll(name)
-	}(tmpFile.Name())
-
-	actualSize := fsize / 2
-
-	rawBuf := make([]byte, actualSize)
-	_, err = rand.Read(rawBuf)
-	if err != nil {
-		require.NoError(t, err)
-	} //nolint:gosec,revive
-
-	buf := bytes.NewBuffer(rawBuf)
-
-	fileMeta := sdk.FileMeta{
-		Path:       tmpFile.Name(),
-		ActualSize: actualSize,
-		RemoteName: filepath.Base(fpath),
-		RemotePath: "/" + filepath.Join("", filepath.Base(fpath)),
-	}
-
-	sdkAllocation, err := sdk.GetAllocation(allocationID)
-	require.NoError(t, err)
-
-	homeDir, err := config.GetHomeDir()
-	require.NoError(t, err)
-
-	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
-		fileMeta, buf, true, false, false, zboxutil.NewConnectionId())
-	require.NoError(t, err)
-	require.Nil(t, chunkedUpload.Start())
-
-	return fpath, actualSize
 }
 
 func (c *SDKClient) DownloadFile(t *test.SystemTest, allocationID, remotepath, localpath string) {

@@ -202,7 +202,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			})
 
 			// Update with a smaller file
-			fpath, newFsize = sdkClient.UpdateFileSmaller(t, allocationID, fpath, newFsize)
+			fpath, newFsize = sdkClient.UploadFileWithParams(t, allocationID, newFsize, fpath)
 			t.Logf("Filename after update smaller : %v", fpath)
 
 			// Check decreased
@@ -602,7 +602,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 
 		// Update with a smaller file
-		fpath, newFsize = sdkClient.UpdateFileSmaller(t, allocationID, fpath, newFsize)
+		fpath, newFsize = sdkClient.UploadFileWithParams(t, allocationID, newFsize, fpath)
 		t.Logf("Filename after update smaller : %v", fpath)
 
 		// Check decreased
