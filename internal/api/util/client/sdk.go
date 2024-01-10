@@ -212,7 +212,7 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, dir, format string, o
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
-	tmpFile, err := os.CreateTemp("", "*"+format)
+	tmpFile, err := os.CreateTemp(dir, "*"+format)
 	if err != nil {
 		require.NoError(t, err)
 	}
