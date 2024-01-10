@@ -66,7 +66,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -106,7 +106,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -149,7 +149,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -303,7 +303,7 @@ func createAllocationAndPerformMultiOperation(t *test.SystemTest, allocSize int6
 			format = fileExtensions[i]
 		}
 
-		op := sdkClient.AddUploadOperation(t, format, fileSize)
+		op := sdkClient.AddUploadOperation(t, "", format, fileSize)
 		ops = append(ops, op)
 	}
 	start := time.Now()
