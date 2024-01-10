@@ -109,6 +109,10 @@ func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet, mnemonic
 }
 
 func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) (tmpFilePath string, actualSizeUploaded int64) {
+	return c.UploadFileWithParams(t, allocationID, 1024, "")
+}
+
+func (c *SDKClient) UploadFileWithParams(t *test.SystemTest, allocationID string, fileSize int64, path string) (tmpFilePath string, actualSizeUploaded int64) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
@@ -121,35 +125,10 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) (tmpFile
 		_ = os.RemoveAll(name)
 	}(tmpFile.Name())
 
-	const actualSize int64 = 1024
+	uploadOp := c.AddUploadOperation(t, path, "", fileSize)
+	c.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
-	rawBuf := make([]byte, actualSize)
-	_, err = rand.Read(rawBuf)
-	if err != nil {
-		require.NoError(t, err)
-	} //nolint:gosec,revive
-
-	buf := bytes.NewBuffer(rawBuf)
-
-	fileMeta := sdk.FileMeta{
-		Path:       tmpFile.Name(),
-		ActualSize: actualSize,
-		RemoteName: filepath.Base(tmpFile.Name()),
-		RemotePath: "/" + filepath.Join("", filepath.Base(tmpFile.Name())),
-	}
-
-	sdkAllocation, err := sdk.GetAllocation(allocationID)
-	require.NoError(t, err)
-
-	homeDir, err := config.GetHomeDir()
-	require.NoError(t, err)
-
-	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
-		fileMeta, buf, false, false, false, zboxutil.NewConnectionId())
-	require.NoError(t, err)
-	require.Nil(t, chunkedUpload.Start())
-
-	return filepath.Join("", filepath.Base(tmpFile.Name())), actualSize
+	return filepath.Join("", filepath.Base(uploadOp.FileMeta.Path)), fileSize
 }
 
 func (c *SDKClient) DeleteFile(t *test.SystemTest, allocationID, fpath string) {
@@ -162,50 +141,6 @@ func (c *SDKClient) DeleteFile(t *test.SystemTest, allocationID, fpath string) {
 
 	err = sdkAllocation.DeleteFile("/" + filepath.Join("", filepath.Base(fpath)))
 	require.NoError(t, err)
-}
-
-func (c *SDKClient) UpdateFileBigger(t *test.SystemTest, allocationID, fpath string, fsize int64) (tmpFilePath string, actualSizeUploaded int64) {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
-
-	tmpFile, err := os.CreateTemp("", "*")
-	if err != nil {
-		require.NoError(t, err)
-	}
-
-	defer func(name string) {
-		_ = os.RemoveAll(name)
-	}(tmpFile.Name())
-
-	actualSize := fsize * 2
-
-	rawBuf := make([]byte, actualSize)
-	_, err = rand.Read(rawBuf)
-	if err != nil {
-		require.NoError(t, err)
-	} //nolint:gosec,revive
-
-	buf := bytes.NewBuffer(rawBuf)
-
-	fileMeta := sdk.FileMeta{
-		Path:       tmpFile.Name(),
-		ActualSize: actualSize,
-		RemoteName: filepath.Base(fpath),
-		RemotePath: "/" + filepath.Join("", filepath.Base(fpath)),
-	}
-
-	sdkAllocation, err := sdk.GetAllocation(allocationID)
-	require.NoError(t, err)
-
-	homeDir, err := config.GetHomeDir()
-	require.NoError(t, err)
-
-	chunkedUpload, err := sdk.CreateChunkedUpload(homeDir, sdkAllocation,
-		fileMeta, buf, true, false, false, zboxutil.NewConnectionId())
-	require.NoError(t, err)
-	require.Nil(t, chunkedUpload.Start())
-
-	return fpath, actualSize
 }
 
 func (c *SDKClient) UpdateFileSmaller(t *test.SystemTest, allocationID, fpath string, fsize int64) (tmpFilePath string, actualSizeUploaded int64) {
@@ -320,7 +255,7 @@ func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops 
 	require.NoError(t, err)
 }
 
-func (c *SDKClient) AddUploadOperation(t *test.SystemTest, format string, opts ...int64) sdk.OperationRequest {
+func (c *SDKClient) AddUploadOperation(t *test.SystemTest, dir, format string, opts ...int64) sdk.OperationRequest {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
