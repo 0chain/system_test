@@ -112,17 +112,7 @@ func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) (tmpFile
 }
 
 func (c *SDKClient) UploadFileWithParams(t *test.SystemTest, allocationID string, fileSize int64, path string) (tmpFilePath string, actualSizeUploaded int64) {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
-
-	tmpFile, err := os.CreateTemp("", "*")
-	if err != nil {
-		require.NoError(t, err)
-	}
-
-	defer func(name string) {
-		_ = os.RemoveAll(name)
-	}(tmpFile.Name())
+	t.Log("Uploading file to allocation", allocationID)
 
 	uploadOp := c.AddUploadOperation(t, path, "", fileSize)
 	c.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
