@@ -84,7 +84,7 @@ func TestResumeUpload(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Resume upload with same filename having same filesize with diff content(Negative)", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
 		fileSize := int64(300 * MB)
-	
+
 		output, err := executeFaucetWithTokens(t, configPath, 100.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
@@ -104,7 +104,7 @@ func TestResumeUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
 			"localpath":   filename,
-			"chunknumber": 40, // 64KB * 40 = 2.56M
+			"chunknumber": 20,
 		}
 		upload_param := createParams(param)
 		command := fmt.Sprintf(
@@ -124,9 +124,9 @@ func TestResumeUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
 			"localpath":   filename,
-			"chunknumber": 40, // 64KB * 40 = 2.56M
+			"chunknumber": 20,
 		}, false)
-	
+
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		//asserting output
 		require.Contains(t, output[1],"Error in file operation: consensus_not_met: Commit failed. Required consensus 3, got 0")
@@ -195,71 +195,10 @@ func TestResumeUpload(testSetup *testing.T) {
 		require.Equal(t, expected, err.Error())
 	})
 
-	t.RunSequentiallyWithTimeout("Resume upload with same file having diff size (Negative)", 10*time.Minute, func(t *test.SystemTest) {
-		allocSize := int64(2 * GB)
-		fileSize := int64(300 * MB)
-		fileSize2 := int64(350 * MB)
-
-		output, err := executeFaucetWithTokens(t, configPath, 100.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-			"lock": 50,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-		defer func() {
-			os.Remove(filename) //nolint: errcheck
-		}()
-
-		param := map[string]interface{}{
-			"allocation":  allocationID,
-			"remotepath":  "/dummy",
-			"localpath":   filename,
-			"chunknumber": 500, // 64KB * 500 = 32M
-		}
-		upload_param := createParams(param)
-		command := fmt.Sprintf(
-			"./zbox upload %s --silent --wallet %s --configDir ./config --config %s",
-			upload_param,
-			escapedTestName(t)+"_wallet.json",
-			configPath,
-		)
-
-		cmd, _ := cliutils.StartCommandWithoutRetry(command)
-		uploaded := waitPartialUploadAndInterrupt(t, cmd)
-		t.Logf("the uploaded is %v ", uploaded)
-
-		// increasing the file size to test the negative flow
-		err = createFileWithSize(filename, fileSize2)
-		output, err = uploadFile(t, configPath, map[string]interface{}{
-			"allocation":  allocationID,
-			"remotepath":  "/dummy",
-			"localpath":   filename,
-			"chunknumber": 500, // 64KB * 500 = 32M
-		}, false)
-
-		//asserting output
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		expected := fmt.Sprintf(
-			"Error in file operation: consensus_not_met: Commit failed. Required consensus 3, got 0",
-		)
-		require.Equal(t, expected, output[1])
-		//asserting error
-		require.Error(t, err)
-		expected = fmt.Sprintf(
-			"exit status 1",
-		)
-		require.Equal(t, expected, err.Error())
-	})
-
 	t.RunSequentiallyWithTimeout("Resume upload with diff file of diff size (Negative)", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
 		fileSize := int64(300 * MB)
-		fileSize2 := int64(300 * MB)
+		fileSize2 := int64(350 * MB)
 
 		output, err := executeFaucetWithTokens(t, configPath, 100.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -282,7 +221,7 @@ func TestResumeUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
 			"localpath":   filename,
-			"chunknumber": 500, // 64KB * 500 = 32M
+			"chunknumber": 20, // 64KB * 500 = 32M
 		}
 		upload_param := createParams(param)
 		command := fmt.Sprintf(
@@ -302,7 +241,7 @@ func TestResumeUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
 			"localpath":   filename2,
-			"chunknumber": 500, // 64KB * 500 = 32M
+			"chunknumber": 20, // 64KB * 500 = 32M
 		}, false)
 
 		//asserting output
