@@ -62,7 +62,7 @@ func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 
 	// add back the authorizer removed previously, the auths[0]
 	addAuth := auths[0]
-	output, err = registerAuthorizer(t, addAuth.ID, authsIDKeys[addAuth.ID], addAuth.URL, false)
+	output, err = registerAuthorizer(t, "random_delegate_wallet", authsIDKeys[addAuth.ID], addAuth.URL, false)
 	require.NoError(t, err, "Unexpected register authorizer failure", strings.Join(output, "\n"))
 
 	// wait until the new one is registered
@@ -88,7 +88,7 @@ func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 
 	// add back the second removed authorizer
 	addAuth2 := auths[1]
-	output, err = registerAuthorizer(t, addAuth2.ID, authsIDKeys[addAuth2.ID], addAuth2.URL, false)
+	output, err = registerAuthorizer(t, "random_delegate_wallet", authsIDKeys[addAuth2.ID], addAuth2.URL, false)
 	require.NoError(t, err, "Unexpected register authorizer failure", strings.Join(output, "\n"))
 
 	// TODO: test burn-wzcn and mint zcn, but thats require the grapnode and dex_subgraph setup for
