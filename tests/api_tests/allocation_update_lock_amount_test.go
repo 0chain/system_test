@@ -56,7 +56,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.2, client.TxSuccessfulStatus)
 		t.Log("Allocation ID: ", allocationID)
 
-		uploadOp := sdkClient.AddUploadOperation(t, "", 10*MB)
+		uploadOp := sdkClient.AddUploadOperation(t, "", "", 10*MB)
 		chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 		time.Sleep(2 * time.Minute)
@@ -123,7 +123,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.2, client.TxSuccessfulStatus)
 		t.Log("Allocation ID: ", allocationID)
 
-		uploadOp := sdkClient.AddUploadOperation(t, "", 10*MB)
+		uploadOp := sdkClient.AddUploadOperation(t, "", "", 10*MB)
 		chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 		time.Sleep(2 * time.Minute)
@@ -194,7 +194,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.2, client.TxSuccessfulStatus)
 		t.Log("Allocation ID: ", allocationID)
 
-		uploadOp := sdkClient.AddUploadOperation(t, "", 10*MB)
+		uploadOp := sdkClient.AddUploadOperation(t, "", "", 10*MB)
 		chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 		time.Sleep(2 * time.Minute)
@@ -270,7 +270,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		allocationID := apiClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 0.3, client.TxSuccessfulStatus)
 		t.Log("Allocation ID: ", allocationID)
 
-		uploadOp := sdkClient.AddUploadOperation(t, "", 10*MB)
+		uploadOp := sdkClient.AddUploadOperation(t, "", "", 10*MB)
 		chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 		time.Sleep(2 * time.Minute)
