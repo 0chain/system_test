@@ -24,7 +24,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 5)
 
 		for i := 0; i < 1; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -32,7 +32,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		newOps := make([]sdk.OperationRequest, 0, 5)
 		time.Sleep(2 * time.Second)
 		for i := 0; i < 2; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			newOps = append(newOps, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, newOps)
@@ -42,7 +42,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 
 		moreOps := make([]sdk.OperationRequest, 0, 5)
 		for i := 0; i < 3; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			moreOps = append(moreOps, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, moreOps)
@@ -61,7 +61,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -90,7 +90,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -119,7 +119,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -132,7 +132,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 				op := sdkClient.AddDeleteOperation(t, allocationID, ops[i].FileMeta.RemotePath)
 				newOps = append(newOps, op)
 			case 1:
-				op := sdkClient.AddUpdateOperation(t, allocationID, ops[i].FileMeta.RemotePath, ops[i].FileMeta.RemoteName)
+				op := sdkClient.AddUpdateOperation(t, ops[i].FileMeta.RemotePath, ops[i].FileMeta.RemoteName, ops[i].FileMeta.ActualSize)
 				newOps = append(newOps, op)
 			case 2:
 				op := sdkClient.AddRenameOperation(t, allocationID, ops[i].FileMeta.RemotePath, randName())
