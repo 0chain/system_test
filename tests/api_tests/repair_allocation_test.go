@@ -84,7 +84,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
 		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
-		updateOp := sdkClient.AddUpdateOperation(t, allocationID, op.RemotePath, op.FileMeta.RemoteName)
+		updateOp := sdkClient.AddUpdateOperation(t, op.RemotePath, op.FileMeta.RemoteName, op.FileMeta.ActualSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{updateOp}, client.WithRepair(alloc.Blobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)

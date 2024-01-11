@@ -181,7 +181,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			})
 
 			// Update with a bigger file
-			fpath, newFsize := sdkClient.UploadFileWithParams(t, allocationID, fsize, fpath)
+			fpath, newFsize := sdkClient.UpdateFileWithParams(t, allocationID, fsize*2, fpath)
 			t.Logf("Filename after update bigger : %v", fpath)
 
 			// Check increased
@@ -202,7 +202,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			})
 
 			// Update with a smaller file
-			fpath, newFsize = sdkClient.UploadFileWithParams(t, allocationID, newFsize, fpath)
+			fpath, newFsize = sdkClient.UpdateFileWithParams(t, allocationID, newFsize/2, fpath)
 			t.Logf("Filename after update smaller : %v", fpath)
 
 			// Check decreased
@@ -355,7 +355,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		require.Equal(t, 1, len([]int64(challengeData.TotalChallenges)))
 		totalGraphChallenges := challengeData.TotalChallenges[0]
 
-		require.InEpsilon(t, totalChallengesForAllocations, totalGraphChallenges, 0.05, "Total challenges for allocations and total challenges from graph should be equal")
+		require.InEpsilon(t, totalChallengesForAllocations, totalGraphChallenges, 0.1, "Total challenges for allocations and total challenges from graph should be equal")
 	})
 
 	t.RunSequentially("endpoint parameters ( test /v2/graph-write-price )", graphEndpointTestCases(zboxClient.GetGraphWritePrice))

@@ -117,7 +117,16 @@ func (c *SDKClient) UploadFileWithParams(t *test.SystemTest, allocationID string
 	uploadOp := c.AddUploadOperation(t, path, "", fileSize)
 	c.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
-	return filepath.Join("", filepath.Base(uploadOp.FileMeta.Path)), fileSize
+	return uploadOp.FileMeta.RemoteName, fileSize
+}
+
+func (c *SDKClient) UpdateFileWithParams(t *test.SystemTest, allocationID string, fileSize int64, path string) (tmpFilePath string, actualSizeUploaded int64) {
+	t.Log("Updating file to allocation", allocationID)
+
+	updateOp := c.AddUpdateOperation(t, "/"+filepath.Join("", path), path, fileSize)
+	c.MultiOperation(t, allocationID, []sdk.OperationRequest{updateOp})
+
+	return updateOp.FileMeta.RemoteName, fileSize
 }
 
 func (c *SDKClient) DeleteFile(t *test.SystemTest, allocationID, fpath string) {
@@ -198,14 +207,18 @@ func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops 
 	require.NoError(t, err)
 }
 
-func (c *SDKClient) AddUploadOperation(t *test.SystemTest, dir, format string, opts ...int64) sdk.OperationRequest {
+func (c *SDKClient) AddUploadOperation(t *test.SystemTest, path, format string, opts ...int64) sdk.OperationRequest {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
-	tmpFile, err := os.CreateTemp(dir, "*"+format)
+	tmpFile, err := os.CreateTemp("", "*"+format)
 	if err != nil {
 		require.NoError(t, err)
 	}
+
+	defer func(name string) {
+		_ = os.RemoveAll(name)
+	}(tmpFile.Name())
 
 	var actualSize int64 = 1024
 	if len(opts) > 0 {
@@ -223,12 +236,21 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, dir, format string, o
 	_, err = tmpFile.Seek(0, 0)
 	require.NoError(t, err)
 
+	remoteName := filepath.Base(path)
+	remotePath := "/" + filepath.Join("", filepath.Base(path))
+	if path == "" {
+		remoteName = filepath.Base(tmpFile.Name())
+		remotePath = "/" + filepath.Join("", filepath.Base(tmpFile.Name()))
+	}
+
 	fileMeta := sdk.FileMeta{
 		Path:       tmpFile.Name(),
 		ActualSize: actualSize,
-		RemoteName: filepath.Base(tmpFile.Name()),
-		RemotePath: "/" + filepath.Join("", filepath.Base(tmpFile.Name())),
+		RemoteName: remoteName,
+		RemotePath: remotePath,
 	}
+
+	t.Log("fileMeta", fileMeta)
 
 	homeDir, err := config.GetHomeDir()
 	require.NoError(t, err)
@@ -298,7 +320,7 @@ func (c *SDKClient) AddRenameOperation(t *test.SystemTest, allocationID, remoteP
 	}
 }
 
-func (c *SDKClient) AddUpdateOperation(t *test.SystemTest, allocationID, remotePath, remoteName string) sdk.OperationRequest {
+func (c *SDKClient) AddUpdateOperation(t *test.SystemTest, remotePath, remoteName string, fileSize int64) sdk.OperationRequest {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
@@ -307,16 +329,14 @@ func (c *SDKClient) AddUpdateOperation(t *test.SystemTest, allocationID, remoteP
 		require.NoError(t, err)
 	}
 
-	const actualSize int64 = 1024
-
-	rawBuf := make([]byte, actualSize)
+	rawBuf := make([]byte, fileSize)
 	_, err = rand.Read(rawBuf)
 	if err != nil {
 		require.NoError(t, err)
 	} //nolint:gosec,revive
 	fileMeta := sdk.FileMeta{
 		Path:       tmpFile.Name(),
-		ActualSize: actualSize,
+		ActualSize: fileSize,
 		RemotePath: remotePath,
 		RemoteName: remoteName,
 	}
@@ -359,9 +379,9 @@ func (c *SDKClient) AddUploadOperationWithPath(t *test.SystemTest, allocationID,
 		require.NoError(t, err)
 	}
 
-	const actualSize int64 = 1024
+	const fileSize int64 = 1024
 
-	rawBuf := make([]byte, actualSize)
+	rawBuf := make([]byte, fileSize)
 	_, err = rand.Read(rawBuf)
 	if err != nil {
 		require.NoError(t, err)
@@ -369,7 +389,7 @@ func (c *SDKClient) AddUploadOperationWithPath(t *test.SystemTest, allocationID,
 
 	fileMeta := sdk.FileMeta{
 		Path:       tmpFile.Name(),
-		ActualSize: actualSize,
+		ActualSize: fileSize,
 		RemoteName: filepath.Base(tmpFile.Name()),
 		RemotePath: remotePath + filepath.Join("", filepath.Base(tmpFile.Name())),
 	}
