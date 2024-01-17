@@ -197,8 +197,8 @@ func TestResumeUpload(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Resume upload with diff file of diff size (Negative)", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
-		fileSize := int64(300 * MB)
-		fileSize2 := int64(350 * MB)
+		fileSize := int64(500 * MB)
+		fileSize2 := int64(550 * MB)
 
 		output, err := executeFaucetWithTokens(t, configPath, 100.0)
 		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
@@ -221,7 +221,7 @@ func TestResumeUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
 			"localpath":   filename,
-			"chunknumber": 20, // 64KB * 500 = 32M
+			"chunknumber": 500, // 64KB * 500 = 32M
 		}
 		upload_param := createParams(param)
 		command := fmt.Sprintf(
@@ -241,7 +241,7 @@ func TestResumeUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
 			"localpath":   filename2,
-			"chunknumber": 20, // 64KB * 500 = 32M
+			"chunknumber": 500, // 64KB * 500 = 32M
 		}, false)
 
 		//asserting output
