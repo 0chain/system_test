@@ -261,7 +261,7 @@ jobs:
       - name: "Set build status to ${{ env.WORKFLOW_CONCLUSION }}"
         uses: Sibz/github-status-action@v1
         with:
-          authToken: ${{secrets.GITHUB_TOKEN}}
+          authToken: ${{secrets.SVC_ACCOUNT_SECRET}}
           context: '0Chain System Tests CI'
           description: "Build status: ${{ env.WORKFLOW_CONCLUSION }}"
           state: ${{ env.WORKFLOW_CONCLUSION }}
