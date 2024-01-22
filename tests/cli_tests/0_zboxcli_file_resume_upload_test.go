@@ -219,7 +219,7 @@ func TestResumeUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
 			"localpath":   filename,
-			"chunknumber": 500, // 64KB * 500 = 32M
+			"chunknumber": 20, // 64KB * 500 = 32M
 		}
 		upload_param := createParams(param)
 		command := fmt.Sprintf(
@@ -239,7 +239,7 @@ func TestResumeUpload(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
 			"localpath":   filename,
-			"chunknumber": 500, // 64KB * 500 = 32M
+			"chunknumber": 20, // 64KB * 500 = 32M
 		}, false)
 
 		//asserting output
