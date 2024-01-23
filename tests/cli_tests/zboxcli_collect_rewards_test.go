@@ -32,14 +32,10 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with valid pool and blobber id should pass", func(t *test.SystemTest) { // TODO slow
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
-
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		// Upload and download a file so blobber can accumulate rewards
 		allocSize := int64(1 * GB)
@@ -58,7 +54,7 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 		blobberID := alloc.Blobbers[time.Now().Unix()%int64(len(alloc.Blobbers))].ID
 
 		// Stake tokens against this blobber
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+		output, err := stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobberID,
 			"tokens":     1.0,
 		}), true)
@@ -117,14 +113,10 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with invalid blobber id should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
+		output, err := listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		err = json.Unmarshal([]byte(output[0]), &blobbers)
@@ -153,14 +145,10 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with invalid provider type should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
+		output, err := listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		err = json.Unmarshal([]byte(output[0]), &blobbers)
@@ -189,10 +177,9 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with no provider id or type should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{}), false)
+		output, err := collectRewards(t, configPath, createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err)
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "missing tokens flag")
@@ -218,17 +205,13 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Test collect reward with valid pool and validator id should pass", 10*time.Minute, func(t *test.SystemTest) { // TODO slow
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
 		var validators []climodel.Validator
-		output, err = listValidators(t, configPath, "--json")
+		output, err := listValidators(t, configPath, "--json")
 		require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		err = json.Unmarshal([]byte(output[0]), &validators)
@@ -311,14 +294,10 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with invalid validator id should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		validators := []climodel.Validator{}
-		output, err = listValidators(t, configPath, "--json")
+		output, err := listValidators(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		err = json.Unmarshal([]byte(output[0]), &validators)
@@ -347,14 +326,10 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with invalid provider type should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		validators := []climodel.Validator{}
-		output, err = listValidators(t, configPath, "--json")
+		output, err := listValidators(t, configPath, "--json")
 		require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		err = json.Unmarshal([]byte(output[0]), &validators)
@@ -383,10 +358,9 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Test collect reward with no provider id or type should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{}), false)
+		output, err := collectRewards(t, configPath, createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err)
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "missing tokens flag")

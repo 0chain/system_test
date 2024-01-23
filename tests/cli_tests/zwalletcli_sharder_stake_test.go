@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -26,11 +27,9 @@ func TestSharderStake(testSetup *testing.T) {
 			t.Skipf("miner node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 		}
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = createWalletForName(t, configPath, sharder01NodeDelegateWalletName)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWalletForName(sharder01NodeDelegateWalletName)
 
 		sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
 
@@ -50,10 +49,9 @@ func TestSharderStake(testSetup *testing.T) {
 	)
 
 	t.RunSequentiallyWithTimeout("Staking tokens against valid sharder with valid tokens should work, unlocking should work", 80*time.Second, func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
 			"tokens":     1,
 		}), true)
@@ -82,10 +80,9 @@ func TestSharderStake(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Multiple stakes against a sharder should not create multiple pools", 80*time.Second, func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
 			"tokens":     2,
 		}), true)
@@ -115,10 +112,9 @@ func TestSharderStake(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
 			"tokens":     6,
 		}), false)
@@ -128,13 +124,9 @@ func TestSharderStake(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Staking negative tokens against valid sharder should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
 			"tokens":     -1,
 		}), false)
@@ -144,15 +136,17 @@ func TestSharderStake(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Staking tokens against sharder should return interest to wallet", 2*time.Minute, func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		initialBalance := 1.0
-		output, err = executeFaucetWithTokens(t, configPath, initialBalance)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+		output, err := getBalance(t, configPath)
+		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile(`Balance: \d*\.?\d+ ZCN \(\d*\.?\d+ USD\)$`), output[0])
+		newBalance := regexp.MustCompile(`\d+\.?\d* [um]?(ZCN|SAS)`).FindString(output[0])
+		initialBalance, err := strconv.ParseFloat(strings.Fields(newBalance)[0], 64)
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
@@ -177,12 +171,11 @@ func TestSharderStake(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Unlock tokens with invalid pool id should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
 		}), false)
 		require.NotNil(t, err, "expected error when using invalid node id")

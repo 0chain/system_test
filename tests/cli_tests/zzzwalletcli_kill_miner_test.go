@@ -20,8 +20,7 @@ const (
 func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+	createWallet(t)
 
 	sharderUrl := getSharderUrl(t)
 	startMiners := getNodeSlice(t, "getMinerList", sharderUrl)
@@ -41,9 +40,6 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 	}
 
 	t.RunSequentially("kill miner by non-smartcontract owner should fail", func(t *test.SystemTest) {
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
 		output, err := killMiner(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"id": minerToKill,
 		}), true)
@@ -53,9 +49,6 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 	})
 
 	t.RunSequentially("Killed miner does not receive rewards", func(t *test.SystemTest) {
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
 		output, err := killMiner(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
 			"id": minerToKill,
 		}), true)

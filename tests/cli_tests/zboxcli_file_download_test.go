@@ -257,8 +257,7 @@ func TestDownload(testSetup *testing.T) {
 		})
 
 		// Just create a wallet so that we can work further
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// Download file using auth-ticket: should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -594,8 +593,7 @@ func TestDownload(testSetup *testing.T) {
 		})
 
 		// Just create a wallet so that we can work further
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// Download file using auth-ticket: shouldn't work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -1119,10 +1117,9 @@ func TestDownload(testSetup *testing.T) {
 	// Failure Scenarios
 
 	t.Run("Download File from Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": "12334qe",
 			"remotepath": "/",
 			"localpath":  "tmp/",
@@ -1153,8 +1150,7 @@ func TestDownload(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		// Download using otherAllocationID: should not work
-		_, err = createWallet(t, configPath)
-		require.NoError(t, err)
+		createWallet(t)
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": otherAllocationID,
@@ -1187,10 +1183,9 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download without any Parameter Should Fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = downloadFile(t, configPath, "", false)
+		output, err := downloadFile(t, configPath, "", false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 

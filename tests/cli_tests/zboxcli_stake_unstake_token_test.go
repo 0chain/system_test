@@ -23,14 +23,13 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Staked tokens should move from wallet to Provider's stake pool, unstaking should move tokens back to wallet", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error getting wallet", strings.Join(output, "\n"))
+		require.Nil(t, err, "Error getting wallet")
 
 		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
+		output, err := listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -134,10 +133,9 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens without specifying amount of tokens to lock should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+		output, err := stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": "-",
 		}), false)
 		require.NotNil(t, err, "Expected error when amount of tokens to stake is not specified", strings.Join(output, "\n"))
@@ -146,10 +144,9 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens without specifying provider should generate corresponding error", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+		output, err := stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"tokens": 1.0,
 		}), false)
 		require.NotNil(t, err, "Expected error when blobber to stake tokens to is not specified", strings.Join(output, "\n"))
@@ -158,15 +155,14 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking more tokens than in wallet should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Wallet balance before staking tokens
 		balance, err := getBalanceZCN(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Nil(t, err, "Error fetching balance")
 
 		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
+		output, err := listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -193,23 +189,14 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking 0 tokens against blobber should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-		t.Logf("output: %v", output)
-		txnHash := getTransactionHash(output, false)
+		createWallet(t)
 
 		// Wallet balance before staking tokens
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		t.Logf("wallet balance: %v, txn hash: %v", balance, txnHash)
-		output, err = getTransaction(t, configPath, createParams(map[string]interface{}{
-			"hash": txnHash,
-		}))
-		require.NoError(t, err)
-		t.Logf("transaction output: %v", output)
 
 		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
+		output, err := listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -236,15 +223,14 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking negative tokens should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Wallet balance before staking tokens
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
 		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
+		output, err := listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 

@@ -20,8 +20,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Creating allocation should move tokens from wallet to write pool, write lock should work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// get balance
 		balance, err := getBalanceZCN(t, configPath)
@@ -32,7 +31,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 			"size": "2048",
 			"lock": "1",
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		t.Log("new allocation:", output)
 
@@ -84,15 +83,14 @@ func TestWritePoolLock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock more write tokens than wallet balance", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"size": "1024",
 			"lock": "0.5",
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -121,15 +119,14 @@ func TestWritePoolLock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock negative write tokens", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"size": "1024",
 			"lock": "0.5",
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -158,15 +155,14 @@ func TestWritePoolLock(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Should not be able to lock zero write tokens", 60*time.Second, func(t *test.SystemTest) { //todo: slow
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"size": "1024",
 			"lock": "0.5",
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -195,15 +191,14 @@ func TestWritePoolLock(testSetup *testing.T) {
 	})
 
 	t.Run("Missing tokens flag should result in error", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"size": "1024",
 			"lock": "0.5",
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)

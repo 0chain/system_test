@@ -333,8 +333,7 @@ func TestListFileSystem(testSetup *testing.T) {
 		fname := filepath.Base(filename)
 
 		// Just create a wallet so that we can work further
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// Listing contents using auth-ticket: should work
 		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -385,8 +384,7 @@ func TestListFileSystem(testSetup *testing.T) {
 		fname := filepath.Base(filename)
 
 		// Just create a wallet so that we can work further
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// Listing contents using auth-ticket: should work
 		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -445,8 +443,7 @@ func TestListFileSystem(testSetup *testing.T) {
 		})
 
 		// Just create a wallet so that we can work further
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// Listing contents of allocationID: should work
 		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -499,8 +496,7 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("No Parameter Should Fail", func(t *test.SystemTest) {
-		_, err := createWallet(t, configPath)
-		require.NoError(t, err)
+		createWallet(t)
 
 		output, err := listFilesInAllocation(t, configPath, "", false)
 		require.NotNil(t, err,

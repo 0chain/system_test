@@ -820,8 +820,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = createWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -883,8 +882,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = createWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation":         allocationID,
@@ -1031,15 +1029,8 @@ func TestShareFile(testSetup *testing.T) {
 
 	t.RunWithTimeout("Share encrypted huge file using auth ticket - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
-		faucetTokens := 9.0
 
-		output, err := createWalletForName(t, configPath, walletOwner)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-
-		for i := 0; i < 3; i++ {
-			output, err = executeFaucetWithTokensForWallet(t, walletOwner, configPath, faucetTokens)
-			require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-		}
+		createWalletForName(walletOwner)
 
 		allocParam := createParams(map[string]interface{}{
 			"lock":   24,
@@ -1048,7 +1039,7 @@ func TestShareFile(testSetup *testing.T) {
 			"data":   1,
 		})
 
-		output, err = createNewAllocationForWallet(t, walletOwner, configPath, allocParam)
+		output, err := createNewAllocationForWallet(t, walletOwner, configPath, allocParam)
 
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
@@ -1166,8 +1157,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = createWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1243,8 +1233,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = createWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1509,8 +1498,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err = createWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1553,8 +1541,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		output, err := createWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1568,7 +1555,7 @@ func TestShareFile(testSetup *testing.T) {
 			"encryptionpublickey": encKey,
 			"remotepath":          "/blahblah.txt",
 		}
-		output, err = shareFile(t, configPath, shareParams)
+		output, err := shareFile(t, configPath, shareParams)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "file_meta_error: Error getting object meta data from blobbers", output[0],
@@ -1582,14 +1569,12 @@ func TestShareFile(testSetup *testing.T) {
 		// sharer wallet operations
 		sharerWallet := escapedTestName(t) + "_sharer"
 
-		output, err := createWalletForName(t, configPath, sharerWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(sharerWallet)
 
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_receiver"
 
-		output, err = createWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1603,7 +1588,7 @@ func TestShareFile(testSetup *testing.T) {
 			"encryptionpublickey": encKey,
 			"remotepath":          "/blahblah.txt",
 		}
-		output, err = shareFileWithWallet(t, sharerWallet, configPath, shareParams)
+		output, err := shareFileWithWallet(t, sharerWallet, configPath, shareParams)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "file_meta_error: Error getting object meta data from blobbers", output[0],
@@ -1612,13 +1597,12 @@ func TestShareFile(testSetup *testing.T) {
 
 	t.Run("Share file with missing allocation should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		shareParams := map[string]interface{}{
 			"remotepath": "/blahblah.txt",
 		}
-		output, err = shareFile(t, configPath, shareParams)
+		output, err := shareFile(t, configPath, shareParams)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Error: allocation flag is missing", output[0],
@@ -1627,13 +1611,12 @@ func TestShareFile(testSetup *testing.T) {
 
 	t.Run("Share file with missing remotepath should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		shareParams := map[string]interface{}{
 			"allocation": "dummy",
 		}
-		output, err = shareFile(t, configPath, shareParams)
+		output, err := shareFile(t, configPath, shareParams)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
 		require.Equal(t, "Error: remotepath flag is missing", output[0],
@@ -1776,18 +1759,7 @@ func shareFileWithWallet(t *test.SystemTest, wallet, cliConfigFilename string, p
 }
 
 func createWalletAndAllocation(t *test.SystemTest, configPath, wallet string) (string, *climodel.Wallet) {
-	faucetTokens := 3.0
-	// First create a wallet and run faucet command
-	// Output:
-	// 		[0]:"No wallet in path  C:\Users\kisha\.zcn\unique found. Creating wallet..."
-	// 		[1]:"ZCN wallet created!!"
-	// 		[2]:"Execute faucet smart contract success with txn : ${hash}"
-	output, err := createWalletForName(t, configPath, wallet)
-	require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-	require.Len(t, output, 3, strings.Join(output, "\n"))
-
-	output, err = executeFaucetWithTokensForWallet(t, wallet, configPath, faucetTokens)
-	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	createWalletForName(wallet)
 
 	allocParam := createParams(map[string]interface{}{
 		"lock":   2,
@@ -1796,8 +1768,7 @@ func createWalletAndAllocation(t *test.SystemTest, configPath, wallet string) (s
 		"data":   1,
 	})
 
-	output, err = createNewAllocationForWallet(t, wallet, configPath, allocParam)
-
+	output, err := createNewAllocationForWallet(t, wallet, configPath, allocParam)
 	require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 	require.Len(t, output, 1)

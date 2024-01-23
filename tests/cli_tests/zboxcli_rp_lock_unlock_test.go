@@ -21,8 +21,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Locking read pool tokens moves tokens from wallet to read pool", 90*time.Second, func(t *test.SystemTest) { //TOOD: slow
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Wallet balance before lock should be 5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
@@ -34,7 +33,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		readPoolParams := createParams(map[string]interface{}{
 			"tokens": lockAmount,
 		})
-		output, err = readPoolLock(t, configPath, readPoolParams, true)
+		output, err := readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -62,8 +61,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock more read tokens than wallet balance", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Wallet balance before lock should be 5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
@@ -73,7 +71,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		readPoolParams := createParams(map[string]interface{}{
 			"tokens": 10,
 		})
-		output, err = readPoolLock(t, configPath, readPoolParams, false)
+		output, err := readPoolLock(t, configPath, readPoolParams, false)
 		require.NotNil(t, err, "Locked more tokens than in wallet", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: read_pool_lock_failed: lock amount is greater than balance", output[0], strings.Join(output, "\n"))
@@ -85,8 +83,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock negative read tokens", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Wallet balance before lock should be 5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
@@ -97,7 +94,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		readPoolParams := createParams(map[string]interface{}{
 			"tokens": -1,
 		})
-		output, err = readPoolLock(t, configPath, readPoolParams, false)
+		output, err := readPoolLock(t, configPath, readPoolParams, false)
 		require.NotNil(t, err, "Locked negative tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "invalid token amount: negative", output[0], strings.Join(output, "\n"))
@@ -108,8 +105,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Should not be able to lock zero read tokens", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Wallet balance before lock should be 5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
@@ -122,7 +118,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 			"tokens": 0,
 		})
 
-		output, err = readPoolLock(t, configPath, readPoolParams, false)
+		output, err := readPoolLock(t, configPath, readPoolParams, false)
 		require.NotNil(t, err, "Locked 0 tokens", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Equal(t, "Failed to lock tokens in read pool: read_pool_lock_failed: invalid amount to lock [ensure token > 0].", output[0], strings.Join(output, "\n"))
@@ -134,8 +130,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	})
 
 	t.Run("Missing tokens flag in rp-lock should result in error", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
@@ -143,7 +138,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 
 		// Not specifying amount to lock should not succeed
 		readPoolParams := createParams(map[string]interface{}{})
-		output, err = readPoolLock(t, configPath, readPoolParams, false)
+		output, err := readPoolLock(t, configPath, readPoolParams, false)
 		require.NotNil(t, err, "Locked tokens without providing amount to lock", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "missing required 'tokens' flag", output[0])

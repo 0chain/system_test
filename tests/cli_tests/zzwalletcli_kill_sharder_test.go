@@ -20,8 +20,7 @@ const (
 func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
 
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
+	createWallet(t)
 
 	sharderUrl := getSharderUrl(t)
 	startSharders := getNodeSlice(t, "getSharderList", sharderUrl)
@@ -41,10 +40,7 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 	}
 
 	t.RunSequentially("kill sharder by non-smartcontract owner should fail", func(t *test.SystemTest) {
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = killSharder(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+		output, err := killSharder(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"id": sharderToKill,
 		}), true)
 		require.Error(t, err, "kill sharder by non-smartcontract owner should fail")
@@ -53,10 +49,7 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 	})
 
 	t.RunSequentially("Killed sharder does not receive rewards", func(t *test.SystemTest) {
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = killSharder(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
+		output, err := killSharder(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
 			"id": sharderToKill,
 		}), true)
 		require.NoError(t, err, strings.Join(output, "\n"))

@@ -28,8 +28,7 @@ func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 	}
 
 	// create local wallet and faucet
-	output, err := createWallet(t, configPath)
-	require.NoError(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+	createWallet(t)
 
 	// We should have 3 authorizers in total when the network is deployed.
 	// Test steps:
@@ -47,7 +46,7 @@ func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 
 	// Remove 1 authorizer from zcnsc smartcontract
 	removeAuth := auths[0]
-	output, err = removeAuthorizer(t, removeAuth.ID, false)
+	output, err := removeAuthorizer(t, removeAuth.ID, false)
 	require.NoError(t, err, "Unexpected remove authorizer failure", strings.Join(output, "\n"))
 	t.Logf("remove authorizer: %s zcnsc successfully", removeAuth.ID)
 

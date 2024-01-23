@@ -20,8 +20,7 @@ func TestReadPoolInfo(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Read pool info testing with json parameter", 90*time.Second, func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Wallet balance before lock should be 5 ZCN
 		balance, err := getBalanceZCN(t, configPath)
@@ -33,7 +32,7 @@ func TestReadPoolInfo(testSetup *testing.T) {
 		readPoolParams := createParams(map[string]interface{}{
 			"tokens": lockAmount,
 		})
-		output, err = readPoolLock(t, configPath, readPoolParams, true)
+		output, err := readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -52,8 +51,7 @@ func TestReadPoolInfo(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Read pool info testing without json parameter", 90*time.Second, func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Wallet balance before lock should be 5.0 ZCN
 		balance, err := getBalanceZCN(t, configPath)
@@ -65,7 +63,7 @@ func TestReadPoolInfo(testSetup *testing.T) {
 		readPoolParams := createParams(map[string]interface{}{
 			"tokens": lockAmount,
 		})
-		output, err = readPoolLock(t, configPath, readPoolParams, true)
+		output, err := readPoolLock(t, configPath, readPoolParams, true)
 		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)

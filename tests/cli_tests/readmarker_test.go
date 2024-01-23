@@ -27,11 +27,10 @@ func TestReadMarker(testSetup *testing.T) {
 
 	var sharderUrl string
 	t.TestSetup("Create wallet and temp directories, get sharder url", func() {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWallet(t)
 		sharderUrl = getSharderUrl(t)
 
-		err = os.MkdirAll("tmp", os.ModePerm)
+		err := os.MkdirAll("tmp", os.ModePerm)
 		require.Nil(t, err)
 	})
 

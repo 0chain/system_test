@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -108,6 +109,9 @@ var (
 var (
 	configPath string
 	configDir  string
+
+	wallets   []json.RawMessage
+	walletIdx int64
 )
 
 var tenderlyClient *tenderly.Client
@@ -174,6 +178,20 @@ func TestMain(m *testing.M) {
 
 	// Create an S3 client
 	S3Client = s3.New(sess)
+
+	// Read the content of the file
+	fileContent, err := os.ReadFile("./config/wallets/wallets.json")
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return
+	}
+
+	// Parse the JSON data into a list of strings
+	err = json.Unmarshal(fileContent, &wallets)
+	if err != nil {
+		fmt.Println("Error decoding JSON:", err)
+		return
+	}
 
 	exitRun := m.Run()
 
