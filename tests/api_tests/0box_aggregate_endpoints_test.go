@@ -1110,8 +1110,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Parallel()
-
 	testWallet := initialisedWallets[walletIdx]
 	walletIdx++
 	balance := apiClient.GetWalletBalance(t, testWallet, client.HttpOkStatus)
