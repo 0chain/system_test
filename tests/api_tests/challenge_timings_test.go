@@ -39,9 +39,12 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 
 	testWallet := initialisedWallets[walletIdx]
 	walletIdx++
+	balance := apiClient.GetWalletBalance(t, testWallet, client.HttpOkStatus)
+	testWallet.Nonce = int(balance.Nonce)
+	sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+	sdkClient.SetWallet(t, testWallet)
 
 	t.TestSetupWithTimeout("Setup", 2*time.Minute, func() {
-
 		allBlobbers, resp, err = apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
@@ -78,6 +81,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t.RunWithTimeout("1mb file", 1*time.Hour, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(sdkWalletBalance.Nonce)
@@ -119,6 +124,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(sdkWalletBalance.Nonce)
@@ -159,6 +166,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t.RunWithTimeout("100mb file", 1*time.Hour, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		time.Sleep(2 * time.Minute)
 		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -200,6 +209,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t.RunWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		time.Sleep(3 * time.Minute)
 		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)

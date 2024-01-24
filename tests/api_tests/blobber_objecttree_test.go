@@ -20,6 +20,10 @@ func TestObjectTree(testSetup *testing.T) {
 	t.RunSequentially("Get object tree with allocation id, remote path should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -27,7 +31,6 @@ func TestObjectTree(testSetup *testing.T) {
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
-		// TODO: replace with native "Upload API" call
 		remoteFilePath, _ := sdkClient.UploadFile(t, allocationID)
 		remoteFilePath = "/" + remoteFilePath
 
@@ -55,6 +58,8 @@ func TestObjectTree(testSetup *testing.T) {
 	t.RunSequentially("Get file ref for empty allocation should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -87,6 +92,10 @@ func TestObjectTree(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: Why is this so slow?  (69s)
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -94,7 +103,6 @@ func TestObjectTree(testSetup *testing.T) {
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
-		// TODO: replace with native "Upload API" call
 		remoteFilePath, _ := sdkClient.UploadFile(t, allocationID)
 		remoteFilePath = "/" + remoteFilePath
 
@@ -118,6 +126,10 @@ func TestObjectTree(testSetup *testing.T) {
 	t.RunSequentially("Get file ref with invalid sign should fail", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -125,7 +137,6 @@ func TestObjectTree(testSetup *testing.T) {
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
-		// TODO: replace with native "Upload API" call
 		remoteFilePath, _ := sdkClient.UploadFile(t, allocationID)
 		remoteFilePath = "/" + remoteFilePath
 
@@ -146,6 +157,8 @@ func TestObjectTree(testSetup *testing.T) {
 	t.RunSequentially("Get file ref with invalid remotepath should fail", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)

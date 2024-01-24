@@ -20,6 +20,8 @@ func TestRegisterBlobber(testSetup *testing.T) {
 	t.Run("Write price lower than min_write_price should not allow register", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		t.Logf("wallet balance: %v", wallet)
@@ -43,6 +45,8 @@ func TestRegisterBlobber(testSetup *testing.T) {
 	t.Run("Write price higher than max_write_price should not allow register", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		t.Logf("wallet balance: %v", wallet)
@@ -66,6 +70,8 @@ func TestRegisterBlobber(testSetup *testing.T) {
 	t.Run("Read price higher than max_read_price should not allow register", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		t.Logf("wallet balance: %v", wallet)
@@ -89,6 +95,8 @@ func TestRegisterBlobber(testSetup *testing.T) {
 	t.Run("Service charge higher than max_service_charge should not allow register", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		t.Logf("wallet balance: %v", wallet)
@@ -112,6 +120,8 @@ func TestRegisterBlobber(testSetup *testing.T) {
 	t.Run("Capacity lower than min_blobber_capacity should not allow register", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		t.Logf("wallet balance: %v", wallet)

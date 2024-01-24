@@ -20,6 +20,10 @@ func TestMultiDownload(testSetup *testing.T) {
 	t.Run("Multi download should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)

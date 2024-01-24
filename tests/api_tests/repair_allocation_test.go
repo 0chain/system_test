@@ -17,12 +17,18 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 	testWallet := initialisedWallets[walletIdx]
 	walletIdx++
+	balance := apiClient.GetWalletBalance(t, testWallet, client.HttpOkStatus)
+	testWallet.Nonce = int(balance.Nonce)
 
 	apiClient.CreateReadPool(t, testWallet, 0.5, client.TxSuccessfulStatus)
 
 	t.Run("Repair allocation after single upload should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
@@ -46,6 +52,11 @@ func TestRepairAllocation(testSetup *testing.T) {
 	t.Run("Repair allocation after multiple uploads should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
+
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
@@ -74,6 +85,11 @@ func TestRepairAllocation(testSetup *testing.T) {
 	t.Run("Repair allocation after update should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
+
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 6096
 		blobberRequirements.DataShards = 2
@@ -106,6 +122,11 @@ func TestRepairAllocation(testSetup *testing.T) {
 	t.Run("Repair allocation after delete should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
+
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 2056
 		blobberRequirements.DataShards = 2
@@ -132,6 +153,11 @@ func TestRepairAllocation(testSetup *testing.T) {
 	t.Run("Repair allocation after move should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
+
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 6096
 		blobberRequirements.DataShards = 2
@@ -159,6 +185,11 @@ func TestRepairAllocation(testSetup *testing.T) {
 	t.Run("Repair allocation after copy should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
+
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 8096
 		blobberRequirements.DataShards = 2
@@ -188,6 +219,11 @@ func TestRepairAllocation(testSetup *testing.T) {
 	t.Run("Repair allocation after rename should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
+
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 6096
 		blobberRequirements.DataShards = 2

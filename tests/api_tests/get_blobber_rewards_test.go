@@ -22,6 +22,10 @@ func TestBlobberRewards(testSetup *testing.T) {
 	t.Run("Check if blobber, which already exists in allocation as additional parity shard can receive rewards, should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -34,7 +38,6 @@ func TestBlobberRewards(testSetup *testing.T) {
 
 		apiClient.CreateStakePool(t, wallet, 3, blobberID, client.TxSuccessfulStatus)
 
-		// TODO: replace with native "Upload API" call
 		sdkClient.UploadFile(t, allocationID)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -70,9 +73,12 @@ func TestBlobberRewards(testSetup *testing.T) {
 	})
 
 	t.Run("Check if the balance of the wallet has been changed without rewards being claimed, shouldn't work", func(t *test.SystemTest) {
-
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -85,7 +91,6 @@ func TestBlobberRewards(testSetup *testing.T) {
 
 		apiClient.CreateStakePool(t, wallet, 3, blobberID, client.TxSuccessfulStatus)
 
-		// TODO: replace with native "Upload API" call
 		sdkClient.UploadFile(t, allocationID)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -115,6 +120,10 @@ func TestBlobberRewards(testSetup *testing.T) {
 	t.RunWithTimeout("Check if a new added blobber as additional parity shard to allocation can receive rewards, should work", 3*time.Minute, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -140,7 +149,6 @@ func TestBlobberRewards(testSetup *testing.T) {
 
 		apiClient.CreateStakePool(t, wallet, 3, newBlobberID, client.TxSuccessfulStatus)
 
-		// TODO: replace with native "Upload API" call
 		sdkClient.UploadFile(t, allocationID)
 
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)

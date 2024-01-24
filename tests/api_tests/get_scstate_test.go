@@ -19,6 +19,8 @@ func TestGetSCState(testSetup *testing.T) {
 	t.Run("Get SCState of faucet SC, should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
 			t,
@@ -35,6 +37,8 @@ func TestGetSCState(testSetup *testing.T) {
 	t.Run("Get SCState of faucet SC, shouldn't work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
 			t,

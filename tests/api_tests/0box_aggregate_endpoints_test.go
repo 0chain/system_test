@@ -33,6 +33,8 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 	testWallet := initialisedWallets[walletIdx]
 	walletIdx++
+	balance := apiClient.GetWalletBalance(t, testWallet, client.HttpOkStatus)
+	testWallet.Nonce = int(balance.Nonce)
 
 	// Stake 6 blobbers, each with 1 token
 	targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 6, client.HttpOkStatus)
@@ -46,13 +48,16 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 	// Create the free allocation marker (ownerWallet -> sdkWallet)
 	apiClient.AddFreeStorageAssigner(t, ownerWallet, client.TxSuccessfulStatus) // 0.1 ZCN 1 ZCN = 1e10 from owner wallet
-	marker := config.CreateFreeStorageMarker(t, testWallet.ToSdkWallet(sdkWalletMnemonics), ownerWallet.ToSdkWallet(ownerWalletMnemonics))
+	marker := config.CreateFreeStorageMarker(t, testWallet.ToSdkWallet(testWallet.Mnemonics), ownerWallet.ToSdkWallet(ownerWalletMnemonics))
 	t.Logf("Free allocation marker: %v", marker)
 
-	t.RunWithTimeout("test multi allocation overall graph data", 10*time.Minute, func(t *test.SystemTest) {
-
+	t.RunSequentiallyWithTimeout("test multi allocation overall graph data", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		// Get initial total challenge pools
 		PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
@@ -360,665 +365,693 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		require.InEpsilon(t, totalChallengesForAllocations, totalGraphChallenges, 0.1, "Total challenges for allocations and total challenges from graph should be equal")
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-write-price )", graphEndpointTestCases(zboxClient.GetGraphWritePrice))
+	t.RunWithTimeout("/v2/graph-write-price", 5*time.Minute, func(t *test.SystemTest) {
+		t.RunSequentially("endpoint parameters ( test /v2/graph-write-price )", graphEndpointTestCases(zboxClient.GetGraphWritePrice))
 
-	t.RunWithTimeout("test graph data ( test /v2/graph-write-price )", 5*time.Minute, func(t *test.SystemTest) {
-		data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 1, len([]int64(*data)))
-		priceBeforeStaking := (*data)[0]
-
-		targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 2, client.HttpOkStatus)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Len(t, targetBlobbers, 2)
-
-		targetBlobbers[0].Capacity += 10 * 1024 * 1024 * 1024
-		targetBlobbers[1].Capacity -= 10 * 1024 * 1024 * 1024
-
-		targetBlobbers[0].Terms.WritePrice += *tokenomics.IntToZCN(0.1)
-		targetBlobbers[1].Terms.WritePrice += *tokenomics.IntToZCN(0.1)
-
-		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[0], client.TxSuccessfulStatus)
-		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[1], client.TxSuccessfulStatus)
-
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			// get all blobbers
-			allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			printBlobbers(t, "After Update", allBlobbers)
-
-			expectedAWP := calculateExpectedAvgWritePrice(allBlobbers)
-			roundingError := int64(1000)
-
+		t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-write-price )", 5*time.Minute, func(t *test.SystemTest) {
 			data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
-			priceAfterStaking := (*data)[0]
+			priceBeforeStaking := (*data)[0]
 
-			latest, resp, err := zboxClient.GetAverageWritePrice(t)
+			targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 2, client.HttpOkStatus)
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
+			require.Len(t, targetBlobbers, 2)
 
-			diff := priceAfterStaking - expectedAWP
-			t.Logf("priceBeforeStaking: %d, priceAfterStaking: %d, expectedAWP: %d, diff: %d", priceBeforeStaking, priceAfterStaking, expectedAWP, diff)
-			return priceAfterStaking != priceBeforeStaking && diff >= -roundingError && diff <= roundingError && priceAfterStaking == int64(*latest)
+			targetBlobbers[0].Capacity += 10 * 1024 * 1024 * 1024
+			targetBlobbers[1].Capacity -= 10 * 1024 * 1024 * 1024
+
+			targetBlobbers[0].Terms.WritePrice += *tokenomics.IntToZCN(0.1)
+			targetBlobbers[1].Terms.WritePrice += *tokenomics.IntToZCN(0.1)
+
+			apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[0], client.TxSuccessfulStatus)
+			apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[1], client.TxSuccessfulStatus)
+
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				// get all blobbers
+				allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				printBlobbers(t, "After Update", allBlobbers)
+
+				expectedAWP := calculateExpectedAvgWritePrice(allBlobbers)
+				roundingError := int64(1000)
+
+				data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				priceAfterStaking := (*data)[0]
+
+				latest, resp, err := zboxClient.GetAverageWritePrice(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+
+				diff := priceAfterStaking - expectedAWP
+				t.Logf("priceBeforeStaking: %d, priceAfterStaking: %d, expectedAWP: %d, diff: %d", priceBeforeStaking, priceAfterStaking, expectedAWP, diff)
+				return priceAfterStaking != priceBeforeStaking && diff >= -roundingError && diff <= roundingError && priceAfterStaking == int64(*latest)
+			})
+
+			// Cleanup: Revert write price to 0.1
+			targetBlobbers[0].Terms.WritePrice = *tokenomics.IntToZCN(0.1)
+			targetBlobbers[1].Terms.WritePrice = *tokenomics.IntToZCN(0.1)
+			apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[0], client.TxSuccessfulStatus)
+			apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[1], client.TxSuccessfulStatus)
 		})
-
-		// Cleanup: Revert write price to 0.1
-		targetBlobbers[0].Terms.WritePrice = *tokenomics.IntToZCN(0.1)
-		targetBlobbers[1].Terms.WritePrice = *tokenomics.IntToZCN(0.1)
-		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[0], client.TxSuccessfulStatus)
-		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[1], client.TxSuccessfulStatus)
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-total-challenge-pools )", graphEndpointTestCases(zboxClient.GetGraphTotalChallengePools))
+	t.RunWithTimeout("/v2/total-challenge-pools", 5*time.Minute, func(t *test.SystemTest) {
+		t.RunSequentially("endpoint parameters ( test /v2/graph-total-challenge-pools )", graphEndpointTestCases(zboxClient.GetGraphTotalChallengePools))
 
-	t.Run("test graph data ( test /v2/graph-total-challenge-pools )", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
+		t.RunSequentially("test graph data ( test /v2/graph-total-challenge-pools )", func(t *test.SystemTest) {
+			wallet := initialisedWallets[walletIdx]
+			walletIdx++
+			balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+			wallet.Nonce = int(balance.Nonce)
+			sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+			sdkClient.SetWallet(t, wallet)
 
-		PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
-		// Get initial total challenge pools
-		data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 1, len([]int64(*data)))
-		totalChallengePools := (*data)[0]
-
-		// Create a new allocation
-		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		// Upload a file
-		sdkClient.UploadFile(t, allocationID)
-
-		var totalChallengePoolsAfterAllocation int64
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			// Get total challenge pools
+			PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
+			// Get initial total challenge pools
 			data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
-			totalChallengePoolsAfterAllocation = (*data)[0]
-			return totalChallengePoolsAfterAllocation > totalChallengePools
-		})
+			totalChallengePools := (*data)[0]
 
-		// Cancel the second allocation
-		apiClient.CancelAllocation(t, wallet, allocationID, client.TxSuccessfulStatus)
+			// Create a new allocation
+			blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+			blobberRequirements.DataShards = 1
+			blobberRequirements.ParityShards = 1
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			// Get total challenge pools
-			data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			totalChallengePoolsAfterCancel := (*data)[0]
-			return totalChallengePoolsAfterCancel < totalChallengePoolsAfterAllocation
+			// Upload a file
+			sdkClient.UploadFile(t, allocationID)
+
+			var totalChallengePoolsAfterAllocation int64
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				// Get total challenge pools
+				data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				totalChallengePoolsAfterAllocation = (*data)[0]
+				return totalChallengePoolsAfterAllocation > totalChallengePools
+			})
+
+			// Cancel the second allocation
+			apiClient.CancelAllocation(t, wallet, allocationID, client.TxSuccessfulStatus)
+
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				// Get total challenge pools
+				data, resp, err := zboxClient.GetGraphTotalChallengePools(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				totalChallengePoolsAfterCancel := (*data)[0]
+				return totalChallengePoolsAfterCancel < totalChallengePoolsAfterAllocation
+			})
 		})
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-allocated-storage )", graphEndpointTestCases(zboxClient.GetGraphAllocatedStorage))
+	t.RunWithTimeout("/v2/graph-allocated-storage", 5*time.Minute, func(t *test.SystemTest) {
+		t.RunSequentially("endpoint parameters ( test /v2/graph-allocated-storage )", graphEndpointTestCases(zboxClient.GetGraphAllocatedStorage))
 
-	t.RunWithTimeout("test graph data ( test /v2/graph-allocated-storage )", 10*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
+		t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-allocated-storage )", 10*time.Minute, func(t *test.SystemTest) {
+			wallet := initialisedWallets[walletIdx]
+			walletIdx++
+			balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+			wallet.Nonce = int(balance.Nonce)
 
-		// Get initial total challenge pools
-		PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
-		data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 1, len([]int64(*data)))
-		allocatedStorage := (*data)[0]
-
-		// Create a new allocation
-		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		// Check increased
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
+			// Get initial total challenge pools
+			PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
 			data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
-			allocatedStorageAfterAllocation := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := allocatedStorageAfterAllocation > allocatedStorage && allocatedStorageAfterAllocation == int64(*latest)
-			if cond {
-				allocatedStorage = allocatedStorageAfterAllocation
-			}
-			return cond
-		})
+			allocatedStorage := (*data)[0]
 
-		// Add blobber to the allocation
-		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
-		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, "", allocationID, client.TxSuccessfulStatus)
+			// Create a new allocation
+			blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+			blobberRequirements.DataShards = 1
+			blobberRequirements.ParityShards = 1
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		// Check increased
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			allocatedStorageAfter := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := allocatedStorageAfter > allocatedStorage && allocatedStorageAfter == int64(*latest)
-			if cond {
+			// Check increased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				allocatedStorageAfterAllocation := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := allocatedStorageAfterAllocation > allocatedStorage && allocatedStorageAfterAllocation == int64(*latest)
+				if cond {
+					allocatedStorage = allocatedStorageAfterAllocation
+				}
+				return cond
+			})
+
+			// Add blobber to the allocation
+			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+			require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
+			apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, "", allocationID, client.TxSuccessfulStatus)
+
+			// Check increased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				allocatedStorageAfter := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := allocatedStorageAfter > allocatedStorage && allocatedStorageAfter == int64(*latest)
+				if cond {
+					allocatedStorage = allocatedStorageAfter
+				}
+				return cond
+			})
+
+			// Cancel allocation
+			apiClient.CancelAllocation(t, wallet, allocationID, client.TxSuccessfulStatus)
+
+			// Check decreased + consistency
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				allocatedStorageAfter := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := (allocatedStorageAfter == allocatedStorage) && (allocatedStorageAfter == int64(*latest)) //nolint
 				allocatedStorage = allocatedStorageAfter
-			}
-			return cond
-		})
 
-		// Cancel allocation
-		apiClient.CancelAllocation(t, wallet, allocationID, client.TxSuccessfulStatus)
+				// get all blobbers
+				allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				expectedAllocatedStorage := calculateExpectedAllocated(allBlobbers)
+				cond = cond && (allocatedStorageAfter == expectedAllocatedStorage)
 
-		// Check decreased + consistency
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			allocatedStorageAfter := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalAllocatedStorage(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := (allocatedStorageAfter == allocatedStorage) && (allocatedStorageAfter == int64(*latest)) //nolint
-			allocatedStorage = allocatedStorageAfter
-
-			// get all blobbers
-			allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			expectedAllocatedStorage := calculateExpectedAllocated(allBlobbers)
-			cond = cond && (allocatedStorageAfter == expectedAllocatedStorage)
-
-			return cond
+				return cond
+			})
 		})
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-used-storage )", graphEndpointTestCases(zboxClient.GetGraphUsedStorage))
+	t.RunWithTimeout("/v2/graph-used-storage", 5*time.Minute, func(t *test.SystemTest) {
+		t.RunSequentially("endpoint parameters ( test /v2/graph-used-storage )", graphEndpointTestCases(zboxClient.GetGraphUsedStorage))
 
-	t.RunWithTimeout("test graph data ( test /v2/graph-used-storage )", 30*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
+		t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-used-storage )", 30*time.Minute, func(t *test.SystemTest) {
+			wallet := initialisedWallets[walletIdx]
+			walletIdx++
+			balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+			wallet.Nonce = int(balance.Nonce)
+			sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+			sdkClient.SetWallet(t, wallet)
 
-		PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
-		// Get initial used storage
-		data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 1, len([]int64(*data)))
-		usedStorage := (*data)[0]
-
-		// Create a new allocation
-		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		fpath, fsize := sdkClient.UploadFile(t, allocationID)
-
-		// Check increased
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
+			PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
+			// Get initial used storage
 			data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
-			usedStorageAfter := (*data)[0]
-			cond := (usedStorageAfter - usedStorage) == fsize*2
+			usedStorage := (*data)[0]
 
-			if cond {
+			// Create a new allocation
+			blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+			blobberRequirements.DataShards = 1
+			blobberRequirements.ParityShards = 1
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+			fpath, fsize := sdkClient.UploadFile(t, allocationID)
+
+			// Check increased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				usedStorageAfter := (*data)[0]
+				cond := (usedStorageAfter - usedStorage) == fsize*2
+
+				if cond {
+					usedStorage = usedStorageAfter
+				}
+				return cond
+			})
+
+			// Update with a bigger file
+			fpath, newFsize := sdkClient.UpdateFileWithParams(t, allocationID, fsize*2, fpath)
+			t.Logf("Filename after update bigger : %v", fpath)
+
+			// Check increased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				usedStorageAfter := (*data)[0]
+				cond := (usedStorageAfter - usedStorage) == (newFsize-fsize)*2
+
+				if cond {
+					usedStorage = usedStorageAfter
+					fsize = newFsize
+				}
+				return cond
+			})
+
+			// Update with a smaller file
+			fpath, newFsize = sdkClient.UpdateFileWithParams(t, allocationID, newFsize/2, fpath)
+			t.Logf("Filename after update smaller : %v", fpath)
+
+			// Check decreased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				usedStorageAfter := (*data)[0]
+				cond := (usedStorage - usedStorageAfter) == (fsize-newFsize)*2
+
+				if cond {
+					usedStorage = usedStorageAfter
+					fsize = newFsize
+				}
+
+				return cond
+			})
+
+			// Remove a file
+			sdkClient.DeleteFile(t, allocationID, fpath)
+
+			// Check decreased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				usedStorageAfter := (*data)[0]
+				cond := (usedStorage - usedStorageAfter) == fsize*2
+				if cond {
+					usedStorage = usedStorageAfter
+				}
+				return cond
+			})
+
+			// Upload another file
+			_, fsize = sdkClient.UploadFile(t, allocationID)
+
+			// Check increased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				usedStorageAfter := (*data)[0]
+				cond := (usedStorageAfter - usedStorage) == fsize*2
+				if cond {
+					usedStorage = usedStorageAfter
+				}
+				return cond
+			})
+
+			// Cancel the allocation
+			apiClient.CancelAllocation(t, wallet, allocationID, client.TxSuccessfulStatus)
+
+			// Check decreased + consistency
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				// Get total challenge pools
+				data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				usedStorageAfter := (*data)[0]
+				cond := usedStorage == usedStorageAfter
 				usedStorage = usedStorageAfter
-			}
-			return cond
-		})
 
-		// Update with a bigger file
-		fpath, newFsize := sdkClient.UpdateFileWithParams(t, allocationID, fsize*2, fpath)
-		t.Logf("Filename after update bigger : %v", fpath)
+				// get all blobbers
+				allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
 
-		// Check increased
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			usedStorageAfter := (*data)[0]
-			cond := (usedStorageAfter - usedStorage) == (newFsize-fsize)*2
+				expectedSavedData := calculateExpectedSavedData(allBlobbers)
+				cond = cond && usedStorageAfter == expectedSavedData
 
-			if cond {
-				usedStorage = usedStorageAfter
-				fsize = newFsize
-			}
-			return cond
-		})
-
-		// Update with a smaller file
-		fpath, newFsize = sdkClient.UpdateFileWithParams(t, allocationID, newFsize/2, fpath)
-		t.Logf("Filename after update smaller : %v", fpath)
-
-		// Check decreased
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			usedStorageAfter := (*data)[0]
-			cond := (usedStorage - usedStorageAfter) == (fsize-newFsize)*2
-
-			if cond {
-				usedStorage = usedStorageAfter
-				fsize = newFsize
-			}
-
-			return cond
-		})
-
-		// Remove a file
-		sdkClient.DeleteFile(t, allocationID, fpath)
-
-		// Check decreased
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			usedStorageAfter := (*data)[0]
-			cond := (usedStorage - usedStorageAfter) == fsize*2
-			if cond {
-				usedStorage = usedStorageAfter
-			}
-			return cond
-		})
-
-		// Upload another file
-		_, fsize = sdkClient.UploadFile(t, allocationID)
-
-		// Check increased
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			usedStorageAfter := (*data)[0]
-			cond := (usedStorageAfter - usedStorage) == fsize*2
-			if cond {
-				usedStorage = usedStorageAfter
-			}
-			return cond
-		})
-
-		// Cancel the allocation
-		apiClient.CancelAllocation(t, wallet, allocationID, client.TxSuccessfulStatus)
-
-		// Check decreased + consistency
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			// Get total challenge pools
-			data, resp, err := zboxClient.GetGraphUsedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			usedStorageAfter := (*data)[0]
-			cond := usedStorage == usedStorageAfter
-			usedStorage = usedStorageAfter
-
-			// get all blobbers
-			allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-
-			expectedSavedData := calculateExpectedSavedData(allBlobbers)
-			cond = cond && usedStorageAfter == expectedSavedData
-
-			return cond
+				return cond
+			})
 		})
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-total-staked )", graphEndpointTestCases(zboxClient.GetGraphTotalStaked))
+	t.RunWithTimeout("/v2/graph-total-staked", 5*time.Minute, func(t *test.SystemTest) {
+		t.RunSequentially("endpoint parameters ( test /v2/graph-total-staked )", graphEndpointTestCases(zboxClient.GetGraphTotalStaked))
 
-	t.RunWithTimeout("test graph data ( test /v2/graph-total-staked )", 5*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
+		t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-total-staked )", 5*time.Minute, func(t *test.SystemTest) {
+			wallet := initialisedWallets[walletIdx]
+			walletIdx++
+			balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+			wallet.Nonce = int(balance.Nonce)
 
-		PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
-		data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 1, len([]int64(*data)))
-		totalStaked := (*data)[0]
-
-		// Stake a blobbers
-		targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Len(t, targetBlobbers, 1)
-		confHash := apiClient.CreateStakePool(t, wallet, 3, targetBlobbers[0].ID, client.TxSuccessfulStatus)
-		require.NotEmpty(t, confHash)
-
-		// Check increased
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
+			PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
 			data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
 			require.Equal(t, 1, len([]int64(*data)))
-			totalStakedAfter := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalStaked(t)
+			totalStaked := (*data)[0]
+
+			// Stake a blobbers
+			targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 1, client.HttpOkStatus)
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
-			cond := (totalStakedAfter-totalStaked) == *(tokenomics.IntToZCN(1)) && totalStakedAfter == int64(*latest)
-			if cond {
-				totalStaked = totalStakedAfter
-			}
-			return cond
+			require.Len(t, targetBlobbers, 1)
+			confHash := apiClient.CreateStakePool(t, wallet, 3, targetBlobbers[0].ID, client.TxSuccessfulStatus)
+			require.NotEmpty(t, confHash)
+
+			// Check increased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				totalStakedAfter := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalStaked(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := (totalStakedAfter-totalStaked) == *(tokenomics.IntToZCN(1)) && totalStakedAfter == int64(*latest)
+				if cond {
+					totalStaked = totalStakedAfter
+				}
+				return cond
+			})
+
+			// Get blobber balance before unlocking
+			blobberBalanceBefore := getClientStakeForSSCProvider(t, wallet, targetBlobbers[0].ID)
+
+			// Unlock a stake pool => should decrease
+			restake := unstakeBlobber(t, wallet, targetBlobbers[0].ID)
+			defer restake()
+
+			// Check decreased
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				totalStakedAfter := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalStaked(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := (totalStaked-totalStakedAfter) == blobberBalanceBefore && totalStakedAfter == int64(*latest)
+				if cond {
+					totalStaked = totalStakedAfter
+				}
+				return cond
+			})
+
+			// Stake a validator
+			vs, resp, err := apiClient.V1SCRestGetAllValidators(t, client.HttpOkStatus)
+			require.NoError(t, err)
+			require.Equal(t, 200, resp.StatusCode())
+			require.NotEmpty(t, vs)
+			validatorId := vs[0].ValidatorID
+			confHash = apiClient.CreateStakePool(t, wallet, 4, validatorId, client.TxSuccessfulStatus)
+			require.NotEmpty(t, confHash)
+
+			// Check increase
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				totalStakedAfter := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalStaked(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := totalStakedAfter-totalStaked == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
+				if cond {
+					totalStaked = totalStakedAfter
+				}
+				return cond
+			})
+
+			// Unstake the validator
+			confHash = apiClient.UnlockStakePool(t, wallet, 4, validatorId, client.TxSuccessfulStatus)
+			require.NotEmpty(t, confHash)
+
+			// Check decrease
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				totalStakedAfter := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalStaked(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := totalStaked-totalStakedAfter == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
+				if cond {
+					totalStaked = totalStakedAfter
+				}
+				return cond
+			})
+
+			// Stake a miner
+			miners, resp, err := apiClient.V1SCRestGetAllMiners(t, client.HttpOkStatus)
+			require.NoError(t, err)
+			require.Equal(t, 200, resp.StatusCode())
+			require.NotEmpty(t, miners)
+			minerId := miners[0].SimpleNodeResponse.ID
+			t.Logf("Staking miner %s", minerId)
+			confHash = apiClient.CreateMinerStakePool(t, wallet, 1, minerId, 1.0, client.TxSuccessfulStatus)
+			require.NotEmpty(t, confHash)
+
+			// Check increase
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				totalStakedAfter := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalStaked(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := totalStakedAfter-totalStaked == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
+				if cond {
+					totalStaked = totalStakedAfter
+				}
+				return cond
+			})
+
+			// Unstake the miner
+			confHash = apiClient.UnlockMinerStakePool(t, wallet, 1, minerId, client.TxSuccessfulStatus)
+			require.NotEmpty(t, confHash)
+
+			// Check decrease
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				totalStakedAfter := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalStaked(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := totalStaked-totalStakedAfter == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
+				if cond {
+					totalStaked = totalStakedAfter
+				}
+				return cond
+			})
+
+			// Stake a sharder
+			sharders, resp, err := apiClient.V1SCRestGetAllSharders(t, client.HttpOkStatus)
+			require.NoError(t, err)
+			require.Equal(t, 200, resp.StatusCode())
+			require.NotEmpty(t, sharders)
+			sharderId := sharders[0].SimpleNodeResponse.ID
+			confHash = apiClient.CreateMinerStakePool(t, wallet, 2, sharderId, 1.0, client.TxSuccessfulStatus)
+			require.NotEmpty(t, confHash)
+
+			// Check increase
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				totalStakedAfter := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalStaked(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := totalStakedAfter-totalStaked == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
+				if cond {
+					totalStaked = totalStakedAfter
+				}
+				return cond
+			})
+
+			// Unstake the sharder
+			confHash = apiClient.UnlockMinerStakePool(t, wallet, 2, sharderId, client.TxSuccessfulStatus)
+			require.NotEmpty(t, confHash)
+
+			// Check decrease
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(*data)))
+				totalStakedAfter := (*data)[0]
+				latest, resp, err := zboxClient.GetTotalStaked(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := totalStaked-totalStakedAfter == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
+				if cond {
+					totalStaked = totalStakedAfter
+				}
+				return cond
+			})
+		})
+	})
+
+	t.RunWithTimeout("/v2/graph-challenges", 5*time.Minute, func(t *test.SystemTest) {
+		t.RunSequentially("endpoint parameters ( test /v2/graph-challenges )", func(t *test.SystemTest) {
+			// should fail for invalid parameters
+			_, resp, _ := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "AX", To: "20", DataPoints: "5"})
+			require.Equal(t, 400, resp.StatusCode())
+			require.Contains(t, resp.String(), "invalid from param")
+
+			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "10", To: "AX", DataPoints: "5"})
+			require.Equal(t, 400, resp.StatusCode())
+			require.Contains(t, resp.String(), "invalid to param")
+
+			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "10", To: "20", DataPoints: "AX"})
+			require.Equal(t, 400, resp.StatusCode())
+			require.Contains(t, resp.String(), "invalid data-points query param")
+
+			// should pass for valid parameters (end - start = points)
+			data, resp, _ := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "1000", To: "1010", DataPoints: "10"})
+			require.Equal(t, 200, resp.StatusCode())
+			require.Equal(t, 10, len([]int64(data.TotalChallenges)))
+			require.Equal(t, 10, len([]int64(data.SuccessfulChallenges)))
+
+			// should fail for invalid parameters (end < start)
+			_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "10000", To: "1000", DataPoints: "10"})
+			require.Equal(t, 400, resp.StatusCode())
+			require.Contains(t, resp.String(), "to 1000 less than from 10000")
+
+			// should succeed in case of 1 point
+			data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
+			require.NoError(t, err)
+			require.Equal(t, 200, resp.StatusCode())
+			require.Equal(t, 1, len([]int64(data.TotalChallenges)))
+			require.Equal(t, 1, len([]int64(data.SuccessfulChallenges)))
+
+			// should succeed in case of multiple points
+			minerStats, _, err := apiClient.V1MinerGetStats(t, 200)
+			require.NoError(t, err)
+			latestRound := minerStats.LastFinalizedRound
+			data, resp, err = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: strconv.FormatInt(latestRound-int64(20), 10), To: strconv.FormatInt(latestRound, 10), DataPoints: "10"})
+			require.NoError(t, err)
+			require.Equal(t, 200, resp.StatusCode())
+			require.Equal(t, 10, len([]int64(data.TotalChallenges)))
+			require.Equal(t, 10, len([]int64(data.SuccessfulChallenges)))
 		})
 
-		// Get blobber balance before unlocking
-		blobberBalanceBefore := getClientStakeForSSCProvider(t, wallet, targetBlobbers[0].ID)
+		t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-challenges )", 5*time.Minute, func(t *test.SystemTest) {
+			wallet := initialisedWallets[walletIdx]
+			walletIdx++
+			balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+			wallet.Nonce = int(balance.Nonce)
+			sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+			sdkClient.SetWallet(t, wallet)
 
-		// Unlock a stake pool => should decrease
-		restake := unstakeBlobber(t, wallet, targetBlobbers[0].ID)
-		defer restake()
-
-		// Check decreased
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
+			// Get initial graph data
+			data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
 			require.NoError(t, err)
 			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			totalStakedAfter := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalStaked(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := (totalStaked-totalStakedAfter) == blobberBalanceBefore && totalStakedAfter == int64(*latest)
-			if cond {
-				totalStaked = totalStakedAfter
-			}
-			return cond
-		})
+			require.Equal(t, 1, len([]int64(data.TotalChallenges)))
+			require.Equal(t, 1, len([]int64(data.SuccessfulChallenges)))
+			totalChallenges, successfulChallenges := data.TotalChallenges[0], data.SuccessfulChallenges[0]
 
-		// Stake a validator
-		vs, resp, err := apiClient.V1SCRestGetAllValidators(t, client.HttpOkStatus)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.NotEmpty(t, vs)
-		validatorId := vs[0].ValidatorID
-		confHash = apiClient.CreateStakePool(t, wallet, 4, validatorId, client.TxSuccessfulStatus)
-		require.NotEmpty(t, confHash)
+			sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+			t.Logf("sdk wallet balance: %v", sdkWalletBalance.Balance)
+			wallet.Nonce = int(sdkWalletBalance.Nonce)
 
-		// Check increase
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			totalStakedAfter := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalStaked(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := totalStakedAfter-totalStaked == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
-			if cond {
-				totalStaked = totalStakedAfter
-			}
-			return cond
-		})
+			// Create an allocation
+			blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+			blobberRequirements.DataShards = 1
+			blobberRequirements.ParityShards = 1
+			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		// Unstake the validator
-		confHash = apiClient.UnlockStakePool(t, wallet, 4, validatorId, client.TxSuccessfulStatus)
-		require.NotEmpty(t, confHash)
+			// Upload a file
+			sdkClient.UploadFile(t, allocationID)
 
-		// Check decrease
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			totalStakedAfter := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalStaked(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := totalStaked-totalStakedAfter == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
-			if cond {
-				totalStaked = totalStakedAfter
-			}
-			return cond
-		})
+			// Check total challenges increase
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(data.TotalChallenges)))
+				totalChallengesAfter := data.TotalChallenges[0]
+				successfulChallengesAfter := data.SuccessfulChallenges[0]
+				latestTotal, resp, err := zboxClient.GetTotalChallenges(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				latestSuccessful, resp, err := zboxClient.GetSuccessfulChallenges(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond := totalChallengesAfter > totalChallenges && int64(*latestTotal) == totalChallengesAfter && int64(*latestSuccessful) == successfulChallengesAfter
+				if cond {
+					totalChallenges = totalChallengesAfter
+					successfulChallenges = data.SuccessfulChallenges[0]
+				}
 
-		// Stake a miner
-		miners, resp, err := apiClient.V1SCRestGetAllMiners(t, client.HttpOkStatus)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.NotEmpty(t, miners)
-		minerId := miners[0].SimpleNodeResponse.ID
-		t.Logf("Staking miner %s", minerId)
-		confHash = apiClient.CreateMinerStakePool(t, wallet, 1, minerId, 1.0, client.TxSuccessfulStatus)
-		require.NotEmpty(t, confHash)
+				return cond
+			})
 
-		// Check increase
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			totalStakedAfter := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalStaked(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := totalStakedAfter-totalStaked == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
-			if cond {
-				totalStaked = totalStakedAfter
-			}
-			return cond
-		})
+			// Add blobber to the allocation
+			allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+			newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+			require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
+			apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID,
+				allocation.Blobbers[0].ID, allocationID, client.TxSuccessfulStatus)
 
-		// Unstake the miner
-		confHash = apiClient.UnlockMinerStakePool(t, wallet, 1, minerId, client.TxSuccessfulStatus)
-		require.NotEmpty(t, confHash)
-
-		// Check decrease
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			totalStakedAfter := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalStaked(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := totalStaked-totalStakedAfter == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
-			if cond {
-				totalStaked = totalStakedAfter
-			}
-			return cond
-		})
-
-		// Stake a sharder
-		sharders, resp, err := apiClient.V1SCRestGetAllSharders(t, client.HttpOkStatus)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.NotEmpty(t, sharders)
-		sharderId := sharders[0].SimpleNodeResponse.ID
-		confHash = apiClient.CreateMinerStakePool(t, wallet, 2, sharderId, 1.0, client.TxSuccessfulStatus)
-		require.NotEmpty(t, confHash)
-
-		// Check increase
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			totalStakedAfter := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalStaked(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := totalStakedAfter-totalStaked == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
-			if cond {
-				totalStaked = totalStakedAfter
-			}
-			return cond
-		})
-
-		// Unstake the sharder
-		confHash = apiClient.UnlockMinerStakePool(t, wallet, 2, sharderId, client.TxSuccessfulStatus)
-		require.NotEmpty(t, confHash)
-
-		// Check decrease
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphTotalStaked(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			totalStakedAfter := (*data)[0]
-			latest, resp, err := zboxClient.GetTotalStaked(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := totalStaked-totalStakedAfter == *tokenomics.IntToZCN(1.0) && totalStakedAfter == int64(*latest)
-			if cond {
-				totalStaked = totalStakedAfter
-			}
-			return cond
+			// Check total challenges increase + successful challenges increase because time has passed since the upload
+			wait.PoolImmediately(t, 2*time.Minute, func() bool {
+				data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				require.Equal(t, 1, len([]int64(data.TotalChallenges)))
+				totalChallengesAfter := data.TotalChallenges[0]
+				cond := totalChallengesAfter > totalChallenges
+				totalChallenges = totalChallengesAfter
+				successfulChallengesAfter := data.SuccessfulChallenges[0]
+				cond = cond && successfulChallengesAfter > successfulChallenges
+				successfulChallenges = successfulChallengesAfter
+				latestTotal, resp, err := zboxClient.GetTotalChallenges(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				latestSuccessful, resp, err := zboxClient.GetSuccessfulChallenges(t)
+				require.NoError(t, err)
+				require.Equal(t, 200, resp.StatusCode())
+				cond = cond && int64(*latestTotal) == totalChallengesAfter && int64(*latestSuccessful) == successfulChallengesAfter
+				return cond
+			})
 		})
 	})
 
 	t.Run("endpoint parameters ( test /v2/graph-total-locked )", graphEndpointTestCases(zboxClient.GetGraphTotalLocked))
-
-	t.Run("endpoint parameters ( test /v2/graph-challenges )", func(t *test.SystemTest) {
-		// should fail for invalid parameters
-		_, resp, _ := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "AX", To: "20", DataPoints: "5"})
-		require.Equal(t, 400, resp.StatusCode())
-		require.Contains(t, resp.String(), "invalid from param")
-
-		_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "10", To: "AX", DataPoints: "5"})
-		require.Equal(t, 400, resp.StatusCode())
-		require.Contains(t, resp.String(), "invalid to param")
-
-		_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "10", To: "20", DataPoints: "AX"})
-		require.Equal(t, 400, resp.StatusCode())
-		require.Contains(t, resp.String(), "invalid data-points query param")
-
-		// should pass for valid parameters (end - start = points)
-		data, resp, _ := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "1000", To: "1010", DataPoints: "10"})
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 10, len([]int64(data.TotalChallenges)))
-		require.Equal(t, 10, len([]int64(data.SuccessfulChallenges)))
-
-		// should fail for invalid parameters (end < start)
-		_, resp, _ = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: "10000", To: "1000", DataPoints: "10"})
-		require.Equal(t, 400, resp.StatusCode())
-		require.Contains(t, resp.String(), "to 1000 less than from 10000")
-
-		// should succeed in case of 1 point
-		data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 1, len([]int64(data.TotalChallenges)))
-		require.Equal(t, 1, len([]int64(data.SuccessfulChallenges)))
-
-		// should succeed in case of multiple points
-		minerStats, _, err := apiClient.V1MinerGetStats(t, 200)
-		require.NoError(t, err)
-		latestRound := minerStats.LastFinalizedRound
-		data, resp, err = zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{From: strconv.FormatInt(latestRound-int64(20), 10), To: strconv.FormatInt(latestRound, 10), DataPoints: "10"})
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 10, len([]int64(data.TotalChallenges)))
-		require.Equal(t, 10, len([]int64(data.SuccessfulChallenges)))
-	})
-
-	t.RunWithTimeout("test graph data ( test /v2/graph-challenges )", 5*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-
-		// Get initial graph data
-		data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 1, len([]int64(data.TotalChallenges)))
-		require.Equal(t, 1, len([]int64(data.SuccessfulChallenges)))
-		totalChallenges, successfulChallenges := data.TotalChallenges[0], data.SuccessfulChallenges[0]
-
-		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		t.Logf("sdk wallet balance: %v", sdkWalletBalance.Balance)
-		wallet.Nonce = int(sdkWalletBalance.Nonce)
-
-		// Create an allocation
-		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		blobberRequirements.DataShards = 1
-		blobberRequirements.ParityShards = 1
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		// Upload a file
-		sdkClient.UploadFile(t, allocationID)
-
-		// Check total challenges increase
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(data.TotalChallenges)))
-			totalChallengesAfter := data.TotalChallenges[0]
-			successfulChallengesAfter := data.SuccessfulChallenges[0]
-			latestTotal, resp, err := zboxClient.GetTotalChallenges(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			latestSuccessful, resp, err := zboxClient.GetSuccessfulChallenges(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond := totalChallengesAfter > totalChallenges && int64(*latestTotal) == totalChallengesAfter && int64(*latestSuccessful) == successfulChallengesAfter
-			if cond {
-				totalChallenges = totalChallengesAfter
-				successfulChallenges = data.SuccessfulChallenges[0]
-			}
-
-			return cond
-		})
-
-		// Add blobber to the allocation
-		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
-		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID,
-			allocation.Blobbers[0].ID, allocationID, client.TxSuccessfulStatus)
-
-		// Check total challenges increase + successful challenges increase because time has passed since the upload
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			data, resp, err := zboxClient.GetGraphChallenges(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(data.TotalChallenges)))
-			totalChallengesAfter := data.TotalChallenges[0]
-			cond := totalChallengesAfter > totalChallenges
-			totalChallenges = totalChallengesAfter
-			successfulChallengesAfter := data.SuccessfulChallenges[0]
-			cond = cond && successfulChallengesAfter > successfulChallenges
-			successfulChallenges = successfulChallengesAfter
-			latestTotal, resp, err := zboxClient.GetTotalChallenges(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			latestSuccessful, resp, err := zboxClient.GetSuccessfulChallenges(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			cond = cond && int64(*latestTotal) == totalChallengesAfter && int64(*latestSuccessful) == successfulChallengesAfter
-			return cond
-		})
-	})
 
 	t.RunWithTimeout("test /v2/total-blobber-capacity", 5*time.Minute, func(t *test.SystemTest) {
 		// Get initial
@@ -1081,6 +1114,8 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 	testWallet := initialisedWallets[walletIdx]
 	walletIdx++
+	balance := apiClient.GetWalletBalance(t, testWallet, client.HttpOkStatus)
+	testWallet.Nonce = int(balance.Nonce)
 
 	// Faucet the used initialisedWallets
 	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
@@ -1104,16 +1139,20 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	require.Len(t, blobbers, 1)
 	require.NotNil(t, blobbers[0].ID)
 
-	t.Run("endpoint parameters ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesPassed, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesPassed, blobbers[0].ID))
 
-	t.Run("endpoint parameters ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesCompleted, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesCompleted, blobbers[0].ID))
 
-	t.Run("endpoint parameters ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesOpen, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesOpen, blobbers[0].ID))
 
-	t.RunWithTimeout("test graph data ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", 3*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", 3*time.Minute, func(t *test.SystemTest) {
 
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		// Create allocation
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -1178,11 +1217,11 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-blobber-inactive-rounds )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberInactiveRounds, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-inactive-rounds )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberInactiveRounds, blobbers[0].ID))
 
-	t.Run("endpoint parameters ( test /v2/graph-blobber-write-price )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberWritePrice, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-write-price )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberWritePrice, blobbers[0].ID))
 
-	t.RunWithTimeout("test graph data ( test /v2/graph-blobber-write-price )", 5*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-blobber-write-price )", 5*time.Minute, func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		targetBlobber := blobbers[0]
 
@@ -1230,9 +1269,9 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-blobber-capacity )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberCapacity, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-capacity )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberCapacity, blobbers[0].ID))
 
-	t.RunWithTimeout("test graph data ( test /v2/graph-blobber-capacity )", 5*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-blobber-capacity )", 5*time.Minute, func(t *test.SystemTest) {
 		// Get a single blobber to use in graph parameters test
 		targetBlobber := blobbers[0]
 
@@ -1280,11 +1319,13 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-blobber-allocated )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberAllocated, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-allocated )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberAllocated, blobbers[0].ID))
 
-	t.RunWithTimeout("test graph data ( test /v2/graph-blobber-allocated )", 5*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-blobber-allocated )", 5*time.Minute, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		// Get allocated of all blobbers
 		blobberAllocated := make(map[string]int64)
@@ -1336,11 +1377,15 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-blobber-saved-data )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberSavedData, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-saved-data )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberSavedData, blobbers[0].ID))
 
-	t.RunWithTimeout("test graph data ( test /v2/graph-blobber-saved-data )", 5*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-blobber-saved-data )", 5*time.Minute, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		// Get saved data of all blobbers
 		blobberSavedData := make(map[string]int64)
@@ -1435,11 +1480,15 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-blobber-read-data )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberReadData, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-read-data )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberReadData, blobbers[0].ID))
 
-	t.Run("test graph data ( test /v2/graph-blobber-read-data )", func(t *test.SystemTest) {
+	t.RunSequentially("test graph data ( test /v2/graph-blobber-read-data )", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		// Get read data of all blobbers
 		blobberReadData := make(map[string]int64)
@@ -1487,11 +1536,13 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-blobber-offers-total )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberOffersTotal, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-offers-total )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberOffersTotal, blobbers[0].ID))
 
-	t.Run("test graph data ( test /v2/graph-blobber-offers-total )", func(t *test.SystemTest) {
+	t.RunSequentially("test graph data ( test /v2/graph-blobber-offers-total )", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		// Get offers of all blobbers
 		blobberOffersTotal := make(map[string]int64)
@@ -1557,11 +1608,13 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-blobber-stake-total )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalStake, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-stake-total )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalStake, blobbers[0].ID))
 
-	t.Run("test graph data ( test /v2/graph-blobber-stake-total )", func(t *test.SystemTest) {
+	t.RunSequentially("test graph data ( test /v2/graph-blobber-stake-total )", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
 
 		targetBlobber := blobbers[0].ID
 		data, resp, err := apiClient.V1SCRestGetStakePoolStat(t, model.SCRestGetStakePoolStatRequest{
@@ -1608,11 +1661,15 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.Run("endpoint parameters ( test /v2/graph-blobber-total-rewards )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalRewards, blobbers[0].ID))
+	t.RunSequentially("endpoint parameters ( test /v2/graph-blobber-total-rewards )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalRewards, blobbers[0].ID))
 
-	t.Run("test graph data ( test /v2/graph-blobber-total-rewards )", func(t *test.SystemTest) {
+	t.RunSequentially("test graph data ( test /v2/graph-blobber-total-rewards )", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
+		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(balance.Nonce)
+		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+		sdkClient.SetWallet(t, wallet)
 
 		// Get read data of all blobbers
 		blobberRewards := make(map[string]int64)
