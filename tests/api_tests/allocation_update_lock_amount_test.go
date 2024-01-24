@@ -13,6 +13,7 @@ import (
 
 func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 
 	t.RunWithTimeout("Extend Allocation Size", 1*time.Minute, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]

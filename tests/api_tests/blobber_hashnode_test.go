@@ -14,9 +14,10 @@ import (
 
 func TestHashnodeRoot(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 	t.SetSmokeTests("Get hashnode root from blobber for an empty allocation should work")
 
-	t.RunSequentially("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
+	t.Run("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 
@@ -51,7 +52,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 		require.Equal(t, getBlobberResponse.Path, "/")
 	})
 
-	t.RunSequentiallyWithTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
+	t.RunWithTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 
@@ -77,7 +78,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 		require.Nil(t, getBlobberResponse)
 	})
 
-	t.RunSequentially("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
+	t.Run("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 

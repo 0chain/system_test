@@ -30,35 +30,36 @@ var fileExtensions = []string{
 
 func TestMultiOperation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 	t.SetSmokeTests("Multi upload operations should work")
 
-	t.RunSequentially("Multi upload operations should work", func(t *test.SystemTest) {
+	t.Run("Multi upload operations should work", func(t *test.SystemTest) {
 		createAllocationAndPerformMultiOperation(t, 0, 10, 10, false, []int64{}, "")
 	})
 
-	t.RunSequentiallyWithTimeout("Multi upload operations of single format should work with 50 large and 50 small files", 500*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Multi upload operations of single format should work with 50 large and 50 small files", 500*time.Minute, func(t *test.SystemTest) {
 		t.Skip()
 		createAllocationAndPerformMultiOperation(t, 2*GB, 100, 100, false, []int64{1 * KB, 40 * MB}, "")
 	})
 
-	t.RunSequentiallyWithTimeout("Multi upload operations of multiple formats should work with 50 large and 50 small files", 500*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Multi upload operations of multiple formats should work with 50 large and 50 small files", 500*time.Minute, func(t *test.SystemTest) {
 		t.Skip()
 		createAllocationAndPerformMultiOperation(t, 2*GB, 100, 100, true, []int64{1 * KB, 40 * MB}, "")
 	})
 
-	t.RunSequentially("Multi delete operations should work", func(t *test.SystemTest) {
+	t.Run("Multi delete operations should work", func(t *test.SystemTest) {
 		createAllocationAndPerformMultiOperation(t, 0, 10, 0, false, []int64{}, "delete")
 	})
 
-	t.RunSequentially("Multi update operations should work", func(t *test.SystemTest) {
+	t.Run("Multi update operations should work", func(t *test.SystemTest) {
 		createAllocationAndPerformMultiOperation(t, 0, 10, 10, false, []int64{}, "update")
 	})
 
-	t.RunSequentially("Multi rename operations should work", func(t *test.SystemTest) {
+	t.Run("Multi rename operations should work", func(t *test.SystemTest) {
 		createAllocationAndPerformMultiOperation(t, 0, 10, 10, false, []int64{}, "rename")
 	})
 
-	t.RunSequentially("Multi different operations should work", func(t *test.SystemTest) {
+	t.Run("Multi different operations should work", func(t *test.SystemTest) {
 
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
@@ -100,7 +101,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		require.Equal(t, 6, len(listResult.Children), "files count mismatch expected %v actual %v", 6, len(listResult.Children))
 	})
 
-	t.RunSequentially("Multi move operations should work", func(t *test.SystemTest) {
+	t.Run("Multi move operations should work", func(t *test.SystemTest) {
 
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
@@ -145,7 +146,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		require.Equal(t, 5, len(listResult.Children), "files count mismatch expected %v actual %v", 5, len(listResult.Children))
 	})
 
-	t.RunSequentially("Multi copy operations should work", func(t *test.SystemTest) {
+	t.Run("Multi copy operations should work", func(t *test.SystemTest) {
 
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
@@ -189,7 +190,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		require.Equal(t, 5, len(listResult.Children), "files count mismatch expected %v actual %v", 5, len(listResult.Children))
 	})
 
-	t.RunSequentially("Multi create dir operations should work", func(t *test.SystemTest) {
+	t.Run("Multi create dir operations should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -216,7 +217,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		sdkClient.MultiOperation(t, allocationID, newOps)
 	})
 
-	t.RunSequentially("Nested move operation should work", func(t *test.SystemTest) {
+	t.Run("Nested move operation should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -236,7 +237,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		require.Equal(t, 0, len(listResult.Children), "files count mismatch expected %v actual %v", 0, len(listResult.Children))
 	})
 
-	t.RunSequentially("Nested copy operation should work", func(t *test.SystemTest) {
+	t.Run("Nested copy operation should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -255,7 +256,7 @@ func TestMultiOperation(testSetup *testing.T) {
 		require.Equal(t, 1, len(listResult.Children), "files count mismatch expected %v actual %v", 1, len(listResult.Children))
 	})
 
-	t.RunSequentially("Nested rename directory operation should work", func(t *test.SystemTest) {
+	t.Run("Nested rename directory operation should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)

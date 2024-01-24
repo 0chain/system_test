@@ -17,6 +17,7 @@ import (
 
 func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 
 	wallet1 := initialisedWallets[walletIdx]
 	walletIdx++
@@ -57,6 +58,7 @@ func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 
 func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 	wallet1 := initialisedWallets[walletIdx]
 	walletIdx++
 
@@ -174,6 +176,7 @@ L1:
 
 func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 	wallet1 := initialisedWallets[walletIdx]
 	walletIdx++
 

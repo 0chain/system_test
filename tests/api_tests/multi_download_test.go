@@ -14,9 +14,10 @@ import (
 
 func TestMultiDownload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 	t.SetSmokeTests("Multi download should work")
 
-	t.RunSequentially("Multi download should work", func(t *test.SystemTest) {
+	t.Run("Multi download should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 

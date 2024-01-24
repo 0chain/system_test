@@ -13,8 +13,10 @@ import (
 
 func TestMultiOperationRollback(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 	t.SetSmokeTests("Multi different operations rollback should work")
-	t.RunSequentially("Multi upload operations rollback should work", func(t *test.SystemTest) {
+
+	t.Run("Multi upload operations rollback should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 
@@ -52,7 +54,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		require.Equal(t, 4, len(listResult.Children), "files count mismatch expected %v actual %v", 4, len(listResult.Children))
 	})
 
-	t.RunSequentially("Multi delete operations rollback should work", func(t *test.SystemTest) {
+	t.Run("Multi delete operations rollback should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -81,7 +83,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		require.Equal(t, 10, len(listResult.Children), "files count mismatch expected 5 got %v", len(listResult.Children))
 	})
 
-	t.RunSequentially("Multi rename operations rollback should work", func(t *test.SystemTest) {
+	t.Run("Multi rename operations rollback should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -110,7 +112,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		listResult := sdkClient.GetFileList(t, allocationID, "/")
 		require.Equal(t, 10, len(listResult.Children), "files count mismatch expected %v actual %v", 10, len(listResult.Children))
 	})
-	t.RunSequentially("Multi different operations rollback should work", func(t *test.SystemTest) {
+	t.Run("Multi different operations rollback should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)

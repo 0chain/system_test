@@ -76,7 +76,7 @@ func TestMain(m *testing.M) {
 	ownerWallet = apiClient.CreateWalletForMnemonic(t, ownerWalletMnemonics)
 
 	// Read the content of the file
-	fileContent, err := os.ReadFile("./config/initialisedWallets.json")
+	fileContent, err := os.ReadFile("./config/wallets.json")
 	if err != nil {
 		fmt.Println("Error reading file:", err)
 		return

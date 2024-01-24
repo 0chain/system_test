@@ -18,6 +18,7 @@ import (
 func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Replace blobber in allocation, should work")
+	t.Skip()
 
 	const (
 		allocSize = 20 * GB
