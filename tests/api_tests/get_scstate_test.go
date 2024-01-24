@@ -17,8 +17,8 @@ func TestGetSCState(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Get SCState of faucet SC, should work", func(t *test.SystemTest) {
-		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		wallet := initialisedWallets[walletIdx]
+		walletIdx++
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
 			t,
@@ -33,7 +33,8 @@ func TestGetSCState(testSetup *testing.T) {
 	})
 
 	t.Run("Get SCState of faucet SC, shouldn't work", func(t *test.SystemTest) {
-		wallet := apiClient.CreateWallet(t)
+		wallet := initialisedWallets[walletIdx]
+		walletIdx++
 
 		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
 			t,

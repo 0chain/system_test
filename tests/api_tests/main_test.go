@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -18,19 +19,22 @@ import (
 )
 
 var (
-	apiClient                   *client.APIClient
-	zs3Client                   *client.ZS3Client
-	sdkClient                   *client.SDKClient
-	zboxClient                  *client.ZboxClient
-	chimneyClient               *client.APIClient
-	chimneySdkClient            *client.SDKClient
-	sdkWallet                   *model.Wallet
+	apiClient        *client.APIClient
+	zs3Client        *client.ZS3Client
+	sdkClient        *client.SDKClient
+	zboxClient       *client.ZboxClient
+	chimneyClient    *client.APIClient
+	chimneySdkClient *client.SDKClient
+	//sdkWallet                   *model.Wallet
 	sdkWalletMnemonics          string
 	ownerWallet                 *model.Wallet
 	ownerWalletMnemonics        string
 	blobberOwnerWallet          *model.Wallet
 	blobberOwnerWalletMnemonics string
 	parsedConfig                *config.Config
+
+	initialisedWallets []*model.Wallet
+	walletIdx          int64
 )
 
 func TestMain(m *testing.M) {
@@ -62,14 +66,30 @@ func TestMain(m *testing.M) {
 	err = zcncore.Init(getConfigForZcnCoreInit(parsedConfig.BlockWorker))
 	require.NoError(t, err)
 	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
-	sdkWallet = apiClient.CreateWalletForMnemonic(t, sdkWalletMnemonics)
-	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
+	//sdkWallet = apiClient.CreateWalletForMnemonic(t, sdkWalletMnemonics)
+	//sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
 
 	blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics
 	blobberOwnerWallet = apiClient.CreateWalletForMnemonic(t, blobberOwnerWalletMnemonics)
 
 	ownerWalletMnemonics = parsedConfig.OwnerWalletMnemonics
 	ownerWallet = apiClient.CreateWalletForMnemonic(t, ownerWalletMnemonics)
+
+	// Read the content of the file
+	fileContent, err := os.ReadFile("./config/initialisedWallets.json")
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return
+	}
+
+	// Parse the JSON data into a list of strings
+	err = json.Unmarshal(fileContent, &initialisedWallets)
+	if err != nil {
+		fmt.Println("Error decoding JSON:", err)
+		return
+	}
+
+	fmt.Println("initialisedWallets", initialisedWallets[0].Id)
 
 	os.Exit(m.Run())
 }
