@@ -25,7 +25,6 @@ const (
 
 func Test0BoxFreeStorage(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 	t.SetSmokeTests("List allocation with zero allocation should work")
 
 	var firebaseToken *model.FirebaseToken

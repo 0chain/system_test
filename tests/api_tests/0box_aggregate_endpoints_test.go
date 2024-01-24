@@ -22,8 +22,7 @@ import (
 //nolint:gocyclo
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-
-	t.Parallel()
+	// Faucet the used wallets
 
 	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
 	t.Logf("Owner balance: %v", ownerBalance)
