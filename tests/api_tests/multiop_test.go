@@ -30,7 +30,6 @@ var fileExtensions = []string{
 
 func TestMultiOperation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 	t.SetSmokeTests("Multi upload operations should work")
 
 	t.RunSequentially("Multi upload operations should work", func(t *test.SystemTest) {
