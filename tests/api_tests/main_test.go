@@ -24,6 +24,7 @@ var (
 	zboxClient       *client.ZboxClient
 	chimneyClient    *client.APIClient
 	chimneySdkClient *client.SDKClient
+	sdkClient        *client.SDKClient
 	//sdkWallet                   *model.Wallet
 	ownerWallet                 *model.Wallet
 	ownerWalletMnemonics        string
@@ -48,6 +49,7 @@ func TestMain(m *testing.M) {
 	zboxClient = client.NewZboxClient(parsedConfig.ZboxUrl, parsedConfig.ZboxPhoneNumber)
 	chimneyClient = client.NewAPIClient(parsedConfig.ChimneyTestNetwork)
 	chimneySdkClient = client.NewSDKClient(parsedConfig.ChimneyTestNetwork)
+	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
 	if err != nil {

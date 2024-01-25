@@ -56,7 +56,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		// Get initial total challenge pools
@@ -430,7 +430,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			walletIdx++
 			balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 			wallet.Nonce = int(balance.Nonce)
-			sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 			sdkClient.SetWallet(t, wallet)
 
 			PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
@@ -577,7 +577,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			walletIdx++
 			balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 			wallet.Nonce = int(balance.Nonce)
-			sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 			sdkClient.SetWallet(t, wallet)
 
 			PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
@@ -972,7 +972,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			walletIdx++
 			balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 			wallet.Nonce = int(balance.Nonce)
-			sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 			sdkClient.SetWallet(t, wallet)
 
 			// Get initial graph data
@@ -1149,7 +1149,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		// Create allocation
@@ -1382,7 +1382,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		// Get saved data of all blobbers
@@ -1485,7 +1485,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		// Get read data of all blobbers
@@ -1666,7 +1666,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		// Get read data of all blobbers

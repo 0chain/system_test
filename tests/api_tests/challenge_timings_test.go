@@ -41,7 +41,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	walletIdx++
 	balance := apiClient.GetWalletBalance(t, testWallet, client.HttpOkStatus)
 	testWallet.Nonce = int(balance.Nonce)
-	sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 	sdkClient.SetWallet(t, testWallet)
 
 	t.TestSetupWithTimeout("Setup", 2*time.Minute, func() {

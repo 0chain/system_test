@@ -23,7 +23,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -118,7 +118,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -152,7 +152,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -186,7 +186,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -220,7 +220,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -254,7 +254,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -288,7 +288,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -318,7 +318,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -354,7 +354,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, initialisedWallet, client.HttpOkStatus)
 		initialisedWallet.Nonce = int(balance.Nonce)
-		sdkClient := client.NewSDKClient(parsedConfig.BlockWorker)
+
 		sdkClient.SetWallet(t, initialisedWallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(initialisedWallet.Id, initialisedWallet.PublicKey)
