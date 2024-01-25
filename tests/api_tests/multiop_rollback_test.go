@@ -13,10 +13,9 @@ import (
 
 func TestMultiOperationRollback(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 	t.SetSmokeTests("Multi different operations rollback should work")
 
-	t.Run("Multi upload operations rollback should work", func(t *test.SystemTest) {
+	t.RunSequentially("Multi upload operations rollback should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -58,7 +57,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		require.Equal(t, 4, len(listResult.Children), "files count mismatch expected %v actual %v", 4, len(listResult.Children))
 	})
 
-	t.Run("Multi delete operations rollback should work", func(t *test.SystemTest) {
+	t.RunSequentially("Multi delete operations rollback should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -92,7 +91,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		require.Equal(t, 10, len(listResult.Children), "files count mismatch expected 5 got %v", len(listResult.Children))
 	})
 
-	t.Run("Multi rename operations rollback should work", func(t *test.SystemTest) {
+	t.RunSequentially("Multi rename operations rollback should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
