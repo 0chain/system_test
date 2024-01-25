@@ -15,6 +15,7 @@ const (
 func TestZs3ServerOperations(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
+	// FIXME: we should never return a 500 to the end user
 
 	t.SetSmokeTests("CreateBucket should return 200 when all the parameters are correct",
 		"ListBucket should return 200 all the parameter are correct",
@@ -46,7 +47,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		require.Equal(t, 500, resp.StatusCode())
 	})
 
-	t.Run("CreateBucket should return 200 when all the parameters are correct", func(t *test.SystemTest) {
+	t.RunSequentially("CreateBucket should return 200 when all the parameters are correct", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -58,7 +59,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 
-	t.Run("CreateBucket should not return error when bucket name already exist", func(t *test.SystemTest) {
+	t.RunSequentially("CreateBucket should not return error when bucket name already exist", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -70,7 +71,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 
-	t.Run("ListBucket should return 200 all the parameter are correct", func(t *test.SystemTest) {
+	t.RunSequentially("ListBucket should return 200 all the parameter are correct", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -81,7 +82,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 
-	t.Run("ListObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
+	t.RunSequentially("ListObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -93,7 +94,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 
-	t.Run("PutObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
+	t.RunSequentially("PutObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -118,7 +119,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 
-	t.Run("GetObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
+	t.RunSequentially("GetObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -134,7 +135,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 
-	t.Run("PutObjects should return error when buckcet name does not exist", func(t *test.SystemTest) {
+	t.RunSequentially("PutObjects should return error when buckcet name does not exist", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -150,7 +151,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		require.Equal(t, `{"error":"Bucket name contains invalid characters"}`, resp.String())
 	})
 
-	t.Run("RemoveObject should return 200 all the parameter are correct", func(t *test.SystemTest) {
+	t.RunSequentially("RemoveObject should return 200 all the parameter are correct", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -173,7 +174,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 	})
 
-	t.Run("RemoveObject should not return error if object doen't exist", func(t *test.SystemTest) {
+	t.RunSequentially("RemoveObject should not return error if object doen't exist", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
