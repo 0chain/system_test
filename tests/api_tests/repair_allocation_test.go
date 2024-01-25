@@ -13,7 +13,6 @@ import (
 
 func TestRepairAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	testWallet := initialisedWallets[walletIdx]
 	walletIdx++
@@ -22,7 +21,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 	apiClient.CreateReadPool(t, testWallet, 0.5, client.TxSuccessfulStatus)
 
-	t.Run("Repair allocation after single upload should work", func(t *test.SystemTest) {
+	t.RunSequentially("Repair allocation after single upload should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -49,7 +48,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 	})
 
-	t.Run("Repair allocation after multiple uploads should work", func(t *test.SystemTest) {
+	t.RunSequentially("Repair allocation after multiple uploads should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -82,7 +81,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		}
 	})
 
-	t.Run("Repair allocation after update should work", func(t *test.SystemTest) {
+	t.RunSequentially("Repair allocation after update should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -119,7 +118,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		require.Equal(t, updatedRef.ActualFileHash, fRef.ActualFileHash)
 	})
 
-	t.Run("Repair allocation after delete should work", func(t *test.SystemTest) {
+	t.RunSequentially("Repair allocation after delete should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -150,7 +149,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		require.NotNil(t, err)
 	})
 
-	t.Run("Repair allocation after move should work", func(t *test.SystemTest) {
+	t.RunSequentially("Repair allocation after move should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -182,7 +181,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 	})
 
-	t.Run("Repair allocation after copy should work", func(t *test.SystemTest) {
+	t.RunSequentially("Repair allocation after copy should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -216,7 +215,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 	})
 
-	t.Run("Repair allocation after rename should work", func(t *test.SystemTest) {
+	t.RunSequentially("Repair allocation after rename should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)

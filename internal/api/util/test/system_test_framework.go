@@ -24,7 +24,7 @@ func NewSystemTest(t *testing.T) *SystemTest {
 	return &SystemTest{Unwrap: t, testComplete: false, childTest: false}
 }
 
-func (s *SystemTest) Run(name string, testCaseFunction func(w *SystemTest)) bool {
+func (s *SystemTest) RunSequentiallyRun(name string, testCaseFunction func(w *SystemTest)) bool {
 	s.Unwrap.Helper()
 	return s.RunWithTimeout(name, DefaultTestTimeout, testCaseFunction)
 }
