@@ -20,7 +20,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Replace blobber in allocation, should work", func(t *test.SystemTest) {
+	t.RunSequentially("Replace blobber in allocation, should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -56,7 +56,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.True(t, isBlobberExist(newBlobberID, allocation.Blobbers))
 	})
 
-	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *test.SystemTest) {
+	t.RunSequentially("Replace blobber with the same one in allocation, shouldn't work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -88,7 +88,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
-	t.Run("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *test.SystemTest) {
+	t.RunSequentially("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -123,7 +123,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
-	t.Run("Check token accounting of a blobber replacing in allocation, should work", func(t *test.SystemTest) {
+	t.RunSequentially("Check token accounting of a blobber replacing in allocation, should work", func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -163,7 +163,7 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.Greater(t, balanceBeforeAllocationUpdate, balanceAfterAllocationUpdate)
 	})
 
-	t.RunWithTimeout("Replace blobber in allocation with repair should work", 90*time.Second, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Replace blobber in allocation with repair should work", 90*time.Second, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
