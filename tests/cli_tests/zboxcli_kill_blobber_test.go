@@ -61,6 +61,12 @@ func TestKillBlobber(testSetup *testing.T) {
 		require.NoError(t, err)
 		createAllocationTestTeardown(t, allocationID)
 
+		_, err = executeFaucetWithTokens(t, configPath, 100.0)
+		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+		_, err = stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToKill, "tokens": 100}), true)
+		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", blobberToKill)
+
 		spBefore := getStakePoolInfo(t, blobberToKill)
 		output, err = killBlobber(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
 			"id": blobberToKill,
@@ -82,9 +88,13 @@ func TestKillBlobber(testSetup *testing.T) {
 			t.Log("spBefore", spBefore.Delegate[poolIndex].Balance)
 			t.Log("spAfter", spAfter.Delegate[poolIndex].Balance)
 			t.Log("killSlash", killSlash)
-			require.InEpsilon(t, float64(spBefore.Delegate[poolIndex].Balance)*killSlash, float64(spAfter.Delegate[poolIndex].Balance), 0.05,
+			require.InEpsilon(t, float64(spBefore.Delegate[poolIndex].Balance)*(1-killSlash), float64(spAfter.Delegate[poolIndex].Balance), 0.05,
 				"stake pools should be slashed by %f", killSlash) // 5% error margin because there can be challenge penalty
 		}
+
+		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToKill}), true)
+		require.NoError(t, err, "should be able to unstake tokens from a killed blobber")
+		t.Log(strings.Join(output, "\n"))
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
