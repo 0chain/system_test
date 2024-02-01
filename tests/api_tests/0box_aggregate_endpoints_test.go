@@ -34,7 +34,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	testWallet := initialisedWallets[walletIdx]
 	walletIdx++
 	balance := apiClient.GetWalletBalance(t, testWallet, client.HttpOkStatus)
-	testWallet.Nonce = int(balance.Nonce + 1)
+	testWallet.Nonce = int(balance.Nonce)
 
 	// Stake 6 blobbers, each with 1 token
 	targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 6, client.HttpOkStatus)
@@ -50,61 +50,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	apiClient.AddFreeStorageAssigner(t, ownerWallet, client.TxSuccessfulStatus) // 0.1 ZCN 1 ZCN = 1e10 from owner wallet
 	marker := config.CreateFreeStorageMarker(t, testWallet.ToSdkWallet(testWallet.Mnemonics), ownerWallet.ToSdkWallet(ownerWalletMnemonics))
 	t.Logf("Free allocation marker: %v", marker)
-
-	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-write-price )", 5*time.Minute, func(t *test.SystemTest) {
-		data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, 1, len([]int64(*data)))
-		priceBeforeStaking := (*data)[0]
-
-		targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 2, client.HttpOkStatus)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Len(t, targetBlobbers, 2)
-
-		targetBlobbers[0].Capacity += 10 * 1024 * 1024 * 1024
-		targetBlobbers[1].Capacity -= 10 * 1024 * 1024 * 1024
-
-		targetBlobbers[0].Terms.WritePrice += *tokenomics.IntToZCN(0.1)
-		targetBlobbers[1].Terms.WritePrice += *tokenomics.IntToZCN(0.1)
-
-		t.Log("Blobber : ", blobberOwnerWallet.Id)
-
-		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[0], client.TxSuccessfulStatus)
-		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[1], client.TxSuccessfulStatus)
-
-		wait.PoolImmediately(t, 2*time.Minute, func() bool {
-			// get all blobbers
-			allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			printBlobbers(t, "After Update", allBlobbers)
-
-			expectedAWP := calculateExpectedAvgWritePrice(allBlobbers)
-			roundingError := int64(1000)
-
-			data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-			require.Equal(t, 1, len([]int64(*data)))
-			priceAfterStaking := (*data)[0]
-
-			latest, resp, err := zboxClient.GetAverageWritePrice(t)
-			require.NoError(t, err)
-			require.Equal(t, 200, resp.StatusCode())
-
-			diff := priceAfterStaking - expectedAWP
-			t.Logf("priceBeforeStaking: %d, priceAfterStaking: %d, expectedAWP: %d, diff: %d", priceBeforeStaking, priceAfterStaking, expectedAWP, diff)
-			return priceAfterStaking != priceBeforeStaking && diff >= -roundingError && diff <= roundingError && priceAfterStaking == int64(*latest)
-		})
-
-		// Cleanup: Revert write price to 0.1
-		targetBlobbers[0].Terms.WritePrice = *tokenomics.IntToZCN(0.1)
-		targetBlobbers[1].Terms.WritePrice = *tokenomics.IntToZCN(0.1)
-		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[0], client.TxSuccessfulStatus)
-		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[1], client.TxSuccessfulStatus)
-	})
 
 	t.RunSequentiallyWithTimeout("test multi allocation overall graph data", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
@@ -698,6 +643,61 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 			return cond
 		})
+	})
+
+	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-write-price )", 5*time.Minute, func(t *test.SystemTest) {
+		data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+		require.Equal(t, 1, len([]int64(*data)))
+		priceBeforeStaking := (*data)[0]
+
+		targetBlobbers, resp, err := apiClient.V1SCRestGetFirstBlobbers(t, 2, client.HttpOkStatus)
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+		require.Len(t, targetBlobbers, 2)
+
+		targetBlobbers[0].Capacity += 10 * 1024 * 1024 * 1024
+		targetBlobbers[1].Capacity -= 10 * 1024 * 1024 * 1024
+
+		targetBlobbers[0].Terms.WritePrice += *tokenomics.IntToZCN(0.1)
+		targetBlobbers[1].Terms.WritePrice += *tokenomics.IntToZCN(0.1)
+
+		t.Log("Blobber : ", blobberOwnerWallet.Id)
+
+		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[0], client.TxSuccessfulStatus)
+		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[1], client.TxSuccessfulStatus)
+
+		wait.PoolImmediately(t, 2*time.Minute, func() bool {
+			// get all blobbers
+			allBlobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
+			require.NoError(t, err)
+			require.Equal(t, 200, resp.StatusCode())
+			printBlobbers(t, "After Update", allBlobbers)
+
+			expectedAWP := calculateExpectedAvgWritePrice(allBlobbers)
+			roundingError := int64(1000)
+
+			data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
+			require.NoError(t, err)
+			require.Equal(t, 200, resp.StatusCode())
+			require.Equal(t, 1, len([]int64(*data)))
+			priceAfterStaking := (*data)[0]
+
+			latest, resp, err := zboxClient.GetAverageWritePrice(t)
+			require.NoError(t, err)
+			require.Equal(t, 200, resp.StatusCode())
+
+			diff := priceAfterStaking - expectedAWP
+			t.Logf("priceBeforeStaking: %d, priceAfterStaking: %d, expectedAWP: %d, diff: %d", priceBeforeStaking, priceAfterStaking, expectedAWP, diff)
+			return priceAfterStaking != priceBeforeStaking && diff >= -roundingError && diff <= roundingError && priceAfterStaking == int64(*latest)
+		})
+
+		// Cleanup: Revert write price to 0.1
+		targetBlobbers[0].Terms.WritePrice = *tokenomics.IntToZCN(0.1)
+		targetBlobbers[1].Terms.WritePrice = *tokenomics.IntToZCN(0.1)
+		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[0], client.TxSuccessfulStatus)
+		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[1], client.TxSuccessfulStatus)
 	})
 
 	t.RunSequentiallyWithTimeout("/v2/graph-total-staked", 5*time.Minute, func(t *test.SystemTest) {
