@@ -106,8 +106,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		apiClient.UpdateBlobber(t, blobberOwnerWallet, targetBlobbers[1], client.TxSuccessfulStatus)
 	})
 
-	t.Skip()
-
 	t.RunSequentiallyWithTimeout("test multi allocation overall graph data", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
@@ -1491,7 +1489,12 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 		// Download the file
 		sdkClient.DownloadFile(t, allocationID, fpath, "temp/")
-		defer os.Remove(path.Join("temp/", fpath))
+		defer func(name string) {
+			err := os.Remove(name)
+			if err != nil {
+				t.Logf("error removing file %v: %v", name, err)
+			}
+		}(path.Join("temp/", fpath))
 
 		// Check increased for the same blobber
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {
@@ -1685,27 +1688,16 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	})
 
 	t.Run("endpoint parameters ( test /v2/graph-blobber-inactive-rounds )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberInactiveRounds, blobbers[0].ID))
-
 	t.Run("endpoint parameters ( test /v2/graph-blobber-write-price )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberWritePrice, blobbers[0].ID))
-
 	t.Run("endpoint parameters ( test /v2/graph-blobber-capacity )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberCapacity, blobbers[0].ID))
-
 	t.Run("endpoint parameters ( test /v2/graph-blobber-allocated )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberAllocated, blobbers[0].ID))
-
 	t.Run("endpoint parameters ( test /v2/graph-blobber-saved-data )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberSavedData, blobbers[0].ID))
-
 	t.Run("endpoint parameters ( test /v2/graph-blobber-read-data )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberReadData, blobbers[0].ID))
-
 	t.Run("endpoint parameters ( test /v2/graph-blobber-offers-total )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberOffersTotal, blobbers[0].ID))
-
 	t.Run("endpoint parameters ( test /v2/graph-blobber-stake-total )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalStake, blobbers[0].ID))
-
 	t.Run("endpoint parameters ( test /v2/graph-blobber-total-rewards )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberTotalRewards, blobbers[0].ID))
-
 	t.Run("endpoint parameters ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesPassed, blobbers[0].ID))
-
 	t.Run("endpoint parameters ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesCompleted, blobbers[0].ID))
-
 	t.Run("endpoint parameters ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", graphBlobberEndpointTestCases(zboxClient.GetGraphBlobberChallengesOpen, blobbers[0].ID))
 }
 
