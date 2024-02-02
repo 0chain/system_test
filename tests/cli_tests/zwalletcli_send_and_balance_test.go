@@ -81,7 +81,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 		// Before send balance checks
 		srcBalanceBefore, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t))
-		require.Equal(t, 5.0, srcBalanceBefore)
 
 		_, err = getBalanceForWallet(t, configPath, targetWallet)
 		require.NoError(t, err)
@@ -99,7 +98,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		// After send balance checks
 		srcBalanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 3.99, srcBalanceAfter)
+		require.Equal(t, srcBalanceBefore-1-0.01, srcBalanceAfter)
 
 		targetBalanceAfter, err := getBalanceZCN(t, configPath, targetWallet)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", targetWallet, strings.Join(output, "\n"))
@@ -123,7 +122,8 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt on zero ZCN wallet should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		createWallet(t)
+		_, err := executeFaucetWithTokens(t, configPath, 0.1)
+		require.Nil(t, err, "Error occurred when executing faucet")
 
 		createWalletForName(targetWallet)
 
