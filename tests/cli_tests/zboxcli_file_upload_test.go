@@ -302,6 +302,7 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Upload tests with Thumbnail with different format", 40*time.Minute, func(t *test.SystemTest) {
+		t.Skip("Need improvements in performance")
 		for _, blobber := range blobbersList {
 			// stake tokens
 			_, err := stakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{

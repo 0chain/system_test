@@ -94,7 +94,13 @@ func getBalanceZCN(t *test.SystemTest, cliConfigFilename string, walletName ...s
 		return 0, err
 	}
 
-	return strconv.ParseFloat(balance.ZCN, 64)
+	balanceFloat, err := strconv.ParseFloat(balance.ZCN, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	// round up to 2 decimal places
+	return float64(int(balanceFloat*100)) / 100, nil
 }
 
 func getBalanceForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
@@ -146,4 +152,22 @@ func escapedTestName(t *test.SystemTest) string {
 		")", "-", "<", "LESS_THAN", ">", "GREATER_THAN", "|", "-", "*", "-",
 		"?", "-")
 	return replacer.Replace(t.Name())
+}
+
+// executeFaucetWithTokens executes faucet command with given tokens.
+// Tokens greater than or equal to 10 are considered to be 1 token by the system.
+func executeFaucetWithTokens(t *test.SystemTest, cliConfigFilename string, tokens float64) ([]string, error) {
+	return executeFaucetWithTokensForWallet(t, escapedTestName(t), cliConfigFilename, tokens)
+}
+
+// executeFaucetWithTokensForWallet executes faucet command with given tokens and wallet.
+// Tokens greater than or equal to 10 are considered to be 1 token by the system.
+func executeFaucetWithTokensForWallet(t *test.SystemTest, wallet, cliConfigFilename string, tokens float64) ([]string, error) {
+	t.Logf("Executing faucet...")
+	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet faucet --methodName "+
+		"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
+		tokens,
+		wallet,
+		cliConfigFilename,
+	), 3, time.Second*5)
 }

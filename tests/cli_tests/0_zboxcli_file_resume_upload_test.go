@@ -17,6 +17,7 @@ import (
 
 func TestResumeUpload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 
 	t.RunSequentiallyWithTimeout("Resume upload should work fine", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)

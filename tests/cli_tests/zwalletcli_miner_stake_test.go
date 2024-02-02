@@ -122,7 +122,8 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
-		createWallet(t)
+		_, err := executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error executing faucet")
 
 		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,

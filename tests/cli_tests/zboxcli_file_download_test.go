@@ -192,7 +192,6 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	//TODO: Directory download seems broken see https://github.com/0chain/blobber/issues/588
 	t.RunWithTimeout("Download Entire Directory Should Work but does not see blobber/issues/588", 3*time.Minute, func(t *test.SystemTest) { // todo: slow
 		allocSize := int64(2048)
 		filesize := int64(256)
@@ -219,7 +218,6 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	//TODO: Directory share seems broken see https://github.com/0chain/blobber/issues/588
 	t.RunWithTimeout("Download File From Shared Folder Should Work but does not see blobber/issues/588", 3*time.Minute, func(t *test.SystemTest) {
 		var authTicket, filename string
 

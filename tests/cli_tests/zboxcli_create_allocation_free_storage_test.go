@@ -35,6 +35,8 @@ const (
 
 func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
+
 	t.SetSmokeTests("Create free storage from marker with accounting")
 
 	var assignerWallet *climodel.WalletFile
@@ -85,7 +87,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		t.Log(output)
 	})
 
-	t.RunSequentiallyWithTimeout("Create free storage from marker with accounting", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Create free storage from marker with accounting", 60*time.Second, func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
 		// create recipient wallet
@@ -143,7 +145,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		require.Equal(t, ConvertToValue(wantReadPoolFraction), readPool.Balance, "Read Pool balance must be equal to locked amount")
 	})
 
-	t.RunSequentially("Create free storage with malformed marker should fail", func(t *test.SystemTest) {
+	t.Run("Create free storage with malformed marker should fail", func(t *test.SystemTest) {
 		// create recipient wallet
 		createWallet(t)
 
@@ -160,7 +162,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		require.Equal(t, "unmarshalling markerinvalid character 'b' looking for beginning of value", output[0])
 	})
 
-	t.RunSequentially("Create free storage with invalid marker contents should fail", func(t *test.SystemTest) {
+	t.Run("Create free storage with invalid marker contents should fail", func(t *test.SystemTest) {
 		// create recipient wallet
 		createWallet(t)
 
@@ -177,7 +179,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker can be used only by its recipient", output[0])
 	})
 
-	t.RunSequentially("Create free storage with invalid marker signature should fail", func(t *test.SystemTest) {
+	t.Run("Create free storage with invalid marker signature should fail", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
 		// create recipient wallet
@@ -211,7 +213,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker verification failed: encoding/hex: invalid byte: U+0073 's'", output[0])
 	})
 
-	t.RunSequentially("Create free storage with wrong recipient wallet should fail", func(t *test.SystemTest) {
+	t.Run("Create free storage with wrong recipient wallet should fail", func(t *test.SystemTest) {
 		recipientCorrect := escapedTestName(t) + "_RECIPIENT"
 
 		// create correct recipient wallet
@@ -256,7 +258,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		require.Equal(t, "Error creating free allocation: free_allocation_failed: marker can be used only by its recipient", output[0])
 	})
 
-	t.RunSequentially("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *test.SystemTest) {
+	t.Run("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
 		// create recipient wallet

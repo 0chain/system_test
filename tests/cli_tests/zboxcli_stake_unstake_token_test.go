@@ -155,7 +155,8 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking more tokens than in wallet should fail", func(t *test.SystemTest) {
-		createWallet(t)
+		_, err := executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "Error executing faucet")
 
 		// Wallet balance before staking tokens
 		balance, err := getBalanceZCN(t, configPath)
