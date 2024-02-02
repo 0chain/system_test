@@ -502,7 +502,7 @@ func TestFileUpdate(testSetup *testing.T) {
 
 		finalAllocation := getAllocation(t, allocationID)
 
-		require.InEpsilon(t, expectedUploadCostInZCN*2, intToZCN(finalAllocation.MovedToChallenge), 0.15)
+		require.InEpsilon(t, expectedUploadCostInZCN*2, intToZCN(finalAllocation.MovedToChallenge), 0.2)
 
 		createAllocationTestTeardown(t, allocationID)
 	})

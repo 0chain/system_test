@@ -18,7 +18,6 @@ import (
 
 // Fixed
 func TestFileDelete(testSetup *testing.T) {
-	//todo: slow operations
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("delete existing file in root directory should work")
 
@@ -322,6 +321,11 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing file in root directory with wallet balance accounting", func(t *test.SystemTest) {
+		createWallet(t)
+
+		balanceBefore, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -331,9 +335,9 @@ func TestFileDelete(testSetup *testing.T) {
 		fname := filepath.Base(filename)
 		remoteFilePath := path.Join(remotepath, fname)
 
-		balance, err := getBalanceZCN(t, configPath)
+		balanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 1.99, balance)
+		require.Equal(t, balanceBefore-5.01, balanceAfter)
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -352,9 +356,9 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 
-		balance, err = getBalanceZCN(t, configPath)
+		balanceAfter, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 1.99, balance)
+		require.Equal(t, balanceBefore+4.99, balanceAfter)
 	})
 
 	t.Run("delete existing file in someone else's allocation should fail", func(t *test.SystemTest) {
