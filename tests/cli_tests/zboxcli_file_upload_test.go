@@ -381,8 +381,8 @@ func TestUpload(testSetup *testing.T) {
 		allocSize := int64(400 * 1024 * 1024)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		output, err := cliutils.RunCommand(t, "wget http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4 -O test_video.mp4", 3, 2*time.Second)
@@ -599,10 +599,8 @@ func TestUpload(testSetup *testing.T) {
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
-			otherAllocationID = setupAllocation(t, configPath, map[string]interface{}{
-				"size": allocSize,
-			})
+		otherAllocationID = setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
 		})
 
 		// Upload using allocationID: should work
@@ -938,8 +936,8 @@ func TestUpload(testSetup *testing.T) {
 			t.RunSequentiallyWithTimeout("Upload Video File "+videoFormat+" With Web Streaming Should Work", 2*time.Minute, func(t *test.SystemTest) {
 				allocSize := int64(400 * 1024 * 1024)
 				allocationID := setupAllocation(t, configPath, map[string]interface{}{
-					"size":   allocSize,
-					"tokens": 9,
+					"size": allocSize,
+					"lock": 9,
 				})
 				downloadVideo := "wget " + videoLink + " -O " + videoName + "." + videoFormat
 				output, err := cliutils.RunCommand(t, downloadVideo, 3, 2*time.Second)
