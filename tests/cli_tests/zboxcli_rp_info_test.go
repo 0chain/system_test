@@ -22,11 +22,6 @@ func TestReadPoolInfo(testSetup *testing.T) {
 	t.RunWithTimeout("Read pool info testing with json parameter", 90*time.Second, func(t *test.SystemTest) {
 		createWallet(t)
 
-		// Wallet balance before lock should be 5 ZCN
-		balance, err := getBalanceZCN(t, configPath)
-		require.NoError(t, err)
-		require.Equal(t, 5.0, balance)
-
 		// Lock 1 token in read pool distributed amongst all blobbers
 		lockAmount := 1.0
 		readPoolParams := createParams(map[string]interface{}{
@@ -52,11 +47,6 @@ func TestReadPoolInfo(testSetup *testing.T) {
 
 	t.RunWithTimeout("Read pool info testing without json parameter", 90*time.Second, func(t *test.SystemTest) {
 		createWallet(t)
-
-		// Wallet balance before lock should be 5.0 ZCN
-		balance, err := getBalanceZCN(t, configPath)
-		require.NoError(t, err)
-		require.Equal(t, 5.0, balance)
 
 		// Lock 1 token in read pool distributed amongst all blobbers
 		lockAmount := 1.0

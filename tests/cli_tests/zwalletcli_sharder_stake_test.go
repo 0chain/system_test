@@ -112,7 +112,7 @@ func TestSharderStake(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
-		createWallet(t)
+		_, err := executeFaucetWithTokens(t, configPath, 1)
 
 		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,

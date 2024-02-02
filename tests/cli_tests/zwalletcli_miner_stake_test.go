@@ -213,10 +213,11 @@ func TestMinerStake(testSetup *testing.T) {
 				defer wg.Done()
 
 				walletName := escapedTestName(t) + fmt.Sprintf("%d", i)
+				createWalletForName(walletName)
 
 				output, err = minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
 					"miner_id": newMiner.ID,
-					"tokens":   0.1,
+					"tokens":   1,
 				}), walletName, true)
 				require.NoError(t, err)
 				require.Len(t, output, 1)
