@@ -40,6 +40,7 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 	}
 
 	t.RunSequentially("kill miner by non-smartcontract owner should fail", func(t *test.SystemTest) {
+		createWallet(t)
 		output, err := killMiner(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"id": minerToKill,
 		}), true)
@@ -49,6 +50,8 @@ func TestKillMiner(testSetup *testing.T) { // nolint:gocyclo // team preference 
 	})
 
 	t.RunSequentially("Killed miner does not receive rewards", func(t *test.SystemTest) {
+		createWallet(t)
+
 		output, err := killMiner(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
 			"id": minerToKill,
 		}), true)

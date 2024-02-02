@@ -40,6 +40,7 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 	}
 
 	t.RunSequentially("kill sharder by non-smartcontract owner should fail", func(t *test.SystemTest) {
+		createWallet(t)
 		output, err := killSharder(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"id": sharderToKill,
 		}), true)
@@ -49,6 +50,7 @@ func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preferenc
 	})
 
 	t.RunSequentially("Killed sharder does not receive rewards", func(t *test.SystemTest) {
+		createWallet(t)
 		output, err := killSharder(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
 			"id": sharderToKill,
 		}), true)

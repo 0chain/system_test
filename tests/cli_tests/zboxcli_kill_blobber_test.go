@@ -25,6 +25,7 @@ func TestKillBlobber(testSetup *testing.T) {
 	// Killing a blobber should make it unavalable for any new allocations,
 	// and stake pools should be slashed by an amount given by the "stakepool.kill_slash" setting
 	t.RunSequentially("killed blobber is not available for allocations", func(t *test.SystemTest) {
+		createWallet(t)
 		startBlobbers := getBlobbers(t)
 		var blobberToKill string
 		var activeBlobbers int
