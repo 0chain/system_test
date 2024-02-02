@@ -338,6 +338,7 @@ func TestFileDelete(testSetup *testing.T) {
 		balanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 		require.Equal(t, balanceBefore-5.01, balanceAfter)
+		balanceBefore = balanceAfter
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
