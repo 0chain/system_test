@@ -36,14 +36,17 @@ func createWallet(t *test.SystemTest) {
 }
 
 func createWalletForName(name string) {
+	walletPath := fmt.Sprintf("./config/%s_wallet.json", name)
+
+	// check if wallet already exists
+	if _, err := os.Stat(walletPath); err == nil {
+		return
+	}
+
 	walletMutex.Lock()
 	wallet := wallets[walletIdx]
 	walletIdx++
 	walletMutex.Unlock()
-
-	walletPath := fmt.Sprintf("./config/%s_wallet.json", name)
-
-	fmt.Println(walletPath)
 
 	err := os.WriteFile(walletPath, wallet, 0644)
 	if err != nil {
