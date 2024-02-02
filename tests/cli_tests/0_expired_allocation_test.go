@@ -16,7 +16,7 @@ import (
 
 func TestExpiredAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
+	//t.Parallel()
 	t.SetSmokeTests("Finalize Expired Allocation Should Work after challenge completion time + expiry")
 
 	t.TestSetup("register wallet and get blobbers", func() {

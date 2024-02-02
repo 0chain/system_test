@@ -599,8 +599,10 @@ func TestUpload(testSetup *testing.T) {
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		otherAllocationID = setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
+		t.Run("Get Other Allocation ID", func(t *test.SystemTest) {
+			otherAllocationID = setupAllocation(t, configPath, map[string]interface{}{
+				"size": allocSize,
+			})
 		})
 
 		// Upload using allocationID: should work
