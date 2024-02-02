@@ -23,7 +23,6 @@ import (
 const StatusCompletedCB = "Status completed callback"
 
 func TestDownload(testSetup *testing.T) {
-	//todo: too mnay test cases are slow in here
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Download File from Root Directory Should Work")
 	t.Parallel()
@@ -1313,6 +1312,8 @@ func setupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, ex
 		token, err := strconv.ParseFloat(fmt.Sprintf("%v", tok), 64)
 		require.Nil(t, err)
 		tokens = token
+		// remove "tokens" from extraParam
+		delete(extraParam, "tokens")
 	}
 
 	allocationID := setupAllocation(t, cliConfigFilename, extraParam)

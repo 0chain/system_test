@@ -36,7 +36,11 @@ func createWallet(t *test.SystemTest) {
 }
 
 func createWalletForName(name string) {
+	walletMutex.Lock()
 	wallet := wallets[walletIdx]
+	walletIdx++
+	walletMutex.Unlock()
+
 	walletPath := fmt.Sprintf("./config/%s_wallet.json", name)
 
 	fmt.Println(walletPath)

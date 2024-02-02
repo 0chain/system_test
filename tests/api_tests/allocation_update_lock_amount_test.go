@@ -139,7 +139,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		require.Equal(t, int64(1*GB), alloc.Size, "Allocation size is not updated")
 	})
 
-	t.RunSequentiallyWithTimeout("Extend Allocation Duration", 1*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Extend Allocation Duration", 1*time.Minute, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -213,7 +213,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		require.Equal(t, int64(1*GB), alloc.Size, "Allocation size is not updated")
 	})
 
-	t.RunSequentiallyWithTimeout("Replace blobber", 1*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Replace blobber", 1*time.Minute, func(t *test.SystemTest) {
 
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
@@ -254,7 +254,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		require.Equal(t, int64(1*GB), alloc.Size, "Allocation size is not updated")
 	})
 
-	t.RunSequentiallyWithTimeout("Extend Allocation Size", 1*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Extend Allocation Size", 1*time.Minute, func(t *test.SystemTest) {
 		wallet := initialisedWallets[walletIdx]
 		walletIdx++
 		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -287,7 +287,4 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 
 		require.Equal(t, int64(2*GB), alloc.Size, "Allocation size is not updated")
 	})
-
 }
-
-//https://dev-1.devnet-0chain.net/sharder01/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/allocation-update-min-lock?data=%7B%22add_blobber_id%22%3A%22%22%2C%22extend%22%3Afalse%2C%22id%22%3A%22a50b5e9e0b24569b04b3f8c45a67730e11a0b9fe1840a88c130efa7ec34c6a73%22%2C%22owner_id%22%3A%226d02a02cb9cbddd76f7e3981eae473b86dc488e558cbaffbe0549b31926605b3%22%2C%22owner_public_key%22%3A%22%22%2C%22remove_blobber_id%22%3A%22%22%2C%22size%22%3A0%7D

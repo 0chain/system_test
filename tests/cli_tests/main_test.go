@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -110,8 +111,9 @@ var (
 	configPath string
 	configDir  string
 
-	wallets   []json.RawMessage
-	walletIdx int64
+	wallets     []json.RawMessage
+	walletIdx   int64
+	walletMutex sync.Mutex
 )
 
 var tenderlyClient *tenderly.Client
@@ -179,6 +181,7 @@ func TestMain(m *testing.M) {
 	// Create an S3 client
 	S3Client = s3.New(sess)
 
+	walletMutex.Lock()
 	// Read the content of the file
 	fileContent, err := os.ReadFile("./config/wallets/wallets.json")
 	if err != nil {
@@ -192,6 +195,8 @@ func TestMain(m *testing.M) {
 		fmt.Println("Error decoding JSON:", err)
 		return
 	}
+
+	walletMutex.Unlock()
 
 	exitRun := m.Run()
 
