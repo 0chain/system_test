@@ -19,6 +19,7 @@ func TestOwnerUpdate(testSetup *testing.T) {
 
 	var newOwnerWallet *climodel.Wallet
 	var newOwnerName string
+	var err error
 
 	t.TestSetup("Create new owner wallet", func() {
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
@@ -26,7 +27,7 @@ func TestOwnerUpdate(testSetup *testing.T) {
 		}
 
 		createWallet(t)
-		_, err := getWallet(t, configPath)
+		newOwnerWallet, err = getWallet(t, configPath)
 		require.Nil(t, err, "error fetching wallet")
 
 		newOwnerName = escapedTestName(t)

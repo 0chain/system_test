@@ -32,6 +32,9 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 	t.Run("Create Allocation - Locked amount must've been withdrawn from user wallet", func(t *test.SystemTest) {
 		createWallet(t)
 
+		balanceBefore, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
 		// Lock tokens for allocation
 		allocParams := createParams(map[string]interface{}{
 			"lock": "5",
@@ -45,9 +48,9 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		// Wallet balance should decrease by locked amount
-		balance, err := getBalanceZCN(t, configPath)
+		balanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 8.99, balance) // lock - fee
+		require.Equal(t, balanceBefore-5.01, balanceAfter) // lock - fee
 
 		createAllocationTestTeardown(t, allocationID)
 	})
