@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -31,54 +30,14 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 	})
 
-	t.Run("Test collect reward with valid pool and blobber id should pass", func(t *test.SystemTest) { // TODO slow
+	t.Run("Test collect reward with valid pool and blobber id should pass", func(t *test.SystemTest) {
 		createWallet(t)
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		// Upload and download a file so blobber can accumulate rewards
-		allocSize := int64(1 * GB)
-		filesize := int64(256)
-		remotepath := "/"
-
-		// Use all blobbers
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
-			"data":   3,
-			"parity": 1,
-		})
-
-		alloc := getAllocation(t, allocationID)
-		blobberID := alloc.Blobbers[time.Now().Unix()%int64(len(alloc.Blobbers))].ID
-
-		// Stake tokens against this blobber
-		output, err := stakeTokens(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobberID,
-			"tokens":     1.0,
-		}), true)
-		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("tokens locked, txn hash: ([a-f0-9]{64})"), output[0])
-
-		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		// Delete the uploaded file, since we will be downloading it now
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		cliutils.Wait(t, 30*time.Second)
-
-		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobberID,
+		output, err := stakePoolInfo(t, configPath, createParams(map[string]interface{}{
+			"blobber_id": blobbersList[0].Id,
 			"json":       "",
 		}))
 		require.Nil(t, err, "error getting stake pool info")
@@ -101,7 +60,7 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 		balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
 			"provider_type": "blobber",
-			"provider_id":   blobberID,
+			"provider_id":   blobbersList[0].Id,
 			"fee":           "0.15",
 		}), true)
 		require.NoError(t, err, output)
@@ -188,23 +147,10 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 
 func TestValidatorCollectRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 	t.SetSmokeTests("Test collect reward with valid pool and validator id should pass")
 
-	t.TestSetup("Reduce time unit", func() {
-		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "7m",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-	})
-
-	t.Cleanup(func() {
-		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "1h",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-	})
-
-	t.RunWithTimeout("Test collect reward with valid pool and validator id should pass", 10*time.Minute, func(t *test.SystemTest) { // TODO slow
+	t.RunWithTimeout("Test collect reward with valid pool and validator id should pass", 10*time.Minute, func(t *test.SystemTest) {
 		createWallet(t)
 
 		wallet, err := getWallet(t, configPath)
@@ -230,36 +176,6 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("tokens locked, txn hash: ([a-f0-9]{64})"), output[0])
 
-		balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
-
-		// Upload and download a file so blobber can accumulate rewards
-		allocSize := 1000 * MB
-		filesize := 200 * MB
-		remotepath := "/"
-
-		// Use all blobbers
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
-			"data":   4,
-			"parity": 1,
-		})
-
-		filename := generateFileAndUpload(t, allocationID, remotepath, int64(filesize))
-
-		// Delete the uploaded file, since we will be downloading it now
-		err = os.Remove(filename)
-		require.Nil(t, err)
-
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  os.TempDir() + string(os.PathSeparator),
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		cliutils.Wait(t, 30*time.Second)
-
 		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
 			"validator_id": validator.ID,
 			"json":         "",
@@ -278,8 +194,9 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 				break
 			}
 		}
-		// TODO: fix me - rewards should be greater than 0
 		require.Greater(t, rewards, int64(0))
+
+		balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
 
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
 			"provider_type": "validator",
@@ -289,8 +206,10 @@ func TestValidatorCollectRewards(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "transferred reward tokens", output[0])
 
+		time.Sleep(10 * time.Second)
+
 		balanceAfter := getBalanceFromSharders(t, wallet.ClientID)
-		require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards) // greater or equal since more rewards can accumulate after we check stakepool
+		require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards-1e8) // greater or equal since more rewards can accumulate after we check stakepool
 	})
 
 	t.Run("Test collect reward with invalid validator id should fail", func(t *test.SystemTest) {

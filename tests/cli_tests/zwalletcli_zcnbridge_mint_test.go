@@ -23,11 +23,11 @@ func TestBridgeMint(testSetup *testing.T) {
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
 		require.NoError(t, err)
 
+		createWallet(t)
+
 		output, err := resetUserNonce(t, true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
-
-		createWallet(t)
 
 		output, err = burnZcn(t, "1", false)
 		require.Nil(t, err)

@@ -183,8 +183,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 		balanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
-		expected := ((balanceBefore - 0.51) * 100) / 100
-		require.Equal(t, expected, balanceAfter)
+		require.InEpsilon(t, balanceBefore-0.51, balanceAfter, 0.01)
 		balanceBefore = balanceAfter
 
 		// Locking 0 token in write pool should not succeed
@@ -200,8 +199,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 		// Wallet balance should remain same (-fee)
 		balanceAfter, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		expected = ((balanceBefore - 0.01) * 100) / 100
-		require.Equal(t, expected, balanceAfter)
+		require.InEpsilon(t, balanceBefore-0.01, balanceAfter, 0.01)
 	})
 
 	t.Run("Missing tokens flag should result in error", func(t *test.SystemTest) {

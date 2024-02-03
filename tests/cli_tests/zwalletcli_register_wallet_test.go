@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -46,6 +47,7 @@ func createWalletForName(name string) {
 	walletMutex.Lock()
 	wallet := wallets[walletIdx]
 	walletIdx++
+	log.Println("Creating wallet for", name, "with walletIdx", walletIdx)
 	walletMutex.Unlock()
 
 	err := os.WriteFile(walletPath, wallet, 0644)

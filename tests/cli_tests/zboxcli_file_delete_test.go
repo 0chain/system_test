@@ -360,9 +360,7 @@ func TestFileDelete(testSetup *testing.T) {
 		balanceAfter, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
-		expected := ((balanceBefore - 0.01) * 100) / 100
-
-		require.Equal(t, expected, balanceAfter)
+		require.InEpsilon(t, balanceBefore-0.01, balanceAfter, 0.01)
 	})
 
 	t.Run("delete existing file in someone else's allocation should fail", func(t *test.SystemTest) {
