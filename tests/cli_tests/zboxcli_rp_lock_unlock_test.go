@@ -26,6 +26,8 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 		balanceBefore, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
+		prevRP := getReadPoolInfo(t)
+
 		// Lock 1 token in read pool distributed amongst all blobbers
 		lockAmount := 1.0
 		readPoolParams := createParams(map[string]interface{}{
@@ -45,7 +47,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 
 		// Read pool balance should increment to 1
 		readPool := getReadPoolInfo(t)
-		require.Equal(t, ConvertToValue(lockAmount), readPool.Balance, "Read Pool balance must be equal to locked amount")
+		require.Equal(t, ConvertToValue(lockAmount), readPool.Balance-prevRP.Balance, "Read Pool balance must be equal to locked amount")
 
 		output, err = readPoolUnlock(t, configPath, "", true)
 		require.Nil(t, err, "Unable to unlock tokens", strings.Join(output, "\n"))
