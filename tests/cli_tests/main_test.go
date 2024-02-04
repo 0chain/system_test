@@ -196,6 +196,8 @@ func TestMain(m *testing.M) {
 		return
 	}
 
+	walletIdx = 500
+
 	walletMutex.Unlock()
 
 	exitRun := m.Run()

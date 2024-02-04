@@ -33,11 +33,23 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 	t.Run("Test collect reward with valid pool and blobber id should pass", func(t *test.SystemTest) {
 		createWallet(t)
 
+		blobbersList = getBlobbersList(t)
+		blobberID := blobbersList[0].Id
+
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		output, err := stakePoolInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id": blobbersList[0].Id,
+		// Stake tokens against this blobber
+		output, err := stakeTokens(t, configPath, createParams(map[string]interface{}{
+			"blobber_id": blobberID,
+			"tokens":     1.0,
+		}), true)
+		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Regexp(t, regexp.MustCompile("tokens locked, txn hash: ([a-f0-9]{64})"), output[0])
+
+		output, err = stakePoolInfo(t, configPath, createParams(map[string]interface{}{
+			"blobber_id": blobberID,
 			"json":       "",
 		}))
 		require.Nil(t, err, "error getting stake pool info")
@@ -60,7 +72,7 @@ func TestBlobberCollectRewards(testSetup *testing.T) {
 		balanceBefore := getBalanceFromSharders(t, wallet.ClientID)
 		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
 			"provider_type": "blobber",
-			"provider_id":   blobbersList[0].Id,
+			"provider_id":   blobberID,
 			"fee":           "0.15",
 		}), true)
 		require.NoError(t, err, output)
