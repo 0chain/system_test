@@ -16,7 +16,6 @@ import (
 
 func TestExpiredAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	//t.Parallel()
 	t.SetSmokeTests("Finalize Expired Allocation Should Work after challenge completion time + expiry")
 
 	t.TestSetup("register wallet and get blobbers", func() {
@@ -38,13 +37,9 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
 
-		time.Sleep(90 * time.Second)
-
 		allocations := parseListAllocations(t, configPath)
 		_, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
-
-		cliutils.Wait(t, 2*time.Minute)
 
 		output, err := finalizeAllocation(t, configPath, allocationID, true)
 
@@ -59,7 +54,6 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
 
-		time.Sleep(2 * time.Minute)
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -84,8 +78,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		time.Sleep(2 * time.Minute)
+		time.Sleep(10 * time.Second)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -103,8 +96,6 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 	t.RunWithTimeout("Update Expired Allocation Should Fail", 7*time.Minute, func(t *test.SystemTest) {
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
-
-		time.Sleep(2 * time.Minute)
 
 		// Update expired alloc's duration
 		params := createParams(map[string]interface{}{
