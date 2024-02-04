@@ -41,6 +41,8 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		_, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
 
+		time.Sleep(2 * time.Minute)
+
 		output, err := finalizeAllocation(t, configPath, allocationID, true)
 
 		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
@@ -54,6 +56,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
 
+		time.Sleep(2 * time.Minute)
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
@@ -78,7 +81,8 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-		time.Sleep(10 * time.Second)
+
+		time.Sleep(2 * time.Minute)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -96,6 +100,8 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 	t.RunWithTimeout("Update Expired Allocation Should Fail", 7*time.Minute, func(t *test.SystemTest) {
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
+
+		time.Sleep(2 * time.Minute)
 
 		// Update expired alloc's duration
 		params := createParams(map[string]interface{}{
