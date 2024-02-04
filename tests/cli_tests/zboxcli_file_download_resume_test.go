@@ -23,14 +23,15 @@ func TestResumeDownload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunWithTimeout("Resume download should work", 5*time.Minute, func(t *test.SystemTest) {
-		allocSize := int64(600 * MB)
-		filesize := int64(300 * MB)
+		allocSize := int64(900 * MB)
+		filesize := int64(600 * MB)
 		remotepath := "/"
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 			"data":   3,
+			"parity": 1,
 		})
 		defer func() {
 			createAllocationTestTeardown(t, allocationID)
@@ -96,6 +97,7 @@ func TestResumeDownload(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(filename))
 
 		outputStatus := strings.Fields(output[0])
+		t.Log("Output status:", outputStatus)
 		actualDownloadedBytes, err := strconv.ParseInt(outputStatus[len(outputStatus)-5], 10, 64) // This gets the 5th element from the end
 		require.Nil(t, err)
 
