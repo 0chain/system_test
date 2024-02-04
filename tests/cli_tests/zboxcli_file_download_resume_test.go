@@ -2,7 +2,9 @@ package cli_tests
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
@@ -27,6 +30,7 @@ func TestResumeDownload(testSetup *testing.T) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
+			"data":   3,
 		})
 		defer func() {
 			createAllocationTestTeardown(t, allocationID)
@@ -60,16 +64,20 @@ func TestResumeDownload(testSetup *testing.T) {
 		}), false)
 		require.Nil(t, err, "Download failed to start")
 
+		idr, err := os.UserHomeDir()
+		require.Nil(t, err)
+		idr = filepath.Join(idr, ".zcn")
+		hash := fnv.New64a()
+		hash.Write([]byte(remotepath + filepath.Base(filename)))
+		progressID := filepath.Join(idr, "download", allocationID[:8]+"_"+strconv.FormatUint(hash.Sum64(), 36))
+
 		// Wait till more than 20% of the file is downloaded and send interrupt signal to command
-		downloaded := waitPartialDownloadAndInterrupt(t, cmd, filename, filesize)
+		downloaded, dp := waitPartialDownloadAndInterrupt(t, cmd, filename, progressID, filesize)
 		require.True(t, downloaded)
 
 		// Allow command to stop
 		time.Sleep(5 * time.Second)
-
-		info, err := os.Stat(filename)
-		require.Nil(t, err, "File was not partially downloaded")
-		partialDownloadedBytes := info.Size()
+		partialDownloadedBytes := int64(dp.LastWrittenBlock * 64 * KB * 3)
 		percentDownloaded := float64(partialDownloadedBytes) / float64(filesize) * 100
 		t.Logf("Partially downloaded %.2f%% of the file: %v / %v\n", percentDownloaded, partialDownloadedBytes, filesize)
 		require.Greater(t, partialDownloadedBytes, int64(0))
@@ -121,27 +129,32 @@ func startDownloadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename, p
 	}
 }
 
-func waitPartialDownloadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd, filename string, filesize int64) bool {
+func waitPartialDownloadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd, filename string, progressID string, filesize int64) (bool, sdk.DownloadProgress) {
 	t.Log("Waiting till file is partially downloaded...")
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
-
+	dp := sdk.DownloadProgress{}
 	for {
 		select {
 		case <-ctx.Done():
 			t.Log("Timeout waiting for partial download")
-			return false
-		case <-time.After(1 * time.Second):
-			info, err := os.Stat(filename)
+			return false, dp
+		case <-time.After(2 * time.Second):
+			buf, err := os.ReadFile(progressID)
+			if err != nil {
+				t.Log("Error reading download progress file:", err)
+				continue
+			}
+			err = json.Unmarshal(buf, &dp)
 			if err != nil {
 				continue
 			}
-			if info.Size() > filesize/5 {
-				// Send interrupt signal to command
-				err = cmd.Process.Signal(os.Interrupt)
+			if dp.LastWrittenBlock > 0 {
+				//Send interrupt signal to command
+				err := cmd.Process.Signal(os.Interrupt)
 				require.Nil(t, err)
-				t.Log("Partial download successful, download has been interrupted")
-				return true
+				t.Log("Interrupt signal sent to download command")
+				return true, dp
 			}
 		}
 	}
