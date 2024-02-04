@@ -17,7 +17,6 @@ import (
 
 func TestFreeReads(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 	t.SetSmokeTests("free reads should work")
 
 	var blobberList []climodel.BlobberDetails
