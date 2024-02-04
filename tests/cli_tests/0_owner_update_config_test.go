@@ -152,7 +152,7 @@ func TestOwnerUpdate(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
-		require.Equal(t, "storagesc smart contract settings updated", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "minersc smart contract settings updated", output[0], strings.Join(output, "\n"))
 
 		output, err = getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
