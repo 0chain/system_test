@@ -42,6 +42,14 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	var assignerWallet *climodel.WalletFile
 	var cfg map[string]string
 
+	createWallet(t)
+
+	blobbersList = getBlobbersList(t)
+	var listBlobbersString []string
+	for _, blobber := range blobbersList {
+		listBlobbersString = append(listBlobbersString, blobber.Id)
+	}
+
 	t.TestSetup("Create free storage allocation wallet", func() {
 		err := bls.Init(bls.CurveFp254BNb)
 		require.NoError(t, err, "Error initializing BLS")
@@ -100,6 +108,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 			Recipient:  recipientWallet.ClientID,
 			FreeTokens: 5,
 			Nonce:      time.Now().Unix(),
+			Blobbers:   listBlobbersString,
 		}
 
 		forSignatureBytes := fmt.Sprintf("%s:%f:%d", marker.Recipient, marker.FreeTokens, marker.Nonce)
@@ -192,6 +201,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 			Recipient:  recipientWallet.ClientID,
 			FreeTokens: 5,
 			Nonce:      2,
+			Blobbers:   listBlobbersString,
 		}
 
 		marker.Signature = "badsignature"
@@ -229,6 +239,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 			Recipient:  recipientWallet.ClientID,
 			FreeTokens: 5,
 			Nonce:      time.Now().Unix(),
+			Blobbers:   listBlobbersString,
 		}
 
 		forSignatureBytes, err := json.Marshal(&marker)
@@ -271,6 +282,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 			Recipient:  recipientWallet.ClientID,
 			FreeTokens: freeTokensIndividualLimit + 1,
 			Nonce:      time.Now().Unix(),
+			Blobbers:   listBlobbersString,
 		}
 
 		forSignatureBytes := fmt.Sprintf("%s:%f:%d", marker.Recipient, marker.FreeTokens, marker.Nonce)
