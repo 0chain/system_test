@@ -1452,7 +1452,7 @@ func TestShareFile(testSetup *testing.T) {
 			"remotepath": remoteOwnerPath,
 		})
 
-		receiverWalletObj, err := getWallet(t, receiverWallet)
+		receiverWalletObj, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
 
 		t.Log("Downloading file for wallet", receiverWalletObj.ClientID)
