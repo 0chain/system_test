@@ -21,7 +21,6 @@ import (
 )
 
 func TestShareFile(testSetup *testing.T) {
-	//TODO: all share operations take ~40s except for PRE which takes ~2mins 30s!
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Share to public a folder with no encrypted file using auth ticket with zero expiration")
 
@@ -1452,6 +1451,12 @@ func TestShareFile(testSetup *testing.T) {
 			"authticket": authTicket,
 			"remotepath": remoteOwnerPath,
 		})
+
+		receiverWalletObj, err := getWallet(t, receiverWallet)
+		require.Nil(t, err)
+
+		t.Log("Downloading file for wallet", receiverWalletObj.ClientID)
+
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
