@@ -93,11 +93,11 @@ func TestShutdownBlobber(testSetup *testing.T) {
 
 		balanceBefore := getBalanceFromSharders(t, blobberOwnerWallet)
 
-		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
+		output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
 			"provider_type": "blobber",
 			"provider_id":   blobberToShutdown,
 			"fee":           "0.15",
-		}), true)
+		}), blobberOwnerWallet, true)
 		require.NoError(t, err, output)
 
 		balanceAfter := getBalanceFromSharders(t, blobberOwnerWallet)
