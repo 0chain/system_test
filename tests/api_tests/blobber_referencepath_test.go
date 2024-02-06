@@ -18,10 +18,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 	t.SetSmokeTests("Get file ref with allocation id, remote path should work")
 
 	t.Run("Get file ref with allocation id, remote path should work", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -59,10 +56,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 
 	t.Run("Get file ref for empty allocation should work", func(t *test.SystemTest) {
 
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -93,10 +87,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid allocation id should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -127,10 +118,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid sign should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -158,10 +146,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 	})
 
 	t.Run("Get file ref with invalid remotepath should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)

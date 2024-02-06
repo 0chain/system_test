@@ -60,10 +60,7 @@ func TestMultiOperation(testSetup *testing.T) {
 
 	t.RunSequentially("Multi different operations should work", func(t *test.SystemTest) {
 
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -106,10 +103,7 @@ func TestMultiOperation(testSetup *testing.T) {
 
 	t.RunSequentially("Multi move operations should work", func(t *test.SystemTest) {
 
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -155,10 +149,7 @@ func TestMultiOperation(testSetup *testing.T) {
 
 	t.RunSequentially("Multi copy operations should work", func(t *test.SystemTest) {
 
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -202,10 +193,7 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi create dir operations should work", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -234,10 +222,7 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Nested move operation should work", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -259,10 +244,7 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Nested copy operation should work", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -283,10 +265,7 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Nested rename directory operation should work", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 

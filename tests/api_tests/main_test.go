@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -34,6 +35,7 @@ var (
 
 	initialisedWallets []*model.Wallet
 	walletIdx          int64
+	walletMutex        sync.Mutex
 )
 
 func TestMain(m *testing.M) {
@@ -142,4 +144,15 @@ type WalletFile struct {
 	Nonce           int         `json:"nonce"`
 	ChainID         string      `json:"ChainID"`
 	SignatureScheme interface{} `json:"SignatureScheme"`
+}
+
+func createWallet(t *test.SystemTest) *model.Wallet {
+	walletMutex.Lock()
+	wallet := initialisedWallets[walletIdx]
+	walletIdx++
+	balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+	wallet.Nonce = int(balance.Nonce)
+	walletMutex.Unlock()
+
+	return wallet
 }

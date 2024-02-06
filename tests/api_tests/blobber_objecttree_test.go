@@ -18,10 +18,7 @@ func TestObjectTree(testSetup *testing.T) {
 	t.SetSmokeTests("Get object tree with allocation id, remote path should work")
 
 	t.RunSequentially("Get object tree with allocation id, remote path should work", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -56,10 +53,7 @@ func TestObjectTree(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref for empty allocation should work", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -90,10 +84,7 @@ func TestObjectTree(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: Why is this so slow?  (69s)
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -124,10 +115,7 @@ func TestObjectTree(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref with invalid sign should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -155,10 +143,7 @@ func TestObjectTree(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref with invalid remotepath should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)

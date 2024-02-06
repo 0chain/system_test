@@ -18,10 +18,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 	t.SetSmokeTests("Get hashnode root from blobber for an empty allocation should work")
 
 	t.Run("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -55,10 +52,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		allocationID := "badallocation"
 
@@ -83,10 +77,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 	})
 
 	t.Run("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)

@@ -18,10 +18,7 @@ func TestMultiDownload(testSetup *testing.T) {
 	t.SetSmokeTests("Multi download should work")
 
 	t.Run("Multi download should work", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 

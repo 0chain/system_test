@@ -18,10 +18,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 	t.SetSmokeTests("Get file ref with allocation id, remote path with reftype as regular or updated should work")
 
 	t.RunSequentially("Get file ref with allocation id, remote path with reftype as regular or updated should work", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -83,10 +80,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Get file ref with incorrect allocation id should fail", 90*time.Second, func(t *test.SystemTest) { // todo - too slow (70s)
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -113,10 +107,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref with invalid remote file path should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -147,10 +138,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref with invalid refType should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -181,10 +169,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref with no path should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -215,10 +200,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref with no refType should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -249,10 +231,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref with no path and no refType should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -283,10 +262,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref with invalid client signature should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -313,10 +289,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get file ref with invalid client id should fail", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 

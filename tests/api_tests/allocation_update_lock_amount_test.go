@@ -15,10 +15,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentiallyWithTimeout("Extend Allocation Size with used size > 0", 5*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -33,7 +30,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		uploadOp := sdkClient.AddUploadOperation(t, "", "", 10*MB)
 		chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
-		time.Sleep(2 * time.Minute)
+		time.Sleep(10 * time.Second)
 
 		uar := &model.UpdateAllocationRequest{
 			ID:   allocationID,
@@ -56,10 +53,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Extend Allocation Duration with used size > 0", 5*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -74,7 +68,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		uploadOp := sdkClient.AddUploadOperation(t, "", "", 10*MB)
 		chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
-		time.Sleep(2 * time.Minute)
+		time.Sleep(10 * time.Second)
 
 		uar := &model.UpdateAllocationRequest{
 			ID:     allocationID,
@@ -96,10 +90,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Add blobber to allocation with used size > 0", 5*time.Minute, func(t *test.SystemTest) {
 
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -114,7 +105,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		uploadOp := sdkClient.AddUploadOperation(t, "", "", 10*MB)
 		chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
-		time.Sleep(2 * time.Minute)
+		time.Sleep(10 * time.Second)
 
 		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
@@ -140,10 +131,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Extend Allocation Duration", 1*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 1 * GB
@@ -174,10 +162,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Add blobber to allocation", 1*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 1 * GB
@@ -215,10 +200,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 
 	t.RunWithTimeout("Replace blobber", 1*time.Minute, func(t *test.SystemTest) {
 
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 1 * GB
@@ -255,10 +237,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Extend Allocation Size", 1*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 1 * GB

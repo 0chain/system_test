@@ -79,10 +79,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("1mb file", 1*time.Hour, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(sdkWalletBalance.Nonce)
@@ -122,10 +119,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t.RunWithTimeout("10mb file", 1*time.Hour, func(t *test.SystemTest) {
 		time.Sleep(1 * time.Minute)
 
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(sdkWalletBalance.Nonce)
@@ -164,10 +158,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("100mb file", 1*time.Hour, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		time.Sleep(2 * time.Minute)
 		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
@@ -207,10 +198,7 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		time.Sleep(3 * time.Minute)
 		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)

@@ -52,10 +52,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t.Logf("Free allocation marker: %v", marker)
 
 	t.RunSequentiallyWithTimeout("test multi allocation overall graph data", 10*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -366,10 +363,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("test graph data ( test /v2/graph-total-challenge-pools )", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -417,10 +411,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-allocated-storage )", 10*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		// Get initial total challenge pools
 		PrintBalance(t, ownerWallet, blobberOwnerWallet, wallet)
@@ -505,10 +496,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-used-storage )", 30*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -1129,10 +1117,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", 3*time.Minute, func(t *test.SystemTest) {
 
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -1296,10 +1281,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-blobber-allocated )", 5*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		// Get allocated of all blobbers
 		blobberAllocated := make(map[string]int64)
@@ -1352,10 +1334,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-blobber-saved-data )", 5*time.Minute, func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -1453,10 +1432,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("test graph data ( test /v2/graph-blobber-read-data )", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
@@ -1512,10 +1488,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("test graph data ( test /v2/graph-blobber-offers-total )", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		// Get offers of all blobbers
 		blobberOffersTotal := make(map[string]int64)
@@ -1582,10 +1555,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("test graph data ( test /v2/graph-blobber-stake-total )", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		targetBlobber := blobbers[0].ID
 		data, resp, err := apiClient.V1SCRestGetStakePoolStat(t, model.SCRestGetStakePoolStatRequest{
@@ -1633,10 +1603,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("test graph data ( test /v2/graph-blobber-total-rewards )", func(t *test.SystemTest) {
-		wallet := initialisedWallets[walletIdx]
-		walletIdx++
-		balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(balance.Nonce)
+		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
 
