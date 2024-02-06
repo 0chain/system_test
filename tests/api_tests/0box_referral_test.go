@@ -10,7 +10,6 @@ import (
 
 func Test0BoxReferral(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 	t.SetSmokeTests("Post referrals with correct CSRF should work properly")
 
 	var firebaseTokens []*model.FirebaseToken
