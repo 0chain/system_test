@@ -23,7 +23,7 @@ func TestResumeDownload(testSetup *testing.T) {
 		t.Skip()
 
 		allocSize := int64(600 * MB)
-		filesize := int64(500 * MB)
+		filesize := int64(300 * MB)
 		remotepath := "/"
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -41,9 +41,10 @@ func TestResumeDownload(testSetup *testing.T) {
 
 		// Upload parameters
 		uploadWithParam(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  filename,
-			"remotepath": remotepath + filepath.Base(filename),
+			"allocation":  allocationID,
+			"localpath":   filename,
+			"remotepath":  remotepath + filepath.Base(filename),
+			"chunknumber": 100,
 		})
 
 		// Delete the uploaded file, since we will be downloading it now
@@ -54,9 +55,10 @@ func TestResumeDownload(testSetup *testing.T) {
 		}()
 
 		cmd, err := startDownloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
+			"allocation":      allocationID,
+			"remotepath":      remotepath + filepath.Base(filename),
+			"localpath":       filename,
+			"blockspermarker": 100,
 		}), false)
 		require.Nil(t, err, "Download failed to start")
 
@@ -76,9 +78,10 @@ func TestResumeDownload(testSetup *testing.T) {
 		require.Less(t, partialDownloadedBytes, filesize)
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
+			"allocation":      allocationID,
+			"remotepath":      remotepath + filepath.Base(filename),
+			"localpath":       filename,
+			"blockspermarker": 100,
 		}), true)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
