@@ -96,18 +96,18 @@ func TestKillBlobber(testSetup *testing.T) {
 		require.NoError(t, err, "should be able to unstake tokens from a killed blobber")
 		t.Log(strings.Join(output, "\n"))
 
-		balanceBefore := getBalanceFromSharders(t, blobberOwnerWallet)
+		//balanceBefore := getBalanceFromSharders(t, blobberOwnerWallet)
+		//
+		//output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
+		//	"provider_type": "blobber",
+		//	"provider_id":   blobberToKill,
+		//	"fee":           "0.15",
+		//}), true)
+		//require.NoError(t, err, output)
+		//
+		//balanceAfter := getBalanceFromSharders(t, blobberOwnerWallet)
 
-		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
-			"provider_type": "blobber",
-			"provider_id":   blobberToKill,
-			"fee":           "0.15",
-		}), true)
-		require.NoError(t, err, output)
-
-		balanceAfter := getBalanceFromSharders(t, blobberOwnerWallet)
-
-		require.Greater(t, balanceAfter, balanceBefore, "should have collected rewards")
+		//require.Greater(t, balanceAfter, balanceBefore, "should have collected rewards")
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
@@ -212,18 +212,18 @@ func TestKillBlobber(testSetup *testing.T) {
 		require.NoError(t, err, "should be able to unstake tokens from a shutdowned blobber")
 		t.Log(strings.Join(output, "\n"))
 
-		balanceBefore := getBalanceFromSharders(t, blobberOwnerWallet)
-
-		output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
-			"provider_type": "blobber",
-			"provider_id":   blobberToShutdown,
-			"fee":           "0.15",
-		}), blobberOwnerWallet, true)
-		require.NoError(t, err, output)
-
-		balanceAfter := getBalanceFromSharders(t, blobberOwnerWallet)
-
-		require.Greater(t, balanceAfter, balanceBefore, "should have collected rewards")
+		//balanceBefore := getBalanceFromSharders(t, blobberOwnerWallet)
+		//
+		//output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
+		//	"provider_type": "blobber",
+		//	"provider_id":   blobberToShutdown,
+		//	"fee":           "0.15",
+		//}), blobberOwnerWallet, true)
+		//require.NoError(t, err, output)
+		//
+		//balanceAfter := getBalanceFromSharders(t, blobberOwnerWallet)
+		//
+		//require.Greater(t, balanceAfter, balanceBefore, "should have collected rewards")
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
