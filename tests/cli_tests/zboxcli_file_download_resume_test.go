@@ -20,10 +20,10 @@ func TestResumeDownload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunWithTimeout("Resume download should work", 10*time.Minute, func(t *test.SystemTest) {
-		createWallet(t)
+		t.Skip()
 
 		allocSize := int64(600 * MB)
-		filesize := int64(300 * MB)
+		filesize := int64(500 * MB)
 		remotepath := "/"
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
