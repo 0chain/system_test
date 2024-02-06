@@ -24,7 +24,6 @@ const (
 )
 
 func Test0BoxFreeStorage(testSetup *testing.T) {
-	// todo: These tests are sequential and start with teardown as they all share a common phone number
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("List allocation with zero allocation should work")
 

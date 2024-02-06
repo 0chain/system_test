@@ -54,6 +54,7 @@ type ZboxFreeStorageMarker struct {
 	FreeTokens float64          `json:"free_tokens"`
 	Timestamp  common.Timestamp `json:"timestamp"`
 	Signature  string           `json:"signature"`
+	Blobbers   []string         `json:"blobbers"`
 }
 type ZboxFreeStorageMarkerResponse struct {
 	Marker             string `json:"marker"`
