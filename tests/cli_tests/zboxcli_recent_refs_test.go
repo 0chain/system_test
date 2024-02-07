@@ -154,8 +154,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err = createWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(nonAllocOwnerWallet)
 
 		t1 := time.Now()
 		time.Sleep(time.Second * 30)

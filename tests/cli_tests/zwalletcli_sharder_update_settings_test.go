@@ -68,10 +68,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 			if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 				for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-					// dummy transactions to increase round
-					for i := 0; i < 5; i++ {
-						_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-					}
+					time.Sleep(10 * time.Second)
 					currRound = getCurrentRound(t)
 				}
 			}
@@ -93,10 +90,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -128,10 +122,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -152,10 +143,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -176,10 +164,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -195,10 +180,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -219,18 +201,14 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": 5,
 			"sharder":       "",

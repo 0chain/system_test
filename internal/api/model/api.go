@@ -41,12 +41,13 @@ type ExecutionRequest struct {
 }
 
 type Wallet struct {
-	Id           string `json:"id"`
+	Id           string `json:"client_id"`
 	Version      string `json:"version"`
 	CreationDate *int   `json:"creation_date"`
-	PublicKey    string `json:"public_key"`
+	PublicKey    string `json:"client_key"`
 	Nonce        int
 	Keys         *KeyPair `json:"-"`
+	Mnemonics    string   `json:"mnemonics"`
 }
 
 type SdkWallet struct {
