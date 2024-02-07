@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subset of 0Chain System test suite [optimise_rewards-tests/53eaf9cb] ran against [dev-2.devnet-0chain.net] at [2024-02-07_21.09.38]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">Subset of 0Chain System test suite [optimise_rewards-tests/53eaf9cb] ran against [dev-2.devnet-0chain.net] at [2024-02-07_21.09.38]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>4</strong>Duration: <strong>2ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>1</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>3</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">February 7, 2024 22:34:56</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup failed " id="2"></div>
+            
+                <div class="testResultGroup failed " id="3"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestAllocationRewards","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":116.09,"Output":["","    system_test_framework.go:70: Test setup [set storage config to use time_unit as 10 minutes] scheduled at [02-07-2024 21:09:40] \n","    system_test_framework.go:80: Test setup [set storage config to use time_unit as 10 minutes] start at [02-07-2024 21:09:40] \n","    wallet.go:115: Updating storage config...\n","    system_test_framework.go:93: Test setup [set storage config to use time_unit as 10 minutes] exit at [02-07-2024 21:09:43]\n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/TestAllocationRewards_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  f4b8c1e6062416d612637eb9ce76e869c9c53e7ed75dee8fa28764786c9be747]\n","    blobbers.go:12: Requesting blobber list...\n","    blobbers.go:17: Requesting validator list...\n","    wallet.go:25: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:100: Staking tokens...\n","    wallet.go:115: Updating storage config...\n","","","    system_test_framework.go:70: Test setup [set storage config to use time_unit as 10 minutes] scheduled at [02-07-2024 21:50:59] \n","    system_test_framework.go:80: Test setup [set storage config to use time_unit as 10 minutes] start at [02-07-2024 21:50:59] \n","    wallet.go:115: Updating storage config...\n","    system_test_framework.go:93: Test setup [set storage config to use time_unit as 10 minutes] exit at [02-07-2024 21:51:02]\n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/TestAllocationRewards_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  48d1ea96ac09f6c60fe91cfa48e24a30090d98269afaf1560451cf44556a1179]\n","    blobbers.go:12: Requesting blobber list...\n","    blobbers.go:17: Requesting validator list...\n","    wallet.go:25: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:100: Staking tokens...\n","    wallet.go:115: Updating storage config...\n","","","    system_test_framework.go:70: Test setup [set storage config to use time_unit as 10 minutes] scheduled at [02-07-2024 22:03:31] \n","    system_test_framework.go:80: Test setup [set storage config to use time_unit as 10 minutes] start at [02-07-2024 22:03:31] \n","    wallet.go:115: Updating storage config...\n","    system_test_framework.go:93: Test setup [set storage config to use time_unit as 10 minutes] exit at [02-07-2024 22:03:34]\n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/TestAllocationRewards_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  429c0075ff945b08db4a9db046887a71c3034925ed4b90b5d52a18ade77ce2c6]\n","    blobbers.go:12: Requesting blobber list...\n","    blobbers.go:17: Requesting validator list...\n","    wallet.go:25: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:100: Staking tokens...\n","    wallet.go:115: Updating storage config...\n","","","    system_test_framework.go:70: Test setup [set storage config to use time_unit as 10 minutes] scheduled at [02-07-2024 22:30:15] \n","    system_test_framework.go:80: Test setup [set storage config to use time_unit as 10 minutes] start at [02-07-2024 22:30:15] \n","    wallet.go:115: Updating storage config...\n","    system_test_framework.go:93: Test setup [set storage config to use time_unit as 10 minutes] exit at [02-07-2024 22:30:18]\n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/TestAllocationRewards_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  377131ea4937b4a05a00bd9636957c90a1879231d02c8175df042a0f3d2d3200]\n","    blobbers.go:12: Requesting blobber list...\n","    blobbers.go:17: Requesting validator list...\n","    wallet.go:25: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:100: Staking tokens...\n","    wallet.go:115: Updating storage config...\n","","","    system_test_framework.go:70: Test setup [set storage config to use time_unit as 10 minutes] scheduled at [02-07-2024 22:33:00] \n","    system_test_framework.go:80: Test setup [set storage config to use time_unit as 10 minutes] start at [02-07-2024 22:33:00] \n","    wallet.go:115: Updating storage config...\n","    system_test_framework.go:93: Test setup [set storage config to use time_unit as 10 minutes] exit at [02-07-2024 22:33:03]\n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/TestAllocationRewards_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  02e6db97673fba3c01c4c7542aee8cdec464357bb6f417a1cc7572a3d2ceffb5]\n","    blobbers.go:12: Requesting blobber list...\n","    blobbers.go:17: Requesting validator list...\n","    wallet.go:25: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:100: Staking tokens...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:100: Staking tokens...\n","    wallet.go:115: Updating storage config...\n",""],"Passed":false,"Skipped":false,"TestFileName":"allocation_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestAllocationRewards/Create_+_Upload_+_Cancel_equal_read_price_0.1","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":166.78,"Output":["","    allocation_test.go:159: Test case [Create + Upload + Cancel equal read price 0.1] scheduled at [02-07-2024 21:22:08] \n","    system_test_framework.go:149: Test case [Create + Upload + Cancel equal read price 0.1] start at [02-07-2024 21:22:08] \n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/TestAllocationRewards-Create_+_Upload_+_Cancel_equal_read_price_0.1_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  3efb6cdd0017859d8c0e7229c4942e4c8ce5ee80182a38af775116f5789f5160]\n","    wallet.go:25: Executing faucet...\n","    allocation.go:134: Creating new allocation...\n","    allocation_test.go:180: allocationId 7b69abc84a065b7def589729485e1a570275a1f9386d3a54b87c20976f2c9a27\n","    allocation_test.go:191: Uploading file  /tmp/tS6yWTw9Wy_test.txt\n","    allocation.go:190: Uploading file...\n","    allocation.go:217: Get Allocation...\n","    allocation.go:144: Canceling allocation...\n","    allocation.go:217: Get Allocation...\n","    sharders.go:42: getting sharder url...\n","    sharders.go:64: list sharder nodes...\n","    allocation_test.go:671: URL :  http://dev-2.devnet-0chain.net:31101/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=7b69abc84a065b7def589729485e1a570275a1f9386d3a54b87c20976f2c9a27\n","    allocation_test.go:696: allocationChallengeRewards map[blobber_rewards:map[5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671:3.819181e+06 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d:3.824061e+06] validator_rewards:map[7b162815cec387fd2d6a83db8aae7d17e717c2323513ce750062906835c72db4:84603 7c8e5922b29aa9a7be01c8cfb97c111958ba6f45a979895a4bdccd5778a7c19d:84641]]\n","    sharders.go:42: getting sharder url...\n","    sharders.go:64: list sharder nodes...\n","    allocation_test.go:597: URL :  http://dev-2.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/cancelation-rewards?allocation_id=7b69abc84a065b7def589729485e1a570275a1f9386d3a54b87c20976f2c9a27\n","    allocation_test.go:159: Test case [Create + Upload + Cancel equal read price 0.1] exit at [02-07-2024 21:24:55]\n","--- PASS: TestAllocationRewards/Create_+_Upload_+_Cancel_equal_read_price_0.1 (166.78s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestAllocationRewards/Create_+_Upload_+_Upgrade_equal_read_price_0.1","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":122.4,"Output":["","    allocation_test.go:77: Test case [Create + Upload + Upgrade equal read price 0.1] scheduled at [02-07-2024 21:10:19] \n","    system_test_framework.go:149: Test case [Create + Upload + Upgrade equal read price 0.1] start at [02-07-2024 21:10:19] \n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/TestAllocationRewards-Create_+_Upload_+_Upgrade_equal_read_price_0.1_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  fe6a6ce34f856c49df4a20d3753fb21baa5a1aab05fb13765ab8d42bece1b663]\n","    wallet.go:25: Executing faucet...\n","    allocation.go:134: Creating new allocation...\n","    allocation.go:217: Get Allocation...\n","    allocation.go:190: Uploading file...\n","    allocation.go:217: Get Allocation...\n","    wallet.go:25: Executing faucet...\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    wallet.go:25: Executing faucet...\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    allocation.go:231: Updating allocation...\n","    allocation.go:217: Get Allocation...\n","    sharders.go:42: getting sharder url...\n","    sharders.go:64: list sharder nodes...\n","    allocation_test.go:671: URL :  http://dev-2.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=b8f086e500c5b6fcdb3d08c57b69e61fa219889ff3ba14d34f1e877afbfc400e\n","    allocation_test.go:696: allocationChallengeRewards map[blobber_rewards:map[5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671:1.9323161e+07 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d:1.9320022e+07] validator_rewards:map[7b162815cec387fd2d6a83db8aae7d17e717c2323513ce750062906835c72db4:489578 7c8e5922b29aa9a7be01c8cfb97c111958ba6f45a979895a4bdccd5778a7c19d:489631]]\n","    allocation_test.go:154: collecting rewards for blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    utils.go:166: Waiting 5s...\n","    blobbers.go:32: Fetching stake pool info...\n","    wallet.go:68: Getting wallet...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner2/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:741\n","        \t            \t\t\t\t/root/actions-runner2/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:155\n","        \t            \t\t\t\t/root/actions-runner2/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner2/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestAllocationRewards/Create_+_Upload_+_Upgrade_equal_read_price_0.1\n","    allocation_test.go:77: Test case [Create + Upload + Upgrade equal read price 0.1] exit at [02-07-2024 21:22:08]\n","","","    allocation_test.go:77: Test case [Create + Upload + Upgrade equal read price 0.1] scheduled at [02-07-2024 21:51:38] \n","    system_test_framework.go:149: Test case [Create + Upload + Upgrade equal read price 0.1] start at [02-07-2024 21:51:38] \n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/TestAllocationRewards-Create_+_Upload_+_Upgrade_equal_read_price_0.1_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  894f1f24852993ea1ea7cbe9b396a8c3fe2b590432e38d006631f92fb0e0c7f1]\n","    wallet.go:25: Executing faucet...\n","    allocation.go:134: Creating new allocation...\n","    allocation.go:217: Get Allocation...\n","    allocation.go:190: Uploading file...\n","    allocation.go:217: Get Allocation...\n","    wallet.go:25: Executing faucet...\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    wallet.go:25: Executing faucet...\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    allocation.go:231: Updating allocation...\n","    allocation.go:217: Get Allocation...\n","    sharders.go:42: getting sharder url...\n","    sharders.go:64: list sharder nodes...\n","    allocation_test.go:671: URL :  http://dev-2.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=455138d1311fcd32b38f6085d0b53e62171846e1efb2afb77e670f5baf5dbbfa\n","    allocation_test.go:696: allocationChallengeRewards map[blobber_rewards:map[5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671:1.93222956e+08 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d:1.93294955e+08] validator_rewards:map[7b162815cec387fd2d6a83db8aae7d17e717c2323513ce750062906835c72db4:4.852995e+06 7c8e5922b29aa9a7be01c8cfb97c111958ba6f45a979895a4bdccd5778a7c19d:4.85305e+06]]\n","    allocation_test.go:154: collecting rewards for blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    utils.go:166: Waiting 5s...\n","    blobbers.go:32: Fetching stake pool info...\n","    wallet.go:68: Getting wallet...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner2/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:741\n","        \t            \t\t\t\t/root/actions-runner2/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:155\n","        \t            \t\t\t\t/root/actions-runner2/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner2/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestAllocationRewards/Create_+_Upload_+_Upgrade_equal_read_price_0.1\n","    allocation_test.go:77: Test case [Create + Upload + Upgrade equal read price 0.1] exit at [02-07-2024 22:03:27]\n","","","    allocation_test.go:77: Test case [Create + Upload + Upgrade equal read price 0.1] scheduled at [02-07-2024 22:30:54] \n","    system_test_framework.go:149: Test case [Create + Upload + Upgrade equal read price 0.1] start at [02-07-2024 22:30:54] \n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/TestAllocationRewards-Create_+_Upload_+_Upgrade_equal_read_price_0.1_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  4beed0037813e140ec63f89eecd4d853762b32b7d10555f0bb6ab2077d6037c1]\n","    wallet.go:25: Executing faucet...\n","    allocation.go:134: Creating new allocation...\n","    allocation.go:217: Get Allocation...\n","    allocation.go:190: Uploading file...\n","    allocation.go:217: Get Allocation...\n","    wallet.go:25: Executing faucet...\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    wallet.go:25: Executing faucet...\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    allocation.go:231: Updating allocation...\n","    utils.go:82: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error updating allocation:allocation_extending_failed: blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 doesn't have enough free space]\n","    utils.go:82: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error updating allocation:allocation_extending_failed: blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 doesn't have enough free space]\n","    utils.go:98: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [Error updating allocation:allocation_extending_failed: blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 doesn't have enough free space]\n","    utils.go:101: \u001b[31mThe verbose output for the command is:\n","    utils.go:105: \u001b[31m0chain-core-sdk [INFO]   2024/02/07 22:32:51.684220 wallet_base.go:331: ******* Wallet SDK Version:v1.11.5-4-ga759a908 ******* (SetLogFile)\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/07 22:32:51.684324 sdk.go:88: ******* Storage SDK Version: v1.11.5-4-ga759a908 *******\n","    utils.go:105: \u001b[31m0chain-core-sdk [INFO]   2024/02/07 22:32:51.707867 transaction_base.go:143: ******* Wallet SDK Version:v1.11.5-4-ga759a908 ******* (InitZCNSDK)\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2024/02/07 22:32:51.717053 networkworker.go:119: Get network result:{\"miners\":[\"https://dev-2.devnet-0chain.net/miner02\",\"https://dev-2.devnet-0chain.net/miner01\",\"https://dev-2.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-2.devnet-0chain.net/sharder02\",\"https://dev-2.devnet-0chain.net/sharder01\"]}\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/07 22:32:51.731943 node.go:194: Query from https://dev-2.devnet-0chain.net/sharder02/v1/client/get/balance?client_id=618cb882e2c2471539641acd2d976c0aca4133f7bef57d94fd71c5f32599fd19\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/07 22:32:51.731954 node.go:194: Query from https://dev-2.devnet-0chain.net/sharder01/v1/client/get/balance?client_id=618cb882e2c2471539641acd2d976c0aca4133f7bef57d94fd71c5f32599fd19\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2024/02/07 22:32:51.733651 node.go:147: https://dev-2.devnet-0chain.net/sharder01/v1/client/get/balance?client_id=618cb882e2c2471539641acd2d976c0aca4133f7bef57d94fd71c5f32599fd19200 OK\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2024/02/07 22:32:51.733671 node.go:152: {\"txn\":\"c98db65de39d9dd3dc8cd7748e3f0a34ffe9be63f7e301594d8986982e67a144\",\"round\":25676,\"balance\":119600000000,\"nonce\":6}\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2024/02/07 22:32:51.734539 node.go:147: https://dev-2.devnet-0chain.net/sharder02/v1/client/get/balance?client_id=618cb882e2c2471539641acd2d976c0aca4133f7bef57d94fd71c5f32599fd19200 OK\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2024/02/07 22:32:51.734550 node.go:152: {\"txn\":\"c98db65de39d9dd3dc8cd7748e3f0a34ffe9be63f7e301594d8986982e67a144\",\"round\":25676,\"balance\":119600000000,\"nonce\":6}\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/07 22:32:51.734822 sdk.go:1514: executing transaction 'update_allocation_request' with hash a47a1b070e8e47398915a8fdd6f9adfe03ddb85245b54369e82daf37062063df\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/07 22:32:51.734834 sdk.go:1515: estimated txn fee: 100000000\n","    utils.go:105: \u001b[31mError updating allocation:allocation_extending_failed: blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 doesn't have enough free space\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner2/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:135\n","        \t            \t\t\t\t/root/actions-runner2/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner2/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0005be1c8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestAllocationRewards/Create_+_Upload_+_Upgrade_equal_read_price_0.1\n","        \tMessages:   \tError updating allocation%!(EXTRA string=blobber settings updated successfully)\n","    allocation_test.go:77: Test case [Create + Upload + Upgrade equal read price 0.1] exit at [02-07-2024 22:32:56]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestAllocationRewards/External_Party_Upgrades_Allocation","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":74.19,"Output":["","    allocation_test.go:254: Test case [External Party Upgrades Allocation] scheduled at [02-07-2024 21:24:55] \n","    system_test_framework.go:149: Test case [External Party Upgrades Allocation] start at [02-07-2024 21:24:55] \n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/TestAllocationRewards-External_Party_Upgrades_Allocation_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  b63fd12a3780d40706af79d34ef8189c53d81d8e65710684c0c2a1219e472eaf]\n","    allocation.go:134: Creating new allocation...\n","    allocation.go:190: Uploading file...\n","    allocation.go:217: Get Allocation...\n","    allocation.go:231: Updating allocation...\n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/newwallet_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  bd4cbb13cc3c0903f230587ad84ddb8241e6be33098821c08e93a6d9d0dafd7d]\n","    wallet.go:25: Executing faucet...\n","    allocation.go:231: Updating allocation...\n","    allocation.go:217: Get Allocation...\n","    sharders.go:42: getting sharder url...\n","    sharders.go:64: list sharder nodes...\n","    allocation_test.go:671: URL :  http://dev-2.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=82329e759316767c99bd81d5aab26532c8ab72c79f73d91adf8916f7fa097859\n","    allocation_test.go:696: allocationChallengeRewards map[blobber_rewards:map[5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671:2.0387454e+07 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d:2.0385807e+07] validator_rewards:map[7b162815cec387fd2d6a83db8aae7d17e717c2323513ce750062906835c72db4:511726 7c8e5922b29aa9a7be01c8cfb97c111958ba6f45a979895a4bdccd5778a7c19d:511885]]\n","    allocation_test.go:332: collecting rewards for blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    utils.go:166: Waiting 5s...\n","    blobbers.go:32: Fetching stake pool info...\n","    wallet.go:68: Getting wallet...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner2/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:741\n","        \t            \t\t\t\t/root/actions-runner2/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:333\n","        \t            \t\t\t\t/root/actions-runner2/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner2/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestAllocationRewards/External_Party_Upgrades_Allocation\n","    allocation_test.go:254: Test case [External Party Upgrades Allocation] exit at [02-07-2024 21:50:56]\n","","","    allocation_test.go:254: Test case [External Party Upgrades Allocation] scheduled at [02-07-2024 22:04:10] \n","    system_test_framework.go:149: Test case [External Party Upgrades Allocation] start at [02-07-2024 22:04:10] \n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/TestAllocationRewards-External_Party_Upgrades_Allocation_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  b8fb9612fd92c47e0ba5a56c322d5d30a24a9fa5e025f815f6f7d6e1ddb4d494]\n","    allocation.go:134: Creating new allocation...\n","    allocation.go:190: Uploading file...\n","    allocation.go:217: Get Allocation...\n","    allocation.go:231: Updating allocation...\n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/newwallet_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  28c0f2e45b730028fa128ce13768d297cafb9d28da90ce69aa9b381be27fbef7]\n","    wallet.go:25: Executing faucet...\n","    allocation.go:231: Updating allocation...\n","    allocation.go:217: Get Allocation...\n","    sharders.go:42: getting sharder url...\n","    sharders.go:64: list sharder nodes...\n","    allocation_test.go:671: URL :  http://dev-2.devnet-0chain.net:31101/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=f48c6488663e13347cb3a3af7ac37db05096ee6139cb58ce34b05e546ff2d484\n","    allocation_test.go:696: allocationChallengeRewards map[blobber_rewards:map[5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671:2.03531913e+08 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d:2.03499361e+08] validator_rewards:map[7b162815cec387fd2d6a83db8aae7d17e717c2323513ce750062906835c72db4:5.143216e+06 7c8e5922b29aa9a7be01c8cfb97c111958ba6f45a979895a4bdccd5778a7c19d:5.143216e+06]]\n","    allocation_test.go:332: collecting rewards for blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    utils.go:166: Waiting 5s...\n","    blobbers.go:32: Fetching stake pool info...\n","    wallet.go:68: Getting wallet...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner2/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:741\n","        \t            \t\t\t\t/root/actions-runner2/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:333\n","        \t            \t\t\t\t/root/actions-runner2/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner2/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestAllocationRewards/External_Party_Upgrades_Allocation\n","    allocation_test.go:254: Test case [External Party Upgrades Allocation] exit at [02-07-2024 22:30:10]\n","","","    allocation_test.go:254: Test case [External Party Upgrades Allocation] scheduled at [02-07-2024 22:33:39] \n","    system_test_framework.go:149: Test case [External Party Upgrades Allocation] start at [02-07-2024 22:33:39] \n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/TestAllocationRewards-External_Party_Upgrades_Allocation_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  0d9fd701c7225a8db19b545f72731aa781fb19d61d0c1f80d1eadba1a3fada8d]\n","    allocation.go:134: Creating new allocation...\n","    allocation.go:190: Uploading file...\n","    allocation.go:217: Get Allocation...\n","    allocation.go:231: Updating allocation...\n","    wallet.go:46: creating wallet...\n","    wallet.go:25: Executing faucet...\n","    wallet.go:63: faucet output: [No wallet in path  config/newwallet_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  9fddb4e9d79fcbaf2d002ab26327f75f6a95410c52fa5584608074319ea7f460]\n","    wallet.go:25: Executing faucet...\n","    allocation.go:231: Updating allocation...\n","    utils.go:82: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error updating allocation:allocation_extending_failed: blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 doesn't have enough free space]\n","    utils.go:82: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error updating allocation:allocation_extending_failed: blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 doesn't have enough free space]\n","    utils.go:98: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [Error updating allocation:allocation_extending_failed: blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 doesn't have enough free space]\n","    utils.go:101: \u001b[31mThe verbose output for the command is:\n","    utils.go:105: \u001b[31m0chain-core-sdk [INFO]   2024/02/07 22:34:48.352397 wallet_base.go:331: ******* Wallet SDK Version:v1.11.5-4-ga759a908 ******* (SetLogFile)\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/07 22:34:48.352511 sdk.go:88: ******* Storage SDK Version: v1.11.5-4-ga759a908 *******\n","    utils.go:105: \u001b[31m0chain-core-sdk [INFO]   2024/02/07 22:34:48.376508 transaction_base.go:143: ******* Wallet SDK Version:v1.11.5-4-ga759a908 ******* (InitZCNSDK)\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2024/02/07 22:34:48.384288 networkworker.go:119: Get network result:{\"miners\":[\"https://dev-2.devnet-0chain.net/miner02\",\"https://dev-2.devnet-0chain.net/miner01\",\"https://dev-2.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-2.devnet-0chain.net/sharder02\",\"https://dev-2.devnet-0chain.net/sharder01\"]}\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/07 22:34:48.397381 node.go:194: Query from https://dev-2.devnet-0chain.net/sharder02/v1/client/get/balance?client_id=feb922d1d9e996353098f1d5b6d428c9b174aa8ba628a1082366c0e34cb8b3cf\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/07 22:34:48.397386 node.go:194: Query from https://dev-2.devnet-0chain.net/sharder01/v1/client/get/balance?client_id=feb922d1d9e996353098f1d5b6d428c9b174aa8ba628a1082366c0e34cb8b3cf\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2024/02/07 22:34:48.398927 node.go:147: https://dev-2.devnet-0chain.net/sharder02/v1/client/get/balance?client_id=feb922d1d9e996353098f1d5b6d428c9b174aa8ba628a1082366c0e34cb8b3cf200 OK\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2024/02/07 22:34:48.398950 node.go:152: {\"txn\":\"403c57f79fa32b2e7371d3e8f260e30c1249734963054b8ec5ef7c16b99feec0\",\"round\":26252,\"balance\":139700000000,\"nonce\":5}\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2024/02/07 22:34:48.399059 node.go:147: https://dev-2.devnet-0chain.net/sharder01/v1/client/get/balance?client_id=feb922d1d9e996353098f1d5b6d428c9b174aa8ba628a1082366c0e34cb8b3cf200 OK\n","    utils.go:105: \u001b[31m0box-sdk        [DEBUG]  2024/02/07 22:34:48.399075 node.go:152: {\"txn\":\"403c57f79fa32b2e7371d3e8f260e30c1249734963054b8ec5ef7c16b99feec0\",\"round\":26252,\"balance\":139700000000,\"nonce\":5}\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/07 22:34:48.399347 sdk.go:1514: executing transaction 'update_allocation_request' with hash 7a6c6ce088f3ecd1fd801627b32b503a5c07bc7ef65ddb29b3b739bc794d8586\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/07 22:34:48.399360 sdk.go:1515: estimated txn fee: 100000000\n","    utils.go:105: \u001b[31mError updating allocation:allocation_extending_failed: blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 doesn't have enough free space\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner2/_work/system_test/system_test/tests/tokenomics_tests/allocation_test.go:310\n","        \t            \t\t\t\t/root/actions-runner2/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner2/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00010a168), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestAllocationRewards/External_Party_Upgrades_Allocation\n","        \tMessages:   \tError updating allocation%!(EXTRA string=No wallet in path  config/newwallet_wallet.json found. Creating wallet...\n","        \t            \tZCN wallet created!!\n","        \t            \tExecute faucet smart contract success with txn :  9fddb4e9d79fcbaf2d002ab26327f75f6a95410c52fa5584608074319ea7f460)\n","    allocation_test.go:254: Test case [External Party Upgrades Allocation] exit at [02-07-2024 22:34:53]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
