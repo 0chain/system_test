@@ -25,12 +25,7 @@ func TestKillBlobber(testSetup *testing.T) {
 	// Killing a blobber should make it unavalable for any new allocations,
 	// and stake pools should be slashed by an amount given by the "stakepool.kill_slash" setting
 	t.RunSequentially("killed blobber is not available for allocations", func(t *test.SystemTest) {
-		output, err := createWalletForName(t, configPath, scOwnerWallet)
-		require.NoError(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
+		createWallet(t)
 		startBlobbers := getBlobbers(t)
 		var blobberToKill string
 		var activeBlobbers int
@@ -47,7 +42,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		dataShards := 1
 		parityShards := activeBlobbers - 1
 
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   5.0,
@@ -122,8 +117,7 @@ func TestKillBlobber(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("kill blobber by non-smartcontract owner should fail", func(t *test.SystemTest) {
-		_, err := createWallet(t, configPath)
-		require.NoError(t, err)
+		createWallet(t)
 
 		startBlobbers := getBlobbers(t)
 		var blobberToKill string
@@ -143,11 +137,7 @@ func TestKillBlobber(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("shutdowned blobber is not available for allocations", func(t *test.SystemTest) {
-		output, err := createWalletForName(t, configPath, scOwnerWallet)
-		require.NoError(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		startBlobbers := getBlobbers(t)
 		var blobberToShutdown string
@@ -163,7 +153,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		dataShards := 1
 		parityShards := activeBlobbers - 1
 
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   5.0,
@@ -238,8 +228,7 @@ func TestKillBlobber(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("shutdown blobber by non-smartcontract owner should fail", func(t *test.SystemTest) {
-		_, err := createWallet(t, configPath)
-		require.NoError(t, err)
+		createWallet(t)
 
 		startBlobbers := getBlobbers(t)
 		var blobberToShutdown string

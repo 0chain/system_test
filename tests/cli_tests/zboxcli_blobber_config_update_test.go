@@ -24,13 +24,10 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
 			t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
 		}
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
 
-		output, err = createWalletForName(t, configPath, blobberOwnerWallet)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
+		output, err := listBlobbers(t, configPath, createParams(map[string]interface{}{"json": ""}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 
@@ -42,8 +39,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		intialBlobberInfo = blobberList[0]
 
 		t.Cleanup(func() {
-			output, err := createWallet(t, configPath)
-			require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+			createWallet(t)
 
 			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": intialBlobberInfo.Capacity}))
 			require.Nil(t, err, strings.Join(output, "\n"))
@@ -64,21 +60,15 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 			require.Nil(t, err, strings.Join(output, "\n"))
 		})
 
-		// init enough tokens to blobber owner wallet to issue txns
-		for i := 0; i < 3; i++ {
-			_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 9)
-			require.NoError(t, err)
-		}
 	})
 
 	t.RunSequentially("update blobber capacity should work", func(t *test.SystemTest) {
 		// create wallet for normal user
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		newCapacity := 301 * GB
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": newCapacity}))
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": newCapacity}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -94,12 +84,11 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update blobber number of delegates should work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		newNumberOfDelegates := 15
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": newNumberOfDelegates}))
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": newNumberOfDelegates}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -115,12 +104,11 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update blobber service charge should work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		newServiceCharge := 0.1
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "service_charge": newServiceCharge}))
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "service_charge": newServiceCharge}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -136,10 +124,9 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update no params should work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}))
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -148,30 +135,27 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update without blobber ID should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = updateBlobberInfo(t, configPath, "")
+		output, err := updateBlobberInfo(t, configPath, "")
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 26)
 		require.Equalf(t, "Error: required flag(s) \"blobber_id\" not set", output[0], "output was: %s", output[0])
 	})
 
 	t.RunSequentially("update with invalid blobber ID should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": "invalid-blobber-id"}))
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": "invalid-blobber-id"}))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 		require.Equal(t, "internal_error: error retrieving blobber invalid-blobber-id, error record not found", output[1])
 	})
 
 	t.RunSequentially("update with invalid blobber wallet/owner should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = cliutils.RunCommand(t, fmt.Sprintf("./zbox bl-update %s --silent --wallet %s_wallet.json --configDir ./config --config %s", createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}), escapedTestName(t), configPath), 1, time.Second*2)
+		output, err := cliutils.RunCommand(t, fmt.Sprintf("./zbox bl-update %s --silent --wallet %s_wallet.json --configDir ./config --config %s", createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}), escapedTestName(t), configPath), 1, time.Second*2)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_blobber_settings_failed: access denied, allowed for delegate_wallet owner only",
@@ -179,13 +163,12 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update blobber read price should work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		oldReadPrice := intialBlobberInfo.Terms.ReadPrice
 		newReadPrice := intToZCN(oldReadPrice) + 1
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": newReadPrice}))
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": newReadPrice}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "blobber settings updated successfully", output[0])
@@ -202,13 +185,12 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update blobber write price should work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		oldWritePrice := intialBlobberInfo.Terms.WritePrice
 		newWritePrice := intToZCN(oldWritePrice) + 0.01
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice}))
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "blobber settings updated successfully", output[0])
@@ -225,8 +207,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update all params at once should work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		newWritePrice := intToZCN(intialBlobberInfo.Terms.WritePrice) + 0.01
 		newServiceCharge := intialBlobberInfo.StakePoolSettings.ServiceCharge + 0.1
@@ -235,7 +216,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		newCapacity := intialBlobberInfo.Capacity + 1
 		newNotAvailable := !intialBlobberInfo.NotAvailable
 
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id":     intialBlobberInfo.ID,
 			"write_price":    newWritePrice,
 			"service_charge": newServiceCharge,

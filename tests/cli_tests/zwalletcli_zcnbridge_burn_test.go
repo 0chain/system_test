@@ -75,20 +75,17 @@ func TestBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.Run("Burning ZCN tokens with available ZCN tokens on balance, should work", func(t *test.SystemTest) {
-		output, err := executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = burnZcn(t, "1", true)
+		createWallet(t)
+		output, err := burnZcn(t, "1", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Transaction completed successfully:")
 	})
 
 	t.RunSequentiallyWithTimeout("Get ZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
-		output, err := executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = burnZcn(t, "1", true)
+		output, err := burnZcn(t, "1", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Transaction completed successfully:")
@@ -137,6 +134,8 @@ func burnZcn(t *test.SystemTest, amount string, retry bool) ([]string, error) {
 		escapedTestName(t)+"_wallet.json",
 		configPath,
 	)
+
+	fmt.Println(cmd)
 
 	if retry {
 		return cliutils.RunCommand(t, cmd, 6, time.Second*10)

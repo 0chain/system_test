@@ -1,12 +1,14 @@
 package cli_tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -108,6 +110,10 @@ var (
 var (
 	configPath string
 	configDir  string
+
+	wallets     []json.RawMessage
+	walletIdx   int64
+	walletMutex sync.Mutex
 )
 
 var tenderlyClient *tenderly.Client
@@ -174,6 +180,25 @@ func TestMain(m *testing.M) {
 
 	// Create an S3 client
 	S3Client = s3.New(sess)
+
+	walletMutex.Lock()
+	// Read the content of the file
+	fileContent, err := os.ReadFile("./config/wallets/wallets.json")
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return
+	}
+
+	// Parse the JSON data into a list of strings
+	err = json.Unmarshal(fileContent, &wallets)
+	if err != nil {
+		fmt.Println("Error decoding JSON:", err)
+		return
+	}
+
+	walletIdx = 500
+
+	walletMutex.Unlock()
 
 	exitRun := m.Run()
 

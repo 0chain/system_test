@@ -50,13 +50,9 @@ func TestMinerStake(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Staking tokens against valid miner with valid tokens should work", 5*time.Minute, func(t *test.SystemTest) { // todo: slow
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
 			"tokens":   2.0,
 		}), true)
@@ -86,14 +82,10 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Multiple stakes against a miner should add balance to client's stake pool", 5*time.Minute, func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 6.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		var poolsInfoBefore climodel.MinerSCUserPoolsInfo
-		output, err = stakePoolsInMinerSCInfo(t, configPath, "", true)
+		output, err := stakePoolsInMinerSCInfo(t, configPath, "", true)
 		require.Nil(t, err, "error fetching Miner SC User pools")
 		require.Len(t, output, 1)
 		err = json.Unmarshal([]byte(output[0]), &poolsInfoBefore)
@@ -130,10 +122,10 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		_, err := executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "error executing faucet")
 
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
 			"tokens":   10,
 		}), false)
@@ -144,13 +136,9 @@ func TestMinerStake(testSetup *testing.T) {
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
 	t.Run("Staking tokens against invalid node id should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": "abcdefgh",
 			"tokens":   1,
 		}), false)
@@ -160,13 +148,9 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	t.Run("Staking negative tokens against valid miner should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
 			"tokens":   -1,
 		}), false)
@@ -177,16 +161,12 @@ func TestMinerStake(testSetup *testing.T) {
 
 	// todo rewards not transferred to wallet until a collect reward transaction
 	t.RunSequentially("Staking tokens against miner should return interest to wallet", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "error getting wallet")
 
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
 			"tokens":   1,
 		}), true)
@@ -216,13 +196,9 @@ func TestMinerStake(testSetup *testing.T) {
 			}
 		}
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 9.9)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		output, err = getMinerSCConfig(t, configPath, true)
+		output, err := getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
@@ -237,12 +213,11 @@ func TestMinerStake(testSetup *testing.T) {
 				defer wg.Done()
 
 				walletName := escapedTestName(t) + fmt.Sprintf("%d", i)
-				_, err := executeFaucetWithTokensForWallet(t, walletName, configPath, 1.0)
-				require.Nil(t, err)
+				createWalletForName(walletName)
 
 				output, err = minerOrSharderLockForWallet(t, configPath, createParams(map[string]interface{}{
 					"miner_id": newMiner.ID,
-					"tokens":   0.1,
+					"tokens":   1,
 				}), walletName, true)
 				require.NoError(t, err)
 				require.Len(t, output, 1)
@@ -261,13 +236,9 @@ func TestMinerStake(testSetup *testing.T) {
 	})
 
 	t.Run("Staking 0 tokens against miner should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner01ID,
 			"tokens":   0,
 		}), false)
@@ -278,13 +249,9 @@ func TestMinerStake(testSetup *testing.T) {
 
 	// this case covers both invalid miner and sharder id, so is not repeated in zwalletcli_sharder_stake_test.go
 	t.Run("Unlock tokens with invalid node id should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
 			"tokens":   2,
 		}), true)

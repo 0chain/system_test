@@ -14,16 +14,19 @@ import (
 
 func TestMultiDownload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 	t.SetSmokeTests("Multi download should work")
 
-	t.RunSequentially("Multi download should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.Run("Multi download should work", func(t *test.SystemTest) {
+		wallet := createWallet(t)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		sdkClient.SetWallet(t, wallet)
 
-		apiClient.CreateReadPool(t, sdkWallet, float64(1.5), client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		apiClient.CreateReadPool(t, wallet, float64(1.5), client.TxSuccessfulStatus)
 
 		ops := make([]sdk.OperationRequest, 0, 10)
 
