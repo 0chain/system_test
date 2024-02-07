@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -143,4 +144,63 @@ func createKeyValueParams(params map[string]string) string {
 	keys += "\""
 	values += "\""
 	return keys + " " + values
+}
+
+func CollectRewards(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return CollectRewardsForWallet(t, cliConfigFilename, params, EscapedTestName(t), retry)
+}
+
+func CollectRewardsForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
+	t.Log("collecting rewards...")
+	cmd := fmt.Sprintf("./zbox collect-reward %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
+func GetBalanceZCN(t *test.SystemTest, cliConfigFilename string, walletName ...string) (float64, error) {
+	cliutils.Wait(t, 5*time.Second)
+	var (
+		output []string
+		err    error
+	)
+	if len(walletName) > 0 && walletName[0] != "" {
+		output, err = GetBalanceForWalletJSON(t, cliConfigFilename, walletName[0])
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		output, err = GetBalanceForWalletJSON(t, cliConfigFilename, EscapedTestName(t))
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	var balance = struct {
+		ZCN string `json:"zcn"`
+	}{}
+
+	if err := json.Unmarshal([]byte(output[0]), &balance); err != nil {
+		return 0, err
+	}
+
+	balanceFloat, err := strconv.ParseFloat(balance.ZCN, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	// round up to 2 decimal places
+	return float64(int(balanceFloat*100)) / 100, nil
+}
+
+func GetBalanceForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
+	return cliutils.RunCommand(t, "./zwallet getbalance --silent "+
+		"--wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+}
+
+func GetBalanceForWalletJSON(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
+	return cliutils.RunCommand(t, "./zwallet getbalance --silent --json "+
+		"--wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 }

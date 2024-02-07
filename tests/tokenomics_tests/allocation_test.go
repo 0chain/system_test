@@ -149,6 +149,10 @@ func TestAllocationRewards(testSetup *testing.T) {
 		}
 
 		require.Equal(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
+
+		for _, blobber := range alloc.Blobbers {
+			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
+		}
 	})
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Cancel equal read price 0.1", 1*time.Hour, func(t *test.SystemTest) {
@@ -239,6 +243,10 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Equal(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), "Total cancelation Reward should be equal to total expected cancelation reward")
 		require.Equal(t, blobber1cancelationReward, blobber1cancelationReward, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 		require.Equal(t, blobber1cancelationReward, blobber2cancelationReward, "Blobber 2 cancelation Reward should be equal to total expected cancelation reward")
+
+		for _, blobber := range alloc.Blobbers {
+			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
+		}
 	})
 
 	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", 1*time.Hour, func(t *test.SystemTest) {
@@ -317,6 +325,10 @@ func TestAllocationRewards(testSetup *testing.T) {
 		}
 
 		require.InEpsilon(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, 0.10, "Total Blobber Challenge reward should be equal to MovedToChallenge")
+
+		for _, blobber := range alloc.Blobbers {
+			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
+		}
 	})
 }
 
@@ -469,7 +481,12 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		t.Log("blobber2cancelationReward", blobber2cancelationReward)
 		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
 		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
+
+		for _, blobber := range allocation.Blobbers {
+			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
+		}
 	})
+
 	t.RunSequentiallyWithTimeout("Replace Blobber", 1*time.Hour, func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -560,6 +577,10 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		t.Log("blobber2cancelationReward", blobber2cancelationReward)
 		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
 		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
+
+		for _, blobber := range allocation.Blobbers {
+			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
+		}
 	})
 }
 
@@ -685,4 +706,41 @@ func stringListContains(s []string, e string) bool {
 		}
 	}
 	return false
+}
+
+func collectAndVerifyRewardsForWallet(t *test.SystemTest, blobberID, wallet string) {
+	balanceBefore, err := utils.GetBalanceZCN(t, configPath, wallet)
+	require.Nil(t, err, "Error getting balance", balanceBefore)
+
+	output, err := utils.StakePoolInfo(t, configPath, utils.CreateParams(map[string]interface{}{
+		"blobber_id": blobberID,
+		"json":       "",
+	}))
+	require.Nil(t, err, "error getting stake pool info")
+	require.Len(t, output, 1)
+	stakePoolAfter := climodel.StakePoolInfo{}
+	err = json.Unmarshal([]byte(output[0]), &stakePoolAfter)
+	require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
+	require.NotEmpty(t, stakePoolAfter)
+
+	modelWallet, err := utils.GetWalletForName(t, configPath, utils.EscapedTestName(t))
+	require.Nil(t, err, "Get wallet failed")
+
+	rewards := float64(0)
+	for _, poolDelegateInfo := range stakePoolAfter.Delegate {
+		if poolDelegateInfo.DelegateID == modelWallet.ClientID {
+			rewards = float64(poolDelegateInfo.TotalReward)
+			break
+		}
+	}
+	require.Greater(t, rewards, int64(0))
+	t.Logf("reward tokens: %v", rewards)
+
+	output, err = utils.CollectRewardsForWallet(t, configPath, wallet, blobberID, true)
+	require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
+
+	balanceAfter, err := utils.GetBalanceZCN(t, configPath, wallet)
+	require.Nil(t, err, "Error getting balance", balanceAfter)
+
+	require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards, "Balance should increase after collecting rewards")
 }
