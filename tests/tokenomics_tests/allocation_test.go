@@ -741,7 +741,10 @@ func collectAndVerifyRewardsForWallet(t *test.SystemTest, blobberID, wallet stri
 	require.Greater(t, rewards, float64(0))
 	t.Logf("reward tokens: %v", rewards)
 
-	output, err = utils.CollectRewardsForWallet(t, configPath, wallet, blobberID, true)
+	output, err = utils.CollectRewardsForWallet(t, configPath, utils.CreateParams(map[string]interface{}{
+		"provider_type": "blobber",
+		"provider_id":   blobberID,
+	}), wallet, true)
 	require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
 
 	balanceAfter, err := utils.GetBalanceZCN(t, configPath, wallet)
