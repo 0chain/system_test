@@ -111,16 +111,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 			Blobbers:   listBlobbersString,
 		}
 
-		forSignatureBytes := fmt.Sprintf("%s:%f:%d", marker.Recipient, marker.FreeTokens, marker.Nonce)
-		require.Nil(t, err, "Could not marshal marker")
-
-		data := hex.EncodeToString([]byte(forSignatureBytes))
-		rawHash, err := hex.DecodeString(data)
-		require.Nil(t, err, "failed to decode hex %s", data)
-		require.NotNil(t, rawHash, "failed to decode hex %s", data)
-		secretKey := crypto.ToSecretKey(t, assignerWallet)
-		marker.Signature = crypto.Sign(t, string(rawHash), secretKey)
-
+		marker.Signature = getFreeStorageMarkerSignature(t, &marker, assignerWallet)
 		marker.Assigner = assignerWallet.ClientID
 
 		forFileBytes, err := json.Marshal(marker)
@@ -285,15 +276,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 			Blobbers:   listBlobbersString,
 		}
 
-		forSignatureBytes := fmt.Sprintf("%s:%f:%d", marker.Recipient, marker.FreeTokens, marker.Nonce)
-		require.Nil(t, err, "Could not marshal marker")
-
-		data := hex.EncodeToString([]byte(forSignatureBytes))
-		rawHash, err := hex.DecodeString(data)
-		require.Nil(t, err, "failed to decode hex %s", data)
-		require.NotNil(t, rawHash, "failed to decode hex %s", data)
-		secretKey := crypto.ToSecretKey(t, assignerWallet)
-		marker.Signature = crypto.Sign(t, string(rawHash), secretKey)
+		marker.Signature = getFreeStorageMarkerSignature(t, &marker, assignerWallet)
 		marker.Assigner = assignerWallet.ClientID
 
 		forFileBytes, err := json.Marshal(marker)
@@ -335,4 +318,20 @@ func createFreeStorageAllocation(t *test.SystemTest, configFile, from, params st
 		params,
 		from+"_wallet.json",
 		configFile), 3, time.Second*5)
+}
+
+func getFreeStorageMarkerSignature(t *test.SystemTest, marker *climodel.FreeStorageMarker, assignerWallet *climodel.WalletFile) string {
+	var ids string
+	for _, blobber := range marker.Blobbers {
+		ids += blobber
+	}
+
+	forSignatureBytes := fmt.Sprintf("%s:%f:%d:%s", marker.Recipient, marker.FreeTokens, marker.Nonce, ids)
+
+	data := hex.EncodeToString([]byte(forSignatureBytes))
+	rawHash, err := hex.DecodeString(data)
+	require.Nil(t, err, "failed to decode hex %s", data)
+	require.NotNil(t, rawHash, "failed to decode hex %s", data)
+	secretKey := crypto.ToSecretKey(t, assignerWallet)
+	return crypto.Sign(t, string(rawHash), secretKey)
 }

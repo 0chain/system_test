@@ -18,6 +18,22 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("update by non-smartcontract owner should fail")
 
+	t.RunSequentially("update share_ratio should work", func(t *test.SystemTest) {
+		configKey := "share_ratio"
+		newValue := "0.5"
+
+		// unused wallet, just added to avoid having the creating new wallet outputs
+		createWallet(t)
+
+		output, err := updateMinerSCConfig(t, escapedTestName(t), map[string]interface{}{
+			"keys":   configKey,
+			"values": newValue,
+		}, false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Equal(t, "", output[0], strings.Join(output, "\n"))
+	})
+
 	t.RunSequentially("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		configKey := "reward_rate"
 		newValue := "0.1"
