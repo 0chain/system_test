@@ -151,6 +151,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Equal(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
 
 		for _, blobber := range alloc.Blobbers {
+			t.Log("collecting rewards for blobber", blobber.ID)
 			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
 		}
 	})
@@ -245,6 +246,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Equal(t, blobber1cancelationReward, blobber2cancelationReward, "Blobber 2 cancelation Reward should be equal to total expected cancelation reward")
 
 		for _, blobber := range alloc.Blobbers {
+			t.Log("collecting rewards for blobber", blobber.ID)
 			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
 		}
 	})
@@ -327,6 +329,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.InEpsilon(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, 0.10, "Total Blobber Challenge reward should be equal to MovedToChallenge")
 
 		for _, blobber := range alloc.Blobbers {
+			t.Log("collecting rewards for blobber", blobber.ID)
 			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
 		}
 	})
@@ -483,6 +486,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 
 		for _, blobber := range allocation.Blobbers {
+			t.Log("collecting rewards for blobber", blobber.ID)
 			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
 		}
 	})
@@ -579,6 +583,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 
 		for _, blobber := range allocation.Blobbers {
+			t.Log("collecting rewards for blobber", blobber.ID)
 			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
 		}
 	})
@@ -733,7 +738,7 @@ func collectAndVerifyRewardsForWallet(t *test.SystemTest, blobberID, wallet stri
 			break
 		}
 	}
-	require.Greater(t, rewards, int64(0))
+	require.Greater(t, rewards, float64(0))
 	t.Logf("reward tokens: %v", rewards)
 
 	output, err = utils.CollectRewardsForWallet(t, configPath, wallet, blobberID, true)
