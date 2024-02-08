@@ -17,13 +17,11 @@ import (
 
 func TestResumeUpload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 
 	t.RunSequentiallyWithTimeout("Resume upload should work fine", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
 		fileSize := int64(500 * MB)
-
-		output, err := executeFaucetWithTokens(t, configPath, 100.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -31,7 +29,7 @@ func TestResumeUpload(testSetup *testing.T) {
 		})
 
 		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, fileSize)
+		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 		defer func() {
 			os.Remove(filename) //nolint: errcheck
@@ -55,7 +53,7 @@ func TestResumeUpload(testSetup *testing.T) {
 		uploaded := waitPartialUploadAndInterrupt(t, cmd)
 		t.Logf("the uploaded is %v ", uploaded)
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  "/",
 			"localpath":   filename,

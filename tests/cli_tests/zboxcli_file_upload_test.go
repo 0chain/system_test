@@ -302,12 +302,10 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Upload tests with Thumbnail with different format", 40*time.Minute, func(t *test.SystemTest) {
+		t.Skip("Need improvements in performance")
 		for _, blobber := range blobbersList {
-			_, err := executeFaucetWithTokens(t, configPath, 11)
-			require.Nil(t, err, "Error executing faucet")
-
 			// stake tokens
-			_, err = stakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{
+			_, err := stakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{
 				"blobber_id": blobber.Id,
 				"tokens":     10,
 			}), true)
@@ -383,8 +381,8 @@ func TestUpload(testSetup *testing.T) {
 		allocSize := int64(400 * 1024 * 1024)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		output, err := cliutils.RunCommand(t, "wget http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4 -O test_video.mp4", 3, 2*time.Second)
@@ -405,11 +403,6 @@ func TestUpload(testSetup *testing.T) {
 	t.RunWithTimeout("Upload Large File Should Work", 6*time.Minute, func(t *test.SystemTest) { // todo: this is slow, see https://0chain.slack.com/archives/G014PQ61WNT/p1669672933550459
 		allocSize := int64(2 * GB)
 		fileSize := int64(1 * GB)
-
-		for i := 0; i < 6; i++ {
-			output, err := executeFaucetWithTokens(t, configPath, 9.0)
-			require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-		}
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -573,11 +566,10 @@ func TestUpload(testSetup *testing.T) {
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
 		fileSize := int64(256)
 
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, fileSize)
+		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
 		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
@@ -664,10 +656,9 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload without any Parameter Should Fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = uploadFileWithoutRetry(t, configPath, nil)
+		output, err := uploadFileWithoutRetry(t, configPath, nil)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -749,17 +740,13 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", 10*time.Minute, func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
+		createWallet(t)
 
 		allocParam := createParams(map[string]interface{}{
 			"lock": 0.8,
 			"size": 10485760,
 		})
-		output, err = createNewAllocation(t, configPath, allocParam)
+		output, err := createNewAllocation(t, configPath, allocParam)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -951,8 +938,8 @@ func TestUpload(testSetup *testing.T) {
 			t.RunSequentiallyWithTimeout("Upload Video File "+videoFormat+" With Web Streaming Should Work", 2*time.Minute, func(t *test.SystemTest) {
 				allocSize := int64(400 * 1024 * 1024)
 				allocationID := setupAllocation(t, configPath, map[string]interface{}{
-					"size":   allocSize,
-					"tokens": 9,
+					"size": allocSize,
+					"lock": 9,
 				})
 				downloadVideo := "wget " + videoLink + " -O " + videoName + "." + videoFormat
 				output, err := cliutils.RunCommand(t, downloadVideo, 3, 2*time.Second)

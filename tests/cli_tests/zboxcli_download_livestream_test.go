@@ -27,11 +27,12 @@ import (
 func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complexity 48
 	testSetup.Skip("Flaky")
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 	t.TestSetup("Kill FFMPEG", KillFFMPEG)
 
 	defer KillFFMPEG()
 
-	t.RunSequentiallyWithTimeout("Downloading youtube feed to allocation should work", 400*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Downloading youtube feed to allocation should work", 400*time.Second, func(t *test.SystemTest) {
 		feed, ok := getFeed()
 
 		if !ok {
@@ -184,7 +185,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		}
 	}) // TODO: TOO LONG
 
-	t.RunSequentiallyWithTimeout("Downloading local webcam feed to allocation", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Downloading local webcam feed to allocation", 60*time.Second, func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 		walletOwner := escapedTestName(t) + "_wallet"
 
@@ -333,7 +334,7 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		}
 	})
 
-	t.RunSequentiallyWithTimeout("Downloading feed to allocation with delay flag", 3*time.Minute, func(t *test.SystemTest) { // todo this is unacceptably slow
+	t.RunWithTimeout("Downloading feed to allocation with delay flag", 3*time.Minute, func(t *test.SystemTest) { // todo this is unacceptably slow
 		feed, ok := getFeed()
 
 		if !ok {

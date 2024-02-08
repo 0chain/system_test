@@ -755,14 +755,13 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	t.Run("copy file from someone else's allocation should fail", func(t *test.SystemTest) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err := createWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(nonAllocOwnerWallet)
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, fileSize)
+		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
@@ -773,7 +772,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"size": allocSize,
 		})
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
@@ -827,10 +826,9 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("copy file with no allocation param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = copyFile(t, configPath, map[string]interface{}{
+		output, err := copyFile(t, configPath, map[string]interface{}{
 			"remotepath": "/abc.txt",
 			"destpath":   "/",
 		}, false)
@@ -841,10 +839,9 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("copy file with no remotepath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = copyFile(t, configPath, map[string]interface{}{
+		output, err := copyFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
 			"destpath":   "/",
 		}, false)
@@ -855,10 +852,9 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("copy file with no destpath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on copy
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = copyFile(t, configPath, map[string]interface{}{
+		output, err := copyFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
 			"remotepath": "/abc.txt",
 		}, false)
@@ -914,20 +910,14 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.RunWithTimeout("File copy - Users should be charged for copying a file ", 5*time.Minute, func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-		t.Logf("Wallet created: %s", output[0])
-
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-		t.Logf("Faucet executed: %s", output[0])
+		createWallet(t)
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"lock": "0.5",
 			"size": 4 * MB,
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		t.Logf("Allocation created: %s", output[0])
 

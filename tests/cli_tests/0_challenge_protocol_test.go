@@ -29,11 +29,10 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	// Setup related to these tests is done in `0chain/actions/run-system-tests/action.yml`.
 	// The 1 hour wait after setup is also handled in CI.
 	t.TestSetup("Get list of sharders and blobbers", func() {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Get sharder list.
-		output, err = getSharders(t, configPath)
+		output, err := getSharders(t, configPath)
 		require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 1)
 		require.Equal(t, "MagicBlock Sharders", output[0])

@@ -41,12 +41,13 @@ type ExecutionRequest struct {
 }
 
 type Wallet struct {
-	Id           string `json:"id"`
+	Id           string `json:"client_id"`
 	Version      string `json:"version"`
 	CreationDate *int   `json:"creation_date"`
-	PublicKey    string `json:"public_key"`
+	PublicKey    string `json:"client_key"`
 	Nonce        int
 	Keys         *KeyPair `json:"-"`
+	Mnemonics    string   `json:"mnemonics"`
 }
 
 type SdkWallet struct {
@@ -1014,11 +1015,12 @@ type DelegatePool struct {
 }
 
 type FreeStorageMarker struct {
-	Assigner   string  `json:"assigner,omitempty"`
-	Recipient  string  `json:"recipient"`
-	FreeTokens float64 `json:"free_tokens"`
-	Nonce      int64   `json:"nonce"`
-	Signature  string  `json:"signature,omitempty"`
+	Assigner   string   `json:"assigner,omitempty"`
+	Recipient  string   `json:"recipient"`
+	FreeTokens float64  `json:"free_tokens"`
+	Nonce      int64    `json:"nonce"`
+	Signature  string   `json:"signature,omitempty"`
+	Blobbers   []string `json:"blobbers"`
 }
 
 // ----------------------------------------------

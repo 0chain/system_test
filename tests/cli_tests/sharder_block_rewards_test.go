@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"strings"
 	"testing"
 	"time"
 
@@ -28,8 +27,7 @@ func TestSharderBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team p
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
 	t.RunSequentially("Sharder share of block rewards", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		if !confirmDebugBuild(t) {
 			t.Skip("sharder block rewards test skipped as it requires a debug event database")

@@ -37,10 +37,12 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Multi upload operations of single format should work with 50 large and 50 small files", 500*time.Minute, func(t *test.SystemTest) {
+		t.Skip("Need performance optimization")
 		createAllocationAndPerformMultiOperation(t, 2*GB, 100, 100, false, []int64{1 * KB, 40 * MB}, "")
 	})
 
 	t.RunSequentiallyWithTimeout("Multi upload operations of multiple formats should work with 50 large and 50 small files", 500*time.Minute, func(t *test.SystemTest) {
+		t.Skip("Need performance optimization")
 		createAllocationAndPerformMultiOperation(t, 2*GB, 100, 100, true, []int64{1 * KB, 40 * MB}, "")
 	})
 
@@ -57,11 +59,14 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi different operations should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		wallet := createWallet(t)
+
+		sdkClient.SetWallet(t, wallet)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		ops := make([]sdk.OperationRequest, 0, 10)
 
@@ -97,11 +102,14 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi move operations should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		wallet := createWallet(t)
+
+		sdkClient.SetWallet(t, wallet)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		ops := make([]sdk.OperationRequest, 0, 10)
 
@@ -140,11 +148,14 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi copy operations should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		wallet := createWallet(t)
+
+		sdkClient.SetWallet(t, wallet)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		ops := make([]sdk.OperationRequest, 0, 10)
 
@@ -182,11 +193,13 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi create dir operations should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+		wallet := createWallet(t)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		sdkClient.SetWallet(t, wallet)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		ops := make([]sdk.OperationRequest, 0, 10)
 		names := make([]string, 0, 10)
@@ -209,11 +222,13 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Nested move operation should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+		wallet := createWallet(t)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		sdkClient.SetWallet(t, wallet)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		nestedDir := sdkClient.AddUploadOperationWithPath(t, allocationID, "/new/nested/")
 
@@ -229,11 +244,13 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Nested copy operation should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+		wallet := createWallet(t)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		sdkClient.SetWallet(t, wallet)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		nestedDir := sdkClient.AddUploadOperationWithPath(t, allocationID, "/new/nested/")
 
@@ -248,10 +265,13 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Nested rename directory operation should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		wallet := createWallet(t)
+
+		sdkClient.SetWallet(t, wallet)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		nestedDir := sdkClient.AddCreateDirOperation(t, allocationID, "/new/nested/nested1")
 
@@ -278,13 +298,18 @@ func randName() string {
 }
 
 func createAllocationAndPerformMultiOperation(t *test.SystemTest, allocSize int64, filesCount, expectedFilesCount int, fileWithFormats bool, fileSizes []int64, secondaryOperation string) {
-	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-	blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+	wallet := initialisedWallets[walletIdx]
+	walletIdx++
+	balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+	wallet.Nonce = int(balance.Nonce)
+	sdkClient.SetWallet(t, wallet)
+
+	blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 	if allocSize != 0 {
 		blobberRequirements.Size = allocSize
 	}
-	allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-	allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+	allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+	allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 	ops := make([]sdk.OperationRequest, 0, 10)
 

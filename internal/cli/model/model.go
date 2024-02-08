@@ -406,11 +406,12 @@ type FileDiff struct {
 }
 
 type FreeStorageMarker struct {
-	Assigner   string  `json:"assigner,omitempty"`
-	Recipient  string  `json:"recipient"`
-	FreeTokens float64 `json:"free_tokens"`
-	Nonce      int64   `json:"nonce"`
-	Signature  string  `json:"signature,omitempty"`
+	Assigner   string   `json:"assigner,omitempty"`
+	Recipient  string   `json:"recipient"`
+	FreeTokens float64  `json:"free_tokens"`
+	Nonce      int64    `json:"nonce"`
+	Signature  string   `json:"signature,omitempty"`
+	Blobbers   []string `json:"blobbers"`
 }
 
 type WalletFile struct {

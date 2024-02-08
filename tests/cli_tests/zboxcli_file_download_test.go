@@ -23,7 +23,6 @@ import (
 const StatusCompletedCB = "Status completed callback"
 
 func TestDownload(testSetup *testing.T) {
-	//todo: too mnay test cases are slow in here
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Download File from Root Directory Should Work")
 	t.Parallel()
@@ -193,7 +192,6 @@ func TestDownload(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	//TODO: Directory download seems broken see https://github.com/0chain/blobber/issues/588
 	t.RunWithTimeout("Download Entire Directory Should Work but does not see blobber/issues/588", 3*time.Minute, func(t *test.SystemTest) { // todo: slow
 		allocSize := int64(2048)
 		filesize := int64(256)
@@ -220,7 +218,6 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	//TODO: Directory share seems broken see https://github.com/0chain/blobber/issues/588
 	t.RunWithTimeout("Download File From Shared Folder Should Work but does not see blobber/issues/588", 3*time.Minute, func(t *test.SystemTest) {
 		var authTicket, filename string
 
@@ -257,8 +254,7 @@ func TestDownload(testSetup *testing.T) {
 		})
 
 		// Just create a wallet so that we can work further
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// Download file using auth-ticket: should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -594,8 +590,7 @@ func TestDownload(testSetup *testing.T) {
 		})
 
 		// Just create a wallet so that we can work further
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// Download file using auth-ticket: shouldn't work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -617,8 +612,8 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocation(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
-				"tokens": 9,
+				"size": 10 * 1024,
+				"lock": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -1119,10 +1114,9 @@ func TestDownload(testSetup *testing.T) {
 	// Failure Scenarios
 
 	t.Run("Download File from Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": "12334qe",
 			"remotepath": "/",
 			"localpath":  "tmp/",
@@ -1153,8 +1147,7 @@ func TestDownload(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		// Download using otherAllocationID: should not work
-		_, err = createWallet(t, configPath)
-		require.NoError(t, err)
+		createWallet(t)
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": otherAllocationID,
@@ -1187,10 +1180,9 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download without any Parameter Should Fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = downloadFile(t, configPath, "", false)
+		output, err := downloadFile(t, configPath, "", false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -1318,6 +1310,8 @@ func setupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, ex
 		token, err := strconv.ParseFloat(fmt.Sprintf("%v", tok), 64)
 		require.Nil(t, err)
 		tokens = token
+		// remove "tokens" from extraParam
+		delete(extraParam, "tokens")
 	}
 
 	allocationID := setupAllocation(t, cliConfigFilename, extraParam)

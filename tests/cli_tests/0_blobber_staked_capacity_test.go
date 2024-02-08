@@ -22,8 +22,7 @@ func TestStakePool(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.TestSetup("register wallet and get blobbers", func() {
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", err)
+		createWallet(t)
 
 		// get the list of blobbers
 		blobbersList = getBlobbersList(t)
@@ -31,8 +30,7 @@ func TestStakePool(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Total stake in a blobber can never be less than it's used capacity", 800*time.Minute, func(t *test.SystemTest) {
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", err)
+		createWallet(t)
 
 		// stake 10 tokens on all blobbers
 		stakeTokensToAllBlobbers(t, 1)
@@ -168,11 +166,6 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 	allocationCost, err := getAllocationCost(output[0])
 	require.Nil(t, err, "could not get allocation cost")
 
-	for i := float64(0); i <= (allocationCost/9999)+1; i++ {
-		_, err = executeFaucetWithTokens(t, configPath, 9999)
-		require.Nil(t, err, "Error executing faucet with tokens", err)
-	}
-
 	// Create an allocation of maximum size that all blobbers can honor.
 	output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 		"size":        allocSize,
@@ -192,13 +185,9 @@ func createAllocationOfMaxSizeBlobbersCanHonour(t *test.SystemTest, minAvailable
 
 func createWalletAndStakeTokensForWallet(t *test.SystemTest, blobber *climodel.BlobberInfo) {
 	// Stake 1 token from new wallet
-	_, err := createWalletForName(t, configPath, newStakeWallet)
-	require.Nil(t, err, "Error registering wallet", err)
+	createWalletForName(newStakeWallet)
 
-	_, err = executeFaucetWithTokensForWallet(t, newStakeWallet, configPath, 90)
-	require.Nil(t, err, "Error executing faucet with tokens", err)
-
-	_, err = stakeTokensForWallet(t, configPath, newStakeWallet, createParams(map[string]interface{}{"blobber_id": blobber.Id, "tokens": 1}), true)
+	_, err := stakeTokensForWallet(t, configPath, newStakeWallet, createParams(map[string]interface{}{"blobber_id": blobber.Id, "tokens": 1}), true)
 	require.Nil(t, err, "Error staking tokens", err)
 }
 
@@ -215,9 +204,6 @@ func stakeTokensToAllBlobbers(t *test.SystemTest, tokens int64) {
 	// get the list of blobbers
 	blobbers := getBlobbersList(t)
 	require.Greater(t, len(blobbers), 0, "No blobbers found")
-
-	_, err := executeFaucetWithTokens(t, configPath, 90)
-	require.Nil(t, err, "Error executing faucet with tokens", err)
 
 	for i := range blobbers {
 		blobber := blobbers[i]
