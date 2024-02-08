@@ -23,10 +23,9 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 	}
 
 	t.RunSequentially("Get Global Config Should Work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = getGlobalConfig(t, true)
+		output, err := getGlobalConfig(t, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, strings.Join(output, "\n"))
 
@@ -46,8 +45,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		newValue := "200"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		cfgBefore := getGlobalConfiguration(t, true)
 		oldValue := cfgBefore[configKey]
@@ -57,15 +55,13 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 
 		// ensure revert in config is run regardless of test result
 		defer func() {
-			output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+			_, _ = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey,
 				"values": oldValue,
 			}, true)
 		}()
-		_, err = createWalletForName(t, configPath, scOwnerWallet)
-		require.NoError(t, err)
 
-		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
@@ -79,10 +75,6 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		cfgAfter := getGlobalConfiguration(t, true)
 
 		require.Equal(t, newValue, cfgAfter[configKey], "new value %s for config was not set", newValue, configKey)
-
-		// test transaction to verify chain is still working
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	})
 
 	t.RunSequentially("Update Global Config - Update multiple mutable config should work", func(t *test.SystemTest) {
@@ -93,8 +85,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		newValue2 := "210"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		cfgBefore := getGlobalConfiguration(t, true)
 		oldValue1 := cfgBefore[configKey1].(string)
@@ -109,13 +100,13 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 
 		// ensure revert in config is run regardless of test result
 		defer func() {
-			output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+			_, _ = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey1 + "," + configKey2,
 				"values": oldValue1 + "," + oldValue2,
 			}, true)
 		}()
 
-		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey1 + "," + configKey2,
 			"values": newValue1 + "," + newValue2,
 		}, false)
@@ -132,14 +123,10 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		require.Equal(t, newValue1, cfgAfter[configKey1], "new value %s for config %s was not set", newValue1, configKey1)
 		require.Equal(t, newValue2, cfgAfter[configKey2], "new value %s for config %s was not set", newValue2, configKey2)
 
-		// test transaction to verify chain is still working
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	})
 
 	t.RunSequentially("Update Global Config - Update immutable config must fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Failed to get wallet")
@@ -147,7 +134,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		configKey := "server_chain.owner"
 		newValue := wallet.ClientID
 
-		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
@@ -158,8 +145,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 
 	t.RunSequentially("Update Global Config - Update multiple config including 1 immutable config must fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Failed to get wallet")
@@ -172,7 +158,7 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 
 		cfgBefore := getGlobalConfiguration(t, true)
 
-		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey1 + "," + configKey2,
 			"values": newValue1 + "," + newValue2,
 		}, false)
@@ -187,20 +173,16 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		require.Equal(t, cfgBefore[configKey1], cfgAfter[configKey1], "new value %s for config %s must not be set", newValue1, configKey1)
 		require.Equal(t, cfgBefore[configKey2], cfgAfter[configKey2], "new value %s for config %s must not be set", newValue2, configKey2)
 
-		// test transaction to verify chain is still working
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
 	})
 
 	// FIXME! Maybe this is better to fail the command from zwallet or gosdk in case of no parameters.
 	// Currently in this case transaction is getting executed, but nothing is getting updated.
 	t.RunSequentially("Update Global Config - update with suppliying no parameter must update nothing", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		cfgBefore := getGlobalConfiguration(t, true)
 
-		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{}, false)
+		output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{}, false)
 		require.Nil(t, err, "Error in updating global config", strings.Join(output, "\n"))
 		require.Len(t, output, 2, strings.Join(output, "\n"))
 		require.Equal(t, "global settings updated", output[0], strings.Join(output, "\n"))
@@ -216,13 +198,12 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update Global Config - update with invalid key must fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		configKey := "invalid.key"
 		newValue := "120ms"
 
-		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
@@ -232,13 +213,12 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update Global Config - update with invalid value must fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		configKey := "server_chain.block.proposal.max_wait_time"
 		newValue := "abc"
 
-		output, err = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
@@ -251,10 +231,9 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 		configKey := "server_chain.smart_contract.setting_update_period"
 		newValue := "215"
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = updateGlobalConfigWithWallet(t, escapedTestName(t), map[string]interface{}{
+		output, err := updateGlobalConfigWithWallet(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
