@@ -70,11 +70,11 @@ func TestAllocationRewards(testSetup *testing.T) {
 		validatorListString = append(validatorListString, validator.ID)
 	}
 
-	stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-		1, 1, 1, 1,
-	}, 1)
-
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", 1*time.Hour, func(t *test.SystemTest) {
+		stakeTokensToBlobbersAndValidatorsForWallet(t, blobberListString, validatorListString, configPath, utils.EscapedTestName(t), []float64{
+			1, 1, 1, 1,
+		}, 1)
+
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -157,6 +157,10 @@ func TestAllocationRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Cancel equal read price 0.1", 1*time.Hour, func(t *test.SystemTest) {
+		stakeTokensToBlobbersAndValidatorsForWallet(t, blobberListString, validatorListString, configPath, utils.EscapedTestName(t), []float64{
+			1, 1, 1, 1,
+		}, 1)
+
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -252,6 +256,10 @@ func TestAllocationRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("External Party Upgrades Allocation", 1*time.Hour, func(t *test.SystemTest) {
+		stakeTokensToBlobbersAndValidatorsForWallet(t, blobberListString, validatorListString, configPath, utils.EscapedTestName(t), []float64{
+			1, 1, 1, 1,
+		}, 1)
+
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -728,7 +736,7 @@ func collectAndVerifyRewardsForWallet(t *test.SystemTest, blobberID, wallet stri
 	require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
 	require.NotEmpty(t, stakePoolAfter)
 
-	modelWallet, err := utils.GetWalletForName(t, configPath, utils.EscapedTestName(t))
+	modelWallet, err := utils.GetWalletForName(t, configPath, wallet)
 	require.Nil(t, err, "Get wallet failed")
 
 	rewards := float64(0)
@@ -751,4 +759,67 @@ func collectAndVerifyRewardsForWallet(t *test.SystemTest, blobberID, wallet stri
 	require.Nil(t, err, "Error getting balance", balanceAfter)
 
 	require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards, "Balance should increase after collecting rewards")
+}
+
+func stakeTokensToBlobbersAndValidatorsForWallet(t *test.SystemTest, blobbers, validators []string, configPath, wallet string, tokens []float64, numDelegates int) {
+	tIdx := 0
+
+	for i := 0; i < numDelegates; i++ {
+		for _, blobber := range blobbers { // add balance to delegate wallet
+			_, err := utils.ExecuteFaucetWithTokensForWallet(t, wallet, configPath, tokens[tIdx]+1)
+			require.Nil(t, err, "Error executing faucet")
+
+			t.Log("Staking tokens for blobber: ", blobber)
+
+			// stake tokens
+			_, err = utils.StakeTokensForWallet(t, configPath, wallet, utils.CreateParams(map[string]interface{}{
+				"blobber_id": blobber,
+				"tokens":     tokens[tIdx],
+			}), true)
+			require.Nil(t, err, "Error staking tokens")
+
+			tIdx++
+		}
+	}
+
+	for i := 0; i < numDelegates; i++ {
+		for _, validator := range validators {
+			// add balance to delegate wallet
+			_, err := utils.ExecuteFaucetWithTokensForWallet(t, wallet, configPath, tokens[tIdx]+1)
+			require.Nil(t, err, "Error executing faucet")
+
+			// stake tokens
+			_, err = utils.StakeTokensForWallet(t, configPath, wallet, utils.CreateParams(map[string]interface{}{
+				"validator_id": validator,
+				"tokens":       tokens[tIdx],
+			}), true)
+			require.Nil(t, err, "Error staking tokens")
+
+			tIdx++
+		}
+	}
+}
+
+func unstakeTokensForBlobbersAndValidatorsForWallet(t *test.SystemTest, blobbers, validators []string, configPath, wallet string, numDelegates int) {
+	for i := 0; i < numDelegates; i++ {
+		for _, blobber := range blobbers {
+			t.Log("Unstaking tokens for blobber: ", blobber)
+			// unstake tokens
+			_, err := utils.UnstakeTokensForWallet(t, configPath, wallet, utils.CreateParams(map[string]interface{}{
+				"blobber_id": blobber,
+			}))
+			require.Nil(t, err, "Error unstaking tokens")
+		}
+	}
+
+	for i := 0; i < numDelegates; i++ {
+		for _, validator := range validators {
+			t.Log("Unstaking tokens for validator: ", validator)
+			// unstake tokens
+			_, err := utils.UnstakeTokensForWallet(t, configPath, wallet, utils.CreateParams(map[string]interface{}{
+				"validator_id": validator,
+			}))
+			require.Nil(t, err, "Error unstaking tokens")
+		}
+	}
 }
