@@ -155,7 +155,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		require.True(t, strings.Contains(output[0], "unauthorized access - only the owner can access"), "")
 	})
 
-	t.RunSequentially("shutdowned blobber is not available for allocations", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("shutdowned blobber is not available for allocations", 10*time.Minute, func(t *test.SystemTest) {
 		createWallet(t)
 
 		startBlobbers := getBlobbers(t)
