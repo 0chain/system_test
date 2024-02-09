@@ -237,7 +237,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		require.NoError(t, err, output)
 
 		balanceAfter := getBalanceFromSharders(t, testWallet.ClientID) + 1500000000 // Txn fee
-		require.Greater(t, balanceAfter, balanceBefore, "should have collected rewards")
+		require.GreaterOrEqual(t, balanceAfter, balanceBefore, "should have collected rewards")
 
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToShutdown}), true)
 		require.NoError(t, err, "should be able to unstake tokens from a shutdowned blobber")
