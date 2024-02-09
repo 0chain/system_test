@@ -24,8 +24,9 @@ func TestKillBlobber(testSetup *testing.T) {
 
 	// Killing a blobber should make it unavalable for any new allocations,
 	// and stake pools should be slashed by an amount given by the "stakepool.kill_slash" setting
-	t.RunSequentially("killed blobber is not available for allocations", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("killed blobber is not available for allocations", 10*time.Minute, func(t *test.SystemTest) {
 		createWallet(t)
+
 		startBlobbers := getBlobbers(t)
 		var blobberToKill string
 		var activeBlobbers int
@@ -42,6 +43,13 @@ func TestKillBlobber(testSetup *testing.T) {
 		dataShards := 1
 		parityShards := activeBlobbers - 1
 
+		t.Log("blobberToKill", blobberToKill)
+
+		_, err := stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToKill, "tokens": 100}), true)
+		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", blobberToKill)
+
+		time.Sleep(2 * time.Minute)
+
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
@@ -55,12 +63,6 @@ func TestKillBlobber(testSetup *testing.T) {
 		allocationID, err := getAllocationID(output[0])
 		require.NoError(t, err)
 		createAllocationTestTeardown(t, allocationID)
-
-		_, err = executeFaucetWithTokens(t, configPath, 100.0)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		_, err = stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToKill, "tokens": 100}), true)
-		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", blobberToKill)
 
 		spBefore := getStakePoolInfo(t, blobberToKill)
 		output, err = killBlobber(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
@@ -87,22 +89,39 @@ func TestKillBlobber(testSetup *testing.T) {
 				"stake pools should be slashed by %f", killSlash) // 5% error margin because there can be challenge penalty
 		}
 
+		testWallet, err := getWallet(t, configPath)
+		require.NoError(t, err, "error fetching wallet")
+
+		balanceBefore := getBalanceFromSharders(t, testWallet.ClientID)
+
+		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
+			"provider_type": "blobber",
+			"provider_id":   blobberToKill,
+			"fee":           "0.15",
+		}), true)
+		require.NoError(t, err, output)
+
+		balanceAfter := getBalanceFromSharders(t, testWallet.ClientID) + 1500000000 // Txn fee
+		require.GreaterOrEqual(t, balanceAfter, balanceBefore, "should have collected rewards")
+
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToKill}), true)
 		require.NoError(t, err, "should be able to unstake tokens from a killed blobber")
 		t.Log(strings.Join(output, "\n"))
 
-		//balanceBefore := getBalanceFromSharders(t, blobberOwnerWallet)
-		//
-		//output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
-		//	"provider_type": "blobber",
-		//	"provider_id":   blobberToKill,
-		//	"fee":           "0.15",
-		//}), true)
-		//require.NoError(t, err, output)
-		//
-		//balanceAfter := getBalanceFromSharders(t, blobberOwnerWallet)
+		blobberDelegateWallet, err := getWalletForName(t, configPath, blobberOwnerWallet)
+		require.NoError(t, err, "Error getting wallet for blobber owner")
 
-		//require.Greater(t, balanceAfter, balanceBefore, "should have collected rewards")
+		balanceBefore = getBalanceFromSharders(t, blobberDelegateWallet.ClientID)
+
+		output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
+			"provider_type": "blobber",
+			"provider_id":   blobberToKill,
+			"fee":           "0.15",
+		}), blobberOwnerWallet, true)
+		require.NoError(t, err, output)
+
+		balanceAfter = getBalanceFromSharders(t, blobberDelegateWallet.ClientID) + 1500000000 // Txn fee
+		require.Greater(t, balanceAfter, balanceBefore, "should have collected rewards")
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
@@ -136,7 +155,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		require.True(t, strings.Contains(output[0], "unauthorized access - only the owner can access"), "")
 	})
 
-	t.RunSequentially("shutdowned blobber is not available for allocations", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("shutdowned blobber is not available for allocations", 10*time.Minute, func(t *test.SystemTest) {
 		createWallet(t)
 
 		startBlobbers := getBlobbers(t)
@@ -152,6 +171,13 @@ func TestKillBlobber(testSetup *testing.T) {
 		require.True(t, activeBlobbers > 1, "need at least two active blobbers")
 		dataShards := 1
 		parityShards := activeBlobbers - 1
+
+		t.Log("blobberToShutdown", blobberToShutdown)
+
+		_, err := stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToShutdown, "tokens": 100}), true)
+		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", blobberToShutdown)
+
+		time.Sleep(2 * time.Minute)
 
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
@@ -198,22 +224,39 @@ func TestKillBlobber(testSetup *testing.T) {
 				"stake pools should be slashed by %f", shutdownSlash) // 5% error margin because there can be challenge penalty
 		}
 
+		testWallet, err := getWallet(t, configPath)
+		require.NoError(t, err, "error fetching wallet")
+
+		balanceBefore := getBalanceFromSharders(t, testWallet.ClientID)
+
+		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
+			"provider_type": "blobber",
+			"provider_id":   blobberToShutdown,
+			"fee":           "0.15",
+		}), true)
+		require.NoError(t, err, output)
+
+		balanceAfter := getBalanceFromSharders(t, testWallet.ClientID) + 1500000000 // Txn fee
+		require.GreaterOrEqual(t, balanceAfter, balanceBefore, "should have collected rewards")
+
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToShutdown}), true)
 		require.NoError(t, err, "should be able to unstake tokens from a shutdowned blobber")
 		t.Log(strings.Join(output, "\n"))
 
-		//balanceBefore := getBalanceFromSharders(t, blobberOwnerWallet)
-		//
-		//output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
-		//	"provider_type": "blobber",
-		//	"provider_id":   blobberToShutdown,
-		//	"fee":           "0.15",
-		//}), blobberOwnerWallet, true)
-		//require.NoError(t, err, output)
-		//
-		//balanceAfter := getBalanceFromSharders(t, blobberOwnerWallet)
-		//
-		//require.Greater(t, balanceAfter, balanceBefore, "should have collected rewards")
+		blobberDelegateWallet, err := getWalletForName(t, configPath, blobberOwnerWallet)
+		require.NoError(t, err, "Error getting wallet for blobber owner")
+
+		balanceBefore = getBalanceFromSharders(t, blobberDelegateWallet.ClientID)
+
+		output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
+			"provider_type": "blobber",
+			"provider_id":   blobberToShutdown,
+			"fee":           "0.15",
+		}), blobberOwnerWallet, true)
+		require.NoError(t, err, output)
+
+		balanceAfter = getBalanceFromSharders(t, blobberDelegateWallet.ClientID) + 1500000000 // Txn fee
+		require.Greater(t, balanceAfter, balanceBefore, "should have collected rewards")
 
 		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
