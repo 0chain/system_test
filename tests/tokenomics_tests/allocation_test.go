@@ -232,13 +232,11 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.InEpsilon(t, int64(expectedChallengeRewards), totalBlobberChallengereward, 0.1, "Expected challenge rewards should be equal to actual challenge rewards")
 
 		// cancelation Rewards
-		alloccancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
-		if err != nil {
-			return
-		}
+		allocCancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
+		require.Nil(t, err, "Error getting allocation cancelation rewards", strings.Join(output, "\n"))
 
-		blobber1cancelationReward := alloccancelationRewards[0]
-		blobber2cancelationReward := alloccancelationRewards[1]
+		blobber1cancelationReward := allocCancelationRewards[0]
+		blobber2cancelationReward := allocCancelationRewards[1]
 
 		totalExpectedcancelationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
 
@@ -483,9 +481,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 		// cancelation Rewards
 		alloccancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
-		if err != nil {
-			return
-		}
+		require.Nil(t, err, "Error getting allocation cancelation rewards", strings.Join(output, "\n"))
 
 		blobber1cancelationReward := alloccancelationRewards[0]
 		blobber2cancelationReward := alloccancelationRewards[1]
@@ -584,9 +580,8 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 		// cancelation Rewards
 		alloccancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
-		if err != nil {
-			return
-		}
+		require.Nil(t, err, "Error getting allocation cancelation rewards", strings.Join(output, "\n"))
+
 		blobber1cancelationReward := alloccancelationRewards[0]
 		blobber2cancelationReward := alloccancelationRewards[1]
 		totalExpectedcancelationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
