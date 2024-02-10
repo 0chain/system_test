@@ -226,6 +226,8 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			}
 		}
 
+		t.Log("Expected Counts : ", expectedCounts)
+
 		for _, blobber := range blobberList {
 			weight := float64((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
 
