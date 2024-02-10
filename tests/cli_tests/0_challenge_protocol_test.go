@@ -217,6 +217,11 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		for i := int64(0); i < allChallengesCount["total"]; i++ {
 			randomWeight := rand.Intn(int(totalWeight))
 
+			// shuffle blobbers list
+			rand.Shuffle(len(blobberList), func(i, j int) {
+				blobberList[i], blobberList[j] = blobberList[j], blobberList[i]
+			})
+
 			for _, blobber := range blobberList {
 				randomWeight -= int((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
 				if randomWeight <= 0 {
