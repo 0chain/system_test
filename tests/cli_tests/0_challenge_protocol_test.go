@@ -209,12 +209,16 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			totalWeight += float64((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
 		}
 
+		t.Log("Total weight : ", totalWeight)
+
 		for _, blobber := range blobberList {
 			weight := float64((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
 
 			challengesCountQuery := fmt.Sprintf("blobber_id = '%s'", blobber.Id)
 			blobberChallengeCount, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 			require.Nil(t, err, "error counting challenges")
+
+			t.Log("Blobber weight : ", weight, " Expected Challenges : ", int64(float64(allChallengesCount["total"])*(weight/totalWeight)), " Blobber Challenges : ", blobberChallengeCount["total"])
 
 			require.InEpsilon(t, int64(float64(allChallengesCount["total"])*(weight/totalWeight)), blobberChallengeCount["total"], 0.20, "blobber distribution should within tolerance")
 			require.InEpsilon(t, blobberChallengeCount["total"], blobberChallengeCount["passed"]+blobberChallengeCount["open"], 0.05, "failure rate should not be more than 5 percent")

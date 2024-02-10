@@ -85,6 +85,15 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		assertChallengeRewardsForTwoDelegatesEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, []int64{
 			1, 1, 1, 1, 1, 1, 1, 1,
 		})
+
+		alloc := utils.GetAllocation(t, allocationId)
+
+		t.Log("Collecting rewards for blobbers count : ", len(alloc.Blobbers))
+
+		for _, blobber := range alloc.Blobbers {
+			t.Log("collecting rewards for blobber", blobber.ID)
+			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
+		}
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 2 delegate each (unequal stake)", 30*time.Minute, func(t *test.SystemTest) {
@@ -108,6 +117,15 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		assertChallengeRewardsForTwoDelegatesEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, []int64{
 			1, 1, 2, 2, 1, 1, 2, 2,
 		})
+
+		alloc := utils.GetAllocation(t, allocationId)
+
+		t.Log("Collecting rewards for blobbers count : ", len(alloc.Blobbers))
+
+		for _, blobber := range alloc.Blobbers {
+			t.Log("collecting rewards for blobber", blobber.ID)
+			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
+		}
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (equal stake)", 30*time.Minute, func(t *test.SystemTest) {
@@ -130,6 +148,15 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		})
 
 		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, 1, 0)
+
+		alloc := utils.GetAllocation(t, allocationId)
+
+		t.Log("Collecting rewards for blobbers count : ", len(alloc.Blobbers))
+
+		for _, blobber := range alloc.Blobbers {
+			t.Log("collecting rewards for blobber", blobber.ID)
+			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
+		}
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 30% of Allocation and 1 delegate each (equal stake)", 30*time.Minute, func(t *test.SystemTest) {
@@ -152,6 +179,15 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		})
 
 		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.3*GB, 1, 0)
+
+		alloc := utils.GetAllocation(t, allocationId)
+
+		t.Log("Collecting rewards for blobbers count : ", len(alloc.Blobbers))
+
+		for _, blobber := range alloc.Blobbers {
+			t.Log("collecting rewards for blobber", blobber.ID)
+			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
+		}
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 10% of Allocation and 1 delegate each (unequal stake 2:1)", 30*time.Minute, func(t *test.SystemTest) {
@@ -175,6 +211,15 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		})
 
 		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, 1, 0)
+
+		alloc := utils.GetAllocation(t, allocationId)
+
+		t.Log("Collecting rewards for blobbers count : ", len(alloc.Blobbers))
+
+		for _, blobber := range alloc.Blobbers {
+			t.Log("collecting rewards for blobber", blobber.ID)
+			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
+		}
 	})
 
 	t.RunSequentiallyWithTimeout("Client Uploads 20% of Allocation and delete 10% immediately and 1 delegate each (equal stake)", 30*time.Minute, func(t *test.SystemTest) {
@@ -197,6 +242,15 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		})
 
 		assertChallengeRewardsForOneDelegateEach(t, allocationId, blobberListString, validatorListString, 0.1*GB, 2, 1)
+
+		alloc := utils.GetAllocation(t, allocationId)
+
+		t.Log("Collecting rewards for blobbers count : ", len(alloc.Blobbers))
+
+		for _, blobber := range alloc.Blobbers {
+			t.Log("collecting rewards for blobber", blobber.ID)
+			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
+		}
 	})
 }
 
