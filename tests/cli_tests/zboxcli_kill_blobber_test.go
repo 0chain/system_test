@@ -359,3 +359,17 @@ func shutdownBlobber(t *test.SystemTest, wallet, cliConfigFilename, params strin
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
 }
+
+func collectRewards(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return collectRewardsForWallet(t, cliConfigFilename, params, escapedTestName(t), retry)
+}
+
+func collectRewardsForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
+	t.Log("collecting rewards...")
+	cmd := fmt.Sprintf("./zbox collect-reward %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
