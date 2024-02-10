@@ -71,7 +71,6 @@ func TestAllocationRewards(testSetup *testing.T) {
 	}
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", 1*time.Hour, func(t *test.SystemTest) {
-		t.Skip()
 		stakeTokensToBlobbersAndValidatorsForWallet(t, blobberListString, validatorListString, configPath, utils.EscapedTestName(t), []float64{
 			1, 1, 1, 1,
 		}, 1)
