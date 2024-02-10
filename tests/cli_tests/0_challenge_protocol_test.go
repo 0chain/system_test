@@ -220,7 +220,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 
 			t.Log("Blobber weight : ", weight, " Expected Challenges : ", int64(float64(allChallengesCount["total"])*(weight/totalWeight)), " Blobber Challenges : ", blobberChallengeCount["total"])
 
-			require.InEpsilon(t, int64(float64(allChallengesCount["total"])*(weight/totalWeight)), blobberChallengeCount["total"], 0.20, "blobber distribution should within tolerance")
+			require.InEpsilon(t, blobberChallengeCount["total"], int64(float64(allChallengesCount["total"])*(weight/totalWeight)), 0.20, "blobber distribution should within tolerance")
 			require.InEpsilon(t, blobberChallengeCount["total"], blobberChallengeCount["passed"]+blobberChallengeCount["open"], 0.05, "failure rate should not be more than 5 percent")
 		}
 	})
