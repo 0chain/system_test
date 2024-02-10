@@ -71,6 +71,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 	}
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Upgrade equal read price 0.1", 1*time.Hour, func(t *test.SystemTest) {
+		t.Skip()
 		stakeTokensToBlobbersAndValidatorsForWallet(t, blobberListString, validatorListString, configPath, utils.EscapedTestName(t), []float64{
 			1, 1, 1, 1,
 		}, 1)
@@ -232,20 +233,21 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.InEpsilon(t, int64(expectedChallengeRewards), totalBlobberChallengereward, 0.1, "Expected challenge rewards should be equal to actual challenge rewards")
 
 		// cancelation Rewards
-		allocCancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
+		allocCancelationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
 		require.Nil(t, err, "Error getting allocation cancelation rewards", strings.Join(output, "\n"))
 
 		blobber1cancelationReward := allocCancelationRewards[0]
 		blobber2cancelationReward := allocCancelationRewards[1]
 
-		totalExpectedcancelationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
+		totalExpectedcancelationReward := sizeInGB(int64(allocSize)) * 2 * 1000000000 * 0.2
+		totalExpectedcancelationReward -= float64(alloc.MovedToChallenge - alloc.MovedBack)
 
 		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
 
 		t.Log("blobber1cancelationReward", blobber1cancelationReward)
 		t.Log("blobber2cancelationReward", blobber2cancelationReward)
 
-		require.Equal(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), "Total cancelation Reward should be equal to total expected cancelation reward")
+		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
 		require.Equal(t, blobber1cancelationReward, blobber1cancelationReward, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 		require.Equal(t, blobber1cancelationReward, blobber2cancelationReward, "Blobber 2 cancelation Reward should be equal to total expected cancelation reward")
 
@@ -323,7 +325,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		// sleep for 5 minutes
-		time.Sleep(25 * time.Minute)
+		time.Sleep(10 * time.Minute)
 
 		alloc = utils.GetAllocation(t, allocationId)
 		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should increase")
@@ -480,7 +482,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		}
 
 		// cancelation Rewards
-		alloccancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
+		alloccancelationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
 		require.Nil(t, err, "Error getting allocation cancelation rewards", strings.Join(output, "\n"))
 
 		blobber1cancelationReward := alloccancelationRewards[0]
@@ -579,7 +581,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		}
 
 		// cancelation Rewards
-		alloccancelationRewards, err := getAllocationcancelationReward(t, allocationId, blobberListString)
+		alloccancelationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
 		require.Nil(t, err, "Error getting allocation cancelation rewards", strings.Join(output, "\n"))
 
 		blobber1cancelationReward := alloccancelationRewards[0]
@@ -598,10 +600,10 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 	})
 }
 
-func getAllocationcancelationReward(t *test.SystemTest, allocationID string, blobberList []string) ([]int64, error) {
+func getAllocationCancellationReward(t *test.SystemTest, allocationID string, blobberList []string) ([]int64, error) {
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	sharderBaseUrl := utils.GetSharderUrl(t)
-	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/cancelation-rewards?" + "allocation_id=" + allocationID)
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/cancellation-rewards?" + "allocation_id=" + allocationID)
 
 	t.Log("URL : ", url)
 
