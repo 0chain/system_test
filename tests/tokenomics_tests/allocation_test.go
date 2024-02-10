@@ -148,15 +148,13 @@ func TestAllocationRewards(testSetup *testing.T) {
 			totalBlobberChallengereward += int64(v.(float64))
 		}
 
-		//require.Equal(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
+		require.Equal(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
 
 		for _, blobber := range alloc.Blobbers {
 			t.Log("collecting rewards for blobber", blobber.ID)
 			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
 		}
 	})
-
-	t.Skip()
 
 	t.RunSequentiallyWithTimeout("Create + Upload + Cancel equal read price 0.1", 1*time.Hour, func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidatorsForWallet(t, blobberListString, validatorListString, configPath, utils.EscapedTestName(t), []float64{
@@ -251,6 +249,8 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Equal(t, blobber1cancelationReward, blobber1cancelationReward, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 		require.Equal(t, blobber1cancelationReward, blobber2cancelationReward, "Blobber 2 cancelation Reward should be equal to total expected cancelation reward")
 
+		t.Log("Collecting rewards for blobbers count : ", len(alloc.Blobbers))
+
 		for _, blobber := range alloc.Blobbers {
 			t.Log("collecting rewards for blobber", blobber.ID)
 			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
@@ -337,6 +337,8 @@ func TestAllocationRewards(testSetup *testing.T) {
 		}
 
 		require.InEpsilon(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, 0.10, "Total Blobber Challenge reward should be equal to MovedToChallenge")
+
+		t.Log("Collecting rewards for blobbers count : ", len(alloc.Blobbers))
 
 		for _, blobber := range alloc.Blobbers {
 			t.Log("collecting rewards for blobber", blobber.ID)
