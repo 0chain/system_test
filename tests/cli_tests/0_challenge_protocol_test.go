@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -211,6 +212,20 @@ func TestProtocolChallenge(testSetup *testing.T) {
 
 		t.Log("Total weight : ", totalWeight)
 
+		expectedCounts := make(map[string]int64)
+
+		for i := int64(0); i < allChallengesCount["total"]; i++ {
+			randomWeight := rand.Intn(int(totalWeight))
+
+			for _, blobber := range blobberList {
+				randomWeight -= int((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
+				if randomWeight <= 0 {
+					expectedCounts[blobber.Id]++
+					break
+				}
+			}
+		}
+
 		for _, blobber := range blobberList {
 			weight := float64((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
 
@@ -218,9 +233,9 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			blobberChallengeCount, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 			require.Nil(t, err, "error counting challenges")
 
-			t.Log("Blobber weight : ", weight, " Expected Challenges : ", int64(float64(allChallengesCount["total"])*(weight/totalWeight)), " Blobber Challenges : ", blobberChallengeCount["total"])
+			t.Log("Blobber weight : ", weight, " Expected Challenges : ", expectedCounts[blobber.Id], " Blobber Challenges : ", blobberChallengeCount["total"])
 
-			require.InEpsilon(t, blobberChallengeCount["total"], int64(float64(allChallengesCount["total"])*(weight/totalWeight)), 0.20, "blobber distribution should within tolerance")
+			require.InEpsilon(t, blobberChallengeCount["total"], expectedCounts[blobber.Id], 0.25, "blobber distribution should within tolerance")
 			require.InEpsilon(t, blobberChallengeCount["total"], blobberChallengeCount["passed"]+blobberChallengeCount["open"], 0.05, "failure rate should not be more than 5 percent")
 		}
 	})
