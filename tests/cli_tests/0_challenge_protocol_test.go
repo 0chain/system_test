@@ -215,7 +215,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		expectedCounts := make(map[string]int64)
 
 		for i := int64(0); i < allChallengesCount["total"]; i++ {
-			randomWeight := rand.Intn(int(totalWeight))
+			randomWeight := int64(rand.Intn(int(totalWeight)))
 
 			// shuffle blobbers list
 			rand.Shuffle(len(blobberList), func(i, j int) {
@@ -223,7 +223,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			})
 
 			for _, blobber := range blobberList {
-				randomWeight -= int((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
+				randomWeight -= (blobber.UsedAllocation) * (blobber.TotalStake / 1e10)
 				if randomWeight <= 0 {
 					expectedCounts[blobber.Id]++
 					break
@@ -257,8 +257,6 @@ func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 }
 
 func countChallengesByQuery(t *test.SystemTest, query string, sharderBaseURLs []string) (map[string]int64, error) {
-	t.Logf("Counting challenges with query: %s", query)
-
 	for _, sharderBaseURL := range sharderBaseURLs {
 		encodedQuery := url.QueryEscape(query)
 		baseURL := fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/count-challenges")
