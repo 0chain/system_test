@@ -3,6 +3,8 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -203,4 +205,49 @@ func GetBalanceForWallet(t *test.SystemTest, cliConfigFilename, wallet string) (
 func GetBalanceForWalletJSON(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
 	return cliutils.RunCommand(t, "./zwallet getbalance --silent --json "+
 		"--wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+}
+
+func GetBalanceFromSharders(t *test.SystemTest, clientId string) int64 {
+	output, err := getSharders(t, configPath)
+	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 1)
+	require.Equal(t, "MagicBlock Sharders", output[0])
+
+	var sharders map[string]*climodel.Sharder
+	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
+	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
+
+	// Get base URL for API calls.
+	sharderBaseURLs := getAllSharderBaseURLs(sharders)
+	res, err := apiGetBalance(t, sharderBaseURLs[0], clientId)
+	require.Nil(t, err, "error getting balance")
+
+	if res.StatusCode == 400 {
+		return 0
+	}
+	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get balance")
+	require.NotNil(t, res.Body, "Balance API response must not be nil")
+
+	resBody, err := io.ReadAll(res.Body)
+	require.Nil(t, err, "Error reading response body")
+
+	var startBalance climodel.Balance
+	err = json.Unmarshal(resBody, &startBalance)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+
+	return startBalance.Balance
+}
+
+func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
+	sharderURLs := make([]string, 0)
+	for _, sharder := range sharders {
+		sharderURLs = append(sharderURLs, getNodeBaseURL(sharder.Host, sharder.Port))
+	}
+	return sharderURLs
+}
+
+func apiGetBalance(t *test.SystemTest, sharderBaseURL, clientID string) (*http.Response, error) {
+	t.Logf("Getting balance for %s...", clientID)
+	return http.Get(sharderBaseURL + "/v1/client/get/balance?client_id=" + clientID)
 }

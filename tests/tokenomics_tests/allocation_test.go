@@ -722,8 +722,7 @@ func stringListContains(s []string, e string) bool {
 }
 
 func collectAndVerifyRewardsForWallet(t *test.SystemTest, blobberID, wallet string) {
-	balanceBefore, err := utils.GetBalanceZCN(t, configPath, wallet)
-	require.Nil(t, err, "Error getting balance", balanceBefore)
+	balanceBefore := utils.GetBalanceFromSharders(t, wallet)
 
 	output, err := utils.StakePoolInfo(t, configPath, utils.CreateParams(map[string]interface{}{
 		"blobber_id": blobberID,
@@ -739,14 +738,14 @@ func collectAndVerifyRewardsForWallet(t *test.SystemTest, blobberID, wallet stri
 	modelWallet, err := utils.GetWalletForName(t, configPath, wallet)
 	require.Nil(t, err, "Get wallet failed")
 
-	rewards := float64(0)
+	rewards := int64(0)
 	for _, poolDelegateInfo := range stakePoolAfter.Delegate {
 		if poolDelegateInfo.DelegateID == modelWallet.ClientID {
-			rewards = float64(poolDelegateInfo.TotalReward)
+			rewards = poolDelegateInfo.TotalReward
 			break
 		}
 	}
-	require.Greater(t, rewards, float64(0))
+	require.Greater(t, rewards, int64(0))
 	t.Logf("reward tokens: %v", rewards)
 
 	output, err = utils.CollectRewardsForWallet(t, configPath, utils.CreateParams(map[string]interface{}{
@@ -755,7 +754,7 @@ func collectAndVerifyRewardsForWallet(t *test.SystemTest, blobberID, wallet stri
 	}), wallet, true)
 	require.Nil(t, err, "Error collecting rewards", strings.Join(output, "\n"))
 
-	balanceAfter, err := utils.GetBalanceZCN(t, configPath, wallet)
+	balanceAfter := utils.GetBalanceFromSharders(t, wallet)
 	require.Nil(t, err, "Error getting balance", balanceAfter)
 
 	require.GreaterOrEqual(t, balanceAfter, balanceBefore+rewards, "Balance should increase after collecting rewards")
