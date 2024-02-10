@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain System test suite: Challenge tests [optimise_rewards-tests/cb03cd7e] ran against [dev-5.devnet-0chain.net] at [2024-02-10_22.09.17]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain System test suite: Challenge tests [optimise_rewards-tests/cb03cd7e] ran against [dev-5.devnet-0chain.net] at [2024-02-10_22.09.17]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>9</strong>Duration: <strong>3ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>0</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>9</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">February 10, 2024 23:11:24</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup failed " id="1"></div>
+            
+                <div class="testResultGroup failed " id="2"></div>
+            
+                <div class="testResultGroup failed " id="3"></div>
+            
+                <div class="testResultGroup failed " id="4"></div>
+            
+                <div class="testResultGroup failed " id="5"></div>
+            
+                <div class="testResultGroup failed " id="6"></div>
+            
+                <div class="testResultGroup failed " id="7"></div>
+            
+                <div class="testResultGroup failed " id="8"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.05,"Output":["","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:10:37] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:10:37] \n","2024/02/10 23:10:37 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000538030), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:10:37]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:10:48] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:10:48] \n","2024/02/10 23:10:48 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000538030), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:10:48]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:10:59] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:10:59] \n","2024/02/10 23:10:59 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0005a03d8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:10:59]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:00] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:00] \n","2024/02/10 23:11:00 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0005b8030), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:00]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:01] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:01] \n","2024/02/10 23:11:01 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000012408), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:01]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:02] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:02] \n","2024/02/10 23:11:02 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000154048), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:02]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:03] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:03] \n","2024/02/10 23:11:03 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000012708), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:03]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:04] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:04] \n","2024/02/10 23:11:04 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0007223c0), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:04]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:05] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:05] \n","2024/02/10 23:11:05 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00012c678), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:06]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:06] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:06] \n","2024/02/10 23:11:06 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0005a6018), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:07]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:18] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:18] \n","2024/02/10 23:11:18 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00013e3c0), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:18]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:19] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:19] \n","2024/02/10 23:11:19 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000012030), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:19]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:20] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:20] \n","2024/02/10 23:11:20 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00012c6d8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:20]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:21] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:21] \n","2024/02/10 23:11:21 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00012c018), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:21]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:22] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:22] \n","2024/02/10 23:11:22 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc000012030), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:22]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:23] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:23] \n","2024/02/10 23:11:23 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc0000126a8), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:23]\n","","","    system_test_framework.go:70: Test setup [Get list of sharders and blobbers] scheduled at [02-10-2024 23:11:24] \n","    system_test_framework.go:80: Test setup [Get list of sharders and blobbers] start at [02-10-2024 23:11:24] \n","2024/02/10 23:11:24 Creating wallet for TestProtocolChallenge with walletIdx 501\n","File ./config/TestProtocolChallenge_wallet.json written successfully.\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:37\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:81\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tExpected nil, but got: \u0026exec.ExitError{ProcessState:(*os.ProcessState)(0xc00012c018), Stderr:[]uint8(nil)}\n","        \tTest:       \tTestProtocolChallenge\n","        \tMessages:   \tget sharders failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tget_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \t)\n","    system_test_framework.go:93: Test setup [Get list of sharders and blobbers] exit at [02-10-2024 23:11:24]\n",""],"Passed":false,"Skipped":false,"TestFileName":"0_challenge_protocol_test.go","TestFunctionDetail":{"Line":22,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Added_blobber_in_an_allocation_should_also_be_challenged_for_this_blobber_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    0_challenge_protocol_test.go:139: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] scheduled at [02-10-2024 23:10:37] \n","","","    system_test_framework.go:149: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] start at [02-10-2024 23:10:37] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:154\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestProtocolChallenge/Added_blobber_in_an_allocation_should_also_be_challenged_for_this_blobber_allocation\n","        \tMessages:   \tnumber of challenges should be greater than 0\n","    0_challenge_protocol_test.go:139: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] exit at [02-10-2024 23:10:37]\n","","","    0_challenge_protocol_test.go:139: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] scheduled at [02-10-2024 23:11:02] \n","","","    system_test_framework.go:149: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] start at [02-10-2024 23:11:02] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:154\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestProtocolChallenge/Added_blobber_in_an_allocation_should_also_be_challenged_for_this_blobber_allocation\n","        \tMessages:   \tnumber of challenges should be greater than 0\n","    0_challenge_protocol_test.go:139: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] exit at [02-10-2024 23:11:02]\n","","","    0_challenge_protocol_test.go:139: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] scheduled at [02-10-2024 23:11:21] \n","","","    system_test_framework.go:149: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] start at [02-10-2024 23:11:21] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:154\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestProtocolChallenge/Added_blobber_in_an_allocation_should_also_be_challenged_for_this_blobber_allocation\n","        \tMessages:   \tnumber of challenges should be greater than 0\n","    0_challenge_protocol_test.go:139: Test case [Added blobber in an allocation should also be challenged for this blobber allocation] exit at [02-10-2024 23:11:21]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Allocation_with_writes_and_deletes_should_not_get_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    0_challenge_protocol_test.go:113: Test case [Allocation with writes and deletes should not get challenges] scheduled at [02-10-2024 23:10:37] \n","","","    system_test_framework.go:149: Test case [Allocation with writes and deletes should not get challenges] start at [02-10-2024 23:10:37] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    0_challenge_protocol_test.go:113: Test case [Allocation with writes and deletes should not get challenges] exit at [02-10-2024 23:10:37]\n","","","    0_challenge_protocol_test.go:113: Test case [Allocation with writes and deletes should not get challenges] scheduled at [02-10-2024 23:11:00] \n","","","    system_test_framework.go:149: Test case [Allocation with writes and deletes should not get challenges] start at [02-10-2024 23:11:00] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    0_challenge_protocol_test.go:113: Test case [Allocation with writes and deletes should not get challenges] exit at [02-10-2024 23:11:00]\n","","","    0_challenge_protocol_test.go:113: Test case [Allocation with writes and deletes should not get challenges] scheduled at [02-10-2024 23:11:19] \n","","","    system_test_framework.go:149: Test case [Allocation with writes and deletes should not get challenges] start at [02-10-2024 23:11:19] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    0_challenge_protocol_test.go:113: Test case [Allocation with writes and deletes should not get challenges] exit at [02-10-2024 23:11:19]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Allocation_with_writes_should_get_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    0_challenge_protocol_test.go:99: Test case [Allocation with writes should get challenges] scheduled at [02-10-2024 23:10:37] \n","","","    system_test_framework.go:149: Test case [Allocation with writes should get challenges] start at [02-10-2024 23:10:37] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:109\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestProtocolChallenge/Allocation_with_writes_should_get_challenges\n","        \tMessages:   \tnumber of challenges should be greater than 0\n","    0_challenge_protocol_test.go:99: Test case [Allocation with writes should get challenges] exit at [02-10-2024 23:10:37]\n","","","    0_challenge_protocol_test.go:99: Test case [Allocation with writes should get challenges] scheduled at [02-10-2024 23:10:59] \n","","","    system_test_framework.go:149: Test case [Allocation with writes should get challenges] start at [02-10-2024 23:10:59] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:109\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestProtocolChallenge/Allocation_with_writes_should_get_challenges\n","        \tMessages:   \tnumber of challenges should be greater than 0\n","    0_challenge_protocol_test.go:99: Test case [Allocation with writes should get challenges] exit at [02-10-2024 23:10:59]\n","","","    0_challenge_protocol_test.go:99: Test case [Allocation with writes should get challenges] scheduled at [02-10-2024 23:11:18] \n","","","    system_test_framework.go:149: Test case [Allocation with writes should get challenges] start at [02-10-2024 23:11:18] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:109\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestProtocolChallenge/Allocation_with_writes_should_get_challenges\n","        \tMessages:   \tnumber of challenges should be greater than 0\n","    0_challenge_protocol_test.go:99: Test case [Allocation with writes should get challenges] exit at [02-10-2024 23:11:18]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Canceled_allocation_should_no_more_get_any_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    0_challenge_protocol_test.go:189: Test case [Canceled allocation should no more get any challenges] scheduled at [02-10-2024 23:10:37] \n","","","    system_test_framework.go:149: Test case [Canceled allocation should no more get any challenges] start at [02-10-2024 23:10:37] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    0_challenge_protocol_test.go:189: Test case [Canceled allocation should no more get any challenges] exit at [02-10-2024 23:10:37]\n","","","    0_challenge_protocol_test.go:189: Test case [Canceled allocation should no more get any challenges] scheduled at [02-10-2024 23:11:04] \n","","","    system_test_framework.go:149: Test case [Canceled allocation should no more get any challenges] start at [02-10-2024 23:11:04] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    0_challenge_protocol_test.go:189: Test case [Canceled allocation should no more get any challenges] exit at [02-10-2024 23:11:04]\n","","","    0_challenge_protocol_test.go:189: Test case [Canceled allocation should no more get any challenges] scheduled at [02-10-2024 23:11:23] \n","","","    system_test_framework.go:149: Test case [Canceled allocation should no more get any challenges] start at [02-10-2024 23:11:23] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    0_challenge_protocol_test.go:189: Test case [Canceled allocation should no more get any challenges] exit at [02-10-2024 23:11:23]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Challenges_success_rate_and_blobber_distribution_should_be_good","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    0_challenge_protocol_test.go:202: Test case [Challenges success rate and blobber distribution should be good] scheduled at [02-10-2024 23:10:37] \n","","","    system_test_framework.go:149: Test case [Challenges success rate and blobber distribution should be good] start at [02-10-2024 23:10:37] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:206\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \texpected value must have a value other than zero to calculate the relative error\n","        \tTest:       \tTestProtocolChallenge/Challenges_success_rate_and_blobber_distribution_should_be_good\n","        \tMessages:   \tChallenge Failure rate should not be more than 5%\n","File ./config/TestProtocolChallenge-Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_after_challenge_generation_gap_-given_that_we_have_active_allocations-_wallet.json written successfully.\n","    0_challenge_protocol_test.go:202: Test case [Challenges success rate and blobber distribution should be good] exit at [02-10-2024 23:10:37]\n","","","    0_challenge_protocol_test.go:202: Test case [Challenges success rate and blobber distribution should be good] scheduled at [02-10-2024 23:11:06] \n","","","    system_test_framework.go:149: Test case [Challenges success rate and blobber distribution should be good] start at [02-10-2024 23:11:06] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:206\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \texpected value must have a value other than zero to calculate the relative error\n","        \tTest:       \tTestProtocolChallenge/Challenges_success_rate_and_blobber_distribution_should_be_good\n","        \tMessages:   \tChallenge Failure rate should not be more than 5%\n","    0_challenge_protocol_test.go:202: Test case [Challenges success rate and blobber distribution should be good] exit at [02-10-2024 23:11:06]\n","","","    0_challenge_protocol_test.go:202: Test case [Challenges success rate and blobber distribution should be good] scheduled at [02-10-2024 23:11:24] \n","","","    system_test_framework.go:149: Test case [Challenges success rate and blobber distribution should be good] start at [02-10-2024 23:11:24] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:206\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \texpected value must have a value other than zero to calculate the relative error\n","        \tTest:       \tTestProtocolChallenge/Challenges_success_rate_and_blobber_distribution_should_be_good\n","        \tMessages:   \tChallenge Failure rate should not be more than 5%\n","    0_challenge_protocol_test.go:202: Test case [Challenges success rate and blobber distribution should be good] exit at [02-10-2024 23:11:24]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Empty_Allocation_should_not_get_challenges","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    0_challenge_protocol_test.go:126: Test case [Empty Allocation should not get challenges] scheduled at [02-10-2024 23:10:37] \n","","","    system_test_framework.go:149: Test case [Empty Allocation should not get challenges] start at [02-10-2024 23:10:37] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","2024/02/10 23:10:37 Creating wallet for TestProtocolChallenge-Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_after_challenge_generation_gap_-given_that_we_have_active_allocations- with walletIdx 502\n","    0_challenge_protocol_test.go:126: Test case [Empty Allocation should not get challenges] exit at [02-10-2024 23:10:37]\n","","","    0_challenge_protocol_test.go:126: Test case [Empty Allocation should not get challenges] scheduled at [02-10-2024 23:11:01] \n","","","    system_test_framework.go:149: Test case [Empty Allocation should not get challenges] start at [02-10-2024 23:11:01] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    0_challenge_protocol_test.go:126: Test case [Empty Allocation should not get challenges] exit at [02-10-2024 23:11:01]\n","","","    0_challenge_protocol_test.go:126: Test case [Empty Allocation should not get challenges] scheduled at [02-10-2024 23:11:20] \n","","","    system_test_framework.go:149: Test case [Empty Allocation should not get challenges] start at [02-10-2024 23:11:20] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    0_challenge_protocol_test.go:126: Test case [Empty Allocation should not get challenges] exit at [02-10-2024 23:11:20]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_after_challenge_generation_gap_(given_that_we_have_active_allocations)","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":10.19,"Output":["","    0_challenge_protocol_test.go:60: Test case [Number of challenges between 2 blocks should be equal to the number of blocks after challenge_generation_gap (given that we have active allocations)] scheduled at [02-10-2024 23:10:37] \n","","","    system_test_framework.go:149: Test case [Number of challenges between 2 blocks should be equal to the number of blocks after challenge_generation_gap (given that we have active allocations)] start at [02-10-2024 23:10:37] \n","    zboxcli_create_allocation_test.go:443: Creating new allocation...\n","    utils.go:82: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found -\u003cNEWLINE\u003e- Error initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found]\n","    utils.go:82: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found -\u003cNEWLINE\u003e- Error initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found]\n","    utils.go:98: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found -\u003cNEWLINE\u003e- Error initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found]\n","    utils.go:101: \u001b[31mThe verbose output for the command is:\n","    utils.go:105: \u001b[31m0chain-core-sdk [INFO]   2024/02/10 23:10:47.783990 wallet_base.go:331: ******* Wallet SDK Version:v1.11.5-4-ga759a908 ******* (SetLogFile)\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/10 23:10:47.784049 sdk.go:88: ******* Storage SDK Version: v1.11.5-4-ga759a908 *******\n","    utils.go:105: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2024/02/10 23:10:47.799163 networkworker.go:51: Failed to update network details {error 26 0  get_network_details_error: Unable to get http request with 404 Not Found}\u001b[0m\n","    utils.go:105: \u001b[31mUpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","    utils.go:105: \u001b[31mError initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/zboxcli_update_allocation_test.go:819\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/zboxcli_update_allocation_test.go:801\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/zboxcli_file_download_test.go:1317\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:61\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tReceived unexpected error:\n","        \t            \texit status 1\n","        \tTest:       \tTestProtocolChallenge/Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_after_challenge_generation_gap_(given_that_we_have_active_allocations)\n","        \tMessages:   \tcreate new allocation failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tError initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found)\n","    0_challenge_protocol_test.go:60: Test case [Number of challenges between 2 blocks should be equal to the number of blocks after challenge_generation_gap (given that we have active allocations)] exit at [02-10-2024 23:10:47]\n","","","    0_challenge_protocol_test.go:60: Test case [Number of challenges between 2 blocks should be equal to the number of blocks after challenge_generation_gap (given that we have active allocations)] scheduled at [02-10-2024 23:10:48] \n","","","    system_test_framework.go:149: Test case [Number of challenges between 2 blocks should be equal to the number of blocks after challenge_generation_gap (given that we have active allocations)] start at [02-10-2024 23:10:48] \n","2024/02/10 23:10:48 Creating wallet for TestProtocolChallenge-Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_after_challenge_generation_gap_-given_that_we_have_active_allocations- with walletIdx 502\n","File ./config/TestProtocolChallenge-Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_after_challenge_generation_gap_-given_that_we_have_active_allocations-_wallet.json written successfully.\n","    zboxcli_create_allocation_test.go:443: Creating new allocation...\n","    utils.go:82: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found -\u003cNEWLINE\u003e- Error initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found]\n","    utils.go:82: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found -\u003cNEWLINE\u003e- Error initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found]\n","    utils.go:98: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found -\u003cNEWLINE\u003e- Error initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found]\n","    utils.go:101: \u001b[31mThe verbose output for the command is:\n","    utils.go:105: \u001b[31m0chain-core-sdk [INFO]   2024/02/10 23:10:58.901599 wallet_base.go:331: ******* Wallet SDK Version:v1.11.5-4-ga759a908 ******* (SetLogFile)\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/10 23:10:58.901854 sdk.go:88: ******* Storage SDK Version: v1.11.5-4-ga759a908 *******\n","    utils.go:105: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2024/02/10 23:10:58.922445 networkworker.go:51: Failed to update network details {error 26 0  get_network_details_error: Unable to get http request with 404 Not Found}\u001b[0m\n","    utils.go:105: \u001b[31mUpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","    utils.go:105: \u001b[31mError initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/zboxcli_update_allocation_test.go:819\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/zboxcli_update_allocation_test.go:801\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/zboxcli_file_download_test.go:1317\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:61\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tReceived unexpected error:\n","        \t            \texit status 1\n","        \tTest:       \tTestProtocolChallenge/Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_after_challenge_generation_gap_(given_that_we_have_active_allocations)\n","        \tMessages:   \tcreate new allocation failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tError initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found)\n","    0_challenge_protocol_test.go:60: Test case [Number of challenges between 2 blocks should be equal to the number of blocks after challenge_generation_gap (given that we have active allocations)] exit at [02-10-2024 23:10:58]\n","","","    0_challenge_protocol_test.go:60: Test case [Number of challenges between 2 blocks should be equal to the number of blocks after challenge_generation_gap (given that we have active allocations)] scheduled at [02-10-2024 23:11:07] \n","","","    system_test_framework.go:149: Test case [Number of challenges between 2 blocks should be equal to the number of blocks after challenge_generation_gap (given that we have active allocations)] start at [02-10-2024 23:11:07] \n","2024/02/10 23:11:07 Creating wallet for TestProtocolChallenge-Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_after_challenge_generation_gap_-given_that_we_have_active_allocations- with walletIdx 502\n","File ./config/TestProtocolChallenge-Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_after_challenge_generation_gap_-given_that_we_have_active_allocations-_wallet.json written successfully.\n","    zboxcli_create_allocation_test.go:443: Creating new allocation...\n","    utils.go:82: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found -\u003cNEWLINE\u003e- Error initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found]\n","    utils.go:82: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found -\u003cNEWLINE\u003e- Error initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found]\n","    utils.go:98: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found -\u003cNEWLINE\u003e- Error initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found]\n","    utils.go:101: \u001b[31mThe verbose output for the command is:\n","    utils.go:105: \u001b[31m0chain-core-sdk [INFO]   2024/02/10 23:11:17.210281 wallet_base.go:331: ******* Wallet SDK Version:v1.11.5-4-ga759a908 ******* (SetLogFile)\n","    utils.go:105: \u001b[31m0box-sdk        [INFO]   2024/02/10 23:11:17.210481 sdk.go:88: ******* Storage SDK Version: v1.11.5-4-ga759a908 *******\n","    utils.go:105: \u001b[31m0chain-core-sdk \u001b[31m[ERROR]  2024/02/10 23:11:17.234795 networkworker.go:51: Failed to update network details {error 26 0  get_network_details_error: Unable to get http request with 404 Not Found}\u001b[0m\n","    utils.go:105: \u001b[31mUpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","    utils.go:105: \u001b[31mError initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/zboxcli_update_allocation_test.go:819\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/zboxcli_update_allocation_test.go:801\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/zboxcli_file_download_test.go:1317\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:61\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \tReceived unexpected error:\n","        \t            \texit status 1\n","        \tTest:       \tTestProtocolChallenge/Number_of_challenges_between_2_blocks_should_be_equal_to_the_number_of_blocks_after_challenge_generation_gap_(given_that_we_have_active_allocations)\n","        \tMessages:   \tcreate new allocation failed%!(EXTRA string=UpdateNetworkDetails: get_network_details_error: Unable to get http request with 404 Not Found\n","        \t            \tError initializing core SDK. get_network_details_error: Unable to get http request with 404 Not Found)\n","    0_challenge_protocol_test.go:60: Test case [Number of challenges between 2 blocks should be equal to the number of blocks after challenge_generation_gap (given that we have active allocations)] exit at [02-10-2024 23:11:17]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallenge/Replaced_blobber_in_an_allocation_should_not_be_challenged_for_this_blobber_allocation","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    0_challenge_protocol_test.go:158: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] scheduled at [02-10-2024 23:10:37] \n","","","    system_test_framework.go:149: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] start at [02-10-2024 23:10:37] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:176\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestProtocolChallenge/Replaced_blobber_in_an_allocation_should_not_be_challenged_for_this_blobber_allocation\n","        \tMessages:   \tnumber of challenges should be greater than 0\n","    0_challenge_protocol_test.go:158: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] exit at [02-10-2024 23:10:37]\n","","","    0_challenge_protocol_test.go:158: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] scheduled at [02-10-2024 23:11:03] \n","","","    system_test_framework.go:149: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] start at [02-10-2024 23:11:03] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:176\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestProtocolChallenge/Replaced_blobber_in_an_allocation_should_not_be_challenged_for_this_blobber_allocation\n","        \tMessages:   \tnumber of challenges should be greater than 0\n","    0_challenge_protocol_test.go:158: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] exit at [02-10-2024 23:11:03]\n","","","    0_challenge_protocol_test.go:158: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] scheduled at [02-10-2024 23:11:22] \n","","","    system_test_framework.go:149: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] start at [02-10-2024 23:11:22] \n","    0_challenge_protocol_test.go:287: all sharders gave an error at endpoint /count-challenges\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner5/_work/system_test/system_test/tests/cli_tests/0_challenge_protocol_test.go:176\n","        \t            \t\t\t\t/root/actions-runner5/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner5/_work/_tool/go/1.20.12/x64/src/runtime/asm_amd64.s:1598\n","        \tError:      \t\"0\" is not greater than \"0\"\n","        \tTest:       \tTestProtocolChallenge/Replaced_blobber_in_an_allocation_should_not_be_challenged_for_this_blobber_allocation\n","        \tMessages:   \tnumber of challenges should be greater than 0\n","    0_challenge_protocol_test.go:158: Test case [Replaced blobber in an allocation should not be challenged for this blobber allocation] exit at [02-10-2024 23:11:22]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
