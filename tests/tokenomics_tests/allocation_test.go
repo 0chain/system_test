@@ -150,6 +150,8 @@ func TestAllocationRewards(testSetup *testing.T) {
 
 		require.Equal(t, alloc.MovedToChallenge-alloc.MovedBack, totalBlobberChallengereward, "Total Blobber Challenge reward should not change")
 
+		t.Log("Collecting rewards for blobbers count : ", len(alloc.Blobbers))
+
 		for _, blobber := range alloc.Blobbers {
 			t.Log("collecting rewards for blobber", blobber.ID)
 			collectAndVerifyRewardsForWallet(t, blobber.ID, utils.EscapedTestName(t))
