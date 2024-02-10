@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     repo_snapshots_branch:
       description: 'branch of repo-snapshots to derive images and branches from.'
-      default: 'current-sprint'
+      default: 'staging'
       required: true
 
 jobs:
