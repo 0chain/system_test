@@ -89,19 +89,19 @@ func TestKillBlobber(testSetup *testing.T) {
 				"stake pools should be slashed by %f", killSlash) // 5% error margin because there can be challenge penalty
 		}
 
-		testWallet, err := getWallet(t, configPath)
+		stakingWalletModel, err := getWalletForName(t, configPath, stakingWallet)
 		require.NoError(t, err, "error fetching wallet")
 
-		balanceBefore := getBalanceFromSharders(t, testWallet.ClientID)
+		balanceBefore := getBalanceFromSharders(t, stakingWalletModel.ClientID)
 
-		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
+		output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
 			"provider_type": "blobber",
 			"provider_id":   blobberToKill,
 			"fee":           "0.15",
-		}), true)
+		}), stakingWallet, true)
 		require.NoError(t, err, output)
 
-		balanceAfter := getBalanceFromSharders(t, testWallet.ClientID) + 1500000000 // Txn fee
+		balanceAfter := getBalanceFromSharders(t, stakingWalletModel.ClientID) + 1500000000 // Txn fee
 		require.GreaterOrEqual(t, balanceAfter, balanceBefore, "should have collected rewards")
 
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToKill}), true)
@@ -224,19 +224,19 @@ func TestKillBlobber(testSetup *testing.T) {
 				"stake pools should be slashed by %f", shutdownSlash) // 5% error margin because there can be challenge penalty
 		}
 
-		testWallet, err := getWallet(t, configPath)
+		stakingWalletModel, err := getWalletForName(t, configPath, stakingWallet)
 		require.NoError(t, err, "error fetching wallet")
 
-		balanceBefore := getBalanceFromSharders(t, testWallet.ClientID)
+		balanceBefore := getBalanceFromSharders(t, stakingWalletModel.ClientID)
 
-		output, err = collectRewards(t, configPath, createParams(map[string]interface{}{
+		output, err = collectRewardsForWallet(t, configPath, createParams(map[string]interface{}{
 			"provider_type": "blobber",
 			"provider_id":   blobberToShutdown,
 			"fee":           "0.15",
-		}), true)
+		}), stakingWallet, true)
 		require.NoError(t, err, output)
 
-		balanceAfter := getBalanceFromSharders(t, testWallet.ClientID) + 1500000000 // Txn fee
+		balanceAfter := getBalanceFromSharders(t, stakingWalletModel.ClientID) + 1500000000 // Txn fee
 		require.GreaterOrEqual(t, balanceAfter, balanceBefore, "should have collected rewards")
 
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToShutdown}), true)
