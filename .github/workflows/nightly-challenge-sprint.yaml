@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     repo_snapshots_branch:
       description: 'branch of repo-snapshots to derive images and branches from.'
-      default: 'verify/partition-weights'
+      default: 'fix/update-partition-on-finalisation'
       required: true
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=verify/partition-weights" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=fix/update-partition-on-finalisation" >> $GITHUB_ENV
 
       - name: 'Setup jq'
         uses: dcarbone/install-jq-action@v2.1.0
@@ -109,7 +109,7 @@ jobs:
               https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_FORK_ID }}/simulate
 
       - name: "Deploy 0Chain"
-        uses: 0chain/actions/deploy-0chain@fix/challenge-generation-gap
+        uses: 0chain/actions/deploy-0chain@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
@@ -122,7 +122,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Challenge System tests"
-        uses: 0chain/actions/run-system-tests@fix/challenge-generation-gap
+        uses: 0chain/actions/run-system-tests@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
