@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -730,7 +731,7 @@ func collectAndVerifyRewardsForWallet(t *test.SystemTest, blobberID, wallet stri
 	require.Nil(t, err, "Get wallet failed")
 
 	balanceBefore := utils.GetBalanceFromSharders(t, modelWallet.ClientID)
-	fmt.Println("balanceBefore", balanceBefore)
+	log.Println("balanceBefore", balanceBefore)
 
 	output, err := utils.StakePoolInfo(t, configPath, utils.CreateParams(map[string]interface{}{
 		"blobber_id": blobberID,

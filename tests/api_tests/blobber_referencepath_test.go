@@ -55,7 +55,6 @@ func TestFileReferencePath(testSetup *testing.T) {
 	})
 
 	t.Run("Get file ref for empty allocation should work", func(t *test.SystemTest) {
-
 		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)

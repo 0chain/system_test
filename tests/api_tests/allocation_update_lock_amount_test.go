@@ -89,7 +89,6 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Add blobber to allocation with used size > 0", 5*time.Minute, func(t *test.SystemTest) {
-
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -199,7 +198,6 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Replace blobber", 1*time.Minute, func(t *test.SystemTest) {
-
 		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
