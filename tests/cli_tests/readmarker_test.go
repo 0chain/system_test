@@ -21,7 +21,7 @@ func TestReadMarker(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("After downloading a file, return a readmarker for each blobber used in download")
 
-	//t.Parallel()
+	// t.Parallel()
 
 	const blobbersRequiredForDownload = 3 // download needs (data shards) number of blobbers
 

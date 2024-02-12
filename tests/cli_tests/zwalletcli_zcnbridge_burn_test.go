@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -135,7 +136,7 @@ func burnZcn(t *test.SystemTest, amount string, retry bool) ([]string, error) {
 		configPath,
 	)
 
-	fmt.Println(cmd)
+	log.Println(cmd)
 
 	if retry {
 		return cliutils.RunCommand(t, cmd, 6, time.Second*10)

@@ -187,14 +187,14 @@ func TestMain(m *testing.M) {
 	// Read the content of the file
 	fileContent, err := os.ReadFile("./config/wallets/wallets.json")
 	if err != nil {
-		fmt.Println("Error reading file:", err)
+		log.Println("Error reading file:", err)
 		return
 	}
 
 	// Parse the JSON data into a list of strings
 	err = json.Unmarshal(fileContent, &wallets)
 	if err != nil {
-		fmt.Println("Error decoding JSON:", err)
+		log.Println("Error decoding JSON:", err)
 		return
 	}
 

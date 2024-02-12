@@ -136,7 +136,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Nothing Should Fail", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
@@ -165,7 +164,6 @@ func TestUpdateAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Update Other's Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) { // todo: too slow
-
 		myAllocationID := setupAllocation(t, configPath)
 
 		targetWalletName := escapedTestName(t) + "_TARGET"

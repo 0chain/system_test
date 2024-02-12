@@ -25,7 +25,6 @@ func TestCancelAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Cancel allocation immediately should work", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := cancelAllocation(t, configPath, allocationID, true)
@@ -35,7 +34,6 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Cancel allocation after upload should work", 5*time.Minute, func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		filename := generateRandomTestFileName(t)

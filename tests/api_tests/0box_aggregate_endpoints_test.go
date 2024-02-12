@@ -1116,7 +1116,6 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	require.NotNil(t, blobbers[0].ID)
 
 	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-blobber-challenges-passed and /v2/graph-blobber-challenges-completed )", 3*time.Minute, func(t *test.SystemTest) {
-
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)

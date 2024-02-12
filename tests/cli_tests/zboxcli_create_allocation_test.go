@@ -113,6 +113,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createWalletForName(targetWalletName)
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err, "could not get target wallet", err.Error())
 
 		options := map[string]interface{}{
 			"lock":             "0.5",

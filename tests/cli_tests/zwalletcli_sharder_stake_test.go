@@ -113,6 +113,7 @@ func TestSharderStake(testSetup *testing.T) {
 
 	t.RunSequentially("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
 		_, err := executeFaucetWithTokens(t, configPath, 1)
+		require.NoError(t, err)
 
 		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
@@ -147,6 +148,7 @@ func TestSharderStake(testSetup *testing.T) {
 		require.Regexp(t, regexp.MustCompile(`Balance: \d*\.?\d+ ZCN \(\d*\.?\d+ USD\)$`), output[0])
 		newBalance := regexp.MustCompile(`\d+\.?\d* [um]?(ZCN|SAS)`).FindString(output[0])
 		initialBalance, err := strconv.ParseFloat(strings.Fields(newBalance)[0], 64)
+		require.Nil(t, err, "error parsing balance")
 
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,

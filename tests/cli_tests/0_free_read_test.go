@@ -42,7 +42,6 @@ func TestFreeReads(testSetup *testing.T) {
 			require.Len(t, output, 1)
 			require.Equal(t, "blobber settings updated successfully", output[0])
 		}
-
 	})
 
 	// revert read prices irrespective of test results

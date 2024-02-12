@@ -18,7 +18,6 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
-
 		allocationID := setupAllocation(t, configPath)
 
 		output, err := finalizeAllocation(t, configPath, allocationID, false)

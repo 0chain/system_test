@@ -2,7 +2,6 @@ package api_tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -21,12 +20,12 @@ import (
 var (
 	apiClient *client.APIClient
 	zs3Client *client.ZS3Client
-	//sdkClient        *client.SDKClient
+	// sdkClient        *client.SDKClient
 	zboxClient       *client.ZboxClient
 	chimneyClient    *client.APIClient
 	chimneySdkClient *client.SDKClient
 	sdkClient        *client.SDKClient
-	//sdkWallet                   *model.Wallet
+	// sdkWallet                   *model.Wallet
 	ownerWallet                 *model.Wallet
 	ownerWalletMnemonics        string
 	blobberOwnerWallet          *model.Wallet
@@ -76,7 +75,7 @@ func TestMain(m *testing.M) {
 	// Read the content of the file
 	fileContent, err := os.ReadFile("./config/wallets.json")
 	if err != nil {
-		fmt.Println("Error reading file:", err)
+		log.Println("Error reading file:", err)
 		return
 	}
 
@@ -85,11 +84,12 @@ func TestMain(m *testing.M) {
 	// Parse the JSON data into a list of strings
 	err = json.Unmarshal(fileContent, &fileWallets)
 	if err != nil {
-		fmt.Println("Error decoding JSON:", err)
+		log.Println("Error decoding JSON:", err)
 		return
 	}
 
-	for _, wallet := range fileWallets {
+	for i := range fileWallets {
+		wallet := fileWallets[i]
 		initialisedWallet := &model.Wallet{
 			Id:        wallet.ClientId,
 			Version:   wallet.Version,
@@ -101,17 +101,15 @@ func TestMain(m *testing.M) {
 
 		err := initialisedWallet.Keys.PublicKey.DeserializeHexStr(wallet.Keys[0].PublicKey)
 		if err != nil {
-			fmt.Println("Error decoding JSON:", err)
+			log.Println("Error decoding JSON:", err)
 		}
 		err = initialisedWallet.Keys.PrivateKey.DeserializeHexStr(wallet.Keys[0].PrivateKey)
 		if err != nil {
-			fmt.Println("Error decoding JSON:", err)
+			log.Println("Error decoding JSON:", err)
 		}
 
 		initialisedWallets = append(initialisedWallets, initialisedWallet)
 	}
-
-	fmt.Println("initialisedWallets", initialisedWallets[0].Id)
 
 	os.Exit(m.Run())
 }

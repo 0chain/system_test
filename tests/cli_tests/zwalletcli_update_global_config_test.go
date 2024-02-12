@@ -122,7 +122,6 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 
 		require.Equal(t, newValue1, cfgAfter[configKey1], "new value %s for config %s was not set", newValue1, configKey1)
 		require.Equal(t, newValue2, cfgAfter[configKey2], "new value %s for config %s was not set", newValue2, configKey2)
-
 	})
 
 	t.RunSequentially("Update Global Config - Update immutable config must fail", func(t *test.SystemTest) {
@@ -172,7 +171,6 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 
 		require.Equal(t, cfgBefore[configKey1], cfgAfter[configKey1], "new value %s for config %s must not be set", newValue1, configKey1)
 		require.Equal(t, cfgBefore[configKey2], cfgAfter[configKey2], "new value %s for config %s must not be set", newValue2, configKey2)
-
 	})
 
 	// FIXME! Maybe this is better to fail the command from zwallet or gosdk in case of no parameters.

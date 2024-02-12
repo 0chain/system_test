@@ -59,7 +59,6 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi different operations should work", func(t *test.SystemTest) {
-
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -102,7 +101,6 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi move operations should work", func(t *test.SystemTest) {
-
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -148,7 +146,6 @@ func TestMultiOperation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi copy operations should work", func(t *test.SystemTest) {
-
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
