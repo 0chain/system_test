@@ -1294,7 +1294,7 @@ func Test0Box(testSetup *testing.T) {
 		require.Equal(t, description, zboxWallet.Description, "Description does not match expected")
 	})
 
-	t.RunSequentially("List wallet should work with zero wallets", func(t *test.SystemTest) {
+	t.RunSequentially("List wallet should work with zero initialisedWallets", func(t *test.SystemTest) {
 		teardown(t, firebaseToken.IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
@@ -1303,7 +1303,7 @@ func Test0Box(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, wallets)
-		require.Equal(t, 0, len(wallets.Data), "More wallets present than expected")
+		require.Equal(t, 0, len(wallets.Data), "More initialisedWallets present than expected")
 	})
 
 	t.RunSequentially("List wallet should work with wallet present", func(t *test.SystemTest) {
@@ -2193,13 +2193,13 @@ func teardown(t *test.SystemTest, idToken, phoneNumber string) {
 		wallets, _, _ := zboxClient.GetWalletKeysForNumber(t, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber, app) // This endpoint used instead of list wallet as list wallet doesn't return the required data
 
 		if len(wallets) != 0 {
-			t.Logf("Found [%v] existing wallets for [%v] for the app type [%v]", len(wallets), phoneNumber, app)
+			t.Logf("Found [%v] existing initialisedWallets for [%v] for the app type [%v]", len(wallets), phoneNumber, app)
 			for _, wallet := range wallets {
 				message, response, err := zboxClient.DeleteWalletForNumber(t, wallet.WalletId, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber)
 				println(message, response, err)
 			}
 		} else {
-			t.Logf("No wallets found for [%v] teardown", phoneNumber)
+			t.Logf("No initialisedWallets found for [%v] teardown", phoneNumber)
 		}
 	}
 }

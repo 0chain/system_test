@@ -31,7 +31,7 @@ func TestGetId(testSetup *testing.T) {
 	})
 
 	t.Run("get sharder id should work", func(t *test.SystemTest) {
-		_, _ = createWallet(t, configPath)
+		createWallet(t)
 
 		sharders := getShardersList(t)
 		sharderKey := reflect.ValueOf(sharders).MapKeys()[0].String()
@@ -47,7 +47,7 @@ func TestGetId(testSetup *testing.T) {
 	})
 
 	t.Run("get blobber id should not work", func(t *test.SystemTest) {
-		_, _ = createWallet(t, configPath)
+		createWallet(t)
 
 		blobbers := getBlobbersList(t)
 		blobberUrl := blobbers[0].Url

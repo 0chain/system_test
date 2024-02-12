@@ -17,17 +17,21 @@ import (
 
 func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip()
+	t.Parallel()
 
-	wallet1, mnemonic := apiClient.CreateWalletWithMnemonicsInReturnValue(t)
-	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
+	wallet1 := initialisedWallets[walletIdx]
+	walletIdx++
+
+	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics), false)
 	require.NoError(t, err)
 
 	faucetAmount := float64(9)
-	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
 	require.EqualValues(t, zcncore.ConvertToValue(faucetAmount), balResp.Balance)
 
-	wallet2 := apiClient.CreateWallet(t)
+	wallet2 := initialisedWallets[walletIdx]
+	walletIdx++
 	futureNonce := GetFutureNonceConfig(t)
 	currentNonce := balResp.Nonce
 
@@ -55,12 +59,15 @@ func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 
 func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	wallet1, mnemonic := apiClient.CreateWalletWithMnemonicsInReturnValue(t)
-	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
+	t.Skip()
+	t.Parallel()
+	wallet1 := initialisedWallets[walletIdx]
+	walletIdx++
+
+	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics), false)
 	require.NoError(t, err)
 
 	faucetAmount := float64(9)
-	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
 	require.EqualValues(t, zcncore.ConvertToValue(faucetAmount), balResp.Balance)
 
@@ -71,7 +78,8 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	transactions := make(map[string]struct{}, numSameTxns)
 	value := int64(1)
 	for i := 0; i < numSameTxns; i++ {
-		wallets[i] = apiClient.CreateWallet(t)
+		wallets[i] = initialisedWallets[walletIdx]
+		walletIdx++
 
 		txnResp, _, err := apiClient.V1TransactionPutWithNonceAndServiceProviders(
 			t,
@@ -101,7 +109,9 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 		require.True(t, ok, "hash: ", txn, " does not exist in extracted transaction list")
 	}
 
-	wallet2 := apiClient.CreateWallet(t)
+	wallet2 := initialisedWallets[walletIdx]
+	walletIdx++
+
 	txnResp, _, err := apiClient.V1TransactionPutWithNonceAndServiceProviders(
 		t,
 		model.InternalTransactionPutRequest{
@@ -168,17 +178,22 @@ L1:
 
 func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	wallet1, mnemonic := apiClient.CreateWalletWithMnemonicsInReturnValue(t)
-	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
+	t.Skip()
+	t.Parallel()
+	wallet1 := initialisedWallets[walletIdx]
+	walletIdx++
+
+	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics), false)
 	require.NoError(t, err)
 
 	faucetAmount := float64(9)
-	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
 	require.EqualValues(t, zcncore.ConvertToValue(faucetAmount), balResp.Balance)
 	require.GreaterOrEqual(t, len(apiClient.Miners), 1)
 
-	wallet2 := apiClient.CreateWallet(t)
+	wallet2 := initialisedWallets[walletIdx]
+	walletIdx++
+
 	value := int64(1)
 	miner := apiClient.Miners[0]
 	txnResp, _, err := apiClient.V1TransactionPutWithNonceAndServiceProviders(

@@ -267,10 +267,9 @@ func TestFileStats(testSetup *testing.T) {
 			}
 		})
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating own wallet failed", err, strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
+		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": otherAllocationID,
 			"remotepath": remoteFilePath,
 			"json":       "",
