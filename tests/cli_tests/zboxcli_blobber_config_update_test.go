@@ -59,7 +59,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": intToZCN(intialBlobberInfo.Terms.WritePrice)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		})
-
 	})
 
 	t.RunSequentially("update blobber capacity should work", func(t *test.SystemTest) {

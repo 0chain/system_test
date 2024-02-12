@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -204,14 +205,44 @@ func TestProtocolChallenge(testSetup *testing.T) {
 
 		require.InEpsilonf(t, allChallengesCount["total"], allChallengesCount["passed"]+allChallengesCount["open"], 0.05, "Challenge Failure rate should not be more than 5%")
 
-		lenBlobberList := int64(len(blobberList))
+		totalWeight := float64(0)
+		for _, blobber := range blobberList {
+			totalWeight += float64((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
+		}
+
+		t.Log("Total weight : ", totalWeight)
+
+		expectedCounts := make(map[string]int64)
+
+		for i := int64(0); i < allChallengesCount["total"]; i++ {
+			randomWeight := int64(rand.Intn(int(totalWeight)))
+
+			// shuffle blobbers list
+			// rand.Shuffle(len(blobberList), func(i, j int) {
+			//	blobberList[i], blobberList[j] = blobberList[j], blobberList[i]
+			// })
+
+			for _, blobber := range blobberList {
+				randomWeight -= (blobber.UsedAllocation) * (blobber.TotalStake / 1e10)
+				if randomWeight <= 0 {
+					expectedCounts[blobber.Id]++
+					break
+				}
+			}
+		}
+
+		t.Log("Expected Counts : ", expectedCounts)
 
 		for _, blobber := range blobberList {
+			weight := float64((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
+
 			challengesCountQuery := fmt.Sprintf("blobber_id = '%s'", blobber.Id)
 			blobberChallengeCount, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 			require.Nil(t, err, "error counting challenges")
 
-			require.InEpsilon(t, allChallengesCount["total"]/lenBlobberList, blobberChallengeCount["total"], 0.20, "blobber distribution should within tolerance")
+			t.Log("Blobber weight : ", weight, " Expected Challenges : ", expectedCounts[blobber.Id], " Blobber Challenges : ", blobberChallengeCount["total"])
+
+			require.InEpsilon(t, blobberChallengeCount["total"], expectedCounts[blobber.Id], 0.25, "blobber distribution should within tolerance")
 			require.InEpsilon(t, blobberChallengeCount["total"], blobberChallengeCount["passed"]+blobberChallengeCount["open"], 0.05, "failure rate should not be more than 5 percent")
 		}
 	})
@@ -226,8 +257,6 @@ func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 }
 
 func countChallengesByQuery(t *test.SystemTest, query string, sharderBaseURLs []string) (map[string]int64, error) {
-	t.Logf("Counting challenges with query: %s", query)
-
 	for _, sharderBaseURL := range sharderBaseURLs {
 		encodedQuery := url.QueryEscape(query)
 		baseURL := fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/count-challenges")
