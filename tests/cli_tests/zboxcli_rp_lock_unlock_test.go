@@ -62,6 +62,7 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 
 	t.Run("Should not be able to lock more read tokens than wallet balance", func(t *test.SystemTest) {
 		_, err := executeFaucetWithTokens(t, configPath, 1)
+		require.NoError(t, err)
 
 		balanceBefore, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)

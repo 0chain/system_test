@@ -260,7 +260,7 @@ func balanceSharderDelegatePoolBlockRewards(
 					rewards[dReward.PoolID] += dReward.Amount
 				default:
 					require.Failf(t, "", "reward type %s not available to sharders stake pools;"+
-						" received by sharder %s on round %d", dReward.RewardType.String(), &dReward.PoolID, round)
+						" received by sharder %s on round %d", dReward.RewardType.String(), round)
 				}
 			}
 			confirmPoolPayments(

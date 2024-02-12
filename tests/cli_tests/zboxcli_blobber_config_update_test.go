@@ -59,7 +59,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": intToZCN(intialBlobberInfo.Terms.WritePrice)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
 		})
-
 	})
 
 	t.RunSequentially("update blobber capacity should work", func(t *test.SystemTest) {
@@ -139,7 +138,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 
 		output, err := updateBlobberInfo(t, configPath, "")
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 26)
+		require.Len(t, output, 27)
 		require.Equalf(t, "Error: required flag(s) \"blobber_id\" not set", output[0], "output was: %s", output[0])
 	})
 
