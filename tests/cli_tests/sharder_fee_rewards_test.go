@@ -25,21 +25,14 @@ func TestSharderFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
 	t.RunSequentially("Sharder share of fee rewards for transactions", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		wallet, err := getWalletForName(t, configPath, escapedTestName(t)+"_TARGET")
-		require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
+		require.NoError(t, err, "error getting target wallet")
 
 		if !confirmDebugBuild(t) {
 			t.Skip("sharder fee rewards test skipped as it requires a debug event database")
 		}
-
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		sharderUrl := getSharderUrl(t)
 		var sharderIds []string

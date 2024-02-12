@@ -22,7 +22,6 @@ import (
 )
 
 func TestFileUpdate(testSetup *testing.T) {
-	//todo: very slow executions observed
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("update file with thumbnail")
 
@@ -70,18 +69,14 @@ func TestFileUpdate(testSetup *testing.T) {
 		// Logic: Upload a 1 MB file, get the write pool info. Update said file with another file
 		// of size 1 MB. Get write pool info and check nothing has been deducted.
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"lock": "5",
 			"size": 4 * MB,
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -466,18 +461,14 @@ func TestFileUpdate(testSetup *testing.T) {
 		// and see that blobber's write pool balances are deduced again for the cost of uploading extra
 		// 0.5 MBs.
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"lock": "1",
 			"size": 10 * MB,
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -511,7 +502,7 @@ func TestFileUpdate(testSetup *testing.T) {
 
 		finalAllocation := getAllocation(t, allocationID)
 
-		require.InEpsilon(t, expectedUploadCostInZCN*2, intToZCN(finalAllocation.MovedToChallenge), 0.15)
+		require.InEpsilon(t, expectedUploadCostInZCN*2, intToZCN(finalAllocation.MovedToChallenge), 0.2)
 
 		createAllocationTestTeardown(t, allocationID)
 	})

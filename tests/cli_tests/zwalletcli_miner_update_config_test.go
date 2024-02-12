@@ -23,10 +23,9 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		newValue := "0.1"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = updateMinerSCConfig(t, escapedTestName(t), map[string]interface{}{
+		output, err := updateMinerSCConfig(t, escapedTestName(t), map[string]interface{}{
 			"keys":   configKey,
 			"values": newValue,
 		}, false)
@@ -43,14 +42,9 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		configKey := "unknown_key"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		// create SC owner wallet
-		output, err = createWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   configKey,
 			"values": 1,
 		}, false)
@@ -65,14 +59,9 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		}
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		// create SC owner wallet
-		output, err = createWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"values": 1,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
@@ -86,14 +75,9 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		}
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		// create SC owner wallet
-		output, err = createWalletForName(t, configPath, scOwnerWallet)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys": "reward_rate",
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))

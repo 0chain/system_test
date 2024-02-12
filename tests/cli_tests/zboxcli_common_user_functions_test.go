@@ -30,18 +30,17 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Create Allocation - Locked amount must've been withdrawn from user wallet", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		_, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), configPath, 9)
-		require.Nil(t, err)
+		balanceBefore, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
 
 		// Lock tokens for allocation
 		allocParams := createParams(map[string]interface{}{
 			"lock": "5",
 			"size": 1 * MB,
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -49,19 +48,15 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		// Wallet balance should decrease by locked amount
-		balance, err := getBalanceZCN(t, configPath)
+		balanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 8.99, balance) // lock - fee
+		require.Equal(t, balanceBefore-5.01, balanceAfter) // lock - fee
 
 		createAllocationTestTeardown(t, allocationID)
 	})
 
 	t.Run("Update Allocation by locking more tokens - Locked amount must be withdrawn from user wallet", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-
-		_, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), configPath, 9)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// get wallet balance
 		balance, err := getBalanceZCN(t, configPath)
@@ -72,7 +67,7 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 			"lock": "5",
 			"size": 1 * MB,
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
