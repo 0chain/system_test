@@ -83,16 +83,13 @@ func TestResumeUpload(testSetup *testing.T) {
 		allocSize := int64(2 * GB)
 		fileSize := int64(300 * MB)
 
-		output, err := executeFaucetWithTokens(t, configPath, 100.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 			"lock": 50,
 		})
 
 		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, fileSize)
+		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 		defer func() {
 			os.Remove(filename) //nolint: errcheck
@@ -118,7 +115,7 @@ func TestResumeUpload(testSetup *testing.T) {
 
 		//creating file with samename & size but with new content
 		err = createFileWithSize(filename, fileSize)
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
 			"localpath":   filename,
@@ -140,16 +137,13 @@ func TestResumeUpload(testSetup *testing.T) {
 		allocSize := int64(2 * GB)
 		fileSize := int64(100 * MB)
 
-		output, err := executeFaucetWithTokens(t, configPath, 100.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 			"lock": 50,
 		})
 
 		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, fileSize)
+		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 		defer func() {
 			os.Remove(filename) //nolint: errcheck
@@ -175,7 +169,7 @@ func TestResumeUpload(testSetup *testing.T) {
 
 		//renaming the same file
 		filename = generateRandomTestFileName(t)
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
 			"localpath":   filename,
@@ -198,16 +192,13 @@ func TestResumeUpload(testSetup *testing.T) {
 		fileSize := int64(500 * MB)
 		fileSize2 := int64(550 * MB)
 
-		output, err := executeFaucetWithTokens(t, configPath, 100.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 			"lock": 50,
 		})
 
 		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, fileSize)
+		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 		defer func() {
 			os.Remove(filename) //nolint: errcheck
@@ -233,7 +224,7 @@ func TestResumeUpload(testSetup *testing.T) {
 
 		// increasing the file size to test the negative flow
 		err = createFileWithSize(filename, fileSize2)
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
 			"localpath":   filename,
