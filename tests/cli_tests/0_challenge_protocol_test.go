@@ -89,7 +89,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		challengeGenerationGap := int64(4)
+		challengeGenerationGap := int64(1)
 
 		require.InEpsilon(t, (endBlock.Round-startBlock.Round)/challengeGenerationGap, challenges["total"], 0.05, "number of challenges should be equal to the number of blocks after challenge_generation_gap")
 		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
