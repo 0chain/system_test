@@ -108,18 +108,12 @@ jobs:
           echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
           echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
           echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
-          if [[ -z "${{github.event.inputs.run_smoke_tests}}" ]];
+          if [[ "${{github.event.inputs.run_smoke_tests}}" == 'true' ]];
             then
-              echo "FALSE RUN SMOKE TESTS : ${{ env.RUN_SMOKE_TESTS }}"
-              echo "FALSE run smoke tests : ${{ github.event.inputs.run_smoke_tests }}"
-              echo RUN_SMOKE_TESTS=false >> $GITHUB_ENV
-            else
-              echo "TRUE RUN SMOKE TESTS : ${{ env.RUN_SMOKE_TESTS }}"
-              echo "TRUE run smoke tests : ${{ github.event.inputs.run_smoke_tests }}"
               echo RUN_SMOKE_TESTS=true >> $GITHUB_ENV
+            else
+              echo RUN_SMOKE_TESTS=false >> $GITHUB_ENV
           fi
-          echo "RUN SMOKE TESTS : ${{ env.RUN_SMOKE_TESTS }}"
-          echo "run smoke tests : ${{ github.event.inputs.run_smoke_tests }}"
 
       - name: 'Setup jq'
         uses: dcarbone/install-jq-action@v2.1.0
