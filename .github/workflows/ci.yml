@@ -114,7 +114,7 @@ jobs:
             else
               echo RUN_SMOKE_TESTS=true >> $GITHUB_ENV
           fi
-          echo "RUN SMOKE TESTS : $RUN_SMOKE_TESTS"
+          echo "RUN SMOKE TESTS : ${{ env.RUN_SMOKE_TESTS }}"
           echo "run smoke tests : ${{ github.event.inputs.run_smoke_tests }}"
 
       - name: 'Setup jq'
