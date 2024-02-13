@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -234,7 +235,9 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		t.Log("Expected Counts : ", expectedCounts)
 
 		for _, blobber := range blobberList {
-			weight := float64((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
+			totalStake := int(blobber.TotalStake / 1e10)
+			used := float64(blobber.UsedAllocation / 1e6)
+			weight := 20*totalStake + int(10000*math.Log2(used+2))
 
 			challengesCountQuery := fmt.Sprintf("blobber_id = '%s'", blobber.Id)
 			blobberChallengeCount, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
