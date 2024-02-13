@@ -114,6 +114,8 @@ jobs:
             else
               echo RUN_SMOKE_TESTS=true >> $GITHUB_ENV
           fi
+          echo "$RUN_SMOKE_TESTS"
+          echo "${{ github.event.inputs.run_smoke_tests }}"
 
       - name: 'Setup jq'
         uses: dcarbone/install-jq-action@v2.1.0
