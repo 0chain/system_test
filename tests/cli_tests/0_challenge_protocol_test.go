@@ -208,7 +208,17 @@ func TestProtocolChallenge(testSetup *testing.T) {
 
 		totalWeight := float64(0)
 		for _, blobber := range blobberList {
-			totalWeight += float64((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
+			stake := float64(blobber.TotalStake / 1e10)
+			used := float64(blobber.UsedAllocation) / 1e6
+
+			weightFloat := 20*stake + 10000*math.Log2(used+2)
+			weight := uint64(10000000)
+
+			if weightFloat < float64(weight) {
+				weight = uint64(weightFloat)
+			}
+
+			totalWeight += float64(weight)
 		}
 
 		t.Log("Total weight : ", totalWeight)
