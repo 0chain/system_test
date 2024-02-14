@@ -399,11 +399,11 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		validatorListString = append(validatorListString, validator.ID)
 	}
 
-	stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
-		1, 1, 1, 1, 1, 1,
-	}, 1)
-
 	t.RunSequentiallyWithTimeout("Add Blobber to Increase Parity", 1*time.Hour, func(t *test.SystemTest) {
+		stakeTokensToBlobbersAndValidatorsForWallet(t, blobberListString, validatorListString, configPath, utils.EscapedTestName(t), []float64{
+			1, 1, 1, 1, 1, 1,
+		}, 1)
+
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -494,8 +494,13 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
 
+		totalExpectedcancelationReward -= float64(allocation.MovedToChallenge - allocation.MovedBack)
+
+		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
+
 		t.Log("blobber1cancelationReward", blobber1cancelationReward)
 		t.Log("blobber2cancelationReward", blobber2cancelationReward)
+
 		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
 		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 
@@ -506,6 +511,10 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Replace Blobber", 1*time.Hour, func(t *test.SystemTest) {
+		stakeTokensToBlobbersAndValidatorsForWallet(t, blobberListString, validatorListString, configPath, utils.EscapedTestName(t), []float64{
+			1, 1, 1, 1, 1, 1,
+		}, 1)
+
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
@@ -590,6 +599,11 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		blobber2cancelationReward := alloccancelationRewards[1]
 		totalExpectedcancelationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
 		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
+
+		totalExpectedcancelationReward -= float64(allocation.MovedToChallenge - allocation.MovedBack)
+
+		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
+
 		t.Log("blobber1cancelationReward", blobber1cancelationReward)
 		t.Log("blobber2cancelationReward", blobber2cancelationReward)
 		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
