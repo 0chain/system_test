@@ -505,7 +505,8 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		t.Log("blobber3cancelationReward", blobber3cancelationReward)
 
 		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward+blobber3cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
-		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
+		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to blobber 2 reward")
+		require.InEpsilon(t, blobber1cancelationReward, blobber3cancelationReward, 0.05, "Blobber 2 cancelation Reward should be equal to blobber 3 reward")
 
 		for _, blobber := range allocation.Blobbers {
 			t.Log("collecting rewards for blobber", blobber.ID)
@@ -514,8 +515,6 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Replace Blobber", 1*time.Hour, func(t *test.SystemTest) {
-		t.Skip()
-
 		stakeTokensToBlobbersAndValidatorsForWallet(t, blobberListString, validatorListString, configPath, utils.EscapedTestName(t), []float64{
 			1, 1, 1, 1, 1, 1,
 		}, 1)
