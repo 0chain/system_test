@@ -175,7 +175,86 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to block_reward did not succeed with specified value")
 	})
-       
+
+	// Share Ratio - Test case for updating share_ratio to the minimum allowed value
+	t.RunSequentially("successful update of share_ratio to minimum allowed value", func(t *test.SystemTest) {
+		configKey := "share_ratio"
+		minValue := "0" // The minimum allowed value for share_ratio
+
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": minValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to share_ratio did not succeed with minimum value")
+	})
+
+	// Share Ratio - Test case for updating share_ratio to a mid-interval value
+	t.RunSequentially("successful update of share_ratio to mid-interval value", func(t *test.SystemTest) {
+		configKey := "share_ratio"
+		midValue := "0.5" // A valid mid-interval value for share_ratio
+
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": midValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to share_ratio did not succeed with mid-interval value")
+	})
+
+	//  Share Ratio - Test case for updating share_ratio to the maximum allowed value, exclusive of 1
+	t.RunSequentially("successful update of share_ratio to maximum allowed value", func(t *test.SystemTest) {
+		configKey := "share_ratio"
+		maxValue := "0.999999" // A value just under 1 for the exclusive range
+
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": maxValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to share_ratio did not succeed with maximum allowed value")
+	})
+
+	// Reward Decline Rate - Test case for updating reward_decline_rate to the minimum allowed value
+	t.RunSequentially("successful update of reward_decline_rate to minimum allowed value", func(t *test.SystemTest) {
+		configKey := "reward_decline_rate"
+		minValue := "0" // The minimum allowed value for reward_decline_rate
+
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": minValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to reward_decline_rate did not succeed with minimum value")
+	})
+
+	// Reward Decline Rate - Test case for updating reward_decline_rate to a mid-interval value
+	t.RunSequentially("successful update of reward_decline_rate to mid-interval value", func(t *test.SystemTest) {
+		configKey := "reward_decline_rate"
+		midValue := "0.5" // A valid mid-interval value for reward_decline_rate
+
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": midValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to reward_decline_rate did not succeed with mid-interval value")
+	})
+
+	// Reward Decline Rate - Test case for updating reward_decline_rate to the maximum allowed value, exclusive of 1
+	t.RunSequentially("successful update of reward_decline_rate to maximum allowed value", func(t *test.SystemTest) {
+		configKey := "reward_decline_rate"
+		maxValue := "0.999999" // A value just under 1 for the exclusive range
+
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": maxValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to reward_decline_rate did not succeed with maximum allowed value")
+	})
+
+		   
 
 }
 
