@@ -263,10 +263,10 @@ func listBlobbers(t *test.SystemTest, cliConfigFilename, params string) ([]strin
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox ls-blobbers %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
-func getTransaction(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	t.Log("Get transaction list...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet verify %s --silent --configDir ./config --config %s", params, cliConfigFilename), 3, time.Second*2)
-}
+// func getTransaction(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
+//	t.Log("Get transaction list...")
+//	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet verify %s --silent --configDir ./config --config %s", params, cliConfigFilename), 3, time.Second*2)
+//}
 
 func stakeTokens(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return stakeTokensForWallet(t, cliConfigFilename, escapedTestName(t), params, retry)

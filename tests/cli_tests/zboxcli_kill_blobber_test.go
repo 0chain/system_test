@@ -351,7 +351,10 @@ func shutdownBlobber(t *test.SystemTest, wallet, cliConfigFilename, params strin
 	cmd := fmt.Sprintf("./zbox shutdown-blobber %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		params, wallet, cliConfigFilename)
 
-	fmt.Println(cmd)
+	_, err := fmt.Println(cmd)
+	if err != nil {
+		return nil, err
+	}
 
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
@@ -360,9 +363,9 @@ func shutdownBlobber(t *test.SystemTest, wallet, cliConfigFilename, params strin
 	}
 }
 
-func collectRewards(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
-	return collectRewardsForWallet(t, cliConfigFilename, params, escapedTestName(t), retry)
-}
+// func collectRewards(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
+//	return collectRewardsForWallet(t, cliConfigFilename, params, escapedTestName(t), retry)
+//}
 
 func collectRewardsForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
 	t.Log("collecting rewards...")

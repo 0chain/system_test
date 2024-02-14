@@ -383,7 +383,7 @@ func CountReadMarkers(t *test.SystemTest, allocationId, sharderBaseUrl string) *
 func GetReadMarkers(t *test.SystemTest, allocationId, sharderBaseUrl string) []climodel.ReadMarker {
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + cliutils.StorageScAddress + "/readmarkers")
 	params := make(map[string]string)
-	if len(allocationId) > 0 {
+	if allocationId != "" {
 		params["allocation_id"] = allocationId
 	}
 	return cliutils.ApiGetList[climodel.ReadMarker](t, url, params, 0, 100)
