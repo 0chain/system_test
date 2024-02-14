@@ -239,7 +239,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		blobber1cancelationReward := allocCancelationRewards[0]
 		blobber2cancelationReward := allocCancelationRewards[1]
 
-		totalExpectedcancelationReward := sizeInGB(int64(allocSize)) * 2 * 1000000000 * 0.2
+		totalExpectedcancelationReward := sizeInGB(int64(allocSize)) * 2 * 10000000000 * 0.2
 		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward, "MovedToChallenge", alloc.MovedToChallenge, "MovedBack", alloc.MovedBack)
 
 		totalExpectedcancelationReward -= float64(alloc.MovedToChallenge - alloc.MovedBack)

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -89,7 +90,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		challengeGenerationGap := int64(4)
+		challengeGenerationGap := int64(1)
 
 		require.InEpsilon(t, (endBlock.Round-startBlock.Round)/challengeGenerationGap, challenges["total"], 0.05, "number of challenges should be equal to the number of blocks after challenge_generation_gap")
 		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
@@ -207,7 +208,17 @@ func TestProtocolChallenge(testSetup *testing.T) {
 
 		totalWeight := float64(0)
 		for _, blobber := range blobberList {
-			totalWeight += float64((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
+			stake := float64(blobber.TotalStake / 1e10)
+			used := float64(blobber.UsedAllocation) / 1e6
+
+			weightFloat := 20*stake + 10000*math.Log2(used+2)
+			weight := uint64(10000000)
+
+			if weightFloat < float64(weight) {
+				weight = uint64(weightFloat)
+			}
+
+			totalWeight += float64(weight)
 		}
 
 		t.Log("Total weight : ", totalWeight)
@@ -217,13 +228,18 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		for i := int64(0); i < allChallengesCount["total"]; i++ {
 			randomWeight := int64(rand.Intn(int(totalWeight)))
 
-			// shuffle blobbers list
-			// rand.Shuffle(len(blobberList), func(i, j int) {
-			//	blobberList[i], blobberList[j] = blobberList[j], blobberList[i]
-			// })
-
 			for _, blobber := range blobberList {
-				randomWeight -= (blobber.UsedAllocation) * (blobber.TotalStake / 1e10)
+				stake := float64(blobber.TotalStake / 1e10)
+				used := float64(blobber.UsedAllocation) / 1e6
+
+				weightFloat := 20*stake + 10000*math.Log2(used+2)
+				weight := uint64(10000000)
+
+				if weightFloat < float64(weight) {
+					weight = uint64(weightFloat)
+				}
+
+				randomWeight -= int64(weight)
 				if randomWeight <= 0 {
 					expectedCounts[blobber.Id]++
 					break
@@ -234,7 +250,15 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		t.Log("Expected Counts : ", expectedCounts)
 
 		for _, blobber := range blobberList {
-			weight := float64((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
+			stake := float64(blobber.TotalStake / 1e10)
+			used := float64(blobber.UsedAllocation) / 1e6
+
+			weightFloat := 20*stake + 10000*math.Log2(used+2)
+			weight := uint64(10000000)
+
+			if weightFloat < float64(weight) {
+				weight = uint64(weightFloat)
+			}
 
 			challengesCountQuery := fmt.Sprintf("blobber_id = '%s'", blobber.Id)
 			blobberChallengeCount, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
