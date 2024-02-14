@@ -599,8 +599,14 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		alloccancelationRewards, err := getAllocationCancellationReward(t, allocationId, blobberListString)
 		require.Nil(t, err, "Error getting allocation cancelation rewards", strings.Join(output, "\n"))
 
+		// Replaced blobber
 		blobber1cancelationReward := alloccancelationRewards[0]
+		expectedReplacedBlobberCancellationCharge := sizeInGB(int64(allocSize)) * 1000000000 * 0.2
+		t.Log("expectedcancelationReward", expectedReplacedBlobberCancellationCharge)
+		require.InEpsilon(t, expectedReplacedBlobberCancellationCharge, float64(blobber1cancelationReward), 0.05, "Replaced blobber cancellation charge Reward should be equal to total expected cancelation reward")
+
 		blobber2cancelationReward := alloccancelationRewards[1]
+		blobber3cancelationReward := alloccancelationRewards[2]
 		totalExpectedcancelationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
 		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
 
@@ -611,8 +617,9 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 		t.Log("blobber1cancelationReward", blobber1cancelationReward)
 		t.Log("blobber2cancelationReward", blobber2cancelationReward)
-		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber1cancelationReward+blobber2cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
-		require.InEpsilon(t, blobber1cancelationReward, blobber2cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
+		t.Log("blobber3cancelationReward", blobber3cancelationReward)
+		require.InEpsilon(t, totalExpectedcancelationReward, float64(blobber2cancelationReward+blobber3cancelationReward), 0.05, "Total cancelation Reward should be equal to total expected cancelation reward")
+		require.InEpsilon(t, blobber2cancelationReward, blobber3cancelationReward, 0.05, "Blobber 1 cancelation Reward should be equal to total expected cancelation reward")
 
 		for _, blobber := range allocation.Blobbers {
 			t.Log("collecting rewards for blobber", blobber.ID)
