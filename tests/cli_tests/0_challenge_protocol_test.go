@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"math/big"
 	"net/http"
 	"net/url"
@@ -208,7 +209,17 @@ func TestProtocolChallenge(testSetup *testing.T) {
 
 		totalWeight := float64(0)
 		for _, blobber := range blobberList {
-			totalWeight += float64((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
+			stake := float64(blobber.TotalStake / 1e10)
+			used := float64(blobber.UsedAllocation) / 1e6
+
+			weightFloat := 20*stake + 10000*math.Log2(used+2)
+			weight := uint64(10000000)
+
+			if weightFloat < float64(weight) {
+				weight = uint64(weightFloat)
+			}
+
+			totalWeight += float64(weight)
 		}
 
 		t.Log("Total weight : ", totalWeight)
@@ -218,13 +229,18 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		for i := int64(0); i < allChallengesCount["total"]; i++ {
 			randomWeight, _ := secureRandomInt(int(totalWeight))
 
-			// shuffle blobbers list
-			// rand.Shuffle(len(blobberList), func(i, j int) {
-			//	blobberList[i], blobberList[j] = blobberList[j], blobberList[i]
-			// })
-
 			for _, blobber := range blobberList {
-				randomWeight -= (blobber.UsedAllocation) * (blobber.TotalStake / 1e10)
+				stake := float64(blobber.TotalStake / 1e10)
+				used := float64(blobber.UsedAllocation) / 1e6
+
+				weightFloat := 20*stake + 10000*math.Log2(used+2)
+				weight := uint64(10000000)
+
+				if weightFloat < float64(weight) {
+					weight = uint64(weightFloat)
+				}
+
+				randomWeight -= int64(weight)
 				if randomWeight <= 0 {
 					expectedCounts[blobber.Id]++
 					break
@@ -235,7 +251,15 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		t.Log("Expected Counts : ", expectedCounts)
 
 		for _, blobber := range blobberList {
-			weight := float64((blobber.UsedAllocation) * (blobber.TotalStake / 1e10))
+			stake := float64(blobber.TotalStake / 1e10)
+			used := float64(blobber.UsedAllocation) / 1e6
+
+			weightFloat := 20*stake + 10000*math.Log2(used+2)
+			weight := uint64(10000000)
+
+			if weightFloat < float64(weight) {
+				weight = uint64(weightFloat)
+			}
 
 			challengesCountQuery := fmt.Sprintf("blobber_id = '%s'", blobber.Id)
 			blobberChallengeCount, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
