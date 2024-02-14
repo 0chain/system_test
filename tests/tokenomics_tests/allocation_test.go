@@ -494,6 +494,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 
 		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
 
+		allocation = utils.GetAllocation(t, allocationId)
 		totalExpectedcancelationReward -= float64(allocation.MovedToChallenge - allocation.MovedBack)
 
 		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
@@ -600,6 +601,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		totalExpectedcancelationReward := sizeInGB(int64(allocSize)*2) * 1000000000 * 0.2
 		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
 
+		allocation = utils.GetAllocation(t, allocationId)
 		totalExpectedcancelationReward -= float64(allocation.MovedToChallenge - allocation.MovedBack)
 
 		t.Log("totalExpectedcancelationReward", totalExpectedcancelationReward)
