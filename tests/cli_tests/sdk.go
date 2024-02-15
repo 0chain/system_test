@@ -122,7 +122,7 @@ func GetRandomBlobber(walletname, configFile, allocationID, except_blobber strin
 		}
 	}
 
-	if len(randomBlobber) > 0 {
+	if randomBlobber != "" {
 		return randomBlobber, nil
 	}
 	return "", fmt.Errorf("failed to get blobbers")
