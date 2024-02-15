@@ -1,12 +1,14 @@
 package cli_tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -86,6 +88,7 @@ const (
 	miner03NodeDelegateWalletName   = "wallets/miner03_node_delegate"
 	sharder01NodeDelegateWalletName = "wallets/sharder01_node_delegate"
 	sharder02NodeDelegateWalletName = "wallets/sharder02_node_delegate"
+	stakingWallet                   = "wallets/staking"
 )
 
 var (
@@ -108,6 +111,10 @@ var (
 var (
 	configPath string
 	configDir  string
+
+	wallets     []json.RawMessage
+	walletIdx   int64
+	walletMutex sync.Mutex
 )
 
 var tenderlyClient *tenderly.Client
@@ -138,7 +145,8 @@ func TestMain(m *testing.M) {
 					strings.HasSuffix(f, miner02NodeDelegateWalletName+"_wallet.json") ||
 					strings.HasSuffix(f, miner03NodeDelegateWalletName+"_wallet.json") ||
 					strings.HasSuffix(f, sharder01NodeDelegateWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") {
+					strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, stakingWallet+"_wallet.json") {
 					continue
 				}
 				_ = os.Remove(f)
@@ -174,6 +182,25 @@ func TestMain(m *testing.M) {
 
 	// Create an S3 client
 	S3Client = s3.New(sess)
+
+	walletMutex.Lock()
+	// Read the content of the file
+	fileContent, err := os.ReadFile("./config/wallets/wallets.json")
+	if err != nil {
+		log.Println("Error reading file:", err)
+		return
+	}
+
+	// Parse the JSON data into a list of strings
+	err = json.Unmarshal(fileContent, &wallets)
+	if err != nil {
+		log.Println("Error decoding JSON:", err)
+		return
+	}
+
+	walletIdx = 500
+
+	walletMutex.Unlock()
 
 	exitRun := m.Run()
 

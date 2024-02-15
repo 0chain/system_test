@@ -28,8 +28,7 @@ func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 	}
 
 	// create local wallet and faucet
-	output, err := createWallet(t, configPath)
-	require.NoError(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+	createWallet(t)
 
 	// We should have 3 authorizers in total when the network is deployed.
 	// Test steps:
@@ -47,7 +46,7 @@ func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 
 	// Remove 1 authorizer from zcnsc smartcontract
 	removeAuth := auths[0]
-	output, err = removeAuthorizer(t, removeAuth.ID, false)
+	output, err := removeAuthorizer(t, removeAuth.ID, false)
 	require.NoError(t, err, "Unexpected remove authorizer failure", strings.Join(output, "\n"))
 	t.Logf("remove authorizer: %s zcnsc successfully", removeAuth.ID)
 
@@ -62,7 +61,7 @@ func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 
 	// add back the authorizer removed previously, the auths[0]
 	addAuth := auths[0]
-	output, err = registerAuthorizer(t, addAuth.ID, authsIDKeys[addAuth.ID], addAuth.URL, false)
+	output, err = registerAuthorizer(t, "random_delegate_wallet", authsIDKeys[addAuth.ID], addAuth.URL, false)
 	require.NoError(t, err, "Unexpected register authorizer failure", strings.Join(output, "\n"))
 
 	// wait until the new one is registered
@@ -88,7 +87,7 @@ func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 
 	// add back the second removed authorizer
 	addAuth2 := auths[1]
-	output, err = registerAuthorizer(t, addAuth2.ID, authsIDKeys[addAuth2.ID], addAuth2.URL, false)
+	output, err = registerAuthorizer(t, "random_delegate_wallet", authsIDKeys[addAuth2.ID], addAuth2.URL, false)
 	require.NoError(t, err, "Unexpected register authorizer failure", strings.Join(output, "\n"))
 
 	// TODO: test burn-wzcn and mint zcn, but thats require the grapnode and dex_subgraph setup for

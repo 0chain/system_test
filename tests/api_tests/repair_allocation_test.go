@@ -13,23 +13,29 @@ import (
 
 func TestRepairAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-	apiClient.CreateReadPool(t, sdkWallet, 0.5, client.TxSuccessfulStatus)
-	t.RunSequentially("Repair allocation after single upload should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+	wallet := initialisedWallets[walletIdx]
+	walletIdx++
+	balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+	wallet.Nonce = int(balance.Nonce)
+
+	sdkClient.SetWallet(t, wallet)
+
+	apiClient.CreateReadPool(t, wallet, 0.5, client.TxSuccessfulStatus)
+
+	t.RunSequentially("Repair allocation after single upload should work", func(t *test.SystemTest) {
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
 		blobberRequirements.Size = 2056
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
 		lastBlobber := alloc.Blobbers[0]
 		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
-		op := sdkClient.AddUploadOperation(t, "")
+		op := sdkClient.AddUploadOperation(t, "", "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op}, client.WithRepair(alloc.Blobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
@@ -38,13 +44,11 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after multiple uploads should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -53,7 +57,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 		ops := make([]sdk.OperationRequest, 0, 4)
 		for i := 0; i < 4; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
@@ -66,25 +70,23 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after update should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 6096
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
 		firstBlobber := alloc.Blobbers[0]
 		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
 
-		op := sdkClient.AddUploadOperation(t, "")
+		op := sdkClient.AddUploadOperation(t, "", "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
 		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
-		updateOp := sdkClient.AddUpdateOperation(t, allocationID, op.RemotePath, op.FileMeta.RemoteName)
+		updateOp := sdkClient.AddUpdateOperation(t, op.RemotePath, op.FileMeta.RemoteName, op.FileMeta.ActualSize)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{updateOp}, client.WithRepair(alloc.Blobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
@@ -98,20 +100,18 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after delete should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 2056
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
 		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
 
-		op := sdkClient.AddUploadOperation(t, "")
+		op := sdkClient.AddUploadOperation(t, "", "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
@@ -124,20 +124,18 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after move should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 6096
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
 		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
 
-		op := sdkClient.AddUploadOperation(t, "")
+		op := sdkClient.AddUploadOperation(t, "", "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
@@ -151,20 +149,18 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after copy should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 8096
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
 		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
 
-		op := sdkClient.AddUploadOperation(t, "")
+		op := sdkClient.AddUploadOperation(t, "", "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
@@ -180,20 +176,18 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after rename should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 6096
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
 		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
 
-		op := sdkClient.AddUploadOperation(t, "")
+		op := sdkClient.AddUploadOperation(t, "", "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
 
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"

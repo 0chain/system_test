@@ -18,11 +18,10 @@ func TestReplaceBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Replace blobber in allocation, should work")
 
-	t.Parallel()
+	t.RunSequentially("Replace blobber in allocation, should work", func(t *test.SystemTest) {
+		wallet := createWallet(t)
 
-	t.Run("Replace blobber in allocation, should work", func(t *test.SystemTest) {
-		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -52,9 +51,10 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.True(t, isBlobberExist(newBlobberID, allocation.Blobbers))
 	})
 
-	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *test.SystemTest) {
-		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+	t.RunSequentially("Replace blobber with the same one in allocation, shouldn't work", func(t *test.SystemTest) {
+		wallet := createWallet(t)
+
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -80,9 +80,10 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
-	t.Run("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *test.SystemTest) {
-		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+	t.RunSequentially("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *test.SystemTest) {
+		wallet := createWallet(t)
+
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -111,9 +112,8 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
 	})
 
-	t.Run("Check token accounting of a blobber replacing in allocation, should work", func(t *test.SystemTest) {
-		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+	t.RunSequentially("Check token accounting of a blobber replacing in allocation, should work", func(t *test.SystemTest) {
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -149,24 +149,26 @@ func TestReplaceBlobber(testSetup *testing.T) {
 		require.Greater(t, balanceBeforeAllocationUpdate, balanceAfterAllocationUpdate)
 	})
 
-	t.RunWithTimeout("Replace blobber in allocation with repair should work", 90*time.Second, func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.RunSequentiallyWithTimeout("Replace blobber in allocation with repair should work", 90*time.Second, func(t *test.SystemTest) {
+		wallet := createWallet(t)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		sdkClient.SetWallet(t, wallet)
 
-		uploadOp := sdkClient.AddUploadOperation(t, "")
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		uploadOp := sdkClient.AddUploadOperation(t, "", "")
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		apiClient.CreateReadPool(t, sdkWallet, 1.0, client.TxSuccessfulStatus)
+		apiClient.CreateReadPool(t, wallet, 1.0, client.TxSuccessfulStatus)
 
 		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
 		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
 		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
-		apiClient.UpdateAllocationBlobbers(t, sdkWallet, newBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
+		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
 
 		time.Sleep(10 * time.Second)
 

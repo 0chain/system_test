@@ -14,17 +14,20 @@ import (
 func TestMultiOperationRollback(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Multi different operations rollback should work")
-	t.RunSequentially("Multi upload operations rollback should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+	t.RunSequentially("Multi upload operations rollback should work", func(t *test.SystemTest) {
+		wallet := createWallet(t)
+
+		sdkClient.SetWallet(t, wallet)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		ops := make([]sdk.OperationRequest, 0, 5)
 
 		for i := 0; i < 1; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -32,7 +35,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		newOps := make([]sdk.OperationRequest, 0, 5)
 		time.Sleep(2 * time.Second)
 		for i := 0; i < 2; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			newOps = append(newOps, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, newOps)
@@ -42,7 +45,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 
 		moreOps := make([]sdk.OperationRequest, 0, 5)
 		for i := 0; i < 3; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			moreOps = append(moreOps, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, moreOps)
@@ -52,16 +55,18 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi delete operations rollback should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+		wallet := createWallet(t)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		sdkClient.SetWallet(t, wallet)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -81,16 +86,18 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Multi rename operations rollback should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+		wallet := createWallet(t)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		sdkClient.SetWallet(t, wallet)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -109,17 +116,19 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		listResult := sdkClient.GetFileList(t, allocationID, "/")
 		require.Equal(t, 10, len(listResult.Children), "files count mismatch expected %v actual %v", 10, len(listResult.Children))
 	})
-	t.RunSequentially("Multi different operations rollback should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.Run("Multi different operations rollback should work", func(t *test.SystemTest) {
+		wallet := createWallet(t)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		sdkClient.SetWallet(t, wallet)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			op := sdkClient.AddUploadOperation(t, "")
+			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
@@ -132,7 +141,7 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 				op := sdkClient.AddDeleteOperation(t, allocationID, ops[i].FileMeta.RemotePath)
 				newOps = append(newOps, op)
 			case 1:
-				op := sdkClient.AddUpdateOperation(t, allocationID, ops[i].FileMeta.RemotePath, ops[i].FileMeta.RemoteName)
+				op := sdkClient.AddUpdateOperation(t, ops[i].FileMeta.RemotePath, ops[i].FileMeta.RemoteName, ops[i].FileMeta.ActualSize)
 				newOps = append(newOps, op)
 			case 2:
 				op := sdkClient.AddRenameOperation(t, allocationID, ops[i].FileMeta.RemotePath, randName())

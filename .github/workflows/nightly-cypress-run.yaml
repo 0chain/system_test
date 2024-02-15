@@ -141,7 +141,7 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git clone https://${{ secrets.SVC_ACCOUNT_USER }}:${{ secrets.SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
 
       - name: Set Docker Image Tags.
         id: get_info
@@ -278,7 +278,7 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git clone https://${{ secrets. SVC_ACCOUNT_USER }}:${{ secrets. SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
 
       - name: Point to cypress.bolt.software webapp
         run: |
@@ -336,11 +336,11 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git clone https://${{ secrets. SVC_ACCOUNT_USER }}:${{ secrets. SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
 
       # - name: Cloning web-apps Repository.
       #   run: |
-      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
+      #     git clone https://${{ secrets.SVC_ACCOUNT_USER }}:${{ secrets.SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
       #     echo "Successfully cloned the web-apps repository"
 
       - name: Set Docker Image Tags.
@@ -474,7 +474,7 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git clone https://${{ secrets. SVC_ACCOUNT_USER }}:${{ secrets. SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
 
       - name: Point to cypress.atlus.cloud webapp
         run: |
@@ -532,11 +532,11 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git clone https://${{ secrets. SVC_ACCOUNT_USER }}:${{ secrets. SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
 
       # - name: Cloning web-apps Repository.
       #   run: |
-      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
+      #     git clone https://${{ secrets.SVC_ACCOUNT_USER }}:${{ secrets.SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
       #     echo "Successfully cloned the web-apps repository"
 
       - name: Set Docker Image Tags.
@@ -676,7 +676,7 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git clone https://${{ secrets. SVC_ACCOUNT_USER }}:${{ secrets. SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
 
       - name: Point to cypress.chalk.software webapp
         run: |
@@ -734,11 +734,11 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git clone https://${{ secrets. SVC_ACCOUNT_USER }}:${{ secrets. SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
 
       # - name: Cloning web-apps Repository.
       #   run: |
-      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
+      #     git clone https://${{ secrets.SVC_ACCOUNT_USER }}:${{ secrets.SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
       #     echo "Successfully cloned the web-apps repository"
 
       - name: Set Docker Image Tags.
@@ -874,7 +874,7 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git clone https://${{ secrets. SVC_ACCOUNT_USER }}:${{ secrets. SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
 
       - name: Point to cypress.chimney.software webapp
         run: |
@@ -932,11 +932,11 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git clone https://${{ secrets. SVC_ACCOUNT_USER }}:${{ secrets. SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
 
       # - name: Cloning web-apps Repository.
       #   run: |
-      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
+      #     git clone https://${{ secrets.SVC_ACCOUNT_USER }}:${{ secrets.SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
       #     echo "Successfully cloned the web-apps repository"
 
       - name: Set Docker Image Tags.
@@ -1074,7 +1074,7 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git clone https://${{ secrets. SVC_ACCOUNT_USER }}:${{ secrets. SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
 
       - name: Point to cypress.blimp.software webapp
         run: |
@@ -1132,11 +1132,11 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git clone https://${{ secrets. SVC_ACCOUNT_USER }}:${{ secrets. SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
 
       # - name: Cloning web-apps Repository.
       #   run: |
-      #     git clone https://${{ secrets.USER_NAME }}:${{ secrets.ACCESS_TOKEN }}@github.com/0chain/web-apps.git
+      #     git clone https://${{ secrets.SVC_ACCOUNT_USER }}:${{ secrets.SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
       #     echo "Successfully cloned the web-apps repository"
 
       - name: Set Docker Image Tags.
@@ -1271,7 +1271,7 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone https://${{ secrets.GIT_USER }}:${{ secrets.GIT_PAT }}@github.com/0chain/web-apps.git
+          git clone https://${{ secrets. SVC_ACCOUNT_USER }}:${{ secrets. SVC_ACCOUNT_SECRET }}@github.com/0chain/web-apps.git
 
       - name: Point to cypress.vult.network webapp
         run: |

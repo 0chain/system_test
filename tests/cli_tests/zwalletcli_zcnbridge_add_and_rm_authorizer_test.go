@@ -13,17 +13,16 @@ import (
 
 func TestZCNBridgeAuthorizerRegisterAndDelete(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
 	t := test.NewSystemTest(testSetup)
-	output, err := createWallet(t, configPath)
-	require.NoError(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+	createWallet(t)
 
 	t.RunSequentially("Register authorizer to DEX smartcontract", func(t *test.SystemTest) {
-		output, err = scRegisterAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", true)
+		output, err := scRegisterAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", true)
 		require.NoError(t, err, "error trying to register authorizer to DEX sc: %s", strings.Join(output, "\n"))
 		t.Log("register authorizer DEX SC successfully")
 	})
 
 	t.RunSequentially("Remove authorizer from DEX smartcontract", func(t *test.SystemTest) {
-		output, err = scRemoveAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", true)
+		output, err := scRemoveAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", true)
 		require.NoError(t, err, strings.Join(output, "\n"))
 		t.Log("remove authorizer DEX SC successfully")
 	})
@@ -31,8 +30,7 @@ func TestZCNBridgeAuthorizerRegisterAndDelete(testSetup *testing.T) { // nolint:
 
 func TestZCNAuthorizerRegisterAndDelete(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	output, err := createWallet(t, configPath)
-	require.NoError(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+	createWallet(t)
 
 	w, err := getWallet(t, configPath)
 	require.NoError(t, err)
@@ -42,12 +40,9 @@ func TestZCNAuthorizerRegisterAndDelete(testSetup *testing.T) {
 		clientID  = w.ClientID
 		authURL   = "http://systemtest.network/authorizer01"
 	)
-	// faucet pour to sc owner wallet
-	output, err = executeFaucetWithTokensForWallet(t, "wallets/sc_owner", configPath, defaultInitFaucetTokens)
-	require.NoError(t, err, "Unexpected faucet execution failure", strings.Join(output, "\n"))
 
 	t.RunSequentially("Register authorizer to zcnsc smartcontract", func(t *test.SystemTest) {
-		output, err := registerAuthorizer(t, clientID, publicKey, authURL, true)
+		output, err := registerAuthorizer(t, "random_delegate_wallet", publicKey, authURL, true)
 		require.NoError(t, err, "error trying to register authorizer to zcnsc: %s", strings.Join(output, "\n"))
 		t.Log("register authorizer zcnsc successfully")
 	})

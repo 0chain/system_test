@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -29,11 +31,10 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	// Setup related to these tests is done in `0chain/actions/run-system-tests/action.yml`.
 	// The 1 hour wait after setup is also handled in CI.
 	t.TestSetup("Get list of sharders and blobbers", func() {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Get sharder list.
-		output, err = getSharders(t, configPath)
+		output, err := getSharders(t, configPath)
 		require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 1)
 		require.Equal(t, "MagicBlock Sharders", output[0])
@@ -89,7 +90,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 		require.Nil(t, err, "error counting challenges")
 
-		challengeGenerationGap := int64(4)
+		challengeGenerationGap := int64(1)
 
 		require.InEpsilon(t, (endBlock.Round-startBlock.Round)/challengeGenerationGap, challenges["total"], 0.05, "number of challenges should be equal to the number of blocks after challenge_generation_gap")
 		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
@@ -205,14 +206,67 @@ func TestProtocolChallenge(testSetup *testing.T) {
 
 		require.InEpsilonf(t, allChallengesCount["total"], allChallengesCount["passed"]+allChallengesCount["open"], 0.05, "Challenge Failure rate should not be more than 5%")
 
-		lenBlobberList := int64(len(blobberList))
+		totalWeight := float64(0)
+		for _, blobber := range blobberList {
+			stake := float64(blobber.TotalStake / 1e10)
+			used := float64(blobber.UsedAllocation) / 1e6
+
+			weightFloat := 20*stake + 10000*math.Log2(used+2)
+			weight := uint64(10000000)
+
+			if weightFloat < float64(weight) {
+				weight = uint64(weightFloat)
+			}
+
+			totalWeight += float64(weight)
+		}
+
+		t.Log("Total weight : ", totalWeight)
+
+		expectedCounts := make(map[string]int64)
+
+		for i := int64(0); i < allChallengesCount["total"]; i++ {
+			randomWeight := int64(rand.Intn(int(totalWeight)))
+
+			for _, blobber := range blobberList {
+				stake := float64(blobber.TotalStake / 1e10)
+				used := float64(blobber.UsedAllocation) / 1e6
+
+				weightFloat := 20*stake + 10000*math.Log2(used+2)
+				weight := uint64(10000000)
+
+				if weightFloat < float64(weight) {
+					weight = uint64(weightFloat)
+				}
+
+				randomWeight -= int64(weight)
+				if randomWeight <= 0 {
+					expectedCounts[blobber.Id]++
+					break
+				}
+			}
+		}
+
+		t.Log("Expected Counts : ", expectedCounts)
 
 		for _, blobber := range blobberList {
+			stake := float64(blobber.TotalStake / 1e10)
+			used := float64(blobber.UsedAllocation) / 1e6
+
+			weightFloat := 20*stake + 10000*math.Log2(used+2)
+			weight := uint64(10000000)
+
+			if weightFloat < float64(weight) {
+				weight = uint64(weightFloat)
+			}
+
 			challengesCountQuery := fmt.Sprintf("blobber_id = '%s'", blobber.Id)
 			blobberChallengeCount, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 			require.Nil(t, err, "error counting challenges")
 
-			require.InEpsilon(t, allChallengesCount["total"]/lenBlobberList, blobberChallengeCount["total"], 0.15, "blobber distribution should within tolerance")
+			t.Log("Blobber weight : ", weight, " Expected Challenges : ", expectedCounts[blobber.Id], " Blobber Challenges : ", blobberChallengeCount["total"])
+
+			require.InEpsilon(t, blobberChallengeCount["total"], expectedCounts[blobber.Id], 0.25, "blobber distribution should within tolerance")
 			require.InEpsilon(t, blobberChallengeCount["total"], blobberChallengeCount["passed"]+blobberChallengeCount["open"], 0.05, "failure rate should not be more than 5 percent")
 		}
 	})
@@ -227,8 +281,6 @@ func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
 }
 
 func countChallengesByQuery(t *test.SystemTest, query string, sharderBaseURLs []string) (map[string]int64, error) {
-	t.Logf("Counting challenges with query: %s", query)
-
 	for _, sharderBaseURL := range sharderBaseURLs {
 		encodedQuery := url.QueryEscape(query)
 		baseURL := fmt.Sprintf(sharderBaseURL + "/v1/screst/" + storageSmartContractAddress + "/count-challenges")

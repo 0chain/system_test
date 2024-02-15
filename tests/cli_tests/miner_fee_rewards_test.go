@@ -31,20 +31,14 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
 	t.RunSequentially("Miner share of fee rewards for transactions", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		wallet, err := getWalletForName(t, configPath, escapedTestName(t)+"_TARGET")
-		require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
+		require.NoError(t, err, "error getting target wallet")
 
 		if !confirmDebugBuild(t) {
 			t.Skip("miner fee rewards test skipped as it requires a debug event database")
 		}
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		sharderUrl := getSharderUrl(t)
 		minerIds := getSortedMinerIds(t, sharderUrl)
@@ -285,8 +279,7 @@ func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {
 }
 
 func getLatestFinalizedBlock(t *test.SystemTest) *climodel.LatestFinalizedBlock {
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+	createWallet(t)
 
 	sharders := getShardersList(t)
 	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]

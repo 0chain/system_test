@@ -25,28 +25,22 @@ func TestCancelAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Cancel allocation immediately should work", func(t *test.SystemTest) {
-		output, err := executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
 		allocationID := setupAllocation(t, configPath)
 
-		output, err = cancelAllocation(t, configPath, allocationID, true)
+		output, err := cancelAllocation(t, configPath, allocationID, true)
 		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 	})
 
 	t.RunWithTimeout("Cancel allocation after upload should work", 5*time.Minute, func(t *test.SystemTest) {
-		output, err := executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
 		allocationID := setupAllocation(t, configPath)
 
 		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, 1*MB)
+		err := createFileWithSize(filename, 1*MB)
 		require.Nil(t, err)
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
@@ -64,8 +58,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
 		// create wallet
-		_, err := createWallet(t, configPath)
-		require.NoError(t, err)
+		createWallet(t)
 
 		cmd := fmt.Sprintf(
 			"./zbox alloc-cancel --silent "+
@@ -83,8 +76,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
 		otherAllocationID := setupAllocationWithWallet(t, escapedTestName(t)+"_other_wallet.json", configPath)
 
-		_, err := createWallet(t, configPath)
-		require.NoError(t, err)
+		createWallet(t)
 		// otherAllocationID should not be cancelable from this level
 		output, err := cancelAllocation(t, configPath, otherAllocationID, false)
 
@@ -94,8 +86,7 @@ func TestCancelAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
-		_, err := createWallet(t, configPath)
-		require.NoError(t, err)
+		createWallet(t)
 
 		allocationID := "123abc"
 

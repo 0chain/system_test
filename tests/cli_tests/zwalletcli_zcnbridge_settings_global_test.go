@@ -34,9 +34,6 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("should allow update of min_mint_amount")
 
-	output, err := executeFaucetWithTokensForWallet(t, zcnscOwner, configPath, 10.0)
-	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
 	defaultParams := getDefaultConfig(t)
 
 	t.RunSequentially("should allow update of min_mint_amount", func(t *test.SystemTest) {
@@ -114,8 +111,7 @@ func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t.RunSequentially("should allow update of owner_id", func(t *test.SystemTest) {
 		newOwner := escapedTestName(t)
 
-		output, err := createWalletForName(t, configPath, newOwner)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(newOwner)
 
 		newOwnerWallet, err := getWalletForName(t, configPath, newOwner)
 		t.Cleanup(func() {
