@@ -831,7 +831,7 @@ func stakeTokensToBlobbersAndValidatorsForWallet(t *test.SystemTest, blobbers, v
 	}
 }
 
-//nolint:unused
+//nolint:deadcode,unused
 func unstakeTokensForBlobbersAndValidatorsForWallet(t *test.SystemTest, blobbers, validators []string, configPath, wallet string, numDelegates int) {
 	for i := 0; i < numDelegates; i++ {
 		for _, blobber := range blobbers {
