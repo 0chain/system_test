@@ -361,6 +361,7 @@ func shutdownBlobber(t *test.SystemTest, wallet, cliConfigFilename, params strin
 	}
 }
 
+//nolint:unused
 func collectRewards(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return collectRewardsForWallet(t, cliConfigFilename, params, escapedTestName(t), retry)
 }
