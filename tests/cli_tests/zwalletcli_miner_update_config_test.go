@@ -254,8 +254,106 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.True(t, isUpdateSuccess(output), "Update to reward_decline_rate did not succeed with maximum allowed value")
 	})
 
-		   
+		// DKG - Test case for updating t_percent to a valid value
+	t.RunSequentially("successful update of t_percent to a valid value", func(t *test.SystemTest) {
+		configKey := "t_percent"
+		validValue := "0.66" // A min value for t_percent
 
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": validValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to t_percent did not succeed with valid value")
+	})
+
+	// DKG - Test case for updating k_percent to a valid value
+	t.RunSequentially("successful update of k_percent to a valid value", func(t *test.SystemTest) {
+		configKey := "k_percent"
+		validValue := "0.75" // A min value for k_percent
+
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": validValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to k_percent did not succeed with valid value")
+	})
+
+	// DKG - Test case for updating x_percent to a valid value
+	t.RunSequentially("successful update of x_percent to a valid value", func(t *test.SystemTest) {
+		configKey := "x_percent"
+		validValue := "0.70" // A min value for x_percent
+
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": validValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to x_percent did not succeed with valid value")
+	})
+
+	t.RunSequentially("successful update of add_miner cost", func(t *test.SystemTest) {
+		configKey := "cost.add_miner"
+		newValue := "361" // A valid cost value for adding a miner
+	
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": newValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to add_miner cost did not succeed with valid value")
+	})
+	
+	t.RunSequentially("successful update of add_sharder cost", func(t *test.SystemTest) {
+		configKey := "cost.add_sharder"
+		newValue := "331" // A valid cost value for adding a sharder
+	
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": newValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to add_sharder cost did not succeed with valid value")
+	})
+			   
+	t.RunSequentially("successful update of delete_miner cost", func(t *test.SystemTest) {
+		configKey := "cost.delete_miner"
+		newValue := "484" // A valid cost value for deleting a miner
+	
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": newValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to delete_miner cost did not succeed with valid value")
+	})
+
+	t.RunSequentially("successful update of delete_sharder cost", func(t *test.SystemTest) {
+		configKey := "cost.delete_sharder"
+		newValue := "335" // A valid cost value for deleting a sharder
+	
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": newValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to delete_sharder cost did not succeed with valid value")
+	})
+
+	t.RunSequentially("successful update of miner_health_check cost", func(t *test.SystemTest) {
+		configKey := "cost.miner_health_check"
+		newValue := "149" // A valid cost value for miner health check
+	
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   configKey,
+			"values": newValue,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to miner_health_check cost did not succeed with valid value")
+	})
+	
+		
 }
 
 func getMinerSCConfig(t *test.SystemTest, cliConfigFilename string, retry bool) ([]string, error) {
