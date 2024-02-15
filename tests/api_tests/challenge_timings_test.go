@@ -29,7 +29,6 @@ const (
 
 func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip()
 
 	var (
 		allBlobbers []*model.SCRestGetBlobberResponse
