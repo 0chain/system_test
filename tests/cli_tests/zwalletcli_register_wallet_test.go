@@ -50,7 +50,7 @@ func createWalletForName(name string) {
 	log.Println("Creating wallet for", name, "with walletIdx", walletIdx)
 	walletMutex.Unlock()
 
-	err := os.WriteFile(walletPath, wallet, 0644)
+	err := os.WriteFile(walletPath, wallet, 0600)
 	if err != nil {
 		fmt.Printf("Error writing file %s: %v\n", walletPath, err)
 	} else {
