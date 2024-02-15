@@ -1,11 +1,12 @@
 package cli_tests
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
 	"math"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"net/url"
 	"os"
@@ -226,7 +227,8 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		expectedCounts := make(map[string]int64)
 
 		for i := int64(0); i < allChallengesCount["total"]; i++ {
-			randomWeight := int64(rand.Intn(int(totalWeight)))
+			randomWeight, err := secureRandomInt(int(totalWeight))
+			require.Nil(t, err, "error generating random number")
 
 			for _, blobber := range blobberList {
 				stake := float64(blobber.TotalStake / 1e10)
@@ -270,6 +272,15 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			require.InEpsilon(t, blobberChallengeCount["total"], blobberChallengeCount["passed"]+blobberChallengeCount["open"], 0.05, "failure rate should not be more than 5 percent")
 		}
 	})
+}
+
+// Generate a random number in the range [0, max)
+func secureRandomInt(max int) (int64, error) {
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
+	if err != nil {
+		return 0, err
+	}
+	return n.Int64(), nil
 }
 
 func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
