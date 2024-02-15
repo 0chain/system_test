@@ -227,7 +227,8 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		expectedCounts := make(map[string]int64)
 
 		for i := int64(0); i < allChallengesCount["total"]; i++ {
-			randomWeight, _ := secureRandomInt(int(totalWeight))
+			randomWeight, err := secureRandomInt(int(totalWeight))
+			require.Nil(t, err, "error generating random number")
 
 			for _, blobber := range blobberList {
 				stake := float64(blobber.TotalStake / 1e10)
