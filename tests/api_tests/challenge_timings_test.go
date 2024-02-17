@@ -271,7 +271,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []*blockchain.StorageNode,
 
 		proofGenTimes = append(proofGenTimes, challengeTiming.ProofGenTime) // proof gen time in milliseconds
 
-		// Calculate the time difference in milliseconds
+		// Calculate the time difference in seconds
 		txnSubmission := challengeTiming.TxnSubmission.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime())
 		txnSubmissions = append(txnSubmissions, int64(txnSubmission.Seconds()))
 
