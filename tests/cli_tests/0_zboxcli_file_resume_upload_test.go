@@ -113,8 +113,8 @@ func TestResumeUpload(testSetup *testing.T) {
 		uploaded := waitPartialUploadAndInterrupt(t, cmd)
 		t.Logf("the uploaded is %v ", uploaded)
 
-		//creating file with samename & size but with new content
-		err = createFileWithSize(filename, fileSize)
+		//  creating file with samename & size but with new content
+		_ = createFileWithSize(filename, fileSize)
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
@@ -123,8 +123,8 @@ func TestResumeUpload(testSetup *testing.T) {
 		}, false)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		//asserting output
-		require.Contains(t, output[1],"Error in file operation: consensus_not_met: Commit failed. Required consensus 3, got 0")
+		//  asserting output
+		require.Contains(t, output[1], "Error in file operation: consensus_not_met: Commit failed. Required consensus 3, got 0")
 		require.Error(t, err)
 		////asserting error
 		expected := fmt.Sprintf(
@@ -167,7 +167,7 @@ func TestResumeUpload(testSetup *testing.T) {
 		uploaded := waitPartialUploadAndInterrupt(t, cmd)
 		t.Logf("the uploaded is %v ", uploaded)
 
-		//renaming the same file
+		//  renaming the same file
 		filename = generateRandomTestFileName(t)
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
@@ -177,10 +177,10 @@ func TestResumeUpload(testSetup *testing.T) {
 		}, false)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		//asserting output
-		require.Contains(t, output[0],"no such file or directory")
+		//  asserting output
+		require.Contains(t, output[0], "no such file or directory")
 		require.Error(t, err)
-		//asserting error
+		//  asserting error
 		expected := fmt.Sprintf(
 			"exit status 1",
 		)
@@ -223,7 +223,7 @@ func TestResumeUpload(testSetup *testing.T) {
 		t.Logf("the uploaded is %v ", uploaded)
 
 		// increasing the file size to test the negative flow
-		err = createFileWithSize(filename, fileSize2)
+		_ = createFileWithSize(filename, fileSize2)
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation":  allocationID,
 			"remotepath":  "/dummy",
@@ -231,13 +231,13 @@ func TestResumeUpload(testSetup *testing.T) {
 			"chunknumber": 20, // 64KB * 500 = 32M
 		}, false)
 
-		//asserting output
+		//  asserting output
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		expected := fmt.Sprintf(
 			"Error in file operation: consensus_not_met: Commit failed. Required consensus 3, got 0",
 		)
 		require.Equal(t, expected, output[1])
-		//asserting error
+		//  asserting error
 		require.Error(t, err)
 		expected = fmt.Sprintf(
 			"exit status 1",
