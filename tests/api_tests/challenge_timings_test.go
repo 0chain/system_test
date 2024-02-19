@@ -36,25 +36,22 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		err         error
 	)
 
-	testWallet := initialisedWallets[walletIdx]
-	walletIdx++
-	balance := apiClient.GetWalletBalance(t, testWallet, client.HttpOkStatus)
-	testWallet.Nonce = int(balance.Nonce)
+	wallet := createWallet(t)
 
-	sdkClient.SetWallet(t, testWallet)
+	sdkClient.SetWallet(t, wallet)
 
 	t.TestSetupWithTimeout("Setup", 2*time.Minute, func() {
 		allBlobbers, resp, err = apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 
-		blobberRequirements := model.DefaultBlobberRequirements(testWallet.Id, testWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 3
 		blobberRequirements.ParityShards = 3
 
 		for _, blobber := range allBlobbers {
 			// stake tokens to this blobber
-			apiClient.CreateStakePool(t, testWallet, 3, blobber.ID, client.TxSuccessfulStatus, 10.0)
+			apiClient.CreateStakePool(t, wallet, 3, blobber.ID, client.TxSuccessfulStatus, 10.0)
 		}
 
 		allBlobbers, resp, err = apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
@@ -62,8 +59,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 
 		blobberRequirements.Size = 10 * MB
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, testWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocationWithLockValue(t, testWallet, allocationBlobbers, 10, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocationWithLockValue(t, wallet, allocationBlobbers, 10, client.TxSuccessfulStatus)
 
 		fileSize := int64(1 * MB)
 		uploadOp := sdkClient.AddUploadOperation(t, "", "", fileSize)
@@ -73,15 +70,13 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t.Cleanup(func() {
 		for _, blobber := range allBlobbers {
 			// unstake tokens from this blobber
-			apiClient.UnlockStakePool(t, testWallet, 3, blobber.ID, client.TxSuccessfulStatus)
+			apiClient.UnlockStakePool(t, wallet, 3, blobber.ID, client.TxSuccessfulStatus)
 		}
 	})
 
 	t.RunWithTimeout("1mb file", 1*time.Hour, func(t *test.SystemTest) {
-		wallet := createWallet(t)
-
-		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(sdkWalletBalance.Nonce)
+		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(walletBalance.Nonce)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		t.Log("Blobber Requirements:", blobberRequirements)
@@ -91,8 +86,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 
 		// Update wallet nonce
-		sdkWalletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(sdkWalletBalance.Nonce)
+		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(walletBalance.Nonce)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, wallet, allocationBlobbers, 10, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
@@ -118,10 +113,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	t.RunWithTimeout("10mb file", 1*time.Hour, func(t *test.SystemTest) {
 		time.Sleep(1 * time.Minute)
 
-		wallet := createWallet(t)
-
-		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(sdkWalletBalance.Nonce)
+		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(walletBalance.Nonce)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 1
@@ -131,8 +124,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		t.Log("Blobber Requirements:", blobberRequirements)
 
 		// Update wallet nonce
-		sdkWalletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(sdkWalletBalance.Nonce)
+		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(walletBalance.Nonce)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, wallet, allocationBlobbers, 10, client.TxSuccessfulStatus)
 
@@ -157,11 +150,9 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("100mb file", 1*time.Hour, func(t *test.SystemTest) {
-		wallet := createWallet(t)
-
 		time.Sleep(2 * time.Minute)
-		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(sdkWalletBalance.Nonce)
+		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(walletBalance.Nonce)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 1
@@ -171,8 +162,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		t.Log("Blobber Requirements:", blobberRequirements)
 
 		// Update wallet nonce
-		sdkWalletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(sdkWalletBalance.Nonce)
+		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(walletBalance.Nonce)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, wallet, allocationBlobbers, 100, client.TxSuccessfulStatus)
 
@@ -197,11 +188,10 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
-		wallet := createWallet(t)
 
 		time.Sleep(3 * time.Minute)
-		sdkWalletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(sdkWalletBalance.Nonce)
+		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(walletBalance.Nonce)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 1
@@ -211,8 +201,8 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 		t.Log("Blobber Requirements:", blobberRequirements)
 
 		// Update wallet nonce
-		sdkWalletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		wallet.Nonce = int(sdkWalletBalance.Nonce)
+		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		wallet.Nonce = int(walletBalance.Nonce)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, wallet, allocationBlobbers, 500, client.TxSuccessfulStatus)
 
@@ -281,7 +271,7 @@ func getChallengeTimings(t *test.SystemTest, blobbers []*blockchain.StorageNode,
 
 		proofGenTimes = append(proofGenTimes, challengeTiming.ProofGenTime) // proof gen time in milliseconds
 
-		// Calculate the time difference in milliseconds
+		// Calculate the time difference in seconds
 		txnSubmission := challengeTiming.TxnSubmission.ToTime().Sub(challengeTiming.CreatedAtBlobber.ToTime())
 		txnSubmissions = append(txnSubmissions, int64(txnSubmission.Seconds()))
 
