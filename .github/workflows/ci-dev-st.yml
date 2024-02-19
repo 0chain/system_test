@@ -1,8 +1,9 @@
 name: "DEV-ST.DEVNET-0CHAIN.NET"
 run-name: "System tests [${{ github.ref_name }}] - [${{ github.event.head_commit.message }}]"
 concurrency:
-  group: "system-tests-${{ github.ref }}-${{ github.event_name }}"
+  group: "dev-st-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
+
 on:
   push:
     branches: [ master, staging, sprint* ]
