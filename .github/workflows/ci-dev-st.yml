@@ -30,7 +30,7 @@ on:
 jobs:
   dev-st:
     name: "Deploy dev-st.devnet-0chain.net"
-    runs-on: [ dev-st.devnet-0chain.net ]
+    runs-on: [ arc-runner ]
     timeout-minutes: 150
     steps:
       # - name: "Get current PR"
