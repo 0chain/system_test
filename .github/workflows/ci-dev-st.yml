@@ -28,8 +28,8 @@ on:
         required: false
 
 jobs:
-  system-tests:
-    name: "System Tests"
+  dev-st:
+    name: "Deploy dev-st.devnet-0chain.net"
     runs-on: [ dev-st.devnet-0chain.net ]
     timeout-minutes: 150
     steps:
