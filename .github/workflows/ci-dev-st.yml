@@ -33,23 +33,23 @@ jobs:
     runs-on: [ dev-st.devnet-0chain.net ]
     timeout-minutes: 150
     steps:
-      - name: "Get current PR"
-        uses: jwalton/gh-find-current-pr@v1
-        id: findPr
-        with:
-          github-token: ${{ github.token }}
+      # - name: "Get current PR"
+      #   uses: jwalton/gh-find-current-pr@v1
+      #   id: findPr
+      #   with:
+      #     github-token: ${{ github.token }}
 
-      - name: "Set PR status as pending"
-        uses: 0chain/actions/set-pr-status@master
-        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
-        with:
-          pr_number: ${{ steps.findPr.outputs.pr }}
-          description: "System tests running with default config..."
-          state: "pending"
-          repository: ${{ github.repository }}
-          status_name: "0Chain System Tests"
-          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          github_token: ${{ github.token }}
+      # - name: "Set PR status as pending"
+      #   uses: 0chain/actions/set-pr-status@master
+      #   if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
+      #   with:
+      #     pr_number: ${{ steps.findPr.outputs.pr }}
+      #     description: "System tests running with default config..."
+      #     state: "pending"
+      #     repository: ${{ github.repository }}
+      #     status_name: "0Chain System Tests"
+      #     target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      #     github_token: ${{ github.token }}
 
       - name: "Config: Run tests against existing 0Chain network"
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
