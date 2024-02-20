@@ -149,11 +149,11 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	// Test case for cost of deleting sharder  
 	// newValue := "335" // A valid cost value for deleting a sharder
 
-	t.RunSequentially("successful update of config to maximum allowed value", func(t *test.SystemTest) {
+	t.RunSequentially("successful update of config to minimum allowed value", func(t *test.SystemTest) {
 
 		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   []string{"max_n", "min_n", "max_s", "min_s","max_delegates", "reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent","min_stake","max_stake","min_stake_per_delegate","start_rounds","contribute_rounds","share_rounds","publish_rounds","wait_rounds","max_charge","epoch","reward_decline_rate","reward_round_frequency","num_miner_delegates_rewarded","num_sharders_rewarded","num_sharder_delegates_rewarded","cost.add_miner","cost.add_sharder","cost.delete_miner","cost.delete_sharder"},
-			"values": []string{"100", "3", "30", "1","200", "0", "0.9", "0", "0","0.66","0.75","0.70","0.0","20000.0","1","50","50","50","50","50","0.5","125000000","0","250","10","1","5","361","331","484","335" },
+			"values": []string{"100", "3", "30", "1","200", "0", "0.1", "0", "0","0.66","0.75","0.70","0.0","20000.0","1","50","50","50","50","50","0.5","125000000","0","250","10","1","5","361","331","484","335" },
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with min values")
@@ -168,21 +168,20 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	// Share Ratio - Test case for updating share_ratio 
 	//				"0.5" Setting reward rate to mid-interval value to test rangerange [0; 1)
 	// Reward Decline Rate - Test case for updating reward_decline_rate to the mid value
-	//				"0.5" The mid value for reward_decline_rate
+	//				"0.5" The mid value for reward_decline_rate to test range [0; 1)
 	// DKG - Test case for updating t_percent to a valid value
  	// 				"0.80" A mid value for t_percent
 	// DKG - Test case for updating k_percent to a valid value
 	//				"0.82" A mid value for k_percent
 	// DKG - Test case for updating x_percent to a valid value
 	//				"0.85" A mid value for x_percent
-	// Reward Decline Rate - Test case for updating reward_decline_rate 
-	//				"0.5" Setting reward decline rate to mid-interval value to test range [0; 1)
+
 
 	t.RunSequentially("successful update of config to mid-level allowed value", func(t *test.SystemTest) {
 
 		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   []string{ "reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent","reward_decline_rate"},
-			"values": []string{ "0.5", "0.5", "0.5", "0.5","0.80","0.82","0.85","0.5"},
+			"keys":   []string{ "reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent"},
+			"values": []string{ "0.5", "0.5", "0.5", "0.5","0.80","0.82","0.85"},
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with mid values")
@@ -203,14 +202,12 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	//				"1" A max value for k_percent
 	// DKG - Test case for updating x_percent to a valid value
 	//				"1" A max value for x_percent
-	// Reward Decline Rate - Test case for updating reward_decline_rate 
-	//				"0.999999" // A value just under 1 for the exclusive range 
 
 	t.RunSequentially("successful update of config to maximum allowed value", func(t *test.SystemTest) {
 
 		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   []string{"reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent","reward_decline_rate"},
-			"values": []string{ "0.999999", "0.999999", "0.999999", "0.999999","1","1","1","0.999999" },
+			"keys":   []string{"reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent"},
+			"values": []string{ "0.999999", "0.9", "0.999999", "0.999999","1","1","1" },
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with max values")
@@ -232,17 +229,16 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	//				"0" Involving no miner/sharder in key generation 
 	// DKG - Test case for updating x_percent to an invalid value
 	//				"0" Involving no miner/sharder in key generation 
-	// Reward Decline Rate - Test case for updating reward_decline_rate 
-	//				"1" // A value of 1 for the exclusive range  
+
 
 	t.RunSequentially("successful update of config to maximum allowed value", func(t *test.SystemTest) {
 
 		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   []string{"reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent","reward_decline_rate"},
-			"values": []string{ "1", "1", "1", "1","0","0","0","1" },
+			"keys":   []string{"reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent"},
+			"values": []string{ "1", "1", "1", "1","0","0","0"},
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, isUpdateSuccess(output), "Update to config parameters failed with out of bounds values")
+		require.True(t, !isUpdateSuccess(output), "Update to config parameters failed with out of bounds values")
 	})
 
 	
