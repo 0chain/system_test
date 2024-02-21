@@ -6,10 +6,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
-
-	//"path/filepath"
-	//"regexp"
-	//"strconv"
 	"strings"
 	"testing"
 	"time"
