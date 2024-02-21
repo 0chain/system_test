@@ -189,8 +189,8 @@ func TestResumeUpload(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Should discard previous progress and treat as new upload when file size if different", 10*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2 * GB)
-		fileSize := int64(10 * MB)
-		fileSize2 := int64(15 * MB)
+		fileSize := int64(500 * MB)
+		fileSize2 := int64(550 * MB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
