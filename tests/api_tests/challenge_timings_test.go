@@ -188,7 +188,6 @@ func TestProtocolChallengeTimings(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("1gb file", 1*time.Hour, func(t *test.SystemTest) {
-
 		time.Sleep(3 * time.Minute)
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		wallet.Nonce = int(walletBalance.Nonce)
