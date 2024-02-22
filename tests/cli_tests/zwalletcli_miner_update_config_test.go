@@ -151,10 +151,44 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 
 	t.RunSequentially("successful update of config to minimum allowed value", func(t *test.SystemTest) {
 
+		keys := []string{"max_n", "min_n", "max_s", "min_s","max_delegates", "reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent","min_stake","max_stake","min_stake_per_delegate","start_rounds","contribute_rounds","share_rounds","publish_rounds","wait_rounds","max_charge","epoch","reward_decline_rate","reward_round_frequency","num_miner_delegates_rewarded","num_sharders_rewarded","num_sharder_delegates_rewarded","cost.add_miner","cost.add_sharder","cost.delete_miner","cost.delete_sharder"}
+		values := []string{"100", "3", "30", "1","200", "0", "0.1", "0", "0","0.66","0.75","0.70","0.0","20000.0","1","50","50","50","50","50","0.5","125000000","0","250","10","1","5","361","331","484","335" }
+
+		// Convert slices to comma-separated strings
+		keysStr := strings.Join(keys, ",")
+		valuesStr := strings.Join(values, ",")
+
 		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   []string{"max_n", "min_n", "max_s", "min_s","max_delegates", "reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent","min_stake","max_stake","min_stake_per_delegate","start_rounds","contribute_rounds","share_rounds","publish_rounds","wait_rounds","max_charge","epoch","reward_decline_rate","reward_round_frequency","num_miner_delegates_rewarded","num_sharders_rewarded","num_sharder_delegates_rewarded","cost.add_miner","cost.add_sharder","cost.delete_miner","cost.delete_sharder"},
-			"values": []string{"100", "3", "30", "1","200", "0", "0.1", "0", "0","0.66","0.75","0.70","0.0","20000.0","1","50","50","50","50","50","0.5","125000000","0","250","10","1","5","361","331","484","335" },
-		}, true)
+			"keys": keysStr,
+			"values": valuesStr,
+		}, false)
+		
+/*  Code block for assertions - verifying individual config parameters
+		// Retrieve the updated config
+		updatedConfig, err := getMinerSCConfig(t, "/zbox_config.yaml", true)
+		require.Nil(t, err)
+
+		// Convert updatedConfig to a map for easier comparison
+		updatedConfigMap := make(map[string]string)
+		for _, line := range updatedConfig {
+			if line != "" {
+				parts := strings.SplitN(line, ":", 2)
+				if len(parts) == 2 {
+					key := strings.TrimSpace(parts[0])
+					value := strings.TrimSpace(parts[1])
+					updatedConfigMap[key] = value
+				}
+			}
+		}
+
+		// Assert that each updated value matches the expected value
+		for i, key := range keys {
+			expectedValue := values[i]
+			actualValue, exists := updatedConfigMap[key]
+			require.True(t, exists, fmt.Sprintf("Config key %s does not exist", key))
+			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
+		}
+*/		
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with min values")
 	})
@@ -179,10 +213,45 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 
 	t.RunSequentially("successful update of config to mid-level allowed value", func(t *test.SystemTest) {
 
+		keys := []string{ "reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent"}
+		values:= []string{ "0.5", "0.5", "0.5", "0.5","0.80","0.82","0.85"}
+
+		// Convert slices to comma-separated strings
+		keysStr := strings.Join(keys, ",")
+		valuesStr := strings.Join(values, ",")
+
 		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   []string{ "reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent"},
-			"values": []string{ "0.5", "0.5", "0.5", "0.5","0.80","0.82","0.85"},
-		}, true)
+			"keys": keysStr,
+			"values": valuesStr,
+		}, false)
+
+		
+/*  Code block for assertions - verifying individual config parameters
+		// Retrieve the updated config
+		updatedConfig, err := getMinerSCConfig(t, "/zbox_config.yaml", true)
+		require.Nil(t, err)
+
+		// Convert updatedConfig to a map for easier comparison
+		updatedConfigMap := make(map[string]string)
+		for _, line := range updatedConfig {
+			if line != "" {
+				parts := strings.SplitN(line, ":", 2)
+				if len(parts) == 2 {
+					key := strings.TrimSpace(parts[0])
+					value := strings.TrimSpace(parts[1])
+					updatedConfigMap[key] = value
+				}
+			}
+		}
+
+		// Assert that each updated value matches the expected value
+		for i, key := range keys {
+			expectedValue := values[i]
+			actualValue, exists := updatedConfigMap[key]
+			require.True(t, exists, fmt.Sprintf("Config key %s does not exist", key))
+			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
+		}		
+*/
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with mid values")
 	})
@@ -205,10 +274,43 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 
 	t.RunSequentially("successful update of config to maximum allowed value", func(t *test.SystemTest) {
 
+		keys := []string{"reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent"}
+		values := []string{ "0.999999", "0.9", "0.999999", "0.999999","1","1","1" }
+		// Convert slices to comma-separated strings
+		keysStr := strings.Join(keys, ",")
+		valuesStr := strings.Join(values, ",")
+
 		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   []string{"reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent"},
-			"values": []string{ "0.999999", "0.9", "0.999999", "0.999999","1","1","1" },
-		}, true)
+			"keys": keysStr,
+			"values": valuesStr,
+		}, false)
+
+/*	Code block for assertions - verifying individual config parameters
+		// Retrieve the updated config
+		updatedConfig, err := getMinerSCConfig(t, "/zbox_config.yaml", true)
+		require.Nil(t, err)
+
+		// Convert updatedConfig to a map for easier comparison
+		updatedConfigMap := make(map[string]string)
+		for _, line := range updatedConfig {
+			if line != "" {
+				parts := strings.SplitN(line, ":", 2)
+				if len(parts) == 2 {
+					key := strings.TrimSpace(parts[0])
+					value := strings.TrimSpace(parts[1])
+					updatedConfigMap[key] = value
+				}
+			}
+		}
+
+		// Assert that each updated value matches the expected value
+		for i, key := range keys {
+			expectedValue := values[i]
+			actualValue, exists := updatedConfigMap[key]
+			require.True(t, exists, fmt.Sprintf("Config key %s does not exist", key))
+			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
+		}
+*/
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with max values")
 	})
@@ -231,12 +333,21 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	//				"0" Involving no miner/sharder in key generation 
 
 
-	t.RunSequentially("successful update of config to maximum allowed value", func(t *test.SystemTest) {
+	t.RunSequentially("unsuccessful update of config to out of bounds value", func(t *test.SystemTest) {
+
+		keys := []string{"reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent"}
+		values:= []string{ "1", "1", "1", "1","0","0","0"}
+
+		// Convert slices to comma-separated strings
+		keysStr := strings.Join(keys, ",")
+		valuesStr := strings.Join(values, ",")
 
 		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   []string{"reward_rate","block_reward","share_ratio","reward_decline_rate","t_percent","k_percent","x_percent"},
-			"values": []string{ "1", "1", "1", "1","0","0","0"},
-		}, true)
+			"keys": keysStr,
+			"values": valuesStr,
+		}, false)
+
+
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, !isUpdateSuccess(output), "Update to config parameters failed with out of bounds values")
 	})
