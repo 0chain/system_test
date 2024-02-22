@@ -1,12 +1,10 @@
 name: "DEV-ST.DEVNET-0CHAIN.NET"
 run-name: "System tests [${{ github.ref_name }}] - [${{ github.event.head_commit.message }}]"
 concurrency:
-  group: "system-tests-${{ github.ref }}-${{ github.event_name }}"
+  group: "dev-st-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
+
 on:
-  push:
-    branches: [ master, staging, sprint* ]
-  pull_request:
   workflow_dispatch:
     inputs:
       repo_snapshots_branch:
@@ -27,70 +25,28 @@ on:
         required: false
 
 jobs:
-  golangci:
-    # if: github.event_name == 'push'
-    name: "lint"
-    runs-on: [ arc-runner ]
-    steps:
-      - name: Install Packages
-        run: |
-          sudo apt-get update
-          sudo apt-get -y install build-essential nghttp2 libnghttp2-dev libssl-dev
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '1.20'
-      - uses: actions/checkout@v3
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.52.2
-          skip-build-cache: true
-          skip-pkg-cache: true
-          only-new-issues: true
-
-  ensure-master-is-green:
-    # if: github.ref != 'refs/heads/master'
-    name: "Ensure master is green"
-    runs-on: arc-runner
-    steps:
-      - name: Check CI
-        id: check-ci
-        uses: 0chain/actions/get-build-state@master
-        with:
-          github_token: ${{ github.token }}
-          repository: "0chain/system_test"
-          sha: master
-      - name: Success
-        if: ${{ env.BUILD_STATE == 'success' }}
-        run: echo "master is successful!"
-      - name: Not Successful
-        if: ${{ env.BUILD_STATE != 'success' }}
-        run: |
-          echo "master is NOT successful! was: [${{ env.BUILD_STATE }}]"
-          exit 1
-
-  system-tests:
-    name: "System Tests"
+  dev-st:
+    name: "Deploy dev-st.devnet-0chain.net"
     runs-on: [ dev-st.devnet-0chain.net ]
     timeout-minutes: 150
     steps:
-      - name: "Get current PR"
-        uses: jwalton/gh-find-current-pr@v1
-        id: findPr
-        with:
-          github-token: ${{ github.token }}
+      # - name: "Get current PR"
+      #   uses: jwalton/gh-find-current-pr@v1
+      #   id: findPr
+      #   with:
+      #     github-token: ${{ github.token }}
 
-      - name: "Set PR status as pending"
-        uses: 0chain/actions/set-pr-status@master
-        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
-        with:
-          pr_number: ${{ steps.findPr.outputs.pr }}
-          description: "System tests running with default config..."
-          state: "pending"
-          repository: ${{ github.repository }}
-          status_name: "0Chain System Tests"
-          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          github_token: ${{ github.token }}
+      # - name: "Set PR status as pending"
+      #   uses: 0chain/actions/set-pr-status@master
+      #   if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
+      #   with:
+      #     pr_number: ${{ steps.findPr.outputs.pr }}
+      #     description: "System tests running with default config..."
+      #     state: "pending"
+      #     repository: ${{ github.repository }}
+      #     status_name: "0Chain System Tests"
+      #     target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      #     github_token: ${{ github.token }}
 
       - name: "Config: Run tests against existing 0Chain network"
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
@@ -201,7 +157,7 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-dev-st@dev-st
+        uses: 0chain/actions/deploy-0chain-dev-st@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           kube_config: ${{ secrets[format('DEVSTKC', env.RUNNER_NUMBER)] }}
