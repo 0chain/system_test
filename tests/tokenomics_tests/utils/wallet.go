@@ -3,6 +3,9 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -143,4 +146,108 @@ func createKeyValueParams(params map[string]string) string {
 	keys += "\""
 	values += "\""
 	return keys + " " + values
+}
+
+func CollectRewards(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return CollectRewardsForWallet(t, cliConfigFilename, params, EscapedTestName(t), retry)
+}
+
+func CollectRewardsForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
+	t.Log("collecting rewards...")
+	cmd := fmt.Sprintf("./zbox collect-reward %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
+func GetBalanceZCN(t *test.SystemTest, cliConfigFilename string, walletName ...string) (float64, error) {
+	cliutils.Wait(t, 5*time.Second)
+	var (
+		output []string
+		err    error
+	)
+	if len(walletName) > 0 && walletName[0] != "" {
+		output, err = GetBalanceForWalletJSON(t, cliConfigFilename, walletName[0])
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		output, err = GetBalanceForWalletJSON(t, cliConfigFilename, EscapedTestName(t))
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	var balance = struct {
+		ZCN string `json:"zcn"`
+	}{}
+
+	if err := json.Unmarshal([]byte(output[0]), &balance); err != nil {
+		return 0, err
+	}
+
+	balanceFloat, err := strconv.ParseFloat(balance.ZCN, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	// round up to 2 decimal places
+	return float64(int(balanceFloat*100)) / 100, nil
+}
+
+func GetBalanceForWallet(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
+	return cliutils.RunCommand(t, "./zwallet getbalance --silent "+
+		"--wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+}
+
+func GetBalanceForWalletJSON(t *test.SystemTest, cliConfigFilename, wallet string) ([]string, error) {
+	return cliutils.RunCommand(t, "./zwallet getbalance --silent --json "+
+		"--wallet "+wallet+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+}
+
+func GetBalanceFromSharders(t *test.SystemTest, clientId string) int64 {
+	output, err := getSharders(t, configPath)
+	require.Nil(t, err, "get sharders failed", strings.Join(output, "\n"))
+	require.Greater(t, len(output), 1)
+	require.Equal(t, "MagicBlock Sharders", output[0])
+
+	var sharders map[string]*climodel.Sharder
+	err = json.Unmarshal([]byte(strings.Join(output[1:], "")), &sharders)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output[1:], "\n"), err)
+	require.NotEmpty(t, sharders, "No sharders found: %v", strings.Join(output[1:], "\n"))
+
+	// Get base URL for API calls.
+	sharderBaseURLs := getAllSharderBaseURLs(sharders)
+	res, err := apiGetBalance(t, sharderBaseURLs[0], clientId)
+	require.Nil(t, err, "error getting balance")
+
+	if res.StatusCode == 400 {
+		return 0
+	}
+	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get balance")
+	require.NotNil(t, res.Body, "Balance API response must not be nil")
+
+	resBody, err := io.ReadAll(res.Body)
+	require.Nil(t, err, "Error reading response body")
+
+	var startBalance climodel.Balance
+	err = json.Unmarshal(resBody, &startBalance)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+
+	return startBalance.Balance
+}
+
+func getAllSharderBaseURLs(sharders map[string]*climodel.Sharder) []string {
+	sharderURLs := make([]string, 0)
+	for _, sharder := range sharders {
+		sharderURLs = append(sharderURLs, getNodeBaseURL(sharder.Host, sharder.Port))
+	}
+	return sharderURLs
+}
+
+func apiGetBalance(t *test.SystemTest, sharderBaseURL, clientID string) (*http.Response, error) {
+	t.Logf("Getting balance for %s...", clientID)
+	return http.Get(sharderBaseURL + "/v1/client/get/balance?client_id=" + clientID)
 }

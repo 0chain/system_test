@@ -27,3 +27,8 @@ func UpdateBlobberInfoForWallet(t *test.SystemTest, cliConfigFilename, wallet, p
 func StakeTokens(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return StakeTokensForWallet(t, cliConfigFilename, EscapedTestName(t), params, retry)
 }
+
+func StakePoolInfo(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
+	t.Log("Fetching stake pool info...")
+	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, EscapedTestName(t), cliConfigFilename), 3, time.Second*2)
+}

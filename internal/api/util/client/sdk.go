@@ -79,7 +79,7 @@ func NewSDKClient(blockWorker string) *SDKClient {
 	return sdkClient
 }
 
-func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet, mnemonics string) {
+func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 	c.wallet = &model.SdkWallet{
@@ -89,7 +89,7 @@ func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet, mnemonic
 			PrivateKey: wallet.Keys.PrivateKey.SerializeToHexStr(),
 			PublicKey:  wallet.Keys.PublicKey.SerializeToHexStr(),
 		}},
-		Mnemonics: mnemonics,
+		Mnemonics: wallet.Mnemonics,
 		Version:   wallet.Version,
 	}
 

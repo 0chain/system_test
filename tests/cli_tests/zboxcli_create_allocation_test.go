@@ -110,21 +110,17 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Run("Create allocation for another owner should Work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 		targetWalletName := escapedTestName(t) + "_TARGET"
-		output, err := createWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error creating target wallet", strings.Join(output, "\n"))
+		createWalletForName(targetWalletName)
 
 		targetWallet, err := getWalletForName(t, configPath, targetWalletName)
-		require.Nil(t, err, "error getting target wallet", strings.Join(output, "\n"))
-
-		_, err = executeFaucetWithTokensForWallet(t, targetWalletName, configPath, 9)
-		require.Nil(t, err, "Error executing faucet with tokens", err)
+		require.Nil(t, err, "could not get target wallet")
 
 		options := map[string]interface{}{
 			"lock":             "0.5",
 			"owner":            targetWallet.ClientID,
 			"owner_public_key": targetWallet.ClientPublicKey,
 		}
-		output, err = createNewAllocation(t, configPath, createParams(options))
+		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
 		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
@@ -301,11 +297,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Run("Create allocation with some forbidden file options flags should pass and show in allocation", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		for i := 0; i < 2; i++ {
-			_, err := executeFaucetWithTokens(t, configPath, 9)
-			require.Nil(t, err)
-		}
-
 		// Forbid upload
 		options := map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_upload": nil}
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
@@ -437,13 +428,9 @@ func TestCreateAllocation(testSetup *testing.T) {
 }
 
 func setupWallet(t *test.SystemTest, configPath string) []string {
-	output, err := createWallet(t, configPath)
-	require.Nil(t, err, strings.Join(output, "\n"))
+	createWallet(t)
 
-	output, err = executeFaucetWithTokens(t, configPath, 1)
-	require.Nil(t, err, strings.Join(output, "\n"))
-
-	output, err = getBalance(t, configPath)
+	output, err := getBalance(t, configPath)
 	require.Nil(t, err, strings.Join(output, "\n"))
 
 	return output
