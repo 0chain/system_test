@@ -8,22 +8,9 @@ import (
 	"github.com/0chain/gosdk/zcncore"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
+	"github.com/0chain/gosdk/core/zcncrypto"
 )
 
-type Key struct {
-	PublicKey  string `json:"public_key"`
-	PrivateKey string `json:"private_key"`
-}
-
-type splitKeyWallet struct {
-	ClientID    string `json:"client_id"`
-	ClientKey   string `json:"client_key"`
-	Keys        Key  `json:"keys"`
-	Mnemonics   string `json:"mnemonics"`
-	Version     string `json:"version"`
-	DateCreated string `json:"date_created"`
-	Nonce       int    `json:"nonce"`
-}
 
 func TestSplitKey(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
@@ -56,7 +43,7 @@ func TestSplitKey(testSetup *testing.T) {
 				"nonce": 0
 			}
 		*/
-		var splitKeyWallet splitKeyWallet
+		var splitKeyWallet  zcncrypto.Wallet
 		err = json.Unmarshal([]byte(wStr), &splitKeyWallet)
 		if err != nil {
 			fmt.Println("Error while unmarshalling split key wallet:", err)
@@ -65,7 +52,7 @@ func TestSplitKey(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, splitKeyWallet)
 		require.Equal(t, splitKeyWallet.ClientID, wallet.Id)
-		require.NotNil(t,splitKeyWallet.Keys.PublicKey)
-		require.NotNil(t,splitKeyWallet.Keys.PrivateKey)
+		require.NotNil(t, splitKeyWallet.Keys[0].PrivateKey)
+		require.NotNil(t, splitKeyWallet.Keys[0].PublicKey)
 	})
 }
