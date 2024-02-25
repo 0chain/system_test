@@ -2,7 +2,6 @@ package api_tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/0chain/gosdk/zcncore"
@@ -22,10 +21,7 @@ func TestSplitKey(testSetup *testing.T) {
 		// this represents number of split keys made from private key
 		numSplit := 2
 		wStr, err := zcncore.SplitKeys(privateKey, numSplit)
-		if err != nil {
-			fmt.Println("Error while spliting keys:", err)
-			return
-		}
+		require.NoError(t, err, "failed to create split key wallet using private key")
 		/*
 			{
 				"client_id": "f2461679c2407f12a0cbe161b55f1367aeb7af9e196438effa39b9c29e147af8",
@@ -45,11 +41,7 @@ func TestSplitKey(testSetup *testing.T) {
 		*/
 		var splitKeyWallet  zcncrypto.Wallet
 		err = json.Unmarshal([]byte(wStr), &splitKeyWallet)
-		if err != nil {
-			fmt.Println("Error while unmarshalling split key wallet:", err)
-			return
-		}
-		require.Nil(t, err)
+		require.NoError(t, err, "failed to deserialize wallet object", wStr)
 		require.NotNil(t, splitKeyWallet)
 		require.Equal(t, splitKeyWallet.ClientID, wallet.Id)
 		require.NotNil(t, splitKeyWallet.Keys[0].PrivateKey)
