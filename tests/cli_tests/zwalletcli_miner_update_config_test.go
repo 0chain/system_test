@@ -83,6 +83,8 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 
 	t.RunSequentially("successful update of config to minimum allowed value", func(t *test.SystemTest) {
 
+		// Get storage config and store them for later comparison
+
 		keys := []string{
 			"max_n",
 			"min_n",
@@ -175,6 +177,9 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
 		}
 		*/
+
+		// Update config to previous values and then compare them
+
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with min values")
 	})
