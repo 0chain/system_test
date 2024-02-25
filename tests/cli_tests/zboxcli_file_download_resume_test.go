@@ -132,7 +132,7 @@ func startDownloadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename, p
 	}
 }
 
-func waitPartialDownloadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd, filename string, progressID string, filesize int64) (bool, sdk.DownloadProgress) {
+func waitPartialDownloadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd, filename, progressID string, filesize int64) (bool, sdk.DownloadProgress) {
 	t.Log("Waiting till file is partially downloaded...")
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
