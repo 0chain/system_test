@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 	"time"
-
+	"regexp"
 	"github.com/stretchr/testify/require"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -125,9 +125,9 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			"0",
 			"0.66",
 			"0.75",
-			"0.70",
-			"0.0",
-			"20000.0",
+			"0.7",
+			"0",
+			"20000",
 			"1",
 			"0.5",
 			"125000000",
@@ -151,32 +151,36 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			"values": valuesStr,
 		}, false)
 
-		/*  Code block for assertions - verifying individual config parameters
+		/*  Code block for assertions - verifying individual config parameters */
 		// Retrieve the updated config
-		updatedConfig, err := getMinerSCConfig(t, "/zbox_config.yaml", true)
+		updatedConfig, err := getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err)
+		t.Logf("!!!!! error msg : %s", err)
+		t.Logf("Updated config string : %s", updatedConfig)
 
 		// Convert updatedConfig to a map for easier comparison
 		updatedConfigMap := make(map[string]string)
-		for _, line := range updatedConfig {
-			if line != "" {
-				parts := strings.SplitN(line, ":", 2)
-				if len(parts) == 2 {
-					key := strings.TrimSpace(parts[0])
-					value := strings.TrimSpace(parts[1])
-					updatedConfigMap[key] = value
-				}
+		for _, key := range keys {
+			// Find the key in the output and extract the value that follows it
+			r := regexp.MustCompile(fmt.Sprintf(`\b%s\s+(\S+)`, key))
+			matches := r.FindStringSubmatch(strings.Join(updatedConfig, " "))
+			if len(matches) >= 2 { 
+				updatedConfigMap[key] = matches[1]
 			}
 		}
 
 		// Assert that each updated value matches the expected value
 		for i, key := range keys {
+
 			expectedValue := values[i]
 			actualValue, exists := updatedConfigMap[key]
+			t.Logf("Config parameter to be compared: %s", key) 
+			t.Logf("Expected config: %s", expectedValue) 
+			t.Logf("Actual config: %s", actualValue)
 			require.True(t, exists, fmt.Sprintf("Config key %s does not exist", key))
 			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
 		}
-		*/
+		
 
 		// Update config to previous values and then compare them
 
@@ -203,7 +207,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	t.RunSequentially("successful update of config to mid-level allowed value", func(t *test.SystemTest) {
 
 		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate", "t_percent", "k_percent", "x_percent"}
-		values := []string{"0.5", "0.5", "0.5", "0.5", "0.80", "0.82", "0.85"}
+		values := []string{"0.5", "0.5", "0.5", "0.5", "0.8", "0.82", "0.85"}
 
 		// Convert slices to comma-separated strings
 		keysStr := strings.Join(keys, ",")
@@ -214,32 +218,36 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			"values": valuesStr,
 		}, false)
 
-		/*  Code block for assertions - verifying individual config parameters
+		/*  Code block for assertions - verifying individual config parameters */
 		// Retrieve the updated config
-		updatedConfig, err := getMinerSCConfig(t, "/zbox_config.yaml", true)
+		updatedConfig, err := getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err)
+		t.Logf("!!!!! error msg : %s", err)
+		t.Logf("Updated config string : %s", updatedConfig)
 
 		// Convert updatedConfig to a map for easier comparison
 		updatedConfigMap := make(map[string]string)
-		for _, line := range updatedConfig {
-			if line != "" {
-				parts := strings.SplitN(line, ":", 2)
-				if len(parts) == 2 {
-					key := strings.TrimSpace(parts[0])
-					value := strings.TrimSpace(parts[1])
-					updatedConfigMap[key] = value
-				}
+		for _, key := range keys {
+			// Find the key in the output and extract the value that follows it
+			r := regexp.MustCompile(fmt.Sprintf(`\b%s\s+(\S+)`, key))
+			matches := r.FindStringSubmatch(strings.Join(updatedConfig, " "))
+			if len(matches) >= 2 { 
+				updatedConfigMap[key] = matches[1]
 			}
 		}
 
 		// Assert that each updated value matches the expected value
 		for i, key := range keys {
+
 			expectedValue := values[i]
 			actualValue, exists := updatedConfigMap[key]
+			t.Logf("Config parameter to be compared: %s", key) 
+			t.Logf("Expected config: %s", expectedValue) 
+			t.Logf("Actual config: %s", actualValue)
 			require.True(t, exists, fmt.Sprintf("Config key %s does not exist", key))
 			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
 		}
-		*/
+
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with mid values")
 	})
@@ -273,37 +281,76 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			"values": valuesStr,
 		}, false)
 
-		/*	Code block for assertions - verifying individual config parameters
-			// Retrieve the updated config
-			updatedConfig, err := getMinerSCConfig(t, "/zbox_config.yaml", true)
-			require.Nil(t, err)
+		/*  Code block for assertions - verifying individual config parameters */
+		// Retrieve the updated config
+		updatedConfig, err := getMinerSCConfig(t, configPath, true)
+		require.Nil(t, err)
+		t.Logf("!!!!! error msg : %s", err)
+		t.Logf("Updated config string : %s", updatedConfig)
 
-			// Convert updatedConfig to a map for easier comparison
-			updatedConfigMap := make(map[string]string)
-			for _, line := range updatedConfig {
-				if line != "" {
-					parts := strings.SplitN(line, ":", 2)
-					if len(parts) == 2 {
-						key := strings.TrimSpace(parts[0])
-						value := strings.TrimSpace(parts[1])
-						updatedConfigMap[key] = value
-					}
-				}
+		// Convert updatedConfig to a map for easier comparison
+		updatedConfigMap := make(map[string]string)
+		for _, key := range keys {
+			// Find the key in the output and extract the value that follows it
+			r := regexp.MustCompile(fmt.Sprintf(`\b%s\s+(\S+)`, key))
+			matches := r.FindStringSubmatch(strings.Join(updatedConfig, " "))
+			if len(matches) >= 2 { 
+				updatedConfigMap[key] = matches[1]
 			}
+		}
 
-			// Assert that each updated value matches the expected value
-			for i, key := range keys {
-				expectedValue := values[i]
-				actualValue, exists := updatedConfigMap[key]
-				require.True(t, exists, fmt.Sprintf("Config key %s does not exist", key))
-				require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
-			}
-		*/
+		// Assert that each updated value matches the expected value
+		for i, key := range keys {
+
+			expectedValue := values[i]
+			actualValue, exists := updatedConfigMap[key]
+			t.Logf("Config parameter to be compared: %s", key) 
+			t.Logf("Expected config: %s", expectedValue) 
+			t.Logf("Actual config: %s", actualValue)
+			require.True(t, exists, fmt.Sprintf("Config key %s does not exist", key))
+			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
+		}
+
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with max values")
 	})
 
-	// Test Suite IV - Testing out of bounds [ Negative test cases ]
+	// Test Suite IV - Testing invalid values [ Negative test cases ]
+	// Reward Rate - Test cases for updating reward_rate
+	//					"-1" // An invalid value of 1 for the exclusive range
+	// Block Reward - Test case for updating block_reward to any flointing point value
+	// 				"-1"
+	// Share Ratio - Test case for updating share_ratio
+	//				"-1" // An invalid value 1 for the exclusive range
+	// Reward Decline Rate - Test case for updating reward_decline_rate to the minimum allowed value
+	//				"-1" // A value of 1 for the exclusive range
+	// DKG - Test case for updating t_percent to an invalid value
+	// 				"-1" Involving no miner/sharder in key generation
+	// DKG - Test case for updating k_percent to an invalid value
+	//				"-1" Involving no miner/sharder in key generation
+	// DKG - Test case for updating x_percent to an invalid value
+	//				"-1" Involving no miner/sharder in key generation
+
+	t.RunSequentially("unsuccessful update of config to invalid values", func(t *test.SystemTest) {
+
+		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate", "t_percent", "k_percent", "x_percent"}
+		values := []string{"-1", "-1", "-1", "-1", "-1", "-1", "-1"}
+
+		// Convert slices to comma-separated strings
+		keysStr := strings.Join(keys, ",")
+		valuesStr := strings.Join(values, ",")
+
+		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   keysStr,
+			"values": valuesStr,
+		}, false)
+
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.True(t, !isUpdateSuccess(output), "Update to config parameters failed with invalid values")
+	})
+
+
+	// Test Suite V - Testing out of bounds [ Negative test cases ]
 	// Reward Rate - Test cases for updating reward_rate
 	//					"1" // A value of 1 for the exclusive range
 	// Block Reward - Test case for updating block_reward to any flointing point value
