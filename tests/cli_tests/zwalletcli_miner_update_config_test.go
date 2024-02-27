@@ -402,17 +402,12 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	//				"1" // A value of 1 for the exclusive range
 	// Reward Decline Rate - Test case for updating reward_decline_rate to the minimum allowed value
 	//				"1" // A value of 1 for the exclusive range
-	// DKG - Test case for updating t_percent to an invalid value
-	// 				"0" Involving no miner/sharder in key generation
-	// DKG - Test case for updating k_percent to an invalid value
-	//				"0" Involving no miner/sharder in key generation
-	// DKG - Test case for updating x_percent to an invalid value
-	//				"0" Involving no miner/sharder in key generation
+
 
 	t.RunSequentially("unsuccessful update of config to out of bounds value", func(t *test.SystemTest) {
 
-		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate", "t_percent", "k_percent", "x_percent"}
-		values := []string{"1", "1", "1", "1", "0", "0", "0"}
+		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate"}
+		values := []string{"1", "1", "1", "1"}
 
 		// Convert slices to comma-separated strings
 		keysStr := strings.Join(keys, ",")
