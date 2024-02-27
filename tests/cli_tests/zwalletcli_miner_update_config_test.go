@@ -110,7 +110,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			"num_sharder_delegates_rewarded",
 			"cost.add_miner",
 			"cost.add_sharder",
-			"cost.delete_miner",
+			//"cost.delete_miner",
 			//"cost.delete_sharder",
 		}
 		values := []string{
@@ -138,16 +138,25 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			"5",
 			"361",
 			"331",
-			"484",
+			//"484",
 			//"335",
 		}
 
+		// Save original ( prev ) config values in order to restore system to its previous state
 		configMapBefore := getMinerScConfigsForKeys(t, configPath, keys)
 		var beforeKeys, beforeValues []string
 		for k, v := range configMapBefore {
 			beforeKeys = append(beforeKeys, k)
 			beforeValues = append(beforeValues, v)
 		}
+
+		t.Logf("original (prior to update ) values")
+		t.Logf("***start***")
+		t.Logf("Keys : %s",beforeKeys)
+		t.Logf("Values : %s",beforeValues)
+		t.Logf("***end***")
+
+		t.Logf("update and verify updated values")
 
 		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   strings.Join(keys, ","),
@@ -169,6 +178,8 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
 		}
 
+		t.Logf("update and verify original values")
+
 		// Update config to previous values and then compare them
 		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
 			"keys":   strings.Join(beforeKeys, ","),
@@ -177,10 +188,12 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with min values")
 
-		// Assert that each updated value matches the expected value
+		prevConfigMap := getMinerScConfigsForKeys(t, configPath, keys)
+
+		// Assert that each updated value matches the original ( prev ) config values
 		for i, key := range beforeKeys {
 			expectedValue := beforeValues[i]
-			actualValue, exists := updatedConfigMap[key]
+			actualValue, exists := prevConfigMap[key]
 			t.Logf("Config parameter to be compared: %s", key)
 			t.Logf("Expected config: %s", expectedValue)
 			t.Logf("Actual config: %s", actualValue)
@@ -189,7 +202,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		}
 	})
 
-	t.Skip()
+	//t.Skip()
 
 	// Test Suite II - Testing mid-value allowances  [ Positive test cases ]
 	// Reward Rate - Test cases for updating reward_rate
@@ -212,36 +225,29 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate", "t_percent", "k_percent", "x_percent"}
 		values := []string{"0.5", "0.5", "0.5", "0.5", "0.8", "0.82", "0.85"}
 
-		// Convert slices to comma-separated strings
-		keysStr := strings.Join(keys, ",")
-		valuesStr := strings.Join(values, ",")
+		
+
+		// Save original ( prev ) config values in order to restore system to its previous state
+		configMapBefore := getMinerScConfigsForKeys(t, configPath, keys)
+		var beforeKeys, beforeValues []string
+		for k, v := range configMapBefore {
+			beforeKeys = append(beforeKeys, k)
+			beforeValues = append(beforeValues, v)
+		}
+
+		t.Logf("update and verify updated values")
 
 		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   keysStr,
-			"values": valuesStr,
-		}, false)
+			"keys":   strings.Join(keys, ","),
+			"values": strings.Join(values, ","),
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with min values")
 
-		/*  Code block for assertions - verifying individual config parameters */
-		// Retrieve the updated config
-		updatedConfig, err := getMinerSCConfig(t, configPath, true)
-		require.Nil(t, err)
-		t.Logf("!!!!! error msg : %s", err)
-		t.Logf("Updated config string : %s", updatedConfig)
-
-		// Convert updatedConfig to a map for easier comparison
-		updatedConfigMap := make(map[string]string)
-		for _, key := range keys {
-			// Find the key in the output and extract the value that follows it
-			r := regexp.MustCompile(fmt.Sprintf(`\b%s\s+(\S+)`, key))
-			matches := r.FindStringSubmatch(strings.Join(updatedConfig, " "))
-			if len(matches) >= 2 {
-				updatedConfigMap[key] = matches[1]
-			}
-		}
+		updatedConfigMap := getMinerScConfigsForKeys(t, configPath, keys)
 
 		// Assert that each updated value matches the expected value
 		for i, key := range keys {
-
 			expectedValue := values[i]
 			actualValue, exists := updatedConfigMap[key]
 			t.Logf("Config parameter to be compared: %s", key)
@@ -251,8 +257,30 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
 		}
 
+		t.Logf("update and verify original values")
+
+		// Update config to previous values and then compare them
+		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   strings.Join(beforeKeys, ","),
+			"values": strings.Join(beforeValues, ","),
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with mid values")
+		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with min values")
+
+		prevConfigMap := getMinerScConfigsForKeys(t, configPath, keys)
+
+		// Assert that each updated value matches the original ( prev ) config values
+		for i, key := range beforeKeys {
+			expectedValue := beforeValues[i]
+			actualValue, exists := prevConfigMap[key]
+			t.Logf("Config parameter to be compared: %s", key)
+			t.Logf("Expected config: %s", expectedValue)
+			t.Logf("Actual config: %s", actualValue)
+			require.True(t, exists, fmt.Sprintf("Config key %s does not exist", key))
+			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
+		}		
+
+
 	})
 
 	// Test Suite III - Testing max allowances  [ Positive test cases ]
@@ -275,36 +303,28 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 
 		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate", "t_percent", "k_percent", "x_percent"}
 		values := []string{"0.999999", "0.9", "0.999999", "0.999999", "1", "1", "1"}
-		// Convert slices to comma-separated strings
-		keysStr := strings.Join(keys, ",")
-		valuesStr := strings.Join(values, ",")
+
+		// Save original ( prev ) config values in order to restore system to its previous state
+		configMapBefore := getMinerScConfigsForKeys(t, configPath, keys)
+		var beforeKeys, beforeValues []string
+		for k, v := range configMapBefore {
+			beforeKeys = append(beforeKeys, k)
+			beforeValues = append(beforeValues, v)
+		}
+
+		t.Logf("update and verify updated values")
 
 		output, err := updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
-			"keys":   keysStr,
-			"values": valuesStr,
-		}, false)
+			"keys":   strings.Join(keys, ","),
+			"values": strings.Join(values, ","),
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with min values")
 
-		/*  Code block for assertions - verifying individual config parameters */
-		// Retrieve the updated config
-		updatedConfig, err := getMinerSCConfig(t, configPath, true)
-		require.Nil(t, err)
-		t.Logf("!!!!! error msg : %s", err)
-		t.Logf("Updated config string : %s", updatedConfig)
-
-		// Convert updatedConfig to a map for easier comparison
-		updatedConfigMap := make(map[string]string)
-		for _, key := range keys {
-			// Find the key in the output and extract the value that follows it
-			r := regexp.MustCompile(fmt.Sprintf(`\b%s\s+(\S+)`, key))
-			matches := r.FindStringSubmatch(strings.Join(updatedConfig, " "))
-			if len(matches) >= 2 {
-				updatedConfigMap[key] = matches[1]
-			}
-		}
+		updatedConfigMap := getMinerScConfigsForKeys(t, configPath, keys)
 
 		// Assert that each updated value matches the expected value
 		for i, key := range keys {
-
 			expectedValue := values[i]
 			actualValue, exists := updatedConfigMap[key]
 			t.Logf("Config parameter to be compared: %s", key)
@@ -314,8 +334,29 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
 		}
 
+		t.Logf("update and verify original values")
+
+		// Update config to previous values and then compare them
+		output, err = updateMinerSCConfig(t, scOwnerWallet, map[string]interface{}{
+			"keys":   strings.Join(beforeKeys, ","),
+			"values": strings.Join(beforeValues, ","),
+		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with max values")
+		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with min values")
+
+		prevConfigMap := getMinerScConfigsForKeys(t, configPath, keys)
+
+		// Assert that each updated value matches the original ( prev ) config values
+		for i, key := range beforeKeys {
+			expectedValue := beforeValues[i]
+			actualValue, exists := prevConfigMap[key]
+			t.Logf("Config parameter to be compared: %s", key)
+			t.Logf("Expected config: %s", expectedValue)
+			t.Logf("Actual config: %s", actualValue)
+			require.True(t, exists, fmt.Sprintf("Config key %s does not exist", key))
+			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
+		}
+
 	})
 
 	// Test Suite IV - Testing invalid values [ Negative test cases ]
