@@ -486,7 +486,7 @@ func updateMinerSCConfig(t *test.SystemTest, walletName string, param map[string
 
 // isUpdateSuccess checks if the output contains a "updated" message indicating that the update was successful.
 func isUpdateSuccess(output []string) bool {
-	successMsg := "storagesc smart contract settings updated"
+	successMsg := "minersc smart contract settings updated"
 	for _, line := range output {
 		if strings.Contains(line, successMsg) {
 			return true
