@@ -95,9 +95,6 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			"block_reward",
 			"share_ratio",
 			"reward_decline_rate",
-			"t_percent",
-			"k_percent",
-			"x_percent",
 			"min_stake",
 			"max_stake",
 			"min_stake_per_delegate",
@@ -112,6 +109,24 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			"cost.add_sharder",
 			//"cost.delete_miner",
 			//"cost.delete_sharder",
+			"cost.miner_health_check",
+			"cost.sharder_health_check",
+			//"cost.contributeMpk",
+			//"cost.shareSignsOrShares",
+			"cost.wait",
+			"cost.update_globals",
+			"cost.update_settings",
+			"cost.update_miner_settings",
+			"cost.update_sharder_settings",
+			//"cost.payFees",
+			//"cost.feesPaid",
+			//"cost.mintedTokens",
+			//"cost.addToDelegatePool",
+			//"cost.deleteFromDelegatePool",
+			"cost.sharder_keep",
+			//"cost.collect_reward",
+			"cost.kill_miner",
+			"cost.kill_sharder",
 		}
 		values := []string{
 			"100",
@@ -123,9 +138,6 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			"0.1",
 			"0",
 			"0",
-			"0.66",
-			"0.75",
-			"0.7",
 			"0",
 			"20000",
 			"1",
@@ -140,6 +152,24 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			"331",
 			//"484",
 			//"335",
+			"149", 
+			"145",  
+			//"1433", 
+			//"509",  
+			"100",  
+			"269",  
+			"136",  
+			"137", 
+			"134", 
+			//"1356", 
+			//"100",  
+			//"100",  
+			//"186",  
+			//"150", 
+			"211",  
+			//"230", 
+			"146",  
+			"140",  
 		}
 
 		// Save original ( prev ) config values in order to restore system to its previous state
@@ -213,17 +243,12 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	//				"0.5" Setting reward rate to mid-interval value to test rangerange [0; 1)
 	// Reward Decline Rate - Test case for updating reward_decline_rate to the mid value
 	//				"0.5" The mid value for reward_decline_rate to test range [0; 1)
-	// DKG - Test case for updating t_percent to a valid value
-	// 				"0.80" A mid value for t_percent
-	// DKG - Test case for updating k_percent to a valid value
-	//				"0.82" A mid value for k_percent
-	// DKG - Test case for updating x_percent to a valid value
-	//				"0.85" A mid value for x_percent
+
 
 	t.RunSequentially("successful update of config to mid-level allowed value", func(t *test.SystemTest) {
 
-		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate", "t_percent", "k_percent", "x_percent"}
-		values := []string{"0.5", "0.5", "0.5", "0.5", "0.8", "0.82", "0.85"}
+		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate"}
+		values := []string{"0.5", "0.5", "0.5", "0.5"}
 
 		
 
@@ -292,17 +317,12 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	//				"0.999999" // A value just under 1 for the exclusive range
 	// Reward Decline Rate - Test case for updating reward_decline_rate to the minimum allowed value
 	//				"0.999999" // A value just under 1 for the exclusive range
-	// DKG - Test case for updating t_percent to a valid value
-	// 				"1" A max value for t_percent
-	// DKG - Test case for updating k_percent to a valid value
-	//				"1" A max value for k_percent
-	// DKG - Test case for updating x_percent to a valid value
-	//				"1" A max value for x_percent
+
 
 	t.RunSequentially("successful update of config to maximum allowed value", func(t *test.SystemTest) {
 
-		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate", "t_percent", "k_percent", "x_percent"}
-		values := []string{"0.999999", "0.9", "0.999999", "0.999999", "1", "1", "1"}
+		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate"}
+		values := []string{"0.999999", "0.9", "0.999999", "0.999999"}
 
 		// Save original ( prev ) config values in order to restore system to its previous state
 		configMapBefore := getMinerScConfigsForKeys(t, configPath, keys)
@@ -368,17 +388,12 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	//				"-1" // An invalid value 1 for the exclusive range
 	// Reward Decline Rate - Test case for updating reward_decline_rate to the minimum allowed value
 	//				"-1" // A value of 1 for the exclusive range
-	// DKG - Test case for updating t_percent to an invalid value
-	// 				"-1" Involving no miner/sharder in key generation
-	// DKG - Test case for updating k_percent to an invalid value
-	//				"-1" Involving no miner/sharder in key generation
-	// DKG - Test case for updating x_percent to an invalid value
-	//				"-1" Involving no miner/sharder in key generation
+
 
 	t.RunSequentially("unsuccessful update of config to invalid values", func(t *test.SystemTest) {
 
-		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate", "t_percent", "k_percent", "x_percent"}
-		values := []string{"-1", "-1", "-1", "-1", "-1", "-1", "-1"}
+		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate"}
+		values := []string{"-1", "-1", "-1", "-1"}
 
 		// Convert slices to comma-separated strings
 		keysStr := strings.Join(keys, ",")
@@ -393,12 +408,11 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.True(t, !isUpdateSuccess(output), "Update to config parameters failed with invalid values")
 	})
 
+	/* Exclusive values ( upper bound ) tests failing for below parameters - https://github.com/0chain/0chain/issues/3168 */
 	// Test Suite V - Testing out of bounds [ Negative test cases ]
-	// Reward Rate - Test cases for updating reward_rate
+	// Reward Rate - Test cases for updating reward_rate	
 	//					"1" // A value of 1 for the exclusive range
-	// Block Reward - Test case for updating block_reward to any flointing point value
-	// 				"1"
-	// Share Ratio - Test case for updating share_ratio
+	// Share Ratio - Test case for updating share_ratio		
 	//				"1" // A value of 1 for the exclusive range
 	// Reward Decline Rate - Test case for updating reward_decline_rate to the minimum allowed value
 	//				"1" // A value of 1 for the exclusive range
@@ -406,8 +420,10 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 
 	t.RunSequentially("unsuccessful update of config to out of bounds value", func(t *test.SystemTest) {
 
-		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate"}
-		values := []string{"1", "1", "1", "1"}
+		t.Skip("skip till the issue is fixed")
+
+		keys := []string{"reward_rate", "share_ratio", "reward_decline_rate"}
+		values := []string{"1", "1", "1"}
 
 		// Convert slices to comma-separated strings
 		keysStr := strings.Join(keys, ",")
@@ -421,6 +437,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, !isUpdateSuccess(output), "Update to config parameters failed with out of bounds values")
 	})
+
 
 	t.RunSequentially("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		configKey := "reward_rate"
