@@ -2,13 +2,15 @@ package cli_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/stretchr/testify/require"
+	"log"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/stretchr/testify/require"
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
@@ -82,7 +84,6 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	// newValue := "335" // A valid cost value for deleting a sharder
 
 	t.RunSequentiallyWithTimeout("successful update of config to minimum allowed value", 200*time.Minute, func(t *test.SystemTest) {
-
 		// Get storage config and store them for later comparison
 
 		keys := []string{
@@ -107,24 +108,21 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			"num_sharder_delegates_rewarded",
 			"cost.add_miner",
 			"cost.add_sharder",
-			//"cost.delete_miner",
-			//"cost.delete_sharder",
 			"cost.miner_health_check",
 			"cost.sharder_health_check",
-			//"cost.contributeMpk",
-			//"cost.shareSignsOrShares",
+			"cost.contributempk",
+			"cost.sharesignsorshares",
 			"cost.wait",
 			"cost.update_globals",
 			"cost.update_settings",
 			"cost.update_miner_settings",
 			"cost.update_sharder_settings",
-			//"cost.payFees",
-			//"cost.feesPaid",
-			//"cost.mintedTokens",
-			//"cost.addToDelegatePool",
-			//"cost.deleteFromDelegatePool",
+			"cost.payfees",
+			"cost.feespaid",
+			"cost.mintedtokens",
+			"cost.addtodelegatepool",
+			"cost.deletefromdelegatepool",
 			"cost.sharder_keep",
-			//"cost.collect_reward",
 			"cost.kill_miner",
 			"cost.kill_sharder",
 		}
@@ -150,26 +148,23 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			"5",
 			"361",
 			"331",
-			//"484",
-			//"335",
-			"149", 
-			"145",  
-			//"1433", 
-			//"509",  
-			"100",  
-			"269",  
-			"136",  
-			"137", 
-			"134", 
-			//"1356", 
-			//"100",  
-			//"100",  
-			//"186",  
-			//"150", 
-			"211",  
-			//"230", 
-			"146",  
-			"140",  
+			"149",
+			"400",
+			"200",
+			"509",
+			"100",
+			"269",
+			"136",
+			"137",
+			"134",
+			"1356",
+			"100",
+			"100",
+			"186",
+			"150",
+			"211",
+			"146",
+			"140",
 		}
 
 		// Save original ( prev ) config values in order to restore system to its previous state
@@ -182,8 +177,8 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 
 		t.Logf("original (prior to update ) values")
 		t.Logf("***start***")
-		t.Logf("Keys : %s",beforeKeys)
-		t.Logf("Values : %s",beforeValues)
+		t.Logf("Keys : %s", beforeKeys)
+		t.Logf("Values : %s", beforeValues)
 		t.Logf("***end***")
 
 		t.Logf("update and verify updated values")
@@ -232,8 +227,6 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		}
 	})
 
-	//t.Skip()
-
 	// Test Suite II - Testing mid-value allowances  [ Positive test cases ]
 	// Reward Rate - Test cases for updating reward_rate
 	//					"0.5"  Setting reward rate to mid-interval value to test range [0; 1)
@@ -244,13 +237,9 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	// Reward Decline Rate - Test case for updating reward_decline_rate to the mid value
 	//				"0.5" The mid value for reward_decline_rate to test range [0; 1)
 
-
 	t.RunSequentially("successful update of config to mid-level allowed value", func(t *test.SystemTest) {
-
 		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate"}
 		values := []string{"0.5", "0.5", "0.5", "0.5"}
-
-		
 
 		// Save original ( prev ) config values in order to restore system to its previous state
 		configMapBefore := getMinerScConfigsForKeys(t, configPath, keys)
@@ -303,9 +292,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			t.Logf("Actual config: %s", actualValue)
 			require.True(t, exists, fmt.Sprintf("Config key %s does not exist", key))
 			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
-		}		
-
-
+		}
 	})
 
 	// Test Suite III - Testing max allowances  [ Positive test cases ]
@@ -318,9 +305,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	// Reward Decline Rate - Test case for updating reward_decline_rate to the minimum allowed value
 	//				"0.999999" // A value just under 1 for the exclusive range
 
-
 	t.RunSequentially("successful update of config to maximum allowed value", func(t *test.SystemTest) {
-
 		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate"}
 		values := []string{"0.999999", "0.9", "0.999999", "0.999999"}
 
@@ -376,7 +361,6 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 			require.True(t, exists, fmt.Sprintf("Config key %s does not exist", key))
 			require.Equal(t, expectedValue, actualValue, fmt.Sprintf("Config key %s does not match expected value. Expected: %s, Got: %s", key, expectedValue, actualValue))
 		}
-
 	})
 
 	// Test Suite IV - Testing invalid values [ Negative test cases ]
@@ -389,9 +373,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 	// Reward Decline Rate - Test case for updating reward_decline_rate to the minimum allowed value
 	//				"-1" // A value of 1 for the exclusive range
 
-
 	t.RunSequentially("unsuccessful update of config to invalid values", func(t *test.SystemTest) {
-
 		keys := []string{"reward_rate", "block_reward", "share_ratio", "reward_decline_rate"}
 		values := []string{"-1", "-1", "-1", "-1"}
 
@@ -410,16 +392,14 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 
 	/* Exclusive values ( upper bound ) tests failing for below parameters - https://github.com/0chain/0chain/issues/3168 */
 	// Test Suite V - Testing out of bounds [ Negative test cases ]
-	// Reward Rate - Test cases for updating reward_rate	
+	// Reward Rate - Test cases for updating reward_rate
 	//					"1" // A value of 1 for the exclusive range
-	// Share Ratio - Test case for updating share_ratio		
+	// Share Ratio - Test case for updating share_ratio
 	//				"1" // A value of 1 for the exclusive range
 	// Reward Decline Rate - Test case for updating reward_decline_rate to the minimum allowed value
 	//				"1" // A value of 1 for the exclusive range
 
-
 	t.RunSequentially("unsuccessful update of config to out of bounds value", func(t *test.SystemTest) {
-
 		t.Skip("skip till the issue is fixed")
 
 		keys := []string{"reward_rate", "share_ratio", "reward_decline_rate"}
@@ -437,7 +417,6 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, !isUpdateSuccess(output), "Update to config parameters failed with out of bounds values")
 	})
-
 
 	t.RunSequentially("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		configKey := "reward_rate"
@@ -505,7 +484,6 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "number keys must equal the number values", output[0], strings.Join(output, "\n"))
 	})
-
 }
 
 func getMinerSCConfig(t *test.SystemTest, cliConfigFilename string, retry bool) ([]string, error) {
@@ -580,7 +558,7 @@ func getMinerScConfigsForKeys(t *test.SystemTest, configPath string, keys []stri
 		if len(matches) >= 2 {
 			updatedConfigMap[key] = matches[1]
 		} else {
-			fmt.Println("No match found for key: ", key)
+			log.Println("No match found for key: ", key)
 		}
 	}
 	return updatedConfigMap
