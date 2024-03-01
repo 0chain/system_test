@@ -6,8 +6,7 @@ import (
 	"testing"
 
 	"github.com/0chain/gosdk/core/zcncrypto"
-	"github.com/0chain/gosdk/mobilesdk"
-	"github.com/0chain/gosdk/zcncore"
+	"github.com/0chain/gosdk/mobilesdk/sdk"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 )
@@ -21,8 +20,8 @@ func TestSplitKeyMobile(testSetup *testing.T) {
 		privateKey := wallet.Keys.PrivateKey
 		// this represents number of split keys made from private key
 		numSplit := 2
-		signatureScheme := "blseo"
-		wStr, err := mobilesdk.SplitKeys(privateKey, signatureScheme, numSplit)
+		signatureScheme := "bls0chain"
+		wStr, err := sdk.SplitKeys(privateKey, signatureScheme, numSplit)
 		if err != nil {
 			fmt.Println("Error while spliting keys:", err)
 			return
