@@ -82,6 +82,7 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 			"localpath":  file,
 			"allocation": allocationID,
 			"remotepath": remoteOwnerPath,
+			"blockspermarker": 100,
 		})
 
 		// downloading file for wallet
