@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"encoding/json"
+	"encoding/base64"
 	"testing"
 
 	"github.com/0chain/gosdk/zcncore"
@@ -18,9 +19,11 @@ func TestSplitKey(testSetup *testing.T) {
 	t.Run("Check if Splitkey handler is generating split keys or not", func(t *test.SystemTest) {
 		wallet := createWallet(t)
 		privateKey := wallet.Keys.PrivateKey
+		serializedPrivateKey := privateKey.Serialize()
+		stringPrivateKey := base64.StdEncoding.EncodeToString(serializedPrivateKey)
 		// this represents number of split keys made from private key
 		numSplit := 2
-		wStr, err := zcncore.SplitKeys(privateKey, numSplit)
+		wStr, err := zcncore.SplitKeys(stringPrivateKey, numSplit)
 		require.NoError(t, err, "failed to create split key wallet using private key")
 		/*
 			{
