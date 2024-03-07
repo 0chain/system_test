@@ -1,14 +1,14 @@
 package api_tests
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"testing"
-
 	"github.com/0chain/gosdk/core/zcncrypto"
 	"github.com/0chain/gosdk/mobilesdk/sdk"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestSplitKeyMobile(testSetup *testing.T) {
@@ -18,10 +18,12 @@ func TestSplitKeyMobile(testSetup *testing.T) {
 	t.Run("Check if Splitkey handler is generating split keys or not", func(t *test.SystemTest) {
 		wallet := createWallet(t)
 		privateKey := wallet.Keys.PrivateKey
+		serializedPrivateKey := privateKey.Serialize()
+		stringPrivateKey := base64.StdEncoding.EncodeToString(serializedPrivateKey)
 		// this represents number of split keys made from private key
 		numSplit := 2
 		signatureScheme := "bls0chain"
-		wStr, err := sdk.SplitKeys(privateKey, signatureScheme, numSplit)
+		wStr, err := sdk.SplitKeys(stringPrivateKey, signatureScheme, numSplit)
 		if err != nil {
 			fmt.Println("Error while spliting keys:", err)
 			return
