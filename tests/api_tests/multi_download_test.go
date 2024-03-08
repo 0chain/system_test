@@ -38,19 +38,19 @@ func TestMultiDownload(testSetup *testing.T) {
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err, "error getting allocation")
-		err = os.MkdirAll("temp", os.ModePerm)
+		err = os.MkdirAll("temp_download", os.ModePerm)
 		require.NoError(t, err, "error creating temp dir")
 		defer func() {
-			err = os.RemoveAll("temp")
+			err = os.RemoveAll("temp_download")
 			require.NoError(t, err, "error removing temp dir")
 		}()
 		wg := &sync.WaitGroup{}
 		for i := 0; i < 9; i++ {
-			sdkClient.DownloadFileWithParam(t, alloc, ops[i].FileMeta.RemotePath, "temp/", wg, false)
+			sdkClient.DownloadFileWithParam(t, alloc, ops[i].FileMeta.RemotePath, "temp_download/", wg, false)
 		}
-		sdkClient.DownloadFileWithParam(t, alloc, ops[9].FileMeta.RemotePath, "temp/", wg, true)
+		sdkClient.DownloadFileWithParam(t, alloc, ops[9].FileMeta.RemotePath, "temp_download/", wg, true)
 		wg.Wait()
-		files, err := os.ReadDir("temp")
+		files, err := os.ReadDir("temp_download")
 		require.NoError(t, err, "error reading temp dir")
 		require.Equal(t, 10, len(files), "files count mismatch expected %v actual %v", 10, len(files))
 		for _, file := range files {
