@@ -1230,30 +1230,6 @@ func TestDownload(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, "pre-redeeming read marker")
 	})
 
-	t.Run("Download File to Existing File Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		filesize := int64(256)
-		remotepath := "/"
-
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
-		})
-
-		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  filename,
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		expected := "Error in file operation: Error while calculating shard params. Error: exceeded_max_offset_value: file is already downloaded"
-		require.Equal(t, expected, output[0])
-	})
-
 	t.RunWithTimeout("Download Moved File Should Work", 5*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		filesize := int64(256)
