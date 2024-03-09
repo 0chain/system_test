@@ -214,6 +214,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		newNumberOfDelegates := intialBlobberInfo.StakePoolSettings.MaxNumDelegates + 1
 		newCapacity := intialBlobberInfo.Capacity + 1
 		newNotAvailable := !intialBlobberInfo.NotAvailable
+		url := intialBlobberInfo.BaseURL
 
 		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id":     intialBlobberInfo.ID,
@@ -223,6 +224,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 			"num_delegates":  newNumberOfDelegates,
 			"capacity":       newCapacity,
 			"not_available":  newNotAvailable,
+			"url": 			  url,
 		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -246,6 +248,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.MaxNumDelegates)
 		require.Equal(t, newCapacity, finalBlobberInfo.Capacity)
 		require.Equal(t, newNotAvailable, finalBlobberInfo.NotAvailable)
+		require.Equal(t, url, finalBlobberInfo.BaseURL)
 	})
 }
 
