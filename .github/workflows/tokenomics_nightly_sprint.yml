@@ -1,14 +1,12 @@
-name: "Tokenomics Tests"
+name: "Tokenomics Nightly Tests - Sprint"
 concurrency:
   group: "tokenomics-nightly-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
 on:
+  schedule:
+    # Runs every morning at 2am UTC
+    - cron: '0 2 * * *'
   workflow_dispatch:
-    inputs:
-      repo_snapshots_branch:
-        description: 'branch of repo-snapshots to derive images and branches from.'
-        default: 'current-sprint'
-        required: true
 
 jobs:
   system-tests:
@@ -27,8 +25,6 @@ jobs:
         run: |
           echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
           echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
-          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
 
       - name: "Config: Deploy new 0Chain network then run tests against it"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
@@ -43,15 +39,13 @@ jobs:
           echo "TOKENOMICS_BLOCK_REWARD_TESTS=$(echo $(([ -z 'TestBlockRewardsForBlobbers' ] && echo '') || echo 'TestBlockRewardsForBlobbers'))" >> $GITHUB_ENV
           echo "TOKENOMICS_MIN_STAKE_TESTS=$(echo $(([ -z 'TestMinStakeForProviders' ] && echo '') || echo 'TestMinStakeForProviders'))" >> $GITHUB_ENV
           echo "CLIENT_THROTTLING=$(echo $(([ -z 'TestClientThrottling' ] && echo '') || echo 'TestClientThrottling'))" >> $GITHUB_ENV
-          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
 
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain-2b2v@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          repo_snapshots_branch: current-sprint
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -64,8 +58,7 @@ jobs:
       - name: "Run Allocation System tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          repo_snapshots_branch: current-sprint
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
@@ -84,7 +77,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain-2b2v@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          repo_snapshots_branch: current-sprint
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -97,8 +90,7 @@ jobs:
       - name: "Run Challenge Reward System tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          repo_snapshots_branch: current-sprint
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
@@ -117,7 +109,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain-3b3v@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          repo_snapshots_branch: current-sprint
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -130,8 +122,7 @@ jobs:
       - name: "Run Allocation Add Or Replace Blobber Rewards tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          repo_snapshots_branch: current-sprint
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
@@ -150,7 +141,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain-2b2v@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          repo_snapshots_branch: current-sprint
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -163,8 +154,7 @@ jobs:
       - name: "Run Read Rewards System tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          repo_snapshots_branch: current-sprint
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
@@ -182,8 +172,7 @@ jobs:
       - name: "Run Slash Rewards System tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          repo_snapshots_branch: current-sprint
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
@@ -202,7 +191,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain-minstake@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          repo_snapshots_branch: current-sprint
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -215,8 +204,7 @@ jobs:
       - name: "Run Min Stake System tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          repo_snapshots_branch: current-sprint
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
@@ -235,7 +223,7 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain-fileops-limits@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          repo_snapshots_branch: current-sprint
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -248,8 +236,7 @@ jobs:
       - name: "Run Client throttling tests "
         uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          repo_snapshots_branch: current-sprint
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
@@ -263,3 +250,41 @@ jobs:
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+
+
+  notify_slack_on_failure:
+    runs-on: [self-hosted, arc-runner]
+    needs: [system-tests]
+    if: always() && (needs.system-tests.result == 'failure')
+    steps:
+      - name: "Notify Slack"
+        run: |
+          payload='{
+          "text": "'"<!here> Tokenomics Nightly Tests - Current Sprint FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "attachments": [
+              {
+              "text": "Tokenomics Nightly Tests - Current sprint: FAILED ⚠️",
+              "color": "#ff0000"
+              }
+          ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+
+  notify_slack_on_success:
+    runs-on: [self-hosted, arc-runner]
+    needs: [system-tests]
+    if: always() && (needs.system-tests.result == 'success')
+    steps:
+      - name: "Notify Slack"
+        run: |
+          payload='{
+          "text": "'"<!here> Tokenomics Nightly Tests - Current Sprint PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "attachments": [
+              {
+              "text": "Tokenomics Nightly Tests - Current sprint: PASSED ✅",
+              "color": "#22bb33"
+              }
+          ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}

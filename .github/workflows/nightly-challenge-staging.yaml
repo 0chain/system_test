@@ -1,4 +1,4 @@
-name: "Challenge Protocol Nightly Tests - Sprint"
+name: "Challenge Protocol Nightly Tests - Staging"
 concurrency:
   group: "challenge-nightly-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
@@ -105,7 +105,7 @@ jobs:
       - name: "Deploy 0Chain"
         uses: 0chain/actions/deploy-0chain@master
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
@@ -118,7 +118,7 @@ jobs:
       - name: "Run Challenge System tests"
         uses: 0chain/actions/run-system-tests@master
         with:
-          repo_snapshots_branch: current-sprint
+          repo_snapshots_branch: staging
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
@@ -151,10 +151,10 @@ jobs:
       - name: "Notify Slack"
         run: |
           payload='{
-          "text": "'"<!here> Challenge Protocol Nightly Tests - Current Sprint FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "text": "'"<!here> Challenge Protocol Nightly Tests - Staging FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
           "attachments": [
               {
-              "text": "Challenge Protocol Nightly Tests - Current sprint: FAILED ⚠️",
+              "text": "Challenge Protocol Nightly Tests - Staging: FAILED ⚠️",
               "color": "#ff0000"
               }
           ]
@@ -169,10 +169,10 @@ jobs:
       - name: "Notify Slack"
         run: |
           payload='{
-          "text": "'"<!here> Challenge Protocol Nightly Tests - Current Sprint PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "text": "'"<!here> Challenge Protocol Nightly Tests - Staging PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
           "attachments": [
               {
-              "text": "Challenge Protocol Nightly Tests - Current sprint: PASSED ✅",
+              "text": "Challenge Protocol Nightly Tests - Staging: PASSED ✅",
               "color": "#22bb33"
               }
           ]
