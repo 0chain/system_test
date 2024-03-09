@@ -6,7 +6,7 @@ require (
 	github.com/0chain/errors v1.0.3
 	github.com/0chain/gosdk v1.11.1-0.20240204123736-4997432ef46e
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/herumi/bls-go-binary v1.33.0
+	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.15.0
