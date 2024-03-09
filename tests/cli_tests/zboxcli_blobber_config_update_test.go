@@ -58,6 +58,9 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 
 			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": intToZCN(intialBlobberInfo.Terms.WritePrice)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
+
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "url": intialBlobberInfo.BaseURL}))
+			require.Nil(t, err, strings.Join(output, "\n"))
 		})
 	})
 
@@ -214,7 +217,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		newNumberOfDelegates := intialBlobberInfo.StakePoolSettings.MaxNumDelegates + 1
 		newCapacity := intialBlobberInfo.Capacity + 1
 		newNotAvailable := !intialBlobberInfo.NotAvailable
-		url := intialBlobberInfo.BaseURL
+		url := "https://dev-5.devnet-0chain.net/testblobber04"
 
 		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id":     intialBlobberInfo.ID,
