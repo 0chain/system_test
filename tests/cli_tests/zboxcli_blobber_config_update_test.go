@@ -224,7 +224,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 			"num_delegates":  newNumberOfDelegates,
 			"capacity":       newCapacity,
 			"not_available":  newNotAvailable,
-			"url": 			  url,
+			"url":            url,
 		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
