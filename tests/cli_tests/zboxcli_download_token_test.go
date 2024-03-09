@@ -79,9 +79,9 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 		os.Remove(file)
 
 		downloadParams := createParams(map[string]interface{}{
-			"localpath":  file,
-			"allocation": allocationID,
-			"remotepath": remoteOwnerPath,
+			"localpath":       file,
+			"allocation":      allocationID,
+			"remotepath":      remoteOwnerPath,
 			"blockspermarker": 100,
 		})
 

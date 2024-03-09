@@ -22,7 +22,6 @@ import (
 func TestResumeDownload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-
 	t.RunWithTimeout("Resume download should work", 5*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(900 * MB)
 		filesize := int64(600 * MB)
