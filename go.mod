@@ -22,6 +22,7 @@ require (
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.1 // indirect
 	github.com/hitenjain14/fasthttp v0.0.0-20240201092245-8e4835c0e974 // indirect
 	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
