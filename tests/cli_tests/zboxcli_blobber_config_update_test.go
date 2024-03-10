@@ -259,8 +259,8 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		url := "https://dev-5.devnet-0chain.net/testblobber04"
 
 		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id":     intialBlobberInfo.ID,
-			"url":            url,
+			"blobber_id": intialBlobberInfo.ID,
+			"url":        url,
 		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -269,7 +269,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-
 
 		var finalBlobberInfo climodel.BlobberDetails
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
