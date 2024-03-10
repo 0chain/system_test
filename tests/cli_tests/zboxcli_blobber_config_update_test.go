@@ -58,6 +58,9 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 
 			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": intToZCN(intialBlobberInfo.Terms.WritePrice)}))
 			require.Nil(t, err, strings.Join(output, "\n"))
+
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "url": intialBlobberInfo.BaseURL}))
+			require.Nil(t, err, strings.Join(output, "\n"))
 		})
 	})
 
@@ -214,6 +217,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		newNumberOfDelegates := intialBlobberInfo.StakePoolSettings.MaxNumDelegates + 1
 		newCapacity := intialBlobberInfo.Capacity + 1
 		newNotAvailable := !intialBlobberInfo.NotAvailable
+		url := "https://dev-5.devnet-0chain.net/testblobber04"
 
 		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id":     intialBlobberInfo.ID,
@@ -223,6 +227,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 			"num_delegates":  newNumberOfDelegates,
 			"capacity":       newCapacity,
 			"not_available":  newNotAvailable,
+			"url":            url,
 		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -246,6 +251,30 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newNumberOfDelegates, finalBlobberInfo.StakePoolSettings.MaxNumDelegates)
 		require.Equal(t, newCapacity, finalBlobberInfo.Capacity)
 		require.Equal(t, newNotAvailable, finalBlobberInfo.NotAvailable)
+		require.Equal(t, url, finalBlobberInfo.BaseURL)
+	})
+	t.RunSequentially("update base_url should work", func(t *test.SystemTest) {
+		createWallet(t)
+
+		url := "https://dev-5.devnet-0chain.net/testblobber04"
+
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
+			"blobber_id": intialBlobberInfo.ID,
+			"url":        url,
+		}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "blobber settings updated successfully", output[0])
+
+		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var finalBlobberInfo climodel.BlobberDetails
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		require.Equal(t, url, finalBlobberInfo.BaseURL)
 	})
 }
 
