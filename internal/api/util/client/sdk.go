@@ -261,6 +261,9 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, path, format string, 
 		FileMeta:      fileMeta,
 		Workdir:       homeDir,
 		RemotePath:    fileMeta.RemotePath,
+		Opts: []sdk.ChunkedUploadOption{
+			sdk.WithChunkNumber(120),
+		},
 	}
 }
 
