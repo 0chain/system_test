@@ -27,7 +27,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		blobberRequirements.Size = 2056
+		blobberRequirements.Size = 240 * MB
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -35,7 +35,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		lastBlobber := alloc.Blobbers[0]
 		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
-		op := sdkClient.AddUploadOperation(t, "", "")
+		op := sdkClient.AddUploadOperation(t, "", "", 100*MB)
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op}, client.WithRepair(alloc.Blobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
