@@ -112,6 +112,7 @@ jobs:
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
           TENDERLY_FORK_ID: ${{ env.TENDERLY_FORK_ID }}
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          custom_go_sdk_version: "feature/debug-dex"
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ env.TENDERLY_FORK_ID }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
