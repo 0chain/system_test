@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -198,5 +199,89 @@ func TestRepairAllocation(testSetup *testing.T) {
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, "/"+newName)
 		require.Nil(t, err)
+	})
+
+	t.RunSequentially("Repair allocation should work with multiple 100MB file", func(t *test.SystemTest) {
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoError(t, err)
+		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
+		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
+
+		ops := make([]sdk.OperationRequest, 0, 4)
+		fileSize := int64(1024 * 100) //100MB
+		for i := 0; i < 4; i++ {
+			path := fmt.Sprintf("dummy_%d", i)
+			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
+			ops = append(ops, op)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+
+		sdkClient.RepairAllocation(t, allocationID)
+		for _, op := range ops {
+			_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
+			require.Nil(t, err)
+		}
+	})
+
+	t.RunSequentially("Repair allocation should work with multiple 500MB file", func(t *test.SystemTest) {
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoError(t, err)
+		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
+		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
+
+		ops := make([]sdk.OperationRequest, 0, 4)
+		fileSize := int64(1024 * 500)  // 500MB
+		for i := 0; i < 4; i++ {
+			path := fmt.Sprintf("dummy_%d", i)
+			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
+			ops = append(ops, op)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+
+		sdkClient.RepairAllocation(t, allocationID)
+		for _, op := range ops {
+			_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
+			require.Nil(t, err)
+		}
+	})
+
+	t.RunSequentially("Repair allocation should work with multiple 1GB file", func(t *test.SystemTest) {
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoError(t, err)
+		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
+		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
+
+		ops := make([]sdk.OperationRequest, 0, 4)
+		fileSize := int64(1024 * 1000)  // 1GB
+		for i := 0; i < 4; i++ {
+			path := fmt.Sprintf("dummy_%d", i)
+			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
+			ops = append(ops, op)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+
+		sdkClient.RepairAllocation(t, allocationID)
+		for _, op := range ops {
+			_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
+			require.Nil(t, err)
+		}
 	})
 }
