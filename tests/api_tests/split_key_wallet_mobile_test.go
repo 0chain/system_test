@@ -4,11 +4,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"testing"
+
 	"github.com/0chain/gosdk/core/zcncrypto"
 	"github.com/0chain/gosdk/mobilesdk/sdk"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestSplitKeyMobile(testSetup *testing.T) {
