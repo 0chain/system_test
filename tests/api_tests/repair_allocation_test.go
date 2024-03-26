@@ -202,9 +202,11 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation should work with multiple 100MB file", func(t *test.SystemTest) {
+		fileSize := int64(1024 * 100) // 100MB
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
+		blobberRequirements.Size = 2 * fileSize
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -214,7 +216,6 @@ func TestRepairAllocation(testSetup *testing.T) {
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 
 		ops := make([]sdk.OperationRequest, 0, 4)
-		fileSize := int64(1024 * 100) //100MB
 		for i := 0; i < 4; i++ {
 			path := fmt.Sprintf("dummy_%d", i)
 			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
@@ -230,9 +231,11 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation should work with multiple 500MB file", func(t *test.SystemTest) {
+		fileSize := int64(1024 * 500) // 500MB
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
+		blobberRequirements.Size = 2 * fileSize
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -242,7 +245,6 @@ func TestRepairAllocation(testSetup *testing.T) {
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 
 		ops := make([]sdk.OperationRequest, 0, 4)
-		fileSize := int64(1024 * 500) // 500MB
 		for i := 0; i < 4; i++ {
 			path := fmt.Sprintf("dummy_%d", i)
 			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
@@ -258,9 +260,11 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation should work with multiple 1GB file", func(t *test.SystemTest) {
+		fileSize := int64(1024 * 1000) // 1GB
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
+		blobberRequirements.Size = 2 * fileSize
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -270,7 +274,6 @@ func TestRepairAllocation(testSetup *testing.T) {
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 
 		ops := make([]sdk.OperationRequest, 0, 4)
-		fileSize := int64(1024 * 1000) // 1GB
 		for i := 0; i < 4; i++ {
 			path := fmt.Sprintf("dummy_%d", i)
 			op := sdkClient.AddUploadOperation(t, path, "", fileSize)

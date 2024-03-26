@@ -4,7 +4,7 @@ import "time"
 
 func DefaultBlobberRequirements(id, publicKey string) BlobberRequirements {
 	return BlobberRequirements{
-		Size:           2048000,
+		Size:           600000,
 		DataShards:     3,
 		ParityShards:   1,
 		ExpirationDate: time.Now().Add(721 * time.Hour).Unix(),
