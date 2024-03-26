@@ -242,7 +242,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 
 		ops := make([]sdk.OperationRequest, 0, 4)
-		fileSize := int64(1024 * 500)  // 500MB
+		fileSize := int64(1024 * 500) // 500MB
 		for i := 0; i < 4; i++ {
 			path := fmt.Sprintf("dummy_%d", i)
 			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
@@ -270,7 +270,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 
 		ops := make([]sdk.OperationRequest, 0, 4)
-		fileSize := int64(1024 * 1000)  // 1GB
+		fileSize := int64(1024 * 1000) // 1GB
 		for i := 0; i < 4; i++ {
 			path := fmt.Sprintf("dummy_%d", i)
 			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
