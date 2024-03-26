@@ -217,7 +217,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 
 		ops := make([]sdk.OperationRequest, 0, 4)
-		for i := 0; i < int(numOfFile) ; i++ {
+		for i := 0; i < int(numOfFile); i++ {
 			path := fmt.Sprintf("dummy_%d", i)
 			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
 			ops = append(ops, op)
