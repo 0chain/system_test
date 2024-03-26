@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.11.1-0.20240204123736-4997432ef46e
+	github.com/0chain/gosdk v1.13.6
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
@@ -12,7 +12,7 @@ require (
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.4
 	github.com/tyler-smith/go-bip39 v1.1.0
-	github.com/ybbus/jsonrpc/v3 v3.1.1 // nolint
+	github.com/ybbus/jsonrpc/v3 v3.1.5 // nolint
 	golang.org/x/crypto v0.17.0
 	gopkg.in/errgo.v2 v2.1.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -22,7 +22,8 @@ require (
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
-	github.com/hitenjain14/fasthttp v0.0.0-20240201092245-8e4835c0e974 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.1 // indirect
+	github.com/hitenjain14/fasthttp v0.0.0-20240229173600-722723e15e17 // indirect
 	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
@@ -64,7 +65,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
-	github.com/h2non/filetype v1.1.3 // indirect
+	github.com/h2non/filetype v1.1.4-0.20231228185113-6469358c2bcb // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
