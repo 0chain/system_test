@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -201,8 +202,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation should work with multiple 100MB file", func(t *test.SystemTest) {
-		//fileSize := int64(1024 * 1024 * 10) // 100MB
-		fileSize := 1024 * 1024 * 10 // 100MB
+		fileSize := int64(1024 * 1024 * 10) // 100MB
+		//fileSize := 1024 * 1024 * 10 // 100MB
 		numOfFile := int64(3)
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
@@ -218,9 +219,9 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 		ops := make([]sdk.OperationRequest, 0, 4)
 		for i := 0; i < int(numOfFile); i++ {
-			//path := fmt.Sprintf("dummy_%d", i)
-			//op := sdkClient.AddUploadOperation(t, path, "", fileSize)
-			op := sdkClient.AddUploadOperationForBigFile(t, allocationID, fileSize)
+			path := fmt.Sprintf("dummy_%d", i)
+			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
+			//op := sdkClient.AddUploadOperationForBigFile(t, allocationID, fileSize)
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
