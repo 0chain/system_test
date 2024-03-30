@@ -151,7 +151,7 @@ func waitPartialDownloadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd, filename
 			if err != nil {
 				continue
 			}
-			if dp.LastWrittenBlock > 0 {
+			if dp.LastWrittenBlock > 500 {
 				// Send interrupt signal to command
 				err := cmd.Process.Signal(os.Interrupt)
 				require.Nil(t, err)
