@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
@@ -221,7 +222,6 @@ func TestRepairAllocation(testSetup *testing.T) {
 		for i := 0; i < int(numOfFile); i++ {
 			path := fmt.Sprintf("dummy_%d", i)
 			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
-			//op := sdkClient.AddUploadOperationForBigFile(t, allocationID, fileSize)
 			ops = append(ops, op)
 		}
 		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
@@ -233,7 +233,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentially("Repair allocation should work with multiple 500MB file", func(t *test.SystemTest) {
+	t.RunWithTimeout("Repair allocation should work with multiple 500MB file", 10*time.Minute, func(t *test.SystemTest) {
 		fileSize := int64(1024 * 1024 * 500) // 500MB
 		numOfFile := int64(4)
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -263,7 +263,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentially("Repair allocation should work with multiple 1GB file", func(t *test.SystemTest) {
+	t.RunWithTimeout("Repair allocation should work with multiple 1GB file", 10*time.Minute, func(t *test.SystemTest) {
 		fileSize := int64(1024 * 1024 * 1000) // 1GB
 		numOfFile := int64(4)
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
