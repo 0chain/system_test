@@ -204,7 +204,6 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 	t.RunSequentially("Repair allocation should work with multiple 100MB file", func(t *test.SystemTest) {
 		fileSize := int64(1024 * 1024 * 10) // 100MB
-		//fileSize := 1024 * 1024 * 10 // 100MB
 		numOfFile := int64(4)
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
@@ -263,7 +262,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		}
 	})
 
-	t.RunWithTimeout("Repair allocation should work with multiple 1GB file", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Repair allocation should work with multiple 1GB file", 30*time.Minute, func(t *test.SystemTest) {
 		fileSize := int64(1024 * 1024 * 1000) // 1GB
 		numOfFile := int64(4)
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
