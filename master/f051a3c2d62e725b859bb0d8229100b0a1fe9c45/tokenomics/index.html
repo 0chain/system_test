@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Subset of 0Chain System test suite [master/f051a3c2] ran against [dev-1.devnet-0chain.net] at [2024-03-31_06.34.16]</title>
+    <title>Subset of 0Chain System test suite [master/f051a3c2] ran against [dev-1.devnet-0chain.net] at [2024-04-01_14.44.19]</title>
     <style type="text/css">
         body {
             font-family: sans-serif;
@@ -234,26 +234,20 @@
 </head>
 <body>
 <div class="pageHeader">
-    <span class="projectTitle">Subset of 0Chain System test suite [master/f051a3c2] ran against [dev-1.devnet-0chain.net] at [2024-03-31_06.34.16]</span>
+    <span class="projectTitle">Subset of 0Chain System test suite [master/f051a3c2] ran against [dev-1.devnet-0chain.net] at [2024-04-01_14.44.19]</span>
     <div class="testStats">
-        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>3</strong>Duration: <strong>0s</strong>
-        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>3</strong>
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>0</strong>Duration: <strong>0s</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>0</strong>
         </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
         </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
         </span>
     </div>
     <span class="testGroupsTitle">Test Groups:</span>
-    <span class="testExecutionDate">March 31, 2024 06:36:19</span>
+    <span class="testExecutionDate">April 1, 2024 14:44:25</span>
 </div>
 <div class="testReportContainer">
     <div class="cardContainer">
         <div id="testResults">
-            
-                <div class="testResultGroup  " id="0"></div>
-            
-                <div class="testResultGroup  " id="1"></div>
-            
-                <div class="testResultGroup  " id="2"></div>
             
         </div>
     </div>
@@ -458,7 +452,7 @@ window.GoTestReport = function (elements) {
 
     
 
-    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestClientThrottling","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":35.75,"Output":["","    wallet.go:48: creating wallet...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:65: faucet output: [No wallet in path  config/TestClientThrottling_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  6acb658fbedfb453c18dda4e4db8a26866d37b0f1d8ca212b7cc6c95235a05e8]\n","    blobbers.go:12: Requesting blobber list...\n","    blobbers.go:17: Requesting validator list...\n","    wallet.go:27: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:102: Staking tokens...\n","    wallet.go:27: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:102: Staking tokens...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:102: Staking tokens...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:102: Staking tokens...\n","--- PASS: TestClientThrottling (35.75s)",""],"Passed":true,"Skipped":false,"TestFileName":"client_fileops_limits_test.go","TestFunctionDetail":{"Line":16,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestClientThrottling/Exceeding_upload_limits_should_blacklist_user_on_blobber","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":83.66,"Output":["","    client_fileops_limits_test.go:59: Test case [Exceeding upload limits should blacklist user on blobber] scheduled at [03-31-2024 06:34:55] \n","","","    system_test_framework.go:149: Test case [Exceeding upload limits should blacklist user on blobber] start at [03-31-2024 06:34:55] \n","    wallet.go:48: creating wallet...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:65: faucet output: [No wallet in path  config/TestClientThrottling-Exceeding_upload_limits_should_blacklist_user_on_blobber_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  b32b195e5f242735c65a79663c35bbb1916c619c06b2c94f4385912903456824]\n","    allocation.go:86: Creating new allocation... map[data:1 lock:0.5 parity:1 size:10485760]\n","    allocation.go:88: Faucet Tokens :  1\n","    wallet.go:48: creating wallet...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:65: faucet output: [Execute faucet smart contract success with txn :  14967add1890ab8e896454d71fd554ce36e05842ea365a224223839becfb29b6]\n","    wallet.go:27: Executing faucet...\n","    allocation.go:134: Creating new allocation...\n","    allocation.go:51: Locking read tokens...\n","    allocation.go:190: Uploading file...\n","    allocation.go:190: Uploading file...\n","    allocation.go:190: Uploading file...\n","    client_fileops_limits_test.go:59: Test case [Exceeding upload limits should blacklist user on blobber] exit at [03-31-2024 06:36:19]\n","--- PASS: TestClientThrottling/Exceeding_upload_limits_should_blacklist_user_on_blobber (83.66s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestClientThrottling/File_upload_should_fail_on_exceeding_max_number_of_files","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":19.4,"Output":["","    client_fileops_limits_test.go:104: Test case [File upload should fail on exceeding max number of files] scheduled at [03-31-2024 06:34:55] \n","","","    system_test_framework.go:149: Test case [File upload should fail on exceeding max number of files] start at [03-31-2024 06:34:55] \n","    wallet.go:48: creating wallet...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:65: faucet output: [No wallet in path  config/client_wallet_2_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  1bfb94b527e22746090acc352978c896ea389fc7a25579dae7089fd057cac260]\n","    wallet.go:27: Executing faucet...\n","    allocation.go:134: Creating new allocation...\n","    allocation.go:190: Uploading file...\n","    allocation.go:190: Uploading file...\n","    allocation.go:190: Uploading file...\n","    client_fileops_limits_test.go:104: Test case [File upload should fail on exceeding max number of files] exit at [03-31-2024 06:35:15]\n","--- PASS: TestClientThrottling/File_upload_should_fail_on_exceeding_max_number_of_files (19.40s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+    const data =  null 
 
     const report = window.GoTestReport({
                                          data: data,
