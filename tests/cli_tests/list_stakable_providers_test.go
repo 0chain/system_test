@@ -44,7 +44,7 @@ func TestGetStakableProviders(testSetup *testing.T) {
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		t.Cleanup(func() {
-			//reset miner settings
+			// reset miner settings
 			log.Printf("reset miner settings called")
 			output, err = minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 				"id":            miner01ID,
@@ -125,7 +125,7 @@ func TestGetStakableProviders(testSetup *testing.T) {
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		t.Cleanup(func() {
-			//reset sharder settings
+			// reset sharder settings
 			output, err = minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 				"id":            sharder01ID,
 				"num_delegates": sharderInfo.Settings.MaxNumDelegates,
@@ -151,7 +151,7 @@ func TestGetStakableProviders(testSetup *testing.T) {
 		// Stake tokens on this miner
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder01ID,
-			"tokens":   1,
+			"tokens":     1,
 		}), true)
 		require.Nilf(t, err, "err staking tokens on sharder: %v", err)
 		require.Len(t, output, 1)
@@ -315,7 +315,7 @@ func getStakableMinersList(t *test.SystemTest) *model.NodeList {
 	// Get miner list.
 	output, err := listMiners(t, configPath, createParams(map[string]interface{}{
 		"stakable": true,
-		"json": "",
+		"json":     "",
 	}))
 	require.Nil(t, err, "get stakable miners failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, "Expected output to have length of at least 1")
@@ -351,7 +351,7 @@ func getStakableBlobberList(t *test.SystemTest) []model.BlobberInfo {
 	// Get blobber list
 	output, err := utils.ListBlobbers(t, configPath, createParams(map[string]interface{}{
 		"stakable": true,
-		"json": "",
+		"json":     "",
 	}))
 	require.Nilf(t, err, "error listing blobbers: %v", err)
 	require.Len(t, output, 1)
@@ -366,7 +366,7 @@ func getStakableBlobberList(t *test.SystemTest) []model.BlobberInfo {
 func getStakableValidatorList(t *test.SystemTest) []model.Validator {
 	output, err := utils.ListValidators(t, configPath, createParams(map[string]interface{}{
 		"stakable": true,
-		"json": "",
+		"json":     "",
 	}))
 	require.Nilf(t, err, "error listing validators: %v", err)
 	require.Len(t, output, 1)
