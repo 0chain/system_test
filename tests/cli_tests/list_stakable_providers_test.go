@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/0chain/system_test/internal/cli/model"
@@ -21,30 +20,17 @@ func TestGetStakableProviders(testSetup *testing.T) {
 	t.RunSequentially("get stakable miners should work", func(t *test.SystemTest) {
 		createWallet(t)
 
-		stakableMinersBefore := getStakableMinersList(t)
-		hasMiner01 := false
-		var miner01Node model.Node
-		for _, minerNode := range stakableMinersBefore.Nodes {
-			if minerNode.ID == miner01ID {
-				hasMiner01 = true
-				miner01Node = minerNode
-				break
-			}
-		}
-		require.True(t, hasMiner01, "miner01ID is not found in miners list")
-
 		// count number of delegates
-		output, err := utils.StakePoolInfo(t, configPath, createParams(map[string]interface{}{
-			"miner_id": miner01ID,
-			"json":     "",
-		}))
-		require.Nilf(t, err, "error fetching stake pool info: %v", err)
+		output, err := minerInfo(t, configPath, createParams(map[string]interface{}{
+			"id": miner01ID,
+		}), true)
+		require.Nilf(t, err, "error fetching miner info: %v", err)
 		require.Len(t, output, 1)
-		stakePoolInfo := model.StakePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &stakePoolInfo)
-		require.Nilf(t, err, "error unmarshalling stake pool info: %v", err)
-		delegateCnt := len(stakePoolInfo.Delegate)
-		log.Printf("miner stakePoolInfo: %v", stakePoolInfo)
+		var minerInfo1 model.Node
+		err = json.Unmarshal([]byte(output[0]), &minerInfo1)
+		require.Nilf(t, err, "error unmarshalling miner info: %v", err)
+		delegateCnt := len(minerInfo1.Pools)
+		log.Printf("minerInfo: %v", minerInfo1)
 		log.Printf("num delegates: %d", delegateCnt)
 
 		// update num_delegates to delegateCnt + 1
@@ -53,15 +39,16 @@ func TestGetStakableProviders(testSetup *testing.T) {
 			"num_delegates": delegateCnt + 1,
 			"sharder":       false,
 		}), true)
-		require.Nil(t, err, "error updating num_delegates for miner01ID")
+		require.Nilf(t, err, "error updating num_delegates for miner01ID: %v", err)
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		t.Cleanup(func() {
 			//reset miner settings
+			log.Printf("reset miner settings called")
 			output, err = minerSharderUpdateSettings(t, configPath, miner01NodeDelegateWalletName, createParams(map[string]interface{}{
 				"id":            miner01ID,
-				"num_delegates": miner01Node.Settings.MaxNumDelegates,
+				"num_delegates": minerInfo1.Settings.MaxNumDelegates,
 				"sharder":       false,
 			}), true)
 			require.Nilf(t, err, "error reverting miner settings during cleanup: %v", err)
@@ -70,17 +57,29 @@ func TestGetStakableProviders(testSetup *testing.T) {
 			require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		})
 
-		// Stake tokens against this miner
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+		// assert miner01ID is present in stakable miners
+		stakableMinersBefore := getStakableMinersList(t)
+		hasMiner01 := false
+		for _, minerNode := range stakableMinersBefore.Nodes {
+			if minerNode.ID == miner01ID {
+				hasMiner01 = true
+				break
+			}
+		}
+		require.True(t, hasMiner01, "miner01ID should be found in miners list")
+
+		// Stake tokens on this miner
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner01ID,
-			"tokens":   1.0,
+			"tokens":   1,
 		}), true)
-		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
+		require.Nilf(t, err, "err staking tokens on miner: %v", err)
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("tokens locked, txn hash: ([a-f0-9]{64})"), output[0])
+		require.Regexp(t, lockOutputRegex, output[0])
 		t.Cleanup(func() {
 			// Unstake the tokens
-			output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
+			log.Printf("unstake tokens called")
+			output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 				"miner_id": miner01ID,
 			}), true)
 			require.Nilf(t, err, "error in unstake tokens during cleanup: %v", err)
@@ -95,37 +94,24 @@ func TestGetStakableProviders(testSetup *testing.T) {
 				break
 			}
 		}
-		require.False(t, hasMiner01, "miner01ID should NOT be present in miners list")
+		require.False(t, hasMiner01, "miner01ID should NOT be found in miners list")
 		require.Equal(t, len(stakableMinersAfter.Nodes), len(stakableMinersBefore.Nodes)-1, "stakableMinersAfter should be one less than stakableMinersBefore")
 	})
 
 	t.RunSequentially("get stakable sharders should work", func(t *test.SystemTest) {
 		createWallet(t)
 
-		stakableShardersBefore := getStakableSharderList(t)
-		hasSharder01 := false
-		var sharder01Node model.Node
-		for _, sharderNode := range stakableShardersBefore {
-			if sharderNode.ID == sharder01ID {
-				hasSharder01 = true
-				sharder01Node = sharderNode
-				break
-			}
-		}
-		require.True(t, hasSharder01, "sharder01ID is not found in sharders list")
-
 		// count number of delegates
-		output, err := utils.StakePoolInfo(t, configPath, createParams(map[string]interface{}{
-			"sharder_id": sharder01ID,
-			"json":       "",
-		}))
-		require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
+		output, err := minerInfo(t, configPath, createParams(map[string]interface{}{
+			"id": sharder01ID,
+		}), true)
+		require.Nilf(t, err, "error fetching sharder info: %v", err)
 		require.Len(t, output, 1)
-		stakePoolInfo := model.StakePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &stakePoolInfo)
-		require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
-		delegateCnt := len(stakePoolInfo.Delegate)
-		log.Printf("sharder stakePoolInfo: %v", stakePoolInfo)
+		var sharderInfo model.Node
+		err = json.Unmarshal([]byte(output[0]), &sharderInfo)
+		require.Nilf(t, err, "error unmarshalling sharder info: %v", err)
+		delegateCnt := len(sharderInfo.Pools)
+		log.Printf("sharderInfo: %v", sharderInfo)
 		log.Printf("num delegates: %d", delegateCnt)
 
 		// update num_delegates to delegateCnt + 1
@@ -134,7 +120,7 @@ func TestGetStakableProviders(testSetup *testing.T) {
 			"num_delegates": delegateCnt + 1,
 			"sharder":       true,
 		}), true)
-		require.Nil(t, err, "error updating num_delegates for sharder01ID")
+		require.Nilf(t, err, "error updating num_delegates for sharder01ID: %v", err)
 		require.Len(t, output, 2)
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
@@ -142,7 +128,7 @@ func TestGetStakableProviders(testSetup *testing.T) {
 			//reset sharder settings
 			output, err = minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 				"id":            sharder01ID,
-				"num_delegates": sharder01Node.Settings.MaxNumDelegates,
+				"num_delegates": sharderInfo.Settings.MaxNumDelegates,
 				"sharder":       true,
 			}), true)
 			require.Nilf(t, err, "error reverting sharder settings during cleanup: %v", err)
@@ -151,17 +137,28 @@ func TestGetStakableProviders(testSetup *testing.T) {
 			require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 		})
 
-		// Stake tokens against this sharder
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+		// assert sharder01ID is present in stakable sharders
+		stakableShardersBefore := getStakableSharderList(t)
+		hasSharder01 := false
+		for _, sharderNode := range stakableShardersBefore {
+			if sharderNode.ID == sharder01ID {
+				hasSharder01 = true
+				break
+			}
+		}
+		require.True(t, hasSharder01, "sharder01ID is not found in sharders list")
+
+		// Stake tokens on this miner
+		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder01ID,
-			"tokens":     1.0,
+			"tokens":   1,
 		}), true)
-		require.Nil(t, err, "Error staking tokens", strings.Join(output, "\n"))
+		require.Nilf(t, err, "err staking tokens on sharder: %v", err)
 		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("tokens locked, txn hash: ([a-f0-9]{64})"), output[0])
+		require.Regexp(t, lockOutputRegex, output[0])
 		t.Cleanup(func() {
 			// Unstake the tokens
-			output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
+			output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 				"sharder_id": sharder01ID,
 			}), true)
 			require.Nilf(t, err, "error in unstake tokens during cleanup: %v", err)
@@ -316,7 +313,10 @@ func TestGetStakableProviders(testSetup *testing.T) {
 
 func getStakableMinersList(t *test.SystemTest) *model.NodeList {
 	// Get miner list.
-	output, err := getStakableMiners(t, configPath)
+	output, err := listMiners(t, configPath, createParams(map[string]interface{}{
+		"stakable": true,
+		"json": "",
+	}))
 	require.Nil(t, err, "get stakable miners failed", strings.Join(output, "\n"))
 	require.Greater(t, len(output), 0, "Expected output to have length of at least 1")
 
@@ -328,14 +328,9 @@ func getStakableMinersList(t *test.SystemTest) *model.NodeList {
 	return &miners
 }
 
-func getStakableMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
-	t.Log("Get stakable miners...")
-	return cliutil.RunCommand(t, "./zwallet ls-miners --active --stakable --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
-}
-
 func getStakableSharderList(t *test.SystemTest) []model.Node {
 	// Get sharder list.
-	output, err := getStakableSharders(t, configPath)
+	output, err := listStakableShardersCommand(t, configPath)
 	require.Nil(t, err, "get stakable sharders failed", strings.Join(output, ""))
 	require.Greater(t, len(output), 0, "Expected output to have length of at least 1")
 
@@ -347,7 +342,7 @@ func getStakableSharderList(t *test.SystemTest) []model.Node {
 	return sharders
 }
 
-func getStakableSharders(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
+func listStakableShardersCommand(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	t.Logf("list stakable sharder nodes...")
 	return cliutil.RunCommandWithRawOutput("./zwallet ls-sharders --active --stakable --json --silent --all --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + cliConfigFilename)
 }
