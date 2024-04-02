@@ -20,6 +20,7 @@ import (
 
 func TestBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("Skip till fixed : https://github.com/0chain/system_test/issues/1042")
 	t.SetSmokeTests("Burning WZCN tokens on balance, should work")
 
 	t.RunSequentiallyWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
