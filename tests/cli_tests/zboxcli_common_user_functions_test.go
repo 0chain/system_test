@@ -174,6 +174,24 @@ func updateFileWithRandomlyGeneratedDataWithWallet(t *test.SystemTest, walletNam
 	return localfile
 }
 
+func updateFileContentWithRandomlyGeneratedData(t *test.SystemTest, allocationID, remotepath string, filename string, size int64) string {
+	return updateFileContentWithRandomlyGeneratedDataWithWallet(t, escapedTestName(t), allocationID, remotepath, filename, size)
+}
+
+func updateFileContentWithRandomlyGeneratedDataWithWallet(t *test.SystemTest, walletName, allocationID, remotepath string, filename string, size int64) string {
+
+	err := createFileWithSize(filename, size)
+	require.Nil(t, err)
+
+	output, err := updateFileWithWallet(t, walletName, configPath, map[string]interface{}{
+		"allocation": allocationID,
+		"remotepath": remotepath,
+		"localpath":  filename,
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	return filename
+}
+
 func renameFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Renaming file...")
 	p := createParams(param)
