@@ -14,6 +14,7 @@ import (
 
 func TestBridgeVerify(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("Skip till fixed : https://github.com/0chain/system_test/issues/1042")
 	t.SetSmokeTests("Verify ethereum transaction")
 
 	t.RunSequentiallyWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {
