@@ -424,7 +424,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 		createAllocationTestTeardown(t, allocationID)
 	})
-/*
+
 	t.RunSequentially("rollback allocation after multiple files upload and single file update should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   4 * MB,
@@ -502,7 +502,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 	})	
 	
 
-*/
+
 
 
 t.RunSequentially("rollback allocation after multiple files upload and single file delete should work", func(t *test.SystemTest) {
@@ -552,10 +552,12 @@ t.RunSequentially("rollback allocation after multiple files upload and single fi
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Equal(t, filesize, meta.ActualFileSize, "file size should be same as uploaded")
 
-	output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+	output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 		"allocation": allocationID,
 		"remotepath": remotepath + filepath.Base(localfilepath),
 	}), true)
+	
+
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 	require.Equal(t, fmt.Sprintf("%s deleted", "file2.txt"), output[0])
@@ -586,6 +588,56 @@ t.RunSequentially("rollback allocation after multiple files upload and single fi
 
 	createAllocationTestTeardown(t, allocationID)
 })	
+
+
+t.RunSequentially("rollback allocation in the middle of updating a large file should work", func(t *test.SystemTest) {
+	allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		"size":   1 * GB,
+		"tokens": 10,
+	})
+
+	filesize := int64(0.5 * GB)
+	remotepath := "/"
+	localFilePath := ""
+    doneUploading := make(chan bool)
+    go func() {
+        localFilePath = generateFileAndUpload(t, allocationID, remotepath, filesize)
+        doneUploading <- true
+    }()
+
+    time.Sleep(5 * time.Second)
+
+    // Ensure the upload was interrupted
+    select {
+    case <-doneUploading:
+        t.Error("Upload completed unexpectedly")
+    case <-time.After(10 * time.Second):
+		
+		// rollback allocation
+
+		output, err := rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+		}))
+		t.Log(strings.Join(output, "\n"))
+		require.NoError(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+    }
+
+	output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+		"allocation": allocationID,
+		"remotepath": remotepath,
+		"json":       "",
+	}), true)
+	require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+	require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+
+
+	err = os.Remove(localFilePath)
+	require.Nil(t, err)
+
+	createAllocationTestTeardown(t, allocationID)
+})
 
 }
 
