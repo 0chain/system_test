@@ -349,6 +349,38 @@ func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, 
 	return zboxFundingResponse, resp, err
 }
 
+func (c *ZboxClient) PostOwner(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxOwner, *resty.Response, error) {
+	t.Logf("Posting wallet using 0box...")
+	var zboxOwner *model.ZboxOwner
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/owner")
+
+	formData := map[string]string{
+		"username": userName,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &zboxOwner,
+		FormData: formData,
+		Headers: map[string]string{
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-App-Type":             appType,
+		},
+		RequiredStatusCode: 200,
+	}, HttpPOSTMethod)
+
+	return zboxOwner, resp, err
+}
+
 func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Posting wallet using 0box...")
 	var zboxWallet *model.ZboxWallet
@@ -447,6 +479,33 @@ func (c *ZboxClient) UpdateAllocation(t *test.SystemTest, allocationId, allocati
 		},
 		RequiredStatusCode: 200,
 	}, HttpPUTMethod)
+	return message, resp, err
+}
+
+func (c *ZboxClient) DeleteOwner(t *test.SystemTest, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber string) (*model.MessageContainer, *resty.Response, error) {
+	t.Logf("Deleting owner for phone [%v] using 0box...", phoneNumber)
+	var message *model.MessageContainer
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/owner")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst: &message,
+		Headers: map[string]string{
+			"X-App-Client-ID":        clientId,
+			"X-App-Client-Key":       clientKey,
+			"X-App-Client-Signature": clientSignature,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-APP-TYPE":             "blimp",
+		},
+		RequiredStatusCode: 200,
+	}, HttpDELETEMethod)
+
 	return message, resp, err
 }
 

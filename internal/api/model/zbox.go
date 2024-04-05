@@ -24,6 +24,11 @@ type CSRFToken struct {
 	CSRFToken string `json:"csrf_token"`
 }
 
+type ZboxOwner struct {
+	PhoneNumber string `json:"phone_number"`
+	UserName    string `json:"username"`
+}
+
 type ZboxWallet struct {
 	ClientID    string           `json:"client_id"`
 	WalletId    int              `json:"wallet_id"`
