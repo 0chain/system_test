@@ -277,7 +277,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocationDescription := "second allocation description created as part of " + t.Name()
 		allocationType := "s3_server"
 		allocation_id := "new allocation for vult"
-		_, response, err = zboxClient.PostAllocation(t,
+		_, _, err = zboxClient.PostAllocation(t,
 			allocation_id,
 			allocationName,
 			allocationDescription,
@@ -287,6 +287,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 			zboxClient.DefaultPhoneNumber,
 			"vult",
 		)
+		require.NoError(t, err)
 		_, response, err = zboxClient.PostAllocation(t,
 			allocation_id,
 			allocationName,
