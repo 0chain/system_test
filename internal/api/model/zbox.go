@@ -66,8 +66,8 @@ type ZboxFreeStorageMarkerResponse struct {
 	RecipientPublicKey string `json:"recipient_public_key"`
 }
 type ZboxResourceExist struct {
-	Exist *bool   `json:"exist"`
-	Error *string `json:"error"`
+	Exists bool   `json:"exists"`
+	Field  string `json:"field"`
 }
 
 type ZboxFCMResponse struct {

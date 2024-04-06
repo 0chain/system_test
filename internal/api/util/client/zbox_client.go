@@ -522,13 +522,8 @@ func (c *ZboxClient) DeleteWalletForNumber(t *test.SystemTest, walletId int, cli
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/wallet")
 
-	formData := map[string]string{
-		"wallet_id": fmt.Sprintf("%v", walletId),
-	}
-
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:  &message,
-		Body: formData,
+		Dst: &message,
 		Headers: map[string]string{
 			"X-App-Client-ID":        clientId,
 			"X-App-Client-Key":       clientKey,
@@ -752,7 +747,7 @@ func (c *ZboxClient) GetShareInfo(t *test.SystemTest, idToken, csrfToken, phoneN
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/share/shareinfo")
+	urlBuilder.SetPath("/v2/shareinfo")
 
 	formData := map[string]string{
 		"auth_tickets":       authTickets,
@@ -787,7 +782,7 @@ func (c *ZboxClient) PostShareInfo(t *test.SystemTest, authTicket, shareMessage,
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/share/shareinfo")
+	urlBuilder.SetPath("/v2/shareinfo")
 
 	formData := map[string]string{
 		"auth_ticket":        authTicket,
@@ -821,7 +816,7 @@ func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, pho
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/share/shareinfo")
+	urlBuilder.SetPath("/v2/shareinfo")
 
 	formData := map[string]string{
 		"auth_ticket": authTicket,
@@ -1258,8 +1253,8 @@ func (c *ZboxClient) UpdateFCMToken(t *test.SystemTest, idToken, csrfToken, phon
 	urlBuilder.SetPath("/v2/fcmtoken")
 	//todo: figure out which field can be updated
 	formData := map[string]string{
-		"fcm_token":   idToken,
-		"device_type": "zorro",
+		"fcm_token":             idToken,
+		"fcm_token_device_type": "zorro",
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
