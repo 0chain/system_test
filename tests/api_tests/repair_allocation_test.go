@@ -1,8 +1,9 @@
 package api_tests
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -347,9 +348,10 @@ func TestRepairAllocation(testSetup *testing.T) {
 		ops := make([]sdk.OperationRequest, 0, 4)
 
 		for i := 0; i < int(numOfFile); i++ {
-			numOfNestedFolders := rand.Intn(20) + 1
+			numOfNestedFolders, err := rand.Int(rand.Reader, big.NewInt(20))
+			require.Nil(t, err)
 			folderStructer := fmt.Sprintf("test_%d/", i)
-			path := strings.Repeat(folderStructer, int(numOfNestedFolders))
+			path := strings.Repeat(folderStructer, int(numOfNestedFolders.Int64()))
 			if i%2 == 0 {
 				fileSize = int64(1024 * 1024 * 300)
 			}
@@ -358,7 +360,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 			ops = append(ops, op)
 		}
 
-		fmt.Println("=====>>>>", ops)
+		t.Log(ops)
 
 		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
 
