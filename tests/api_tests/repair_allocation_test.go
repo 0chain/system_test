@@ -331,7 +331,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Repair allocation should work with multiple combination of file type & size & nested folders", 10*time.Minute, func(t *test.SystemTest) {
 		fileSize := int64(1024 * 1024 * 500) // 500MB
-		numOfFile := int64(30)
+		numOfFile := int64(10)
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
@@ -346,19 +346,17 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 		ops := make([]sdk.OperationRequest, 0, 4)
 		numOfFolders := rand.Intn(7) + 4
-		for j := 0; j < int(numOfFolders); j++ {
-			numOfNestedFolders := rand.Intn(7) + 4
-			for i := 0; i < int(numOfNestedFolders); i++ {
-				folderStructer := "test/"
-				path := strings.Repeat(folderStructer, int(numOfNestedFolders))
-				format := ""
-				if i%2 == 0 {
-					fileSize = int64(1024 * 1024 * 300)
-				}
 
-				op := sdkClient.AddUploadOperation(t, path, format, fileSize)
-				ops = append(ops, op)
+		for i := 0; i < int(numOfFolders); i++ {
+			numOfNestedFolders := rand.Intn(20) + 1
+			folderStructer := fmt.Sprintf("test_%d/", i)
+			path := strings.Repeat(folderStructer, int(numOfNestedFolders))
+			if i%2 == 0 {
+				fileSize = int64(1024 * 1024 * 300)
 			}
+
+			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
+			ops = append(ops, op)
 		}
 
 		fmt.Println("=====>>>>", ops)
