@@ -38,8 +38,8 @@ func NewZboxClient(zboxEntrypoint, defaultPhoneNumber string) *ZboxClient {
 		DefaultAllocationName: "DefaultName",
 		DefaultAllocationId:   "7df193bcbe12fc3ef9ff143b7825d9afadc3ce3d7214162f13ffad2510494d41",
 		DefaultMnemonic:       "613ed9fb5b9311f6f22080eb1db69b2e786c990706c160faf1f9bdd324fd909bc640ad6a3a44cb4248ddcd92cc1fabf66a69ac4eb38a102b984b98becb0674db7d69c5727579d5f756bb8c333010866d4d871dae1b7032d6140db897e4349f60f94f1eb14a3b7a14a489226a1f35952472c9b2b13e3698523a8be2dcba91c344f55da17c21c403543d82fe5a32cb0c8133759ab67c31f1405163a2a255ec270b1cca40d9f236e007a3ba8f6be4eaeaad10376c5f224bad45c597d85a3b8b984f46c597f6cf561405bd0b0007ac6833cfff408aeb51c0d2fX",
-		DefaultAuthTicket:     "eyJjbGllbnRfaWQiOiIiLCJvd25lcl9pZCI6ImEzMzQ1NGRhMTEwZGY0OTU2ZDc1YzgyMDA2N2M1ZThmZTJlZjIyZjZkNWQxODVhNWRjYTRmODYwMDczNTM1ZDEiLCJhbGxvY2F0aW9uX2lkIjoiZTBjMmNkMmQ1ZmFhYWQxM2ZjNTM3MzNkZDc1OTc0OWYyYjJmMDFhZjQ2MzMyMDA5YzY3ODIyMWEyYzQ4ODE1MyIsImZpbGVfcGF0aF9oYXNoIjoiZTcyNGEyMjAxZTIyNjUzZDMyMTY3ZmNhMWJmMTJiMmU0NGJhYzYzMzdkM2ViZGI3NDI3ZmJhNGVlY2FhNGM5ZCIsImFjdHVhbF9maWxlX2hhc2giOiIxZjExMjA4M2YyNDA1YzM5NWRlNTFiN2YxM2Y5Zjc5NWFhMTQxYzQwZjFkNDdkNzhjODNhNDk5MzBmMmI5YTM0IiwiZmlsZV9uYW1lIjoiSU1HXzQ4NzQuUE5HIiwicmVmZXJlbmNlX3R5cGUiOiJmIiwiZXhwaXJhdGlvbiI6MCwidGltZXN0YW1wIjoxNjY3MjE4MjcwLCJlbmNyeXB0ZWQiOmZhbHNlLCJzaWduYXR1cmUiOiIzMzllNTUyOTliNDhlMjI5ZGRlOTAyZjhjOTY1ZDE1YTk0MGIyNzc3YzVkOTMyN2E0Yzc5MTMxYjhhNzcxZTA3In0=", //nolint:revive
-		DefaultRecieverId:     "a33454da110df4956d75c820067c5e8fe2ef22f6d5d185a5dca4f860073535d1",
+		DefaultAuthTicket:     "eyJjbGllbnRfaWQiOiIiLCJvd25lcl9pZCI6IjMxZjc0MGZiMTJjZjcyNDY0NDE5YTdlODYwNTkxMDU4YTI0OGIwMWUzNGIxM2NiZjcxZDVhMTA3YjdiZGMxZTkiLCJhbGxvY2F0aW9uX2lkIjoiZTBjMmNkMmQ1ZmFhYWQxM2ZjNTM3MzNkZDc1OTc0OWYyYjJmMDFhZjQ2MzMyMDA5YzY3ODIyMWEyYzQ4ODE1MyIsImZpbGVfcGF0aF9oYXNoIjoiZTcyNGEyMjAxZTIyNjUzZDMyMTY3ZmNhMWJmMTJiMmU0NGJhYzYzMzdkM2ViZGI3NDI3ZmJhNGVlY2FhNGM5ZCIsImFjdHVhbF9maWxlX2hhc2giOiIxZjExMjA4M2YyNDA1YzM5NWRlNTFiN2YxM2Y5Zjc5NWFhMTQxYzQwZjFkNDdkNzhjODNhNDk5MzBmMmI5YTM0IiwiZmlsZV9uYW1lIjoiSU1HXzQ4NzQuUE5HIiwicmVmZXJlbmNlX3R5cGUiOiJmIiwiZXhwaXJhdGlvbiI6MCwidGltZXN0YW1wIjoxNjY3MjE4MjcwLCJlbmNyeXB0ZWQiOmZhbHNlLCJzaWduYXR1cmUiOiIzMzllNTUyOTliNDhlMjI5ZGRlOTAyZjhjOTY1ZDE1YTk0MGIyNzc3YzVkOTMyN2E0Yzc5MTMxYjhhNzcxZTA3In0=", //nolint:revive
+		DefaultRecieverId:     "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
 		DefaultAppType:        "blimp",
 	}
 	zboxClient.HttpClient = resty.New()
@@ -740,20 +740,17 @@ func (c *ZboxClient) GetGraphWritePrice(t *test.SystemTest, req *model.ZboxGraph
 	return &graphWritePrice, resp, err
 }
 
-func (c *ZboxClient) GetShareInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber, shareMessage, fromInfo, authTickets, recieverClientId string) (model.ZboxShareInfoList, *resty.Response, error) {
-	t.Logf("Getting share Info for  authentication ticket [%v] using 0box...", authTickets[0])
+func (c *ZboxClient) GetShareInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (model.ZboxShareInfoList, *resty.Response, error) {
+	t.Logf("Getting share Info for [%v] using 0box...", phoneNumber)
 	var ZboxShareInfoList model.ZboxShareInfoList
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/shareinfo")
+	urlBuilder.SetPath("/v2/shareinfo/received")
 
 	formData := map[string]string{
-		"auth_tickets":       authTickets,
-		"message":            shareMessage,
-		"from_info":          fromInfo,
-		"receiver_client_id": recieverClientId,
+		"share_info_type": "public",
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -818,13 +815,13 @@ func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, pho
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/shareinfo")
 
-	formData := map[string]string{
+	queryParams := map[string]string{
 		"auth_ticket": authTicket,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:  &message,
-		Body: formData,
+		Dst:         &message,
+		QueryParams: queryParams,
 		Headers: map[string]string{
 			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
 			"X-App-Client-Key":       X_APP_CLIENT_KEY,
