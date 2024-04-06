@@ -1968,9 +1968,9 @@ func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, idToken, ph
 	return ReferralCountOfUser, resp, err
 }
 
-func (c *ZboxClient) GetLeaderBoard(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralLeaderBoard, *resty.Response, error) {
+func (c *ZboxClient) GetLeaderBoard(t *test.SystemTest, csrfToken, idToken, phoneNumber string) ([]model.TopReferrer, *resty.Response, error) {
 	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
-	var ReferralLeaderBoard model.ReferralLeaderBoard
+	var ReferralLeaderBoard []model.TopReferrer
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)

@@ -197,14 +197,11 @@ type ReferralCountOfUser struct {
 	RewardPoints  int64 `json:"reward_points"`
 }
 
-type TopUser struct {
-	Score int64 `json:"score"`
-	Rank  int64 `json:"rank"`
-}
-
-type ReferralLeaderBoard struct {
-	Users []TopUser `json:"users"`
-	Total int64     `json:"total"`
+type TopReferrer struct {
+	ReferrerID   int64  `json:"referrer_id"`
+	Referrer     string `json:"referrer"`
+	ReferrerName string `json:"referrer_name"`
+	Count        int    `json:"count"`
 }
 
 type ReferralRankOfUser struct {

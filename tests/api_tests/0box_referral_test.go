@@ -205,7 +205,7 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 		referralMnemonic := "total today fortune output enjoy season desert tool transfer awkward post disease junk offer wedding wire brown broccoli size banana harsh stove raise skull"
 		userName2 := "user_name2"
 
-		zboxOwner, response, err = zboxClient.PostOwner(t, firebaseTokens[1].IdToken, csrfToken, "+919876543210", "blimp", userName2)
+		zboxOwner, response, err = zboxClient.PostOwnerWithReferralCode(t, firebaseTokens[1].IdToken, csrfToken, "+919876543210", "blimp", userName2)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxOwner)
@@ -237,8 +237,6 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 
 		require.Equal(t, 200, responses.StatusCode(), "Failed to get LeaderBoard. Output: [%v]", responses.String())
 		require.NotNil(t, zboxRferral)
-		require.Equal(t, int64(1), zboxRferrals.Total, "LeaderBoard should contain 1 User")
-		require.Equal(t, int64(1), zboxRferrals.Users[0].Rank, "User Rank should be 1 Initially")
-		require.Equal(t, int64(1), zboxRferrals.Users[0].Score, "User Score should be 1 Initially")
+		require.Equal(t, 1, zboxRferrals[0].Count, "User Score should be 1 Initially")
 	})
 }
