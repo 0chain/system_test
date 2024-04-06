@@ -100,10 +100,6 @@ type ZboxAllocationList struct {
 	Allocs     []ZboxAllocation `json:"allocs"`
 }
 
-type ZboxWalletArr []struct {
-	*ZboxWallet
-}
-
 type DexState struct {
 	TxHash    string `form:"tx_hash" json:"tx_hash" binding:"-"`
 	Stage     string `form:"stage" json:"stage" binding:"required"`
@@ -215,9 +211,9 @@ type ReferralLeaderBoard struct {
 }
 
 type ReferralRankOfUser struct {
-	UserRank  int64  `json:"rank"`
-	UserScore int64  `json:"score"`
-	UserPhone string `json:"phone"`
+	UserRank   int64 `json:"rank"`
+	UserCount  int64 `json:"count"`
+	ReferrerID int64 `json:"referrer_id"`
 }
 
 type ZboxNft struct {

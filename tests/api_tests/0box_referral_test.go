@@ -22,6 +22,12 @@ func Test0BoxReferral(testSetup *testing.T) {
 		teardown(t, firebaseTokens[0].IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
+		zboxOwner, response, err := zboxClient.PostOwner(t, firebaseTokens[0].IdToken, csrfToken, zboxClient.DefaultPhoneNumber, "blimp", "userName")
+		require.NoError(t, err)
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxOwner)
+		require.Equal(t, "userName", zboxOwner.UserName, "owner name does not match expected")
+
 		zboxRferral, response, err := zboxClient.GetReferralCode(t,
 			csrfToken,
 			firebaseTokens[0].IdToken,
@@ -39,6 +45,12 @@ func Test0BoxReferral(testSetup *testing.T) {
 		teardown(t, firebaseTokens[0].IdToken, zboxClient.DefaultPhoneNumber)
 		csrfToken := createCsrfToken(t, zboxClient.DefaultPhoneNumber)
 
+		zboxOwner, response, err := zboxClient.PostOwner(t, firebaseTokens[0].IdToken, csrfToken, zboxClient.DefaultPhoneNumber, "blimp", "userName")
+		require.NoError(t, err)
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxOwner)
+		require.Equal(t, "userName", zboxOwner.UserName, "owner name does not match expected")
+
 		zboxRferral, response, err := zboxClient.GetReferralRank(t,
 			csrfToken,
 			firebaseTokens[0].IdToken,
@@ -49,9 +61,8 @@ func Test0BoxReferral(testSetup *testing.T) {
 		require.NotNil(t, zboxRferral)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxRferral)
-		require.Equal(t, int64(0), zboxRferral.UserScore, "referral count should be 0 initially")
+		require.Equal(t, int64(0), zboxRferral.UserCount, "referral count should be 0 initially")
 		require.Equal(t, int64(0), zboxRferral.UserRank, "referral rank should be 0 initially")
-		require.Equal(t, zboxClient.DefaultPhoneNumber, zboxRferral.UserPhone, "phone should be same")
 	})
 
 	t.RunSequentially("Create wallet for first time with the referral code should work", func(t *test.SystemTest) {
@@ -63,6 +74,13 @@ func Test0BoxReferral(testSetup *testing.T) {
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
+
+		zboxOwner, response, err := zboxClient.PostOwner(t, firebaseTokens[0].IdToken, csrfToken, zboxClient.DefaultPhoneNumber, "blimp", userName)
+		require.NoError(t, err)
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxOwner)
+		require.Equal(t, userName, zboxOwner.UserName, "owner name does not match expected")
+
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -94,6 +112,13 @@ func Test0BoxReferral(testSetup *testing.T) {
 		referralMnemonic := "total today fortune output enjoy season desert tool transfer awkward post disease junk offer wedding wire brown broccoli size banana harsh stove raise skull"
 
 		userName2 := "user_name2"
+
+		zboxOwner, response, err = zboxClient.PostOwnerWithReferralCode(t, firebaseTokens[1].IdToken, csrfToken, "+919876543210", "blimp", userName2)
+		require.NoError(t, err)
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxOwner)
+		require.Equal(t, userName2, zboxOwner.UserName, "owner name does not match expected")
+
 		zboxWallet, response, err = zboxClient.PostWalletWithReferralCode(t,
 			referralMnemonic,
 			walletName,
@@ -145,6 +170,13 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 		description := "wallet created as part of " + t.Name()
 		walletName := "wallet_name"
 		userName := "user_name"
+
+		zboxOwner, response, err := zboxClient.PostOwner(t, firebaseTokens[0].IdToken, csrfToken, zboxClient.DefaultPhoneNumber, "blimp", userName)
+		require.NoError(t, err)
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxOwner)
+		require.Equal(t, userName, zboxOwner.UserName, "owner name does not match expected")
+
 		zboxWallet, response, err := zboxClient.PostWallet(t,
 			zboxClient.DefaultMnemonic,
 			walletName,
@@ -172,6 +204,13 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 		walletName = "wallet_name1"
 		referralMnemonic := "total today fortune output enjoy season desert tool transfer awkward post disease junk offer wedding wire brown broccoli size banana harsh stove raise skull"
 		userName2 := "user_name2"
+
+		zboxOwner, response, err = zboxClient.PostOwner(t, firebaseTokens[1].IdToken, csrfToken, "+919876543210", "blimp", userName2)
+		require.NoError(t, err)
+		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotNil(t, zboxOwner)
+		require.Equal(t, userName2, zboxOwner.UserName, "owner name does not match expected")
+
 		zboxWallet, response, err = zboxClient.PostWalletWithReferralCode(t,
 			referralMnemonic,
 			walletName,

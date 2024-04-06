@@ -350,7 +350,7 @@ func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, 
 }
 
 func (c *ZboxClient) PostOwner(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxOwner, *resty.Response, error) {
-	t.Logf("Posting wallet using 0box...")
+	t.Logf("Posting owner using 0box...")
 	var zboxOwner *model.ZboxOwner
 
 	urlBuilder := NewURLBuilder()
@@ -846,13 +846,13 @@ func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, pho
 	return message, resp, err
 }
 
-func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType string) (model.ZboxWalletArr, *resty.Response, error) {
+func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType string) (*model.ZboxWallet, *resty.Response, error) {
 	return c.GetWalletKeysForNumber(t, X_APP_CLIENT_ID, X_APP_CLIENT_KEY, X_APP_CLIENT_SIGNATURE, idToken, csrfToken, phoneNumber, appType)
 }
 
-func (c *ZboxClient) GetWalletKeysForNumber(t *test.SystemTest, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber, appType string) (model.ZboxWalletArr, *resty.Response, error) {
+func (c *ZboxClient) GetWalletKeysForNumber(t *test.SystemTest, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber, appType string) (*model.ZboxWallet, *resty.Response, error) {
 	t.Logf("Getting wallet keys for [%v] using 0box...", phoneNumber)
-	var zboxWalletKeys *model.ZboxWalletArr
+	var zboxWallet *model.ZboxWallet
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -860,7 +860,7 @@ func (c *ZboxClient) GetWalletKeysForNumber(t *test.SystemTest, clientId, client
 	urlBuilder.SetPath("/v2/wallet/keys")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &zboxWalletKeys,
+		Dst: &zboxWallet,
 		Headers: map[string]string{
 			"X-App-Client-ID":        clientId,
 			"X-App-Client-Key":       clientKey,
@@ -873,7 +873,7 @@ func (c *ZboxClient) GetWalletKeysForNumber(t *test.SystemTest, clientId, client
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
-	return *zboxWalletKeys, resp, err
+	return zboxWallet, resp, err
 }
 
 func (c *ZboxClient) UpdateWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWallet, *resty.Response, error) {
@@ -2026,6 +2026,38 @@ func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, idToken, pho
 	}, HttpGETMethod)
 
 	return ReferralRankOfUser, resp, err
+}
+
+func (c *ZboxClient) PostOwnerWithReferralCode(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxOwner, *resty.Response, error) {
+	t.Logf("Posting owner using 0box...")
+	var zboxOwner *model.ZboxOwner
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/owner")
+
+	formData := map[string]string{
+		"username": userName,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &zboxOwner,
+		FormData: formData,
+		Headers: map[string]string{
+			"X-App-Client-ID":        X_APP_CLIENT_ID_R,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-App-Type":             appType,
+		},
+		RequiredStatusCode: 200,
+	}, HttpPOSTMethod)
+
+	return zboxOwner, resp, err
 }
 
 func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, userName, refCode string) (*model.ZboxWallet, *resty.Response, error) {
