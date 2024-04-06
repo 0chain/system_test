@@ -331,7 +331,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 	t.RunSequentiallyWithTimeout("Repair allocation should work with multiple combination of file type & size & nested folders", 10*time.Minute, func(t *test.SystemTest) {
 		fileSize := int64(1024 * 1024 * 500) // 500MB
-		numOfFile := int64(10)
+		numOfFile := int64(30)
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
