@@ -24,6 +24,11 @@ type CSRFToken struct {
 	CSRFToken string `json:"csrf_token"`
 }
 
+type ZboxOwner struct {
+	PhoneNumber string `json:"phone_number"`
+	UserName    string `json:"username"`
+}
+
 type ZboxWallet struct {
 	ClientID    string           `json:"client_id"`
 	WalletId    int              `json:"wallet_id"`
@@ -61,8 +66,8 @@ type ZboxFreeStorageMarkerResponse struct {
 	RecipientPublicKey string `json:"recipient_public_key"`
 }
 type ZboxResourceExist struct {
-	Exist *bool   `json:"exist"`
-	Error *string `json:"error"`
+	Exists bool   `json:"exists"`
+	Field  string `json:"field"`
 }
 
 type ZboxFCMResponse struct {
@@ -93,10 +98,6 @@ type ZboxWalletList struct {
 type ZboxAllocationList struct {
 	WalletName string           `json:"wallet_name"`
 	Allocs     []ZboxAllocation `json:"allocs"`
-}
-
-type ZboxWalletArr []struct {
-	*ZboxWallet
 }
 
 type DexState struct {
@@ -144,14 +145,11 @@ type ZboxGraphChallengesResponse struct {
 type ZboxShareInfo struct {
 	AuthTicket string `json:"auth_ticket"` // FIXME: THIS IS INCONSISTENT WITH THE SPELLING OF "USERNAME"
 	Message    string `json:"message"`
-	FromInfo   string `json:"from_info"`
 	ClientID   string `json:"client_id"`
-	Receiver   string `json:"Receiver"`
+	Receiver   string `json:"receiver_client_id"`
 	LookUpHash string `json:"lookup_hash"`
 	CreatedAt  string `json:"CreatedAt"`
 	UpdatedAt  string `json:"UpdatedAt"`
-	AppType    int    `json:"app_type"`
-	// [FIXME] need string for app type. Sanchit is working o this.
 }
 
 type ZboxShareInfoList struct {
@@ -199,20 +197,17 @@ type ReferralCountOfUser struct {
 	RewardPoints  int64 `json:"reward_points"`
 }
 
-type TopUser struct {
-	Score int64 `json:"score"`
-	Rank  int64 `json:"rank"`
-}
-
-type ReferralLeaderBoard struct {
-	Users []TopUser `json:"users"`
-	Total int64     `json:"total"`
+type TopReferrer struct {
+	ReferrerID   int64  `json:"referrer_id"`
+	Referrer     string `json:"referrer"`
+	ReferrerName string `json:"referrer_name"`
+	Count        int    `json:"count"`
 }
 
 type ReferralRankOfUser struct {
-	UserRank  int64  `json:"rank"`
-	UserScore int64  `json:"score"`
-	UserPhone string `json:"phone"`
+	UserRank   int64 `json:"rank"`
+	UserCount  int64 `json:"count"`
+	ReferrerID int64 `json:"referrer_id"`
 }
 
 type ZboxNft struct {

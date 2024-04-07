@@ -2,10 +2,11 @@ package cli_tests
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"math"
-	"math/rand"
+	"math/big"
 	"os"
 	"path"
 	"path/filepath"
@@ -383,15 +384,15 @@ func checkStats(t *test.SystemTest, remoteFilePath, fname, allocationID string, 
 }
 
 func createDirectoryForTestname(t *test.SystemTest) (fullPath string) {
-	rand.Seed(time.Now().UnixNano())
+	randomBigInt, err := rand.Int(rand.Reader, big.NewInt(int64(dirMaxRand)))
+	require.Nil(t, err)
 
-	// Generate a random number within the range
-	randomNumber := rand.Intn(dirMaxRand) //nolint:gosec
+	randomNumber := int(randomBigInt.Int64())
 
 	// Generate a unique directory name based on the random number and current timestamp
 	dirName := fmt.Sprintf("%s%d_%d", dirPrefix, randomNumber, time.Now().UnixNano())
 
-	fullPath, err := filepath.Abs(dirName)
+	fullPath, err = filepath.Abs(dirName)
 	require.Nil(t, err)
 
 	err = os.MkdirAll(fullPath, os.ModePerm)
