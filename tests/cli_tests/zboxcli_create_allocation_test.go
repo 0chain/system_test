@@ -33,67 +33,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.RunSequentiallyWithTimeout("Create allocation on restricted blobbers should pass with correct auth tickets", 10*time.Minute, func(t *test.SystemTest) {
-		// Update blobber config to make restricted blobbers to true
-		blobber1 := blobbersList[0]
-		blobber2 := blobbersList[1]
-		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id":    blobber1.Id,
-			"is_restricted": "true",
-		}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id":    blobber2.Id,
-			"is_restricted": "true",
-		}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		t.Cleanup(func() {
-			// Reset blobber config to make restricted blobbers to false
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-				"blobber_id":    blobber1.Id,
-				"is_restricted": "false",
-			}))
-			require.Nil(t, err, strings.Join(output, "\n"))
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-				"blobber_id":    blobber2.Id,
-				"is_restricted": "false",
-			}))
-			require.Nil(t, err, strings.Join(output, "\n"))
-		})
-
-		// Setup wallet and create allocation
-		_ = setupWallet(t, configPath)
-
-		options := map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5"}
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
-		require.NotNil(t, err)
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		//require.Equal(t, "missing required 'lock' argument", output[len(output)-1])
-
-		// Retry with auth ticket
-		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "could not get wallet")
-
-		blobber1AuthTicket, err := getBlobberAuthTicket(t, blobber1.Id, blobber1.Url, wallet.ClientID)
-		require.Nil(t, err, "could not get blobber1 auth ticket")
-		blobber2AuthTicket, err := getBlobberAuthTicket(t, blobber2.Id, blobber2.Url, wallet.ClientID)
-		require.Nil(t, err, "could not get blobber2 auth ticket")
-
-		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "2", "lock": "0.5", "preferred_blobbers": blobber1.Id + "," + blobber2.Id, "blobber_auth_tickets": blobber1AuthTicket + "," + blobber2AuthTicket}
-		output, err = createNewAllocation(t, configPath, createParams(options))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
-
-		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-
-		createAllocationTestTeardown(t, allocationID)
-	})
-
-	t.Skip()
-
 	t.RunSequentiallyWithTimeout("Create allocation with invalid blobber auth ticket should fail", 10*time.Minute, func(t *test.SystemTest) {
 		// Update blobber config to make restricted blobbers to true
 		blobber := blobbersList[0]
@@ -535,6 +474,64 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
+	t.RunSequentiallyWithTimeout("Create allocation on restricted blobbers should pass with correct auth tickets", 10*time.Minute, func(t *test.SystemTest) {
+		// Update blobber config to make restricted blobbers to true
+		blobber1 := blobbersList[0]
+		blobber2 := blobbersList[1]
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
+			"blobber_id":    blobber1.Id,
+			"is_restricted": "true",
+		}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
+			"blobber_id":    blobber2.Id,
+			"is_restricted": "true",
+		}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		t.Cleanup(func() {
+			// Reset blobber config to make restricted blobbers to false
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
+				"blobber_id":    blobber1.Id,
+				"is_restricted": "false",
+			}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
+				"blobber_id":    blobber2.Id,
+				"is_restricted": "false",
+			}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		})
+
+		// Setup wallet and create allocation
+		_ = setupWallet(t, configPath)
+
+		options := map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5"}
+		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.NotNil(t, err)
+		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+		//require.Equal(t, "missing required 'lock' argument", output[len(output)-1])
+
+		// Retry with auth ticket
+		wallet, err := getWallet(t, configPath)
+		require.Nil(t, err, "could not get wallet")
+
+		blobber1AuthTicket, err := getBlobberAuthTicket(t, blobber1.Id, blobber1.Url, wallet.ClientID)
+		require.Nil(t, err, "could not get blobber1 auth ticket")
+		blobber2AuthTicket, err := getBlobberAuthTicket(t, blobber2.Id, blobber2.Url, wallet.ClientID)
+		require.Nil(t, err, "could not get blobber2 auth ticket")
+
+		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "2", "lock": "0.5", "preferred_blobbers": blobber1.Id + "," + blobber2.Id, "blobber_auth_tickets": blobber1AuthTicket + "," + blobber2AuthTicket}
+		output, err = createNewAllocation(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
+
+		allocationID, err := getAllocationID(output[0])
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
+
+		createAllocationTestTeardown(t, allocationID)
+	})
 }
 
 func setupWallet(t *test.SystemTest, configPath string) []string {
@@ -628,16 +625,5 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 		return "", common.NewError("500", "Error getting auth ticket from blobber")
 	}
 
-	_ = signatureScheme.SetPrivateKey("2910cd21251d927972a7f652cf09028cf98bdb74f61f427df40b30a39869ca13")
-	_ = signatureScheme.SetPublicKey("f31a17eba7c7a7319c4b6cbfbec559ee7a093e383720b8cc2eae79a66654d52406b78cba6b6fbed219d3d01871605c15f2c35c83e96c0c773c0e8a9135f76618")
-
-	signatureFromBlobber, err := signatureScheme.Sign(hex.EncodeToString([]byte(clientID)))
-	if err != nil {
-		return authTicket, err
-	}
-
-	t.Logf("Blobber auth ticket: %s", authTicket)
-	t.Logf("Blobber signature: %s", signatureFromBlobber)
-
-	return signatureFromBlobber, nil
+	return authTicket, nil
 }
