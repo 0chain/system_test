@@ -75,12 +75,12 @@ func TestCreateAllocation(testSetup *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "could not get wallet")
 
-		blobber1AuthTicket, err := getBlobberAuthTicket(t, "3812b813bdbba23d548442add2e49d24edd1a178ba0e8daf878599270a2be0ae", "https://dev-6.devnet-0chain.net/blobber04", wallet.ClientID)
+		blobber1AuthTicket, err := getBlobberAuthTicket(t, blobber1.Id, blobber1.Url, wallet.ClientID)
 		require.Nil(t, err, "could not get blobber1 auth ticket")
-		//blobber2AuthTicket, err := getBlobberAuthTicket(t, blobber2.Id, blobber2.Url, wallet.ClientID)
-		//require.Nil(t, err, "could not get blobber2 auth ticket")
+		blobber2AuthTicket, err := getBlobberAuthTicket(t, blobber2.Id, blobber2.Url, wallet.ClientID)
+		require.Nil(t, err, "could not get blobber2 auth ticket")
 
-		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "2", "lock": "0.5", "preferred_blobbers": "3812b813bdbba23d548442add2e49d24edd1a178ba0e8daf878599270a2be0ae", "blobber_auth_tickets": blobber1AuthTicket}
+		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "2", "lock": "0.5", "preferred_blobbers": blobber1.Id + "," + blobber2.Id, "blobber_auth_tickets": blobber1AuthTicket + "," + blobber2AuthTicket}
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -595,6 +595,16 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 		return authTicket, err
 	}
 
+	//sigScheme := zcncrypto.NewSignatureScheme("bls0chain")
+	//if err := sigScheme.SetPublicKey(zboxWallet.ClientPublicKey); err != nil {
+	//	return "", err
+	//}
+	//
+	//success, err := sigScheme.Verify(signature, hex.EncodeToString([]byte(zboxWallet.ClientPublicKey)))
+	//if err != nil || !success {
+	//	return "", err
+	//}
+
 	url := blobberUrl + "/v1/auth/generate?client_id=" + clientID
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -611,11 +621,11 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 	var responseMap map[string]string
 	err = json.NewDecoder(resp.Body).Decode(&responseMap)
 	if err != nil {
-		return authTicket, err
+		return "", err
 	}
 	authTicket = responseMap["auth_ticket"]
 	if authTicket == "" {
-		common.NewError("500", "Error getting auth ticket from blobber")
+		return "", common.NewError("500", "Error getting auth ticket from blobber")
 	}
 
 	_ = signatureScheme.SetPrivateKey("2910cd21251d927972a7f652cf09028cf98bdb74f61f427df40b30a39869ca13")
