@@ -38,30 +38,31 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 
 		intialBlobberInfo = blobberList[0]
 
-		t.Cleanup(func() {
-			createWallet(t)
+	})
 
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": intialBlobberInfo.Capacity}))
-			require.Nil(t, err, strings.Join(output, "\n"))
+	t.Cleanup(func() {
+		createWallet(t)
 
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}))
-			require.Nil(t, err, strings.Join(output, "\n"))
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "capacity": intialBlobberInfo.Capacity}))
+		require.Nil(t, err, strings.Join(output, "\n"))
 
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": intialBlobberInfo.StakePoolSettings.MaxNumDelegates}))
-			require.Nil(t, err, strings.Join(output, "\n"))
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
 
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "service_charge": intialBlobberInfo.StakePoolSettings.ServiceCharge}))
-			require.Nil(t, err, strings.Join(output, "\n"))
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "num_delegates": intialBlobberInfo.StakePoolSettings.MaxNumDelegates}))
+		require.Nil(t, err, strings.Join(output, "\n"))
 
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": intToZCN(intialBlobberInfo.Terms.ReadPrice)}))
-			require.Nil(t, err, strings.Join(output, "\n"))
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "service_charge": intialBlobberInfo.StakePoolSettings.ServiceCharge}))
+		require.Nil(t, err, strings.Join(output, "\n"))
 
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": intToZCN(intialBlobberInfo.Terms.WritePrice)}))
-			require.Nil(t, err, strings.Join(output, "\n"))
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "read_price": intToZCN(intialBlobberInfo.Terms.ReadPrice)}))
+		require.Nil(t, err, strings.Join(output, "\n"))
 
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "url": intialBlobberInfo.BaseURL}))
-			require.Nil(t, err, strings.Join(output, "\n"))
-		})
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": intToZCN(intialBlobberInfo.Terms.WritePrice)}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "url": intialBlobberInfo.BaseURL}))
+		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
 	t.RunSequentially("update blobber capacity should work", func(t *test.SystemTest) {
