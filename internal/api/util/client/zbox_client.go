@@ -11,88 +11,62 @@ import (
 )
 
 const (
+	X_APP_USER_ID            = "test_user_ID"
+	X_APP_ID_TOKEN           = "test_firebase_token"
 	X_APP_CLIENT_ID          = "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9"
 	X_APP_CLIENT_KEY         = "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96"
 	X_APP_CLIENT_SIGNATURE   = "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a"
 	X_APP_CLIENT_ID_R        = "3fb9694ebf47b5a51c050025d9c807c3319a05499b1eb980bbb9f1e27e119c9f"
 	X_APP_CLIENT_KEY_R       = "9a8a960db2dd93eb35f26e8f7e84976349064cae3246da23abd575f05e7ed31bd90726cfcc960e017a9246d080f5419ada219d03758c370208c5b688e5ec7a9c"
 	X_APP_CLIENT_SIGNATURE_R = "6b710d015b9e5e4734c08ac2de79ffeeeb49e53571cce8f71f21e375e5eca916"
+	X_APP_TIMESTAMP          = "123456789"
+	X_APP_BLIMP              = "blimp"
+	X_APP_CHIMNEY            = "chimney"
+	X_APP_VULT               = "vult"
+	X_APP_BOLT               = "bolt"
+	X_APP_CHALK              = "chalk"
 )
 
 type ZboxClient struct {
 	BaseHttpClient
-	zboxEntrypoint        string
-	DefaultPhoneNumber    string
-	DefaultMnemonic       string
-	DefaultAllocationId   string
-	DefaultAllocationName string
-	DefaultAuthTicket     string
-	DefaultRecieverId     string
-	DefaultAppType        string
+	zboxEntrypoint string
 }
 
-func NewZboxClient(zboxEntrypoint, defaultPhoneNumber string) *ZboxClient {
+func NewZboxClient(zboxEntrypoint string) *ZboxClient {
 	zboxClient := &ZboxClient{
-		zboxEntrypoint:        zboxEntrypoint,
-		DefaultPhoneNumber:    defaultPhoneNumber,
-		DefaultAllocationName: "DefaultName",
-		DefaultAllocationId:   "7df193bcbe12fc3ef9ff143b7825d9afadc3ce3d7214162f13ffad2510494d41",
-		DefaultMnemonic:       "613ed9fb5b9311f6f22080eb1db69b2e786c990706c160faf1f9bdd324fd909bc640ad6a3a44cb4248ddcd92cc1fabf66a69ac4eb38a102b984b98becb0674db7d69c5727579d5f756bb8c333010866d4d871dae1b7032d6140db897e4349f60f94f1eb14a3b7a14a489226a1f35952472c9b2b13e3698523a8be2dcba91c344f55da17c21c403543d82fe5a32cb0c8133759ab67c31f1405163a2a255ec270b1cca40d9f236e007a3ba8f6be4eaeaad10376c5f224bad45c597d85a3b8b984f46c597f6cf561405bd0b0007ac6833cfff408aeb51c0d2fX",
-		DefaultAuthTicket:     "eyJjbGllbnRfaWQiOiIiLCJvd25lcl9pZCI6IjMxZjc0MGZiMTJjZjcyNDY0NDE5YTdlODYwNTkxMDU4YTI0OGIwMWUzNGIxM2NiZjcxZDVhMTA3YjdiZGMxZTkiLCJhbGxvY2F0aW9uX2lkIjoiZTBjMmNkMmQ1ZmFhYWQxM2ZjNTM3MzNkZDc1OTc0OWYyYjJmMDFhZjQ2MzMyMDA5YzY3ODIyMWEyYzQ4ODE1MyIsImZpbGVfcGF0aF9oYXNoIjoiZTcyNGEyMjAxZTIyNjUzZDMyMTY3ZmNhMWJmMTJiMmU0NGJhYzYzMzdkM2ViZGI3NDI3ZmJhNGVlY2FhNGM5ZCIsImFjdHVhbF9maWxlX2hhc2giOiIxZjExMjA4M2YyNDA1YzM5NWRlNTFiN2YxM2Y5Zjc5NWFhMTQxYzQwZjFkNDdkNzhjODNhNDk5MzBmMmI5YTM0IiwiZmlsZV9uYW1lIjoiSU1HXzQ4NzQuUE5HIiwicmVmZXJlbmNlX3R5cGUiOiJmIiwiZXhwaXJhdGlvbiI6MCwidGltZXN0YW1wIjoxNjY3MjE4MjcwLCJlbmNyeXB0ZWQiOmZhbHNlLCJzaWduYXR1cmUiOiIzMzllNTUyOTliNDhlMjI5ZGRlOTAyZjhjOTY1ZDE1YTk0MGIyNzc3YzVkOTMyN2E0Yzc5MTMxYjhhNzcxZTA3In0=", //nolint:revive
-		DefaultRecieverId:     "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
-		DefaultAppType:        "blimp",
+		zboxEntrypoint: zboxEntrypoint,
 	}
 	zboxClient.HttpClient = resty.New()
 
 	return zboxClient
 }
 
-func (c *ZboxClient) FirebaseSendSms(t *test.SystemTest, firebaseKey, phoneNumber string) (*model.FirebaseSession, *resty.Response, error) {
-	t.Logf("Sending firebase SMS...")
-	var firebaseSession *model.FirebaseSession
-
-	urlBuilder := NewURLBuilder().
-		SetScheme("https").
-		SetHost("identitytoolkit.googleapis.com").
-		SetPath("/v1/accounts:sendVerificationCode").
-		AddParams("key", firebaseKey)
-
-	formData := map[string]string{
-		"phoneNumber": phoneNumber,
-		"appId":       "com.0Chain.0Box",
+func (c *ZboxClient) NewZboxHeaders(csrfToken, appType string) map[string]string {
+	zboxHeaders := map[string]string{
+		"X-App-Client-ID":        X_APP_CLIENT_ID,
+		"X-App-Client-Key":       X_APP_CLIENT_KEY,
+		"X-App-Timestamp":        X_APP_TIMESTAMP,
+		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
+		"X-App-User-ID":          X_APP_USER_ID,
+		"X-CSRF-TOKEN":           csrfToken,
+		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+		"X-APP-TYPE":             appType,
 	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &firebaseSession,
-		FormData:           formData,
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return firebaseSession, resp, err
+	return zboxHeaders
 }
 
-func (c *ZboxClient) FirebaseCreateToken(t *test.SystemTest, firebaseKey, sessionInfo string) (*model.FirebaseToken, *resty.Response, error) {
-	t.Logf("Creating firebase token...")
-	var firebaseToken *model.FirebaseToken
-
-	urlBuilder := NewURLBuilder().
-		SetScheme("https").
-		SetHost("identitytoolkit.googleapis.com").
-		SetPath("/v1/accounts:signInWithPhoneNumber").
-		AddParams("key", firebaseKey)
-
-	formData := map[string]string{
-		"code":        "123456",
-		"sessionInfo": sessionInfo,
+func (c *ZboxClient) NewZboxHeaders_R(csrfToken, appType string) map[string]string {
+	zboxHeaders := map[string]string{
+		"X-App-Client-ID":        X_APP_CLIENT_ID_R,
+		"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
+		"X-App-Timestamp":        X_APP_TIMESTAMP,
+		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
+		"X-App-User-ID":          X_APP_USER_ID,
+		"X-CSRF-TOKEN":           csrfToken,
+		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
+		"X-APP-TYPE":             appType,
 	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &firebaseToken,
-		FormData:           formData,
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return firebaseToken, resp, err
+	return zboxHeaders
 }
 
 func (c *ZboxClient) CreateCSRFToken(t *test.SystemTest, phoneNumber string) (*model.CSRFToken, *resty.Response, error) {
@@ -112,6 +86,77 @@ func (c *ZboxClient) CreateCSRFToken(t *test.SystemTest, phoneNumber string) (*m
 	}, HttpGETMethod)
 
 	return csrfToken, resp, err
+}
+
+func (c *ZboxClient) PostOwner(t *test.SystemTest, headers, owner map[string]string) (*model.OwnerResponse, *resty.Response, error) {
+	t.Logf("Posting owner using 0box...")
+	var zboxOwner *model.OwnerResponse
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/owner")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &zboxOwner,
+		FormData:           owner,
+		Headers:            headers,
+		RequiredStatusCode: 201,
+	}, HttpPOSTMethod)
+	return zboxOwner, resp, err
+}
+
+func (c *ZboxClient) UpdateOwner(t *test.SystemTest, headers, owner map[string]string) (*model.OwnerResponse, *resty.Response, error) {
+	t.Logf("Posting owner using 0box...")
+	var zboxOwner *model.OwnerResponse
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/owner")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &zboxOwner,
+		FormData:           owner,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpPUTMethod)
+	return zboxOwner, resp, err
+}
+
+func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxWallet, *resty.Response, error) {
+	t.Logf("Posting wallet using 0box...")
+	var zboxWallet *model.ZboxWallet
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/wallet")
+
+	formData := map[string]string{
+		"mnemonic":    mnemonic,
+		"name":        walletName,
+		"description": walletDescription,
+		"user_name":   userName,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &zboxWallet,
+		FormData: formData,
+		Headers: map[string]string{
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-Phone-Number":     phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-App-Type":             appType,
+		},
+		RequiredStatusCode: 200,
+	}, HttpPOSTMethod)
+
+	return zboxWallet, resp, err
 }
 
 func (c *ZboxClient) ListWallets(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletList, *resty.Response, error) {
@@ -347,73 +392,6 @@ func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, 
 	}, HttpGETMethod)
 
 	return zboxFundingResponse, resp, err
-}
-
-func (c *ZboxClient) PostOwner(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxOwner, *resty.Response, error) {
-	t.Logf("Posting owner using 0box...")
-	var zboxOwner *model.ZboxOwner
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/owner")
-
-	formData := map[string]string{
-		"username": userName,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxOwner,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-App-Type":             appType,
-		},
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return zboxOwner, resp, err
-}
-
-func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxWallet, *resty.Response, error) {
-	t.Logf("Posting wallet using 0box...")
-	var zboxWallet *model.ZboxWallet
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/wallet")
-
-	formData := map[string]string{
-		"mnemonic":    mnemonic,
-		"name":        walletName,
-		"description": walletDescription,
-		"user_name":   userName,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxWallet,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-App-Type":             appType,
-		},
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return zboxWallet, resp, err
 }
 
 func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocationName, allocationDescription, allocationType, idToken, csrfToken, phoneNumber, appType string) (*model.MessageContainer, *resty.Response, error) {
@@ -2018,38 +1996,6 @@ func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, idToken, pho
 	}, HttpGETMethod)
 
 	return ReferralRankOfUser, resp, err
-}
-
-func (c *ZboxClient) PostOwnerWithReferralCode(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxOwner, *resty.Response, error) {
-	t.Logf("Posting owner using 0box...")
-	var zboxOwner *model.ZboxOwner
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/owner")
-
-	formData := map[string]string{
-		"username": userName,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxOwner,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID_R,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-App-Type":             appType,
-		},
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return zboxOwner, resp, err
 }
 
 func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, userName, refCode string) (*model.ZboxWallet, *resty.Response, error) {

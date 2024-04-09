@@ -8,28 +8,18 @@ import (
 
 const GB = float64(1024 * 1024 * 1024)
 
-type FirebaseSession struct {
-	SessionInfo string `json:"sessionInfo"`
-}
-type FirebaseToken struct {
-	IdToken      string `json:"idToken"`
-	RefreshToken string `json:"refreshToken"`
-	ExpiresIn    string `json:"expiresIn"`
-	LocalId      string `json:"localId"`
-	IsNewUser    bool   `json:"isNewUser"`
-	PhoneNumber  string `json:"phoneNumber"`
-}
-
 type CSRFToken struct {
 	CSRFToken string `json:"csrf_token"`
 }
 
-type ZboxOwner struct {
+type Owner struct {
+	UserID      string `json:"user_id"`
 	PhoneNumber string `json:"phone_number"`
 	UserName    string `json:"username"`
+	Email       string `json:"email"`
 }
 
-type ZboxWallet struct {
+type Wallet struct {
 	ClientID    string           `json:"client_id"`
 	WalletId    int              `json:"wallet_id"`
 	PhoneNumber string           `json:"phone_number"`
