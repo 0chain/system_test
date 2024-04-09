@@ -37,7 +37,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Greater(t, len(blobberList), 0, "blobber list is empty")
 
 		intialBlobberInfo = blobberList[0]
-
 	})
 
 	t.Cleanup(func() {
