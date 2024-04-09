@@ -713,7 +713,7 @@ func (c *APIClient) V1SCRestGetAllocationBlobbers(t *test.SystemTest, scRestGetA
 		SharderServiceProvider)
 
 	scRestGetAllocationBlobbersResponse.Blobbers = blobbers
-	for _ = range *blobbers {
+	for range *blobbers {
 		scRestGetAllocationBlobbersResponse.BlobberAuthTickets = append(scRestGetAllocationBlobbersResponse.BlobberAuthTickets, "")
 	}
 	scRestGetAllocationBlobbersResponse.BlobberRequirements = scRestGetAllocationBlobbersRequest.BlobberRequirements
