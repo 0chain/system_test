@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	X_APP_USER_ID            = "test_user_ID"
-	X_APP_ID_TOKEN           = "test_firebase_token"
+	X_APP_USER_ID            = "test_user_id"
+  X_APP_ID_TOKEN           = "test_firebase_token"
 	X_APP_CLIENT_ID          = "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9"
 	X_APP_CLIENT_KEY         = "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96"
 	X_APP_CLIENT_SIGNATURE   = "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a"
@@ -81,7 +81,7 @@ func (c *ZboxClient) CreateCSRFToken(t *test.SystemTest, phoneNumber string) (*m
 
 	resp, err := c.executeForServiceProvider(t, parsedUrl, model.ExecutionRequest{
 		Dst:                &csrfToken,
-		Headers:            map[string]string{"X-App-Phone-Number": phoneNumber},
+		Headers:            map[string]string{"X-App-User-ID": phoneNumber},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -171,10 +171,10 @@ func (c *ZboxClient) ListWallets(t *test.SystemTest, idToken, csrfToken, phoneNu
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst: &zboxWallets,
 		Headers: map[string]string{
-			"X-App-ID-TOKEN":     idToken,
-			"X-App-Phone-Number": phoneNumber,
-			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "blimp",
+			"X-App-ID-TOKEN": idToken,
+			"X-App-User-ID":  phoneNumber,
+			"X-CSRF-TOKEN":   csrfToken,
+			"X-APP-TYPE":     "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -198,7 +198,7 @@ func (c *ZboxClient) GetDexState(t *test.SystemTest, idToken, csrfToken, phoneNu
 			"X-App-Client-Key":       X_APP_CLIENT_KEY,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-APP-TYPE":             "blimp",
@@ -228,7 +228,7 @@ func (c *ZboxClient) PostDexState(t *test.SystemTest, data map[string]string, id
 			"X-App-Client-Key":       X_APP_CLIENT_KEY,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-APP-TYPE":             "blimp",
@@ -258,7 +258,7 @@ func (c *ZboxClient) PutDexState(t *test.SystemTest, data map[string]string, idT
 			"X-App-Client-Key":       X_APP_CLIENT_KEY,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-APP-TYPE":             "blimp",
@@ -292,7 +292,7 @@ func (c *ZboxClient) GetAllocation(t *test.SystemTest, idToken, csrfToken, phone
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -321,7 +321,7 @@ func (c *ZboxClient) ListAllocation(t *test.SystemTest, idToken, csrfToken, phon
 			"X-App-Client-Key":       X_APP_CLIENT_KEY,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
@@ -356,7 +356,7 @@ func (c *ZboxClient) CreateFreeStorage(t *test.SystemTest, mnemonic, walletName,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Type":             appType,
 		},
@@ -384,7 +384,7 @@ func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, 
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Type":             appType,
 		},
@@ -392,6 +392,73 @@ func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, 
 	}, HttpGETMethod)
 
 	return zboxFundingResponse, resp, err
+}
+
+func (c *ZboxClient) PostOwner(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxOwner, *resty.Response, error) {
+	t.Logf("Posting owner using 0box...")
+	var zboxOwner *model.ZboxOwner
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/owner")
+
+	formData := map[string]string{
+		"username": userName,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &zboxOwner,
+		FormData: formData,
+		Headers: map[string]string{
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-User-ID":          phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-App-Type":             appType,
+		},
+		RequiredStatusCode: 200,
+	}, HttpPOSTMethod)
+
+	return zboxOwner, resp, err
+}
+
+func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxWallet, *resty.Response, error) {
+	t.Logf("Posting wallet using 0box...")
+	var zboxWallet *model.ZboxWallet
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/wallet")
+
+	formData := map[string]string{
+		"mnemonic":    mnemonic,
+		"name":        walletName,
+		"description": walletDescription,
+		"user_name":   userName,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &zboxWallet,
+		FormData: formData,
+		Headers: map[string]string{
+			"X-App-Client-ID":        X_APP_CLIENT_ID,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-User-ID":          phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-App-Type":             appType,
+		},
+		RequiredStatusCode: 200,
+	}, HttpPOSTMethod)
+
+	return zboxWallet, resp, err
 }
 
 func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocationName, allocationDescription, allocationType, idToken, csrfToken, phoneNumber, appType string) (*model.MessageContainer, *resty.Response, error) {
@@ -414,13 +481,13 @@ func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocation
 		Dst:      &message,
 		FormData: formData,
 		Headers: map[string]string{
-			"X-App-Client-ID":    X_APP_CLIENT_ID,
-			"X-App-Client-Key":   X_APP_CLIENT_KEY,
-			"X-App-Timestamp":    "1618213324",
-			"X-App-ID-TOKEN":     idToken,
-			"X-App-Phone-Number": phoneNumber,
-			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         appType,
+			"X-App-Client-ID":  X_APP_CLIENT_ID,
+			"X-App-Client-Key": X_APP_CLIENT_KEY,
+			"X-App-Timestamp":  "1618213324",
+			"X-App-ID-TOKEN":   idToken,
+			"X-App-User-ID":    phoneNumber,
+			"X-CSRF-TOKEN":     csrfToken,
+			"X-APP-TYPE":       appType,
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
@@ -447,13 +514,13 @@ func (c *ZboxClient) UpdateAllocation(t *test.SystemTest, allocationId, allocati
 		Dst:      &message,
 		FormData: formData,
 		Headers: map[string]string{
-			"X-App-Client-ID":    X_APP_CLIENT_ID,
-			"X-App-Client-Key":   X_APP_CLIENT_KEY,
-			"X-App-Timestamp":    "1618213324",
-			"X-App-ID-TOKEN":     idToken,
-			"X-App-Phone-Number": phoneNumber,
-			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "blimp",
+			"X-App-Client-ID":  X_APP_CLIENT_ID,
+			"X-App-Client-Key": X_APP_CLIENT_KEY,
+			"X-App-Timestamp":  "1618213324",
+			"X-App-ID-TOKEN":   idToken,
+			"X-App-User-ID":    phoneNumber,
+			"X-CSRF-TOKEN":     csrfToken,
+			"X-APP-TYPE":       "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPUTMethod)
@@ -477,7 +544,7 @@ func (c *ZboxClient) DeleteOwner(t *test.SystemTest, clientId, clientKey, client
 			"X-App-Client-Signature": clientSignature,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -508,7 +575,7 @@ func (c *ZboxClient) DeleteWalletForNumber(t *test.SystemTest, walletId int, cli
 			"X-App-Client-Signature": clientSignature,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -540,7 +607,7 @@ func (c *ZboxClient) PostUserInfoBiography(t *test.SystemTest, bio, idToken, csr
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -569,7 +636,7 @@ func (c *ZboxClient) PostUserInfoAvatar(t *test.SystemTest, filePath, idToken, c
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -598,7 +665,7 @@ func (c *ZboxClient) PostUserInfoBackgroundImage(t *test.SystemTest, filePath, i
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -632,7 +699,7 @@ func (c *ZboxClient) GetUserInfo(t *test.SystemTest, idToken, csrfToken, phoneNu
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -688,7 +755,7 @@ func (c *ZboxClient) PutUsername(t *test.SystemTest, username, idToken, csrfToke
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -739,7 +806,7 @@ func (c *ZboxClient) GetShareInfo(t *test.SystemTest, idToken, csrfToken, phoneN
 			"X-App-Client-Key":       X_APP_CLIENT_KEY,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
@@ -775,7 +842,7 @@ func (c *ZboxClient) PostShareInfo(t *test.SystemTest, authTicket, shareMessage,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -806,7 +873,7 @@ func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, pho
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -837,7 +904,7 @@ func (c *ZboxClient) GetWalletKeysForNumber(t *test.SystemTest, clientId, client
 			"X-App-Client-Signature": clientSignature,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             appType,
 		},
@@ -871,7 +938,7 @@ func (c *ZboxClient) UpdateWallet(t *test.SystemTest, mnemonic, walletName, wall
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -901,7 +968,7 @@ func (c *ZboxClient) ContactWallet(t *test.SystemTest, reqBody, idToken, csrfTok
 			"X-App-Timestamp":        "1618213324",
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -923,9 +990,9 @@ func (c *ZboxClient) CheckPhoneExists(t *test.SystemTest, csrfToken, phoneNumber
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst: &zboxWalletExists,
 		Headers: map[string]string{
-			"X-App-Phone-Number": phoneNumber,
-			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "blimp",
+			"X-App-User-ID": phoneNumber,
+			"X-CSRF-TOKEN":  csrfToken,
+			"X-APP-TYPE":    "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -949,9 +1016,9 @@ func (c *ZboxClient) CheckWalletExists(t *test.SystemTest, walletName, csrfToken
 		Dst:      &zboxWalletExists,
 		FormData: formData,
 		Headers: map[string]string{
-			"X-App-Phone-Number": phoneNumber,
-			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "blimp",
+			"X-App-User-ID": phoneNumber,
+			"X-CSRF-TOKEN":  csrfToken,
+			"X-APP-TYPE":    "blimp",
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -975,13 +1042,13 @@ func (c *ZboxClient) CreateFCMToken(t *test.SystemTest, idToken, csrfToken, phon
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Body: formData,
 		Headers: map[string]string{
-			"X-App-Client-ID":    X_APP_CLIENT_ID,
-			"X-App-Client-Key":   X_APP_CLIENT_KEY,
-			"X-App-ID-TOKEN":     idToken,
-			"X-App-Phone-Number": phoneNumber,
-			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "blimp",
-			"X-App-Timestamp":    "1618213324",
+			"X-App-Client-ID":  X_APP_CLIENT_ID,
+			"X-App-Client-Key": X_APP_CLIENT_KEY,
+			"X-App-ID-TOKEN":   idToken,
+			"X-App-User-ID":    phoneNumber,
+			"X-CSRF-TOKEN":     csrfToken,
+			"X-APP-TYPE":       "blimp",
+			"X-App-Timestamp":  "1618213324",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
@@ -1023,7 +1090,7 @@ func (c *ZboxClient) CreateNftCollectionId(t *test.SystemTest, idToken, csrfToke
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -1067,7 +1134,7 @@ func (c *ZboxClient) PostNftCollection(t *test.SystemTest, idToken, csrfToken, p
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -1115,7 +1182,7 @@ func (c *ZboxClient) UpdateNftCollection(t *test.SystemTest, idToken, csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -1145,7 +1212,7 @@ func (c *ZboxClient) GetAllNft(t *test.SystemTest, idToken, csrfToken, phoneNumb
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -1177,7 +1244,7 @@ func (c *ZboxClient) GetAllNftByCollectionId(t *test.SystemTest, idToken, csrfTo
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -1209,7 +1276,7 @@ func (c *ZboxClient) GetAllNftByWalletId(t *test.SystemTest, idToken, csrfToken,
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -1236,13 +1303,13 @@ func (c *ZboxClient) UpdateFCMToken(t *test.SystemTest, idToken, csrfToken, phon
 		Dst:  &dest,
 		Body: formData,
 		Headers: map[string]string{
-			"X-App-Client-ID":    X_APP_CLIENT_ID,
-			"X-App-Client-Key":   X_APP_CLIENT_KEY,
-			"X-App-ID-TOKEN":     idToken,
-			"X-App-Phone-Number": phoneNumber,
-			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "blimp",
-			"X-App-Timestamp":    "1618213326",
+			"X-App-Client-ID":  X_APP_CLIENT_ID,
+			"X-App-Client-Key": X_APP_CLIENT_KEY,
+			"X-App-ID-TOKEN":   idToken,
+			"X-App-User-ID":    phoneNumber,
+			"X-CSRF-TOKEN":     csrfToken,
+			"X-APP-TYPE":       "blimp",
+			"X-App-Timestamp":  "1618213326",
 		},
 		RequiredStatusCode: 200,
 	}, HttpPUTMethod)
@@ -1261,13 +1328,13 @@ func (c *ZboxClient) DeleteFCMToken(t *test.SystemTest, idToken, csrfToken, phon
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst: &dest,
 		Headers: map[string]string{
-			"X-App-Client-ID":    X_APP_CLIENT_ID,
-			"X-App-Client-Key":   X_APP_CLIENT_KEY,
-			"X-App-ID-TOKEN":     idToken,
-			"X-App-Phone-Number": phoneNumber,
-			"X-CSRF-TOKEN":       csrfToken,
-			"X-APP-TYPE":         "blimp",
-			"X-App-Timestamp":    "1618213426",
+			"X-App-Client-ID":  X_APP_CLIENT_ID,
+			"X-App-Client-Key": X_APP_CLIENT_KEY,
+			"X-App-ID-TOKEN":   idToken,
+			"X-App-User-ID":    phoneNumber,
+			"X-CSRF-TOKEN":     csrfToken,
+			"X-APP-TYPE":       "blimp",
+			"X-App-Timestamp":  "1618213426",
 		},
 		RequiredStatusCode: 200,
 	}, HttpDELETEMethod)
@@ -1313,7 +1380,7 @@ func (c *ZboxClient) GetAllNftCollectionId(t *test.SystemTest, idToken, csrfToke
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -1344,7 +1411,7 @@ func (c *ZboxClient) GetNftCollectionById(t *test.SystemTest, idToken, csrfToken
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
@@ -1906,13 +1973,13 @@ func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, idToken, pho
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst: &ReferralCodeOfUser,
 		Headers: map[string]string{
-			"X-App-Phone-Number": phoneNumber,
-			"X-APP-TYPE":         "blimp",
-			"X-App-Client-ID":    X_APP_CLIENT_ID,
-			"X-App-Client-Key":   X_APP_CLIENT_KEY,
-			"X-App-Timestamp":    "1618213324",
-			"X-App-ID-TOKEN":     idToken,
-			"X-CSRF-TOKEN":       csrfToken,
+			"X-App-User-ID":    phoneNumber,
+			"X-APP-TYPE":       "blimp",
+			"X-App-Client-ID":  X_APP_CLIENT_ID,
+			"X-App-Client-Key": X_APP_CLIENT_KEY,
+			"X-App-Timestamp":  "1618213324",
+			"X-App-ID-TOKEN":   idToken,
+			"X-CSRF-TOKEN":     csrfToken,
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -1932,13 +1999,13 @@ func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, idToken, ph
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst: &ReferralCountOfUser,
 		Headers: map[string]string{
-			"X-App-Phone-Number": phoneNumber,
-			"X-APP-TYPE":         "blimp",
-			"X-App-Client-ID":    X_APP_CLIENT_ID,
-			"X-App-Client-Key":   X_APP_CLIENT_KEY,
-			"X-App-Timestamp":    "1618213324",
-			"X-App-ID-TOKEN":     idToken,
-			"X-CSRF-TOKEN":       csrfToken,
+			"X-App-User-ID":    phoneNumber,
+			"X-APP-TYPE":       "blimp",
+			"X-App-Client-ID":  X_APP_CLIENT_ID,
+			"X-App-Client-Key": X_APP_CLIENT_KEY,
+			"X-App-Timestamp":  "1618213324",
+			"X-App-ID-TOKEN":   idToken,
+			"X-CSRF-TOKEN":     csrfToken,
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -1958,13 +2025,13 @@ func (c *ZboxClient) GetLeaderBoard(t *test.SystemTest, csrfToken, idToken, phon
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst: &ReferralLeaderBoard,
 		Headers: map[string]string{
-			"X-App-Phone-Number": phoneNumber,
-			"X-APP-TYPE":         "blimp",
-			"X-App-Client-ID":    X_APP_CLIENT_ID,
-			"X-App-Client-Key":   X_APP_CLIENT_KEY,
-			"X-App-Timestamp":    "1618213324",
-			"X-App-ID-TOKEN":     idToken,
-			"X-CSRF-TOKEN":       csrfToken,
+			"X-App-User-ID":    phoneNumber,
+			"X-APP-TYPE":       "blimp",
+			"X-App-Client-ID":  X_APP_CLIENT_ID,
+			"X-App-Client-Key": X_APP_CLIENT_KEY,
+			"X-App-Timestamp":  "1618213324",
+			"X-App-ID-TOKEN":   idToken,
+			"X-CSRF-TOKEN":     csrfToken,
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -1984,18 +2051,50 @@ func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, idToken, pho
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst: &ReferralRankOfUser,
 		Headers: map[string]string{
-			"X-App-Phone-Number": phoneNumber,
-			"X-APP-TYPE":         "blimp",
-			"X-App-Client-ID":    X_APP_CLIENT_ID,
-			"X-App-Client-Key":   X_APP_CLIENT_KEY,
-			"X-App-Timestamp":    "1618213324",
-			"X-App-ID-TOKEN":     idToken,
-			"X-CSRF-TOKEN":       csrfToken,
+			"X-App-User-ID":    phoneNumber,
+			"X-APP-TYPE":       "blimp",
+			"X-App-Client-ID":  X_APP_CLIENT_ID,
+			"X-App-Client-Key": X_APP_CLIENT_KEY,
+			"X-App-Timestamp":  "1618213324",
+			"X-App-ID-TOKEN":   idToken,
+			"X-CSRF-TOKEN":     csrfToken,
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
 	return ReferralRankOfUser, resp, err
+}
+
+func (c *ZboxClient) PostOwnerWithReferralCode(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxOwner, *resty.Response, error) {
+	t.Logf("Posting owner using 0box...")
+	var zboxOwner *model.ZboxOwner
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/owner")
+
+	formData := map[string]string{
+		"username": userName,
+	}
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:      &zboxOwner,
+		FormData: formData,
+		Headers: map[string]string{
+			"X-App-Client-ID":        X_APP_CLIENT_ID_R,
+			"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
+			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-User-ID":          phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-App-Type":             appType,
+		},
+		RequiredStatusCode: 200,
+	}, HttpPOSTMethod)
+
+	return zboxOwner, resp, err
 }
 
 func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, userName, refCode string) (*model.ZboxWallet, *resty.Response, error) {
@@ -2024,7 +2123,7 @@ func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, wa
 			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
 			"X-App-Timestamp":        "1618213324",
 			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
+			"X-App-User-ID":          phoneNumber,
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-App-Type":             appType,
 		},
