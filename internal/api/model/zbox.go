@@ -12,24 +12,42 @@ type CSRFToken struct {
 	CSRFToken string `json:"csrf_token"`
 }
 
-type Owner struct {
+type MessageContainer struct {
+	Message string `json:"message"`
+}
+
+type ZboxOwner struct {
 	UserID      string `json:"user_id"`
 	PhoneNumber string `json:"phone_number"`
 	UserName    string `json:"username"`
 	Email       string `json:"email"`
+	Biography   string `json:"biography"`
 }
 
-type Wallet struct {
-	ClientID    string           `json:"client_id"`
-	WalletId    int              `json:"wallet_id"`
-	PhoneNumber string           `json:"phone_number"`
-	Name        string           `json:"name"`
-	Description string           `json:"description"`
-	Mnemonic    string           `json:"mnemonic"`
-	AppType     []string         `json:"app_type"`
-	Allocation  []ZboxAllocation `json:"allocation"`
-	PublicKey   string           `json:"public_key"`
-	LastUpdate  string           `json:"last_update"`
+type ZboxWallet struct {
+	ClientID    string   `json:"client_id"`
+	WalletId    int      `json:"wallet_id"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Mnemonic    string   `json:"mnemonic"`
+	AppType     []string `json:"app_type"`
+	PublicKey   string   `json:"public_key"`
+	LastUpdate  string   `json:"last_update"`
+}
+
+type ZboxWalletList struct {
+	Message string       `json:"message"`
+	Data    []ZboxWallet `json:"data"`
+}
+
+type ZboxAllocation struct {
+	ID             string `json:"id"`
+	WalletID       int64  `json:"wallet_id"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	AllocationType string `json:"allocation_type"`
+	AppType        string `json:"app_type"`
+	UpdateAt       string `json:"last_update"`
 }
 
 type ZboxFundingResponse struct {
@@ -64,25 +82,6 @@ type ZboxFCMResponse struct {
 	FCMToken   string `json:"fcm_token"`
 	DeviceType string `json:"device_type"`
 	Message    string `json:"message"`
-}
-
-type ZboxAllocation struct {
-	Id             string `json:"id"`
-	WalletId       int    `json:"wallet_id"`
-	Name           string `json:"name"`
-	Description    string `json:"random_description"`
-	AllocationType string `json:"allocation_type"`
-	AppType        string `json:"app_type"`
-	LastUpdate     string `json:"last_update"`
-}
-
-type MessageContainer struct {
-	Message string `json:"message"`
-}
-
-type ZboxWalletList struct {
-	MessageContainer
-	Data []ZboxWallet `json:"data"`
 }
 
 type ZboxAllocationList struct {

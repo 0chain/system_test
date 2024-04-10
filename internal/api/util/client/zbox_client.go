@@ -12,7 +12,7 @@ import (
 
 const (
 	X_APP_USER_ID            = "test_user_id"
-  X_APP_ID_TOKEN           = "test_firebase_token"
+	X_APP_ID_TOKEN           = "test_firebase_token"
 	X_APP_CLIENT_ID          = "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9"
 	X_APP_CLIENT_KEY         = "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96"
 	X_APP_CLIENT_SIGNATURE   = "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a"
@@ -20,6 +20,7 @@ const (
 	X_APP_CLIENT_KEY_R       = "9a8a960db2dd93eb35f26e8f7e84976349064cae3246da23abd575f05e7ed31bd90726cfcc960e017a9246d080f5419ada219d03758c370208c5b688e5ec7a9c"
 	X_APP_CLIENT_SIGNATURE_R = "6b710d015b9e5e4734c08ac2de79ffeeeb49e53571cce8f71f21e375e5eca916"
 	X_APP_TIMESTAMP          = "123456789"
+	X_APP_CSRF               = "test_csrf_token"
 	X_APP_BLIMP              = "blimp"
 	X_APP_CHIMNEY            = "chimney"
 	X_APP_VULT               = "vult"
@@ -41,56 +42,37 @@ func NewZboxClient(zboxEntrypoint string) *ZboxClient {
 	return zboxClient
 }
 
-func (c *ZboxClient) NewZboxHeaders(csrfToken, appType string) map[string]string {
+func (c *ZboxClient) NewZboxHeaders(appType string) map[string]string {
 	zboxHeaders := map[string]string{
 		"X-App-Client-ID":        X_APP_CLIENT_ID,
 		"X-App-Client-Key":       X_APP_CLIENT_KEY,
 		"X-App-Timestamp":        X_APP_TIMESTAMP,
 		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
 		"X-App-User-ID":          X_APP_USER_ID,
-		"X-CSRF-TOKEN":           csrfToken,
+		"X-CSRF-TOKEN":           X_APP_CSRF,
 		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
 		"X-APP-TYPE":             appType,
 	}
 	return zboxHeaders
 }
 
-func (c *ZboxClient) NewZboxHeaders_R(csrfToken, appType string) map[string]string {
+func (c *ZboxClient) NewZboxHeaders_R(appType string) map[string]string {
 	zboxHeaders := map[string]string{
 		"X-App-Client-ID":        X_APP_CLIENT_ID_R,
 		"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
 		"X-App-Timestamp":        X_APP_TIMESTAMP,
 		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
 		"X-App-User-ID":          X_APP_USER_ID,
-		"X-CSRF-TOKEN":           csrfToken,
+		"X-CSRF-TOKEN":           X_APP_CSRF,
 		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
 		"X-APP-TYPE":             appType,
 	}
 	return zboxHeaders
 }
 
-func (c *ZboxClient) CreateCSRFToken(t *test.SystemTest, phoneNumber string) (*model.CSRFToken, *resty.Response, error) {
-	t.Logf("Creating CSRF Token using 0box...")
-	var csrfToken *model.CSRFToken
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/csrftoken")
-	parsedUrl := urlBuilder.String()
-
-	resp, err := c.executeForServiceProvider(t, parsedUrl, model.ExecutionRequest{
-		Dst:                &csrfToken,
-		Headers:            map[string]string{"X-App-User-ID": phoneNumber},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return csrfToken, resp, err
-}
-
-func (c *ZboxClient) PostOwner(t *test.SystemTest, headers, owner map[string]string) (*model.OwnerResponse, *resty.Response, error) {
-	t.Logf("Posting owner using 0box...")
-	var zboxOwner *model.OwnerResponse
+func (c *ZboxClient) CreateOwner(t *test.SystemTest, headers, owner map[string]string) (*model.ZboxOwner, *resty.Response, error) {
+	t.Logf("creating owner for userID [%v] using 0box...", headers["X-App-User-ID"])
+	var zboxOwner *model.ZboxOwner
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -106,9 +88,27 @@ func (c *ZboxClient) PostOwner(t *test.SystemTest, headers, owner map[string]str
 	return zboxOwner, resp, err
 }
 
-func (c *ZboxClient) UpdateOwner(t *test.SystemTest, headers, owner map[string]string) (*model.OwnerResponse, *resty.Response, error) {
-	t.Logf("Posting owner using 0box...")
-	var zboxOwner *model.OwnerResponse
+func (c *ZboxClient) UpdateOwner(t *test.SystemTest, headers, owner map[string]string) (*model.MessageContainer, *resty.Response, error) {
+	t.Logf("updating owner for userID [%v] using 0box...", headers["X-App-User-ID"])
+	var message *model.MessageContainer
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/owner")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &message,
+		FormData:           owner,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpPUTMethod)
+	return message, resp, err
+}
+
+func (c *ZboxClient) GetOwner(t *test.SystemTest, headers map[string]string) (*model.ZboxOwner, *resty.Response, error) {
+	t.Logf("getting owner for userID [%v] using 0box...", headers["X-App-User-ID"])
+	var zboxOwner *model.ZboxOwner
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -117,15 +117,33 @@ func (c *ZboxClient) UpdateOwner(t *test.SystemTest, headers, owner map[string]s
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:                &zboxOwner,
-		FormData:           owner,
 		Headers:            headers,
 		RequiredStatusCode: 200,
-	}, HttpPUTMethod)
+	}, HttpGETMethod)
+
 	return zboxOwner, resp, err
 }
 
-func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxWallet, *resty.Response, error) {
-	t.Logf("Posting wallet using 0box...")
+func (c *ZboxClient) DeleteOwner(t *test.SystemTest, headers map[string]string) (*model.MessageContainer, *resty.Response, error) {
+	t.Logf("deleting owner for userID [%v] using 0box...", headers["X-App-User-ID"])
+	var message *model.MessageContainer
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/owner")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &message,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpDELETEMethod)
+
+	return message, resp, err
+}
+
+func (c *ZboxClient) CreateWallet(t *test.SystemTest, headers, wallet map[string]string) (*model.ZboxWallet, *resty.Response, error) {
+	t.Logf("creating wallet for userID [%v] using 0box...", headers["X-App-User-ID"])
 	var zboxWallet *model.ZboxWallet
 
 	urlBuilder := NewURLBuilder()
@@ -133,35 +151,56 @@ func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, wallet
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/wallet")
 
-	formData := map[string]string{
-		"mnemonic":    mnemonic,
-		"name":        walletName,
-		"description": walletDescription,
-		"user_name":   userName,
-	}
-
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxWallet,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-Phone-Number":     phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-App-Type":             appType,
-		},
-		RequiredStatusCode: 200,
+		Dst:                &zboxWallet,
+		FormData:           wallet,
+		Headers:            headers,
+		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
 
 	return zboxWallet, resp, err
 }
 
-func (c *ZboxClient) ListWallets(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.ZboxWalletList, *resty.Response, error) {
-	t.Logf("Listing all wallets for [%v] using 0box...", phoneNumber)
-	var zboxWallets *model.ZboxWalletList
+func (c *ZboxClient) UpdateWallet(t *test.SystemTest, headers, wallet map[string]string) (*model.MessageContainer, *resty.Response, error) {
+	t.Logf("updating wallet for userID [%v] using 0box...", headers["X-App-User-ID"])
+	var message *model.MessageContainer
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/wallet")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &message,
+		FormData:           wallet,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpPUTMethod)
+
+	return message, resp, err
+}
+
+func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, headers map[string]string) (*model.ZboxWallet, *resty.Response, error) {
+	t.Logf("getting wallet keys for userID [%v] using 0box...", headers["X-App-User-ID"])
+	var zboxWallet *model.ZboxWallet
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/wallet/keys")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &zboxWallet,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return zboxWallet, resp, err
+}
+
+func (c *ZboxClient) GetWalletList(t *test.SystemTest, headers map[string]string) (*model.ZboxWalletList, *resty.Response, error) {
+	t.Logf("getting wallet list for userID [%v] using 0box...", headers["X-App-User-ID"])
+	var res *model.ZboxWalletList
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -169,17 +208,107 @@ func (c *ZboxClient) ListWallets(t *test.SystemTest, idToken, csrfToken, phoneNu
 	urlBuilder.SetPath("/v2/wallet/list")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &zboxWallets,
-		Headers: map[string]string{
-			"X-App-ID-TOKEN": idToken,
-			"X-App-User-ID":  phoneNumber,
-			"X-CSRF-TOKEN":   csrfToken,
-			"X-APP-TYPE":     "blimp",
-		},
+		Dst:                &res,
+		Headers:            headers,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
-	return zboxWallets, resp, err
+	return res, resp, err
+}
+
+func (c *ZboxClient) CreateAllocation(t *test.SystemTest, headers, allocation map[string]string) (model.ZboxAllocation, *resty.Response, error) {
+	t.Logf("Getting allocation for  allocationId [%v] using 0box...", allocation["id"])
+	var zboxAllocation model.ZboxAllocation
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/allocation")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &zboxAllocation,
+		FormData:           allocation,
+		Headers:            headers,
+		RequiredStatusCode: 201,
+	}, HttpPOSTMethod)
+
+	return zboxAllocation, resp, err
+}
+
+func (c *ZboxClient) UpdateAllocation(t *test.SystemTest, headers, allocation map[string]string) (model.ZboxAllocation, *resty.Response, error) {
+	t.Logf("Getting allocation for  allocationId [%v] using 0box...", allocation["id"])
+	var zboxAllocation model.ZboxAllocation
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/allocation")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &zboxAllocation,
+		FormData:           allocation,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpPUTMethod)
+
+	return zboxAllocation, resp, err
+}
+
+func (c *ZboxClient) GetAllocation(t *test.SystemTest, headers map[string]string, allocationID string) (model.ZboxAllocation, *resty.Response, error) {
+	t.Logf("Getting allocation for  allocationId [%v] using 0box...", allocationID)
+	var zboxAllocation model.ZboxAllocation
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/allocation")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst: &zboxAllocation,
+		QueryParams: map[string]string{
+			"id": allocationID,
+		},
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return zboxAllocation, resp, err
+}
+
+func (c *ZboxClient) ListAllocation(t *test.SystemTest, headers map[string]string) ([]model.ZboxAllocation, *resty.Response, error) {
+	t.Logf("Getting allocations for  userID [%v] using 0box...", headers["X-App-User-ID"])
+	var zboxAllocation []model.ZboxAllocation
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/allocation/list")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &zboxAllocation,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return zboxAllocation, resp, err
+}
+
+func (c *ZboxClient) CreateFreeStorage(t *test.SystemTest, headers map[string]string) (*model.ZboxFreeStorage, *resty.Response, error) {
+	t.Logf("Creating FreeStorage using 0box...")
+	var ZboxFreeStorage *model.ZboxFreeStorage
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/freestorage")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &ZboxFreeStorage,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return ZboxFreeStorage, resp, err
 }
 
 func (c *ZboxClient) GetDexState(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.DexState, *resty.Response, error) {
@@ -269,103 +398,6 @@ func (c *ZboxClient) PutDexState(t *test.SystemTest, data map[string]string, idT
 	return dexState, resp, err
 }
 
-func (c *ZboxClient) GetAllocation(t *test.SystemTest, idToken, csrfToken, phoneNumber, allocationId, allocationName string) (model.ZboxAllocation, *resty.Response, error) {
-	t.Logf("Getting allocation for  allocationId [%v] using 0box...", allocationId)
-	var allocation model.ZboxAllocation
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/allocation")
-
-	formData := map[string]string{
-		"id":   allocationId,
-		"name": allocationName,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:         &allocation,
-		QueryParams: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
-		},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return allocation, resp, err
-}
-
-func (c *ZboxClient) ListAllocation(t *test.SystemTest, idToken, csrfToken, phoneNumber string) ([]model.ZboxAllocation, *resty.Response, error) {
-	t.Logf("Listing all allocations for [%v] using 0box...", phoneNumber)
-	var allocWalletList []model.ZboxAllocation
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/allocation/list")
-
-	formData := map[string]string{}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &allocWalletList,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-		},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return allocWalletList, resp, err
-}
-
-func (c *ZboxClient) CreateFreeStorage(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType string) (*model.ZboxFreeStorage, *resty.Response, error) {
-	t.Logf("Creating FreeStorage using 0box...")
-	var ZboxFreeStorage *model.ZboxFreeStorage
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/freestorage")
-
-	formData := map[string]string{
-		"mnemonic":    mnemonic,
-		"name":        walletName,
-		"description": walletDescription,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &ZboxFreeStorage,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-App-Type":             appType,
-		},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return ZboxFreeStorage, resp, err
-}
-
 func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, csrfToken, phoneNumber, appType string) (*model.ZboxFundingResponse, *resty.Response, error) {
 	t.Logf("Checking status of funding using funding id")
 	var zboxFundingResponse *model.ZboxFundingResponse
@@ -392,73 +424,6 @@ func (c *ZboxClient) CheckFundingStatus(t *test.SystemTest, fundingId, idToken, 
 	}, HttpGETMethod)
 
 	return zboxFundingResponse, resp, err
-}
-
-func (c *ZboxClient) PostOwner(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxOwner, *resty.Response, error) {
-	t.Logf("Posting owner using 0box...")
-	var zboxOwner *model.ZboxOwner
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/owner")
-
-	formData := map[string]string{
-		"username": userName,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxOwner,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-App-Type":             appType,
-		},
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return zboxOwner, resp, err
-}
-
-func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxWallet, *resty.Response, error) {
-	t.Logf("Posting wallet using 0box...")
-	var zboxWallet *model.ZboxWallet
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/wallet")
-
-	formData := map[string]string{
-		"mnemonic":    mnemonic,
-		"name":        walletName,
-		"description": walletDescription,
-		"user_name":   userName,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxWallet,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-App-Type":             appType,
-		},
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return zboxWallet, resp, err
 }
 
 func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocationName, allocationDescription, allocationType, idToken, csrfToken, phoneNumber, appType string) (*model.MessageContainer, *resty.Response, error) {
@@ -491,97 +456,6 @@ func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocation
 		},
 		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
-	return message, resp, err
-}
-
-func (c *ZboxClient) UpdateAllocation(t *test.SystemTest, allocationId, allocationName, allocationDescription, allocationType, idToken, csrfToken, phoneNumber string) (*model.MessageContainer, *resty.Response, error) {
-	t.Logf("Posting Allocation using 0box...")
-	var message *model.MessageContainer
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/allocation")
-
-	formData := map[string]string{
-		"name":            allocationName,
-		"id":              allocationId,
-		"description":     allocationDescription,
-		"allocation_type": allocationType,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &message,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":  X_APP_CLIENT_ID,
-			"X-App-Client-Key": X_APP_CLIENT_KEY,
-			"X-App-Timestamp":  "1618213324",
-			"X-App-ID-TOKEN":   idToken,
-			"X-App-User-ID":    phoneNumber,
-			"X-CSRF-TOKEN":     csrfToken,
-			"X-APP-TYPE":       "blimp",
-		},
-		RequiredStatusCode: 200,
-	}, HttpPUTMethod)
-	return message, resp, err
-}
-
-func (c *ZboxClient) DeleteOwner(t *test.SystemTest, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber string) (*model.MessageContainer, *resty.Response, error) {
-	t.Logf("Deleting owner for phone [%v] using 0box...", phoneNumber)
-	var message *model.MessageContainer
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/owner")
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &message,
-		Headers: map[string]string{
-			"X-App-Client-ID":        clientId,
-			"X-App-Client-Key":       clientKey,
-			"X-App-Client-Signature": clientSignature,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
-		},
-		RequiredStatusCode: 200,
-	}, HttpDELETEMethod)
-
-	return message, resp, err
-}
-
-func (c *ZboxClient) DeleteWallet(t *test.SystemTest, walletId int, idToken, csrfToken, phoneNumber string) (*model.MessageContainer, *resty.Response, error) {
-	return c.DeleteWalletForNumber(t, walletId, X_APP_CLIENT_ID, X_APP_CLIENT_KEY, X_APP_CLIENT_SIGNATURE, idToken, csrfToken, phoneNumber)
-}
-
-func (c *ZboxClient) DeleteWalletForNumber(t *test.SystemTest, walletId int, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber string) (*model.MessageContainer, *resty.Response, error) {
-	t.Logf("Deleting wallet id [%v] using 0box...", walletId)
-	var message *model.MessageContainer
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/wallet")
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &message,
-		Headers: map[string]string{
-			"X-App-Client-ID":        clientId,
-			"X-App-Client-Key":       clientKey,
-			"X-App-Client-Signature": clientSignature,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
-		},
-		RequiredStatusCode: 200,
-	}, HttpDELETEMethod)
-
 	return message, resp, err
 }
 
@@ -881,70 +755,6 @@ func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, pho
 	}, HttpDELETEMethod)
 
 	return message, resp, err
-}
-
-func (c *ZboxClient) GetWalletKeys(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType string) (*model.ZboxWallet, *resty.Response, error) {
-	return c.GetWalletKeysForNumber(t, X_APP_CLIENT_ID, X_APP_CLIENT_KEY, X_APP_CLIENT_SIGNATURE, idToken, csrfToken, phoneNumber, appType)
-}
-
-func (c *ZboxClient) GetWalletKeysForNumber(t *test.SystemTest, clientId, clientKey, clientSignature, idToken, csrfToken, phoneNumber, appType string) (*model.ZboxWallet, *resty.Response, error) {
-	t.Logf("Getting wallet keys for [%v] using 0box...", phoneNumber)
-	var zboxWallet *model.ZboxWallet
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/wallet/keys")
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &zboxWallet,
-		Headers: map[string]string{
-			"X-App-Client-ID":        clientId,
-			"X-App-Client-Key":       clientKey,
-			"X-App-Client-Signature": clientSignature,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             appType,
-		},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-	return zboxWallet, resp, err
-}
-
-func (c *ZboxClient) UpdateWallet(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber string) (*model.ZboxWallet, *resty.Response, error) {
-	t.Logf("Updating wallet using 0box...")
-	var zboxWallet *model.ZboxWallet
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/wallet")
-
-	formData := map[string]string{
-		"mnemonic":    mnemonic,
-		"allocation":  "",
-		"name":        walletName,
-		"description": walletDescription,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxWallet,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
-		},
-	}, HttpPUTMethod)
-
-	return zboxWallet, resp, err
 }
 
 func (c *ZboxClient) ContactWallet(t *test.SystemTest, reqBody, idToken, csrfToken, phoneNumber string) (*resty.Response, error) {
