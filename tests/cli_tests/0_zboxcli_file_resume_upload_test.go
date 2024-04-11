@@ -124,7 +124,7 @@ func TestResumeUpload(testSetup *testing.T) {
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		//  asserting output
-		require.Contains(t, output[1], "Error committing to file store")
+		require.Contains(t, output[1], "file_store_error: Error committing to file store. fixed_merkle_root_mismatch:")
 		require.Error(t, err)
 		////asserting error
 		expected := fmt.Sprintf(

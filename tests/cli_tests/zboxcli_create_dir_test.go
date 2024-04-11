@@ -108,7 +108,7 @@ func TestCreateDir(testSetup *testing.T) {
 		require.Len(t, output, 2)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "Directory creation failed")
-		require.Contains(t, aggregatedOutput, "commit_failed")
+		require.Contains(t, aggregatedOutput, "ERROR: value too long for type character varying(100)")
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
