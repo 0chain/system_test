@@ -124,7 +124,7 @@ func TestResumeUpload(testSetup *testing.T) {
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		//  asserting output
-		require.Contains(t, output[1], "Error in file operation: consensus_not_met: Commit failed. Required consensus 3, got 0")
+		require.Contains(t, output[1], "Error committing to file store")
 		require.Error(t, err)
 		////asserting error
 		expected := fmt.Sprintf(
