@@ -12,115 +12,7 @@ import (
 
 
 func TestCompareMPTAndEventsDBData(testSetup *testing.T) { 
-	/*
-	t := test.NewSystemTest(testSetup)
-	createWallet(t)
-	mptBaseURL := ""
 
-	// Blobber 
-	response = baseURL+ SCStateGet
-	urlBuilder := NewURLBuilder().SetPath(SCStateGet)
-
-	scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
-		t,
-		model.SCStateGetRequest{
-			SCAddress: client.FaucetSmartContractAddress,
-			Key:       wallet.Id,
-		},
-		client.HttpOkStatus)
-
-		urlBuilder := NewURLBuilder().
-		SetPath(SCStateGet)
-
-	resp, err := c.executeForAllServiceProviders(
-		t,
-		urlBuilder,
-		&model.ExecutionRequest{
-			FormData: map[string]string{
-				"sc_address": scStateGetRequest.SCAddress,
-				"key":        scStateGetRequest.Key,
-			},
-			Dst:                &scStateGetResponse,
-			RequiredStatusCode: requiredStatusCode,
-		},
-		HttpPOSTMethod,
-		SharderServiceProvider)
-
-	return scStateGetResponse, resp, err
-	
-	http.HandleFunc("/v1/scstate/get", common.WithCORS(common.UserRateLimit(common.ToJSONResponse(c.GetNodeFromSCState))))
-*/
-	/*
-	// Mock MPT server
-    server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		response := `{"key": "value"}` 
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(response))
-    }))
-    defer server.Close()
-
-    resp, err := http.Get(server.URL + "/v1/scstate/get")
-    if err != nil {
-        t.Fatalf("Failed to make request: %v", err)
-    }
-    defer resp.Body.Close()
-
-    body, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        t.Fatalf("Failed to read response: %v", err)
-    }
-
-	// Mock EventsDB server
-
-	dbServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-        switch r.URL.Path {
-        case "/v1/screst/" + ADDRESS + "/getBlobber":
-			w.Header().Set("Content-Type", "application/json")
-			response := `{"key": "value"}` 
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(response))
-        case "/v1/screst/" + ADDRESS + "/get_validator":
-			w.Header().Set("Content-Type", "application/json")
-			response := `{"key": "value"}` 
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(response))
-		case "/v1/screst/" + ADDRESS + "/getblobbers":
-			w.Header().Set("Content-Type", "application/json")
-			response := `{"key": "value"}` 
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(response))      
-        }
-    }))
-    defer dbServer.Close()
-
-    // Fetch blobber list
-    resp, err := http.Get(server.URL + "/v1/screst/" + ADDRESS + "/getblobbers")
-    if err != nil {
-        t.Fatalf("Failed to fetch blobber list: %v", err)
-    }
-    defer resp.Body.Close()
-
-    blobberListBody, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        t.Fatalf("Failed to read blobber list response: %v", err)
-    }
-
-    var blobbers []BlobberData
-    if err := json.Unmarshal(blobberListBody, &blobbers); err != nil {
-        t.Fatalf("Failed to unmarshal blobber list: %v", err)
-    }
-
-    for _, blobber := range blobbers {
-        individualResp, err := http.Get(server.URL + "/v1/screst/" + ADDRESS + "/getBlobber?id=" + blobber.ID)
-        if err != nil {
-            t.Errorf("Failed to fetch data for blobber %s: %v", blobber.ID, err)
-            continue
-        }
-        defer individualResp.Body.Close()
-    }
-*/
 
 	t := test.NewSystemTest(testSetup)
 	createWallet(t)
@@ -128,6 +20,11 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 	sharderBaseUrl := utils.GetSharderUrl(t)
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/blobber_ids")
 
+	// Iterate over each provider type 
+	for _, provider := range []string{"blobber", "sharder", "miner"} 
+	{ 
+		fetchAndLogProviderData(t, sharderBaseUrl, StorageScAddress, provider) 
+	}	
 	// ref code for retrieving blobber individual URLs
 	//sharders := getShardersList(t)
 	//sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
@@ -135,16 +32,77 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 
 	t.Log("URL : ", url)
 
-	resp, err := http.Get(url) //nolint:gosec
+	resp, err := http.Get(url) 
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Failed to read response body: %v", err)
 	}
 
 	responseBody := string(body)
 	t.Log("Response Body: ", responseBody)
 
+	blobberIDs := strings.Split(responseBody, ",")
+
+	for _, blobberID := range blobberIDs {
+
+		url := fmt.Sprintf("%s/blobber/%s", sharderBaseUrl, blobberID)
+		t.Log("Request URL: ", url)
+	
+
+		resp, err := http.Get(url)
+		if err != nil {
+			t.Fatalf("Failed to fetch data for blobber %s: %v", blobberID, err)
+		}
+		defer resp.Body.Close()
+	
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatalf("Failed to read response for blobber %s: %v", blobberID, err)
+		}
+	
+		t.Logf("Response for blobber %s: %s", blobberID, string(body))
+	}
+
 }
 
+func fetchAndLogProviderData(t *testing.T, baseURL, StorageScAddress, providerType string) {
+	// Fetch the list of provider IDs
+	url := fmt.Sprintf("%s/v1/screst/%s/%s_ids", baseURL, StorageScAddress, providerType)
+	resp, err := http.Get(url)
+	if err != nil {
+		t.Fatalf("Failed to fetch %s list: %v", providerType, err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("Failed to read response body for %s list: %v", providerType, err)
+	}
+
+	// Split the response body to get individual provider IDs
+	providerIDs := strings.Split(string(body), ",")
+	for _, id := range providerIDs {
+		fetchAndLogProviderDetails(t, baseURL, providerType, id)
+	}
+}
+
+func fetchAndLogProviderDetails(t *testing.T, baseURL, providerType, id string) {
+	// URL to fetch details for the specific provider
+	detailURL := fmt.Sprintf("%s/%s/%s", baseURL, providerType, id)
+	t.Log("Request URL: ", detailURL)
+
+	resp, err := http.Get(detailURL)
+	if err != nil {
+		t.Fatalf("Failed to fetch data for %s %s: %v", providerType, id, err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("Failed to read response for %s %s: %v", providerType, id, err)
+	}
+
+	t.Logf("Response for %s %s: %s", providerType, id, string(body))
+}	
 
