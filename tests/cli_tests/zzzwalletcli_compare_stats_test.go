@@ -2,33 +2,61 @@ package cli_tests
 
 import (
 	"fmt"
-	"strings"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/require"
-
+	"io"
 	"github.com/0chain/system_test/internal/api/util/test"
-	cliutil "github.com/0chain/system_test/internal/cli/util"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"net/http" 
-	"net/http/httptest" 
-	"testing"
-	"github.com/0chain/0chain/code/go/0chain.net/chaincore/chain"
-	"github.com/0chain/0chain/code/go/0chain.net/smartcontract/rest"
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
+
 )
 
 
 func TestCompareMPTAndEventsDBData(testSetup *testing.T) { 
+	/*
+	t := test.NewSystemTest(testSetup)
+	createWallet(t)
+	mptBaseURL := ""
+
+	// Blobber 
+	response = baseURL+ SCStateGet
+	urlBuilder := NewURLBuilder().SetPath(SCStateGet)
+
+	scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
+		t,
+		model.SCStateGetRequest{
+			SCAddress: client.FaucetSmartContractAddress,
+			Key:       wallet.Id,
+		},
+		client.HttpOkStatus)
+
+		urlBuilder := NewURLBuilder().
+		SetPath(SCStateGet)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			FormData: map[string]string{
+				"sc_address": scStateGetRequest.SCAddress,
+				"key":        scStateGetRequest.Key,
+			},
+			Dst:                &scStateGetResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpPOSTMethod,
+		SharderServiceProvider)
+
+	return scStateGetResponse, resp, err
 	
-	//t := test.NewSystemTest(testSetup)
-	//createWallet(t)
-
-    c := chain.GetServerChain()
-
+	http.HandleFunc("/v1/scstate/get", common.WithCORS(common.UserRateLimit(common.ToJSONResponse(c.GetNodeFromSCState))))
+*/
+	/*
 	// Mock MPT server
     server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        common.WithCORS(common.UserRateLimit(common.ToJSONResponse(c.GetNodeFromSCState)))(w, r)
+		w.Header().Set("Content-Type", "application/json")
+		response := `{"key": "value"}` 
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(response))
     }))
     defer server.Close()
 
@@ -46,14 +74,23 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 	// Mock EventsDB server
 
 	dbServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		srh := NewStorageRestHandler(rh)
+
         switch r.URL.Path {
         case "/v1/screst/" + ADDRESS + "/getBlobber":
-            common.WithCORS(common.UserRateLimit(common.ToJSONResponse(srh.GetBlobber)))(w, r)
+			w.Header().Set("Content-Type", "application/json")
+			response := `{"key": "value"}` 
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(response))
         case "/v1/screst/" + ADDRESS + "/get_validator":
-            common.WithCORS(common.UserRateLimit(common.ToJSONResponse(srh.GetBlobber)))(w, r)
+			w.Header().Set("Content-Type", "application/json")
+			response := `{"key": "value"}` 
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(response))
 		case "/v1/screst/" + ADDRESS + "/getblobbers":
-			common.WithCORS(common.UserRateLimit(common.ToJSONResponse(srh.GetBlobbers)))(w, r)	        
+			w.Header().Set("Content-Type", "application/json")
+			response := `{"key": "value"}` 
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(response))      
         }
     }))
     defer dbServer.Close()
@@ -83,6 +120,30 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
         }
         defer individualResp.Body.Close()
     }
+*/
+
+	t := test.NewSystemTest(testSetup)
+	createWallet(t)
+	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+	sharderBaseUrl := utils.GetSharderUrl(t)
+	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/blobber_ids")
+
+	// ref code for retrieving blobber individual URLs
+	//sharders := getShardersList(t)
+	//sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
+	
+
+	t.Log("URL : ", url)
+
+	resp, err := http.Get(url) //nolint:gosec
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	responseBody := string(body)
+	t.Log("Response Body: ", responseBody)
 
 }
 
