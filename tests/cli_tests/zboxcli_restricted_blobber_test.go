@@ -236,7 +236,6 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		removeBlobber, err := GetRandomBlobber(walletFile, configFile, allocationID, blobberID)
 		require.Nil(t, err)
 
-		setupWallet(t, configPath)
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err)
 
