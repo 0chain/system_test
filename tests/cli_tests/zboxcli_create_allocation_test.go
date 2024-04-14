@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/0chain/common/core/common"
@@ -97,7 +98,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 		allocationID, err := getAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-
 		createAllocationTestTeardown(t, allocationID)
 	})
 
@@ -126,16 +126,14 @@ func TestCreateAllocation(testSetup *testing.T) {
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		//require.Equal(t, "missing required 'lock' argument", output[len(output)-1])
+		require.Contains(t, output[len(output)-1], "not enough to honour the allocation")
 
 		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": blobber.Id, "blobber_auth_tickets": "invalid"}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Contains(t, output[len(output)-1], "invalid blobber auth ticket")
+		require.Contains(t, output[len(output)-1], "not enough to honour the allocation")
 	})
-
-	t.Skip()
 
 	t.Run("Create allocation for locking cost equal to the cost calculated should work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
@@ -597,7 +595,7 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 	_ = signatureScheme.SetPrivateKey("85e2119f494cd40ca524f6342e8bdb7bef2af03fe9a08c8d9c1d9f14d6c64f14")
 	_ = signatureScheme.SetPublicKey(zboxWallet.ClientPublicKey)
 
-	signature, err := signatureScheme.Sign(zboxWallet.ClientPublicKey)
+	signature, err := signatureScheme.Sign(hex.EncodeToString([]byte(zboxWallet.ClientPublicKey)))
 	if err != nil {
 		return authTicket, err
 	}
