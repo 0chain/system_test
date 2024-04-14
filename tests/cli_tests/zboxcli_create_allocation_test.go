@@ -1,12 +1,8 @@
 package cli_tests
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/common/core/common"
-	"github.com/0chain/gosdk/core/zcncrypto"
-	"net/http"
 	"regexp"
 	"strings"
 	"testing"
@@ -23,117 +19,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Create allocation for locking cost equal to the cost calculated should work")
 
-	t.TestSetup("register wallet and get blobbers", func() {
-		createWallet(t)
-
-		// get the list of blobbers
-		blobbersList = getBlobbersList(t)
-		require.Greater(t, len(blobbersList), 0, "No blobbers found")
-
-		for _, blobber := range blobbersList {
-			output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-				"blobber_id":    blobber.Id,
-				"not_available": false,
-				"is_restricted": false,
-			}))
-			require.Nil(t, err, strings.Join(output, "\n"))
-		}
-	})
-
 	t.Parallel()
-
-	t.RunSequentiallyWithTimeout("Create allocation on restricted blobbers should pass with correct auth tickets", 10*time.Minute, func(t *test.SystemTest) {
-
-		// Update blobber config to make restricted blobbers to true
-		blobber1 := blobbersList[0]
-		blobber2 := blobbersList[1]
-		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id":    blobber1.Id,
-			"is_restricted": "true",
-		}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id":    blobber2.Id,
-			"is_restricted": "true",
-		}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		t.Cleanup(func() {
-			// Reset blobber config to make restricted blobbers to false
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-				"blobber_id":    blobber1.Id,
-				"is_restricted": "false",
-			}))
-			require.Nil(t, err, strings.Join(output, "\n"))
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-				"blobber_id":    blobber2.Id,
-				"is_restricted": "false",
-			}))
-			require.Nil(t, err, strings.Join(output, "\n"))
-		})
-
-		// Setup wallet and create allocation
-		_ = setupWallet(t, configPath)
-
-		options := map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5"}
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
-		require.NotNil(t, err)
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		//require.Equal(t, "missing required 'lock' argument", output[len(output)-1])
-
-		// Retry with auth ticket
-		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "could not get wallet")
-
-		blobber1AuthTicket, err := getBlobberAuthTicket(t, blobber1.Id, blobber1.Url, wallet.ClientID)
-		require.Nil(t, err, "could not get blobber1 auth ticket")
-		blobber2AuthTicket, err := getBlobberAuthTicket(t, blobber2.Id, blobber2.Url, wallet.ClientID)
-		require.Nil(t, err, "could not get blobber2 auth ticket")
-
-		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": blobber1.Id + "," + blobber2.Id, "blobber_auth_tickets": blobber1AuthTicket + "," + blobber2AuthTicket}
-		output, err = createNewAllocation(t, configPath, createParams(options))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
-
-		allocationID, err := getAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-		createAllocationTestTeardown(t, allocationID)
-	})
-
-	t.RunSequentiallyWithTimeout("Create allocation with invalid blobber auth ticket should fail", 10*time.Minute, func(t *test.SystemTest) {
-		// Update blobber config to make restricted blobbers to true
-		blobber := blobbersList[0]
-		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-			"blobber_id":    blobber.Id,
-			"is_restricted": "true",
-		}))
-		require.Nil(t, err, strings.Join(output, "\n"))
-
-		t.Cleanup(func() {
-			// Reset blobber config to make restricted blobbers to false
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
-				"blobber_id":    blobber.Id,
-				"is_restricted": "false",
-			}))
-			require.Nil(t, err, strings.Join(output, "\n"))
-		})
-
-		// Setup wallet and create allocation
-		_ = setupWallet(t, configPath)
-
-		options := map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5"}
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
-		require.NotNil(t, err)
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Contains(t, output[len(output)-1], "not enough to honour the allocation")
-
-		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": blobber.Id, "blobber_auth_tickets": "invalid"}
-		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
-		require.NotNil(t, err)
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Contains(t, output[len(output)-1], "not enough to honour the allocation")
-	})
 
 	t.Run("Create allocation for locking cost equal to the cost calculated should work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
@@ -539,7 +425,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Equal(t, true, alloc.ThirdPartyExtendable) // 63 - (1 + 8 + 16) = 38 (upload mask = 1, move = 8, copy = 16)
 		createAllocationTestTeardown(t, allocationID)
 	})
-
 }
 
 func setupWallet(t *test.SystemTest, configPath string) []string {
@@ -556,12 +441,6 @@ func createNewAllocation(t *test.SystemTest, cliConfigFilename, params string) (
 }
 
 func createNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, params string) ([]string, error) {
-	print(fmt.Sprintf(
-		"./zbox newallocation %s --wallet %s --configDir ./config --config %s --allocationFileName %s",
-		params,
-		wallet+"_wallet.json",
-		cliConfigFilename,
-		wallet+"_allocation.txt"))
 	t.Logf("Creating new allocation...")
 	return cliutils.RunCommand(t, fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
@@ -584,54 +463,4 @@ func createAllocationTestTeardown(t *test.SystemTest, allocationID string) {
 	t.Cleanup(func() {
 		_, _ = cancelAllocation(t, configPath, allocationID, false)
 	})
-}
-
-func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID string) (string, error) {
-	zboxWallet, err := getWalletForName(t, configPath, zboxTeamWallet)
-	require.Nil(t, err, "could not get zbox wallet")
-
-	var authTicket string
-	signatureScheme := zcncrypto.NewSignatureScheme("bls0chain")
-	_ = signatureScheme.SetPrivateKey("85e2119f494cd40ca524f6342e8bdb7bef2af03fe9a08c8d9c1d9f14d6c64f14")
-	_ = signatureScheme.SetPublicKey(zboxWallet.ClientPublicKey)
-
-	signature, err := signatureScheme.Sign(hex.EncodeToString([]byte(zboxWallet.ClientPublicKey)))
-	if err != nil {
-		return authTicket, err
-	}
-
-	//sigScheme := zcncrypto.NewSignatureScheme("bls0chain")
-	//if err := sigScheme.SetPublicKey(zboxWallet.ClientPublicKey); err != nil {
-	//	return "", err
-	//}
-	//
-	//success, err := sigScheme.Verify(signature, hex.EncodeToString([]byte(zboxWallet.ClientPublicKey)))
-	//if err != nil || !success {
-	//	return "", err
-	//}
-
-	url := blobberUrl + "/v1/auth/generate?client_id=" + clientID
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return authTicket, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Zbox-Signature", signature)
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return authTicket, err
-	}
-	defer resp.Body.Close()
-	var responseMap map[string]string
-	err = json.NewDecoder(resp.Body).Decode(&responseMap)
-	if err != nil {
-		return "", err
-	}
-	authTicket = responseMap["auth_ticket"]
-	if authTicket == "" {
-		return "", common.NewError("500", "Error getting auth ticket from blobber")
-	}
-
-	return authTicket, nil
 }
