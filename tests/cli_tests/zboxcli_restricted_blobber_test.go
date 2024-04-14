@@ -3,8 +3,6 @@ package cli_tests
 import (
 	"encoding/hex"
 	"encoding/json"
-	"github.com/0chain/common/core/common"
-	"github.com/0chain/gosdk/core/zcncrypto"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,6 +10,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/common/core/common"
+	"github.com/0chain/gosdk/core/zcncrypto"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -51,7 +52,6 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Create allocation on restricted blobbers should pass with correct auth tickets", 10*time.Minute, func(t *test.SystemTest) {
-
 		// Update blobber config to make restricted blobbers to true
 		blobber1 := blobbersList[0]
 		blobber2 := blobbersList[1]
@@ -87,7 +87,6 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		//require.Equal(t, "missing required 'lock' argument", output[len(output)-1])
 
 		// Retry with auth ticket
 		wallet, err := getWallet(t, configPath)
@@ -134,13 +133,13 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Contains(t, output[len(output)-1], "not enough to honour the allocation")
+		require.Contains(t, output[len(output)-1], "not enough to honor the allocation")
 
 		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": blobber.Id, "blobber_auth_tickets": "invalid", "force": "true"}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Contains(t, output[len(output)-1], "not enough to honour the allocation")
+		require.Contains(t, output[len(output)-1], "not enough to honor the allocation")
 	})
 
 	t.RunSequentially("Update allocation with add restricted blobber should succeed", func(t *test.SystemTest) {
@@ -283,7 +282,6 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, fref) // not nil when the file exists
 	})
-
 }
 
 func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID string) (string, error) {
@@ -301,7 +299,7 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 	}
 
 	url := blobberUrl + "/v1/auth/generate?client_id=" + clientID
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, http.NoBody)
 	if err != nil {
 		return authTicket, err
 	}
