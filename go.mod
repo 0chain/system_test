@@ -1,6 +1,6 @@
 module github.com/0chain/system_test
 
-go 1.18
+go 1.21
 
 require (
 	github.com/0chain/errors v1.0.3
