@@ -28,6 +28,15 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		// get the list of blobbers
 		blobbersList = getBlobbersList(t)
 		require.Greater(t, len(blobbersList), 0, "No blobbers found")
+
+		for _, blobber := range blobbersList {
+			output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
+				"blobber_id":    blobber.Id,
+				"not_available": false,
+				"is_restricted": false,
+			}))
+			require.Nil(t, err, strings.Join(output, "\n"))
+		}
 	})
 
 	t.Cleanup(func() {
