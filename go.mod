@@ -42,7 +42,7 @@ require (
 )
 
 require (
-	github.com/0chain/common v0.0.6-0.20230127095721-8df4d1d72565
+	github.com/0chain/common v0.0.6-0.20230127095721-8df4d1d72565 // indirect
 	github.com/Luzifer/go-openssl/v3 v3.1.0 // indirect
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
