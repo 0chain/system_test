@@ -156,7 +156,7 @@ func Test0boxNftCollection(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 
 		collection_name := "collection"
 		zboxNftCollectionId, response, err := zboxClient.CreateNftCollectionId(t,
@@ -309,7 +309,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 
 		collection_name := "collection"
 		collection_id := "collectionId2"
@@ -437,7 +437,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 
 		collection_name := "collection"
 
@@ -605,7 +605,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 
 		_, response, err = zboxClient.PostNftCollection(t,
 			firebaseToken.IdToken,
@@ -677,7 +677,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 
 		collection_name := "collection"
 		collection_id := "collectionId3"
@@ -775,7 +775,7 @@ func Test0boxNft(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 
 		collection_name := "collection"
 		collection_id := "collectionId4"

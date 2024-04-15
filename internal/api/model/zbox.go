@@ -90,6 +90,17 @@ type MessageContainer struct {
 	Message string `json:"message"`
 }
 
+type AllocResponse struct {
+	ID               string  `json:"id"`
+	WalletID         int64   `json:"wallet_id"`
+	Name             *string `json:"name"`
+	Description      *string `json:"description"`
+	AllocationType   string  `json:"allocation_type"`
+	BlobbersReplaced int64   `json:"blobbers_replaced"`
+	AppType          string  `json:"app_type"`
+	UpdateAt         string  `json:"last_update"`
+}
+
 type ZboxWalletList struct {
 	MessageContainer
 	Data []ZboxWallet `json:"data"`

@@ -97,7 +97,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 
 		allocationList, response, err := zboxClient.ListAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber)
 		require.NoError(t, err)
@@ -150,7 +150,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 	})
 
 	t.RunSequentially("Post allocation with correct argument for vult should work", func(t *test.SystemTest) {
@@ -197,7 +197,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 	})
 
 	t.RunSequentially("Post multiple allocation for vult should not work", func(t *test.SystemTest) {
@@ -302,7 +302,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 
 		allocationName = "second allocation"
 		allocationDescription = "second allocation description created as part of " + t.Name()
@@ -320,7 +320,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 	})
 
 	t.RunSequentially("Post multiple allocation for chalk should work", func(t *test.SystemTest) {
@@ -367,7 +367,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 
 		allocationName = "second allocation"
 		allocationDescription = "second allocation description created as part of " + t.Name()
@@ -385,7 +385,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 	})
 
 	t.RunSequentially("Post allocation for chimney should not work", func(t *test.SystemTest) {
@@ -526,7 +526,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 
 		_, response, err = zboxClient.PostAllocation(t,
 			allocationID,
@@ -586,7 +586,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 
 		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, allocationID, allocationName)
 		require.NoError(t, err)
@@ -672,9 +672,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "creating allocation successful", allocationObjCreatedResponse.Message)
+		require.NotEqual(t, "", allocationObjCreatedResponse.ID)
 		updatedAllocationName := "update allocation name"
-		allocationObjCreatedResponse, response, err = zboxClient.UpdateAllocation(t,
+		allocationObjUpdatedResponse, response, err := zboxClient.UpdateAllocation(t,
 			allocationID,
 			updatedAllocationName,
 			allocationDescription,
@@ -686,7 +686,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, "updating allocation successful", allocationObjCreatedResponse.Message)
+		require.Equal(t, "updating allocation successful", allocationObjUpdatedResponse.Message)
 
 		allocation, response, err := zboxClient.GetAllocation(t, firebaseToken.IdToken, csrfToken, zboxClient.DefaultPhoneNumber, allocationID, allocationName)
 		require.NoError(t, err)
