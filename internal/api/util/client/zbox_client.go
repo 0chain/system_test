@@ -417,9 +417,9 @@ func (c *ZboxClient) PostWallet(t *test.SystemTest, mnemonic, walletName, wallet
 	return zboxWallet, resp, err
 }
 
-func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocationName, allocationDescription, allocationType, idToken, csrfToken, phoneNumber, appType string) (*model.MessageContainer, *resty.Response, error) {
+func (c *ZboxClient) PostAllocation(t *test.SystemTest, allocationId, allocationName, allocationDescription, allocationType, idToken, csrfToken, phoneNumber, appType string) (*model.AllocResponse, *resty.Response, error) {
 	t.Logf("Posting Allocation using 0box...")
-	var message *model.MessageContainer
+	var message *model.AllocResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
