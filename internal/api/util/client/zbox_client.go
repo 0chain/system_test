@@ -16,6 +16,7 @@ const (
 	X_APP_CLIENT_ID          = "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9"
 	X_APP_CLIENT_KEY         = "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96"
 	X_APP_CLIENT_SIGNATURE   = "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a"
+	X_APP_USER_ID_R          = "test_user_id_referred_user"
 	X_APP_CLIENT_ID_R        = "3fb9694ebf47b5a51c050025d9c807c3319a05499b1eb980bbb9f1e27e119c9f"
 	X_APP_CLIENT_KEY_R       = "9a8a960db2dd93eb35f26e8f7e84976349064cae3246da23abd575f05e7ed31bd90726cfcc960e017a9246d080f5419ada219d03758c370208c5b688e5ec7a9c"
 	X_APP_CLIENT_SIGNATURE_R = "6b710d015b9e5e4734c08ac2de79ffeeeb49e53571cce8f71f21e375e5eca916"
@@ -62,7 +63,7 @@ func (c *ZboxClient) NewZboxHeaders_R(appType string) map[string]string {
 		"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
 		"X-App-Timestamp":        X_APP_TIMESTAMP,
 		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
-		"X-App-User-ID":          X_APP_USER_ID,
+		"X-App-User-ID":          X_APP_USER_ID_R,
 		"X-CSRF-TOKEN":           X_APP_CSRF,
 		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
 		"X-APP-TYPE":             appType,
@@ -309,6 +310,78 @@ func (c *ZboxClient) CreateFreeStorage(t *test.SystemTest, headers map[string]st
 	}, HttpGETMethod)
 
 	return ZboxFreeStorage, resp, err
+}
+
+func (c *ZboxClient) GetReferralCode(t *test.SystemTest, headers map[string]string) (model.ReferralCodeOfUser, *resty.Response, error) {
+	t.Log("Getting referral code...")
+	var ReferralCodeOfUser model.ReferralCodeOfUser
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/referral/code/")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &ReferralCodeOfUser,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return ReferralCodeOfUser, resp, err
+}
+
+func (c *ZboxClient) GetReferralCount(t *test.SystemTest, headers map[string]string) (model.ReferralCount, *resty.Response, error) {
+	t.Log("Getting referral count...")
+	var ReferralCountOfUser model.ReferralCount
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/referral/count/")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &ReferralCountOfUser,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return ReferralCountOfUser, resp, err
+}
+
+func (c *ZboxClient) GetLeaderBoard(t *test.SystemTest, headers map[string]string) (model.TopReferrerResponse, *resty.Response, error) {
+	t.Logf("getting referral leader board")
+	var topReferrers model.TopReferrerResponse
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/referral/topusers/")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &topReferrers,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return topReferrers, resp, err
+}
+
+func (c *ZboxClient) GetReferralRank(t *test.SystemTest, headers map[string]string) (model.ReferralRankOfUser, *resty.Response, error) {
+	t.Log("Getting referral rank...")
+	var ReferralRankOfUser model.ReferralRankOfUser
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/referral/userrank/")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &ReferralRankOfUser,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return ReferralRankOfUser, resp, err
 }
 
 func (c *ZboxClient) GetDexState(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (*model.DexState, *resty.Response, error) {
@@ -1769,110 +1842,6 @@ func (c *ZboxClient) GetGraphBlobberTotalRewards(t *test.SystemTest, blobberId s
 	}, HttpGETMethod)
 
 	return &data, resp, err
-}
-
-func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralCodeOfUser, *resty.Response, error) {
-	t.Log("Getting referral code...")
-	var ReferralCodeOfUser model.ReferralCodeOfUser
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/referral/code/")
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &ReferralCodeOfUser,
-		Headers: map[string]string{
-			"X-App-User-ID":    phoneNumber,
-			"X-APP-TYPE":       "blimp",
-			"X-App-Client-ID":  X_APP_CLIENT_ID,
-			"X-App-Client-Key": X_APP_CLIENT_KEY,
-			"X-App-Timestamp":  "1618213324",
-			"X-App-ID-TOKEN":   idToken,
-			"X-CSRF-TOKEN":     csrfToken,
-		},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return ReferralCodeOfUser, resp, err
-}
-
-func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralCountOfUser, *resty.Response, error) {
-	t.Log("Getting referral count...")
-	var ReferralCountOfUser model.ReferralCountOfUser
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/referral/count/")
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &ReferralCountOfUser,
-		Headers: map[string]string{
-			"X-App-User-ID":    phoneNumber,
-			"X-APP-TYPE":       "blimp",
-			"X-App-Client-ID":  X_APP_CLIENT_ID,
-			"X-App-Client-Key": X_APP_CLIENT_KEY,
-			"X-App-Timestamp":  "1618213324",
-			"X-App-ID-TOKEN":   idToken,
-			"X-CSRF-TOKEN":     csrfToken,
-		},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return ReferralCountOfUser, resp, err
-}
-
-func (c *ZboxClient) GetLeaderBoard(t *test.SystemTest, csrfToken, idToken, phoneNumber string) ([]model.TopReferrer, *resty.Response, error) {
-	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
-	var ReferralLeaderBoard []model.TopReferrer
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/referral/topusers/")
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &ReferralLeaderBoard,
-		Headers: map[string]string{
-			"X-App-User-ID":    phoneNumber,
-			"X-APP-TYPE":       "blimp",
-			"X-App-Client-ID":  X_APP_CLIENT_ID,
-			"X-App-Client-Key": X_APP_CLIENT_KEY,
-			"X-App-Timestamp":  "1618213324",
-			"X-App-ID-TOKEN":   idToken,
-			"X-CSRF-TOKEN":     csrfToken,
-		},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return ReferralLeaderBoard, resp, err
-}
-
-func (c *ZboxClient) GetReferralRank(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralRankOfUser, *resty.Response, error) {
-	t.Log("Getting referral rank...")
-	var ReferralRankOfUser model.ReferralRankOfUser
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/referral/userrank/")
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &ReferralRankOfUser,
-		Headers: map[string]string{
-			"X-App-User-ID":    phoneNumber,
-			"X-APP-TYPE":       "blimp",
-			"X-App-Client-ID":  X_APP_CLIENT_ID,
-			"X-App-Client-Key": X_APP_CLIENT_KEY,
-			"X-App-Timestamp":  "1618213324",
-			"X-App-ID-TOKEN":   idToken,
-			"X-CSRF-TOKEN":     csrfToken,
-		},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return ReferralRankOfUser, resp, err
 }
 
 func (c *ZboxClient) PostOwnerWithReferralCode(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxOwner, *resty.Response, error) {
