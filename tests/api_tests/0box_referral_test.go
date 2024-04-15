@@ -237,6 +237,6 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 
 		require.Equal(t, 200, responses.StatusCode(), "Failed to get LeaderBoard. Output: [%v]", responses.String())
 		require.NotNil(t, zboxRferral)
-		require.Equal(t, 1, zboxRferrals[0].Count, "User Score should be 1 Initially")
+		require.Equal(t, 1, zboxRferrals.TopUsers[0].Count, "User Score should be 1 Initially")
 	})
 }
