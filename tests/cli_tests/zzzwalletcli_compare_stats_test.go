@@ -1,108 +1,108 @@
 package cli_tests
 
 import (
-	"fmt"
 	"testing"
-	"io"
-	"github.com/0chain/system_test/internal/api/util/test"
-	"net/http" 
-	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 
+	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/internal/api/model"
+	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/config"
+	//"github.com/stretchr/testify/require"
+	//"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 )
 
+var (
+		apiClient *client.APIClient
+)
 
 func TestCompareMPTAndEventsDBData(testSetup *testing.T) { 
 
 
 	t := test.NewSystemTest(testSetup)
-	createWallet(t)
+	wallet := createWallet(t)
 	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
-	sharderBaseUrl := utils.GetSharderUrl(t)
-	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/blobber_ids")
+	//sharderBaseUrl := utils.GetSharderUrl(t)
+	t.Log("Default Config File ",configPath)
 
-	// Iterate over each provider type 
-	for _, provider := range []string{"blobber", "sharder", "miner"} 
-	{ 
-		fetchAndLogProviderData(t, sharderBaseUrl, StorageScAddress, provider) 
-	}	
+	//var scRestShardersResponse *model.SCRestGetMinersShardersResponse
+
+	parsedConfig := config.Parse("./config/"+configPath)
+	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
+
+	/*
+	sharders, resp, err := apiClient.V1SCRestGetAllSharders(t, client.HttpOkStatus)
+
+	require.NoError(t, err, "Failed to fetch sharders")
+	require.Equal(t, 200, resp.StatusCode(), "Expected HTTP status code 200")
+	require.NotEmpty(t, sharders, "Sharders list should not be empty")
+	t.Log(sharders[0].Host)
+*/
+	
+	scStateGetResponse, resp, err = fetchMPTdata(testSetup, wallet, StorageScAddress)
+
+	t.RunSequentially("Compare data in MPT with events DB for blobbers", func(t *test.SystemTest) {
+
+		// Blobbers
+		for _, blobber := range apiClient.HealthyServiceProviders.Blobbers  { 
+			t.Logf("Blobber : %s", blobber)
+			fetchAndCompareProviderData(testSetup, blobber, "blobber") 
+		}			
+
+	})
+
+	t.RunSequentially("Compare data in MPT with events DB for Sharders", func(t *test.SystemTest) {
+
+		// Sharders
+		for _, sharder := range apiClient.HealthyServiceProviders.Sharders  { 
+			t.Logf("sharder : %s", sharder)
+			fetchAndCompareProviderData(testSetup, sharder, "sharder", client.GetSharders) 
+		}		
+
+	})	
+
+	t.RunSequentially("Compare data in MPT with events DB for Miners", func(t *test.SystemTest) {
+		
+		// Miners
+		for _, miner := range apiClient.HealthyServiceProviders.Miners  { 
+			t.Logf("miner : %s", miner)
+			fetchAndCompareProviderData(testSetup, miner, StorageScAddress, "miner", client.GetMiners) 
+		}			
+
+	})	
+
+	//url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + StorageScAddress + "/blobber_ids")
+
+
+
 	// ref code for retrieving blobber individual URLs
 	//sharders := getShardersList(t)
 	//sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
-	
-
-	t.Log("URL : ", url)
-
-	resp, err := http.Get(url) 
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("Failed to read response body: %v", err)
-	}
-
-	responseBody := string(body)
-	t.Log("Response Body: ", responseBody)
-
-	blobberIDs := strings.Split(responseBody, ",")
-
-	for _, blobberID := range blobberIDs {
-
-		url := fmt.Sprintf("%s/blobber/%s", sharderBaseUrl, blobberID)
-		t.Log("Request URL: ", url)
-	
-
-		resp, err := http.Get(url)
-		if err != nil {
-			t.Fatalf("Failed to fetch data for blobber %s: %v", blobberID, err)
-		}
-		defer resp.Body.Close()
-	
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			t.Fatalf("Failed to read response for blobber %s: %v", blobberID, err)
-		}
-	
-		t.Logf("Response for blobber %s: %s", blobberID, string(body))
-	}
 
 }
 
-func fetchAndLogProviderData(t *testing.T, baseURL, StorageScAddress, providerType string) {
-	// Fetch the list of provider IDs
-	url := fmt.Sprintf("%s/v1/screst/%s/%s_ids", baseURL, StorageScAddress, providerType)
-	resp, err := http.Get(url)
-	if err != nil {
-		t.Fatalf("Failed to fetch %s list: %v", providerType, err)
-	}
-	defer resp.Body.Close()
+func fetchAndCompareProviderData(t *testing.T, block, provider, providerType string) {
+	t.Logf("Fetch state of provider : %s ", providerType)
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("Failed to read response body for %s list: %v", providerType, err)
-	}
-
-	// Split the response body to get individual provider IDs
-	providerIDs := strings.Split(string(body), ",")
-	for _, id := range providerIDs {
-		fetchAndLogProviderDetails(t, baseURL, providerType, id)
+	if(providerType == "blobber") {
+		var scRestGetBlobbersResponse *model.SCRestGetBlobbersResponse
+		scRestGetBlobbersResponse = provider
 	}
 }
+	
 
-func fetchAndLogProviderDetails(t *testing.T, baseURL, providerType, id string) {
-	// URL to fetch details for the specific provider
-	detailURL := fmt.Sprintf("%s/%s/%s", baseURL, providerType, id)
-	t.Log("Request URL: ", detailURL)
+func fetchMPTdata(t *testing.T, wallet, StorageScAddress string) {
 
-	resp, err := http.Get(detailURL)
-	if err != nil {
-		t.Fatalf("Failed to fetch data for %s %s: %v", providerType, id, err)
-	}
-	defer resp.Body.Close()
+	scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
+		t,
+		model.SCStateGetRequest{
+			SCAddress: client.StorageSmartContractAddress,
+			Key:       wallet.Id,
+		},
+		client.HttpOkStatus)
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("Failed to read response for %s %s: %v", providerType, id, err)
-	}
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, scStateGetResponse)	
 
-	t.Logf("Response for %s %s: %s", providerType, id, string(body))
-}	
-
+	return 	scStateGetResponse, resp, err
+}
