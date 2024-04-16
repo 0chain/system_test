@@ -360,7 +360,8 @@ func (c *ZboxClient) PostOwner(t *test.SystemTest, idToken, csrfToken, phoneNumb
 	urlBuilder.SetPath("/v2/owner")
 
 	formData := map[string]string{
-		"username": userName,
+		"username":     userName,
+		"phone_number": phoneNumber,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -949,6 +950,9 @@ func (c *ZboxClient) CheckPhoneExists(t *test.SystemTest, csrfToken, phoneNumber
 			"X-App-User-ID": phoneNumber,
 			"X-CSRF-TOKEN":  csrfToken,
 			"X-APP-TYPE":    "blimp",
+		},
+		QueryParams: map[string]string{
+			"phone_number": phoneNumber,
 		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
@@ -1943,9 +1947,9 @@ func (c *ZboxClient) GetReferralCode(t *test.SystemTest, csrfToken, idToken, pho
 	return ReferralCodeOfUser, resp, err
 }
 
-func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralCountOfUser, *resty.Response, error) {
+func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.ReferralCount, *resty.Response, error) {
 	t.Log("Getting referral count...")
-	var ReferralCountOfUser model.ReferralCountOfUser
+	var ReferralCountOfUser model.ReferralCount
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -1969,9 +1973,9 @@ func (c *ZboxClient) GetReferralCount(t *test.SystemTest, csrfToken, idToken, ph
 	return ReferralCountOfUser, resp, err
 }
 
-func (c *ZboxClient) GetLeaderBoard(t *test.SystemTest, csrfToken, idToken, phoneNumber string) ([]model.TopReferrer, *resty.Response, error) {
+func (c *ZboxClient) GetLeaderBoard(t *test.SystemTest, csrfToken, idToken, phoneNumber string) (model.TopReferrerResponse, *resty.Response, error) {
 	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
-	var ReferralLeaderBoard []model.TopReferrer
+	var ReferralLeaderBoard model.TopReferrerResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)

@@ -198,21 +198,25 @@ type ZboxNftCollectionList struct {
 }
 
 type ReferralCodeOfUser struct {
-	ReferrerCode  string `json:"referral_code"`
-	ReferrerLink  string `json:"referral_link"`
-	ReferrerPhone string `json:"referer_mail"`
+	ReferrerCode string `json:"referral_code"`
+	ReferrerLink string `json:"referral_link"`
 }
 
-type ReferralCountOfUser struct {
-	ReferralCount int64 `json:"referral_count"`
-	RewardPoints  int64 `json:"reward_points"`
+type ReferralCount struct {
+	ReferralCount int64  `json:"referral_count"`
+	RewardPoints  int64  `json:"reward_points"`
+	TotalRewards  uint64 `json:"total_rewards"`
 }
 
 type TopReferrer struct {
-	ReferrerID   int64  `json:"referrer_id"`
 	Referrer     string `json:"referrer"`
 	ReferrerName string `json:"referrer_name"`
 	Count        int    `json:"count"`
+	Avatar       []byte `json:"avatar"`
+}
+
+type TopReferrerResponse struct {
+	TopUsers []TopReferrer `json:"top_users"`
 }
 
 type ReferralRankOfUser struct {
