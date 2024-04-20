@@ -20,8 +20,8 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 
 
 	t := test.NewSystemTest(testSetup)
-	wallet := createWallet(t)
-	//StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+	createWallet(t)
+	StorageScAddress := "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 	//sharderBaseUrl := utils.GetSharderUrl(t)
 	t.Log("Default Config File ",configPath)
 
@@ -39,8 +39,8 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 	t.Log(sharders[0].Host)
 */
 	//var resp *model.SCRestGetBlobbersResponse
-	resp := fetchMPTdata(testSetup, wallet, StorageScAddress)
-	t.Log(resp)
+	scStateGetResponse, resp, err := fetchMPTdata(testSetup, StorageScAddress)
+	t.Log(scStateGetResponse)
 
 	t.RunSequentially("Compare data in MPT with events DB for blobbers", func(t *test.SystemTest) {
 
@@ -96,12 +96,12 @@ func fetchAndCompareProviderData(t *testing.T, block, provider , providerType st
 }
 	
 
-func fetchMPTdata(testSetup *test.SystemTest, wallet, StorageScAddress string) (*model.SCStateGetResponse, *resty.Response, error){
+func fetchMPTdata(testSetup *test.SystemTest, StorageScAddress string) (*model.SCStateGetResponse, *resty.Response, error){
 
 	scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(testSetup,
 		model.SCStateGetRequest{
 			SCAddress: client.StorageSmartContractAddress,
-			Key:       wallet,
+			Key:       walletIdx,
 		},
 		client.HttpOkStatus)
 
