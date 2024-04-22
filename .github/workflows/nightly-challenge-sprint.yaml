@@ -7,10 +7,6 @@ on:
     # Runs every morning at 2am UTC
     - cron: '0 2 * * *'
   workflow_dispatch:
-    repo_snapshots_branch:
-      description: 'branch of repo-snapshots to derive images and branches from.'
-      default: 'current-sprint'
-      required: true
 
 jobs:
   system-tests:
@@ -22,7 +18,7 @@ jobs:
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
           echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo 'current-sprint') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
 
       - name: 'Setup jq'
         uses: dcarbone/install-jq-action@v2.1.0
