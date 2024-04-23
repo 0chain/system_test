@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"strings"
 	"encoding/json"
+	"bytes"
 
 	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/0chain/system_test/internal/api/model"
+	//"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/stretchr/testify/require"
@@ -21,6 +22,8 @@ var (
 		apiClient *client.APIClient
 		
 )
+
+type customDataMap map[string]interface{}
 
 func TestCompareMPTAndEventsDBData(testSetup *testing.T) { 
 
@@ -44,7 +47,7 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			continue
 		}
 	
-		// Extract the last segment from the URL path as the blobber ID
+		// Extract the last segment from the URL path as the blobber name
 		segments := strings.Split(parsedURL.Path, "/")
 		sharderID := segments[len(segments)-1]
 		sharderBaseURLs[sharderID] = sharderURL
@@ -65,7 +68,7 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			continue
 		}
 	
-		// Extract the last segment from the URL path as the blobber ID
+		// Extract the last segment from the URL path as the blobber name
 		segments := strings.Split(parsedURL.Path, "/")
 		minerID := segments[len(segments)-1]
 		minerBaseURLs[minerID] = minerURL
@@ -96,12 +99,10 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 
 	}
 
-	// Test Case for Blobber 
+	// I - Test Case for Blobber 
 	t.RunSequentially("Compare data in MPT with events DB for blobbers", func(t *test.SystemTest) {
 
-
-
-		// Fetch Blobbers from Events DB
+		// Fetch all blobbers from Events DB via "/v1/screst/:sc_address/getblobbers" endpoint
 		blobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 
 		require.NoError(t, err, "Failed to fetch blobbers")
@@ -120,17 +121,35 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			require.NoError(t, err, "Failed to fetch data from blobber")
 			require.NotNil(t, response, "Response from blobber should not be nil")
 
-			var dataMap map[string]interface{}
-			err = json.Unmarshal(response.Body(), &dataMap)
-			require.NoError(t, err, "Failed to unmarshal response into map")
+			//var blobberMPT model.SCRestGetBlobberResponse
+			//err = json.Unmarshal([]byte(response.Body()), &blobberMPT)
+			//var dataMap map[string]interface{}
+			//err = json.Unmarshal(response.Body(), &dataMap)
+			//require.NoError(t, err, "Failed to unmarshal response into map")
+
+			var dataMap customDataMap
+			// Unmarshal using the custom unmarshal logic.
+			if err := json.Unmarshal([]byte(response.Body()), &dataMap); err != nil {
+				t.Logf("Error unmarshalling JSON: %s", err)
+			}
+
+			t.Logf("*** Blobber Response Body from MPT datastructure ***")
+			//t.Log(blobberMPT)
 			t.Log(dataMap)
+			t.Log(dataMap)
+			t.Logf("***")
 
+			providerMap, ok  := dataMap["Provider"].(map[string]interface{})
+			if ok {
+				t.Log("Retrieved provider node from MPT")
+			}
 
-			//require.Equal(t, blobber.ID, dataMap["Provider"]["ID"], "Blobber ID does not match")
-			require.Equal(t, blobber.BaseURL, dataMap["BaseURL"], "Blobber BaseURL does not match")
-			//require.Equal(t, blobber.Capacity, dataMap["Capacity"], "Blobber Capacity does not match")
-			require.Equal(t, float64(blobber.Allocated), dataMap["Allocated"].(float64), "Blobber Allocated does not match")
-			//require.Equal(t, blobber.LastHealthCheck, dataMap["Provider"]["LastHealthCheck"], "Blobber LastHealthCheck does not match")
+			require.Equal(t, blobber.ID, providerMap["ID"], "Blobber ID does not match")
+			require.Equal(t, blobber.BaseURL, dataMap.GetString("BaseURL"), "Blobber BaseURL does not match")
+			require.Equal(t, blobber.Capacity, dataMap.GetInt64("Capacity"), "Blobber Capacity does not match")
+			require.Equal(t, blobber.Allocated, dataMap.GetInt64("Allocated"), "Blobber Allocated does not match")
+			//require.Equal(t, blobber.LastHealthCheck, providerMap["LastHealthCheck"].(int64), "Blobber LastHealthCheck does not match")
+			require.Equal(t, blobber.PublicKey, dataMap.GetString("PublicKey"), "Blobber PublicKey does not match")
 			//require.Equal(t, blobber.TotalStake, dataMap["TotalStake"], "Blobber TotalStake does not match")
 			//require.Equal(t, blobber.SavedData, dataMap["SavedData"], "Blobber SavedData does not match")
 			//require.Equal(t, blobber.ReadData, dataMap["ReadData"], "Blobber ReadData does not match")
@@ -143,7 +162,7 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 		
 	})
 
-	//  Test Case for Sharders 
+	//  II - Test Case for Sharders 
 	t.RunSequentially("Compare data in MPT with events DB for Sharders", func(t *test.SystemTest) {
 		sharders, resp, err := apiClient.V1SCRestGetAllSharders(t, client.HttpOkStatus)
 		require.NoError(t, err, "Failed to fetch sharders")
@@ -154,12 +173,33 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			sharderURL := fmt.Sprintf("%s%s?key=provider:%s", apiClient.HealthyServiceProviders.Sharders[0], client.SCStateGet, sharder.ID)
 			response, err := apiClient.HttpClient.R().Get(sharderURL)
 			require.NoError(t, err, "Failed to fetch data for sharder from MPT "+sharder.ID)
+			t.Log(sharder)
 
-			var dataMap map[string]interface{}
-			err = json.Unmarshal(response.Body(), &dataMap)
-			require.NoError(t, err, "Failed to unmarshal response into map")
+			var dataMap customDataMap
+			// Unmarshal using the custom unmarshal logic.
+			if err := json.Unmarshal([]byte(response.Body()), &dataMap); err != nil {
+				t.Logf("Error unmarshalling JSON: %s", err)
+			}
 			t.Log(dataMap)
+			simpleNodeMap, ok  := dataMap["SimpleNode"].(map[string]interface{})
+			if ok {
+				t.Log("Retrieved simple node from MPT")
+			}
+			
 
+		
+			require.Equal(t, sharder.BuildTag, simpleNodeMap["BuildTag"], "Blobber ID does not match")
+			require.Equal(t, sharder.Host, simpleNodeMap["Host"], "Blobber BaseURL does not match")
+			require.Equal(t, sharder.LastHealthCheck,  simpleNodeMap["LastHealthCheck"].(int64), "Blobber Capacity does not match")
+			require.Equal(t, sharder.LastSettingUpdateRound, simpleNodeMap["LastSettingUpdateRound"].(int64), "Blobber Allocated does not match")
+			//require.Equal(t, sharder.LastHealthCheck, lastHealthCheck, "Blobber LastHealthCheck does not match")
+			//require.Equal(t, blobber.TotalStake, dataMap["TotalStake"], "Blobber TotalStake does not match")
+			//require.Equal(t, blobber.SavedData, dataMap["SavedData"], "Blobber SavedData does not match")
+			//require.Equal(t, blobber.ReadData, dataMap["ReadData"], "Blobber ReadData does not match")
+			//require.Equal(t, blobber.ChallengesPassed, dataMap["ChallengesPassed"], "Blobber ChallengesPassed does not match")
+			//require.Equal(t, blobber.ChallengesCompleted, dataMap["ChallengesCompleted"], "Blobber ChallengesCompleted does not match")
+	
+				
 			
 		}
 	})
@@ -176,8 +216,8 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			response, err := apiClient.HttpClient.R().Get(minerURL)
 			require.NoError(t, err, "Failed to fetch data for miner "+miner.ID)
 
-			var minerData model.SCRestGetMinerSharderResponse
-			err = json.Unmarshal(response.Body(), &minerData)
+			var dataMap map[string]interface{}
+			err = json.Unmarshal(response.Body(), &dataMap)
 			require.NoError(t, err, "Failed to unmarshal response for miner "+miner.ID)
 
 			
@@ -186,4 +226,70 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 
 
 
+}
+
+
+func (cdm *customDataMap) UnmarshalJSON(data []byte) error {
+    
+    temp := map[string]interface{}{}
+
+    dec := json.NewDecoder(bytes.NewReader(data))
+    dec.UseNumber() 
+    
+    if err := dec.Decode(&temp); err != nil {
+        return err
+    }
+
+    // Convert json.Number into int64 or float64 where necessary.
+    for key, value := range temp {
+        switch v := value.(type) {
+        case json.Number:
+            if i, err := v.Int64(); err == nil {
+                temp[key] = i
+            } else if f, err := v.Float64(); err == nil { 
+                temp[key] = f
+            }
+        }
+    }
+
+    *cdm = temp
+    return nil
+}
+
+
+func (cdm customDataMap) GetString(key string) string {
+    if val, ok := cdm[key]; ok {
+        if str, ok := val.(string); ok {
+            return str
+        }
+    }
+    return ""
+}
+
+func (cdm customDataMap) GetInt64(key string) int64 {
+    if val, ok := cdm[key]; ok {
+        switch v := val.(type) {
+        case int64:
+            return v
+        case json.Number:
+            if i, err := v.Int64(); err == nil {
+                return i
+            }
+        }
+    }
+    return 0
+}
+
+func (cdm customDataMap) GetFloat64(key string) float64 {
+    if val, ok := cdm[key]; ok {
+        switch v := val.(type) {
+        case float64:
+            return v
+        case json.Number:
+            if f, err := v.Float64(); err == nil {
+                return f
+            }
+        }
+    }
+    return 0.0
 }
