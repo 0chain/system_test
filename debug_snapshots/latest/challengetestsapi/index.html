@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain System test suite: Challenge API tests [debug_snapshots/d3999844] ran against [dev-8.devnet-0chain.net] at [2024-04-24_22.14.15]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain System test suite: Challenge API tests [debug_snapshots/d3999844] ran against [dev-8.devnet-0chain.net] at [2024-04-24_22.14.15]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>5</strong>Duration: <strong>3ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>5</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">April 24, 2024 23:52:20</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallengeTimings","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":26.51,"Output":["","    api_client.go:1292: Get wallet balance...\n","0box-sdk: [DEBUG]  2024/04/24 23:05:50.514044 networkworker.go:119: Get network result:{\"miners\":[\"https://dev-8.devnet-0chain.net/miner02\",\"https://dev-8.devnet-0chain.net/miner01\",\"https://dev-8.devnet-0chain.net/miner03\"],\"sharders\":[\"https://dev-8.devnet-0chain.net/sharder01\",\"https://dev-8.devnet-0chain.net/sharder02\"]}\n","    system_test_framework.go:70: Test setup [Setup] scheduled at [04-24-2024 23:05:50] \n","    system_test_framework.go:80: Test setup [Setup] start at [04-24-2024 23:05:50] \n","    api_client.go:1480: Create stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1480: Create stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1480: Create stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1480: Create stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1480: Create stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1480: Create stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1226: Get allocation blobbers...\n","    api_client.go:871: Create allocation...\n","    wait.go:24: Wait condition has succeed\n","    sdk.go:253: fileMeta { /tmp/159730726   1048576 0  159730726 /159730726}\n","0box-sdk: [INFO]   2024/04/24 23:06:04.926269 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber06 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:06:04.926678 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber03 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:06:04.926761 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber01 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:06:04.929116 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber05 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:06:04.929337 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber02 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:06:04.931899 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber04 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:06:04.934656 multi_operation_worker.go:162: MultiOperation Process start\n","0box-sdk: [INFO]   2024/04/24 23:06:04.974478 upload_worker.go:60: UploadOperation Success{name 15 0 159730726 \u003cnil\u003e}\n","0box-sdk: [INFO]   2024/04/24 23:06:04.974505 multi_operation_worker.go:225: Trying to lock write marker.....\n","0box-sdk: [INFO]   2024/04/24 23:06:04.976354 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber05ayHztoCuqsyN2mraVkZrD locked\n","0box-sdk: [INFO]   2024/04/24 23:06:04.978028 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber04ayHztoCuqsyN2mraVkZrD locked\n","0box-sdk: [INFO]   2024/04/24 23:06:04.978117 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber02ayHztoCuqsyN2mraVkZrD locked\n","0box-sdk: [INFO]   2024/04/24 23:06:04.978105 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber06ayHztoCuqsyN2mraVkZrD locked\n","0box-sdk: [INFO]   2024/04/24 23:06:04.978128 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber03ayHztoCuqsyN2mraVkZrD locked\n","0box-sdk: [INFO]   2024/04/24 23:06:04.978313 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber01ayHztoCuqsyN2mraVkZrD locked\n","0box-sdk: [INFO]   2024/04/24 23:06:04.978327 multi_operation_worker.go:235: [writemarkerLocked]3\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980320 multi_operation_worker.go:292: [checkAllocStatus]1\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980337 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980349 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980355 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber01\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980360 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber02\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980369 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber06\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980374 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber04\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980386 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980389 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980402 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980410 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980414 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:06:04.980430 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:06:04.984561 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:06:04.984703 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber04\n","0box-sdk: [INFO]   2024/04/24 23:06:04.984717 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:06:04.984926 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber02\n","0box-sdk: [INFO]   2024/04/24 23:06:04.985283 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber06\n","0box-sdk: [INFO]   2024/04/24 23:06:04.985359 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber01\n","0box-sdk: [INFO]   2024/04/24 23:06:04.992449 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber04 committed\n","0box-sdk: [INFO]   2024/04/24 23:06:04.992469 commitworker.go:213: [commitBlobber]12\n","0box-sdk: [INFO]   2024/04/24 23:06:04.992572 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber03 committed\n","0box-sdk: [INFO]   2024/04/24 23:06:04.992587 commitworker.go:213: [commitBlobber]12\n","0box-sdk: [INFO]   2024/04/24 23:06:04.992837 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber02 committed\n","0box-sdk: [INFO]   2024/04/24 23:06:04.992847 commitworker.go:213: [commitBlobber]12\n","0box-sdk: [INFO]   2024/04/24 23:06:04.992979 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber06 committed\n","0box-sdk: [INFO]   2024/04/24 23:06:04.992987 commitworker.go:213: [commitBlobber]12\n","0box-sdk: [INFO]   2024/04/24 23:06:04.993342 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber05 committed\n","0box-sdk: [INFO]   2024/04/24 23:06:04.993351 commitworker.go:213: [commitBlobber]12\n","0box-sdk: [INFO]   2024/04/24 23:06:04.993452 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber01 committed\n","0box-sdk: [INFO]   2024/04/24 23:06:04.993463 commitworker.go:213: [commitBlobber]13\n","0box-sdk: [INFO]   2024/04/24 23:06:04.993469 multi_operation_worker.go:320: [commitRequests]13\n","0box-sdk: [INFO]   2024/04/24 23:06:04.993482 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:06:04.993495 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:06:04.993503 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber01\n","0box-sdk: [INFO]   2024/04/24 23:06:04.993509 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber02\n","0box-sdk: [INFO]   2024/04/24 23:06:04.993518 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber06\n","0box-sdk: [INFO]   2024/04/24 23:06:04.993522 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber04\n","0box-sdk: [INFO]   2024/04/24 23:06:04.995012 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber06ayHztoCuqsyN2mraVkZrD unlocked\n","0box-sdk: [INFO]   2024/04/24 23:06:04.995321 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber01ayHztoCuqsyN2mraVkZrD unlocked\n","0box-sdk: [INFO]   2024/04/24 23:06:04.995347 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber02ayHztoCuqsyN2mraVkZrD unlocked\n","0box-sdk: [INFO]   2024/04/24 23:06:04.995446 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber04ayHztoCuqsyN2mraVkZrD unlocked\n","0box-sdk: [INFO]   2024/04/24 23:06:04.995467 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber03ayHztoCuqsyN2mraVkZrD unlocked\n","0box-sdk: [INFO]   2024/04/24 23:06:04.997122 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber05ayHztoCuqsyN2mraVkZrD unlocked\n","    system_test_framework.go:93: Test setup [Setup] exit at [04-24-2024 23:06:04]\n","    api_client.go:1535: Unlock stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1535: Unlock stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1535: Unlock stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1535: Unlock stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1535: Unlock stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1535: Unlock stake pool...\n","    wait.go:24: Wait condition has succeed\n","","","    api_client.go:1292: Get wallet balance...\n","0box-sdk: [DEBUG]  2024/04/24 23:28:28.058988 networkworker.go:119: Get network result:{\"miners\":[\"https://dev-8.devnet-0chain.net/miner01\",\"https://dev-8.devnet-0chain.net/miner03\",\"https://dev-8.devnet-0chain.net/miner02\"],\"sharders\":[\"https://dev-8.devnet-0chain.net/sharder02\",\"https://dev-8.devnet-0chain.net/sharder01\"]}\n","    system_test_framework.go:70: Test setup [Setup] scheduled at [04-24-2024 23:28:28] \n","    system_test_framework.go:80: Test setup [Setup] start at [04-24-2024 23:28:28] \n","    api_client.go:1480: Create stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1480: Create stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1480: Create stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1480: Create stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1480: Create stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1480: Create stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1226: Get allocation blobbers...\n","    api_client.go:871: Create allocation...\n","    wait.go:24: Wait condition has succeed\n","    sdk.go:253: fileMeta { /tmp/989061154   1048576 0  989061154 /989061154}\n","0box-sdk: [INFO]   2024/04/24 23:28:42.366217 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber01 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:28:42.367814 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber02 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:28:42.368821 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber05 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:28:42.369811 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber04 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:28:42.370032 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber06 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:28:42.370372 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber03 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:28:42.373362 multi_operation_worker.go:162: MultiOperation Process start\n","0box-sdk: [INFO]   2024/04/24 23:28:42.415052 upload_worker.go:60: UploadOperation Success{name 15 0 989061154 \u003cnil\u003e}\n","0box-sdk: [INFO]   2024/04/24 23:28:42.415086 multi_operation_worker.go:225: Trying to lock write marker.....\n","0box-sdk: [INFO]   2024/04/24 23:28:42.416788 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber05TbRifKSaYP2Md3h53iZfeV locked\n","0box-sdk: [INFO]   2024/04/24 23:28:42.418285 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber04TbRifKSaYP2Md3h53iZfeV locked\n","0box-sdk: [INFO]   2024/04/24 23:28:42.418474 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber02TbRifKSaYP2Md3h53iZfeV locked\n","0box-sdk: [INFO]   2024/04/24 23:28:42.418522 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber01TbRifKSaYP2Md3h53iZfeV locked\n","0box-sdk: [INFO]   2024/04/24 23:28:42.418903 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber03TbRifKSaYP2Md3h53iZfeV locked\n","0box-sdk: [INFO]   2024/04/24 23:28:42.418958 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber06TbRifKSaYP2Md3h53iZfeV locked\n","0box-sdk: [INFO]   2024/04/24 23:28:42.418979 multi_operation_worker.go:235: [writemarkerLocked]3\n","0box-sdk: [INFO]   2024/04/24 23:28:42.420940 multi_operation_worker.go:292: [checkAllocStatus]1\n","0box-sdk: [INFO]   2024/04/24 23:28:42.420956 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:28:42.420968 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:28:42.420974 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber06\n","0box-sdk: [INFO]   2024/04/24 23:28:42.420982 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber01\n","0box-sdk: [INFO]   2024/04/24 23:28:42.420988 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber02\n","0box-sdk: [INFO]   2024/04/24 23:28:42.420993 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber04\n","0box-sdk: [INFO]   2024/04/24 23:28:42.421015 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:28:42.421046 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:28:42.421058 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:28:42.421066 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:28:42.421083 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:28:42.421131 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:28:42.423809 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber02\n","0box-sdk: [INFO]   2024/04/24 23:28:42.423815 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber04\n","0box-sdk: [INFO]   2024/04/24 23:28:42.424005 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:28:42.424080 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber06\n","0box-sdk: [INFO]   2024/04/24 23:28:42.424098 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:28:42.424392 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber01\n","0box-sdk: [INFO]   2024/04/24 23:28:42.431290 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber03 committed\n","0box-sdk: [INFO]   2024/04/24 23:28:42.431301 commitworker.go:213: [commitBlobber]10\n","0box-sdk: [INFO]   2024/04/24 23:28:42.431532 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber04 committed\n","0box-sdk: [INFO]   2024/04/24 23:28:42.431546 commitworker.go:213: [commitBlobber]10\n","0box-sdk: [INFO]   2024/04/24 23:28:42.431968 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber05 committed\n","0box-sdk: [INFO]   2024/04/24 23:28:42.431976 commitworker.go:213: [commitBlobber]10\n","0box-sdk: [INFO]   2024/04/24 23:28:42.431996 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber02 committed\n","0box-sdk: [INFO]   2024/04/24 23:28:42.432004 commitworker.go:213: [commitBlobber]10\n","0box-sdk: [INFO]   2024/04/24 23:28:42.432066 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber06 committed\n","0box-sdk: [INFO]   2024/04/24 23:28:42.432080 commitworker.go:213: [commitBlobber]11\n","0box-sdk: [INFO]   2024/04/24 23:28:42.432847 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber01 committed\n","0box-sdk: [INFO]   2024/04/24 23:28:42.432855 commitworker.go:213: [commitBlobber]11\n","0box-sdk: [INFO]   2024/04/24 23:28:42.432862 multi_operation_worker.go:320: [commitRequests]11\n","0box-sdk: [INFO]   2024/04/24 23:28:42.432871 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:28:42.432881 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:28:42.432888 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber06\n","0box-sdk: [INFO]   2024/04/24 23:28:42.432891 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber01\n","0box-sdk: [INFO]   2024/04/24 23:28:42.432898 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber02\n","0box-sdk: [INFO]   2024/04/24 23:28:42.432903 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber04\n","0box-sdk: [INFO]   2024/04/24 23:28:42.434401 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber06TbRifKSaYP2Md3h53iZfeV unlocked\n","0box-sdk: [INFO]   2024/04/24 23:28:42.434431 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber01TbRifKSaYP2Md3h53iZfeV unlocked\n","0box-sdk: [INFO]   2024/04/24 23:28:42.434602 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber04TbRifKSaYP2Md3h53iZfeV unlocked\n","0box-sdk: [INFO]   2024/04/24 23:28:42.434782 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber03TbRifKSaYP2Md3h53iZfeV unlocked\n","0box-sdk: [INFO]   2024/04/24 23:28:42.435264 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber02TbRifKSaYP2Md3h53iZfeV unlocked\n","0box-sdk: [INFO]   2024/04/24 23:28:42.436584 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber05TbRifKSaYP2Md3h53iZfeV unlocked\n","    system_test_framework.go:93: Test setup [Setup] exit at [04-24-2024 23:28:42]\n","    api_client.go:1535: Unlock stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1535: Unlock stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1535: Unlock stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1535: Unlock stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1535: Unlock stake pool...\n","    wait.go:24: Wait condition has succeed\n","    api_client.go:1535: Unlock stake pool...\n","    wait.go:24: Wait condition has succeed\n","--- PASS: TestProtocolChallengeTimings (26.51s)",""],"Passed":true,"Skipped":false,"TestFileName":"challenge_timings_test.go","TestFunctionDetail":{"Line":30,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallengeTimings/100mb_file","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":1329.33,"Output":["","    challenge_timings_test.go:152: Test case [100mb file] scheduled at [04-24-2024 23:06:04] \n","","","    system_test_framework.go:149: Test case [100mb file] start at [04-24-2024 23:06:04] \n","    api_client.go:1292: Get wallet balance...\n","    challenge_timings_test.go:162: Blobber Requirements: {1 1 209715200 306517a2de8b1d994d0951ba45e276cedc1d1dca32c0e9b731066791eaf8dedc 2875211706e5d0262913418e344baaf05794d6b23ce6dc81f71bdddf9096e21684df0141f2b3f03ff79e2a3dc5cf376b628a5bd6c9f5f93806c408f6c603a083 1716595685 {0 9223372036854775807} {0 9223372036854775807}}\n","    api_client.go:1292: Get wallet balance...\n","    api_client.go:1226: Get allocation blobbers...\n","    api_client.go:871: Create allocation...\n","    wait.go:24: Wait condition has succeed\n","    sdk.go:253: fileMeta { /tmp/3549535044   104857600 0  3549535044 /3549535044}\n","0box-sdk: [INFO]   2024/04/24 23:08:07.511147 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber03 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:08:07.511172 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber05 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:08:07.511913 multi_operation_worker.go:162: MultiOperation Process start\n","0box-sdk: [INFO]   2024/04/24 23:08:13.925172 upload_worker.go:60: UploadOperation Success{name 15 0 3549535044 \u003cnil\u003e}\n","0box-sdk: [INFO]   2024/04/24 23:08:13.925218 multi_operation_worker.go:225: Trying to lock write marker.....\n","0box-sdk: [INFO]   2024/04/24 23:08:13.927514 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber057vXaMy7KfBSzV9q2sMF7JW locked\n","0box-sdk: [INFO]   2024/04/24 23:08:13.931480 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber037vXaMy7KfBSzV9q2sMF7JW locked\n","0box-sdk: [INFO]   2024/04/24 23:08:13.931500 multi_operation_worker.go:235: [writemarkerLocked]6\n","0box-sdk: [INFO]   2024/04/24 23:08:13.934301 multi_operation_worker.go:292: [checkAllocStatus]2\n","0box-sdk: [INFO]   2024/04/24 23:08:13.934315 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:08:13.934327 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:08:13.934336 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:08:13.934419 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:08:13.938240 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:08:13.939847 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:08:13.946341 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber03 committed\n","0box-sdk: [INFO]   2024/04/24 23:08:13.946397 commitworker.go:213: [commitBlobber]12\n","0box-sdk: [INFO]   2024/04/24 23:08:13.947494 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber05 committed\n","0box-sdk: [INFO]   2024/04/24 23:08:13.947507 commitworker.go:213: [commitBlobber]13\n","0box-sdk: [INFO]   2024/04/24 23:08:13.947519 multi_operation_worker.go:320: [commitRequests]13\n","0box-sdk: [INFO]   2024/04/24 23:08:13.947531 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:08:13.947541 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:08:13.949419 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber037vXaMy7KfBSzV9q2sMF7JW unlocked\n","0box-sdk: [INFO]   2024/04/24 23:08:13.951536 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber057vXaMy7KfBSzV9q2sMF7JW unlocked\n","    api_client.go:1369: Get all challenges for allocation...\n","    challenge_timings_test.go:293: Proof Gen Times: [10 10 11 11 11 12 12 12 12 12 12 12 12 12 12 12 12 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 14 14 14 14 14 14 14 14 14 14 14 14 14 14 14 14 14 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 16 16 16 16 16 16 16 16 16 16 16 16 16 16 16 16 16 16 16 17 17 17 17 17 17 17 17 17 17 17 17 17 17 17 17 17 17 17 17 18 18 18 18 18 18 18 18 18 18 18 19 19 19 19 19 19 19 19 20 20 20 20 21 21 22 22 23 23 23 24 24 25 25 27 27 27 29 31 34 34 35 36 50 50 51 56 56 57 59 61 62 65 76 85 88 91 92 94 99 100 103 105]\n","    challenge_timings_test.go:294: Txn Submissions: [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5]\n","    challenge_timings_test.go:295: Txn Verifications: [4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 7 7 7 7 7 7 7 7 7 7 7 7 8 8 8 8 8 9 9 9]\n","    challenge_timings_test.go:303: Max Proof Gen Time: 105\n","    challenge_timings_test.go:304: Max Txn Submission: 5\n","    challenge_timings_test.go:305: Max Txn Verification: 9\n","    challenge_timings_test.go:313: Median Proof Gen Time: 16\n","    challenge_timings_test.go:314: Median Txn Submission: 2\n","    challenge_timings_test.go:315: Median Txn Verification: 5\n","    challenge_timings_test.go:322: Min Proof Gen Time: 10\n","    challenge_timings_test.go:323: Min Txn Submission: 1\n","    challenge_timings_test.go:324: Min Txn Verification: 4\n","    challenge_timings_test.go:336: Mean Proof Gen Time: 22\n","    challenge_timings_test.go:337: Mean Txn Submission: 2\n","    challenge_timings_test.go:338: Mean Txn Verification: 5\n","    challenge_timings_test.go:345: Standard Deviation Proof Gen Time: 19\n","    challenge_timings_test.go:346: Standard Deviation Txn Submission: 0\n","    challenge_timings_test.go:347: Standard Deviation Txn Verification: 1\n","    challenge_timings_test.go:354: Variance Proof Gen Time: 392\n","    challenge_timings_test.go:355: Variance Txn Submission: 0\n","    challenge_timings_test.go:356: Variance Txn Verification: 1\n","    challenge_timings_test.go:152: Test case [100mb file] exit at [04-24-2024 23:28:14]\n","--- PASS: TestProtocolChallengeTimings/100mb_file (1329.33s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallengeTimings/10mb_file","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":1262.87,"Output":["","    challenge_timings_test.go:113: Test case [10mb file] scheduled at [04-24-2024 23:06:04] \n","","","    system_test_framework.go:149: Test case [10mb file] start at [04-24-2024 23:06:04] \n","    api_client.go:1292: Get wallet balance...\n","    challenge_timings_test.go:124: Blobber Requirements: {1 1 20971520 306517a2de8b1d994d0951ba45e276cedc1d1dca32c0e9b731066791eaf8dedc 2875211706e5d0262913418e344baaf05794d6b23ce6dc81f71bdddf9096e21684df0141f2b3f03ff79e2a3dc5cf376b628a5bd6c9f5f93806c408f6c603a083 1716595625 {0 9223372036854775807} {0 9223372036854775807}}\n","    api_client.go:1292: Get wallet balance...\n","    api_client.go:1226: Get allocation blobbers...\n","    api_client.go:871: Create allocation...\n","    wait.go:24: Wait condition has succeed\n","    sdk.go:253: fileMeta { /tmp/3035103829   10485760 0  3035103829 /3035103829}\n","0box-sdk: [INFO]   2024/04/24 23:07:07.215185 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber05 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:07:07.215947 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber03 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:07:07.216716 multi_operation_worker.go:162: MultiOperation Process start\n","0box-sdk: [INFO]   2024/04/24 23:07:07.474378 upload_worker.go:60: UploadOperation Success{name 15 0 3035103829 \u003cnil\u003e}\n","0box-sdk: [INFO]   2024/04/24 23:07:07.474406 multi_operation_worker.go:225: Trying to lock write marker.....\n","0box-sdk: [INFO]   2024/04/24 23:07:07.476437 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber05un7NReZsUDyYm7UiGwUmdn locked\n","0box-sdk: [INFO]   2024/04/24 23:07:07.478609 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber03un7NReZsUDyYm7UiGwUmdn locked\n","0box-sdk: [INFO]   2024/04/24 23:07:07.478630 multi_operation_worker.go:235: [writemarkerLocked]4\n","0box-sdk: [INFO]   2024/04/24 23:07:07.480947 multi_operation_worker.go:292: [checkAllocStatus]2\n","0box-sdk: [INFO]   2024/04/24 23:07:07.480963 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:07:07.480977 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:07:07.480988 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:07:07.481044 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:07:07.484573 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:07:07.484579 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:07:07.491924 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber03 committed\n","0box-sdk: [INFO]   2024/04/24 23:07:07.491939 commitworker.go:213: [commitBlobber]10\n","0box-sdk: [INFO]   2024/04/24 23:07:07.492300 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber05 committed\n","0box-sdk: [INFO]   2024/04/24 23:07:07.492312 commitworker.go:213: [commitBlobber]11\n","0box-sdk: [INFO]   2024/04/24 23:07:07.492324 multi_operation_worker.go:320: [commitRequests]11\n","0box-sdk: [INFO]   2024/04/24 23:07:07.492335 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:07:07.492343 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:07:07.494394 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber03un7NReZsUDyYm7UiGwUmdn unlocked\n","0box-sdk: [INFO]   2024/04/24 23:07:07.496399 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber05un7NReZsUDyYm7UiGwUmdn unlocked\n","    api_client.go:1369: Get all challenges for allocation...\n","    challenge_timings_test.go:293: Proof Gen Times: [1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 7 7 7 7 7 7 7 7 7 7 7 7 8 8 8 8 8 13 80]\n","    challenge_timings_test.go:294: Txn Submissions: [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5]\n","    challenge_timings_test.go:295: Txn Verifications: [4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 8 8 8 8 9 9 9]\n","    challenge_timings_test.go:303: Max Proof Gen Time: 80\n","    challenge_timings_test.go:304: Max Txn Submission: 5\n","    challenge_timings_test.go:305: Max Txn Verification: 9\n","    challenge_timings_test.go:313: Median Proof Gen Time: 3\n","    challenge_timings_test.go:314: Median Txn Submission: 2\n","    challenge_timings_test.go:315: Median Txn Verification: 5\n","    challenge_timings_test.go:322: Min Proof Gen Time: 1\n","    challenge_timings_test.go:323: Min Txn Submission: 1\n","    challenge_timings_test.go:324: Min Txn Verification: 4\n","    challenge_timings_test.go:336: Mean Proof Gen Time: 4\n","    challenge_timings_test.go:337: Mean Txn Submission: 2\n","    challenge_timings_test.go:338: Mean Txn Verification: 5\n","    challenge_timings_test.go:345: Standard Deviation Proof Gen Time: 6\n","    challenge_timings_test.go:346: Standard Deviation Txn Submission: 0\n","    challenge_timings_test.go:347: Standard Deviation Txn Verification: 1\n","    challenge_timings_test.go:354: Variance Proof Gen Time: 40\n","    challenge_timings_test.go:355: Variance Txn Submission: 0\n","    challenge_timings_test.go:356: Variance Txn Verification: 1\n","    challenge_timings_test.go:113: Test case [10mb file] exit at [04-24-2024 23:27:07]\n","--- PASS: TestProtocolChallengeTimings/10mb_file (1262.87s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallengeTimings/1gb_file","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":1405.41,"Output":["","    challenge_timings_test.go:190: Test case [1gb file] scheduled at [04-24-2024 23:06:04] \n","","","    system_test_framework.go:149: Test case [1gb file] start at [04-24-2024 23:06:04] \n","    api_client.go:1292: Get wallet balance...\n","    challenge_timings_test.go:200: Blobber Requirements: {1 1 2147483648 306517a2de8b1d994d0951ba45e276cedc1d1dca32c0e9b731066791eaf8dedc 2875211706e5d0262913418e344baaf05794d6b23ce6dc81f71bdddf9096e21684df0141f2b3f03ff79e2a3dc5cf376b628a5bd6c9f5f93806c408f6c603a083 1716595745 {0 9223372036854775807} {0 9223372036854775807}}\n","    api_client.go:1292: Get wallet balance...\n","    api_client.go:1226: Get allocation blobbers...\n","    api_client.go:871: Create allocation...\n","    wait.go:24: Wait condition has succeed\n","    sdk.go:253: fileMeta { /tmp/2701557512   1073741824 0  2701557512 /2701557512}\n","0box-sdk: [INFO]   2024/04/24 23:09:10.486467 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber05 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:09:10.486645 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber03 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:09:10.487135 multi_operation_worker.go:162: MultiOperation Process start\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.514459 chunked_upload_blobber.go:94: Upload : write tcp4 65.109.154.180:42992-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.514531 chunked_upload_blobber.go:94: Upload : write tcp4 65.109.154.180:42970-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.514568 chunked_upload_blobber.go:94: Upload : write tcp4 65.109.154.180:43070-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.514595 chunked_upload_blobber.go:94: Upload : write tcp4 65.109.154.180:43078-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.515099 chunked_upload_blobber.go:94: Upload : write tcp4 65.109.154.180:42986-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.515410 chunked_upload_blobber.go:94: Upload : write tcp4 65.109.154.180:43086-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.515458 chunked_upload_blobber.go:94: Upload : write tcp4 65.109.154.180:42994-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.515478 chunked_upload_blobber.go:94: Upload : write tcp4 65.109.154.180:43088-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.515742 chunked_upload_blobber.go:94: Upload : write tcp4 65.109.154.180:43084-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.516116 chunked_upload_blobber.go:94: Upload : write tcp4 65.109.154.180:43034-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.516203 chunked_upload_blobber.go:94: Upload : write tcp4 65.109.154.180:43042-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.516230 chunked_upload.go:848: error during sendUploadRequestwrite tcp4 65.109.154.180:43084-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.516360 chunked_upload_blobber.go:94: Upload : write tcp4 65.109.154.180:43026-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.516387 chunked_upload.go:848: error during sendUploadRequestwrite tcp4 65.109.154.180:43034-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.523907 upload_worker.go:42: UploadOperation Failed{name 15 0 2701557512 \u003cnil\u003e} {error 26 0  upload_failed: Upload failed. write tcp4 65.109.154.180:43084-\u003e65.21.10.160:443: write: broken pipe}\u001b[0m\n","0box-sdk: \u001b[31m[ERROR]  2024/04/24 23:09:10.523927 multi_operation_worker.go:186: upload_failed: Upload failed. write tcp4 65.109.154.180:43084-\u003e65.21.10.160:443: write: broken pipe\u001b[0m\n","    assertions.go:333: \n","        \tError Trace:\t/root/actions-runner8/_work/system_test/system_test/internal/api/util/client/sdk.go:207\n","        \t            \t\t\t\t/root/actions-runner8/_work/system_test/system_test/tests/api_tests/challenge_timings_test.go:213\n","        \t            \t\t\t\t/root/actions-runner8/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:150\n","        \t            \t\t\t\t/root/actions-runner8/_work/_tool/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.22.1.linux-amd64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tReceived unexpected error:\n","        \t            \tconsensus_not_met: Multioperation failed. Required consensus 2 got 0. Major error: upload_failed: Upload failed. write tcp4 65.109.154.180:43084-\u003e65.21.10.160:443: write: broken pipe\n","        \tTest:       \tTestProtocolChallengeTimings/1gb_file\n","    challenge_timings_test.go:190: Test case [1gb file] exit at [04-24-2024 23:09:10]\n","","","    challenge_timings_test.go:190: Test case [1gb file] scheduled at [04-24-2024 23:28:42] \n","","","    system_test_framework.go:149: Test case [1gb file] start at [04-24-2024 23:28:42] \n","    api_client.go:1292: Get wallet balance...\n","    challenge_timings_test.go:200: Blobber Requirements: {1 1 2147483648 306517a2de8b1d994d0951ba45e276cedc1d1dca32c0e9b731066791eaf8dedc 2875211706e5d0262913418e344baaf05794d6b23ce6dc81f71bdddf9096e21684df0141f2b3f03ff79e2a3dc5cf376b628a5bd6c9f5f93806c408f6c603a083 1716597102 {0 9223372036854775807} {0 9223372036854775807}}\n","    api_client.go:1292: Get wallet balance...\n","    api_client.go:1226: Get allocation blobbers...\n","    api_client.go:871: Create allocation...\n","    wait.go:24: Wait condition has succeed\n","    sdk.go:253: fileMeta { /tmp/2534640590   1073741824 0  2534640590 /2534640590}\n","0box-sdk: [INFO]   2024/04/24 23:31:47.669142 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber03 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:31:47.719785 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber05 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:31:47.720733 multi_operation_worker.go:162: MultiOperation Process start\n","0box-sdk: [INFO]   2024/04/24 23:32:07.402359 upload_worker.go:60: UploadOperation Success{name 15 0 2534640590 \u003cnil\u003e}\n","0box-sdk: [INFO]   2024/04/24 23:32:07.402394 multi_operation_worker.go:225: Trying to lock write marker.....\n","0box-sdk: [INFO]   2024/04/24 23:32:07.404455 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber053FYRy3kTi79hQy3R326aAT locked\n","0box-sdk: [INFO]   2024/04/24 23:32:07.407149 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber033FYRy3kTi79hQy3R326aAT locked\n","0box-sdk: [INFO]   2024/04/24 23:32:07.407173 multi_operation_worker.go:235: [writemarkerLocked]4\n","0box-sdk: [INFO]   2024/04/24 23:32:07.409236 multi_operation_worker.go:292: [checkAllocStatus]2\n","0box-sdk: [INFO]   2024/04/24 23:32:07.409250 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:32:07.409262 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:32:07.409270 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:32:07.409305 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:32:07.412788 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:32:07.412975 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:32:07.422741 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber03 committed\n","0box-sdk: [INFO]   2024/04/24 23:32:07.422757 commitworker.go:213: [commitBlobber]13\n","0box-sdk: [INFO]   2024/04/24 23:32:07.507606 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber05 committed\n","0box-sdk: [INFO]   2024/04/24 23:32:07.507621 commitworker.go:213: [commitBlobber]98\n","0box-sdk: [INFO]   2024/04/24 23:32:07.507630 multi_operation_worker.go:320: [commitRequests]98\n","0box-sdk: [INFO]   2024/04/24 23:32:07.507639 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:32:07.507648 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:32:07.510230 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber033FYRy3kTi79hQy3R326aAT unlocked\n","0box-sdk: [INFO]   2024/04/24 23:32:07.511931 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber053FYRy3kTi79hQy3R326aAT unlocked\n","    api_client.go:1369: Get all challenges for allocation...\n","    challenge_timings_test.go:293: Proof Gen Times: [126 127 131 156 158 166 183 189 198 229 237 271 278 292 297 297 298 309 313 316 332 350 353 353 353 358 358 360 360 363 369 374 387 392 399 402 402 404 416 417 418 418 421 422 424 427 432 432 435 442 450 453 454 456 462 480 480 484 486 486 489 495 495 496 497 501 513 516 521 524 527 529 532 533 545 549 549 550 553 556 557 559 563 565 566 568 568 569 577 578 579 585 587 589 590 591 592 592 594 598 600 603 606 611 611 614 634 635 636 648 653 654 657 658 667 668 668 677 678 683 683 684 687 695 695 700 706 712 716 721 721 722 728 731 743 744 745 745 748 749 751 753 771 776 777 779 782 783 795 796 797 803 816 857 889 897 899 906 939 944 953 962 966 972 991 992 1054 1115 1150 1150 1211 1214 1217]\n","    challenge_timings_test.go:294: Txn Submissions: [1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 6 6 7 7]\n","    challenge_timings_test.go:295: Txn Verifications: [4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 9 9 9 9 9 9 10 10 10 10 11 11]\n","    challenge_timings_test.go:303: Max Proof Gen Time: 1217\n","    challenge_timings_test.go:304: Max Txn Submission: 7\n","    challenge_timings_test.go:305: Max Txn Verification: 11\n","    challenge_timings_test.go:313: Median Proof Gen Time: 568\n","    challenge_timings_test.go:314: Median Txn Submission: 3\n","    challenge_timings_test.go:315: Median Txn Verification: 6\n","    challenge_timings_test.go:322: Min Proof Gen Time: 126\n","    challenge_timings_test.go:323: Min Txn Submission: 1\n","    challenge_timings_test.go:324: Min Txn Verification: 4\n","    challenge_timings_test.go:336: Mean Proof Gen Time: 582\n","    challenge_timings_test.go:337: Mean Txn Submission: 3\n","    challenge_timings_test.go:338: Mean Txn Verification: 6\n","    challenge_timings_test.go:345: Standard Deviation Proof Gen Time: 226\n","    challenge_timings_test.go:346: Standard Deviation Txn Submission: 1\n","    challenge_timings_test.go:347: Standard Deviation Txn Verification: 1\n","    challenge_timings_test.go:354: Variance Proof Gen Time: 51523\n","    challenge_timings_test.go:355: Variance Txn Submission: 1\n","    challenge_timings_test.go:356: Variance Txn Verification: 1\n","    challenge_timings_test.go:190: Test case [1gb file] exit at [04-24-2024 23:52:07]\n","--- PASS: TestProtocolChallengeTimings/1gb_file (1405.41s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestProtocolChallengeTimings/1mb_file","Package":"github.com/0chain/system_test/tests/api_tests","ElapsedTime":1202.33,"Output":["","    challenge_timings_test.go:77: Test case [1mb file] scheduled at [04-24-2024 23:06:04] \n","","","    system_test_framework.go:149: Test case [1mb file] start at [04-24-2024 23:06:04] \n","    api_client.go:1292: Get wallet balance...\n","    challenge_timings_test.go:82: Blobber Requirements: {3 1 60000 306517a2de8b1d994d0951ba45e276cedc1d1dca32c0e9b731066791eaf8dedc 2875211706e5d0262913418e344baaf05794d6b23ce6dc81f71bdddf9096e21684df0141f2b3f03ff79e2a3dc5cf376b628a5bd6c9f5f93806c408f6c603a083 1716595565 {0 9223372036854775807} {0 9223372036854775807}}\n","    api_client.go:1226: Get allocation blobbers...\n","    api_client.go:1292: Get wallet balance...\n","    api_client.go:871: Create allocation...\n","    wait.go:24: Wait condition has succeed\n","    sdk.go:253: fileMeta { /tmp/2900140223   1048576 0  2900140223 /2900140223}\n","0box-sdk: [INFO]   2024/04/24 23:06:07.045113 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber03 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:06:07.047029 multi_operation_worker.go:126: https://dev-8.devnet-0chain.net/blobber05 connection obj created.\n","0box-sdk: [INFO]   2024/04/24 23:06:07.047650 multi_operation_worker.go:162: MultiOperation Process start\n","0box-sdk: [INFO]   2024/04/24 23:06:07.085614 upload_worker.go:60: UploadOperation Success{name 15 0 2900140223 \u003cnil\u003e}\n","0box-sdk: [INFO]   2024/04/24 23:06:07.085638 multi_operation_worker.go:225: Trying to lock write marker.....\n","0box-sdk: [INFO]   2024/04/24 23:06:07.087501 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber05PHkTiE8kCn3jZ3ppmVGiLL locked\n","0box-sdk: [INFO]   2024/04/24 23:06:07.089333 writemarker_mutex.go:322: https://dev-8.devnet-0chain.net/blobber03PHkTiE8kCn3jZ3ppmVGiLL locked\n","0box-sdk: [INFO]   2024/04/24 23:06:07.089355 multi_operation_worker.go:235: [writemarkerLocked]3\n","0box-sdk: [INFO]   2024/04/24 23:06:07.091231 multi_operation_worker.go:292: [checkAllocStatus]1\n","0box-sdk: [INFO]   2024/04/24 23:06:07.091251 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:06:07.091264 multi_operation_worker.go:315: Commit request sending to blobber https://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:06:07.091273 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:06:07.091421 commitworker.go:102: received a commit request\n","0box-sdk: [INFO]   2024/04/24 23:06:07.094202 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:06:07.094374 commitworker.go:258: Committing to blobber.https://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:06:07.101685 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber03 committed\n","0box-sdk: [INFO]   2024/04/24 23:06:07.101699 commitworker.go:213: [commitBlobber]10\n","0box-sdk: [INFO]   2024/04/24 23:06:07.103777 commitworker.go:297: https://dev-8.devnet-0chain.net/blobber05 committed\n","0box-sdk: [INFO]   2024/04/24 23:06:07.103791 commitworker.go:213: [commitBlobber]12\n","0box-sdk: [INFO]   2024/04/24 23:06:07.103801 multi_operation_worker.go:320: [commitRequests]12\n","0box-sdk: [INFO]   2024/04/24 23:06:07.103814 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber05\n","0box-sdk: [INFO]   2024/04/24 23:06:07.103824 multi_operation_worker.go:326: Commit successhttps://dev-8.devnet-0chain.net/blobber03\n","0box-sdk: [INFO]   2024/04/24 23:06:07.105891 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber03PHkTiE8kCn3jZ3ppmVGiLL unlocked\n","0box-sdk: [INFO]   2024/04/24 23:06:07.107632 writemarker_mutex.go:128: https://dev-8.devnet-0chain.net/blobber05PHkTiE8kCn3jZ3ppmVGiLL unlocked\n","    api_client.go:1369: Get all challenges for allocation...\n","    challenge_timings_test.go:293: Proof Gen Times: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 6 7 9 15]\n","    challenge_timings_test.go:294: Txn Submissions: [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 5 5 5]\n","    challenge_timings_test.go:295: Txn Verifications: [4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 7 7 7 7 7 7 7 7 7 7 7 7 7 8 8 9 9]\n","    challenge_timings_test.go:303: Max Proof Gen Time: 15\n","    challenge_timings_test.go:304: Max Txn Submission: 5\n","    challenge_timings_test.go:305: Max Txn Verification: 9\n","    challenge_timings_test.go:313: Median Proof Gen Time: 2\n","    challenge_timings_test.go:314: Median Txn Submission: 2\n","    challenge_timings_test.go:315: Median Txn Verification: 5\n","    challenge_timings_test.go:322: Min Proof Gen Time: 0\n","    challenge_timings_test.go:323: Min Txn Submission: 1\n","    challenge_timings_test.go:324: Min Txn Verification: 4\n","    challenge_timings_test.go:336: Mean Proof Gen Time: 2\n","    challenge_timings_test.go:337: Mean Txn Submission: 2\n","    challenge_timings_test.go:338: Mean Txn Verification: 5\n","    challenge_timings_test.go:345: Standard Deviation Proof Gen Time: 1\n","    challenge_timings_test.go:346: Standard Deviation Txn Submission: 0\n","    challenge_timings_test.go:347: Standard Deviation Txn Verification: 0\n","    challenge_timings_test.go:354: Variance Proof Gen Time: 3\n","    challenge_timings_test.go:355: Variance Txn Submission: 0\n","    challenge_timings_test.go:356: Variance Txn Verification: 0\n","    challenge_timings_test.go:77: Test case [1mb file] exit at [04-24-2024 23:26:07]\n","--- PASS: TestProtocolChallengeTimings/1mb_file (1202.33s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
