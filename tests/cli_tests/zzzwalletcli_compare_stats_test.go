@@ -1,12 +1,12 @@
 package cli_tests
 
 import (
-	"testing"
-	"net/url"
-	"fmt"
-	"strings"
-	"encoding/json"
 	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/url"
+	"strings"
+	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	//"github.com/0chain/system_test/internal/api/model"
@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 	//"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 	//resty "github.com/go-resty/resty/v2"
-	
 )
 
 var (
@@ -143,17 +142,51 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			if ok {
 				t.Log("Retrieved provider node from MPT")
 			}
+			termsMap, ok  := dataMap["Terms"].(map[string]interface{})
+			if ok {
+				t.Log("Retrieved terms node from MPT")
+			}
+			stakePoolSettingsMap, ok  := dataMap["StakePoolSettings"].(map[string]interface{})
+			if ok {
+				t.Log("Retrieved stakePoolSettings node from MPT")
+			}
 
+			lastHealthCheckNumber, err := providerMap["LastHealthCheck"].(json.Number).Int64()
+			if err != nil {
+				t.Errorf("Failed to convert LastHealthCheck to int64: %v", err)
+			}
+			
+			readPriceNumber, err := termsMap["ReadPrice"].(json.Number).Int64()
+			if err != nil {
+				t.Errorf("Failed to convert ReadPrice to int64: %v", err)
+			}
+
+			writePriceNumber, err := termsMap["WritePrice"].(json.Number).Int64()
+			if err != nil {
+				t.Errorf("Failed to convert WritePrice to int64: %v", err)
+			}
+
+			maxNumDelegatesNumber, err := stakePoolSettingsMap["MaxNumDelegates"].(json.Number).Int64()
+			if err != nil {
+				t.Errorf("Failed to convert WritePrice to int64: %v", err)
+			}
+
+			serviceChargeRatioNumber, err := stakePoolSettingsMap["ServiceChargeRatio"].(json.Number).Float64()
+			if err != nil {
+				t.Errorf("Failed to convert WritePrice to int64: %v", err)
+			}
 			require.Equal(t, blobber.ID, providerMap["ID"], "Blobber ID does not match")
 			require.Equal(t, blobber.BaseURL, dataMap.GetString("BaseURL"), "Blobber BaseURL does not match")
 			require.Equal(t, blobber.Capacity, dataMap.GetInt64("Capacity"), "Blobber Capacity does not match")
 			require.Equal(t, blobber.Allocated, dataMap.GetInt64("Allocated"), "Blobber Allocated does not match")
-			//require.Equal(t, blobber.LastHealthCheck, providerMap["LastHealthCheck"].(int64), "Blobber LastHealthCheck does not match")
-			require.Equal(t, blobber.PublicKey, dataMap.GetString("PublicKey"), "Blobber PublicKey does not match")
+			require.Equal(t, blobber.LastHealthCheck, lastHealthCheckNumber, "Blobber LastHealthCheck does not match")
+			//require.Equal(t, blobber.PublicKey, dataMap.GetString("PublicKey"), "Blobber PublicKey does not match")	# Not in blobber DTO struct
 			//require.Equal(t, blobber.TotalStake, dataMap["TotalStake"], "Blobber TotalStake does not match")
-			//require.Equal(t, blobber.SavedData, dataMap["SavedData"], "Blobber SavedData does not match")
-			//require.Equal(t, blobber.ReadData, dataMap["ReadData"], "Blobber ReadData does not match")
-			//require.Equal(t, blobber.ChallengesPassed, dataMap["ChallengesPassed"], "Blobber ChallengesPassed does not match")
+			require.Equal(t, blobber.Terms.ReadPrice, readPriceNumber, "Blobber ReadPrice does not match")
+			require.Equal(t, blobber.Terms.WritePrice, writePriceNumber, "Blobber WritePrice does not match")
+			require.Equal(t, blobber.StakePoolSettings.DelegateWallet, stakePoolSettingsMap["DelegateWallet"], "Blobber DelegateWallet does not match")
+			require.Equal(t, int64(blobber.StakePoolSettings.NumDelegates), maxNumDelegatesNumber, "Blobber MaxNumDelegates does not match")
+			require.Equal(t, blobber.StakePoolSettings.ServiceCharge, serviceChargeRatioNumber, "Blobber ServiceChargeRatio does not match")
 			//require.Equal(t, blobber.ChallengesCompleted, dataMap["ChallengesCompleted"], "Blobber ChallengesCompleted does not match")
 	
 			
@@ -186,25 +219,39 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 				t.Log("Retrieved simple node from MPT")
 			}
 			
+			totalStakedNumber, err := simpleNodeMap["TotalStaked"].(json.Number).Int64()
+			if err != nil {
+				t.Errorf("Failed to convert totalStakedNumber to int64: %v", err)
+			}
 
+			lastHealthCheckNumber, err := simpleNodeMap["LastHealthCheck"].(json.Number).Int64()
+			if err != nil {
+				t.Errorf("Failed to convert totalStakedNumber to int64: %v", err)
+			}
+
+			lastSettingUpdateRoundNumber, err := simpleNodeMap["LastSettingUpdateRound"].(json.Number).Int64()
+			if err != nil {
+				t.Errorf("Failed to convert totalStakedNumber to int64: %v", err)
+			}
+
+			/*
+			roundServiceChargeLastUpdatedNumber, err := simpleNodeMap["RoundServiceChargeLastUpdated"].(json.Number).Int64()
+			if err != nil {
+				t.Errorf("Failed to convert roundServiceChargeLastUpdatedNumber to int64: %v", err)
+			}
+			*/
 		
-			require.Equal(t, sharder.BuildTag, simpleNodeMap["BuildTag"], "Blobber ID does not match")
-			require.Equal(t, sharder.Host, simpleNodeMap["Host"], "Blobber BaseURL does not match")
-			require.Equal(t, sharder.LastHealthCheck,  simpleNodeMap["LastHealthCheck"].(int64), "Blobber Capacity does not match")
-			require.Equal(t, sharder.LastSettingUpdateRound, simpleNodeMap["LastSettingUpdateRound"].(int64), "Blobber Allocated does not match")
-			//require.Equal(t, sharder.LastHealthCheck, lastHealthCheck, "Blobber LastHealthCheck does not match")
-			//require.Equal(t, blobber.TotalStake, dataMap["TotalStake"], "Blobber TotalStake does not match")
-			//require.Equal(t, blobber.SavedData, dataMap["SavedData"], "Blobber SavedData does not match")
-			//require.Equal(t, blobber.ReadData, dataMap["ReadData"], "Blobber ReadData does not match")
-			//require.Equal(t, blobber.ChallengesPassed, dataMap["ChallengesPassed"], "Blobber ChallengesPassed does not match")
-			//require.Equal(t, blobber.ChallengesCompleted, dataMap["ChallengesCompleted"], "Blobber ChallengesCompleted does not match")
-	
+			require.Equal(t, sharder.Host, simpleNodeMap["Host"], "sharder Host does not match")
+			require.Equal(t, sharder.BuildTag, simpleNodeMap["BuildTag"], "sharder BuildTag does not match")
+			require.Equal(t, sharder.TotalStaked, totalStakedNumber, "sharder TotalStake does not match")
+			require.Equal(t, sharder.LastHealthCheck,  lastHealthCheckNumber, "sharder LastHealthCheck does not match")
+			require.Equal(t, sharder.LastSettingUpdateRound, lastSettingUpdateRoundNumber, "sharder LastSettingUpdateRound does not match")
+			//require.Equal(t, sharder.RoundServiceChargeLastUpdated, roundServiceChargeLastUpdatedNumber, "sharder RoundServiceChargeLastUpdated does not match")	// Not in MPT
 				
-			
 		}
 	})
 
-	//  Test Case for Miners 
+	// III Test Case for Miners 
 	t.RunSequentially("Compare data in MPT with events DB for Miners", func(t *test.SystemTest) {
 		miners, resp, err := apiClient.V1SCRestGetAllMiners(t, client.HttpOkStatus)
 		require.NoError(t, err, "Failed to fetch miners")
@@ -216,11 +263,49 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			response, err := apiClient.HttpClient.R().Get(minerURL)
 			require.NoError(t, err, "Failed to fetch data for miner "+miner.ID)
 
-			var dataMap map[string]interface{}
-			err = json.Unmarshal(response.Body(), &dataMap)
-			require.NoError(t, err, "Failed to unmarshal response for miner "+miner.ID)
+
+			var dataMap customDataMap
+			// Unmarshal using the custom unmarshal logic.
+			if err := json.Unmarshal([]byte(response.Body()), &dataMap); err != nil {
+				t.Logf("Error unmarshalling JSON: %s", err)
+			}
+			t.Log(dataMap)
+			simpleNodeMap, ok  := dataMap["SimpleNode"].(map[string]interface{})
+			if ok {
+				t.Log("Retrieved simple node from MPT")
+			}
+			
 
 			
+			totalStakedNumber, err := simpleNodeMap["TotalStaked"].(json.Number).Int64()
+			if err != nil {
+				t.Errorf("Failed to convert totalStakedNumber to int64: %v", err)
+			}
+
+			lastHealthCheckNumber, err := simpleNodeMap["LastHealthCheck"].(json.Number).Int64()
+			if err != nil {
+				t.Errorf("Failed to convert totalStakedNumber to int64: %v", err)
+			}
+
+			lastSettingUpdateRoundNumber, err := simpleNodeMap["LastSettingUpdateRound"].(json.Number).Int64()
+			if err != nil {
+				t.Errorf("Failed to convert totalStakedNumber to int64: %v", err)
+			}
+
+			/*
+			roundServiceChargeLastUpdatedNumber, err := simpleNodeMap["RoundServiceChargeLastUpdated"].(json.Number).Int64()
+			if err != nil {
+				t.Errorf("Failed to convert roundServiceChargeLastUpdatedNumber to int64: %v", err)
+			}
+			*/
+		
+			require.Equal(t, miner.Host, simpleNodeMap["Host"], "miner Host does not match")
+			require.Equal(t, miner.BuildTag, simpleNodeMap["BuildTag"], "miner BuildTag does not match")
+			require.Equal(t, miner.TotalStaked, totalStakedNumber, "miner TotalStake does not match")
+			require.Equal(t, miner.LastHealthCheck,  lastHealthCheckNumber, "miner LastHealthCheck does not match")
+			require.Equal(t, miner.LastSettingUpdateRound, lastSettingUpdateRoundNumber, "miner LastSettingUpdateRound does not match")
+			//require.Equal(t, miner.RoundServiceChargeLastUpdated, roundServiceChargeLastUpdatedNumber, "miner RoundServiceChargeLastUpdated does not match")	// Not in MPT
+					
 		}
 	})
 
