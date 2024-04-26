@@ -120,12 +120,6 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			require.NoError(t, err, "Failed to fetch data from blobber")
 			require.NotNil(t, response, "Response from blobber should not be nil")
 
-			//var blobberMPT model.SCRestGetBlobberResponse
-			//err = json.Unmarshal([]byte(response.Body()), &blobberMPT)
-			//var dataMap map[string]interface{}
-			//err = json.Unmarshal(response.Body(), &dataMap)
-			//require.NoError(t, err, "Failed to unmarshal response into map")
-
 			var dataMap customDataMap
 			// Unmarshal using the custom unmarshal logic.
 			if err := json.Unmarshal([]byte(response.Body()), &dataMap); err != nil {
@@ -133,8 +127,6 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			}
 
 			t.Logf("*** Blobber Response Body from MPT datastructure ***")
-			//t.Log(blobberMPT)
-			t.Log(dataMap)
 			t.Log(dataMap)
 			t.Logf("***")
 
@@ -181,13 +173,11 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			require.Equal(t, blobber.Allocated, dataMap.GetInt64("Allocated"), "Blobber Allocated does not match")
 			require.Equal(t, blobber.LastHealthCheck, lastHealthCheckNumber, "Blobber LastHealthCheck does not match")
 			//require.Equal(t, blobber.PublicKey, dataMap.GetString("PublicKey"), "Blobber PublicKey does not match")	# Not in blobber DTO struct
-			//require.Equal(t, blobber.TotalStake, dataMap["TotalStake"], "Blobber TotalStake does not match")
 			require.Equal(t, blobber.Terms.ReadPrice, readPriceNumber, "Blobber ReadPrice does not match")
 			require.Equal(t, blobber.Terms.WritePrice, writePriceNumber, "Blobber WritePrice does not match")
 			require.Equal(t, blobber.StakePoolSettings.DelegateWallet, stakePoolSettingsMap["DelegateWallet"], "Blobber DelegateWallet does not match")
 			require.Equal(t, int64(blobber.StakePoolSettings.NumDelegates), maxNumDelegatesNumber, "Blobber MaxNumDelegates does not match")
 			require.Equal(t, blobber.StakePoolSettings.ServiceCharge, serviceChargeRatioNumber, "Blobber ServiceChargeRatio does not match")
-			//require.Equal(t, blobber.ChallengesCompleted, dataMap["ChallengesCompleted"], "Blobber ChallengesCompleted does not match")
 	
 			
 		}
@@ -325,7 +315,7 @@ func (cdm *customDataMap) UnmarshalJSON(data []byte) error {
         return err
     }
 
-    // Convert json.Number into int64 or float64 where necessary.
+    // Convert json.Number into int64 or float64
     for key, value := range temp {
         switch v := value.(type) {
         case json.Number:
