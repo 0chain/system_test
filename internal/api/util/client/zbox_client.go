@@ -536,6 +536,9 @@ func (c *ZboxClient) DeleteWalletForNumber(t *test.SystemTest, walletId int, cli
 			"X-CSRF-TOKEN":           csrfToken,
 			"X-APP-TYPE":             "blimp",
 		},
+		QueryParams: map[string]string{
+			"wallet_id": clientId,
+		},
 		RequiredStatusCode: 200,
 	}, HttpDELETEMethod)
 
