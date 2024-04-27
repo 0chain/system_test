@@ -22,7 +22,6 @@ var (
 type customDataMap map[string]interface{}
 
 func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
-
 	t := test.NewSystemTest(testSetup)
 	createWallet(t)
 
@@ -47,7 +46,6 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 		sharderBaseURLs[sharderID] = sharderURL
 
 		t.Log("Fetched blobber URL:", sharderURL)
-
 	}
 
 	// Fetch base URLs for all miners
@@ -65,14 +63,12 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 		minerBaseURLs[minerID] = minerURL
 
 		t.Log("Fetched miner URL:", minerURL)
-
 	}
 
 	// Fetch base URLs for all blobbers
 	blobberBaseURLs := make(map[string]string)
 
 	for _, blobberURL := range apiClient.HealthyServiceProviders.Blobbers {
-
 		parsedURL, err := url.Parse(blobberURL)
 		if err != nil {
 			fmt.Println("Error parsing URL:", err)
@@ -85,12 +81,10 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 		blobberBaseURLs[blobberID] = blobberURL
 
 		t.Log("Fetched blobber URL:", blobberURL)
-
 	}
 
 	// I - Test Case for Blobber
 	t.RunSequentially("Compare data in MPT with events DB for blobbers", func(t *test.SystemTest) {
-
 		// Fetch all blobbers from Events DB via "/v1/screst/:sc_address/getblobbers" endpoint
 		blobbers, resp, err := apiClient.V1SCRestGetAllBlobbers(t, client.HttpOkStatus)
 
@@ -168,9 +162,7 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			require.Equal(t, blobber.StakePoolSettings.DelegateWallet, stakePoolSettingsMap["DelegateWallet"], "Blobber DelegateWallet does not match")
 			require.Equal(t, int64(blobber.StakePoolSettings.NumDelegates), maxNumDelegatesNumber, "Blobber MaxNumDelegates does not match")
 			require.Equal(t, blobber.StakePoolSettings.ServiceCharge, serviceChargeRatioNumber, "Blobber ServiceChargeRatio does not match")
-
 		}
-
 	})
 
 	//  II - Test Case for Sharders
@@ -227,7 +219,6 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			require.Equal(t, sharder.LastSettingUpdateRound, lastSettingUpdateRoundNumber, "sharder LastSettingUpdateRound does not match")
 			//nolint: unused
 			// require.Equal(t, sharder.RoundServiceChargeLastUpdated, roundServiceChargeLastUpdatedNumber, "sharder RoundServiceChargeLastUpdated does not match")	// Not in MPT
-
 		}
 	})
 
@@ -285,11 +276,9 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			// require.Equal(t, miner.RoundServiceChargeLastUpdated, roundServiceChargeLastUpdatedNumber, "miner RoundServiceChargeLastUpdated does not match")	// Not in MPT
 		}
 	})
-
 }
 
 func (cdm *customDataMap) UnmarshalJSON(data []byte) error {
-
 	temp := map[string]interface{}{}
 
 	dec := json.NewDecoder(bytes.NewReader(data))
