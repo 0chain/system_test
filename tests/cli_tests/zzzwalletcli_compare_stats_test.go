@@ -35,7 +35,6 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 	sharderBaseURLs := make(map[string]string)
 
 	for _, sharderURL := range apiClient.HealthyServiceProviders.Sharders {
-
 		parsedURL, err := url.Parse(sharderURL)
 		if err != nil {
 			fmt.Println("Error parsing URL:", err)
@@ -53,9 +52,7 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 
 	// Fetch base URLs for all miners
 	minerBaseURLs := make(map[string]string)
-
 	for _, minerURL := range apiClient.HealthyServiceProviders.Miners {
-
 		parsedURL, err := url.Parse(minerURL)
 		if err != nil {
 			fmt.Println("Error parsing URL:", err)
@@ -215,6 +212,7 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 				t.Errorf("Failed to convert totalStakedNumber to int64: %v", err)
 			}
 
+			//nolint: unused
 			/*
 				roundServiceChargeLastUpdatedNumber, err := simpleNodeMap["RoundServiceChargeLastUpdated"].(json.Number).Int64()
 				if err != nil {
@@ -227,7 +225,8 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			require.Equal(t, sharder.TotalStaked, totalStakedNumber, "sharder TotalStake does not match")
 			require.Equal(t, sharder.LastHealthCheck, lastHealthCheckNumber, "sharder LastHealthCheck does not match")
 			require.Equal(t, sharder.LastSettingUpdateRound, lastSettingUpdateRoundNumber, "sharder LastSettingUpdateRound does not match")
-			// require.Equal(t, sharder.RoundServiceChargeLastUpdated, roundServiceChargeLastUpdatedNumber, "sharder RoundServiceChargeLastUpdated does not match")	// Not in MPT //nolint: unused
+			//nolint: unused
+			// require.Equal(t, sharder.RoundServiceChargeLastUpdated, roundServiceChargeLastUpdatedNumber, "sharder RoundServiceChargeLastUpdated does not match")	// Not in MPT
 
 		}
 	})
@@ -282,8 +281,8 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			require.Equal(t, miner.TotalStaked, totalStakedNumber, "miner TotalStake does not match")
 			require.Equal(t, miner.LastHealthCheck, lastHealthCheckNumber, "miner LastHealthCheck does not match")
 			require.Equal(t, miner.LastSettingUpdateRound, lastSettingUpdateRoundNumber, "miner LastSettingUpdateRound does not match")
-			// require.Equal(t, miner.RoundServiceChargeLastUpdated, roundServiceChargeLastUpdatedNumber, "miner RoundServiceChargeLastUpdated does not match")	// Not in MPT //nolint: unused
-
+			//nolint: unused
+			// require.Equal(t, miner.RoundServiceChargeLastUpdated, roundServiceChargeLastUpdatedNumber, "miner RoundServiceChargeLastUpdated does not match")	// Not in MPT
 		}
 	})
 
