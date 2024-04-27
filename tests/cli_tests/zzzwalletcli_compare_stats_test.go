@@ -165,7 +165,7 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			require.Equal(t, blobber.Capacity, dataMap.GetInt64("Capacity"), "Blobber Capacity does not match")
 			require.Equal(t, blobber.Allocated, dataMap.GetInt64("Allocated"), "Blobber Allocated does not match")
 			require.Equal(t, blobber.LastHealthCheck, lastHealthCheckNumber, "Blobber LastHealthCheck does not match")
-			//require.Equal(t, blobber.PublicKey, dataMap.GetString("PublicKey"), "Blobber PublicKey does not match")	# Not in blobber DTO struct
+			// require.Equal(t, blobber.PublicKey, dataMap.GetString("PublicKey"), "Blobber PublicKey does not match")	# Not in blobber DTO struct	//nolint: unused
 			require.Equal(t, blobber.Terms.ReadPrice, readPriceNumber, "Blobber ReadPrice does not match")
 			require.Equal(t, blobber.Terms.WritePrice, writePriceNumber, "Blobber WritePrice does not match")
 			require.Equal(t, blobber.StakePoolSettings.DelegateWallet, stakePoolSettingsMap["DelegateWallet"], "Blobber DelegateWallet does not match")
@@ -227,7 +227,7 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			require.Equal(t, sharder.TotalStaked, totalStakedNumber, "sharder TotalStake does not match")
 			require.Equal(t, sharder.LastHealthCheck, lastHealthCheckNumber, "sharder LastHealthCheck does not match")
 			require.Equal(t, sharder.LastSettingUpdateRound, lastSettingUpdateRoundNumber, "sharder LastSettingUpdateRound does not match")
-			//require.Equal(t, sharder.RoundServiceChargeLastUpdated, roundServiceChargeLastUpdatedNumber, "sharder RoundServiceChargeLastUpdated does not match")	// Not in MPT
+			// require.Equal(t, sharder.RoundServiceChargeLastUpdated, roundServiceChargeLastUpdatedNumber, "sharder RoundServiceChargeLastUpdated does not match")	// Not in MPT //nolint: unused
 
 		}
 	})
@@ -270,7 +270,7 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 				t.Errorf("Failed to convert totalStakedNumber to int64: %v", err)
 			}
 
-			/*
+			/*	//nolint: unused
 				roundServiceChargeLastUpdatedNumber, err := simpleNodeMap["RoundServiceChargeLastUpdated"].(json.Number).Int64()
 				if err != nil {
 					t.Errorf("Failed to convert roundServiceChargeLastUpdatedNumber to int64: %v", err)
@@ -282,7 +282,7 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			require.Equal(t, miner.TotalStaked, totalStakedNumber, "miner TotalStake does not match")
 			require.Equal(t, miner.LastHealthCheck, lastHealthCheckNumber, "miner LastHealthCheck does not match")
 			require.Equal(t, miner.LastSettingUpdateRound, lastSettingUpdateRoundNumber, "miner LastSettingUpdateRound does not match")
-			//require.Equal(t, miner.RoundServiceChargeLastUpdated, roundServiceChargeLastUpdatedNumber, "miner RoundServiceChargeLastUpdated does not match")	// Not in MPT
+			// require.Equal(t, miner.RoundServiceChargeLastUpdated, roundServiceChargeLastUpdatedNumber, "miner RoundServiceChargeLastUpdated does not match")	// Not in MPT //nolint: unused
 
 		}
 	})
@@ -302,8 +302,7 @@ func (cdm *customDataMap) UnmarshalJSON(data []byte) error {
 
 	// Convert json.Number into int64 or float64
 	for key, value := range temp {
-		switch v := value.(type) {
-		case json.Number:
+		if v, ok := value.(json.Number); ok {
 			if i, err := v.Int64(); err == nil {
 				temp[key] = i
 			} else if f, err := v.Float64(); err == nil {
