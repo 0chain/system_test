@@ -22,49 +22,23 @@ var (
 type customDataMap map[string]interface{}
 
 func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
-	t := test.NewSystemTest(testSetup)
+	t := setUpTest(testSetup)
 	createWallet(t)
-
 	t.Log("Default Config File ", configPath)
-
 	parsedConfig := config.Parse("./config/" + configPath)
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
 
-	// Fetch base URLs for all sharders
-	sharderBaseURLs := make(map[string]string)
+	compareBlobbersData(t)
+	compareShardersData(t)
+	compareMinersData(t)
+}
 
-	for _, sharderURL := range apiClient.HealthyServiceProviders.Sharders {
-		parsedURL, err := url.Parse(sharderURL)
-		if err != nil {
-			fmt.Println("Error parsing URL:", err)
-			continue
-		}
+func setUpTest(t *testing.T) *test.SystemTest {
+	tSetup := test.NewSystemTest(t)
+	return tSetup
+}
 
-		// Extract the last segment from the URL path as the blobber name
-		segments := strings.Split(parsedURL.Path, "/")
-		sharderID := segments[len(segments)-1]
-		sharderBaseURLs[sharderID] = sharderURL
-
-		t.Log("Fetched blobber URL:", sharderURL)
-	}
-
-	// Fetch base URLs for all miners
-	minerBaseURLs := make(map[string]string)
-	for _, minerURL := range apiClient.HealthyServiceProviders.Miners {
-		parsedURL, err := url.Parse(minerURL)
-		if err != nil {
-			fmt.Println("Error parsing URL:", err)
-			continue
-		}
-
-		// Extract the last segment from the URL path as the blobber name
-		segments := strings.Split(parsedURL.Path, "/")
-		minerID := segments[len(segments)-1]
-		minerBaseURLs[minerID] = minerURL
-
-		t.Log("Fetched miner URL:", minerURL)
-	}
-
+func compareBlobbersData(t *test.SystemTest) {
 	// Fetch base URLs for all blobbers
 	blobberBaseURLs := make(map[string]string)
 
@@ -164,7 +138,26 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			require.Equal(t, blobber.StakePoolSettings.ServiceCharge, serviceChargeRatioNumber, "Blobber ServiceChargeRatio does not match")
 		}
 	})
+}
 
+func compareShardersData(t *test.SystemTest) {
+	// Fetch base URLs for all sharders
+	sharderBaseURLs := make(map[string]string)
+
+	for _, sharderURL := range apiClient.HealthyServiceProviders.Sharders {
+		parsedURL, err := url.Parse(sharderURL)
+		if err != nil {
+			fmt.Println("Error parsing URL:", err)
+			continue
+		}
+
+		// Extract the last segment from the URL path as the blobber name
+		segments := strings.Split(parsedURL.Path, "/")
+		sharderID := segments[len(segments)-1]
+		sharderBaseURLs[sharderID] = sharderURL
+
+		t.Log("Fetched blobber URL:", sharderURL)
+	}
 	//  II - Test Case for Sharders
 	t.RunSequentially("Compare data in MPT with events DB for Sharders", func(t *test.SystemTest) {
 		sharders, resp, err := apiClient.V1SCRestGetAllSharders(t, client.HttpOkStatus)
@@ -211,6 +204,25 @@ func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
 			require.Equal(t, sharder.LastSettingUpdateRound, lastSettingUpdateRoundNumber, "sharder LastSettingUpdateRound does not match")
 		}
 	})
+}
+
+func compareMinersData(t *test.SystemTest) {
+	// Fetch base URLs for all miners
+	minerBaseURLs := make(map[string]string)
+	for _, minerURL := range apiClient.HealthyServiceProviders.Miners {
+		parsedURL, err := url.Parse(minerURL)
+		if err != nil {
+			fmt.Println("Error parsing URL:", err)
+			continue
+		}
+
+		// Extract the last segment from the URL path as the blobber name
+		segments := strings.Split(parsedURL.Path, "/")
+		minerID := segments[len(segments)-1]
+		minerBaseURLs[minerID] = minerURL
+
+		t.Log("Fetched miner URL:", minerURL)
+	}
 
 	// III Test Case for Miners
 	t.RunSequentially("Compare data in MPT with events DB for Miners", func(t *test.SystemTest) {
