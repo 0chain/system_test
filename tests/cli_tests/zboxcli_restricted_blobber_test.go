@@ -104,7 +104,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 				blobberAuthTickets += blobber1AuthTicket + ","
 			} else if i == 1 {
 				blobberAuthTickets += blobber2AuthTicket + ","
-			} else {
+			} else if i != len(blobbersList)-1 {
 				blobberAuthTickets += ","
 			}
 		}
@@ -152,7 +152,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 			preferredBlobbers += bb.Id + ","
 			if i == 0 {
 				blobberAuthTickets += "invalid,"
-			} else {
+			} else if i != len(blobbersList)-1 {
 				blobberAuthTickets += ","
 			}
 		}
