@@ -104,7 +104,7 @@ func TestListFileSystem(testSetup *testing.T) {
 		require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", fname)
+		expected := fmt.Sprintf("Status completed callback. Type = text/plain. Name = %s", fname)
 		require.Equal(t, expected, output[1], strings.Join(output, "\n"))
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{

@@ -97,7 +97,19 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		blobber2AuthTicket, err := getBlobberAuthTicket(t, blobber2.Id, blobber2.Url, wallet.ClientID)
 		require.Nil(t, err, "could not get blobber2 auth ticket")
 
-		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": blobber1.Id + "," + blobber2.Id, "blobber_auth_tickets": blobber1AuthTicket + "," + blobber2AuthTicket, "force": "true"}
+		var preferredBlobbers, blobberAuthTickets string
+		for i, bb := range blobbersList {
+			preferredBlobbers += bb.Id + ","
+			if i == 0 {
+				blobberAuthTickets += blobber1AuthTicket + ","
+			} else if i == 1 {
+				blobberAuthTickets += blobber2AuthTicket + ","
+			} else {
+				blobberAuthTickets += ","
+			}
+		}
+
+		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": preferredBlobbers, "blobber_auth_tickets": blobberAuthTickets, "force": "true"}
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -135,7 +147,17 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Contains(t, output[len(output)-1], "not enough blobbers to honor the allocation")
 
-		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": blobber.Id, "blobber_auth_tickets": "invalid"}
+		var preferredBlobbers, blobberAuthTickets string
+		for i, bb := range blobbersList {
+			preferredBlobbers += bb.Id + ","
+			if i == 0 {
+				blobberAuthTickets += "invalid,"
+			} else {
+				blobberAuthTickets += ","
+			}
+		}
+
+		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": preferredBlobbers, "blobber_auth_tickets": blobberAuthTickets}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))

@@ -73,7 +73,7 @@ func TestResumeUpload(testSetup *testing.T) {
 		require.Less(t, first, second) // Ensures upload didn't start from beginning
 		require.Len(t, output, 2)
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -234,7 +234,7 @@ func TestResumeUpload(testSetup *testing.T) {
 		//  asserting positive output
 		require.Nil(t, err, strings.Join(output, "\n"))
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = dummy",
+			"Status completed callback. Type = text/plain. Name = dummy",
 		)
 		require.Equal(t, expected, output[1])
 	})

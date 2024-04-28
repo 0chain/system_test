@@ -103,7 +103,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -240,7 +240,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -307,7 +307,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -382,7 +382,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -451,7 +451,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -610,7 +610,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
