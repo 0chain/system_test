@@ -234,7 +234,7 @@ func TestResumeUpload(testSetup *testing.T) {
 		//  asserting positive output
 		require.Nil(t, err, strings.Join(output, "\n"))
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = text/plain. Name = dummy",
+			"Status completed callback. Type = application/octet-stream. Name = dummy",
 		)
 		require.Equal(t, expected, output[1])
 	})
