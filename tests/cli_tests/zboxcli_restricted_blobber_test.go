@@ -161,7 +161,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 
 			preferredBlobbers += bb.Id + ","
 			if i == 0 {
-				blobberAuthTickets += "invalid,"
+				blobberAuthTickets += "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl,"
 			} else {
 				blobberAuthTickets += ","
 			}
