@@ -99,12 +99,17 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 
 		var preferredBlobbers, blobberAuthTickets string
 		for i, bb := range blobbersList {
+			if i == len(blobbersList)-1 {
+				preferredBlobbers += bb.Id
+				break
+			}
+
 			preferredBlobbers += bb.Id + ","
 			if i == 0 {
 				blobberAuthTickets += blobber1AuthTicket + ","
 			} else if i == 1 {
 				blobberAuthTickets += blobber2AuthTicket + ","
-			} else if i != len(blobbersList)-1 {
+			} else {
 				blobberAuthTickets += ","
 			}
 		}
@@ -149,10 +154,15 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 
 		var preferredBlobbers, blobberAuthTickets string
 		for i, bb := range blobbersList {
+			if i == len(blobbersList)-1 {
+				preferredBlobbers += bb.Id
+				break
+			}
+
 			preferredBlobbers += bb.Id + ","
 			if i == 0 {
 				blobberAuthTickets += "invalid,"
-			} else if i != len(blobbersList)-1 {
+			} else {
 				blobberAuthTickets += ","
 			}
 		}
