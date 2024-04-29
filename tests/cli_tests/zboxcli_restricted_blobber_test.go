@@ -171,7 +171,8 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Contains(t, output[len(output)-1], "not enough blobbers to honor the allocation")
+		require.Contains(t, output[len(output)-1], "Not enough blobbers to honor the allocation")
+		require.Contains(t, output[len(output)-1], "auth ticket verification failed")
 	})
 
 	t.RunSequentially("Update allocation with add restricted blobber should succeed", func(t *test.SystemTest) {
