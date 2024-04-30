@@ -45,7 +45,7 @@ func compareBlobbersData(t *test.SystemTest) {
 	for _, blobberURL := range apiClient.HealthyServiceProviders.Blobbers {
 		parsedURL, err := url.Parse(blobberURL)
 		if err != nil {
-			fmt.Println("Error parsing URL:", err)
+			t.Log("Error parsing URL:", err)
 			continue
 		}
 
@@ -147,7 +147,7 @@ func compareShardersData(t *test.SystemTest) {
 	for _, sharderURL := range apiClient.HealthyServiceProviders.Sharders {
 		parsedURL, err := url.Parse(sharderURL)
 		if err != nil {
-			fmt.Println("Error parsing URL:", err)
+			t.Log("Error parsing URL:", err)
 			continue
 		}
 
@@ -212,7 +212,7 @@ func compareMinersData(t *test.SystemTest) {
 	for _, minerURL := range apiClient.HealthyServiceProviders.Miners {
 		parsedURL, err := url.Parse(minerURL)
 		if err != nil {
-			fmt.Println("Error parsing URL:", err)
+			t.Log("Error parsing URL:", err)
 			continue
 		}
 
