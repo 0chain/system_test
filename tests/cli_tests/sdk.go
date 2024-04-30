@@ -62,7 +62,7 @@ func GetBlobberNotPartOfAllocation(walletname, configFile, allocationID string) 
 		return "", err
 	}
 
-	blobbers, err := sdk.GetBlobbers(true)
+	blobbers, err := sdk.GetBlobbers(true, false)
 	if err != nil {
 		return "", err
 	}

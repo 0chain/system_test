@@ -2,9 +2,11 @@ module github.com/0chain/system_test
 
 go 1.21
 
+toolchain go1.22.1
+
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.13.6
+	github.com/0chain/gosdk v1.14.0-RC2
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
