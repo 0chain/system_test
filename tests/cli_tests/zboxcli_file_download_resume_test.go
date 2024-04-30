@@ -70,7 +70,7 @@ func TestResumeDownload(testSetup *testing.T) {
 		idr = filepath.Join(idr, ".zcn")
 		hash := fnv.New64a()
 		hash.Write([]byte(remotepath + filepath.Base(filename)))
-		progressID := filepath.Join(idr, "download", allocationID[:8]+"_"+strconv.FormatUint(hash.Sum64(), 36))
+		progressID := filepath.Join(idr, "download", "d"+allocationID[:8]+"_"+strconv.FormatUint(hash.Sum64(), 36))
 
 		// Wait till more than 20% of the file is downloaded and send interrupt signal to command
 		downloaded, dp := waitPartialDownloadAndInterrupt(t, cmd, filename, progressID, filesize)
@@ -151,7 +151,7 @@ func waitPartialDownloadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd, filename
 			if err != nil {
 				continue
 			}
-			if dp.LastWrittenBlock > 500 {
+			if dp.LastWrittenBlock > 0 {
 				// Send interrupt signal to command
 				err := cmd.Process.Signal(os.Interrupt)
 				require.Nil(t, err)

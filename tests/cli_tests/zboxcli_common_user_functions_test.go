@@ -134,7 +134,7 @@ func uploadRandomlyGeneratedFileWithWallet(t *test.SystemTest, walletName, alloc
 	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 2)
-	require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
+	require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = text/plain. Name = (?P<Filename>.+)`), output[1])
 	return filename
 }
 

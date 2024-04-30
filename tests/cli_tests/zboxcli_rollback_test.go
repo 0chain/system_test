@@ -170,7 +170,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -275,7 +275,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
