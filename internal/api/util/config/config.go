@@ -36,6 +36,7 @@ type Config struct {
 	BlobberOwnerWalletMnemonics string `yaml:"blobber_owner_wallet_mnemonics"`
 	OwnerWalletMnemonics        string `yaml:"owner_wallet_mnemonics"`
 	DropboxAccessToken          string `yaml:"dropboxAccessToken"`
+	GdriveAccessToken           string `yaml:"gdrive_access_token"`
 }
 
 func Parse(configPath string) *Config {
