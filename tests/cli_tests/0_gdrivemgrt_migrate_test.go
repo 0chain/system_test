@@ -140,7 +140,6 @@ func Test0Gdrive(testSetup *testing.T) {
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Equal(t, output[0], "Error: Gdrive credentials missing", "Output was not as expected", strings.Join(output, "\n"))
 	})
-
 }
 
 func migrateFromGdrive(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {

@@ -186,7 +186,7 @@ func TestMain(m *testing.M) {
 		return
 	}
 
-	//Create a session with Dropbox
+	// Create a session with Dropbox
 	sess_dp, err_dp := session.NewSession(&aws.Config{
 		Credentials: credentials.NewStaticCredentials(
 			dropboxAccessToken, "", ""),
