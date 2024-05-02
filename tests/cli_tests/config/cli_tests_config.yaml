@@ -3,5 +3,5 @@ s3_access_key:
 s3_secret_key: 
 s3_bucket_name:
 s3_bucket_name_alternate: alternate-test-bucket
-dropboxAccessToken: sd
-gdriveAccessToken: sd
+dropboxAccessToken: 
+gdriveAccessToken:
