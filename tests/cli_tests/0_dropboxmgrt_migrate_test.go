@@ -140,7 +140,6 @@ func Test0Dropbox(testSetup *testing.T) {
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Equal(t, output[0], "Error: dropbox credentials missing", "Output was not as expected", strings.Join(output, "\n"))
 	})
-
 }
 
 func migrateFromDropbox(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
