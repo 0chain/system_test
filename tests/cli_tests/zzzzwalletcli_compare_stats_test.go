@@ -21,7 +21,7 @@ var (
 
 type customDataMap map[string]interface{}
 
-func TestCompareMPTAndEventsDBData(testSetup *testing.T) {
+func TestMonitoringCompareMPTAndEventsDBData(testSetup *testing.T) {
 	t := setUpTest(testSetup)
 	createWallet(t)
 	t.Log("Default Config File ", configPath)
