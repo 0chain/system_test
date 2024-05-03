@@ -104,14 +104,6 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 
 		createAllocationTestTeardown(t, allocationID)
 	})
-
-	t.Run("Create Allocation - Blobbers must lock appropriate amount of tokens in stake pool", func(t *test.SystemTest) {
-		t.Skip("To be covered after addition of stakePool table to eventsDB")
-	})
-
-	t.Run("Update Allocation - Blobbers' lock in stake pool must increase according to updated size", func(t *test.SystemTest) {
-		t.Skip("To be covered after addition of stakePool table to eventsDB")
-	})
 }
 
 func uploadRandomlyGeneratedFile(t *test.SystemTest, allocationID, remotePath string, fileSize int64, options ...string) string {
