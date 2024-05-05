@@ -93,7 +93,7 @@ func Test0Dropbox(testSetup *testing.T) {
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "invalid Dropbox token: invalid_access_token/", "Output was not as expected", err)
+		require.Contains(t, strings.Join(output, "\n"), "invalid Client token: invalid_access_token/", "Output was not as expected", err)
 	})
 
 	t.RunSequentially("Should fail when access key missing", func(t *test.SystemTest) {

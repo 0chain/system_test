@@ -195,11 +195,22 @@ func TestMain(m *testing.M) {
 	if err_dp != nil {
 		log.Fatalln("Failed to create Dropbox session:", err_dp)
 	}
-	// Create an S3 client
-	useDropbox := "true"
 
-	if useDropbox == "true" {
+	sess_gd, err_gd := session.NewSession(&aws.Config{
+		Credentials: credentials.NewStaticCredentials(
+			gdriveAccessToken, "", ""),
+	})
+
+	if err_gd != nil {
+		log.Fatalln("Failed to create Gdrive session:", err_dp)
+	}
+	// Create an S3 client
+	cloudService := os.Getenv("CLOUD_SERVICE")
+
+	if cloudService == "dropbox" {
 		S3Client = s3.New(sess_dp)
+	} else if cloudService == "gdrive" {
+		S3Client = s3.New(sess_gd)
 	} else {
 		S3Client = s3.New(sess)
 	}
