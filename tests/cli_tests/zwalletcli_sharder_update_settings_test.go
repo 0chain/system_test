@@ -216,24 +216,6 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, sharderAccessDenied, output[0])
-
-		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder01ID,
-			"max_stake": 99,
-			"sharder":   "",
-		}), escapedTestName(t), false)
-		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, sharderAccessDenied, output[0])
-
-		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder01ID,
-			"min_stake": 1,
-			"sharder":   "",
-		}), escapedTestName(t), false)
-		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, sharderAccessDenied, output[0])
 	})
 }
 

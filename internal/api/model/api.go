@@ -487,7 +487,8 @@ type ChallengeTiming struct {
 }
 
 type SCRestGetAllocationBlobbersResponse struct {
-	Blobbers *[]string `json:"blobbers"`
+	Blobbers           *[]string `json:"blobbers"`
+	BlobberAuthTickets []string  `json:"blobber_auth_tickets"`
 	BlobberRequirements
 }
 
@@ -541,6 +542,7 @@ type UpdateAllocationRequest struct {
 	Extend               bool   `json:"extend"`
 	SetImmutable         bool   `json:"set_immutable"`
 	AddBlobberId         string `json:"add_blobber_id"`
+	AddBlobberAuthTicket string `json:"add_blobber_auth_ticket"`
 	RemoveBlobberId      string `json:"remove_blobber_id"`
 	ThirdPartyExtendable bool   `json:"third_party_extendable"`
 	FileOptionsChanged   bool   `json:"file_options_changed"`

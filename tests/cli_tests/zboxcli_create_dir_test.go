@@ -105,10 +105,10 @@ func TestCreateDir(testSetup *testing.T) {
 
 		output, err := createDir(t, configPath, allocID, longDirName, false)
 		require.NotNil(t, err, "expected create dir failure command executed with output: ", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "Directory creation failed")
-		require.Contains(t, aggregatedOutput, "consensus_not_met")
+		require.Contains(t, aggregatedOutput, "ERROR: value too long for type character varying(100)")
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))

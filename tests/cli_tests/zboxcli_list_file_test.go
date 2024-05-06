@@ -1,10 +1,10 @@
 package cli_tests
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -104,7 +104,7 @@ func TestListFileSystem(testSetup *testing.T) {
 		require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", fname)
+		expected := fmt.Sprintf("Status completed callback. Type = text/plain. Name = %s", fname)
 		require.Equal(t, expected, output[1], strings.Join(output, "\n"))
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -598,7 +598,10 @@ func extractAuthToken(str string) (string, error) {
 
 func createFileWithSize(name string, size int64) error {
 	buffer := make([]byte, size)
-	rand.Read(buffer) //nolint:gosec,revive
+	_, err := rand.Read(buffer)
+	if err != nil {
+		return err
+	}
 	return os.WriteFile(name, buffer, os.ModePerm)
 }
 

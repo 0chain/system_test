@@ -47,7 +47,7 @@ func (c *BaseHttpClient) executeForServiceProvider(t *test.SystemTest, url strin
 	case HttpGETMethod:
 		resp, err = c.HttpClient.R().SetHeaders(executionRequest.Headers).SetQueryParams(executionRequest.QueryParams).Get(url)
 	case HttpDELETEMethod:
-		resp, err = c.HttpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetBody(executionRequest.Body).Delete(url)
+		resp, err = c.HttpClient.R().SetHeaders(executionRequest.Headers).SetFormData(executionRequest.FormData).SetQueryParams(executionRequest.QueryParams).SetBody(executionRequest.Body).Delete(url)
 	}
 
 	if err != nil {
