@@ -2,14 +2,8 @@ package cli_tests
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"os"
-	"regexp"
-	"strconv"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -117,7 +111,7 @@ func TestAuthorizerStake(testSetup *testing.T) {
 		createWallet(t)
 
 		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"authorizer_id": authorizer.ID,
+			"authorizer_id": miner01ID,
 			"tokens":        0,
 		}), false)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
