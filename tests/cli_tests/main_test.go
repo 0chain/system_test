@@ -93,12 +93,12 @@ const (
 )
 
 var (
-	miner01ID   string
-	miner02ID   string
-	miner03ID   string
-	sharder01ID string
-	sharder02ID string
-
+	miner01ID             string
+	miner02ID             string
+	miner03ID             string
+	sharder01ID           string
+	sharder02ID           string
+	authorizer01ID        string
 	ethereumNodeURL       string
 	tokenAddress          string
 	ethereumAddress       string

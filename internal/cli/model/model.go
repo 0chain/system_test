@@ -450,6 +450,10 @@ type MinerSCNodes struct {
 	Nodes []Node `json:"Nodes"`
 }
 
+type AutorizerNodes struct {
+	Nodes []Node `json:"Nodes"`
+}
+
 type MinerSCDelegatePoolInfo struct {
 	ID         string `json:"id"`
 	Balance    int64  `json:"balance"`
