@@ -111,7 +111,7 @@ func TestAuthorizerStake(testSetup *testing.T) {
 		createWallet(t)
 
 		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"authorizer_id": miner01ID,
+			"authorizer_id": authorizer01ID,
 			"tokens":        0,
 		}), false)
 		require.NotNil(t, err, "expected error when staking more tokens than max_stake but got output: ", strings.Join(output, "\n"))
@@ -170,7 +170,7 @@ func authorizerLockForWallet(t *test.SystemTest, cliConfigFilename, params, wall
 }
 
 func authorizerUnlock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
-	return minerOrSharderUnlockForWallet(t, cliConfigFilename, params, escapedTestName(t), retry)
+	return authorizerUnlockForWallet(t, cliConfigFilename, params, escapedTestName(t), retry)
 }
 
 func authorizerUnlockForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
