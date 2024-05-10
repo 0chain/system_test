@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -21,7 +22,11 @@ func TestAuthorizerStake(testSetup *testing.T) {
 	var authorizer climodel.Node
 	var authorizers climodel.AutorizerNodes
 	t.TestSetup("Get authorizer details", func() {
+		if _, err := os.Stat("./config/" + authorizer01NodeDelegateWallet + "_wallet.json"); err != nil {
+			t.Skipf("miner node owner wallet located at %s is missing", "./config/"+authorizer01NodeDelegateWallet+"_wallet.json")
+		}
 		output, err := listAuthorizer(t, configPath, "--json")
+		t.Log("list of authorizer " , output) 
 		require.NoError(t, err, "error listing authorizers")
 		require.Len(t, output, 1)
 
