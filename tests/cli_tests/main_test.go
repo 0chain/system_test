@@ -32,7 +32,7 @@ func setupDefaultConfig() {
 	viper.SetDefault("nodes.miner03ID", "c6f4b8ce5da386b278ba8c4e6cf98b24b32d15bc675b4d12c95e082079c91937")
 	viper.SetDefault("nodes.sharder01ID", "ea26431f8adb7061766f1d6bbcc3b292d70dd59960d857f04b8a75e6a5bbe04f")
 	viper.SetDefault("nodes.sharder02ID", "30001a01a888584772b7fee13934021ab8557e0ed471c0a3a454e9164180aef1")
-	viper.SetDefault("nodes.authorizer01ID", "d6e9b3222434faa043c683d1a939d6a0fa2818c4d56e794974d64a32005330d3")
+	viper.SetDefault("nodes.authorizer01ID", "7b07c0489e2f35d7c13160f4da2866b4aa69aa4e8d2b2cd9c4fc002693dca5d7")
 }
 
 // SetupConfig setups the main configuration system.
