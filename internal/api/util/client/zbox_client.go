@@ -322,8 +322,20 @@ func (c *ZboxClient) GetReferralCode(t *test.SystemTest, headers map[string]stri
 	urlBuilder.SetPath("/v2/referral/code/")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &ReferralCodeOfUser,
-		Headers:            headers,
+		Dst: &message,
+		Headers: map[string]string{
+			"X-App-Client-ID":        clientId,
+			"X-App-Client-Key":       clientKey,
+			"X-App-Client-Signature": clientSignature,
+			"X-App-Timestamp":        "1618213324",
+			"X-App-ID-TOKEN":         idToken,
+			"X-App-User-ID":          phoneNumber,
+			"X-CSRF-TOKEN":           csrfToken,
+			"X-APP-TYPE":             "blimp",
+		},
+		QueryParams: map[string]string{
+			"wallet_id": clientId,
+		},
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
