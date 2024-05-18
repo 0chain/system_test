@@ -12,8 +12,13 @@ type CSRFToken struct {
 	CSRFToken string `json:"csrf_token"`
 }
 
-type MessageContainer struct {
+type ZboxMessageResponse struct {
 	Message string `json:"message"`
+}
+
+type ZboxMessageDataResponse struct {
+	Message string          `json:"message"`
+	Data    []ZboxShareInfo `json:"data"`
 }
 
 type ZboxOwner struct {
@@ -95,10 +100,6 @@ type DexState struct {
 	Reference string `form:"reference" json:"reference" binding:"required"`
 }
 
-type ZboxMessageResponse struct {
-	Message string `json:"message"`
-}
-
 type ZboxUsername struct {
 	Username string `json:"username"`
 }
@@ -139,11 +140,6 @@ type ZboxShareInfo struct {
 	LookUpHash string `json:"lookup_hash"`
 	CreatedAt  string `json:"CreatedAt"`
 	UpdatedAt  string `json:"UpdatedAt"`
-}
-
-type ZboxShareInfoList struct {
-	MessageContainer
-	Data []ZboxShareInfo `json:"data"`
 }
 
 type ZboxNftCollection struct {

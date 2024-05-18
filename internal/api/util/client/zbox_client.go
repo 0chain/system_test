@@ -89,9 +89,9 @@ func (c *ZboxClient) CreateOwner(t *test.SystemTest, headers, owner map[string]s
 	return zboxOwner, resp, err
 }
 
-func (c *ZboxClient) UpdateOwner(t *test.SystemTest, headers, owner map[string]string) (*model.MessageContainer, *resty.Response, error) {
+func (c *ZboxClient) UpdateOwner(t *test.SystemTest, headers, owner map[string]string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("updating owner for userID [%v] using 0box...", headers["X-App-User-ID"])
-	var message *model.MessageContainer
+	var message *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -125,9 +125,9 @@ func (c *ZboxClient) GetOwner(t *test.SystemTest, headers map[string]string) (*m
 	return zboxOwner, resp, err
 }
 
-func (c *ZboxClient) DeleteOwner(t *test.SystemTest, headers map[string]string) (*model.MessageContainer, *resty.Response, error) {
+func (c *ZboxClient) DeleteOwner(t *test.SystemTest, headers map[string]string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("deleting owner for userID [%v] using 0box...", headers["X-App-User-ID"])
-	var message *model.MessageContainer
+	var message *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -162,9 +162,9 @@ func (c *ZboxClient) CreateWallet(t *test.SystemTest, headers, wallet map[string
 	return zboxWallet, resp, err
 }
 
-func (c *ZboxClient) UpdateWallet(t *test.SystemTest, headers, wallet map[string]string) (*model.MessageContainer, *resty.Response, error) {
+func (c *ZboxClient) UpdateWallet(t *test.SystemTest, headers, wallet map[string]string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("updating wallet for userID [%v] using 0box...", headers["X-App-User-ID"])
-	var message *model.MessageContainer
+	var message *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -315,6 +315,7 @@ func (c *ZboxClient) CreateFreeStorage(t *test.SystemTest, headers map[string]st
 func (c *ZboxClient) GetReferralCode(t *test.SystemTest, headers map[string]string) (model.ReferralCodeOfUser, *resty.Response, error) {
 	t.Log("Getting referral code...")
 	var ReferralCodeOfUser model.ReferralCodeOfUser
+	var message model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -322,20 +323,8 @@ func (c *ZboxClient) GetReferralCode(t *test.SystemTest, headers map[string]stri
 	urlBuilder.SetPath("/v2/referral/code/")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &message,
-		Headers: map[string]string{
-			"X-App-Client-ID":        clientId,
-			"X-App-Client-Key":       clientKey,
-			"X-App-Client-Signature": clientSignature,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
-		},
-		QueryParams: map[string]string{
-			"wallet_id": clientId,
-		},
+		Dst:                &message,
+		Headers:            headers,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
@@ -531,9 +520,9 @@ func (c *ZboxClient) GetGraphWritePrice(t *test.SystemTest, req *model.ZboxGraph
 	return &graphWritePrice, resp, err
 }
 
-func (c *ZboxClient) GetShareInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (model.ZboxShareInfoList, *resty.Response, error) {
+func (c *ZboxClient) GetShareInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber string) (model.ZboxMessageDataResponse, *resty.Response, error) {
 	t.Logf("Getting share Info for [%v] using 0box...", phoneNumber)
-	var ZboxShareInfoList model.ZboxShareInfoList
+	var ZboxShareInfoList model.ZboxMessageDataResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -563,9 +552,9 @@ func (c *ZboxClient) GetShareInfo(t *test.SystemTest, idToken, csrfToken, phoneN
 	return ZboxShareInfoList, resp, err
 }
 
-func (c *ZboxClient) PostShareInfo(t *test.SystemTest, authTicket, shareMessage, fromInfo, recieverClientId, idToken, csrfToken, phoneNumber string) (*model.MessageContainer, *resty.Response, error) {
+func (c *ZboxClient) PostShareInfo(t *test.SystemTest, authTicket, shareMessage, fromInfo, recieverClientId, idToken, csrfToken, phoneNumber string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("Posting ShareInfo using 0box...")
-	var message *model.MessageContainer
+	var message *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -597,9 +586,9 @@ func (c *ZboxClient) PostShareInfo(t *test.SystemTest, authTicket, shareMessage,
 	return message, resp, err
 }
 
-func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber, authTicket string) (*model.MessageContainer, *resty.Response, error) {
+func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber, authTicket string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("Deleting shareInfo for auth_ticket [%v] using 0box...", authTicket)
-	var message *model.MessageContainer
+	var message *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -642,7 +631,7 @@ func (c *ZboxClient) ContactWallet(t *test.SystemTest, reqBody, idToken, csrfTok
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &model.MessageContainer{},
+		Dst:      &model.ZboxMessageResponse{},
 		FormData: formData,
 		Headers: map[string]string{
 			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
