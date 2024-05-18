@@ -10,7 +10,7 @@ import (
 
 func NewTestAllocation() map[string]string {
 	return map[string]string{
-		"id":              "test_allocation",
+		"id":              "165f0f8e557c430929784035df7eeacf7a3ff795f10d76c8707409bba31cb617",
 		"description":     "test_allocation_description",
 		"name":            "test_allocation_name",
 		"allocation_type": "external_drive",
@@ -64,7 +64,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		allocInput["id"] = "new_allocation_id"
+		allocInput["id"] = "834d8db33f30952238d9ccc4eb7215ed39752b9686ed858aa7e9653f3d41e79b"
 		_, response, err = zboxClient.CreateAllocation(t, headers, allocInput)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -87,7 +87,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		allocInput["id"] = "new_allocation_id"
+		allocInput["id"] = "834d8db33f30952238d9ccc4eb7215ed39752b9686ed858aa7e9653f3d41e79b"
 		_, response, err = zboxClient.CreateAllocation(t, headers, allocInput)
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
