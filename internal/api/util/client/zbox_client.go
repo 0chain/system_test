@@ -233,9 +233,9 @@ func (c *ZboxClient) GetWalletList(t *test.SystemTest, headers map[string]string
 	return res, resp, err
 }
 
-func (c *ZboxClient) CreateAllocation(t *test.SystemTest, headers, allocation map[string]string) (model.ZboxAllocation, *resty.Response, error) {
+func (c *ZboxClient) CreateAllocation(t *test.SystemTest, headers, allocation map[string]string) (*model.ZboxAllocation, *resty.Response, error) {
 	t.Logf("Getting allocation for  allocationId [%v] using 0box...", allocation["id"])
-	var zboxAllocation model.ZboxAllocation
+	var zboxAllocation *model.ZboxAllocation
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -252,9 +252,9 @@ func (c *ZboxClient) CreateAllocation(t *test.SystemTest, headers, allocation ma
 	return zboxAllocation, resp, err
 }
 
-func (c *ZboxClient) UpdateAllocation(t *test.SystemTest, headers, allocation map[string]string) (model.ZboxMessageResponse, *resty.Response, error) {
+func (c *ZboxClient) UpdateAllocation(t *test.SystemTest, headers, allocation map[string]string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("Getting allocation for  allocationId [%v] using 0box...", allocation["id"])
-	var updateResponse model.ZboxMessageResponse
+	var updateResponse *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -271,9 +271,9 @@ func (c *ZboxClient) UpdateAllocation(t *test.SystemTest, headers, allocation ma
 	return updateResponse, resp, err
 }
 
-func (c *ZboxClient) GetAllocation(t *test.SystemTest, headers map[string]string, allocationID string) (model.ZboxAllocation, *resty.Response, error) {
+func (c *ZboxClient) GetAllocation(t *test.SystemTest, headers map[string]string, allocationID string) (*model.ZboxAllocation, *resty.Response, error) {
 	t.Logf("Getting allocation for  allocationId [%v] using 0box...", allocationID)
-	var zboxAllocation model.ZboxAllocation
+	var zboxAllocation *model.ZboxAllocation
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -328,10 +328,9 @@ func (c *ZboxClient) CreateFreeStorage(t *test.SystemTest, headers map[string]st
 	return ZboxFreeStorage, resp, err
 }
 
-func (c *ZboxClient) GetReferralCode(t *test.SystemTest, headers map[string]string) (model.ReferralCodeOfUser, *resty.Response, error) {
+func (c *ZboxClient) GetReferralCode(t *test.SystemTest, headers map[string]string) (*model.ReferralCodeOfUser, *resty.Response, error) {
 	t.Log("Getting referral code...")
-	var ReferralCodeOfUser model.ReferralCodeOfUser
-	var message model.ZboxMessageResponse
+	var referralCodeOfUser *model.ReferralCodeOfUser
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -339,17 +338,17 @@ func (c *ZboxClient) GetReferralCode(t *test.SystemTest, headers map[string]stri
 	urlBuilder.SetPath("/v2/referral/code/")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &message,
+		Dst:                &referralCodeOfUser,
 		Headers:            headers,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
-	return ReferralCodeOfUser, resp, err
+	return referralCodeOfUser, resp, err
 }
 
-func (c *ZboxClient) GetReferralCount(t *test.SystemTest, headers map[string]string) (model.ReferralCount, *resty.Response, error) {
+func (c *ZboxClient) GetReferralCount(t *test.SystemTest, headers map[string]string) (*model.ReferralCount, *resty.Response, error) {
 	t.Log("Getting referral count...")
-	var ReferralCountOfUser model.ReferralCount
+	var ReferralCountOfUser *model.ReferralCount
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -365,9 +364,9 @@ func (c *ZboxClient) GetReferralCount(t *test.SystemTest, headers map[string]str
 	return ReferralCountOfUser, resp, err
 }
 
-func (c *ZboxClient) GetLeaderBoard(t *test.SystemTest, headers map[string]string) (model.TopReferrerResponse, *resty.Response, error) {
+func (c *ZboxClient) GetLeaderBoard(t *test.SystemTest, headers map[string]string) (*model.TopReferrerResponse, *resty.Response, error) {
 	t.Logf("getting referral leader board")
-	var topReferrers model.TopReferrerResponse
+	var topReferrers *model.TopReferrerResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -383,9 +382,9 @@ func (c *ZboxClient) GetLeaderBoard(t *test.SystemTest, headers map[string]strin
 	return topReferrers, resp, err
 }
 
-func (c *ZboxClient) GetReferralRank(t *test.SystemTest, headers map[string]string) (model.ReferralRankOfUser, *resty.Response, error) {
+func (c *ZboxClient) GetReferralRank(t *test.SystemTest, headers map[string]string) (*model.ReferralRankOfUser, *resty.Response, error) {
 	t.Log("Getting referral rank...")
-	var ReferralRankOfUser model.ReferralRankOfUser
+	var ReferralRankOfUser *model.ReferralRankOfUser
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -440,7 +439,7 @@ func (c *ZboxClient) CreateDexState(t *test.SystemTest, headers, data map[string
 	return dexState, resp, err
 }
 
-func (c *ZboxClient) PutDexState(t *test.SystemTest, headers, data map[string]string) (*model.DexState, *resty.Response, error) {
+func (c *ZboxClient) UpdateDexState(t *test.SystemTest, headers, data map[string]string) (*model.DexState, *resty.Response, error) {
 	t.Log("Posting Dex state using 0box...")
 	var dexState *model.DexState
 
@@ -500,9 +499,9 @@ func (c *ZboxClient) GetGraphWritePrice(t *test.SystemTest, req *model.ZboxGraph
 	return &graphWritePrice, resp, err
 }
 
-func (c *ZboxClient) GetShareInfoShared(t *test.SystemTest, headers map[string]string) (model.ZboxMessageDataResponse, *resty.Response, error) {
+func (c *ZboxClient) GetShareInfoShared(t *test.SystemTest, headers map[string]string) (*model.ZboxMessageDataShareinfoResponse, *resty.Response, error) {
 	t.Logf("Getting share Info for [%v] using 0box...", headers["X-App-User-ID"])
-	var ZboxShareInfoList model.ZboxMessageDataResponse
+	var ZboxShareInfoList *model.ZboxMessageDataShareinfoResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -523,9 +522,9 @@ func (c *ZboxClient) GetShareInfoShared(t *test.SystemTest, headers map[string]s
 	return ZboxShareInfoList, resp, err
 }
 
-func (c *ZboxClient) GetShareInfoReceived(t *test.SystemTest, headers map[string]string) (model.ZboxMessageDataResponse, *resty.Response, error) {
+func (c *ZboxClient) GetShareInfoReceived(t *test.SystemTest, headers map[string]string) (*model.ZboxMessageDataShareinfoResponse, *resty.Response, error) {
 	t.Logf("Getting share Info for [%v] using 0box...", headers["X-App-User-ID"])
-	var ZboxShareInfoList model.ZboxMessageDataResponse
+	var ZboxShareInfoList *model.ZboxMessageDataShareinfoResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
@@ -546,7 +545,7 @@ func (c *ZboxClient) GetShareInfoReceived(t *test.SystemTest, headers map[string
 	return ZboxShareInfoList, resp, err
 }
 
-func (c *ZboxClient) CreateShareInfo(t *test.SystemTest, authTicket, shareMessage, fromInfo, recieverClientId, idToken, csrfToken, phoneNumber string) (*model.ZboxMessageResponse, *resty.Response, error) {
+func (c *ZboxClient) CreateShareInfo(t *test.SystemTest, headers, shareinfoData map[string]string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("Posting ShareInfo using 0box...")
 	var message *model.ZboxMessageResponse
 
@@ -555,33 +554,17 @@ func (c *ZboxClient) CreateShareInfo(t *test.SystemTest, authTicket, shareMessag
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/shareinfo")
 
-	formData := map[string]string{
-		"auth_ticket":        authTicket,
-		"message":            shareMessage,
-		"from_info":          fromInfo,
-		"receiver_client_id": recieverClientId,
-	}
-
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &message,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
-		},
-		RequiredStatusCode: 200,
+		Dst:                &message,
+		FormData:           shareinfoData,
+		Headers:            headers,
+		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
 	return message, resp, err
 }
 
-func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, phoneNumber, authTicket string) (*model.ZboxMessageResponse, *resty.Response, error) {
-	t.Logf("Deleting shareInfo for auth_ticket [%v] using 0box...", authTicket)
+func (c *ZboxClient) DeleteShareinfo(t *test.SystemTest, headers map[string]string, authTicket string) (*model.ZboxMessageResponse, *resty.Response, error) {
+	t.Logf("Posting ShareInfo using 0box...")
 	var message *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
@@ -589,106 +572,15 @@ func (c *ZboxClient) DeleteShareInfo(t *test.SystemTest, idToken, csrfToken, pho
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/shareinfo")
 
-	queryParams := map[string]string{
-		"auth_ticket": authTicket,
-	}
-
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:         &message,
-		QueryParams: queryParams,
-		Headers: map[string]string{
-			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
+		Dst: &message,
+		QueryParams: map[string]string{
+			"auth_ticket": authTicket,
 		},
+		Headers:            headers,
 		RequiredStatusCode: 200,
 	}, HttpDELETEMethod)
-
 	return message, resp, err
-}
-
-func (c *ZboxClient) ContactWallet(t *test.SystemTest, reqBody, idToken, csrfToken, phoneNumber string) (*resty.Response, error) {
-	t.Logf("Contacting wallets for [%v] using 0box...", phoneNumber)
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/contact/wallets")
-
-	formData := map[string]string{
-		"contacts": reqBody,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &model.ZboxMessageResponse{},
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9",
-			"X-App-Client-Key":       X_APP_CLIENT_KEY,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-APP-TYPE":             "blimp",
-		},
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return resp, err
-}
-
-func (c *ZboxClient) CheckPhoneExists(t *test.SystemTest, csrfToken, phoneNumber string) (model.ZboxResourceExist, *resty.Response, error) {
-	t.Logf("Checking if phone number [%v] exists using 0box...", phoneNumber)
-	var zboxWalletExists model.ZboxResourceExist
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/phone/exist")
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst: &zboxWalletExists,
-		Headers: map[string]string{
-			"X-App-User-ID": phoneNumber,
-			"X-CSRF-TOKEN":  csrfToken,
-			"X-APP-TYPE":    "blimp",
-		},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return zboxWalletExists, resp, err
-}
-
-func (c *ZboxClient) CheckWalletExists(t *test.SystemTest, walletName, csrfToken, phoneNumber string) (model.ZboxResourceExist, *resty.Response, error) {
-	t.Logf("Checking if wallet exists for [%v] using 0box...", phoneNumber)
-	var zboxWalletExists model.ZboxResourceExist
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/wallet/exist")
-	formData := map[string]string{
-		"wallet_name": walletName,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxWalletExists,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-User-ID": phoneNumber,
-			"X-CSRF-TOKEN":  csrfToken,
-			"X-APP-TYPE":    "blimp",
-		},
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
-
-	return zboxWalletExists, resp, err
 }
 
 func (c *ZboxClient) CreateNftCollection(t *test.SystemTest, headers, nfCollectionData map[string]string) (*model.ZboxNftCollection, *resty.Response, error) {
@@ -1390,72 +1282,4 @@ func (c *ZboxClient) GetGraphBlobberTotalRewards(t *test.SystemTest, blobberId s
 	}, HttpGETMethod)
 
 	return &data, resp, err
-}
-
-func (c *ZboxClient) PostOwnerWithReferralCode(t *test.SystemTest, idToken, csrfToken, phoneNumber, appType, userName string) (*model.ZboxOwner, *resty.Response, error) {
-	t.Logf("Posting owner using 0box...")
-	var zboxOwner *model.ZboxOwner
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/owner")
-
-	formData := map[string]string{
-		"username": userName,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxOwner,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID_R,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-App-Type":             appType,
-		},
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return zboxOwner, resp, err
-}
-
-func (c *ZboxClient) PostWalletWithReferralCode(t *test.SystemTest, mnemonic, walletName, walletDescription, idToken, csrfToken, phoneNumber, appType, userName, refCode string) (*model.ZboxWallet, *resty.Response, error) {
-	t.Logf("Posting wallet with referral code using 0box...")
-	var zboxWallet *model.ZboxWallet
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/wallet")
-
-	formData := map[string]string{
-		"mnemonic":    mnemonic,
-		"name":        walletName,
-		"description": walletDescription,
-		"refcode":     refCode,
-		"user_name":   userName,
-	}
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:      &zboxWallet,
-		FormData: formData,
-		Headers: map[string]string{
-			"X-App-Client-ID":        X_APP_CLIENT_ID_R,
-			"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
-			"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
-			"X-App-Timestamp":        "1618213324",
-			"X-App-ID-TOKEN":         idToken,
-			"X-App-User-ID":          phoneNumber,
-			"X-CSRF-TOKEN":           csrfToken,
-			"X-App-Type":             appType,
-		},
-		RequiredStatusCode: 200,
-	}, HttpPOSTMethod)
-
-	return zboxWallet, resp, err
 }

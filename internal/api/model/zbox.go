@@ -16,7 +16,7 @@ type ZboxMessageResponse struct {
 	Message string `json:"message"`
 }
 
-type ZboxMessageDataResponse struct {
+type ZboxMessageDataShareinfoResponse struct {
 	Message string          `json:"message"`
 	Data    []ZboxShareInfo `json:"data"`
 }

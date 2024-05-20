@@ -21,7 +21,6 @@ func Test0BoxReferral(testSetup *testing.T) {
 
 		zboxReferral, response, err := zboxClient.GetReferralCode(t, headers)
 		require.NoError(t, err)
-		require.NotNil(t, zboxReferral)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotNil(t, zboxReferral)
 		require.Len(t, zboxReferral.ReferrerCode, 14, "length of referral code should be 14")

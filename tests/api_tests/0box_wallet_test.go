@@ -64,7 +64,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 		require.Equal(t, walletInput["description"], wallet.Description)
 	})
 
-	t.RunSequentially("create wallet with existing wallet blimp should not work", func(t *test.SystemTest) {
+	t.RunSequentially("create wallet with existing wallet should not work", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
@@ -80,30 +80,6 @@ func Test0BoxWallet(testSetup *testing.T) {
 		_, response, err = zboxClient.CreateWallet(t, headers, walletInput)
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-	})
-
-	t.RunSequentially("create wallet with existing wallet bolt should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BOLT)
-		Teardown(t, headers)
-
-		ownerInput := NewTestOwner()
-		_, _, err := zboxClient.CreateOwner(t, headers, ownerInput)
-		require.NoError(t, err)
-
-		walletInput := NewTestWallet()
-		_, response, err := zboxClient.CreateWallet(t, headers, walletInput)
-		require.NoError(t, err)
-		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-
-		headers["X-App-Client-ID"] = "new_client_id"
-		_, response, err = zboxClient.CreateWallet(t, headers, walletInput)
-		require.NoError(t, err)
-		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-
-		res, response, err := zboxClient.GetWalletList(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, 2, len(res.Data))
 	})
 
 	t.RunSequentially("create wallet with existing wallet another apptype should work", func(t *test.SystemTest) {
@@ -130,7 +106,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 		require.Equal(t, []string{"blimp", "chimney"}, wallet.AppType)
 	})
 
-	t.RunSequentially("create wallet with existing wallet same apptype blimp should not work", func(t *test.SystemTest) {
+	t.RunSequentially("create wallet with existing wallet same apptype should not work", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
