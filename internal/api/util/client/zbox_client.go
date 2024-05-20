@@ -2,11 +2,12 @@ package client
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/test"
-	resty "github.com/go-resty/resty/v2"
+	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
-	"strconv"
 )
 
 const (

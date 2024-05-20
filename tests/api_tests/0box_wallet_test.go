@@ -1,10 +1,11 @@
 package api_tests
 
 import (
+	"testing"
+
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func NewTestWallet() map[string]string {

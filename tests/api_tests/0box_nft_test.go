@@ -1,17 +1,18 @@
 package api_tests
 
 import (
-	"fmt"
+	"testing"
+
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func NewTestNFTCollection() map[string]string {
 	return map[string]string{
-		"allocation_id":   "165f0f8e557c430929784035df7eeacf7a3ff795f10d76c8707409bba31cb617",
-		"auth_ticket":     "eyJjbGllbnRfaWQiOiIiLCJvd25lcl9pZCI6IjMxZjc0MGZiMTJjZjcyNDY0NDE5YTdlODYwNTkxMDU4YTI0OGIwMWUzNGIxM2NiZjcxZDVhMTA3YjdiZGMxZTkiLCJhbGxvY2F0aW9uX2lkIjoiZTBjMmNkMmQ1ZmFhYWQxM2ZjNTM3MzNkZDc1OTc0OWYyYjJmMDFhZjQ2MzMyMDA5YzY3ODIyMWEyYzQ4ODE1MyIsImZpbGVfcGF0aF9oYXNoIjoiZTcyNGEyMjAxZTIyNjUzZDMyMTY3ZmNhMWJmMTJiMmU0NGJhYzYzMzdkM2ViZGI3NDI3ZmJhNGVlY2FhNGM5ZCIsImFjdHVhbF9maWxlX2hhc2giOiIxZjExMjA4M2YyNDA1YzM5NWRlNTFiN2YxM2Y5Zjc5NWFhMTQxYzQwZjFkNDdkNzhjODNhNDk5MzBmMmI5YTM0IiwiZmlsZV9uYW1lIjoiSU1HXzQ4NzQuUE5HIiwicmVmZXJlbmNlX3R5cGUiOiJmIiwiZXhwaXJhdGlvbiI6MCwidGltZXN0YW1wIjoxNjY3MjE4MjcwLCJlbmNyeXB0ZWQiOmZhbHNlLCJzaWduYXR1cmUiOiIzMzllNTUyOTliNDhlMjI5ZGRlOTAyZjhjOTY1ZDE1YTk0MGIyNzc3YzVkOTMyN2E0Yzc5MTMxYjhhNzcxZTA3In0=",
+		"allocation_id": "165f0f8e557c430929784035df7eeacf7a3ff795f10d76c8707409bba31cb617",
+		"auth_ticket": "eyJjbGllbnRfaWQiOiIiLCJvd25lcl9pZCI6IjMxZjc0MGZiMTJjZjcyNDY0NDE5YTdlODYwNTkxMDU4YTI0OGIwMWUzNGIxM2NiZjcxZDVhMTA3YjdiZGMxZTkiLCJhbGxvY2F0aW9uX2lkIjoiZTBjMmNkMmQ1ZmFhYWQxM2ZjNTM3MzNkZDc1OTc0OWYyYjJmMDFhZjQ2Mz" +
+			"MyMDA5YzY3ODIyMWEyYzQ4ODE1MyIsImZpbGVfcGF0aF9oYXNoIjoiZTcyNGEyMjAxZTIyNjUzZDMyMTY3ZmNhMWJmMTJiMmU0NGJhYzYzMzdkM2ViZGI3NDI3ZmJhNGVlY2FhNGM5ZCIsImFjdHVhbF9maWxlX2hhc2giOiIxZjExMjA4M2YyNDA1YzM5NWRlNTFiN2YxM2Y5Zjc5NWFhMTQxYzQwZjFkNDdkNzhjODNhNDk5MzBmMmI5YTM0IiwiZmlsZV9uYW1lIjoiSU1HXzQ4NzQuUE5HIiwicmVmZXJlbmNlX3R5cGUiOiJmIiwiZXhwaXJhdGlvbiI6MCwidGltZXN0YW1wIjoxNjY3MjE4MjcwLCJlbmNyeXB0ZWQiOmZhbHNlLCJzaWduYXR1cmUiOiIzMzllNTUyOTliNDhlMjI5ZGRlOTAyZjhjOTY1ZDE1YTk0MGIyNzc3YzVkOTMyN2E0Yzc5MTMxYjhhNzcxZTA3In0=",
 		"collection_id":   "165f0f8e557c430929784035df7eeacf7a3ff795f10d76c8707409bba31cb617",
 		"created_by":      client.X_APP_CLIENT_ID,
 		"collection_name": "test_nft_collection",
@@ -20,8 +21,9 @@ func NewTestNFTCollection() map[string]string {
 
 func NewTestNFT() map[string]string {
 	return map[string]string{
-		"allocation_id":    "165f0f8e557c430929784035df7eeacf7a3ff795f10d76c8707409bba31cb617",
-		"auth_ticket":      "eyJjbGllbnRfaWQiOiIiLCJvd25lcl9pZCI6IjMxZjc0MGZiMTJjZjcyNDY0NDE5YTdlODYwNTkxMDU4YTI0OGIwMWUzNGIxM2NiZjcxZDVhMTA3YjdiZGMxZTkiLCJhbGxvY2F0aW9uX2lkIjoiZTBjMmNkMmQ1ZmFhYWQxM2ZjNTM3MzNkZDc1OTc0OWYyYjJmMDFhZjQ2MzMyMDA5YzY3ODIyMWEyYzQ4ODE1MyIsImZpbGVfcGF0aF9oYXNoIjoiZTcyNGEyMjAxZTIyNjUzZDMyMTY3ZmNhMWJmMTJiMmU0NGJhYzYzMzdkM2ViZGI3NDI3ZmJhNGVlY2FhNGM5ZCIsImFjdHVhbF9maWxlX2hhc2giOiIxZjExMjA4M2YyNDA1YzM5NWRlNTFiN2YxM2Y5Zjc5NWFhMTQxYzQwZjFkNDdkNzhjODNhNDk5MzBmMmI5YTM0IiwiZmlsZV9uYW1lIjoiSU1HXzQ4NzQuUE5HIiwicmVmZXJlbmNlX3R5cGUiOiJmIiwiZXhwaXJhdGlvbiI6MCwidGltZXN0YW1wIjoxNjY3MjE4MjcwLCJlbmNyeXB0ZWQiOmZhbHNlLCJzaWduYXR1cmUiOiIzMzllNTUyOTliNDhlMjI5ZGRlOTAyZjhjOTY1ZDE1YTk0MGIyNzc3YzVkOTMyN2E0Yzc5MTMxYjhhNzcxZTA3In0=",
+		"allocation_id": "165f0f8e557c430929784035df7eeacf7a3ff795f10d76c8707409bba31cb617",
+		"auth_ticket": "eyJjbGllbnRfaWQiOiIiLCJvd25lcl9pZCI6IjMxZjc0MGZiMTJjZjcyNDY0NDE5YTdlODYwNTkxMDU4YTI0OGIwMWUzNGIxM2NiZjcxZDVhMTA3YjdiZGMxZTkiLCJhbGxvY2F0aW9uX2lkIjoiZTBjMmNkMmQ1ZmFhYWQxM2ZjNTM3MzNkZDc1OTc0OWYyYjJmMDFhZjQ2Mz" +
+			"MyMDA5YzY3ODIyMWEyYzQ4ODE1MyIsImZpbGVfcGF0aF9oYXNoIjoiZTcyNGEyMjAxZTIyNjUzZDMyMTY3ZmNhMWJmMTJiMmU0NGJhYzYzMzdkM2ViZGI3NDI3ZmJhNGVlY2FhNGM5ZCIsImFjdHVhbF9maWxlX2hhc2giOiIxZjExMjA4M2YyNDA1YzM5NWRlNTFiN2YxM2Y5Zjc5NWFhMTQxYzQwZjFkNDdkNzhjODNhNDk5MzBmMmI5YTM0IiwiZmlsZV9uYW1lIjoiSU1HXzQ4NzQuUE5HIiwicmVmZXJlbmNlX3R5cGUiOiJmIiwiZXhwaXJhdGlvbiI6MCwidGltZXN0YW1wIjoxNjY3MjE4MjcwLCJlbmNyeXB0ZWQiOmZhbHNlLCJzaWduYXR1cmUiOiIzMzllNTUyOTliNDhlMjI5ZGRlOTAyZjhjOTY1ZDE1YTk0MGIyNzc3YzVkOTMyN2E0Yzc5MTMxYjhhNzcxZTA3In0=",
 		"collection_id":    "165f0f8e557c430929784035df7eeacf7a3ff795f10d76c8707409bba31cb617",
 		"owned_by":         client.X_APP_CLIENT_ID,
 		"stage":            "deploy_contract",
@@ -124,6 +126,7 @@ func Test0BoxNFT(testSetup *testing.T) {
 		Teardown(t, headers)
 
 		err := Create0boxTestAllocation(t, headers)
+		require.NoError(t, err)
 
 		nftCollectionData := NewTestNFTCollection()
 		_, response, err := zboxClient.CreateNftCollection(t, headers, nftCollectionData)
@@ -146,6 +149,7 @@ func Test0BoxNFT(testSetup *testing.T) {
 		Teardown(t, headers)
 
 		err := Create0boxTestAllocation(t, headers)
+		require.NoError(t, err)
 
 		nftCollectionData := NewTestNFTCollection()
 		_, response, err := zboxClient.CreateNftCollection(t, headers, nftCollectionData)
@@ -157,15 +161,12 @@ func Test0BoxNFT(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		fmt.Println("--------------- update nft ---------------")
-		fmt.Println(nft)
 		nftData["stage"] = "mint_nft"
 		_, response, err = zboxClient.UpdateNft(t, headers, nftData, nft.Id)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		nftList, response, err := zboxClient.GetAllNfts(t, headers)
-		fmt.Println(nftList)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, int64(1), nftList.NftCount)
@@ -177,7 +178,7 @@ func Test0BoxNFT(testSetup *testing.T) {
 		Teardown(t, headers)
 
 		err := Create0boxTestAllocation(t, headers)
-
+		require.NoError(t, err)
 		nftData := NewTestNFT()
 		nftData["stage"] = "mint_nft"
 		_, response, err := zboxClient.UpdateNft(t, headers, nftData, 1)

@@ -3,9 +3,10 @@ package api_tests
 import (
 	"encoding/base64"
 	"encoding/json"
-	"github.com/0chain/system_test/internal/api/util/client"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/util/client"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"gopkg.in/errgo.v2/errors"
