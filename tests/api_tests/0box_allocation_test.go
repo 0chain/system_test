@@ -17,9 +17,27 @@ func NewTestAllocation() map[string]string {
 	}
 }
 
+func Create0boxTestAllocation(t *test.SystemTest, headers map[string]string) error {
+	ownerInput := NewTestOwner()
+	_, _, err := zboxClient.CreateOwner(t, headers, ownerInput)
+	if err != nil {
+		return err
+	}
+	walletInput := NewTestWallet()
+	_, _, err = zboxClient.CreateWallet(t, headers, walletInput)
+	if err != nil {
+		return err
+	}
+	allocationInput := NewTestAllocation()
+	_, _, err = zboxClient.CreateAllocation(t, headers, allocationInput)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func Test0BoxAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.SetSmokeTests("List allocation with zero allocation should work")
 
 	t.RunSequentially("List allocation with zero allocation should work", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
@@ -183,5 +201,21 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, allocInput["description"], allocation.Description)
 		require.Equal(t, allocInput["name"], allocation.Name)
 		require.Equal(t, allocInput["allocation_type"], allocation.AllocationType)
+	})
+
+	t.RunSequentially("Update an allocation with allocation not present should not work", func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		Teardown(t, headers)
+
+		err := Create0boxTestWallet(t, headers)
+		require.NoError(t, err)
+
+		allocInput := NewTestAllocation()
+		allocInput["name"] = "new_alloc_name"
+		allocInput["description"] = "new_alloc_description"
+		updateResponse, response, err := zboxClient.UpdateAllocation(t, headers, allocInput)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, "no allocation was updated for these details", updateResponse.Message)
 	})
 }

@@ -17,7 +17,7 @@ func NewTestOwner() map[string]string {
 	return map[string]string{
 		"username":     "test_owner_1",
 		"email":        "test_email_1",
-		"phone_number": "test_phone_1",
+		"phone_number": "+919876543210",
 	}
 }
 
