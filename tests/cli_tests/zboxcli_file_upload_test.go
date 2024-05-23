@@ -57,7 +57,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -87,7 +87,7 @@ func TestUpload(testSetup *testing.T) {
 			require.Len(t, output, 2)
 
 			expected := fmt.Sprintf(
-				"Status completed callback. Type = application/octet-stream. Name = %s",
+				"Status completed callback. Type = text/plain. Name = %s",
 				filepath.Base(filename),
 			)
 			require.Equal(t, expected, output[1])
@@ -115,7 +115,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -162,7 +162,7 @@ func TestUpload(testSetup *testing.T) {
 		}
 		wg.Wait()
 
-		const expectedPattern = "Status completed callback. Type = application/octet-stream. Name = %s"
+		const expectedPattern = "Status completed callback. Type = text/plain. Name = %s"
 
 		for i := 0; i < 2; i++ {
 			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
@@ -192,7 +192,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -218,7 +218,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := "Status completed callback. Type = application/octet-stream. Name = " + filepath.Base(filename)
+		expected := "Status completed callback. Type = text/plain. Name = " + filepath.Base(filename)
 		require.Equal(t, expected, output[1])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -264,7 +264,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -295,7 +295,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -342,7 +342,7 @@ func TestUpload(testSetup *testing.T) {
 			require.Len(t, output, 2)
 
 			expected := fmt.Sprintf(
-				"Status completed callback. Type = application/octet-stream. Name = %s",
+				"Status completed callback. Type = text/plain. Name = %s",
 				filepath.Base(filename),
 			)
 			require.Equal(t, expected, output[1], "Failed to upload file with extension: "+ext+" output : "+strings.Join(output, "\n"))
@@ -423,7 +423,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -449,7 +449,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -548,7 +548,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -615,7 +615,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])

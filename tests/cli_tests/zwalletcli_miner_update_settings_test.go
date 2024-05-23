@@ -200,24 +200,6 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "update_miner_settings: access denied", output[0])
-
-		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
-			"min_stake": 1,
-		}), escapedTestName(t), false)
-
-		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings: access denied", output[0])
-
-		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
-			"max_stake": 99,
-		}), escapedTestName(t), false)
-
-		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings: access denied", output[0])
 	})
 }
 

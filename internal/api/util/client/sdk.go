@@ -237,7 +237,7 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, path, format string, 
 	require.NoError(t, err)
 
 	remoteName := filepath.Base(path)
-	remotePath := "/" + filepath.Join("", filepath.Base(path))
+	remotePath := "/" + filepath.Join(filepath.Dir(path), filepath.Base(path))
 	if path == "" {
 		remoteName = filepath.Base(tmpFile.Name())
 		remotePath = "/" + filepath.Join("", filepath.Base(tmpFile.Name()))
