@@ -95,11 +95,11 @@ func TestCreateDir(testSetup *testing.T) {
 		require.Equal(t, wantFile, files[0])
 	})
 
-	t.Run("create attempt with 101-char dirname", func(t *test.SystemTest) {
+	t.Run("create attempt with 151-char dirname", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		longDirName := "/"
-		for i := 0; i < 101; i++ {
+		for i := 0; i < 151; i++ {
 			longDirName += "a"
 		}
 
