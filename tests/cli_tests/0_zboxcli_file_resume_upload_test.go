@@ -73,7 +73,7 @@ func TestResumeUpload(testSetup *testing.T) {
 		require.Less(t, first, second) // Ensures upload didn't start from beginning
 		require.Len(t, output, 2)
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -124,7 +124,7 @@ func TestResumeUpload(testSetup *testing.T) {
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		//  asserting output
-		require.Contains(t, output[1], "Error in file operation: consensus_not_met: Commit failed. Required consensus 3, got 0")
+		require.Contains(t, output[1], "file_store_error: Error committing to file store. fixed_merkle_root_mismatch:")
 		require.Error(t, err)
 		////asserting error
 		expected := fmt.Sprintf(
