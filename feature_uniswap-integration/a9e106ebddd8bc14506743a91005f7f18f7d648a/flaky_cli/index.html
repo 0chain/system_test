@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Subset of 0Chain System test suite [feature_uniswap-integration/a9e106eb] ran against [dev-6.devnet-0chain.net] at [2024-05-27_10.24.31]</title>
+    <title>0Chain Flaky system test suite [feature_uniswap-integration/a9e106eb] ran against [dev-6.devnet-0chain.net] at [2024-05-27_10.24.31]</title>
     <style type="text/css">
         body {
             font-family: sans-serif;
@@ -234,32 +234,20 @@
 </head>
 <body>
 <div class="pageHeader">
-    <span class="projectTitle">Subset of 0Chain System test suite [feature_uniswap-integration/a9e106eb] ran against [dev-6.devnet-0chain.net] at [2024-05-27_10.24.31]</span>
+    <span class="projectTitle">0Chain Flaky system test suite [feature_uniswap-integration/a9e106eb] ran against [dev-6.devnet-0chain.net] at [2024-05-27_10.24.31]</span>
     <div class="testStats">
-        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>6</strong>Duration: <strong>0s</strong>
-        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>6</strong>
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>0</strong>Duration: <strong>0s</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>0</strong>
         </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
         </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
         </span>
     </div>
     <span class="testGroupsTitle">Test Groups:</span>
-    <span class="testExecutionDate">May 27, 2024 10:24:57</span>
+    <span class="testExecutionDate">May 27, 2024 10:25:07</span>
 </div>
 <div class="testReportContainer">
     <div class="cardContainer">
         <div id="testResults">
-            
-                <div class="testResultGroup  " id="0"></div>
-            
-                <div class="testResultGroup  " id="1"></div>
-            
-                <div class="testResultGroup  " id="2"></div>
-            
-                <div class="testResultGroup  " id="3"></div>
-            
-                <div class="testResultGroup  " id="4"></div>
-            
-                <div class="testResultGroup  " id="5"></div>
             
         </div>
     </div>
@@ -464,7 +452,7 @@ window.GoTestReport = function (elements) {
 
     
 
-    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBridgeBurn","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":18.11,"Output":["","--- PASS: TestBridgeBurn (18.11s)",""],"Passed":true,"Skipped":false,"TestFileName":"zwalletcli_zcnbridge_burn_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBridgeBurn/Burning_WZCN_tokens_on_balance,_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.45,"Output":["","    zwalletcli_zcnbridge_burn_test.go:24: Test case [Burning WZCN tokens on balance, should work] scheduled at [05-27-2024 10:24:36] \n","    system_test_framework.go:149: Test case [Burning WZCN tokens on balance, should work] start at [05-27-2024 10:24:36] \n","    zwalletcli_zcnbridge_burn_test.go:148: Burning WZCN tokens that will be minted for ZCN tokens...\n","    zwalletcli_zcnbridge_burn_test.go:24: Test case [Burning WZCN tokens on balance, should work] exit at [05-27-2024 10:24:39]\n","--- PASS: TestBridgeBurn/Burning_WZCN_tokens_on_balance,_should_work (3.45s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBridgeBurn/Burning_ZCN_tokens_with_available_ZCN_tokens_on_balance,_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":3.14,"Output":["","    zwalletcli_zcnbridge_burn_test.go:77: Test case [Burning ZCN tokens with available ZCN tokens on balance, should work] scheduled at [05-27-2024 10:24:48] \n","","","    system_test_framework.go:149: Test case [Burning ZCN tokens with available ZCN tokens on balance, should work] start at [05-27-2024 10:24:54] \n","2024/05/27 10:24:54 Creating wallet for TestBridgeBurn-Burning_ZCN_tokens_with_available_ZCN_tokens_on_balance,_should_work with walletIdx 502\n","File ./config/TestBridgeBurn-Burning_ZCN_tokens_with_available_ZCN_tokens_on_balance,_should_work_wallet.json written successfully.\n","    zwalletcli_zcnbridge_burn_test.go:129: Burning ZCN tokens that will be minted for WZCN tokens...\n","2024/05/27 10:24:54 ./zwallet bridge-burn-zcn --token 1 --path /root/actions-runner6/_work/system_test/system_test/tests/cli_tests/config --wallet TestBridgeBurn-Burning_ZCN_tokens_with_available_ZCN_tokens_on_balance,_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml\n","    zwalletcli_zcnbridge_burn_test.go:77: Test case [Burning ZCN tokens with available ZCN tokens on balance, should work] exit at [05-27-2024 10:24:57]\n","--- PASS: TestBridgeBurn/Burning_ZCN_tokens_with_available_ZCN_tokens_on_balance,_should_work (3.14s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBridgeBurn/Burning_ZCN_tokens_without_ZCN_tokens_on_balance,_shouldn't_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.08,"Output":["","    zwalletcli_zcnbridge_burn_test.go:70: Test case [Burning ZCN tokens without ZCN tokens on balance, shouldn't work] scheduled at [05-27-2024 10:24:48] \n","    system_test_framework.go:149: Test case [Burning ZCN tokens without ZCN tokens on balance, shouldn't work] start at [05-27-2024 10:24:48] \n","    zwalletcli_zcnbridge_burn_test.go:129: Burning ZCN tokens that will be minted for WZCN tokens...\n","2024/05/27 10:24:48 ./zwallet bridge-burn-zcn --token 1 --path /root/actions-runner6/_work/system_test/system_test/tests/cli_tests/config --wallet TestBridgeBurn-Burning_ZCN_tokens_without_ZCN_tokens_on_balance,_shouldn't_work_wallet.json --configDir ./config --config ./zbox_config.yaml\n","    zwalletcli_zcnbridge_burn_test.go:70: Test case [Burning ZCN tokens without ZCN tokens on balance, shouldn't work] exit at [05-27-2024 10:24:48]\n","--- PASS: TestBridgeBurn/Burning_ZCN_tokens_without_ZCN_tokens_on_balance,_shouldn't_work (0.08s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBridgeBurn/Get_WZCN_burn_ticket,_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":8.63,"Output":["","    zwalletcli_zcnbridge_burn_test.go:37: Test case [Get WZCN burn ticket, should work] scheduled at [05-27-2024 10:24:39] \n","    system_test_framework.go:149: Test case [Get WZCN burn ticket, should work] start at [05-27-2024 10:24:39] \n","    zwalletcli_zcnbridge_burn_test.go:148: Burning WZCN tokens that will be minted for ZCN tokens...\n","    zwalletcli_zcnbridge_burn_test.go:183: Get WZCN burn ticket...\n","    zwalletcli_zcnbridge_burn_test.go:37: Test case [Get WZCN burn ticket, should work] exit at [05-27-2024 10:24:48]\n","--- PASS: TestBridgeBurn/Get_WZCN_burn_ticket,_should_work (8.63s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBridgeBurn/Get_ZCN_burn_ticket,_should_work","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":5.95,"Output":["","    zwalletcli_zcnbridge_burn_test.go:85: Test case [Get ZCN burn ticket, should work] scheduled at [05-27-2024 10:24:48] \n","    system_test_framework.go:149: Test case [Get ZCN burn ticket, should work] start at [05-27-2024 10:24:48] \n","2024/05/27 10:24:48 Creating wallet for TestBridgeBurn-Get_ZCN_burn_ticket,_should_work with walletIdx 501\n","File ./config/TestBridgeBurn-Get_ZCN_burn_ticket,_should_work_wallet.json written successfully.\n","    zwalletcli_zcnbridge_burn_test.go:129: Burning ZCN tokens that will be minted for WZCN tokens...\n","2024/05/27 10:24:48 ./zwallet bridge-burn-zcn --token 1 --path /root/actions-runner6/_work/system_test/system_test/tests/cli_tests/config --wallet TestBridgeBurn-Get_ZCN_burn_ticket,_should_work_wallet.json --configDir ./config --config ./zbox_config.yaml\n","    zwalletcli_zcnbridge_burn_test.go:165: Get ZCN burn ticket...\n","    zwalletcli_zcnbridge_burn_test.go:85: Test case [Get ZCN burn ticket, should work] exit at [05-27-2024 10:24:54]\n","--- PASS: TestBridgeBurn/Get_ZCN_burn_ticket,_should_work (5.95s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+    const data =  null 
 
     const report = window.GoTestReport({
                                          data: data,
