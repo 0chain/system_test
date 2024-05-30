@@ -70,7 +70,7 @@ func TestFileDelete(testSetup *testing.T) {
 		}), true)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, `Delete failed. consensus_not_met: Multioperation failed. Required consensus 3 got 0. Major error: delete_failed: Delete failed. response_error: unexpected response with status code 400, message: {"error":"file was deleted"}`, output[0])
+		require.Equal(t, `Delete failed. delete_failed: Delete failed. response_error: unexpected response with status code 400, message: {"error":"file was deleted"}`, output[0])
 	})
 
 	t.Run("delete non-root directory with No existing file should work", func(t *test.SystemTest) {
