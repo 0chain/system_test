@@ -25,7 +25,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	// Faucet the used wallets
 
 	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
-	t.Logf("Owner balance: %v", ownerBalance)
+	t.Logf("ZboxOwner balance: %v", ownerBalance)
 	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
 	t.Logf("Blobber owner balance: %v", blobberOwnerBalance)
 	ownerWallet.Nonce = int(ownerBalance.Nonce)
@@ -1758,7 +1758,7 @@ func graphBlobberEndpointTestCases(endpoint model.ZboxGraphBlobberEndpoint, blob
 
 func PrintBalance(t *test.SystemTest, ownerWallet, blobberOwnerWallet, sdkWallet *model.Wallet) {
 	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
-	t.Logf("Owner balance: %v", ownerBalance)
+	t.Logf("ZboxOwner balance: %v", ownerBalance)
 	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
 	t.Logf("Blobber owner balance: %v", blobberOwnerBalance)
 	sdkWalletBalance := apiClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)

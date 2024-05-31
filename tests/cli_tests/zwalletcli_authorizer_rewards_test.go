@@ -18,8 +18,6 @@ import (
 
 func TestAuthorizerRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("Skip till fixed : https://github.com/0chain/system_test/issues/1042")
-	t.SetSmokeTests("Mint WZCN tokens")
 
 	t.RunSequentiallyWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {
 		err := tenderlyClient.InitBalance(ethereumAddress)
