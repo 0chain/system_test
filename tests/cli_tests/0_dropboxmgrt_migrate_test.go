@@ -153,7 +153,6 @@ func Test0Dropbox(testSetup *testing.T) {
 			})
 		}()
 	})
-
 }
 
 func migrateFromDropbox(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
