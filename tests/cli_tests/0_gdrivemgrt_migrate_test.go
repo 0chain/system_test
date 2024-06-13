@@ -56,7 +56,6 @@ func Test0Gdrive(testSetup *testing.T) {
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
-
 	})
 
 	t.RunSequentially("Should fail when folder does not exist", func(t *test.SystemTest) {
@@ -77,7 +76,6 @@ func Test0Gdrive(testSetup *testing.T) {
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
-
 	})
 
 	t.RunSequentially("Should fail when allocation flag missing", func(t *test.SystemTest) {
