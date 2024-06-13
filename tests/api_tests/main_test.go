@@ -47,7 +47,7 @@ func TestMain(m *testing.M) {
 	parsedConfig = config.Parse(configPath)
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
 	zs3Client = client.NewZS3Client(parsedConfig.ZS3ServerUrl)
-	zboxClient = client.NewZboxClient(parsedConfig.ZboxUrl, parsedConfig.ZboxPhoneNumber)
+	zboxClient = client.NewZboxClient(parsedConfig.ZboxUrl)
 	chimneyClient = client.NewAPIClient(parsedConfig.ChimneyTestNetwork)
 	chimneySdkClient = client.NewSDKClient(parsedConfig.ChimneyTestNetwork)
 	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)

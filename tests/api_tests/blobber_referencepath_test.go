@@ -46,10 +46,10 @@ func TestFileReferencePath(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus, resp)
-		require.Equal(t, blobberFileRefsResponse.Ref.Path, "/")
-		require.NotEmpty(t, blobberFileRefsResponse.Ref.Children)
-		require.Equal(t, blobberFileRefsResponse.Ref.Children[0].Path, remoteFilePath)
-		require.Equal(t, blobberFileRefsResponse.Ref.Children[0].Type, "f")
+		require.Equal(t, blobberFileRefsResponse.Meta["path"].(string), "/")
+		require.NotEmpty(t, blobberFileRefsResponse.List)
+		require.Equal(t, blobberFileRefsResponse.List[0].Meta["path"].(string), remoteFilePath)
+		require.Equal(t, blobberFileRefsResponse.List[0].Meta["type"], "f")
 
 		// TODO add more assertions once there blobber endpoints are documented
 	})
@@ -80,7 +80,7 @@ func TestFileReferencePath(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, blobberFileRefsResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus, resp)
-		require.NotNil(t, blobberFileRefsResponse.Ref)
+		require.NotNil(t, blobberFileRefsResponse.Meta)
 
 		// TODO add more assertions once there blobber endpoints are documented
 	})

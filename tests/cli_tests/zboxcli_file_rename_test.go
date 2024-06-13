@@ -351,7 +351,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("rename file to with 110-char (above 100-char filename limit) should fail", func(t *test.SystemTest) {
+	t.Run("rename file to with 160-char (above 150-char filename limit) should fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -362,7 +362,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		b := make([]rune, 110-4) // subtract chars for extension
+		b := make([]rune, 160-4) // subtract chars for extension
 		for i := range b {
 			b[i] = 'a'
 		}
@@ -394,7 +394,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "filename is longer than 100 characters")
+		require.Contains(t, output[0], "filename is longer than 150 characters")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
