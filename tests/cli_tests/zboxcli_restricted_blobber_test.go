@@ -315,7 +315,6 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, fref) // not nil when the file exists
 	})
-
 }
 
 func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID string) (string, error) {
