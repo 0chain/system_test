@@ -736,9 +736,9 @@ type ReadMarker struct {
 // holds result of repair size
 type RepairSize struct {
 	// upload size in bytes
-	UploadSize 		uint64 `json:"upload_size"`
+	UploadSize uint64 `json:"upload_size"`
 	// download size in bytes
-	DownloadSize	uint64	`json:"download_size"`
+	DownloadSize uint64 `json:"download_size"`
 }
 
 var StorageKeySettings = []string{
