@@ -800,7 +800,6 @@ type LatestWriteMarker struct {
 }
 
 type BlobberGetFileRefsResponse struct {
-	TotalPages        int                `json:"total_pages"`
 	OffsetPath        string             `json:"offset_path"`
 	Refs              []*RefsData        `json:"refs"`
 	LatestWriteMarker *LatestWriteMarker `json:"latest_write_marker"`
