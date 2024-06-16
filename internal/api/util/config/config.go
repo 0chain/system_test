@@ -34,6 +34,8 @@ type Config struct {
 	S3BucketNameAlternate       string `yaml:"s3_bucket_name_alternate"`
 	BlobberOwnerWalletMnemonics string `yaml:"blobber_owner_wallet_mnemonics"`
 	OwnerWalletMnemonics        string `yaml:"owner_wallet_mnemonics"`
+	DropboxAccessToken          string `yaml:"dropboxAccessToken"`
+	GdriveAccessToken           string `yaml:"gdriveAccessToken"`
 }
 
 func Parse(configPath string) *Config {
