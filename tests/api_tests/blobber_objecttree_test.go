@@ -46,8 +46,8 @@ func TestObjectTree(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, blobberObjectTreeResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus, resp)
-		require.Equal(t, blobberObjectTreeResponse.Ref.Path, remoteFilePath)
-		require.Equal(t, blobberObjectTreeResponse.Ref.Type, "f")
+		require.Equal(t, blobberObjectTreeResponse.Meta["path"].(string), remoteFilePath)
+		require.Equal(t, blobberObjectTreeResponse.Meta["type"].(string), "f")
 
 		// TODO add more assertions once there blobber endpoints are documented
 	})
@@ -78,7 +78,7 @@ func TestObjectTree(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, blobberObjectTreeResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus, resp)
-		require.NotNil(t, blobberObjectTreeResponse.Ref)
+		require.NotNil(t, blobberObjectTreeResponse.Meta)
 
 		// TODO add more assertions once there blobber endpoints are documented
 	})

@@ -853,7 +853,6 @@ type Ref struct {
 type BlobberFileRefPathResponse struct {
 	Meta map[string]interface{}        `json:"meta_data"`
 	List []*BlobberFileRefPathResponse `json:"list,omitempty"`
-	Ref  *Ref
 }
 
 type WriteMarker struct {
