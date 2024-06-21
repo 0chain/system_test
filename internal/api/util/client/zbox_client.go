@@ -1284,3 +1284,103 @@ func (c *ZboxClient) GetGraphBlobberTotalRewards(t *test.SystemTest, blobberId s
 
 	return &data, resp, err
 }
+
+func (c *ZboxClient) GetBlobbers(t *test.SystemTest, blobberIds string) ([]model.ZboxBlobber, *resty.Response, error) {
+	t.Logf("Getting blobbers using 0box...")
+	var data []model.ZboxBlobber
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/blobbers")
+	urlBuilder.queries.Set("blobber_ids", blobberIds)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return data, resp, err
+
+}
+
+func (c *ZboxClient) GetMiners(t *test.SystemTest, minerIds string) (*model.ZboxMinerList, *resty.Response, error) {
+	t.Logf("Getting miners using 0box...")
+	var data model.ZboxMinerList
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/miners")
+	urlBuilder.queries.Set("miner_ids", minerIds)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+
+}
+
+func (c *ZboxClient) GetSharders(t *test.SystemTest, sharderIds string) (*model.ZboxSharderList, *resty.Response, error) {
+	t.Logf("Getting sharders using 0box...")
+	var data model.ZboxSharderList
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/sharders")
+	urlBuilder.queries.Set("sharder_ids", sharderIds)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+
+}
+
+func (c *ZboxClient) GetAuthorizers(t *test.SystemTest, authorizerIds string) (*model.ZboxAuthorizerList, *resty.Response, error) {
+	t.Logf("Getting authorizers using 0box...")
+	var data model.ZboxAuthorizerList
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/authorizers")
+	urlBuilder.queries.Set("authorizer_ids", authorizerIds)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+
+}
+
+func (c *ZboxClient) GetValidators(t *test.SystemTest, validatorIds string) (*model.ZboxValidatorList, *resty.Response, error) {
+	t.Logf("Getting validators using 0box...")
+	var data model.ZboxValidatorList
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+
+	urlBuilder.SetPath("/v2/validators")
+	urlBuilder.queries.Set("validator_ids", validatorIds)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+
+}
