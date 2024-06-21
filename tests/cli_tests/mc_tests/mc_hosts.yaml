@@ -1,0 +1,14 @@
+# server: localhost
+# port: 8000
+# access_key: someminiouser
+# secret_key: someminiopassword
+# concurrent: 900
+# secondary_server: localhost
+# secondary_port: 8000
+server: 65.109.152.43
+port: 9001
+access_key: rootroot
+secret_key: rootroot
+concurrent: 900
+secondary_server: localhost
+secondary_port: 9002
