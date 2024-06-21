@@ -14,7 +14,7 @@ func TestZs3serverFanoutTests(testSetup *testing.T) {
 	log.Println("Running Warp Fanout Benchmark...")
 	t := test.NewSystemTest(testSetup)
 
-	server, host, accessKey, secretKey, concurrent := read_file(testSetup)
+	server, host, accessKey, secretKey, concurrent := cliutils.ReadFile(testSetup)
 
 	commandGenerated := "../warp fanout --copies=50 --obj.size=512KiB --host=" + server + ":" + host + " --access-key=" + accessKey + " --secret-key=" + secretKey + "  --concurrent " + concurrent + " --duration 30s" + " --obj.size 1KiB"
 	log.Println("Command Generated: ", commandGenerated)
@@ -30,7 +30,7 @@ func TestZs3serverFanoutTests(testSetup *testing.T) {
 	output_string = strings.Split(output_string, "warp: Starting cleanup")[0]
 
 	output_string = "Condition 1: Retention : objects: 1 \n--------\n" + output_string
-	err = appendToFile("warp-put_output.txt", output_string)
+	err = cliutils.AppendToFile("warp-put_output.txt", output_string)
 
 	if err != nil {
 		testSetup.Fatalf("Error appending to file: %v\n", err)

@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"testing"
 	"time"
+
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
 var allocationId string
@@ -62,7 +64,7 @@ func globalSetup() {
 	}
 
 	// create allocation from allocation.yaml file
-	data, parity, lock := read_file_allocation()
+	data, parity, lock := cliutils.Read_file_allocation()
 	cmd := exec.Command("../zbox", "newallocation", "--lock", lock, "--data", data, "--parity", parity)
 
 	// get the allocation id for created
