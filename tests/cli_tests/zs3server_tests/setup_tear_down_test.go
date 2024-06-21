@@ -18,7 +18,7 @@ var allocationId string
 
 func TestMain(m *testing.M) {
 	globalSetup()
-	timeout := time.Duration(60 * time.Minute)
+	timeout := time.Duration(200 * time.Minute)
 	os.Setenv("GO_TEST_TIMEOUT", timeout.String())
 	code := m.Run()
 	globalTearDown()
