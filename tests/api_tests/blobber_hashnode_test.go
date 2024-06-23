@@ -31,7 +31,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 
 		blobberUrl := getBlobberURL(usedBlobberID, allocation.Blobbers)
 
-		sign, err := crypto.SignHashUsingSignatureScheme(crypto.Sha3256([]byte(allocation.ID+blobberUrl)), "bls0chain", []*model.KeyPair{wallet.Keys})
+		sign, err := crypto.SignHashUsingSignatureScheme(crypto.Sha3256([]byte(allocation.Tx+blobberUrl)), "bls0chain", []*model.KeyPair{wallet.Keys})
 		require.Nil(t, err)
 
 		blobberRequest := &model.BlobberGetHashnodeRequest{
