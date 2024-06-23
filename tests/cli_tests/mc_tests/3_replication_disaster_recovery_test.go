@@ -76,8 +76,15 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 
 	t.RunSequentially("Test for Disaster Recovery", func(t *test.SystemTest) {
 		// creating two server
-		_, _ = cli_utils.RunCommand(t, "../mc alias set primary "+server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2", 1, time.Hour*2)
-		_, _ = cli_utils.RunCommand(t, "../mc alias set secondary "+s_server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2", 1, time.Hour*2)
+		commandGenerated := "../mc alias set primary "+server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2"
+		t.Log("command :: ", commandGenerated)
+
+		_, _ = cli_utils.RunCommand(t, commandGenerated, 1, time.Hour*2)
+
+		commandGenerated = "../mc alias set secondary "+s_server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2"
+
+		t.Log("command :: ", commandGenerated)
+		_, _ = cli_utils.RunCommand(t, commandGenerated, 1, time.Hour*2)
 
 		// create bucket in primary
 		_, _ = cli_utils.RunCommand(t, "../mc mb primary/mybucket", 1, time.Hour*2)
