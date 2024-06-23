@@ -51,7 +51,7 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 	server, port, accessKey, secretKey, _, s_port, s_server := read_file_mc(testSetup)
 	// run minio server
 	log.Print(s_port)
-	cmd := exec.Command("./minio", "gateway", "zcn", "--console-address", ":8000")
+	cmd := exec.Command("../minio", "gateway", "zcn", "--console-address", ":8000")
 
 	err := cmd.Start()
 	if err != nil {
