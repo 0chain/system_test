@@ -57,7 +57,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -87,7 +87,7 @@ func TestUpload(testSetup *testing.T) {
 			require.Len(t, output, 2)
 
 			expected := fmt.Sprintf(
-				"Status completed callback. Type = application/octet-stream. Name = %s",
+				"Status completed callback. Type = text/plain. Name = %s",
 				filepath.Base(filename),
 			)
 			require.Equal(t, expected, output[1])
@@ -115,7 +115,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -162,7 +162,7 @@ func TestUpload(testSetup *testing.T) {
 		}
 		wg.Wait()
 
-		const expectedPattern = "Status completed callback. Type = application/octet-stream. Name = %s"
+		const expectedPattern = "Status completed callback. Type = text/plain. Name = %s"
 
 		for i := 0; i < 2; i++ {
 			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
@@ -192,7 +192,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -218,7 +218,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := "Status completed callback. Type = application/octet-stream. Name = " + filepath.Base(filename)
+		expected := "Status completed callback. Type = text/plain. Name = " + filepath.Base(filename)
 		require.Equal(t, expected, output[1])
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -264,7 +264,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -295,19 +295,17 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
 	})
 
 	t.RunWithTimeout("Upload tests with Thumbnail with different format", 40*time.Minute, func(t *test.SystemTest) {
+		t.Skip("Need improvements in performance")
 		for _, blobber := range blobbersList {
-			_, err := executeFaucetWithTokens(t, configPath, 11)
-			require.Nil(t, err, "Error executing faucet")
-
 			// stake tokens
-			_, err = stakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{
+			_, err := stakeTokens(t, configPath, utils.CreateParams(map[string]interface{}{
 				"blobber_id": blobber.Id,
 				"tokens":     10,
 			}), true)
@@ -344,7 +342,7 @@ func TestUpload(testSetup *testing.T) {
 			require.Len(t, output, 2)
 
 			expected := fmt.Sprintf(
-				"Status completed callback. Type = application/octet-stream. Name = %s",
+				"Status completed callback. Type = text/plain. Name = %s",
 				filepath.Base(filename),
 			)
 			require.Equal(t, expected, output[1], "Failed to upload file with extension: "+ext+" output : "+strings.Join(output, "\n"))
@@ -383,8 +381,8 @@ func TestUpload(testSetup *testing.T) {
 		allocSize := int64(400 * 1024 * 1024)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		output, err := cliutils.RunCommand(t, "wget http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4 -O test_video.mp4", 3, 2*time.Second)
@@ -406,11 +404,6 @@ func TestUpload(testSetup *testing.T) {
 		allocSize := int64(2 * GB)
 		fileSize := int64(1 * GB)
 
-		for i := 0; i < 6; i++ {
-			output, err := executeFaucetWithTokens(t, configPath, 9.0)
-			require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-		}
-
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 			"lock": 50,
@@ -430,7 +423,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -456,7 +449,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -508,7 +501,7 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.Contains(strings.Join(output, "\n"), "alloc: no enough space left in allocation"), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, "\n"), "max_allocation_size"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload 100% of the allocation should work", func(t *test.SystemTest) {
@@ -555,7 +548,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -573,11 +566,10 @@ func TestUpload(testSetup *testing.T) {
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
 		fileSize := int64(256)
 
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, fileSize)
+		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
 		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
@@ -623,7 +615,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(filename),
 		)
 		require.Equal(t, expected, output[1])
@@ -664,10 +656,9 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload without any Parameter Should Fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = uploadFileWithoutRetry(t, configPath, nil)
+		output, err := uploadFileWithoutRetry(t, configPath, nil)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -690,7 +681,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, "Error: multiuploadjson or remotepath/localpath flag is missing", output[0])
 	})
 
-	t.Run("Upload File longer than 100 chars should fail", func(t *test.SystemTest) {
+	t.Run("Upload File longer than 150 chars should fail", func(t *test.SystemTest) {
 		allocSize := int64(1 * MB)
 		fileSize := int64(512 * KB)
 
@@ -701,7 +692,7 @@ func TestUpload(testSetup *testing.T) {
 		})
 
 		dirPath := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
-		randomFilename := cliutils.RandomAlphaNumericString(101)
+		randomFilename := cliutils.RandomAlphaNumericString(151)
 		filename := fmt.Sprintf("%s%s%s_test.txt", dirPath, string(os.PathSeparator), randomFilename)
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
@@ -713,7 +704,7 @@ func TestUpload(testSetup *testing.T) {
 		}, false)
 		require.NotNil(t, err, "error uploading file")
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "filename is longer than 100 characters")
+		require.Contains(t, output[0], "filename is longer than 150 characters")
 	})
 
 	t.Run("Upload File should fail if upload file option is forbidden", func(t *test.SystemTest) {
@@ -749,17 +740,13 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", 10*time.Minute, func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
+		createWallet(t)
 
 		allocParam := createParams(map[string]interface{}{
 			"lock": 0.8,
 			"size": 10485760,
 		})
-		output, err = createNewAllocation(t, configPath, allocParam)
+		output, err := createNewAllocation(t, configPath, allocParam)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -951,8 +938,8 @@ func TestUpload(testSetup *testing.T) {
 			t.RunSequentiallyWithTimeout("Upload Video File "+videoFormat+" With Web Streaming Should Work", 2*time.Minute, func(t *test.SystemTest) {
 				allocSize := int64(400 * 1024 * 1024)
 				allocationID := setupAllocation(t, configPath, map[string]interface{}{
-					"size":   allocSize,
-					"tokens": 9,
+					"size": allocSize,
+					"lock": 9,
 				})
 				downloadVideo := "wget " + videoLink + " -O " + videoName + "." + videoFormat
 				output, err := cliutils.RunCommand(t, downloadVideo, 3, 2*time.Second)

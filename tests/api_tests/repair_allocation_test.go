@@ -1,8 +1,13 @@
 package api_tests
 
 import (
+	"crypto/rand"
+	"fmt"
+	"math/big"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
@@ -13,17 +18,23 @@ import (
 
 func TestRepairAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-	apiClient.CreateReadPool(t, sdkWallet, 0.5, client.TxSuccessfulStatus)
-	t.RunSequentially("Repair allocation after single upload should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+	wallet := initialisedWallets[walletIdx]
+	walletIdx++
+	balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+	wallet.Nonce = int(balance.Nonce)
+
+	sdkClient.SetWallet(t, wallet)
+
+	apiClient.CreateReadPool(t, wallet, 0.5, client.TxSuccessfulStatus)
+
+	t.RunSequentially("Repair allocation after single upload should work", func(t *test.SystemTest) {
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
 		blobberRequirements.Size = 2056
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -38,13 +49,11 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after multiple uploads should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -66,14 +75,12 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after update should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 6096
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -98,14 +105,12 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after delete should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 2056
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -124,14 +129,12 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after move should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 6096
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -151,14 +154,12 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after copy should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 8096
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -180,14 +181,12 @@ func TestRepairAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Repair allocation after rename should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
-
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 6096
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err)
@@ -204,5 +203,247 @@ func TestRepairAllocation(testSetup *testing.T) {
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, "/"+newName)
 		require.Nil(t, err)
+	})
+
+	t.RunSequentially("Repair allocation should work with multiple 100MB file", func(t *test.SystemTest) {
+		fileSize := int64(1024 * 1024 * 10) // 100MB
+		numOfFile := int64(4)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
+		blobberRequirements.Size = 2 * numOfFile * int64(fileSize)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoError(t, err)
+		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
+		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
+
+		ops := make([]sdk.OperationRequest, 0, 4)
+		for i := 0; i < int(numOfFile); i++ {
+			path := fmt.Sprintf("dummy_%d", i)
+			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
+			ops = append(ops, op)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+
+		sdkClient.RepairAllocation(t, allocationID)
+		for _, op := range ops {
+			_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
+			require.Nil(t, err)
+		}
+	})
+
+	t.RunSequentiallyWithTimeout("Repair allocation should work with multiple 500MB file", 10*time.Minute, func(t *test.SystemTest) {
+		fileSize := int64(1024 * 1024 * 500) // 500MB
+		numOfFile := int64(4)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
+		blobberRequirements.Size = 2 * numOfFile * fileSize
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoError(t, err)
+		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
+		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
+
+		ops := make([]sdk.OperationRequest, 0, 4)
+		for i := 0; i < int(numOfFile); i++ {
+			path := fmt.Sprintf("dummy_%d", i)
+			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
+			ops = append(ops, op)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+
+		sdkClient.RepairAllocation(t, allocationID)
+		for _, op := range ops {
+			_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
+			require.Nil(t, err)
+		}
+	})
+
+	t.RunSequentiallyWithTimeout("Repair allocation should work with multiple combination of file type & size", 10*time.Minute, func(t *test.SystemTest) {
+		fileSize := int64(1024 * 1024 * 500) // 500MB
+		numOfFile := int64(4)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
+		blobberRequirements.Size = 2 * numOfFile * fileSize
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoError(t, err)
+		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
+		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
+
+		ops := make([]sdk.OperationRequest, 0, 4)
+		for i := 0; i < int(numOfFile); i++ {
+			path := fmt.Sprintf("dummy_%d", i)
+			format := ""
+			if i%2 == 0 {
+				format = "pdf"
+				fileSize = int64(1024 * 1024 * 300)
+			}
+			op := sdkClient.AddUploadOperation(t, path, format, fileSize)
+			ops = append(ops, op)
+		}
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+
+		sdkClient.RepairAllocation(t, allocationID)
+		for _, op := range ops {
+			_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
+			require.Nil(t, err)
+		}
+	})
+
+	t.RunSequentiallyWithTimeout("Repair allocation should work with multiple combination of file type & size & nested folders", 10*time.Minute, func(t *test.SystemTest) {
+		fileSize := int64(1024 * 1024 * 1000) // 1 GB
+		numOfFile := int64(10)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
+		blobberRequirements.Size = 2 * numOfFile * fileSize
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoError(t, err)
+		lastBlobber := alloc.Blobbers[len(alloc.Blobbers)-1]
+		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
+
+		ops := make([]sdk.OperationRequest, 0, 4)
+
+		for i := 0; i < int(numOfFile); i++ {
+			numOfNestedFolders, err := rand.Int(rand.Reader, big.NewInt(20))
+			require.Nil(t, err)
+			folderStructure := fmt.Sprintf("test_%d/", i)
+			path := strings.Repeat(folderStructure, int(numOfNestedFolders.Int64()))
+
+			switch {
+			case i%5 == 0:
+				fileSize = int64(1024 * 1024 * 500)
+			case i%3 == 0:
+				fileSize = int64(1024 * 1024 * 300)
+			case i%2 == 0:
+				fileSize = int64(1024 * 1024 * 200)
+			}
+			// for default case size would be 1 GB
+			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
+			ops = append(ops, op)
+		}
+
+		t.Log(ops)
+
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+
+		sdkClient.RepairAllocation(t, allocationID)
+		for _, op := range ops {
+			_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
+			require.Nil(t, err)
+		}
+	})
+}
+
+func TestRepairSize(testSetup *testing.T) {
+	t := test.NewSystemTest(testSetup)
+	wallet := createWallet(t)
+	sdkClient.SetWallet(t, wallet)
+	apiClient.CreateReadPool(t, wallet, 0.5, client.TxSuccessfulStatus)
+	
+	t.RunSequentiallyWithTimeout("repair size in case of no blobber failure should be zero", 5 * time.Minute, func(t *test.SystemTest) {
+		// create allocation with default blobber requirements
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		t.Logf("allocationID: %v", allocationID)
+
+		// create and upload a file of 2KB to allocation.
+		op := sdkClient.AddUploadOperation(t, "", "", int64(1024 * 2))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
+		
+		// assert both upload and download size should be zero
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoErrorf(t, err, "allocation ID %v is not found", allocationID)
+		rs, err := alloc.RepairSize("/")
+		require.Nil(t, err)
+		t.Logf("repair size: %v", rs)
+		require.Equal(t, uint64(0), rs.UploadSize, "upload size doesn't match")
+		require.Equal(t, uint64(0), rs.DownloadSize, "download size doesn't match")
+	})
+	
+	t.RunSequentiallyWithTimeout("repair size on single blobber failure should match", 5 * time.Minute, func(t *test.SystemTest) {
+		// create allocation with default blobber requirements
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
+		blobberRequirements.Size = 2056
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		t.Logf("allocationID: %v", allocationID)
+
+		// create and upload a file of 2KB to allocation.
+		// one blobber url is set invalid to mimic failure.
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoErrorf(t, err, "allocation ID %v is not found", allocationID)
+		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
+		op := sdkClient.AddUploadOperation(t, "", "", int64(1024 * 2))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op}, client.WithRepair(alloc.Blobbers))
+		
+		// assert upload and download size should be 1KB and 2KB respectively
+		rs, err := alloc.RepairSize("/")
+		require.Nil(t, err)
+		t.Logf("repair size: %v", rs)
+		require.Equal(t, uint64(1024), rs.UploadSize, "upload size doesn't match")
+		require.Equal(t, uint64(1024 * 2), rs.DownloadSize, "download size doesn't match")
+	})
+
+	t.RunSequentiallyWithTimeout("repair size with nested directories and two blobber failure should match", 5 * time.Minute, func(t *test.SystemTest) {
+		// create allocation with default blobber requirements
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 4
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		t.Logf("allocationID: %v", allocationID)
+
+		// create and upload two files of 1KB each to / and /dir1.
+		// two blobber url is set invalid to mimic failure.
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoErrorf(t, err, "allocation ID %v is not found", allocationID)
+		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
+		alloc.Blobbers[1].Baseurl = "http://0zus.com/"
+		ops := []sdk.OperationRequest{
+			sdkClient.AddUploadOperationWithPath(t, allocationID, "/dir1/"),
+			sdkClient.AddUploadOperationWithPath(t, allocationID, "/dir1/"),
+			sdkClient.AddUploadOperationWithPath(t, allocationID, "/"),  
+			sdkClient.AddUploadOperationWithPath(t, allocationID, "/"),
+		}
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+		
+		// assert both upload and download size should be 2KB in /dir1
+		rs, err := alloc.RepairSize("/dir1")
+		require.Nilf(t, err, "error getting repair size in /dir1: %v", err)
+		t.Logf("repair size: %v", rs)
+		require.Equal(t, uint64(1024 * 2), rs.UploadSize, "upload size in directory /dir1 doesn't match")
+		require.Equal(t, uint64(1024 * 2), rs.DownloadSize, "download size in directory dir1 doesn't match")
+		
+		// with trailing slash
+		// assert both upload and download size should be 2KB in /dir1/ 
+		rs, err = alloc.RepairSize("/dir1/")
+		require.Nilf(t, err, "error getting repair size in /dir1/: %v", err)
+		t.Logf("repair size: %v", rs)
+		require.Equal(t, uint64(1024 * 2), rs.UploadSize, "upload size in directory /dir1/ doesn't match")
+		require.Equal(t, uint64(1024 * 2), rs.DownloadSize, "download size in directory /dir1/ doesn't match")
+		
+		// assert both upload and download size should be 4KB in root directory
+		rs, err = alloc.RepairSize("/")
+		require.Nilf(t, err, "error getting repair size in /: %v", err)
+		t.Logf("repair size: %v", rs)
+		require.Equal(t, uint64(1024 * 4), rs.UploadSize, "upload size in root directory doesn't match")
+		require.Equal(t, uint64(1024 * 4), rs.DownloadSize, "download size in root directory doesn't match")
 	})
 }

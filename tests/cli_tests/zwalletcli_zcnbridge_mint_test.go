@@ -14,7 +14,6 @@ import (
 
 func TestBridgeMint(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.SetSmokeTests("Mint WZCN tokens")
 
 	t.RunSequentiallyWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
 		err := tenderlyClient.InitBalance(ethereumAddress)
@@ -23,10 +22,9 @@ func TestBridgeMint(testSetup *testing.T) {
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
 		require.NoError(t, err)
 
-		output, err := executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = resetUserNonce(t, true)
+		output, err := resetUserNonce(t, true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 
@@ -48,8 +46,7 @@ func TestBridgeMint(testSetup *testing.T) {
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
 		require.NoError(t, err)
 
-		_, err = createWalletForName(t, configPath, escapedTestName(t))
-		require.NoError(t, err)
+		createWallet(t)
 
 		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err)

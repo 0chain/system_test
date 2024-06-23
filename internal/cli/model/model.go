@@ -384,6 +384,7 @@ type BlobberDetails struct {
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 	IsKilled          bool              `json:"is_killed"`
 	IsShutdown        bool              `json:"is_shutdown"`
+	IsRestricted      bool              `json:"is_restricted"`
 	NotAvailable      bool              `json:"not_available"`
 }
 
@@ -406,11 +407,12 @@ type FileDiff struct {
 }
 
 type FreeStorageMarker struct {
-	Assigner   string  `json:"assigner,omitempty"`
-	Recipient  string  `json:"recipient"`
-	FreeTokens float64 `json:"free_tokens"`
-	Nonce      int64   `json:"nonce"`
-	Signature  string  `json:"signature,omitempty"`
+	Assigner   string   `json:"assigner,omitempty"`
+	Recipient  string   `json:"recipient"`
+	FreeTokens float64  `json:"free_tokens"`
+	Nonce      int64    `json:"nonce"`
+	Signature  string   `json:"signature,omitempty"`
+	Blobbers   []string `json:"blobbers"`
 }
 
 type WalletFile struct {
@@ -729,6 +731,14 @@ type ReadMarker struct {
 	PayerID       string  `json:"payer_id"`
 	AuthTicket    string  `json:"auth_ticket"`
 	BlockNumber   int64   `json:"block_number"`
+}
+
+// holds result of repair size
+type RepairSize struct {
+	// upload size in bytes
+	UploadSize uint64 `json:"upload_size"`
+	// download size in bytes
+	DownloadSize uint64 `json:"download_size"`
 }
 
 var StorageKeySettings = []string{

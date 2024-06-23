@@ -41,12 +41,13 @@ type ExecutionRequest struct {
 }
 
 type Wallet struct {
-	Id           string `json:"id"`
+	Id           string `json:"client_id"`
 	Version      string `json:"version"`
 	CreationDate *int   `json:"creation_date"`
-	PublicKey    string `json:"public_key"`
+	PublicKey    string `json:"client_key"`
 	Nonce        int
 	Keys         *KeyPair `json:"-"`
+	Mnemonics    string   `json:"mnemonics"`
 }
 
 type SdkWallet struct {
@@ -486,7 +487,8 @@ type ChallengeTiming struct {
 }
 
 type SCRestGetAllocationBlobbersResponse struct {
-	Blobbers *[]string `json:"blobbers"`
+	Blobbers           *[]string `json:"blobbers"`
+	BlobberAuthTickets []string  `json:"blobber_auth_tickets"`
 	BlobberRequirements
 }
 
@@ -540,6 +542,7 @@ type UpdateAllocationRequest struct {
 	Extend               bool   `json:"extend"`
 	SetImmutable         bool   `json:"set_immutable"`
 	AddBlobberId         string `json:"add_blobber_id"`
+	AddBlobberAuthTicket string `json:"add_blobber_auth_ticket"`
 	RemoveBlobberId      string `json:"remove_blobber_id"`
 	ThirdPartyExtendable bool   `json:"third_party_extendable"`
 	FileOptionsChanged   bool   `json:"file_options_changed"`
@@ -797,7 +800,6 @@ type LatestWriteMarker struct {
 }
 
 type BlobberGetFileRefsResponse struct {
-	TotalPages        int                `json:"total_pages"`
 	OffsetPath        string             `json:"offset_path"`
 	Refs              []*RefsData        `json:"refs"`
 	LatestWriteMarker *LatestWriteMarker `json:"latest_write_marker"`
@@ -851,7 +853,6 @@ type Ref struct {
 type BlobberFileRefPathResponse struct {
 	Meta map[string]interface{}        `json:"meta_data"`
 	List []*BlobberFileRefPathResponse `json:"list,omitempty"`
-	Ref  *Ref
 }
 
 type WriteMarker struct {
@@ -1014,11 +1015,12 @@ type DelegatePool struct {
 }
 
 type FreeStorageMarker struct {
-	Assigner   string  `json:"assigner,omitempty"`
-	Recipient  string  `json:"recipient"`
-	FreeTokens float64 `json:"free_tokens"`
-	Nonce      int64   `json:"nonce"`
-	Signature  string  `json:"signature,omitempty"`
+	Assigner   string   `json:"assigner,omitempty"`
+	Recipient  string   `json:"recipient"`
+	FreeTokens float64  `json:"free_tokens"`
+	Nonce      int64    `json:"nonce"`
+	Signature  string   `json:"signature,omitempty"`
+	Blobbers   []string `json:"blobbers"`
 }
 
 // ----------------------------------------------

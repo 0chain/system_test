@@ -1,12 +1,14 @@
 package cli_tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -56,6 +58,8 @@ func setupConfig() {
 	s3SecretKey = parsedConfig.S3SecretKey
 	s3bucketName = parsedConfig.S3BucketName
 	s3BucketNameAlternate = parsedConfig.S3BucketNameAlternate
+	dropboxAccessToken = parsedConfig.DropboxAccessToken
+	gdriveAccessToken = parsedConfig.GdriveAccessToken
 
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
@@ -86,6 +90,8 @@ const (
 	miner03NodeDelegateWalletName   = "wallets/miner03_node_delegate"
 	sharder01NodeDelegateWalletName = "wallets/sharder01_node_delegate"
 	sharder02NodeDelegateWalletName = "wallets/sharder02_node_delegate"
+	stakingWallet                   = "wallets/staking"
+	zboxTeamWallet                  = "wallets/zbox_team"
 )
 
 var (
@@ -103,11 +109,17 @@ var (
 	s3bucketName          string
 	s3BucketNameAlternate string
 	S3Client              *s3.S3
+	dropboxAccessToken    string
+	gdriveAccessToken     string
 )
 
 var (
 	configPath string
 	configDir  string
+
+	wallets     []json.RawMessage
+	walletIdx   int64
+	walletMutex sync.Mutex
 )
 
 var tenderlyClient *tenderly.Client
@@ -126,7 +138,6 @@ func TestMain(m *testing.M) {
 	}
 
 	configDir, _ = filepath.Abs(configDir)
-
 	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
 		if files, err := filepath.Glob("./config/*.json"); err == nil {
 			for _, f := range files {
@@ -138,7 +149,9 @@ func TestMain(m *testing.M) {
 					strings.HasSuffix(f, miner02NodeDelegateWalletName+"_wallet.json") ||
 					strings.HasSuffix(f, miner03NodeDelegateWalletName+"_wallet.json") ||
 					strings.HasSuffix(f, sharder01NodeDelegateWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") {
+					strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, stakingWallet+"_wallet.json") ||
+					strings.HasSuffix(f, zboxTeamWallet+"_wallet.json") {
 					continue
 				}
 				_ = os.Remove(f)
@@ -167,13 +180,59 @@ func TestMain(m *testing.M) {
 		Region:      aws.String("us-east-2"), // Replace with your desired AWS region
 		Credentials: credentials.NewStaticCredentials(s3AccessKey, s3SecretKey, ""),
 	})
+
 	if err != nil {
 		log.Fatalln("Failed to create AWS session:", err)
 		return
 	}
 
+	// Create a session with Dropbox
+	sess_dp, err_dp := session.NewSession(&aws.Config{
+		Credentials: credentials.NewStaticCredentials(
+			dropboxAccessToken, "", ""),
+	})
+
+	if err_dp != nil {
+		log.Fatalln("Failed to create Dropbox session:", err_dp)
+	}
+
+	sess_gd, err_gd := session.NewSession(&aws.Config{
+		Credentials: credentials.NewStaticCredentials(
+			gdriveAccessToken, "", ""),
+	})
+
+	if err_gd != nil {
+		log.Fatalln("Failed to create Gdrive session:", err_dp)
+	}
 	// Create an S3 client
-	S3Client = s3.New(sess)
+	cloudService := os.Getenv("CLOUD_SERVICE")
+
+	if cloudService == "dropbox" {
+		S3Client = s3.New(sess_dp)
+	} else if cloudService == "gdrive" {
+		S3Client = s3.New(sess_gd)
+	} else {
+		S3Client = s3.New(sess)
+	}
+
+	walletMutex.Lock()
+	// Read the content of the file
+	fileContent, err := os.ReadFile("./config/wallets/wallets.json")
+	if err != nil {
+		log.Println("Error reading file:", err)
+		return
+	}
+
+	// Parse the JSON data into a list of strings
+	err = json.Unmarshal(fileContent, &wallets)
+	if err != nil {
+		log.Println("Error decoding JSON:", err)
+		return
+	}
+
+	walletIdx = 500
+
+	walletMutex.Unlock()
 
 	exitRun := m.Run()
 

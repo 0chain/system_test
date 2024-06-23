@@ -18,7 +18,6 @@ import (
 
 func TestAuthorizerRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.SetSmokeTests("Mint WZCN tokens")
 
 	t.RunSequentiallyWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {
 		err := tenderlyClient.InitBalance(ethereumAddress)
@@ -27,14 +26,13 @@ func TestAuthorizerRewards(testSetup *testing.T) {
 		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
 		require.NoError(t, err)
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		feeRewardAuthorizerQuery := fmt.Sprintf("reward_type = %d", model.FeeRewardAuthorizer)
 		feeRewardAuthorizer, err := getQueryRewards(t, feeRewardAuthorizerQuery)
 		require.Nil(t, err)
 
-		output, err = burnEth(t, "1000000000000", true)
+		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")

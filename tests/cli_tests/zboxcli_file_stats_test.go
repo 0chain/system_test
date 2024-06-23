@@ -267,10 +267,9 @@ func TestFileStats(testSetup *testing.T) {
 			}
 		})
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating own wallet failed", err, strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
+		output, err := getFileStats(t, configPath, createParams(map[string]interface{}{
 			"allocation": otherAllocationID,
 			"remotepath": remoteFilePath,
 			"json":       "",
@@ -485,7 +484,7 @@ func TestFileStats(testSetup *testing.T) {
 				require.Equal(t, true, data.BlockchainAware)
 			}
 		}
-		require.Equal(t, 2, skippedBlobber)
+		require.Equal(t, 1, skippedBlobber)
 	})
 }
 

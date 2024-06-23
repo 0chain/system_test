@@ -103,7 +103,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -240,7 +240,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -307,7 +307,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -351,7 +351,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("rename file to with 110-char (above 100-char filename limit) should fail", func(t *test.SystemTest) {
+	t.Run("rename file to with 160-char (above 150-char filename limit) should fail", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -362,7 +362,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		filename := filepath.Base(file)
 		remotePath := "/child/" + filename
 
-		b := make([]rune, 110-4) // subtract chars for extension
+		b := make([]rune, 160-4) // subtract chars for extension
 		for i := range b {
 			b[i] = 'a'
 		}
@@ -382,7 +382,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -394,7 +394,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "filename is longer than 100 characters")
+		require.Contains(t, output[0], "filename is longer than 150 characters")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -451,7 +451,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -496,18 +496,14 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("File Rename - Users should not be charged for renaming a file", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"lock": "5",
 			"size": 4 * MB,
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -587,14 +583,13 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	t.Run("rename file from someone else's allocation should fail", func(t *test.SystemTest) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err := createWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(nonAllocOwnerWallet)
 
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, fileSize)
+		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
@@ -606,7 +601,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			"size": allocSize,
 		})
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
@@ -615,7 +610,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -660,10 +655,9 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 
 	t.Run("rename file with no allocation param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on rename
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = renameFile(t, configPath, map[string]interface{}{
+		output, err := renameFile(t, configPath, map[string]interface{}{
 			"remotepath": "/abc.txt",
 			"destname":   "def.txt",
 		}, false)
@@ -675,10 +669,9 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 
 	t.Run("rename file with no remotepath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on rename
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = renameFile(t, configPath, map[string]interface{}{
+		output, err := renameFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
 			"destname":   "def.txt",
 		}, false)
@@ -689,10 +682,9 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 
 	t.Run("rename file with no destname param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on rename
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = renameFile(t, configPath, map[string]interface{}{
+		output, err := renameFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
 			"remotepath": "/abc.txt",
 		}, false)
@@ -702,18 +694,14 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("File Rename - Users should not be charged for renaming a file", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
 			"lock": "5",
 			"size": 4 * MB,
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)

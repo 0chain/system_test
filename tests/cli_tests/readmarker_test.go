@@ -21,17 +21,16 @@ func TestReadMarker(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("After downloading a file, return a readmarker for each blobber used in download")
 
-	t.Parallel()
+	// t.Parallel()
 
 	const blobbersRequiredForDownload = 3 // download needs (data shards) number of blobbers
 
 	var sharderUrl string
 	t.TestSetup("Create wallet and temp directories, get sharder url", func() {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWallet(t)
 		sharderUrl = getSharderUrl(t)
 
-		err = os.MkdirAll("tmp", os.ModePerm)
+		err := os.MkdirAll("tmp", os.ModePerm)
 		require.Nil(t, err)
 	})
 
@@ -384,7 +383,7 @@ func CountReadMarkers(t *test.SystemTest, allocationId, sharderBaseUrl string) *
 func GetReadMarkers(t *test.SystemTest, allocationId, sharderBaseUrl string) []climodel.ReadMarker {
 	url := fmt.Sprintf(sharderBaseUrl + "/v1/screst/" + cliutils.StorageScAddress + "/readmarkers")
 	params := make(map[string]string)
-	if len(allocationId) > 0 {
+	if allocationId != "" {
 		params["allocation_id"] = allocationId
 	}
 	return cliutils.ApiGetList[climodel.ReadMarker](t, url, params, 0, 100)

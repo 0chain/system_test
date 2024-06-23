@@ -95,20 +95,20 @@ func TestCreateDir(testSetup *testing.T) {
 		require.Equal(t, wantFile, files[0])
 	})
 
-	t.Run("create attempt with 101-char dirname", func(t *test.SystemTest) {
+	t.Run("create attempt with 151-char dirname", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		longDirName := "/"
-		for i := 0; i < 101; i++ {
+		for i := 0; i < 151; i++ {
 			longDirName += "a"
 		}
 
 		output, err := createDir(t, configPath, allocID, longDirName, false)
 		require.NotNil(t, err, "expected create dir failure command executed with output: ", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		require.Len(t, output, 2)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "Directory creation failed")
-		require.Contains(t, aggregatedOutput, "consensus_not_met")
+		require.Contains(t, aggregatedOutput, "ERROR: value too long for type character varying(150)")
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -244,13 +244,9 @@ func TestCreateDir(testSetup *testing.T) {
 	t.Run("create attempt with missing allocation", func(t *test.SystemTest) {
 		wallet := escapedTestName(t)
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = createDirForWallet(t, configPath, wallet, false, "", true, "/root", false)
+		output, err := createDirForWallet(t, configPath, wallet, false, "", true, "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: allocation flag is missing", output[0])
@@ -259,13 +255,9 @@ func TestCreateDir(testSetup *testing.T) {
 	t.Run("create attempt with empty allocation", func(t *test.SystemTest) {
 		wallet := escapedTestName(t)
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = createDirForWallet(t, configPath, wallet, true, "", true, "/root", false)
+		output, err := createDirForWallet(t, configPath, wallet, true, "", true, "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error fetching the allocation allocation_fetch_error: "+
@@ -273,13 +265,9 @@ func TestCreateDir(testSetup *testing.T) {
 	})
 
 	t.Run("create attempt with invalid allocation", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 1)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = createDir(t, configPath, "invalidallocation", "/root", false)
+		output, err := createDir(t, configPath, "invalidallocation", "/root", false)
 		require.NotNil(t, err, "Expecting create dir failure %s", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error fetching the allocation allocation_fetch_error: Error fetching the allocation.internal_error: "+
@@ -291,10 +279,9 @@ func TestCreateDir(testSetup *testing.T) {
 
 		allocID := setupAllocation(t, configPath)
 
-		output, err := createWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(nonAllocOwnerWallet)
 
-		output, err = createDirForWallet(t, configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir", false)
+		output, err := createDirForWallet(t, configPath, nonAllocOwnerWallet, true, allocID, true, "/mydir", false)
 		require.NotNil(t, err, "Expected create dir failure but got output: ", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		aggregatedOutput := strings.Join(output, " ")

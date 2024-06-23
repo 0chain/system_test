@@ -713,6 +713,9 @@ func (c *APIClient) V1SCRestGetAllocationBlobbers(t *test.SystemTest, scRestGetA
 		SharderServiceProvider)
 
 	scRestGetAllocationBlobbersResponse.Blobbers = blobbers
+	for range *blobbers {
+		scRestGetAllocationBlobbersResponse.BlobberAuthTickets = append(scRestGetAllocationBlobbersResponse.BlobberAuthTickets, "")
+	}
 	scRestGetAllocationBlobbersResponse.BlobberRequirements = scRestGetAllocationBlobbersRequest.BlobberRequirements
 
 	return scRestGetAllocationBlobbersResponse, resp, err
@@ -827,17 +830,6 @@ func (c *APIClient) V1SharderGetSCState(t *test.SystemTest, scStateGetRequest mo
 	return scStateGetResponse, resp, err
 }
 
-func (c *APIClient) CreateWalletWithMnemonicsInReturnValue(t *test.SystemTest) (wallet *model.Wallet, mnemonic string) {
-	mnemonic = crypto.GenerateMnemonics(t)
-	wallet = c.CreateWalletForMnemonic(t, mnemonic)
-	return
-}
-
-func (c *APIClient) CreateWallet(t *test.SystemTest) *model.Wallet {
-	wallet, _ := c.CreateWalletWithMnemonicsInReturnValue(t)
-	return wallet
-}
-
 func (c *APIClient) CreateWalletForMnemonic(t *test.SystemTest, mnemonic string) *model.Wallet {
 	createdWallet, err := c.CreateWalletForMnemonicWithoutAssertion(t, mnemonic)
 	require.Nil(t, err)
@@ -862,153 +854,6 @@ func (c *APIClient) CreateWalletForMnemonicWithoutAssertion(t *test.SystemTest, 
 	createdWallet := model.Wallet{Id: clientId, PublicKey: keyPair.PublicKey.SerializeToHexStr(), Keys: keyPair}
 
 	return &createdWallet, err
-}
-
-// ExecuteFaucet provides basic assertions
-func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) {
-	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
-	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
-}
-
-// ExecuteFaucet provides basic assertions
-func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
-	t.Log("Execute faucet...")
-
-	pourZCN := tokenomics.IntToZCN(tokens)
-	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:          wallet,
-			ToClientID:      FaucetSmartContractAddress,
-			TransactionData: model.NewFaucetTransactionData(),
-			Value:           pourZCN,
-			TxnType:         SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, faucetTransactionPutResponse)
-
-	var faucetTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		faucetTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: faucetTransactionPutResponse.Entity.Hash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if faucetTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return faucetTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	wallet.IncNonce()
-}
-
-func (c *APIClient) ExecuteFaucetWithTokensWithFee(t *test.SystemTest, wallet *model.Wallet, tokens float64, options ...float64) (*model.TransactionPutResponse, *resty.Response, error) {
-	t.Log("Execute faucet...")
-
-	pourZCN := tokenomics.IntToZCN(tokens)
-	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:          wallet,
-			ToClientID:      FaucetSmartContractAddress,
-			TransactionData: model.NewFaucetTransactionData(),
-			Value:           pourZCN,
-			TxnType:         SCTxType,
-		},
-		HttpOkStatus, options...)
-	return faucetTransactionPutResponse, resp, err
-}
-
-// ExecuteFaucetWithAssertions provides deep assertions
-func (c *APIClient) ExecuteFaucetWithAssertions(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) {
-	t.Log("Execute faucet with assertions...")
-
-	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:          wallet,
-			ToClientID:      FaucetSmartContractAddress,
-			TransactionData: model.NewFaucetTransactionData(),
-			TxnType:         SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, faucetTransactionPutResponse)
-
-	var faucetTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		faucetTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: faucetTransactionPutResponse.Entity.Hash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if faucetTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return faucetTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	require.True(t, faucetTransactionPutResponse.Async)
-	require.NotNil(t, faucetTransactionPutResponse.Entity)
-	require.NotNil(t, faucetTransactionPutResponse.Entity.ChainId)
-	require.Zero(t, faucetTransactionPutResponse.Entity.TransactionOutput)
-	require.Zero(t, faucetTransactionPutResponse.Entity.TransactionStatus)
-
-	require.Equal(t, faucetTransactionPutResponse.Request.Hash, faucetTransactionPutResponse.Entity.Hash)
-	require.Equal(t, faucetTransactionPutResponse.Request.Version, faucetTransactionPutResponse.Entity.Version)
-	require.Equal(t, faucetTransactionPutResponse.Request.ClientId, faucetTransactionPutResponse.Entity.ClientId)
-	require.Equal(t, faucetTransactionPutResponse.Request.ToClientId, faucetTransactionPutResponse.Entity.ToClientId)
-	require.Equal(t, faucetTransactionPutResponse.Request.PublicKey, faucetTransactionPutResponse.Entity.PublicKey)
-	require.Equal(t, faucetTransactionPutResponse.Request.TransactionData, faucetTransactionPutResponse.Entity.TransactionData)
-	require.Equal(t, faucetTransactionPutResponse.Request.TransactionValue, faucetTransactionPutResponse.Entity.TransactionValue)
-	require.Equal(t, faucetTransactionPutResponse.Request.Signature, faucetTransactionPutResponse.Entity.Signature)
-	require.Equal(t, faucetTransactionPutResponse.Request.CreationDate, faucetTransactionPutResponse.Entity.CreationDate)
-	require.Equal(t, faucetTransactionPutResponse.Request.TransactionFee, faucetTransactionPutResponse.Entity.TransactionFee)
-	require.Equal(t, faucetTransactionPutResponse.Request.TransactionType, faucetTransactionPutResponse.Entity.TransactionType)
-
-	require.Equal(t, TxVersion, faucetTransactionGetConfirmationResponse.Version)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.BlockHash)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.PreviousBlockHash)
-	require.Greater(t, faucetTransactionGetConfirmationResponse.CreationDate, int64(0))
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.MinerID)
-	require.Greater(t, faucetTransactionGetConfirmationResponse.Round, int64(0))
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.Status)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.RoundRandomSeed)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.StateChangesCount)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.MerkleTreeRoot)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.MerkleTreePath)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.ReceiptMerkleTreeRoot)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.ReceiptMerkleTreePath)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.Transaction.TransactionOutput)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.Transaction.TxnOutputHash)
-
-	wallet.IncNonce()
 }
 
 func (c *APIClient) CreateAllocation(t *test.SystemTest,

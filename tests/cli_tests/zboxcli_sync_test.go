@@ -156,7 +156,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 			require.Nil(t, err, "Error in downloading the file", strings.Join(output, "\n"))
 			require.Len(t, output, 2)
 
-			expected := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filename)
+			expected := fmt.Sprintf("Status completed callback. Type = text/plain. Name = %s", filename)
 			require.Equal(t, expected, output[1])
 
 			downloadedFileChecksum := generateChecksum(t, path.Join(downloadPath, filename))
@@ -227,7 +227,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 			require.Nil(t, err, "Error in downloading the file", strings.Join(output, "\n"))
 			require.Len(t, output, 2)
 
-			expected := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", filename)
+			expected := fmt.Sprintf("Status completed callback. Type = text/plain. Name = %s", filename)
 			require.Equal(t, expected, output[1])
 
 			downloadedFileChecksum := generateChecksum(t, path.Join(downloadPath, filename))
@@ -384,7 +384,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, 2, len(output))
-		require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
+		require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = text/plain. Name = (?P<Filename>.+)`), output[1])
 
 		// The folder structure tree
 		// Integer values will be consider as files with that size
@@ -461,7 +461,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, 2, len(output))
-		require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
+		require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = text/plain. Name = (?P<Filename>.+)`), output[1])
 
 		// The folder structure tree
 		// Integer values will be consider as files with that size
@@ -677,8 +677,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		notOwnerWalletName := escapedTestName(t) + "_NOT_OWNER_WALLET"
-		output, err := createWalletForName(t, configPath, notOwnerWalletName)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWalletForName(notOwnerWalletName)
 
 		// The folder structure tree
 		// Integer values will be consider as files with that size
@@ -692,7 +691,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 		require.Nil(t, err, "Error in creating mock folders: ", err, localpath)
 		defer os.RemoveAll(localpath)
 
-		output, err = syncFolderWithWallet(t, notOwnerWalletName, configPath, map[string]interface{}{
+		output, err := syncFolderWithWallet(t, notOwnerWalletName, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"localpath":  localpath,
 		}, false) // Do not retry when expecting failure
@@ -709,8 +708,7 @@ func TestSyncWithBlobbers(testSetup *testing.T) {
 	}) //todo: too slow
 
 	t.Run("Attempt to Sync to non-existing allocation must fail", func(t *test.SystemTest) {
-		_, err := createWallet(t, configPath)
-		require.NoError(t, err)
+		createWallet(t)
 
 		allocationID := "invalid-allocation-id"
 

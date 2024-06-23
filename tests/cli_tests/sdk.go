@@ -62,7 +62,7 @@ func GetBlobberNotPartOfAllocation(walletname, configFile, allocationID string) 
 		return "", err
 	}
 
-	blobbers, err := sdk.GetBlobbers(true)
+	blobbers, err := sdk.GetBlobbers(true, false)
 	if err != nil {
 		return "", err
 	}
@@ -122,7 +122,7 @@ func GetRandomBlobber(walletname, configFile, allocationID, except_blobber strin
 		}
 	}
 
-	if len(randomBlobber) > 0 {
+	if randomBlobber != "" {
 		return randomBlobber, nil
 	}
 	return "", fmt.Errorf("failed to get blobbers")

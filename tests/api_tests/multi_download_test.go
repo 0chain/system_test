@@ -14,16 +14,19 @@ import (
 
 func TestMultiDownload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 	t.SetSmokeTests("Multi download should work")
 
-	t.RunSequentially("Multi download should work", func(t *test.SystemTest) {
-		apiClient.ExecuteFaucet(t, sdkWallet, client.TxSuccessfulStatus)
+	t.Run("Multi download should work", func(t *test.SystemTest) {
+		wallet := createWallet(t)
 
-		blobberRequirements := model.DefaultBlobberRequirements(sdkWallet.Id, sdkWallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, sdkWallet, allocationBlobbers, client.TxSuccessfulStatus)
+		sdkClient.SetWallet(t, wallet)
 
-		apiClient.CreateReadPool(t, sdkWallet, float64(1.5), client.TxSuccessfulStatus)
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		apiClient.CreateReadPool(t, wallet, float64(1.5), client.TxSuccessfulStatus)
 
 		ops := make([]sdk.OperationRequest, 0, 10)
 
@@ -35,19 +38,19 @@ func TestMultiDownload(testSetup *testing.T) {
 
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoError(t, err, "error getting allocation")
-		err = os.MkdirAll("temp", os.ModePerm)
+		err = os.MkdirAll("temp_download", os.ModePerm)
 		require.NoError(t, err, "error creating temp dir")
 		defer func() {
-			err = os.RemoveAll("temp")
+			err = os.RemoveAll("temp_download")
 			require.NoError(t, err, "error removing temp dir")
 		}()
 		wg := &sync.WaitGroup{}
 		for i := 0; i < 9; i++ {
-			sdkClient.DownloadFileWithParam(t, alloc, ops[i].FileMeta.RemotePath, "temp/", wg, false)
+			sdkClient.DownloadFileWithParam(t, alloc, ops[i].FileMeta.RemotePath, "temp_download/", wg, false)
 		}
-		sdkClient.DownloadFileWithParam(t, alloc, ops[9].FileMeta.RemotePath, "temp/", wg, true)
+		sdkClient.DownloadFileWithParam(t, alloc, ops[9].FileMeta.RemotePath, "temp_download/", wg, true)
 		wg.Wait()
-		files, err := os.ReadDir("temp")
+		files, err := os.ReadDir("temp_download")
 		require.NoError(t, err, "error reading temp dir")
 		require.Equal(t, 10, len(files), "files count mismatch expected %v actual %v", 10, len(files))
 		for _, file := range files {

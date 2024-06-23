@@ -1,10 +1,10 @@
 package cli_tests
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -104,7 +104,7 @@ func TestListFileSystem(testSetup *testing.T) {
 		require.Nil(t, err, "upload failed", strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", fname)
+		expected := fmt.Sprintf("Status completed callback. Type = text/plain. Name = %s", fname)
 		require.Equal(t, expected, output[1], strings.Join(output, "\n"))
 
 		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -333,8 +333,7 @@ func TestListFileSystem(testSetup *testing.T) {
 		fname := filepath.Base(filename)
 
 		// Just create a wallet so that we can work further
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// Listing contents using auth-ticket: should work
 		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -385,8 +384,7 @@ func TestListFileSystem(testSetup *testing.T) {
 		fname := filepath.Base(filename)
 
 		// Just create a wallet so that we can work further
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// Listing contents using auth-ticket: should work
 		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -445,8 +443,7 @@ func TestListFileSystem(testSetup *testing.T) {
 		})
 
 		// Just create a wallet so that we can work further
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// Listing contents of allocationID: should work
 		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
@@ -499,8 +496,7 @@ func TestListFileSystem(testSetup *testing.T) {
 	})
 
 	t.Run("No Parameter Should Fail", func(t *test.SystemTest) {
-		_, err := createWallet(t, configPath)
-		require.NoError(t, err)
+		createWallet(t)
 
 		output, err := listFilesInAllocation(t, configPath, "", false)
 		require.NotNil(t, err,
@@ -602,7 +598,10 @@ func extractAuthToken(str string) (string, error) {
 
 func createFileWithSize(name string, size int64) error {
 	buffer := make([]byte, size)
-	rand.Read(buffer) //nolint:gosec,revive
+	_, err := rand.Read(buffer)
+	if err != nil {
+		return err
+	}
 	return os.WriteFile(name, buffer, os.ModePerm)
 }
 

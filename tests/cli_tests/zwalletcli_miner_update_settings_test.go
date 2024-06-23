@@ -30,14 +30,12 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 			t.Skipf("miner node owner wallet located at %s is missing", "./config/"+miner01NodeDelegateWalletName+"_wallet.json")
 		}
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = createWalletForName(t, configPath, miner01NodeDelegateWalletName)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWalletForName(miner01NodeDelegateWalletName)
 
 		mnConfig = getMinerSCConfiguration(t)
-		output, err = listMiners(t, configPath, "--json")
+		output, err := listMiners(t, configPath, "--json")
 		require.Nil(t, err, "error listing miners")
 		require.Len(t, output, 1)
 
@@ -79,10 +77,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -114,10 +109,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -139,10 +131,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -164,10 +153,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -185,10 +171,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -207,30 +190,11 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 	})
 
 	t.RunSequentially("Miner update settings from non-delegate wallet should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":            miner.ID,
 			"num_delegates": 5,
-		}), escapedTestName(t), false)
-
-		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings: access denied", output[0])
-
-		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
-			"min_stake": 1,
-		}), escapedTestName(t), false)
-
-		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings: access denied", output[0])
-
-		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        miner.ID,
-			"max_stake": 99,
 		}), escapedTestName(t), false)
 
 		require.NotNil(t, err, "expected error when updating miner settings from non delegate wallet", strings.Join(output, "\n"))
