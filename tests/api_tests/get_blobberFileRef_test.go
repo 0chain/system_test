@@ -38,7 +38,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		url := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
 		refType := "regular"
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + url)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
@@ -93,7 +93,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		url := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
 		refType := "regular"
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + url)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
@@ -124,7 +124,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		url := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
 		refType := "regular"
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + url)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
@@ -155,7 +155,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		url := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
 		refType := "invalid-ref-type"
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + url)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
@@ -186,7 +186,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		url := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
 		refType := "invalid-ref-type"
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + url)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
@@ -217,7 +217,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		url := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
 		refType := ""
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + url)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
@@ -248,7 +248,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		url := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
 		refType := ""
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + url)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
@@ -306,7 +306,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		url := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
 		refType := "regular"
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + url)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
@@ -342,7 +342,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		url := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, initialisedWallet.Mnemonics)
 		refType := "regular"
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + url)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 

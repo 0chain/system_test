@@ -37,7 +37,7 @@ func TestObjectTree(testSetup *testing.T) {
 		blobber := apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
 		url := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + url)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
@@ -69,7 +69,7 @@ func TestObjectTree(testSetup *testing.T) {
 		blobber := apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
 		url := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + url)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 
@@ -103,7 +103,7 @@ func TestObjectTree(testSetup *testing.T) {
 		blobber := apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
 		blobberUrl := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + blobberUrl)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 		blobberObjectTreeRequest := newBlobberObjectTreeRequest(blobberUrl, wallet, "invalid_allocation_id", clientSignature, remoteFilePath)
@@ -157,7 +157,7 @@ func TestObjectTree(testSetup *testing.T) {
 		blobber := apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
 		blobberUrl := blobber.BaseURL
 		keyPair := crypto.GenerateKeys(t, wallet.Mnemonics)
-		sign := encryption.Hash(allocation.Tx)
+		sign := encryption.Hash(allocation.Tx + blobberUrl)
 
 		clientSignature := crypto.SignHexString(t, sign, &keyPair.PrivateKey)
 		blobberObjectTreeRequest := newBlobberObjectTreeRequest(blobberUrl, wallet, allocation.ID, clientSignature, "invalid_path")
