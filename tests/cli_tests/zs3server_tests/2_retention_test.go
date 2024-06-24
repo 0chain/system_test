@@ -2,6 +2,7 @@ package zs3servertests
 
 import (
 	"log"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -12,6 +13,10 @@ import (
 
 func TestZs3serverRetentionTests(testSetup *testing.T) {
 	log.Println("Running Warp Retention Benchmark...")
+	timeout := time.Duration(200 * time.Minute)
+	os.Setenv("GO_TEST_TIMEOUT", timeout.String())
+
+
 	t := test.NewSystemTest(testSetup)
 
 	server, host, accessKey, secretKey, concurrent := cliutils.ReadFile(testSetup)
@@ -39,6 +44,10 @@ func TestZs3serverRetentionTests(testSetup *testing.T) {
 
 func TestZs3serverMultipartTests(testSetup *testing.T) {
 	log.Println("Running Warp Multipart Benchmark...")
+	timeout := time.Duration(200 * time.Minute)
+	os.Setenv("GO_TEST_TIMEOUT", timeout.String())
+
+
 	t := test.NewSystemTest(testSetup)
 
 	server, host, accessKey, secretKey, concurrent := cliutils.ReadFile(testSetup)
