@@ -800,7 +800,6 @@ type LatestWriteMarker struct {
 }
 
 type BlobberGetFileRefsResponse struct {
-	TotalPages        int                `json:"total_pages"`
 	OffsetPath        string             `json:"offset_path"`
 	Refs              []*RefsData        `json:"refs"`
 	LatestWriteMarker *LatestWriteMarker `json:"latest_write_marker"`
@@ -854,7 +853,6 @@ type Ref struct {
 type BlobberFileRefPathResponse struct {
 	Meta map[string]interface{}        `json:"meta_data"`
 	List []*BlobberFileRefPathResponse `json:"list,omitempty"`
-	Ref  *Ref
 }
 
 type WriteMarker struct {

@@ -24,7 +24,6 @@ const DefaultConfigPath = "./config/api_tests_config.yaml"
 type Config struct {
 	BlockWorker                 string `yaml:"block_worker"`
 	ZboxUrl                     string `yaml:"0box_url"`
-	ZboxPhoneNumber             string `yaml:"0box_phone_number"`
 	DefaultTestCaseTimeout      string `yaml:"default_test_case_timeout"`
 	ZS3ServerUrl                string `yaml:"zs3_server_url"`
 	ChimneyTestNetwork          string `yaml:"chimney_test_network"`
@@ -35,6 +34,8 @@ type Config struct {
 	S3BucketNameAlternate       string `yaml:"s3_bucket_name_alternate"`
 	BlobberOwnerWalletMnemonics string `yaml:"blobber_owner_wallet_mnemonics"`
 	OwnerWalletMnemonics        string `yaml:"owner_wallet_mnemonics"`
+	DropboxAccessToken          string `yaml:"dropboxAccessToken"`
+	GdriveAccessToken           string `yaml:"gdriveAccessToken"`
 }
 
 func Parse(configPath string) *Config {

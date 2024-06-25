@@ -95,11 +95,11 @@ func TestCreateDir(testSetup *testing.T) {
 		require.Equal(t, wantFile, files[0])
 	})
 
-	t.Run("create attempt with 101-char dirname", func(t *test.SystemTest) {
+	t.Run("create attempt with 151-char dirname", func(t *test.SystemTest) {
 		allocID := setupAllocation(t, configPath)
 
 		longDirName := "/"
-		for i := 0; i < 101; i++ {
+		for i := 0; i < 151; i++ {
 			longDirName += "a"
 		}
 
@@ -108,7 +108,7 @@ func TestCreateDir(testSetup *testing.T) {
 		require.Len(t, output, 2)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, "Directory creation failed")
-		require.Contains(t, aggregatedOutput, "ERROR: value too long for type character varying(100)")
+		require.Contains(t, aggregatedOutput, "ERROR: value too long for type character varying(150)")
 
 		output, err = listAll(t, configPath, allocID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))

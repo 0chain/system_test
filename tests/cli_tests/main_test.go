@@ -58,6 +58,8 @@ func setupConfig() {
 	s3SecretKey = parsedConfig.S3SecretKey
 	s3bucketName = parsedConfig.S3BucketName
 	s3BucketNameAlternate = parsedConfig.S3BucketNameAlternate
+	dropboxAccessToken = parsedConfig.DropboxAccessToken
+	gdriveAccessToken = parsedConfig.GdriveAccessToken
 
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
@@ -107,6 +109,8 @@ var (
 	s3bucketName          string
 	s3BucketNameAlternate string
 	S3Client              *s3.S3
+	dropboxAccessToken    string
+	gdriveAccessToken     string
 )
 
 var (
@@ -134,7 +138,6 @@ func TestMain(m *testing.M) {
 	}
 
 	configDir, _ = filepath.Abs(configDir)
-
 	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
 		if files, err := filepath.Glob("./config/*.json"); err == nil {
 			for _, f := range files {
@@ -177,13 +180,40 @@ func TestMain(m *testing.M) {
 		Region:      aws.String("us-east-2"), // Replace with your desired AWS region
 		Credentials: credentials.NewStaticCredentials(s3AccessKey, s3SecretKey, ""),
 	})
+
 	if err != nil {
 		log.Fatalln("Failed to create AWS session:", err)
 		return
 	}
 
+	// Create a session with Dropbox
+	sess_dp, err_dp := session.NewSession(&aws.Config{
+		Credentials: credentials.NewStaticCredentials(
+			dropboxAccessToken, "", ""),
+	})
+
+	if err_dp != nil {
+		log.Fatalln("Failed to create Dropbox session:", err_dp)
+	}
+
+	sess_gd, err_gd := session.NewSession(&aws.Config{
+		Credentials: credentials.NewStaticCredentials(
+			gdriveAccessToken, "", ""),
+	})
+
+	if err_gd != nil {
+		log.Fatalln("Failed to create Gdrive session:", err_dp)
+	}
 	// Create an S3 client
-	S3Client = s3.New(sess)
+	cloudService := os.Getenv("CLOUD_SERVICE")
+
+	if cloudService == "dropbox" {
+		S3Client = s3.New(sess_dp)
+	} else if cloudService == "gdrive" {
+		S3Client = s3.New(sess_gd)
+	} else {
+		S3Client = s3.New(sess)
+	}
 
 	walletMutex.Lock()
 	// Read the content of the file

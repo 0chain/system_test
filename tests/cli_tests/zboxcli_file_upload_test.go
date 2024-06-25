@@ -501,7 +501,7 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.Contains(strings.Join(output, "\n"), "alloc: no enough space left in allocation"), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, "\n"), "max_allocation_size"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload 100% of the allocation should work", func(t *test.SystemTest) {
@@ -681,7 +681,7 @@ func TestUpload(testSetup *testing.T) {
 		require.Equal(t, "Error: multiuploadjson or remotepath/localpath flag is missing", output[0])
 	})
 
-	t.Run("Upload File longer than 100 chars should fail", func(t *test.SystemTest) {
+	t.Run("Upload File longer than 150 chars should fail", func(t *test.SystemTest) {
 		allocSize := int64(1 * MB)
 		fileSize := int64(512 * KB)
 
@@ -692,7 +692,7 @@ func TestUpload(testSetup *testing.T) {
 		})
 
 		dirPath := strings.TrimSuffix(os.TempDir(), string(os.PathSeparator))
-		randomFilename := cliutils.RandomAlphaNumericString(101)
+		randomFilename := cliutils.RandomAlphaNumericString(151)
 		filename := fmt.Sprintf("%s%s%s_test.txt", dirPath, string(os.PathSeparator), randomFilename)
 		err := createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
@@ -704,7 +704,7 @@ func TestUpload(testSetup *testing.T) {
 		}, false)
 		require.NotNil(t, err, "error uploading file")
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "filename is longer than 100 characters")
+		require.Contains(t, output[0], "filename is longer than 150 characters")
 	})
 
 	t.Run("Upload File should fail if upload file option is forbidden", func(t *test.SystemTest) {
