@@ -2,7 +2,9 @@ package client
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -1276,6 +1278,54 @@ func (c *ZboxClient) GetGraphBlobberTotalRewards(t *test.SystemTest, blobberId s
 	urlBuilder.queries.Set("from", req.From)
 	urlBuilder.queries.Set("to", req.To)
 	urlBuilder.queries.Set("data-points", req.DataPoints)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &data,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &data, resp, err
+}
+
+func (c *ZboxClient) QueryDataFrom0box(t *test.SystemTest, tableName string) (*[]interface{}, *resty.Response, error) {
+	t.Logf("Querying data from 0box...")
+
+	extractFields := func(model interface{}) string {
+		val := reflect.ValueOf(model)
+		if val.Kind() == reflect.Ptr {
+			val = val.Elem()
+		}
+		if val.Kind() != reflect.Struct {
+			return ""
+		}
+		var fieldNames []string
+		typ := val.Type()
+		for i := 0; i < val.NumField(); i++ {
+			fieldNames = append(fieldNames, typ.Field(i).Name)
+		}
+		return strings.Join(fieldNames, ", ")
+	}
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/queryData")
+	var data []interface{}
+	var tableEntity interface{}
+	switch tableName {
+	case "blobber":
+		tableEntity = model.Blobber{}
+	case "miner":
+		tableEntity = model.Miner{}
+	case "authorizer":
+		tableEntity = model.Authorizer{}
+	case "validator":
+		tableEntity = model.Validator{}
+	case "sharder":
+		tableEntity = model.Sharder{}
+	}
+	urlBuilder.queries.Set("table", tableName)
+	urlBuilder.queries.Set("fields", extractFields(tableEntity))
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:                &data,
