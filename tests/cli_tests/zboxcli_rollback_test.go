@@ -358,15 +358,15 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			"size":   2 * MB,
 			"tokens": 10,
 		})
-		
+
 		remotePath := "/"
 		file := "original.txt"
 
 		fileSize := int64(1 * MB)
-	
+
 		localFilePath := generateFileContentAndUpload(t, allocationID, remotePath, file, fileSize)
 		localFileChecksum := generateChecksum(t, localFilePath)
-	
+
 		err := os.Remove(localFilePath)
 		require.Nil(t, err)
 
@@ -384,7 +384,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Equal(t, fileSize, meta.ActualFileSize, "file size should be same as uploaded")
 
 		newFileSize := int64(1.5 * MB)
-		updateFileContentWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath),localFilePath, int64(newFileSize))
+		updateFileContentWithRandomlyGeneratedData(t, allocationID, "/"+filepath.Base(localFilePath), localFilePath, int64(newFileSize))
 
 		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -446,7 +446,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			go func(path string, size int64) {
 				//defer wg.Done()
 				generateFileContentAndUpload(t, allocationID, remotepath, path, size)
-				
+
 			}(filepath, fileSize)
 		}
 		//wg.Wait()
@@ -472,7 +472,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Equal(t, fileSize, meta.ActualFileSize, "file size should be same as uploaded")
 
 		newFileSize := int64(1.5 * MB)
-		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath,filepath.Base(localFilePath), int64(newFileSize))
+		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath, filepath.Base(localFilePath), int64(newFileSize))
 
 		// rollback allocation
 
@@ -499,145 +499,138 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Equal(t, localFileChecksum, downloadedFileChecksum)
 
 		createAllocationTestTeardown(t, allocationID)
-	})	
-	
-
-
-
-
-t.RunSequentially("rollback allocation after multiple files upload and single file delete should work", func(t *test.SystemTest) {
-	allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-		"size":   4 * MB,
-		"tokens": 9,
 	})
 
-	remotepath := "/"
-	filesize := int64(1 * MB)
-	localfilepath := "file2.txt"
+	t.RunSequentially("rollback allocation after multiple files upload and single file delete should work", func(t *test.SystemTest) {
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   4 * MB,
+			"tokens": 9,
+		})
 
-	files := map[string]int64{
-		"file1.txt": 1 * MB,
-		"file2.txt": 1 * MB,
-		"file3.txt": 1 * MB,
-	}
+		remotepath := "/"
+		filesize := int64(1 * MB)
+		localfilepath := "file2.txt"
 
-	//var wg sync.WaitGroup
-	for filepath, fileSize := range files {
-		//wg.Add(1)
-		go func(path string, size int64) {
-			//defer wg.Done()
-			generateFileAndUpload(t, allocationID, path, size)
-			
-		}(filepath, fileSize)
-	}
-	//wg.Wait()
-	
-	localFileChecksum := generateChecksum(t, filepath.Base(localfilepath))
+		files := map[string]int64{
+			"file1.txt": 1 * MB,
+			"file2.txt": 1 * MB,
+			"file3.txt": 1 * MB,
+		}
 
-	for filepath:= range files {
-		err := os.Remove(filepath)
-		require.Nil(t, err)
-	}
+		//var wg sync.WaitGroup
+		for filepath, fileSize := range files {
+			//wg.Add(1)
+			go func(path string, size int64) {
+				//defer wg.Done()
+				generateFileAndUpload(t, allocationID, remotepath+path, size)
 
-	output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
-		"allocation": allocationID,
-		"json":       "",
-		"remotepath": remotepath + filepath.Base(localfilepath),
-	}), true)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 1)
+			}(filepath, fileSize)
+		}
+		//wg.Wait()
 
-	var meta climodel.FileMetaResult
-	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Equal(t, filesize, meta.ActualFileSize, "file size should be same as uploaded")
+		localFileChecksum := generateChecksum(t, filepath.Base(localfilepath))
 
-	output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
-		"allocation": allocationID,
-		"remotepath": remotepath + filepath.Base(localfilepath),
-	}), true)
-	
+		for filepath := range files {
+			err := os.Remove(filepath)
+			require.Nil(t, err)
+		}
 
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 1)
-	require.Equal(t, fmt.Sprintf("%s deleted", "file2.txt"), output[0])
+		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"json":       "",
+			"remotepath": remotepath + filepath.Base(localfilepath),
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
-	// rollback allocation
+		var meta climodel.FileMetaResult
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, filesize, meta.ActualFileSize, "file size should be same as uploaded")
 
-	output, err = rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
-		"allocation": allocationID,
-	}))
-	t.Log(strings.Join(output, "\n"))
-	require.NoError(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 1)
+		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(localfilepath),
+		}), true)
 
-	output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-		"allocation": allocationID,
-		"remotepath": remotepath + filepath.Base(localfilepath),
-		"localpath":  "tmp/",
-	}), true)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 2)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf("%s deleted", "file2.txt"), output[0])
 
-	require.Contains(t, output[1], StatusCompletedCB)
-	require.Contains(t, output[1], filepath.Base(localfilepath))
-
-	downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(localfilepath))
-
-	require.Equal(t, localFileChecksum, downloadedFileChecksum)
-
-	createAllocationTestTeardown(t, allocationID)
-})	
-
-
-t.RunSequentially("rollback allocation in the middle of updating a large file should work", func(t *test.SystemTest) {
-	allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-		"size":   1 * GB,
-		"tokens": 10,
-	})
-
-	filesize := int64(0.5 * GB)
-	remotepath := "/"
-	localFilePath := ""
-    doneUploading := make(chan bool)
-    go func() {
-        localFilePath = generateFileAndUpload(t, allocationID, remotepath, filesize)
-        doneUploading <- true
-    }()
-
-    time.Sleep(5 * time.Second)
-
-    // Ensure the upload was interrupted
-    select {
-    case <-doneUploading:
-        t.Error("Upload completed unexpectedly")
-    case <-time.After(10 * time.Second):
-		
 		// rollback allocation
 
-		output, err := rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+		output, err = rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 		}))
 		t.Log(strings.Join(output, "\n"))
 		require.NoError(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-    }
 
-	output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
-		"allocation": allocationID,
-		"remotepath": remotepath,
-		"json":       "",
-	}), true)
-	require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
-	require.Len(t, output, 1)
-	require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(localfilepath),
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(localfilepath))
 
-	err = os.Remove(localFilePath)
-	require.Nil(t, err)
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(localfilepath))
 
-	createAllocationTestTeardown(t, allocationID)
-})
+		require.Equal(t, localFileChecksum, downloadedFileChecksum)
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
+	t.RunSequentially("rollback allocation in the middle of updating a large file should work", func(t *test.SystemTest) {
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"tokens": 10,
+		})
+
+		filesize := int64(0.5 * GB)
+		remotepath := "/"
+		localFilePath := ""
+		doneUploading := make(chan bool)
+		go func() {
+			localFilePath = generateFileAndUpload(t, allocationID, remotepath, filesize)
+			doneUploading <- true
+		}()
+
+		time.Sleep(5 * time.Second)
+
+		// Ensure the upload was interrupted
+		select {
+		case <-doneUploading:
+			t.Error("Upload completed unexpectedly")
+		case <-time.After(10 * time.Second):
+
+			// rollback allocation
+
+			output, err := rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+			}))
+			t.Log(strings.Join(output, "\n"))
+			require.NoError(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+		}
+
+		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		}), true)
+		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+
+		err = os.Remove(localFilePath)
+		require.Nil(t, err)
+
+		createAllocationTestTeardown(t, allocationID)
+	})
 
 }
 
