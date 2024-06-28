@@ -456,7 +456,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		err := os.Remove(localFilePath)
 		require.Nil(t, err)
 
-		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath, filepath.Base(localFilePath), int64(fileSize/2))
+		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFilePath), filepath.Base(localFilePath), int64(fileSize/2))
 
 		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
