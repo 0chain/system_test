@@ -472,7 +472,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Equal(t, fileSize, meta.ActualFileSize, "file size should be same as uploaded")
 
 		newFileSize := int64(1.5 * MB)
-		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath, filepath.Base(localFilePath), int64(newFileSize))
+		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFilePath), filepath.Base(localFilePath), int64(newFileSize))
 
 		// rollback allocation
 
