@@ -11,8 +11,9 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestZs3serverRetentionTests(testSetup *testing.T) {
-	log.Println("Running Warp Retention Benchmark...")
+
+func TestZs3serverMultipartTests(testSetup *testing.T) {
+	log.Println("Running Warp Multipart Benchmark...")
 	timeout := time.Duration(200 * time.Minute)
 	os.Setenv("GO_TEST_TIMEOUT", timeout.String())
 
@@ -21,15 +22,14 @@ func TestZs3serverRetentionTests(testSetup *testing.T) {
 
 	server, host, accessKey, secretKey, concurrent := cliutils.ReadFile(testSetup)
 
-	commandGenerated := "../warp retention --host=" + server + ":" + host + " --access-key=" + accessKey + " --secret-key=" + secretKey + "  --concurrent " + concurrent + " --duration 30s" + " --obj.size 1KiB"
+	commandGenerated := "../warp multipart --parts=500 --part.size=10MiB --host=" + server + ":" + host + " --access-key=" + accessKey + " --secret-key=" + secretKey + "  --concurrent " + concurrent + " --duration 30s"
 	log.Println("Command Generated: ", commandGenerated)
 
 	output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*2)
-
 	if err != nil {
-		testSetup.Fatalf("Error running warp retention: %v\nOutput: %s", err, output)
+		testSetup.Fatalf("Error running warp multipart: %v\nOutput: %s", err, output)
 	}
-	log.Println("Warp Retention Output:\n", output)
+	log.Println("Warp Multipart Output:\n", output)
 	output_string := strings.Join(output, "\n")
 	output_string = strings.Split(output_string, "----------------------------------------")[1]
 	output_string = strings.Split(output_string, "warp: Starting cleanup")[0]
