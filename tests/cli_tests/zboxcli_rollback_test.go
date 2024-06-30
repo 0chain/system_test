@@ -510,7 +510,6 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		remotepath := "/"
 		filesize := int64(1 * MB)
 		localfilepath := "file2.txt"
-		fileNames := make([]string, 0)
 
 		files := map[string]int64{
 			"file1.txt": 1 * MB,
@@ -519,20 +518,20 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		}
 
 		//var wg sync.WaitGroup
-		for filepath, fileSize := range files {
+		for filename, fileSize := range files {
 			//wg.Add(1)
+			filename := filename
 			go func(path string, size int64) {
 				//defer wg.Done()
-				fileName := generateFileAndUpload(t, allocationID, remotepath+path, size)
-				fileNames = append(fileNames, fileName)
-			}(filepath, fileSize)
+				generateFileAndUpload(t, allocationID, remotepath+filename, size)
+			}(filename, fileSize)
 		}
 		//wg.Wait()
 
 		localFileChecksum := generateChecksum(t, filepath.Base(localfilepath))
 
-		for filepath := range files {
-			err := os.Remove(filepath)
+		for filename := range files {
+			err := os.Remove(filename)
 			require.Nil(t, err)
 		}
 
