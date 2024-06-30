@@ -62,7 +62,7 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 	t.RunSequentially("Test for replication", func(t *test.SystemTest) {
 		// creating two server
 		t.Log(server, "server")
-		command_primary := "../mc alias set primary http://"+server+"://"+port+" "+accessKey+" "+secretKey+" --api S3v2"
+		command_primary := "../mc alias set primary http://"+server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2"
 		t.Log(command_primary, "command Generated")
 
 		command_secondary := "../mc alias set secondary http://"+s_server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2"
