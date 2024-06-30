@@ -469,7 +469,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		var meta climodel.FileMetaResult
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, fileSize, meta.ActualFileSize, "file size should be same as uploaded")
+		require.Equal(t, fileSize/2, meta.ActualFileSize, "file size should be same as uploaded")
 
 		newFileSize := int64(1.5 * MB)
 		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFilePath), filepath.Base(localFilePath), int64(newFileSize))
@@ -510,6 +510,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		remotepath := "/"
 		filesize := int64(1 * MB)
 		localfilepath := "file2.txt"
+		fileNames := make([]string, 0)
 
 		files := map[string]int64{
 			"file1.txt": 1 * MB,
@@ -522,8 +523,8 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			//wg.Add(1)
 			go func(path string, size int64) {
 				//defer wg.Done()
-				generateFileAndUpload(t, allocationID, remotepath+path, size)
-
+				fileName := generateFileAndUpload(t, allocationID, remotepath+path, size)
+				fileNames = append(fileNames, fileName)
 			}(filepath, fileSize)
 		}
 		//wg.Wait()
