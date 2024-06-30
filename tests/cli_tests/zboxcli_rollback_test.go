@@ -469,7 +469,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		var meta climodel.FileMetaResult
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, fileSize/2, meta.ActualFileSize, "file size should be same as uploaded")
+		require.Equal(t, int64(fileSize/2), meta.ActualFileSize, "file size should be same as uploaded")
 
 		newFileSize := int64(1.5 * MB)
 		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFilePath), filepath.Base(localFilePath), int64(newFileSize))
