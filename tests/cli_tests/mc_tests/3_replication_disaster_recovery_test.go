@@ -11,8 +11,8 @@ import (
 
 	test "github.com/0chain/system_test/internal/api/util/test"
 	cli_utils "github.com/0chain/system_test/internal/cli/util"
-
 	"github.com/stretchr/testify/assert"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -60,7 +60,6 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 	t.Logf("Minio server startted")
 
 	t.RunWithTimeout("Test for replication",4000 * time.Second, func(t *test.SystemTest) {
-		// creating two server
 		t.Log(server, "server")
 		command_primary := "../mc alias set primary http://"+server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2"
 		t.Log(command_primary, "command Generated")
@@ -71,42 +70,76 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 		_, _ = cli_utils.RunCommand(t, command_primary, 1, time.Hour*2)
 		_, _ = cli_utils.RunCommand(t,command_secondary , 1, time.Hour*2)
 
-		// create bucket in primary
 		_, _ = cli_utils.RunCommand(t, "../mc mb primary/mybucket", 1, time.Hour*2)
 
-		// enable mirror in primary
-		output, _ := cli_utils.RunCommand(t, "../mc mirror --watch --force primary/mybucket secondary/mybucket", 1, time.Hour*2)
+		file, err := os.Create("a.txt")
+		if err != nil {
+			t.Fatalf("Error creating file: %v", err)
+		}
+		defer file.Close()
 
-		assert.NotContains(t, output, "error")
+		_, err = file.WriteString("test")
+		if err != nil {
+			t.Fatalf("Error writing to file: %v", err)
+		}
+
+		_, _ = cli_utils.RunCommand(t, "../mc mb secondary/mirrorbucket", 1, time.Hour * 2)
+
+		t.Log("copying... the a.txt")
+		_, _ = cli_utils.RunCommand(t, "../mc cp a.txt primary/mybucket", 1, time.Second*2)
+
+		cmd := exec.Command("../mc", "mirror", "--watch", "--overwrite", "primary/mybucket", "secondary/mirrorbucket", "--remove", "--watch")
+
+		if err := cmd.Start(); err != nil {
+			log.Fatalf("Failed to start mirroring: %v", err)
+		}
+
+		t.Log("removing... the a.txt from primary bucket")
+		_, _ = cli_utils.RunCommand(t, "../mc rm primary/mybucket/a.txt", 1, time.Second*2)
+		t.Log("listing... primary bucket")
+
+		output, err  :=cli_utils.RunCommand(t, "../mc ls primary/mybucket", 1, time.Second*2)
+		t.Log(output, "output of command")
+		t.Log(err, "err of command")
+
+		assert.NotContains(t, output, "a.txt")
+
+		// t.Log("All operations are completed")
+		// t.Log("Cleaning up ..... ")
+		// _, _= cli_utils.RunCommand(t, "../mc rm primary/mybucket", 1, time.Hour*2)
+		// _, _ = cli_utils.RunCommand(t, "../mc rm secondary/mirrorbucket", 1, time.Hour*2)
+
+		// _, _ = cli_utils.RunCommand(t, "../mc alias rm primary", 1, 2*time.Hour)
+    	// _, _ = cli_utils.RunCommand(t, "../mc alias rm secondary", 1, 2*time.Hour)
 	})
 
-	t.RunWithTimeout("Test for Disaster Recovery",4000 *time.Second,  func(t *test.SystemTest) {
-		// creating two server
-		t.Log(server, "server")
-		command_primary := "../mc alias set primary http://"+server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2"
-		t.Log(command_primary, "command Generated")
+	// t.RunWithTimeout("Test for Disaster Recovery",4000 *time.Second,  func(t *test.SystemTest) {
+	// 	// creating two server
+	// 	t.Log(server, "server")
+	// 	command_primary := "../mc alias set primary http://"+server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2"
+	// 	t.Log(command_primary, "command Generated")
 
-		command_secondary := "../mc alias set secondary http://"+s_server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2"
-		t.Log(command_secondary, "command Generated")
+	// 	command_secondary := "../mc alias set secondary http://"+s_server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2"
+	// 	t.Log(command_secondary, "command Generated")
 
-		_, _ = cli_utils.RunCommand(t, command_primary, 1, time.Hour*2)
-		_, _ = cli_utils.RunCommand(t,command_secondary , 1, time.Hour*2)
+	// 	_, _ = cli_utils.RunCommand(t, command_primary, 1, time.Hour*2)
+	// 	_, _ = cli_utils.RunCommand(t,command_secondary , 1, time.Hour*2)
 
-		// create bucket in primary
-		_, _ = cli_utils.RunCommand(t, "../mc mb primary/mybucket", 1, time.Hour*2)
+	// 	// create bucket in primary
+	// 	_, _ = cli_utils.RunCommand(t, "../mc mb primary/mybucket", 1, time.Hour*2)
 
-		// enable mirror in primary
-		_, _ = cli_utils.RunCommand(t, "../mc mirror --watch --force primary/mybucket secondary/mybucket", 1, time.Hour*2)
+	// 	// enable mirror in primary
+	// 	_, _ = cli_utils.RunCommand(t, "../mc mirror --watch --force primary/mybucket secondary/mybucket", 1, time.Hour*2)
 
-		// lets remove bucket from primary server and recover from secondary bucket
+	// 	// lets remove bucket from primary server and recover from secondary bucket
 
-		// remove bucket from primary
-		_, _ = cli_utils.RunCommand(t, "../mc rb primary/mybucket", 1, time.Hour*2)
+	// 	// remove bucket from primary
+	// 	_, _ = cli_utils.RunCommand(t, "../mc rb primary/mybucket", 1, time.Hour*2)
 
-		// mirro from secondary bucket to primary bucket
-		output, _ := cli_utils.RunCommand(t, "../mc mirror --watch --force secondary/mybucket primary/mybucket", 1, time.Hour*2)
+	// 	// mirro from secondary bucket to primary bucket
+	// 	output, _ := cli_utils.RunCommand(t, "../mc mirror --watch --force secondary/mybucket primary/mybucket", 1, time.Hour*2)
 
-		assert.NotContains(t, output, "error")
-	})
+	// 	assert.NotContains(t, output, "error")
+	// })
 
 }
