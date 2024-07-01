@@ -59,7 +59,7 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 	}
 	t.Logf("Minio server startted")
 
-	t.RunWithTimeout("Test for replication",4000, func(t *test.SystemTest) {
+	t.RunWithTimeout("Test for replication",4000 * time.Second, func(t *test.SystemTest) {
 		// creating two server
 		t.Log(server, "server")
 		command_primary := "../mc alias set primary http://"+server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2"
@@ -80,7 +80,7 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 		assert.NotContains(t, output, "error")
 	})
 
-	t.RunWithTimeout("Test for Disaster Recovery",4000,  func(t *test.SystemTest) {
+	t.RunWithTimeout("Test for Disaster Recovery",4000 *time.Second,  func(t *test.SystemTest) {
 		// creating two server
 		t.Log(server, "server")
 		command_primary := "../mc alias set primary http://"+server+":"+port+" "+accessKey+" "+secretKey+" --api S3v2"
