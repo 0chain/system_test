@@ -102,7 +102,7 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 		t.Log(output, "output of command")
 		t.Log(err, "err of command")
 
-		assert.NotContains(t, output, "a.txt")
+		assert.Contains(t, output, "a.txt")
 
 		t.Log("All operations are completed")
 		t.Log("Cleaning up ..... ")
