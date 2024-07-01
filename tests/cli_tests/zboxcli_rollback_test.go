@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -440,16 +441,16 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			"file3.txt": 1 * MB,
 		}
 
-		//var wg sync.WaitGroup
+		var wg sync.WaitGroup
 		for filepath, fileSize := range files {
-			//wg.Add(1)
+			wg.Add(1)
 			go func(path string, size int64) {
-				//defer wg.Done()
 				generateFileContentAndUpload(t, allocationID, remotepath, path, size)
+				defer wg.Done()
 
 			}(filepath, fileSize)
 		}
-		//wg.Wait()
+		wg.Wait()
 
 		localFileChecksum := generateChecksum(t, filepath.Base(localFilePath))
 
@@ -475,13 +476,15 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFilePath), filepath.Base(localFilePath), int64(newFileSize))
 
 		// rollback allocation
-
-		output, err = rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-		}))
-		t.Log(strings.Join(output, "\n"))
-		require.NoError(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		// Performing a double rollback.
+		for i := 0; i < 2; i++ {
+			output, err = rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+			}))
+			t.Log(strings.Join(output, "\n"))
+			require.NoError(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+		}
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -518,16 +521,16 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		}
 		var remoteFilesNames map[string]string
 
-		//var wg sync.WaitGroup
+		var wg sync.WaitGroup
 		for filename, fileSize := range files {
-			//wg.Add(1)
+			wg.Add(1)
 			filename := filename
 			go func(path string, size int64) {
-				//defer wg.Done()
+				defer wg.Done()
 				remoteFilesNames[filename] = generateFileAndUpload(t, allocationID, remotepath+filename, size)
 			}(filename, fileSize)
 		}
-		//wg.Wait()
+		wg.Wait()
 		localfilepath = remoteFilesNames[localfilepath]
 
 		localFileChecksum := generateChecksum(t, filepath.Base(localfilepath))
@@ -596,11 +599,14 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		remotepath := "/"
 		localFilePath := ""
 		doneUploading := make(chan bool)
+		var wg sync.WaitGroup
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			localFilePath = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			doneUploading <- true
 		}()
-
+		wg.Wait()
 		time.Sleep(5 * time.Second)
 
 		// Ensure the upload was interrupted
