@@ -452,13 +452,13 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		}
 		wg.Wait()
 
-		remoteFileDownload, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(localFilePath),
 			"localpath":  "tmp/",
 		}), true)
-		require.Nil(t, err)
-		require.True(t, len(remoteFileDownload) > 0)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
 
 		localFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(localFilePath))
 
@@ -470,7 +470,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFilePath), filepath.Base(localFilePath), int64(fileSize/2))
 
-		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
 			"remotepath": remotepath + filepath.Base(localFilePath),
@@ -527,26 +527,34 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			"file2.txt": 1 * MB,
 			"file3.txt": 1 * MB,
 		}
-		remoteFilesNames := make(map[string]string)
+		var mu sync.Mutex
+		remoteLocalFileMap := make(map[string]string)
 
 		var wg sync.WaitGroup
 		for filename, fileSize := range files {
 			wg.Add(1)
-			filename := filename
 			go func(path string, size int64) {
-				remoteFilesNames[filename] = generateFileAndUpload(t, allocationID, remotepath+filename, size)
 				defer wg.Done()
+				localFilePath := generateFileAndUpload(t, allocationID, remotepath+path, size)
+				mu.Lock()
+				remoteLocalFileMap[path] = localFilePath
+				mu.Unlock()
 			}(filename, fileSize)
 		}
 		wg.Wait()
-		localfilepath = remoteFilesNames[localfilepath]
 
-		localFileChecksum := generateChecksum(t, filepath.Base(localfilepath))
+		localFileChecksum := generateChecksum(t, filepath.Join("/tmp", filepath.Base(remoteLocalFileMap[localfilepath])))
 
-		for filename := range files {
-			err := os.Remove(filename)
-			require.Nil(t, err)
-		}
+		startComponent := localfilepath
+		randomFileEndComponent := filepath.Base(remoteLocalFileMap[localfilepath])
+
+		localfilepath = startComponent + randomFileEndComponent
+
+		// as files are created in /tmp directory so no need to remove??
+		//for filename := range files {
+		//	err := os.Remove(filename)
+		//	require.Nil(t, err)
+		//}
 
 		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -568,7 +576,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf("%s deleted", "file2.txt"), output[0])
+		require.Equal(t, fmt.Sprintf("%s deleted", "/"+localfilepath), output[0])
 
 		// rollback allocation
 
