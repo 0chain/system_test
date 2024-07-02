@@ -1,11 +1,16 @@
 package cli_tests
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
+	"os/user"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -16,7 +21,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func read_file_mc(testSetup *testing.T) (string, string, string, string, string, string, string) {
+func read_file_mc(testSetup *testing.T) (string, string, string, string, string, string, string, bool) {
 	file, err := os.Open("mc_hosts.yaml")
 	if err != nil {
 		testSetup.Fatalf("Error opening hosts.yaml file: %v\n", err)
@@ -37,27 +42,97 @@ func read_file_mc(testSetup *testing.T) (string, string, string, string, string,
 	server := hosts["server"].(string)
 	secondary_server := hosts["secondary_server"].(string)
 	s_port := hosts["secondary_port"].(int)
+	use_command, ok := hosts["use_command"].(bool)
+
+	if !ok {
+		use_command = false
+	}
 
 	host := strconv.FormatInt(int64(port), 10)
 	secondary_port := strconv.FormatInt(int64(s_port), 10)
 	concurrent_no := strconv.FormatInt(int64(concurrent), 10)
-	return server, host, accessKey, secretKey, concurrent_no, secondary_port, secondary_server
+	return server, host, accessKey, secretKey, concurrent_no, secondary_port, secondary_server,use_command
 
+}
+
+func splitCmdString(cmdString string) ([]string, error) {
+    return []string{"sh", "-c", cmdString}, nil
+}
+
+func logOutput(stdout  io.Reader, t *test.SystemTest) {
+	scanner := bufio.NewScanner(stdout)
+	for scanner.Scan() {
+		t.Logf("[MinIO stdout] %s", scanner.Text())
+	}
+}
+
+func killProcess(port string) (int, error) {
+    cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port))
+    out, err := cmd.Output()
+    if err != nil {
+        return 0, fmt.Errorf("error running lsof -i command: %v", err)
+    }
+    pidStr := strings.TrimSpace(string(out))
+    if pidStr == "" {
+        return 0, fmt.Errorf("no process found for port %s", port)
+    }
+    pid, err := strconv.Atoi(pidStr)
+    if err != nil {
+        return 0, fmt.Errorf("error converting PID to integer: %v", err)
+    }
+	// killing process by id
+	cmd = exec.Command("kill", strconv.Itoa(pid))
+
+	if err := cmd.Run(); err != nil {
+		return 0, fmt.Errorf("Failed to kill process with PID %d: %v\n", pid, err)
+	}
+
+    return pid, nil
 }
 
 func TestZs3ServerReplication(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	server, port, accessKey, secretKey, _, s_port, s_server := read_file_mc(testSetup)
-	// run minio server
+	server, port, accessKey, secretKey, _, s_port, s_server, use_command := read_file_mc(testSetup)
 	log.Print(s_port)
-	cmd := exec.Command("../minio", "gateway", "zcn", "--console-address", ":8000")
 
-	err := cmd.Start()
-	if err != nil {
-		fmt.Println(err)
+	currentUser, err := user.Current()
+    if err != nil {
+        panic(err)
+    }
+	var cmd *exec.Cmd
+	if use_command{
+		zcnDir := filepath.Join(currentUser.HomeDir, ".zcn")
+
+		cmdString := "export MINIO_ROOT_USER="+accessKey+" && export MINIO_ROOT_PASSWORD="+secretKey+" && ../minio gateway zcn --configDir "+zcnDir + " --console-address :8000"
+
+		cmdParts, err := splitCmdString(cmdString)
+		if err != nil {
+			fmt.Println("Error splitting command string:", err)
+			os.Exit(1)
+		}
+		cmd = exec.Command(cmdParts[0], cmdParts[1:]...)
+
+		_, err = cmd.StdoutPipe()
+		if err != nil {
+			log.Fatalf("Error creating stdout pipe: %v", err)
+		}
+
+		_, _ = cmd.StderrPipe()
+
+
+		log.Printf("Generated command: %s %s", cmd.Path, cmd.Args)
+
+		err = cmd.Start()
+		if err != nil {
+			fmt.Println("Error starting MinIO server:", err)
+			os.Exit(1)
+		}
+		// go logOutput(stdout, t)
+		// go logOutput(stderr, t)
+		time.Sleep(5 *time.Second)
+		t.Logf("MinIO server started successfully")
 	}
-	t.Logf("Minio server startted")
 
 	t.RunWithTimeout("Test for replication",4000 * time.Second, func(t *test.SystemTest) {
 		t.Log(server, "server")
@@ -88,21 +163,16 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 		t.Log("copying... the a.txt")
 		_, _ = cli_utils.RunCommand(t, "../mc cp a.txt primary/mybucket", 1, time.Second*2)
 
-		cmd := exec.Command("../mc", "mirror", "--watch", "--overwrite", "primary/mybucket", "secondary/mirrorbucket", "--remove", "--watch")
-
-		if err := cmd.Start(); err != nil {
-			log.Fatalf("Failed to start mirroring: %v", err)
-		}
+		_, _ =  cli_utils.RunCommand(t, "../mc mirror --overwrite primary/mybucket secondary/mirrorbucket ", 1, time.Minute*2)
 
 		t.Log("removing... the a.txt from primary bucket")
 		_, _ = cli_utils.RunCommand(t, "../mc rm primary/mybucket/a.txt", 1, time.Second*2)
-		t.Log("listing... primary bucket")
+		t.Log("listing... secondary bucket")
 
-		output, err  :=cli_utils.RunCommand(t, "../mc ls primary/mybucket", 1, time.Second*2)
-		t.Log(output, "output of command")
-		t.Log(err, "err of command")
-
-		assert.Contains(t, output, "a.txt")
+		output, err  :=cli_utils.RunCommand(t, "../mc ls secondary/mirrorbucket", 1, time.Second*2)
+		if err != nil {
+			t.Log(err, "err of command")
+		}
 
 		t.Log("All operations are completed")
 		t.Log("Cleaning up ..... ")
@@ -111,5 +181,13 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 
 		_, _ = cli_utils.RunCommand(t, "../mc alias rm primary", 1, 2*time.Hour)
     	_, _ = cli_utils.RunCommand(t, "../mc alias rm secondary", 1, 2*time.Hour)
+		_ = os.Remove("a.txt")
+
+		assert.Contains(t, strings.Join(output, "\n"), "a.txt")
+		_, err = killProcess("9000")
+
+		if err != nil {
+			t.Logf("Error killing the command process")
+		}
 	})
 }
