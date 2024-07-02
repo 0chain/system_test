@@ -1,8 +1,10 @@
 package cliutils
 
 import (
+	"bufio"
 	"crypto/rand"
 	"fmt"
+	"io"
 	"log"
 	"math/big"
 	"os"
@@ -290,7 +292,7 @@ func ReadFile(testSetup *testing.T) (string, string, string, string, string) {
 
 }
 
-func Read_file_allocation() (string, string, string) {
+func Read_file_allocation() (string, string, string, string, string) {
 	file, err := os.Open("allocation.yaml")
 	if err != nil {
 		log.Fatalln("Error reading the file:", err)
@@ -306,11 +308,13 @@ func Read_file_allocation() (string, string, string) {
 	data := allocation_data["data"].(int)
 	parity := allocation_data["parity"].(int)
 	lock := allocation_data["lock"].(int)
+	accessKey := allocation_data["access_key"].(string)
+	secretKey := allocation_data["secret_key"].(string)
 
 	data_str := strconv.FormatInt(int64(data), 10)
 	parity_str := strconv.FormatInt(int64(parity), 10)
 	lock_str := strconv.FormatInt(int64(lock), 10)
-	return data_str, parity_str, lock_str
+	return data_str, parity_str, lock_str, accessKey, secretKey
 }
 
 func AppendToFile(filename string, data string) error {
@@ -325,4 +329,40 @@ func AppendToFile(filename string, data string) error {
 		return err
 	}
 	return nil
+}
+
+func KillProcess(port string) (int, error) {
+    cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port))
+    out, err := cmd.Output()
+    if err != nil {
+        return 0, fmt.Errorf("error running lsof -i command: %v", err)
+    }
+    pidStr := strings.TrimSpace(string(out))
+    if pidStr == "" {
+        return 0, fmt.Errorf("no process found for port %s", port)
+    }
+    pid, err := strconv.Atoi(pidStr)
+    if err != nil {
+        return 0, fmt.Errorf("error converting PID to integer: %v", err)
+    }
+	// killing process by id
+	cmd = exec.Command("kill", strconv.Itoa(pid))
+
+	if err := cmd.Run(); err != nil {
+		return 0, fmt.Errorf("failed to kill process with PID %d: %v ", pid, err)
+	}
+
+    return pid, nil
+}
+
+
+func SplitCmdString(cmdString string) ([]string, error) {
+    return []string{"sh", "-c", cmdString}, nil
+}
+
+func LogOutput(stdout  io.Reader, t *test.SystemTest) {
+	scanner := bufio.NewScanner(stdout)
+	for scanner.Scan() {
+		t.Logf("[MinIO stdout] %s", scanner.Text())
+	}
 }

@@ -1,9 +1,7 @@
 package cli_tests
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -55,41 +53,6 @@ func read_file_mc(testSetup *testing.T) (string, string, string, string, string,
 
 }
 
-func splitCmdString(cmdString string) ([]string, error) {
-    return []string{"sh", "-c", cmdString}, nil
-}
-
-func logOutput(stdout  io.Reader, t *test.SystemTest) {
-	scanner := bufio.NewScanner(stdout)
-	for scanner.Scan() {
-		t.Logf("[MinIO stdout] %s", scanner.Text())
-	}
-}
-
-func killProcess(port string) (int, error) {
-    cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port))
-    out, err := cmd.Output()
-    if err != nil {
-        return 0, fmt.Errorf("error running lsof -i command: %v", err)
-    }
-    pidStr := strings.TrimSpace(string(out))
-    if pidStr == "" {
-        return 0, fmt.Errorf("no process found for port %s", port)
-    }
-    pid, err := strconv.Atoi(pidStr)
-    if err != nil {
-        return 0, fmt.Errorf("error converting PID to integer: %v", err)
-    }
-	// killing process by id
-	cmd = exec.Command("kill", strconv.Itoa(pid))
-
-	if err := cmd.Run(); err != nil {
-		return 0, fmt.Errorf("Failed to kill process with PID %d: %v\n", pid, err)
-	}
-
-    return pid, nil
-}
-
 func TestZs3ServerReplication(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
@@ -106,7 +69,7 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 
 		cmdString := "export MINIO_ROOT_USER="+accessKey+" && export MINIO_ROOT_PASSWORD="+secretKey+" && ../minio gateway zcn --configDir "+zcnDir + " --console-address :8000"
 
-		cmdParts, err := splitCmdString(cmdString)
+		cmdParts, err := cli_utils.SplitCmdString(cmdString)
 		if err != nil {
 			fmt.Println("Error splitting command string:", err)
 			os.Exit(1)
@@ -128,8 +91,8 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 			fmt.Println("Error starting MinIO server:", err)
 			os.Exit(1)
 		}
-		// go logOutput(stdout, t)
-		// go logOutput(stderr, t)
+		// go cli_utils.LogOutput(stdout, t)
+		// go cli_utils.LogOutput(stderr, t)
 		time.Sleep(5 *time.Second)
 		t.Logf("MinIO server started successfully")
 	}
@@ -184,7 +147,7 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 		_ = os.Remove("a.txt")
 
 		assert.Contains(t, strings.Join(output, "\n"), "a.txt")
-		_, err = killProcess("9000")
+		_, err = cli_utils.KillProcess("9000")
 
 		if err != nil {
 			t.Logf("Error killing the command process")
