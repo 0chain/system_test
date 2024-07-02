@@ -11,20 +11,21 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestZs3serverFanoutTests(testSetup *testing.T) {
+
+func TestZs3serverMultipartTests(testSetup *testing.T) {
+	log.Println("Running Warp Multipart Benchmark...")
 	timeout := time.Duration(200 * time.Minute)
 	os.Setenv("GO_TEST_TIMEOUT", timeout.String())
 
-	log.Println("Running Warp Fanout Benchmark...")
+
 	t := test.NewSystemTest(testSetup)
 
 	server, host, accessKey, secretKey, concurrent := cliutils.ReadFile(testSetup)
 
-	commandGenerated := "../warp fanout --copies=50 --obj.size=512KiB --host=" + server + ":" + host + " --access-key=" + accessKey + " --secret-key=" + secretKey + "  --concurrent " + concurrent + " --duration 30s" + " --obj.size 1KiB"
+	commandGenerated := "../warp multipart --parts=500 --part.size=10MiB --host=" + server + ":" + host + " --access-key=" + accessKey + " --secret-key=" + secretKey + "  --concurrent " + concurrent + " --duration 30s"
 	log.Println("Command Generated: ", commandGenerated)
 
-	output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*3)
-
+	output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*2)
 	if err != nil {
 		testSetup.Fatalf("Error running warp multipart: %v\nOutput: %s", err, output)
 	}
