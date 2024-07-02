@@ -527,7 +527,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			"file2.txt": 1 * MB,
 			"file3.txt": 1 * MB,
 		}
-		var remoteFilesNames map[string]string
+		remoteFilesNames := make(map[string]string)
 
 		var wg sync.WaitGroup
 		for filename, fileSize := range files {
