@@ -534,8 +534,8 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			wg.Add(1)
 			filename := filename
 			go func(path string, size int64) {
-				defer wg.Done()
 				remoteFilesNames[filename] = generateFileAndUpload(t, allocationID, remotepath+filename, size)
+				defer wg.Done()
 			}(filename, fileSize)
 		}
 		wg.Wait()
