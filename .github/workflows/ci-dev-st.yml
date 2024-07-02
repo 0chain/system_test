@@ -87,7 +87,7 @@ jobs:
 
       - name: "Parse Tenderly fork creation transaction result"
         run: |
-          echo "TENDERLY_FORK_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.simulation_fork.id')" >> $GITHUB_ENV
+          echo "TENDERLY_VIRTUAL_TESTNET_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.simulation_fork.id')" >> $GITHUB_ENV
           echo "TENDERLY_ROOT_TRANSACTION_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.root_transaction.id')" >> $GITHUB_ENV
 
       - name: "Retrieve Tenderly fork block number"
@@ -124,7 +124,7 @@ jobs:
                 "alias": "",
                 "description": "Transfer ownership to 0x8E25cfd9bd6c0ca67a5522cd920b3c66D39d6E97"
             }' \
-              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_FORK_ID }}/simulate | jq -r '.simulation.id')" >> $GITHUB_ENV
+              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}/simulate | jq -r '.simulation.id')" >> $GITHUB_ENV
 
           echo "TENDERLY_FORK_BLOCK_NUMBER=$((${{ env.TENDERLY_FORK_BLOCK_NUMBER }} + 1))" >> GITHUB_ENV
 
@@ -153,7 +153,7 @@ jobs:
                 "alias": "",
                 "description": "Transfer ownership to 0x8E25cfd9bd6c0ca67a5522cd920b3c66D39d6E97"
             }' \
-              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_FORK_ID }}/simulate
+              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}/simulate
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
@@ -163,8 +163,8 @@ jobs:
           kube_config: ${{ secrets[format('DEVSTKC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ${{ env.TENDERLY_FORK_ID }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ env.TENDERLY_FORK_ID }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
