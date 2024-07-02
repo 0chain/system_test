@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -365,4 +366,78 @@ func LogOutput(stdout  io.Reader, t *test.SystemTest) {
 	for scanner.Scan() {
 		t.Logf("[MinIO stdout] %s", scanner.Text())
 	}
+}
+
+
+func RunMinioServer(cmd *exec.Cmd,  accessKey string, secretKey string,t test.SystemTest ) (*exec.Cmd, error){
+	currentUser, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	zcnDir := filepath.Join(currentUser.HomeDir, ".zcn")
+
+	cmdString := "export MINIO_ROOT_USER="+accessKey+" && export MINIO_ROOT_PASSWORD="+secretKey+" && ../minio gateway zcn --configDir "+zcnDir + " --console-address :8000"
+
+	cmdParts, err := SplitCmdString(cmdString)
+	if err != nil {
+		fmt.Println("Error splitting command string:", err)
+		return cmd, err
+	}
+	cmd = exec.Command(cmdParts[0], cmdParts[1:]...)
+
+	_, err = cmd.StdoutPipe()
+	if err != nil {
+		log.Fatalf("Error creating stdout pipe: %v", err)
+	}
+
+	_, _ = cmd.StderrPipe()
+
+
+	log.Printf("Generated command: %s %s", cmd.Path, cmd.Args)
+
+	err = cmd.Start()
+	if err != nil {
+		fmt.Println("Error starting MinIO server:", err)
+		os.Exit(1)
+	}
+	// go cli_utils.LogOutput(stdout, t)
+	// go cli_utils.LogOutput(stderr, t)
+	time.Sleep(5 *time.Second)
+	t.Logf("MinIO server started successfully")
+	return cmd, nil
+}
+
+
+func ReadFileMC(testSetup *testing.T) (string, string, string, string, string, string, string, bool) {
+	file, err := os.Open("mc_hosts.yaml")
+	if err != nil {
+		testSetup.Fatalf("Error opening hosts.yaml file: %v\n", err)
+	}
+	defer file.Close()
+
+	decoder := yaml.NewDecoder(file)
+	var hosts map[string]interface{}
+	err = decoder.Decode(&hosts)
+	if err != nil {
+		testSetup.Fatalf("Error decoding mc_hosts.yaml file: %v\n", err)
+	}
+
+	accessKey := hosts["access_key"].(string)
+	secretKey := hosts["secret_key"].(string)
+	port := hosts["port"].(int)
+	concurrent := hosts["concurrent"].(int)
+	server := hosts["server"].(string)
+	secondary_server := hosts["secondary_server"].(string)
+	s_port := hosts["secondary_port"].(int)
+	use_command, ok := hosts["use_command"].(bool)
+
+	if !ok {
+		use_command = false
+	}
+
+	host := strconv.FormatInt(int64(port), 10)
+	secondary_port := strconv.FormatInt(int64(s_port), 10)
+	concurrent_no := strconv.FormatInt(int64(concurrent), 10)
+	return server, host, accessKey, secretKey, concurrent_no, secondary_port, secondary_server,use_command
+
 }
