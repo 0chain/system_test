@@ -25,36 +25,25 @@ jobs:
           version: '1.7'
           force: 'false'
 
-      - name: "Create Tenderly fork"
+      - name: "Create Tenderly virtual testnet"
         run: |
           echo "TENDERLY_CREATION_INFO=$(curl -X POST \
-              -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
-              -H "Content-Type: application/json" \
-              -d '{"alias":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}${{ github.run_attempt }}", "description":"", "block_number": 18539779, "network_id":"1"}' \
-              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork)" >> $GITHUB_ENV
+           -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
+           -H "Content-Type: application/json" \
+           -d '{"slug":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","displayName":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","description":"","visibility":"TEAM","tags":{"purpose":"development"},"networkConfig":{"networkId":"1","blockNumber":"latest","chainConfig":{"chainId":"1"},"baseFeePerGas":"1"},"explorerConfig":{"enabled":false,"verificationVisibility":"bytecode"},"syncState":false}' \
+           https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container)" >> $GITHUB_ENV
 
-      - name: "Parse Tenderly fork creation transaction result"
+      - name: "Parse Tenderly virtual testnet creation transaction result"
         run: |
-          echo "TENDERLY_VIRTUAL_TESTNET_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.simulation_fork.id')" >> $GITHUB_ENV
-          echo "TENDERLY_ROOT_TRANSACTION_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.root_transaction.id')" >> $GITHUB_ENV
-
-      - name: "Retrieve Tenderly fork block number"
-        run: |
-          echo "TENDERLY_FORK_BLOCK_NUMBER=$(curl -X GET \
-              -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
-              -H "Content-Type: application/json" \
-              https://api.tenderly.co/api/v1/network/1/block-number | jq -r '.block_number')" >> $GITHUB_ENV
-
-          echo "TENDERLY_FORK_BLOCK_NUMBER=$((${{ env.TENDERLY_FORK_BLOCK_NUMBER }} + 1))" >> GITHUB_ENV
+          echo "TENDERLY_VIRTUAL_TESTNET_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.id')" >> $GITHUB_ENV
 
       - name: "Transfer Bridge ownership in Tenderly fork"
         run: |
-          echo "TENDERLY_ROOT_TRANSACTION_ID=$(curl -X POST \
+          curl -X POST \
               -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
               -H "Content-Type: application/json" \
               -d '{
                 "network_id": "1",
-                "block_number": ${{ env.TENDERLY_FORK_BLOCK_NUMBER }},
                 "transaction_index": null,
                 "from": "0xed8f3170db6d1a71c8fa6d8d73cc2c51db95d5a4",
                 "input": "0xf2fde38b0000000000000000000000008e25cfd9bd6c0ca67a5522cd920b3c66d39d6e97",
@@ -64,17 +53,12 @@ jobs:
                 "value": "0",
                 "access_list": [],
                 "generate_access_list": true,
-                "save": true,
                 "source": "dashboard",
-                "block_header": null,
-                "root": "${{ env.TENDERLY_ROOT_TRANSACTION_ID }}",
                 "skip_fork_head_update": false,
                 "alias": "",
                 "description": "Transfer ownership to 0x8E25cfd9bd6c0ca67a5522cd920b3c66D39d6E97"
             }' \
-              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}/simulate | jq -r '.simulation.id')" >> $GITHUB_ENV
-
-          echo "TENDERLY_FORK_BLOCK_NUMBER=$((${{ env.TENDERLY_FORK_BLOCK_NUMBER }} + 1))" >> GITHUB_ENV
+              https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}/transactions
 
       - name: "Transfer Authorizers ownership in Tenderly fork"
         run: |
@@ -83,7 +67,6 @@ jobs:
               -H "Content-Type: application/json" \
               -d '{
                 "network_id": "1",
-                "block_number": ${{ env.TENDERLY_FORK_BLOCK_NUMBER }},
                 "transaction_index": null,
                 "from": "0xed8f3170db6d1a71c8fa6d8d73cc2c51db95d5a4",
                 "input": "0xf2fde38b0000000000000000000000008e25cfd9bd6c0ca67a5522cd920b3c66d39d6e97",
@@ -93,15 +76,12 @@ jobs:
                 "value": "0",
                 "access_list": [],
                 "generate_access_list": true,
-                "save": true,
                 "source": "dashboard",
-                "block_header": null,
-                "root": "${{ env.TENDERLY_ROOT_TRANSACTION_ID }}",
                 "skip_fork_head_update": false,
                 "alias": "",
                 "description": "Transfer ownership to 0x8E25cfd9bd6c0ca67a5522cd920b3c66D39d6E97"
             }' \
-              https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}/simulate
+              https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}/transactions
 
       - name: "Deploy 0Chain"
         uses: 0chain/actions/deploy-0chain@master
@@ -135,14 +115,14 @@ jobs:
           TENDERLY_VIRTUAL_TESTNET_ID: ""
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-      
-      - name: "Remove Tenderly fork"
+
+      - name: "Remove Tenderly virtual testnet"
         if: always()
         run: |
           curl -X DELETE \
             -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
             -H "Content-Type: application/json" \
-            https://api.tenderly.co/api/v1/account/zus_network/project/project/fork/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}
+            https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}
 
   notify_slack_on_failure:
     runs-on: [self-hosted, arc-runner]
