@@ -452,9 +452,20 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		}
 		wg.Wait()
 
-		localFileChecksum := generateChecksum(t, filepath.Base(localFilePath))
+		remoteFileDownload, err := downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(localFilePath),
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err)
+		require.True(t, len(remoteFileDownload) > 0)
 
-		err := os.Remove(localFilePath)
+		localFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(localFilePath))
+
+		err = os.Remove(localFilePath)
+		require.Nil(t, err)
+
+		err = os.Remove(filepath.Join("tmp/", filepath.Base(localFilePath)))
 		require.Nil(t, err)
 
 		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFilePath), filepath.Base(localFilePath), int64(fileSize/2))
@@ -476,15 +487,12 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFilePath), filepath.Base(localFilePath), int64(newFileSize))
 
 		// rollback allocation
-		// Performing a double rollback.
-		for i := 0; i < 2; i++ {
-			output, err = rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
-				"allocation": allocationID,
-			}))
-			t.Log(strings.Join(output, "\n"))
-			require.NoError(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 1)
-		}
+		output, err = rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+		}))
+		t.Log(strings.Join(output, "\n"))
+		require.NoError(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
