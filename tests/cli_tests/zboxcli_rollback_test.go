@@ -601,14 +601,14 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		remotepath := "/"
 		localFilePath := ""
 		doneUploading := make(chan bool)
-		var wg sync.WaitGroup
-		wg.Add(1)
+		//var wg sync.WaitGroup
+		//wg.Add(1)
 		go func() {
-			defer wg.Done()
+			//defer wg.Done()
 			localFilePath = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			doneUploading <- true
 		}()
-		wg.Wait()
+		//wg.Wait()
 		time.Sleep(5 * time.Second)
 
 		// Ensure the upload was interrupted
