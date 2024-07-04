@@ -27,6 +27,16 @@ import (
 
 var Logger = getLogger()
 
+type Configuration struct {
+	Server      string
+	HostPort        string
+	AccessKey   string
+	SecretKey   string
+	Concurrent  string
+	ObjectSize  string
+	ObjectCount string
+}
+
 func RunCommandWithoutRetry(commandString string) ([]string, error) {
 	command := parseCommand(commandString)
 	commandName := command[0]
@@ -268,7 +278,11 @@ func GetSubPaths(p string) (paths []string, err error) {
 	return
 }
 
-func ReadFile(testSetup *testing.T) (string, string, string, string, string, string, string) {
+
+
+func ReadFile(testSetup *testing.T) Configuration {
+	var config Configuration
+
 	file, err := os.Open("hosts.yaml")
 	if err != nil {
 		testSetup.Fatalf("Error opening hosts.yaml file: %v\n", err)
@@ -282,19 +296,19 @@ func ReadFile(testSetup *testing.T) (string, string, string, string, string, str
 		testSetup.Fatalf("Error decoding hosts.yaml file: %v\n", err)
 	}
 
-	accessKey := hosts["access_key"].(string)
-	secretKey := hosts["secret_key"].(string)
+	config.AccessKey = hosts["access_key"].(string)
+	config.SecretKey = hosts["secret_key"].(string)
 	port := hosts["port"].(int)
 	concurrent := hosts["concurrent"].(int)
-	objectSize := hosts["object_size"].(string)
+	config.ObjectSize = hosts["object_size"].(string)
 	objectCount := hosts["object_count"].(int)
-	server := hosts["server"].(string)
-	host := strconv.FormatInt(int64(port), 10)
-	objectCountStr := strconv.FormatInt(int64(objectCount), 10)
-	concurrent_no := strconv.FormatInt(int64(concurrent), 10)
-	return server, host, accessKey, secretKey, concurrent_no, objectSize, objectCountStr
-
+	config.Server = hosts["server"].(string)
+	config.HostPort = strconv.FormatInt(int64(port), 10)
+	config.ObjectCount = strconv.FormatInt(int64(objectCount), 10)
+	config.Concurrent = strconv.FormatInt(int64(concurrent), 10)
+	return config
 }
+
 
 func Read_file_allocation() (string, string, string, string, string) {
 	file, err := os.Open("allocation.yaml")
