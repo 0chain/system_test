@@ -20,7 +20,13 @@ func TestZs3Server(testSetup *testing.T) {
 		t.Logf("../mc is installed")
 	}
 
-	defer cli_utils.RunCommand(t, "rm -rf a.txt", 1, time.Hour*2)
+	defer func() {
+		_, err := cli_utils.RunCommand(t, "rm -rf a.txt", 1, time.Hour*2)
+		if err != nil {
+			t.Logf("Error while deferring command: %v", err)
+		}
+	}()
+
 	// defer cli_utils.RunCommand(t, "../mc rb custombucket --force --dangerous", 1, time.Hour*2)
 
 	// listing the buckets in the command

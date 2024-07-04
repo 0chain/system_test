@@ -16,10 +16,9 @@ func TestWarpAnalysis(t *testing.T) {
 
     for _, file := range files {
 
-        fmt.Print("<", strings.Repeat("-", 50),"->", "\n\n")
+        fmt.Println("<", strings.Repeat("-", 50), "->")
         fmt.Printf("Analyzing %s\n\n", file)
         cmd := exec.Command("../warp", "analyze", "--analyze.op=GET", "--analyze.v", file)
-        // Set cmd.Dir if necessary
 
         stdoutStderr, err := cmd.CombinedOutput()
         if err != nil {

@@ -21,9 +21,16 @@ func TestZs3ServerBucket(testSetup *testing.T) {
 
 	// test for moving the file from testbucket to testbucket2
 	t.RunSequentially("Test for moving file from testbucket to testbucket2", func(t *test.SystemTest) {
-		cli_utils.RunCommand(t, "../mc mb testbucket", 1, time.Hour*2)
+		_, err := cli_utils.RunCommand(t, "../mc mb testbucket", 1, time.Hour*2)
 
-		cli_utils.RunCommand(t, "../mc mb testbucket2", 1, time.Hour*2)
+		if err != nil {
+			t.Fatalf("Error creating bucket: %v", err)
+		}
+
+		_, err = cli_utils.RunCommand(t, "../mc mb testbucket2", 1, time.Hour*2)
+		if err != nil {
+			t.Fatalf("Error creating bucket: %v", err)
+		}
 
 		file, err := os.Create("a.txt")
 		if err != nil {

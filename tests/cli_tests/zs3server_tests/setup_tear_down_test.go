@@ -18,7 +18,10 @@ var allocationId string
 func TestMain(m *testing.M) {
 	globalSetup()
 	timeout := time.Duration(200 * time.Minute)
-	os.Setenv("GO_TEST_TIMEOUT", timeout.String())
+	err := os.Setenv("GO_TEST_TIMEOUT", timeout.String())
+	if err != nil {
+		log.Printf("Error setting environment variable: %v", err)
+	}
 	code := m.Run()
 	globalTearDown()
 	os.Exit(code)
@@ -62,7 +65,7 @@ func globalSetup() {
 		}
 	}
 	// // create allocation from allocation.yaml file
-	data, parity, lock, accessKey, secretKey := cliutils.Read_file_allocation()
+	data, parity, lock, accessKey, secretKey := cliutils.ReadFileAllocation()
 	// data, parity, lock, _, _ := cliutils.Read_file_allocation()
 	cmd := exec.Command("../zbox", "newallocation", "--lock", lock, "--data", data, "--parity", parity, "--size", "7000000000")
 	output, err := cmd.CombinedOutput()

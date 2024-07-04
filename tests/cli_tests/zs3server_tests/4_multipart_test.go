@@ -15,7 +15,10 @@ import (
 func TestZs3serverMultipartTests(testSetup *testing.T) {
 	log.Println("Running Warp Multipart Benchmark...")
 	timeout := time.Duration(200 * time.Minute)
-	os.Setenv("GO_TEST_TIMEOUT", timeout.String())
+	err := os.Setenv("GO_TEST_TIMEOUT", timeout.String())
+	if err != nil {
+		log.Printf("Error setting environment variable: %v", err)
+	}
 
 
 	t := test.NewSystemTest(testSetup)
