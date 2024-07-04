@@ -13,7 +13,6 @@ import (
 func TestZs3Server(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	// check if ../mc command is available
 	if _, err := os.Stat("../mc"); os.IsNotExist(err) {
 		t.Fatalf("../mc is not installed")
 	} else {

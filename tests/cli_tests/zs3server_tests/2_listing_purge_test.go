@@ -34,7 +34,6 @@ func TestZs3serverWarpTests(testSetup *testing.T) {
 			testSetup.Fatalf("Error appending to file: %v\n", err)
 		}
 	})
-
 }
 
 func TestZs3serverConcurrentListTests(testSetup *testing.T) {

@@ -329,7 +329,7 @@ func ReadFileAllocation() (data string, parity string, lock string, accessKey st
 	var allocationData map[string]interface{}
 
 	if err := decoder.Decode(&allocationData); err != nil {
-		log.Fatalf("Error decoding allocation.yaml file: %v", err)
+		log.Printf("Error decoding allocation.yaml file: %v", err)
 	}
 	data_int := allocationData["data"].(int)
 	parity_int := allocationData["parity"].(int)
@@ -422,7 +422,6 @@ func RunMinioServer(cmd *exec.Cmd, accessKey, secretKey string) (*exec.Cmd, erro
 	}
 
 	time.Sleep(5 * time.Second)
-	// t.Logf("MinIO server started successfully")
 	return cmd, nil
 }
 

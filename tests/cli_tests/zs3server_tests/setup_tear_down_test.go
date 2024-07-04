@@ -61,12 +61,10 @@ func globalSetup() {
 			log.Print("All required commands are installed")
 		} else {
 			log.Print("Checking for next command")
-
 		}
 	}
 	// // create allocation from allocation.yaml file
 	data, parity, lock, accessKey, secretKey := cliutils.ReadFileAllocation()
-	// data, parity, lock, _, _ := cliutils.Read_file_allocation()
 	cmd := exec.Command("../zbox", "newallocation", "--lock", lock, "--data", data, "--parity", parity, "--size", "7000000000")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -86,7 +84,6 @@ func globalSetup() {
 	_, _ = cliutils.RunMinioServer(cmd3, accessKey, secretKey)
 	log.Print("Minio server started")
 	println("Global setup code executed")
-
 }
 
 func globalTearDown() {

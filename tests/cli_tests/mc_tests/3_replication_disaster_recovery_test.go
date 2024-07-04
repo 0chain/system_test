@@ -1,7 +1,6 @@
 package cli_tests
 
 import (
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -15,21 +14,20 @@ import (
 
 func TestZs3ServerReplication(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	server, port, accessKey, secretKey, _, s_port, s_server, use_command := cli_utils.ReadFileMC(testSetup)
-	log.Print(s_port)
+	config := cli_utils.ReadFileMC(testSetup)
 
 	var cmd *exec.Cmd
-	if use_command {
-		_, _ = cli_utils.RunMinioServer(cmd, accessKey, secretKey)
+	if config.UseCommand {
+		_, _ = cli_utils.RunMinioServer(cmd, config.AccessKey, config.SecretKey)
 		t.Logf("Minio server Started")
 	}
 
 	t.RunWithTimeout("Test for replication", 4000*time.Second, func(t *test.SystemTest) {
-		t.Log(server, "server")
-		command_primary := "../mc alias set primary http://" + server + ":" + port + " " + accessKey + " " + secretKey + " --api S3v2"
+		t.Log(config.Server, "server")
+		command_primary := "../mc alias set primary http://" + config.Server + ":" + config.HostPort + " " + config.AccessKey + " " + config.SecretKey + " --api S3v2"
 		t.Log(command_primary, "command Generated")
 
-		command_secondary := "../mc alias set secondary http://" + s_server + ":" + port + " " + accessKey + " " + secretKey + " --api S3v2"
+		command_secondary := "../mc alias set secondary http://" + config.SecondaryServer + ":" + config.SecondaryPort + " " + config.AccessKey + " " + config.SecretKey + " --api S3v2"
 		t.Log(command_secondary, "command Generated")
 
 		_, _ = cli_utils.RunCommand(t, command_primary, 1, time.Hour*2)
