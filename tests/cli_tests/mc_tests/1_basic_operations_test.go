@@ -21,7 +21,7 @@ func TestZs3Server(testSetup *testing.T) {
 	}
 
 	defer cli_utils.RunCommand(t, "rm -rf a.txt", 1, time.Hour*2)
-	defer cli_utils.RunCommand(t, "../mc rb custombucket --force --dangerous", 1, time.Hour*2)
+	// defer cli_utils.RunCommand(t, "../mc rb custombucket --force --dangerous", 1, time.Hour*2)
 
 	// listing the buckets in the command
 	t.RunSequentially("Should list the buckets", func(t *test.SystemTest) {

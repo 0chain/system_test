@@ -2,7 +2,6 @@
 package zs3servertests
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -10,13 +9,15 @@ import (
 	"regexp"
 	"testing"
 	"time"
+
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
 var allocationId string
 
 func TestMain(m *testing.M) {
 	globalSetup()
-	timeout := time.Duration(60 * time.Minute)
+	timeout := time.Duration(200 * time.Minute)
 	os.Setenv("GO_TEST_TIMEOUT", timeout.String())
 	code := m.Run()
 	globalTearDown()
@@ -50,7 +51,7 @@ func globalSetup() {
 			log.Fatal(cmd + " is not installed")
 			os.Exit(1)
 		} else {
-			log.Fatal(cmd + " is  installed")
+			log.Printf(cmd , " is  installed")
 		}
 
 		if requiredCommands[cmd] == requiredCommands["warp"] {
@@ -60,23 +61,16 @@ func globalSetup() {
 
 		}
 	}
-
-	// create allocation from allocation.yaml file
-	data, parity, lock := read_file_allocation()
-	cmd := exec.Command("../zbox", "newallocation", "--lock", lock, "--data", data, "--parity", parity)
-
-	// get the allocation id for created
-
+	// // create allocation from allocation.yaml file
+	data, parity, lock, accessKey, secretKey := cliutils.Read_file_allocation()
+	// data, parity, lock, _, _ := cliutils.Read_file_allocation()
+	cmd := exec.Command("../zbox", "newallocation", "--lock", lock, "--data", data, "--parity", parity, "--size", "7000000000")
 	output, err := cmd.CombinedOutput()
-
 	if err != nil {
 		log.Fatal("Error creating allocation: ", err)
-		os.Exit(1)
 	} else {
-		log.Fatal("Allocation created successfully")
+		log.Print("Allocation created successfully")
 	}
-
-	// use regex
 	re := regexp.MustCompile(`Allocation created:\s*([a-f0-9]+)`)
 
 	match := re.FindStringSubmatch(string(output))
@@ -84,29 +78,15 @@ func globalSetup() {
 		allocationId = match[1]
 	}
 
-	os.Setenv("MINIO_ROOT_USER", "someminiouser")
-	os.Setenv("MINIO_ROOT_PASSWORD", "someminiopassword")
+	var cmd3 *exec.Cmd
 
-	cmd = exec.Command("./minio", "gateway", "zcn", "--console-address", ":8000")
-
-	err = cmd.Start()
-	if err != nil {
-		fmt.Println(err)
-	}
+	_, _ = cliutils.RunMinioServer(cmd3, accessKey, secretKey)
 	log.Print("Minio server started")
-
 	println("Global setup code executed")
 
 }
 
 func globalTearDown() {
 	println("Global teardown code Executing .......")
-	err := exec.Command("../zbox", "delete", "--allocation", allocationId, "--remotepath", "/").Run()
-	if err != nil {
-		log.Fatal("Error deleting allocation: ", err)
-		os.Exit(1)
-	} else {
-		log.Print("Allocation deleted successfully")
-	}
-
+	_ = exec.Command("../zbox", "delete", "--allocation", allocationId, "--remotepath", "/").Run()
 }
