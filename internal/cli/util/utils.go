@@ -318,7 +318,7 @@ func ReadFile(testSetup *testing.T) Configuration {
 	return config
 }
 
-func ReadFileAllocation() (data string, parity string, lock string, accessKey string, secretKey string) {
+func ReadFileAllocation() (data , parity , lock , accessKey , secretKey string) {
 	file, err := os.Open("allocation.yaml")
 	if err != nil {
 		log.Fatalf("Error opening allocation.yaml file: %v", err)
@@ -392,7 +392,7 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 	}
 }
 
-func RunMinioServer(cmd *exec.Cmd, accessKey, secretKey string) (*exec.Cmd, error) {
+func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	currentUser, err := user.Current()
 	if err != nil {
 		panic(err)
@@ -405,7 +405,7 @@ func RunMinioServer(cmd *exec.Cmd, accessKey, secretKey string) (*exec.Cmd, erro
 	if err != nil {
 		return nil, fmt.Errorf("error splitting command string: %w", err)
 	}
-	cmd = exec.Command(cmdParts[0], cmdParts[1:]...)
+	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
 
 	_, err = cmd.StdoutPipe()
 	if err != nil {

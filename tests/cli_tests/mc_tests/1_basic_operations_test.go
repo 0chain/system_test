@@ -26,8 +26,6 @@ func TestZs3Server(testSetup *testing.T) {
 		}
 	}()
 
-	// defer cli_utils.RunCommand(t, "../mc rb custombucket --force --dangerous", 1, time.Hour*2)
-
 	// listing the buckets in the command
 	t.RunSequentially("Should list the buckets", func(t *test.SystemTest) {
 		output, _ := cli_utils.RunCommand(t, "../mc ls play", 1, time.Hour*2)
@@ -93,5 +91,4 @@ func TestZs3Server(testSetup *testing.T) {
 		output, _ := cli_utils.RunCommand(t, "../mc rm custombucket/a.txt", 1, time.Hour*2)
 		assert.Contains(t, output, "Removed `custombucket/a.txt`.")
 	})
-
 }

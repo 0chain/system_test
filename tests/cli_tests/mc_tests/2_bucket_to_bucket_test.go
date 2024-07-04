@@ -15,9 +15,6 @@ import (
 func TestZs3ServerBucket(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	// defer cli_utils.RunCommand(t, "../mc rb testbucket2 --force --dangerous", 1, time.Hour*2)
-	// defer cli_utils.RunCommand(t, "../mc rb testbucket --force --dangerous", 1, time.Hour*2)
-
 	// test for moving the file from testbucket to testbucket2
 	t.RunSequentially("Test for moving file from testbucket to testbucket2", func(t *test.SystemTest) {
 		_, err := cli_utils.RunCommand(t, "../mc mb testbucket", 1, time.Hour*2)
@@ -55,7 +52,5 @@ func TestZs3ServerBucket(testSetup *testing.T) {
 
 		// Assert that the local file exists
 		assert.NoError(t, err, fmt.Sprintf("Local file %s should exist", "testbucket2/a.txt"))
-
 	})
-
 }

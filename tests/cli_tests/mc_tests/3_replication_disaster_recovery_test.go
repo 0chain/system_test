@@ -2,7 +2,6 @@ package cli_tests
 
 import (
 	"os"
-	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -16,9 +15,8 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	config := cli_utils.ReadFileMC(testSetup)
 
-	var cmd *exec.Cmd
 	if config.UseCommand {
-		_, _ = cli_utils.RunMinioServer(cmd, config.AccessKey, config.SecretKey)
+		_, _ = cli_utils.RunMinioServer(config.AccessKey, config.SecretKey)
 		t.Logf("Minio server Started")
 	}
 

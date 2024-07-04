@@ -79,9 +79,7 @@ func globalSetup() {
 		allocationId = match[1]
 	}
 
-	var cmd3 *exec.Cmd
-
-	_, _ = cliutils.RunMinioServer(cmd3, accessKey, secretKey)
+	_, _ = cliutils.RunMinioServer(accessKey, secretKey)
 	log.Print("Minio server started")
 	println("Global setup code executed")
 }
