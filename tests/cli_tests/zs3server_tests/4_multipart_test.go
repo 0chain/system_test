@@ -11,7 +11,6 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-
 func TestZs3serverMultipartTests(testSetup *testing.T) {
 	log.Println("Running Warp Multipart Benchmark...")
 	timeout := time.Duration(200 * time.Minute)
@@ -19,7 +18,6 @@ func TestZs3serverMultipartTests(testSetup *testing.T) {
 	if err != nil {
 		log.Printf("Error setting environment variable: %v", err)
 	}
-
 
 	t := test.NewSystemTest(testSetup)
 

@@ -54,7 +54,7 @@ func globalSetup() {
 			log.Fatal(cmd + " is not installed")
 			os.Exit(1)
 		} else {
-			log.Printf(cmd , " is  installed")
+			log.Printf(cmd, " is  installed")
 		}
 
 		if requiredCommands[cmd] == requiredCommands["warp"] {

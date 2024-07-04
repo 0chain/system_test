@@ -29,7 +29,7 @@ var Logger = getLogger()
 
 type Configuration struct {
 	Server      string
-	HostPort        string
+	HostPort    string
 	AccessKey   string
 	SecretKey   string
 	Concurrent  string
@@ -38,14 +38,14 @@ type Configuration struct {
 }
 
 type McConfiguration struct {
-	Server      string
+	Server          string
 	HostPort        string
-	AccessKey   string
-	SecretKey   string
-	Concurrent  string
-	SecondaryPort string
+	AccessKey       string
+	SecretKey       string
+	Concurrent      string
+	SecondaryPort   string
 	SecondaryServer string
-	UseCommand bool
+	UseCommand      bool
 }
 
 func RunCommandWithoutRetry(commandString string) ([]string, error) {
@@ -289,8 +289,6 @@ func GetSubPaths(p string) (paths []string, err error) {
 	return
 }
 
-
-
 func ReadFile(testSetup *testing.T) Configuration {
 	var config Configuration
 
@@ -319,7 +317,6 @@ func ReadFile(testSetup *testing.T) Configuration {
 	config.Concurrent = strconv.FormatInt(int64(concurrent), 10)
 	return config
 }
-
 
 func ReadFileAllocation() (data string, parity string, lock string, accessKey string, secretKey string) {
 	file, err := os.Open("allocation.yaml")
@@ -361,19 +358,19 @@ func AppendToFile(filename, data string) error {
 }
 
 func KillProcess(port string) (int, error) {
-    cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port))
-    out, err := cmd.Output()
-    if err != nil {
-        return 0, fmt.Errorf("error running lsof -i command: %v", err)
-    }
-    pidStr := strings.TrimSpace(string(out))
-    if pidStr == "" {
-        return 0, fmt.Errorf("no process found for port %s", port)
-    }
-    pid, err := strconv.Atoi(pidStr)
-    if err != nil {
-        return 0, fmt.Errorf("error converting PID to integer: %v", err)
-    }
+	cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port))
+	out, err := cmd.Output()
+	if err != nil {
+		return 0, fmt.Errorf("error running lsof -i command: %v", err)
+	}
+	pidStr := strings.TrimSpace(string(out))
+	if pidStr == "" {
+		return 0, fmt.Errorf("no process found for port %s", port)
+	}
+	pid, err := strconv.Atoi(pidStr)
+	if err != nil {
+		return 0, fmt.Errorf("error converting PID to integer: %v", err)
+	}
 	// killing process by id
 	cmd = exec.Command("kill", strconv.Itoa(pid))
 
@@ -381,34 +378,32 @@ func KillProcess(port string) (int, error) {
 		return 0, fmt.Errorf("failed to kill process with PID %d: %v ", pid, err)
 	}
 
-    return pid, nil
+	return pid, nil
 }
-
 
 func SplitCmdString(cmdString string) ([]string, error) {
-    return []string{"sh", "-c", cmdString}, nil
+	return []string{"sh", "-c", cmdString}, nil
 }
 
-func LogOutput(stdout  io.Reader, t *test.SystemTest) {
+func LogOutput(stdout io.Reader, t *test.SystemTest) {
 	scanner := bufio.NewScanner(stdout)
 	for scanner.Scan() {
 		t.Logf("[MinIO stdout] %s", scanner.Text())
 	}
 }
 
-
-func RunMinioServer(cmd *exec.Cmd,  accessKey, secretKey string) (*exec.Cmd, error){
+func RunMinioServer(cmd *exec.Cmd, accessKey, secretKey string) (*exec.Cmd, error) {
 	currentUser, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
 	zcnDir := filepath.Join(currentUser.HomeDir, ".zcn")
 
-	cmdString := "export MINIO_ROOT_USER="+accessKey+" && export MINIO_ROOT_PASSWORD="+secretKey+" && ../minio gateway zcn --configDir "+zcnDir + " --console-address :8000"
+	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn --configDir " + zcnDir + " --console-address :8000"
 
 	cmdParts, err := SplitCmdString(cmdString)
 	if err != nil {
-		  return nil, fmt.Errorf("error splitting command string: %w", err)
+		return nil, fmt.Errorf("error splitting command string: %w", err)
 	}
 	cmd = exec.Command(cmdParts[0], cmdParts[1:]...)
 
@@ -419,21 +414,19 @@ func RunMinioServer(cmd *exec.Cmd,  accessKey, secretKey string) (*exec.Cmd, err
 
 	_, _ = cmd.StderrPipe()
 
-
 	log.Printf("Generated command: %s %s", cmd.Path, cmd.Args)
 
 	err = cmd.Start()
 	if err != nil {
-    	log.Fatalf("Error starting MinIO server: %v", err)
+		log.Fatalf("Error starting MinIO server: %v", err)
 	}
 
-	time.Sleep(5 *time.Second)
+	time.Sleep(5 * time.Second)
 	// t.Logf("MinIO server started successfully")
 	return cmd, nil
 }
 
-
-func ReadFileMC(testSetup *testing.T) (McConfiguration) {
+func ReadFileMC(testSetup *testing.T) McConfiguration {
 	var config McConfiguration
 
 	file, err := os.Open("mc_hosts.yaml")
