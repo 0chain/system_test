@@ -13,22 +13,23 @@ import (
 func TestZs3Server(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	// check if ../mc command is available
 	if _, err := os.Stat("../mc"); os.IsNotExist(err) {
 		t.Fatalf("../mc is not installed")
 	} else {
 		t.Logf("../mc is installed")
 	}
 
-	defer cli_utils.RunCommand(t, "rm -rf a.txt", 1, time.Hour*2)
-	// defer cli_utils.RunCommand(t, "../mc rb custombucket --force --dangerous", 1, time.Hour*2)
+	defer func() {
+		_, err := cli_utils.RunCommand(t, "rm -rf a.txt", 1, time.Hour*2)
+		if err != nil {
+			t.Logf("Error while deferring command: %v", err)
+		}
+	}()
 
 	// listing the buckets in the command
 	t.RunSequentially("Should list the buckets", func(t *test.SystemTest) {
 		output, _ := cli_utils.RunCommand(t, "../mc ls play", 1, time.Hour*2)
-		// check if error exist in log
 		assert.NotContains(t, output, "error")
-
 	})
 
 	t.RunSequentially("Test Bucket Creation", func(t *test.SystemTest) {
@@ -88,5 +89,4 @@ func TestZs3Server(testSetup *testing.T) {
 		output, _ := cli_utils.RunCommand(t, "../mc rm custombucket/a.txt", 1, time.Hour*2)
 		assert.Contains(t, output, "Removed `custombucket/a.txt`.")
 	})
-
 }

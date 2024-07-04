@@ -27,6 +27,27 @@ import (
 
 var Logger = getLogger()
 
+type Configuration struct {
+	Server      string
+	HostPort    string
+	AccessKey   string
+	SecretKey   string
+	Concurrent  string
+	ObjectSize  string
+	ObjectCount string
+}
+
+type McConfiguration struct {
+	Server          string
+	HostPort        string
+	AccessKey       string
+	SecretKey       string
+	Concurrent      string
+	SecondaryPort   string
+	SecondaryServer string
+	UseCommand      bool
+}
+
 func RunCommandWithoutRetry(commandString string) ([]string, error) {
 	command := parseCommand(commandString)
 	commandName := command[0]
@@ -268,7 +289,9 @@ func GetSubPaths(p string) (paths []string, err error) {
 	return
 }
 
-func ReadFile(testSetup *testing.T) (string, string, string, string, string, string, string) {
+func ReadFile(testSetup *testing.T) Configuration {
+	var config Configuration
+
 	file, err := os.Open("hosts.yaml")
 	if err != nil {
 		testSetup.Fatalf("Error opening hosts.yaml file: %v\n", err)
@@ -282,46 +305,45 @@ func ReadFile(testSetup *testing.T) (string, string, string, string, string, str
 		testSetup.Fatalf("Error decoding hosts.yaml file: %v\n", err)
 	}
 
-	accessKey := hosts["access_key"].(string)
-	secretKey := hosts["secret_key"].(string)
+	config.AccessKey = hosts["access_key"].(string)
+	config.SecretKey = hosts["secret_key"].(string)
 	port := hosts["port"].(int)
 	concurrent := hosts["concurrent"].(int)
-	objectSize := hosts["object_size"].(string)
+	config.ObjectSize = hosts["object_size"].(string)
 	objectCount := hosts["object_count"].(int)
-	server := hosts["server"].(string)
-	host := strconv.FormatInt(int64(port), 10)
-	objectCountStr := strconv.FormatInt(int64(objectCount), 10)
-	concurrent_no := strconv.FormatInt(int64(concurrent), 10)
-	return server, host, accessKey, secretKey, concurrent_no, objectSize, objectCountStr
-
+	config.Server = hosts["server"].(string)
+	config.HostPort = strconv.FormatInt(int64(port), 10)
+	config.ObjectCount = strconv.FormatInt(int64(objectCount), 10)
+	config.Concurrent = strconv.FormatInt(int64(concurrent), 10)
+	return config
 }
 
-func Read_file_allocation() (string, string, string, string, string) {
+func ReadFileAllocation() (data, parity, lock, accessKey, secretKey string) {
 	file, err := os.Open("allocation.yaml")
 	if err != nil {
-		log.Fatalln("Error reading the file:", err)
+		log.Fatalf("Error opening allocation.yaml file: %v", err)
 	}
 	defer file.Close()
 
 	decoder := yaml.NewDecoder(file)
-	var allocation_data map[string]interface{}
-	err = decoder.Decode(&allocation_data)
-	if err != nil {
-		log.Fatal("Error decoding allocation.yaml file:", err)
-	}
-	data := allocation_data["data"].(int)
-	parity := allocation_data["parity"].(int)
-	lock := allocation_data["lock"].(int)
-	accessKey := allocation_data["access_key"].(string)
-	secretKey := allocation_data["secret_key"].(string)
+	var allocationData map[string]interface{}
 
-	data_str := strconv.FormatInt(int64(data), 10)
-	parity_str := strconv.FormatInt(int64(parity), 10)
-	lock_str := strconv.FormatInt(int64(lock), 10)
-	return data_str, parity_str, lock_str, accessKey, secretKey
+	if err := decoder.Decode(&allocationData); err != nil {
+		log.Printf("Error decoding allocation.yaml file: %v", err)
+	}
+	data_int := allocationData["data"].(int)
+	parity_int := allocationData["parity"].(int)
+	lock_int := allocationData["lock"].(int)
+	accessKey = allocationData["access_key"].(string)
+	secretKey = allocationData["secret_key"].(string)
+
+	data = strconv.FormatInt(int64(data_int), 10)
+	parity = strconv.FormatInt(int64(parity_int), 10)
+	lock = strconv.FormatInt(int64(lock_int), 10)
+	return data, parity, lock, accessKey, secretKey
 }
 
-func AppendToFile(filename string, data string) error {
+func AppendToFile(filename, data string) error {
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 
 	if err != nil {
@@ -336,19 +358,19 @@ func AppendToFile(filename string, data string) error {
 }
 
 func KillProcess(port string) (int, error) {
-    cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port))
-    out, err := cmd.Output()
-    if err != nil {
-        return 0, fmt.Errorf("error running lsof -i command: %v", err)
-    }
-    pidStr := strings.TrimSpace(string(out))
-    if pidStr == "" {
-        return 0, fmt.Errorf("no process found for port %s", port)
-    }
-    pid, err := strconv.Atoi(pidStr)
-    if err != nil {
-        return 0, fmt.Errorf("error converting PID to integer: %v", err)
-    }
+	cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port))
+	out, err := cmd.Output()
+	if err != nil {
+		return 0, fmt.Errorf("error running lsof -i command: %v", err)
+	}
+	pidStr := strings.TrimSpace(string(out))
+	if pidStr == "" {
+		return 0, fmt.Errorf("no process found for port %s", port)
+	}
+	pid, err := strconv.Atoi(pidStr)
+	if err != nil {
+		return 0, fmt.Errorf("error converting PID to integer: %v", err)
+	}
 	// killing process by id
 	cmd = exec.Command("kill", strconv.Itoa(pid))
 
@@ -356,37 +378,34 @@ func KillProcess(port string) (int, error) {
 		return 0, fmt.Errorf("failed to kill process with PID %d: %v ", pid, err)
 	}
 
-    return pid, nil
+	return pid, nil
 }
-
 
 func SplitCmdString(cmdString string) ([]string, error) {
-    return []string{"sh", "-c", cmdString}, nil
+	return []string{"sh", "-c", cmdString}, nil
 }
 
-func LogOutput(stdout  io.Reader, t *test.SystemTest) {
+func LogOutput(stdout io.Reader, t *test.SystemTest) {
 	scanner := bufio.NewScanner(stdout)
 	for scanner.Scan() {
 		t.Logf("[MinIO stdout] %s", scanner.Text())
 	}
 }
 
-
-func RunMinioServer(cmd *exec.Cmd,  accessKey string, secretKey string) (*exec.Cmd, error){
+func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	currentUser, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
 	zcnDir := filepath.Join(currentUser.HomeDir, ".zcn")
 
-	cmdString := "export MINIO_ROOT_USER="+accessKey+" && export MINIO_ROOT_PASSWORD="+secretKey+" && ../minio gateway zcn --configDir "+zcnDir + " --console-address :8000"
+	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn --configDir " + zcnDir + " --console-address :8000"
 
 	cmdParts, err := SplitCmdString(cmdString)
 	if err != nil {
-		fmt.Println("Error splitting command string:", err)
-		return cmd, err
+		return nil, fmt.Errorf("error splitting command string: %w", err)
 	}
-	cmd = exec.Command(cmdParts[0], cmdParts[1:]...)
+	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
 
 	_, err = cmd.StdoutPipe()
 	if err != nil {
@@ -395,23 +414,20 @@ func RunMinioServer(cmd *exec.Cmd,  accessKey string, secretKey string) (*exec.C
 
 	_, _ = cmd.StderrPipe()
 
-
 	log.Printf("Generated command: %s %s", cmd.Path, cmd.Args)
 
 	err = cmd.Start()
 	if err != nil {
-		fmt.Println("Error starting MinIO server:", err)
-		os.Exit(1)
+		log.Fatalf("Error starting MinIO server: %v", err)
 	}
-	// go cli_utils.LogOutput(stdout, t)
-	// go cli_utils.LogOutput(stderr, t)
-	time.Sleep(5 *time.Second)
-	// t.Logf("MinIO server started successfully")
+
+	time.Sleep(5 * time.Second)
 	return cmd, nil
 }
 
+func ReadFileMC(testSetup *testing.T) McConfiguration {
+	var config McConfiguration
 
-func ReadFileMC(testSetup *testing.T) (string, string, string, string, string, string, string, bool) {
 	file, err := os.Open("mc_hosts.yaml")
 	if err != nil {
 		testSetup.Fatalf("Error opening hosts.yaml file: %v\n", err)
@@ -425,22 +441,21 @@ func ReadFileMC(testSetup *testing.T) (string, string, string, string, string, s
 		testSetup.Fatalf("Error decoding mc_hosts.yaml file: %v\n", err)
 	}
 
-	accessKey := hosts["access_key"].(string)
-	secretKey := hosts["secret_key"].(string)
+	config.AccessKey = hosts["access_key"].(string)
+	config.SecretKey = hosts["secret_key"].(string)
 	port := hosts["port"].(int)
 	concurrent := hosts["concurrent"].(int)
-	server := hosts["server"].(string)
-	secondary_server := hosts["secondary_server"].(string)
+	config.Server = hosts["server"].(string)
+	config.SecondaryServer = hosts["secondary_server"].(string)
 	s_port := hosts["secondary_port"].(int)
 	use_command, ok := hosts["use_command"].(bool)
 
 	if !ok {
 		use_command = false
 	}
-
-	host := strconv.FormatInt(int64(port), 10)
-	secondary_port := strconv.FormatInt(int64(s_port), 10)
-	concurrent_no := strconv.FormatInt(int64(concurrent), 10)
-	return server, host, accessKey, secretKey, concurrent_no, secondary_port, secondary_server,use_command
-
+	config.UseCommand = use_command
+	config.HostPort = strconv.FormatInt(int64(port), 10)
+	config.SecondaryPort = strconv.FormatInt(int64(s_port), 10)
+	config.Concurrent = strconv.FormatInt(int64(concurrent), 10)
+	return config
 }

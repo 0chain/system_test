@@ -13,14 +13,17 @@ import (
 
 func TestZs3serverFanoutTests(testSetup *testing.T) {
 	timeout := time.Duration(200 * time.Minute)
-	os.Setenv("GO_TEST_TIMEOUT", timeout.String())
+	err := os.Setenv("GO_TEST_TIMEOUT", timeout.String())
+	if err != nil {
+		log.Printf("Error setting environment variable: %v", err)
+	}
 
 	log.Println("Running Warp Fanout Benchmark...")
 	t := test.NewSystemTest(testSetup)
 
-	server, host, accessKey, secretKey, concurrent, objectSize , _:= cliutils.ReadFile(testSetup)
+	config := cliutils.ReadFile(testSetup)
 
-	commandGenerated := "../warp fanout --copies=50 --obj.size=512KiB --host=" + server + ":" + host + " --access-key=" + accessKey + " --secret-key=" + secretKey + "  --concurrent " + concurrent + " --duration 30s" + " --obj.size " +objectSize
+	commandGenerated := "../warp fanout --copies=50 --obj.size=512KiB --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + "  --concurrent " + config.Concurrent + " --duration 30s" + " --obj.size " + config.ObjectSize
 	log.Println("Command Generated: ", commandGenerated)
 
 	output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*3)

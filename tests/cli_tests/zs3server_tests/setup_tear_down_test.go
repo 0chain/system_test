@@ -18,7 +18,10 @@ var allocationId string
 func TestMain(m *testing.M) {
 	globalSetup()
 	timeout := time.Duration(200 * time.Minute)
-	os.Setenv("GO_TEST_TIMEOUT", timeout.String())
+	err := os.Setenv("GO_TEST_TIMEOUT", timeout.String())
+	if err != nil {
+		log.Printf("Error setting environment variable: %v", err)
+	}
 	code := m.Run()
 	globalTearDown()
 	os.Exit(code)
@@ -51,19 +54,17 @@ func globalSetup() {
 			log.Fatal(cmd + " is not installed")
 			os.Exit(1)
 		} else {
-			log.Printf(cmd , " is  installed")
+			log.Printf(cmd, " is  installed")
 		}
 
 		if requiredCommands[cmd] == requiredCommands["warp"] {
 			log.Print("All required commands are installed")
 		} else {
 			log.Print("Checking for next command")
-
 		}
 	}
 	// // create allocation from allocation.yaml file
-	data, parity, lock, accessKey, secretKey := cliutils.Read_file_allocation()
-	// data, parity, lock, _, _ := cliutils.Read_file_allocation()
+	data, parity, lock, accessKey, secretKey := cliutils.ReadFileAllocation()
 	cmd := exec.Command("../zbox", "newallocation", "--lock", lock, "--data", data, "--parity", parity, "--size", "7000000000")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -78,12 +79,9 @@ func globalSetup() {
 		allocationId = match[1]
 	}
 
-	var cmd3 *exec.Cmd
-
-	_, _ = cliutils.RunMinioServer(cmd3, accessKey, secretKey)
+	_, _ = cliutils.RunMinioServer(accessKey, secretKey)
 	log.Print("Minio server started")
 	println("Global setup code executed")
-
 }
 
 func globalTearDown() {
