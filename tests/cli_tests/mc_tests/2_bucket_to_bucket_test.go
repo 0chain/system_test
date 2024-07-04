@@ -15,15 +15,18 @@ import (
 func TestZs3ServerBucket(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	// defer cli_utils.RunCommand(t, "../mc rb testbucket2 --force --dangerous", 1, time.Hour*2)
-	// defer cli_utils.RunCommand(t, "../mc rb testbucket --force --dangerous", 1, time.Hour*2)
-
-
 	// test for moving the file from testbucket to testbucket2
 	t.RunSequentially("Test for moving file from testbucket to testbucket2", func(t *test.SystemTest) {
-		cli_utils.RunCommand(t, "../mc mb testbucket", 1, time.Hour*2)
+		_, err := cli_utils.RunCommand(t, "../mc mb testbucket", 1, time.Hour*2)
 
-		cli_utils.RunCommand(t, "../mc mb testbucket2", 1, time.Hour*2)
+		if err != nil {
+			t.Fatalf("Error creating bucket: %v", err)
+		}
+
+		_, err = cli_utils.RunCommand(t, "../mc mb testbucket2", 1, time.Hour*2)
+		if err != nil {
+			t.Fatalf("Error creating bucket: %v", err)
+		}
 
 		file, err := os.Create("a.txt")
 		if err != nil {
@@ -42,15 +45,12 @@ func TestZs3ServerBucket(testSetup *testing.T) {
 		output, _ := cli_utils.RunCommand(t, "../mc mv testbucket/a.txt  testbucket2 ", 1, time.Hour*2)
 		// output is in format ...sts/../mc_tests/testbucket/a.txt: 4 B / 4 B  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  707 B/s 0s
 
-
 		assert.NotContains(t, output, "../mc: <ERROR>")
 		if _, err := os.Stat("testbucket2/a.txt"); err != nil {
-		t.Errorf("Local file %s not found: %v", "testbucket2/a.txt", err)
-	}
+			t.Errorf("Local file %s not found: %v", "testbucket2/a.txt", err)
+		}
 
 		// Assert that the local file exists
 		assert.NoError(t, err, fmt.Sprintf("Local file %s should exist", "testbucket2/a.txt"))
-
 	})
-
 }
