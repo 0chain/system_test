@@ -15,8 +15,8 @@ import (
 func TestZs3ServerBucket(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	defer cli_utils.RunCommand(t, "../mc rb testbucket2 --force --dangerous", 1, time.Hour*2)
-	defer cli_utils.RunCommand(t, "../mc rb testbucket --force --dangerous", 1, time.Hour*2)
+	// defer cli_utils.RunCommand(t, "../mc rb testbucket2 --force --dangerous", 1, time.Hour*2)
+	// defer cli_utils.RunCommand(t, "../mc rb testbucket --force --dangerous", 1, time.Hour*2)
 
 
 	// test for moving the file from testbucket to testbucket2
