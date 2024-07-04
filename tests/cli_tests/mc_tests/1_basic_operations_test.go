@@ -31,7 +31,6 @@ func TestZs3Server(testSetup *testing.T) {
 		output, _ := cli_utils.RunCommand(t, "../mc ls play", 1, time.Hour*2)
 		// check if error exist in log
 		assert.NotContains(t, output, "error")
-
 	})
 
 	t.RunSequentially("Test Bucket Creation", func(t *test.SystemTest) {

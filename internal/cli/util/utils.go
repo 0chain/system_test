@@ -318,7 +318,7 @@ func ReadFile(testSetup *testing.T) Configuration {
 	return config
 }
 
-func ReadFileAllocation() (data , parity , lock , accessKey , secretKey string) {
+func ReadFileAllocation() (data, parity, lock, accessKey, secretKey string) {
 	file, err := os.Open("allocation.yaml")
 	if err != nil {
 		log.Fatalf("Error opening allocation.yaml file: %v", err)
