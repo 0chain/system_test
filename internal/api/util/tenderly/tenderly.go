@@ -25,7 +25,7 @@ func NewClient(tenderlyNodeURL string) *Client {
 
 // InitBalance sets pre-defined initial balance for the given ethereum address
 func (c *Client) InitBalance(ethereumAddress string) error {
-	resp, err := c.client.Call(context.Background(), "tenderly_addBalance", []string{ethereumAddress}, InitialBalance)
+	resp, err := c.client.Call(context.Background(), "tenderly_setBalance", []string{ethereumAddress}, InitialBalance)
 	if err != nil {
 		return err
 	}
