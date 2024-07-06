@@ -48,5 +48,5 @@ jobs:
           run_smoke_tests: false
           run_s3mgrt_system_tests: false
           run_challenge_system_tests: false
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ${{ secrets.TENDERLY_VIRTUAL_TESTNET_ID }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
