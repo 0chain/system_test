@@ -31,33 +31,20 @@ func TestCompares0boxTablesWithSharder(testSetup *testing.T) {
 		for i := 0; i < len(minersTable_Sharder); i++ {
 			m_sharder := minersTable_Sharder[i].(map[string]interface{})
 			m_0box := minersTable_0box[i].(map[string]interface{})
-			// for k := range b_sharder {
-			// 	t.Logf("k: %s", k)
-			// 	if k == "ID" {
-			// 		t.Logf("IDxxx: %s", b_sharder[k].(string))
-			// 	}
-			// }
-			// t.Logf("ID: %s", b_sharder["ID"].(string))
 			miners_Sharder[m_sharder["ID"].(string)] = m_sharder
 			miners_0box[m_0box["id"].(string)] = m_0box
 		}
 		for k, v := range miners_Sharder {
 			for k1, v1 := range v {
 				if v1 != nil && miners_0box[k][k1] != nil {
-					require.Equal(t, v1, miners_0box[k][k1])
 					if v1 != miners_0box[k][k1] {
 						t.Logf("id:%s and key:%s", k, k1)
 					}
+					require.Equal(t, v1, miners_0box[k][k1])
 				}
 			}
 
 		}
-
-		// t.Logf("blobbersTable_Sharder: %+v", blobbersTable_Sharder)
-		// t.Logf("blobbersTable_0box: %+v", blobbersTable_0box)
-
-		require.Equal(t, 1, 0)
-
 	},
 	)
 }
