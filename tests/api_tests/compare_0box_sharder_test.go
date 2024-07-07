@@ -46,7 +46,8 @@ func TestCompares0boxTablesWithSharder(testSetup *testing.T) {
 				if v1 != nil && miners_0box[k][k1] != nil {
 					require.Equal(t, v1, miners_0box[k][k1])
 					if v1 != miners_0box[k][k1] {
-						t.Logf("id:%s and key %s", k, k1)
+						t.Logf("id:%s and key:%s", k, k1)
+					}
 				}
 			}
 
