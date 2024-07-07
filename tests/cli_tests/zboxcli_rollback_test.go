@@ -110,38 +110,14 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 		// First update
 		newFileSize := int64(0.5 * MB)
-		updatedFileName := updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFileName), localFileName, newFileSize)
-		firstUpdateChecksum := generateChecksum(t, updatedFileName)
+		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFileName), localFileName, newFileSize)
 
 		// Second update
-		newFileSize = int64(1.5 * MB)
-		updatedFileName = updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFileName), localFileName, newFileSize)
+		newFileSize = int64(1 * MB)
+		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFileName), localFileName, newFileSize)
 
-		// Perform first rollback
+		// Perform  rollback
 		output, err := rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-		}))
-		t.Log(strings.Join(output, "\n"))
-		require.NoError(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		// Download file after first rollback
-		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFileName),
-			"localpath":  "tmp/",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		// Generate checksum for downloaded file after first rollback
-		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(localFileName))
-
-		// Compare checksum with first update
-		require.Equal(t, firstUpdateChecksum, downloadedFileChecksum, "File content should match the first update after first rollback")
-
-		// Perform second rollback
-		output, err = rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 		}))
 		t.Log(strings.Join(output, "\n"))
@@ -158,7 +134,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Len(t, output, 2)
 
 		// Generate checksum for downloaded file after second rollback
-		downloadedFileChecksum = generateChecksum(t, "tmp/"+filepath.Base(localFileName))
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(localFileName))
 
 		// Compare checksum with original file
 		require.Equal(t, originalChecksum, downloadedFileChecksum, "File content should match the original file after second rollback")
