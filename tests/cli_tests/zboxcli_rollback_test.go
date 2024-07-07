@@ -92,6 +92,81 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
+	t.RunSequentially("rollback allocation after updating a file multiple times should work", func(t *test.SystemTest) {
+		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			"size":   2 * MB,
+			"tokens": 9,
+		})
+
+		fileSize := int64(1 * MB)
+		localFileName := "file1.txt"
+		remotepath := "/"
+
+		// Upload initial file
+		localFilePath := generateFileContentAndUpload(t, allocationID, remotepath, localFileName, fileSize)
+
+		// Generate checksum for original file
+		originalChecksum := generateChecksum(t, localFilePath)
+
+		// First update
+		newFileSize := int64(0.5 * MB)
+		updatedFileName := updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFileName), localFileName, newFileSize)
+		firstUpdateChecksum := generateChecksum(t, updatedFileName)
+
+		// Second update
+		newFileSize = int64(1.5 * MB)
+		updatedFileName = updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFileName), localFileName, newFileSize)
+
+		// Perform first rollback
+		output, err := rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+		}))
+		t.Log(strings.Join(output, "\n"))
+		require.NoError(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		// Download file after first rollback
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(localFileName),
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		// Generate checksum for downloaded file after first rollback
+		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(localFileName))
+
+		// Compare checksum with first update
+		require.Equal(t, firstUpdateChecksum, downloadedFileChecksum, "File content should match the first update after first rollback")
+
+		// Perform second rollback
+		output, err = rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+		}))
+		t.Log(strings.Join(output, "\n"))
+		require.NoError(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		// Download file after second rollback
+		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath + filepath.Base(localFileName),
+			"localpath":  "tmp/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		// Generate checksum for downloaded file after second rollback
+		downloadedFileChecksum = generateChecksum(t, "tmp/"+filepath.Base(localFileName))
+
+		// Compare checksum with original file
+		require.Equal(t, originalChecksum, downloadedFileChecksum, "File content should match the original file after second rollback")
+
+		// Cleanup
+		createAllocationTestTeardown(t, allocationID)
+	})
+
 	t.RunSequentially("rollback allocation after deleting a file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * MB,
@@ -591,7 +666,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.RunSequentially("rollback allocation in the middle of updating a large file should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("rollback allocation in the middle of updating a large file should work", time.Hour*1, func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"tokens": 10,
@@ -610,6 +685,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		}()
 		//wg.Wait()
 		time.Sleep(5 * time.Second)
+		t.Log("Wait done for upload file........")
 
 		// Ensure the upload was interrupted
 		select {
