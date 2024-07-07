@@ -7,18 +7,55 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Compares0boxTablesWithSharder(testSetup *testing.T) {
+func TestCompares0boxTablesWithSharder(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Compare 0box tables with sharder tables")
 
-	t.RunSequentially("Compare blobbers tables", func(t *test.SystemTest) {
-		blobbersTable_Sharder, resp, err := apiClient.QueryDataFromSharder(t, "blobbers")
+	t.RunSequentially("Compare Miner tables", func(t *test.SystemTest) {
+
+		minersTable_Sharder, resp, err := apiClient.QueryDataFromSharder(t, "miner")
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
-		blobbersTable_0box, resp, err := zboxClient.QueryDataFrom0box(t, "blobbers")
+
+		minersTable_0box, resp, err := zboxClient.QueryDataFrom0box(t, "miner")
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, blobbersTable_Sharder, blobbersTable_0box)
+
+		require.Equal(t, len(minersTable_Sharder), len(minersTable_0box))
+		// t.Logf("minersTable_Sharder: %+v", minersTable_Sharder)
+		// t.Logf("minersTable_0box: %+v", minersTable_0box)
+
+		var miners_Sharder, miners_0box map[string]map[string]interface{}
+		miners_Sharder = make(map[string]map[string]interface{})
+		miners_0box = make(map[string]map[string]interface{})
+		for i := 0; i < len(minersTable_Sharder); i++ {
+			m_sharder := minersTable_Sharder[i].(map[string]interface{})
+			m_0box := minersTable_0box[i].(map[string]interface{})
+			// for k := range b_sharder {
+			// 	t.Logf("k: %s", k)
+			// 	if k == "ID" {
+			// 		t.Logf("IDxxx: %s", b_sharder[k].(string))
+			// 	}
+			// }
+			// t.Logf("ID: %s", b_sharder["ID"].(string))
+			miners_Sharder[m_sharder["ID"].(string)] = m_sharder
+			miners_0box[m_0box["id"].(string)] = m_0box
+		}
+		for k, v := range miners_Sharder {
+			for k1, v1 := range v {
+				if v1 != nil && miners_0box[k][k1] != nil {
+					require.Equal(t, v1, miners_0box[k][k1])
+					if v1 != miners_0box[k][k1] {
+						t.Logf("id:%s and key %s", k, k1)
+				}
+			}
+
+		}
+
+		// t.Logf("blobbersTable_Sharder: %+v", blobbersTable_Sharder)
+		// t.Logf("blobbersTable_0box: %+v", blobbersTable_0box)
+
+		require.Equal(t, 1, 0)
 
 	},
 	)

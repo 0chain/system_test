@@ -1287,7 +1287,7 @@ func (c *ZboxClient) GetGraphBlobberTotalRewards(t *test.SystemTest, blobberId s
 	return &data, resp, err
 }
 
-func (c *ZboxClient) QueryDataFrom0box(t *test.SystemTest, tableName string) (*[]interface{}, *resty.Response, error) {
+func (c *ZboxClient) QueryDataFrom0box(t *test.SystemTest, tableName string) ([]interface{}, *resty.Response, error) {
 	t.Logf("Querying data from 0box...")
 
 	extractFields := func(model interface{}) string {
@@ -1301,16 +1301,23 @@ func (c *ZboxClient) QueryDataFrom0box(t *test.SystemTest, tableName string) (*[
 		var fieldNames []string
 		typ := val.Type()
 		for i := 0; i < val.NumField(); i++ {
-			fieldNames = append(fieldNames, typ.Field(i).Name)
+			field := typ.Field(i)
+			jsonTag := field.Tag.Get("json")
+			if jsonTag != "" && jsonTag != "-" {
+				tagParts := strings.Split(jsonTag, ",")
+				fieldNames = append(fieldNames, tagParts[0])
+			} else {
+				fieldNames = append(fieldNames, field.Name)
+			}
 		}
-		return strings.Join(fieldNames, ", ")
+		return strings.Join(fieldNames, ",")
 	}
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/queryData")
-	var data []interface{}
+	var data interface{}
 	var tableEntity interface{}
 	switch tableName {
 	case "blobber":
@@ -1332,5 +1339,15 @@ func (c *ZboxClient) QueryDataFrom0box(t *test.SystemTest, tableName string) (*[
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
-	return &data, resp, err
+	var result []interface{}
+	switch v := data.(type) {
+	case []interface{}:
+		for _, value := range v {
+			result = append(result, value)
+		}
+	default:
+		t.Error("Invalid response from Sharder")
+	}
+
+	return result, resp, err
 }

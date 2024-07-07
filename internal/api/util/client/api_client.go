@@ -2234,8 +2234,8 @@ func (c *APIClient) BurnZcn(t *test.SystemTest, wallet *model.Wallet, address st
 	return burnZcnTransactionGetConfirmationResponse.Hash
 }
 
-func (c *APIClient) QueryDataFromSharder(t *test.SystemTest, tableName string) (*[]interface{}, *resty.Response, error) {
-	t.Logf("Querying data from Sharder...")
+func (c *APIClient) QueryDataFromSharder(t *test.SystemTest, tableName string) ([]interface{}, *resty.Response, error) {
+	t.Log("Querying data from Sharder...")
 
 	extractFields := func(model interface{}) string {
 		val := reflect.ValueOf(model)
@@ -2248,16 +2248,22 @@ func (c *APIClient) QueryDataFromSharder(t *test.SystemTest, tableName string) (
 		var fieldNames []string
 		typ := val.Type()
 		for i := 0; i < val.NumField(); i++ {
-			fieldNames = append(fieldNames, typ.Field(i).Name)
+			field := typ.Field(i)
+			jsonTag := field.Tag.Get("json")
+			if jsonTag != "" && jsonTag != "-" {
+				tagParts := strings.Split(jsonTag, ",")
+				fieldNames = append(fieldNames, tagParts[0])
+			} else {
+				fieldNames = append(fieldNames, field.Name)
+			}
 		}
-		return strings.Join(fieldNames, ", ")
+		return strings.Join(fieldNames, ",")
 	}
-
 	urlBuilder := NewURLBuilder().
 		SetPath(GetQueryData).
 		SetPathVariable("sc_address", StorageSmartContractAddress)
 
-	var data []interface{}
+	var data interface{}
 	var tableEntity interface{}
 	switch tableName {
 	case "blobber":
@@ -2271,13 +2277,24 @@ func (c *APIClient) QueryDataFromSharder(t *test.SystemTest, tableName string) (
 	case "sharder":
 		tableEntity = model.Sharder{}
 	}
-	urlBuilder.queries.Set("table", tableName)
+	urlBuilder.queries.Set("entity", tableName)
 	urlBuilder.queries.Set("fields", extractFields(tableEntity))
-
 	resp, err := c.executeForAllServiceProviders(t, urlBuilder, &model.ExecutionRequest{
 		Dst:                &data,
 		RequiredStatusCode: 200,
+		Headers: map[string]string{
+			"Accept-Encoding": "",
+		},
 	}, HttpGETMethod, SharderServiceProvider)
+	var result []interface{}
+	switch v := data.(type) {
+	case []interface{}:
+		for _, value := range v {
+			result = append(result, value)
+		}
+	default:
+		t.Error("Invalid response from Sharder")
+	}
 
-	return &data, resp, err
+	return result, resp, err
 }
