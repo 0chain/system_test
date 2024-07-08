@@ -15,10 +15,10 @@ func ParseToTimeIfValid(val interface{}) interface{} {
 	if ok {
 		res, err := time.Parse(time.RFC3339Nano, valStr)
 		if err == nil {
-			// Parsing failed, v1Str is not a time string
 			return res
 		}
 	}
+	// Parsing failed, v1Str is not a time string
 	return val
 }
 
