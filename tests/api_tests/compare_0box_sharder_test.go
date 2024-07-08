@@ -95,26 +95,26 @@ func TestCompares0boxTablesWithSharder(testSetup *testing.T) {
 	t.RunSequentially("Compare Blobber tables", func(t *test.SystemTest) {
 		CompareEntityTables(t, "blobber")
 	})
-	// t.RunSequentially("Compare Sharder tables", func(t *test.SystemTest) {
-	// 	CompareEntityTables(t, "sharder")
-	// })
-	// t.RunSequentially("Compare Validator tables", func(t *test.SystemTest) {
-	// 	CompareEntityTables(t, "validator")
-	// })
-	// t.RunSequentially("Compare Authorizer tables", func(t *test.SystemTest) {
-	// 	CompareEntityTables(t, "authorizer")
-	// })
-	// t.RunSequentially("Compare ProviderRewards tables", func(t *test.SystemTest) {
-	// 	CompareEntityTables(t, "provider_rewards")
-	// })
-	// t.RunSequentially("Compare User tables", func(t *test.SystemTest) {
-	// 	CompareEntityTables(t, "user")
-	// })
-	// t.RunSequentially("Compare Miner Snapshot tables", func(t *test.SystemTest) {
-	// 	CompareEntityTables(t, "miner_snapshot")
-	// })
-	// t.RunSequentially("Compare Blobber Snapshot tables", func(t *test.SystemTest) {
-	// 	CompareEntityTables(t, "blobber_snapshot")
-	// })
+	t.RunSequentially("Compare Sharder tables", func(t *test.SystemTest) {
+		CompareEntityTables(t, "sharder")
+	})
+	t.RunSequentially("Compare Validator tables", func(t *test.SystemTest) {
+		CompareEntityTables(t, "validator")
+	})
+	t.RunSequentially("Compare Authorizer tables", func(t *test.SystemTest) {
+		CompareEntityTables(t, "authorizer")
+	})
+	t.RunSequentially("Compare ProviderRewards tables", func(t *test.SystemTest) {
+		CompareEntityTables(t, "provider_rewards")
+	})
+	t.RunSequentially("Compare User tables", func(t *test.SystemTest) {
+		CompareEntityTables(t, "user")
+	})
+	t.RunSequentially("Compare Miner Snapshot tables", func(t *test.SystemTest) {
+		CompareEntityTables(t, "miner_snapshot")
+	})
+	t.RunSequentially("Compare Blobber Snapshot tables", func(t *test.SystemTest) {
+		CompareEntityTables(t, "blobber_snapshot")
+	})
 
 }
