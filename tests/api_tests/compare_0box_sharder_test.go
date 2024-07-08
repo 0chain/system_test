@@ -116,5 +116,17 @@ func TestCompares0boxTablesWithSharder(testSetup *testing.T) {
 	t.RunSequentially("Compare Blobber Snapshot tables", func(t *test.SystemTest) {
 		CompareEntityTables(t, "blobber_snapshot")
 	})
+	t.RunSequentially("Compare Sharder Snapshot tables", func(t *test.SystemTest) {
+		CompareEntityTables(t, "sharder_snapshot")
+	})
+	t.RunSequentially("Compare Validator Snapshot tables", func(t *test.SystemTest) {
+		CompareEntityTables(t, "validator_snapshot")
+	})
+	t.RunSequentially("Compare Authorizer Snapshot tables", func(t *test.SystemTest) {
+		CompareEntityTables(t, "authorizer_snapshot")
+	})
+	t.RunSequentially("Compare User Snapshot tables", func(t *test.SystemTest) {
+		CompareEntityTables(t, "user_snapshot")
+	})
 
 }
