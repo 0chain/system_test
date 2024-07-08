@@ -169,13 +169,13 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotepath + filepath.Base(localFileName),
-			"localpath":  "/tmp",
+			"localpath":  "/tmp/",
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
 		// Generate checksum for downloaded file after second rollback
-		downloadedFileChecksum := generateChecksum(t, "/tmp"+filepath.Base(localFileName))
+		downloadedFileChecksum := generateChecksum(t, "/tmp/"+filepath.Base(localFileName))
 
 		// Compare checksum with original file
 		require.Equal(t, originalChecksum, downloadedFileChecksum, "File content should match the original file after rollback")
