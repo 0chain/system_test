@@ -702,7 +702,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		}()
 		//wg.Wait()
 		time.Sleep(5 * time.Second)
-		t.Log("Wait done for upload file........")
+		t.Log("Wait done for upload file partially........")
 
 		// Ensure the upload was interrupted
 		select {
@@ -718,22 +718,22 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			t.Log(strings.Join(output, "\n"))
 			require.NoError(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
-
-			output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
-				"allocation": allocationID,
-				"remotepath": remotepath,
-				"json":       "",
-			}), true)
-			require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
-			require.Len(t, output, 1)
-			require.Equal(t, "null", output[0], strings.Join(output, "\n"))
-
-			err = os.Remove(localFilePath)
-			require.Nil(t, err)
-
-			createAllocationTestTeardown(t, allocationID)
 		}
 
+		output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotepath,
+			"json":       "",
+		}), true)
+		t.Log("output for list files after rollback is: ", output)
+		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
+
+		err = os.Remove(localFilePath)
+		require.Nil(t, err)
+
+		createAllocationTestTeardown(t, allocationID)
 	})
 
 }
