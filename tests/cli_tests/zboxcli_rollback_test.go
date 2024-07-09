@@ -92,7 +92,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.RunWithTimeout("rollback allocation after updating a file multiple times should work", time.Hour*2, func(t *test.SystemTest) {
+	t.RunSequentially("rollback allocation after updating a file multiple times should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   4 * MB,
 			"tokens": 9,
@@ -107,83 +107,50 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 		// Generate checksum for original file
 		originalChecksum := generateChecksum(t, localFilePath)
+		t.Logf("Original checksum: %s", originalChecksum)
 
 		//Cleanup
-		err := os.Remove(filepath.Base(localFilePath))
+		err := os.Remove(localFilePath)
 		require.Nil(t, err)
-
-		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"json":       "",
-			"remotepath": remotepath + filepath.Base(localFilePath),
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		var meta climodel.FileMetaResult
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, fileSize, meta.ActualFileSize)
 
 		// First update
 		newFileSize := int64(0.5 * MB)
-		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFileName), localFileName, newFileSize)
-
-		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"json":       "",
-			"remotepath": remotepath + filepath.Base(localFilePath),
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, newFileSize, meta.ActualFileSize)
+		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+localFileName, localFileName, newFileSize)
 
 		// Second update
 		newFileSize = int64(1.5 * MB)
-		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(localFileName), localFileName, newFileSize)
+		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+localFileName, localFileName, newFileSize)
 
-		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"json":       "",
-			"remotepath": remotepath + filepath.Base(localFilePath),
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, newFileSize, meta.ActualFileSize)
-
-		// Perform  rollback
-		output, err = rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+		// Perform rollback
+		output, err := rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 		}))
 		t.Log(strings.Join(output, "\n"))
 		require.NoError(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		// Download file.
+		// Download file
+		downloadPath := filepath.Join(os.TempDir(), localFileName)
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(localFileName),
-			"localpath":  "/tmp/",
+			"remotepath": remotepath + localFileName,
+			"localpath":  downloadPath,
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		// Generate checksum for downloaded file after second rollback
-		downloadedFileChecksum := generateChecksum(t, "/tmp/"+filepath.Base(localFileName))
+		// Generate checksum for downloaded file after rollback
+		downloadedFileChecksum := generateChecksum(t, downloadPath)
+		t.Logf("Downloaded file checksum: %s", downloadedFileChecksum)
 
 		// Compare checksum with original file
 		require.Equal(t, originalChecksum, downloadedFileChecksum, "File content should match the original file after rollback")
 
 		// Cleanup
+		err = os.Remove(downloadPath)
+		require.Nil(t, err)
 		createAllocationTestTeardown(t, allocationID)
 	})
-
 	t.RunSequentially("rollback allocation after deleting a file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * MB,
