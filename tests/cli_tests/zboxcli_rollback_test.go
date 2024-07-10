@@ -707,7 +707,6 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 		filesize := int64(0.5 * GB)
 		remotepath := "/"
-		localFilePath := ""
 		doneUploading := make(chan bool)
 
 		//upload a small file to the allocation.
@@ -736,7 +735,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		//wg.Add(1)
 		go func() {
 			//defer wg.Done()
-			localFilePath = generateFileAndUpload(t, allocationID, remotepath, filesize)
+			generateFileAndUpload(t, allocationID, remotepath, filesize)
 			doneUploading <- true
 		}()
 		//wg.Wait()
@@ -790,7 +789,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 		require.Equal(t, smallFileChecksum, downloadedFileChecksum)
 
-		err = os.Remove(localFilePath)
+		err = os.Remove(smallFilePath)
 		require.Nil(t, err)
 
 		createAllocationTestTeardown(t, allocationID)
