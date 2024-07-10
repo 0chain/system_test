@@ -708,14 +708,16 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		doneUploading := make(chan bool)
 
 		//upload a small file to the allocation.
+		smallFilePath := "smallfile.txt"
 		smallFileSize := int64(0.5 * MB)
-		smallFilePath := generateFileAndUpload(t, allocationID, remotepath, smallFileSize)
+		generateFileContentAndUpload(t, allocationID, remotepath, filepath.Base(smallFilePath), smallFileSize)
 
 		smallFileChecksum := generateChecksum(t, smallFilePath)
 
 		err := os.Remove(smallFilePath)
 		require.Nil(t, err)
 
+		var meta climodel.FileMetaResult
 		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"json":       "",
@@ -724,10 +726,27 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
-		var meta climodel.FileMetaResult
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, smallFileSize, meta.ActualFileSize, "file size should be same as uploaded")
+
+		newSmallFileSize := int64(1.5 * MB)
+		updateFileContentWithRandomlyGeneratedData(t, allocationID, remotepath+filepath.Base(smallFilePath), filepath.Base(smallFilePath), newSmallFileSize)
+
+		err = os.Remove(smallFilePath)
+		require.Nil(t, err)
+
+		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"json":       "",
+			"remotepath": remotepath + filepath.Base(smallFilePath),
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Equal(t, newSmallFileSize, meta.ActualFileSize, "file size should be same as updated file size")
 
 		//var wg sync.WaitGroup
 		//wg.Add(1)
@@ -768,7 +787,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, len(listFiles), 1)
 		require.Equal(t, smallFileSize, listFiles[0].ActualSize)
-		require.Equal(t, filepath.Base(smallFilePath), listFiles[0])
+		require.Equal(t, filepath.Base(smallFilePath), listFiles[0].Name)
 
 		output, err = downloadFile(t, configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -785,7 +804,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 		require.Equal(t, smallFileChecksum, downloadedFileChecksum)
 
-		err = os.Remove(smallFilePath)
+		err = os.Remove("tmp/" + filepath.Base(smallFilePath))
 		require.Nil(t, err)
 
 		createAllocationTestTeardown(t, allocationID)
