@@ -667,8 +667,6 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			doneUploading <- true
 		}()
 		//wg.Wait()
-		time.Sleep(5 * time.Second)
-		t.Log("Wait done for upload file partially........")
 
 		// Ensure the upload was interrupted
 		select {
@@ -739,8 +737,6 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			doneUploading <- true
 		}()
 		//wg.Wait()
-		time.Sleep(5 * time.Second)
-		t.Log("Wait done for upload file partially........")
 
 		// Ensure the upload was interrupted
 		select {
