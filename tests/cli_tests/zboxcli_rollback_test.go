@@ -729,7 +729,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		var meta climodel.FileMetaResult
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&meta)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Equal(t, filesize, meta.ActualFileSize, "file size should be same as uploaded")
+		require.Equal(t, smallFileSize, meta.ActualFileSize, "file size should be same as uploaded")
 
 		//var wg sync.WaitGroup
 		//wg.Add(1)
