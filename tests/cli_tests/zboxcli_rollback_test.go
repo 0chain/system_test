@@ -652,11 +652,11 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 	t.RunSequentially("rollback allocation in the middle of updating a large file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
+			"size":   2 * GB,
 			"tokens": 10,
 		})
 
-		filesize := int64(0.5 * GB)
+		filesize := int64(1.5 * GB)
 		remotepath := "/"
 		doneUploading := make(chan bool)
 		//var wg sync.WaitGroup
@@ -672,7 +672,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		select {
 		case <-doneUploading:
 			t.Error("Upload completed unexpectedly")
-		case <-time.After(10 * time.Second):
+		case <-time.After(5 * time.Second):
 
 			// rollback allocation
 
@@ -699,11 +699,11 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 	t.RunSequentially("rollback allocation after a small file upload in the middle of updating a large file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
+			"size":   2 * GB,
 			"tokens": 10,
 		})
 
-		filesize := int64(0.5 * GB)
+		filesize := int64(1.5 * GB)
 		remotepath := "/"
 		doneUploading := make(chan bool)
 
@@ -761,7 +761,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		select {
 		case <-doneUploading:
 			t.Error("Upload completed unexpectedly")
-		case <-time.After(10 * time.Second):
+		case <-time.After(5 * time.Second):
 
 			// rollback allocation
 
