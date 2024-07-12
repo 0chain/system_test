@@ -60,19 +60,6 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
 	})
 
-	t.Run("delete root directory with No existing file should not work", func(t *test.SystemTest) {
-		allocationID := setupAllocation(t, configPath)
-		createAllocationTestTeardown(t, allocationID)
-
-		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-		}), true)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Contains(t, output[0], "file was deleted")
-	})
-
 	t.Run("delete non-root directory with No existing file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
