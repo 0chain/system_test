@@ -501,7 +501,7 @@ func TestUpload(testSetup *testing.T) {
 			"localpath":  filename,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.Contains(strings.Join(output, "\n"), "alloc: no enough space left in allocation"), strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, "\n"), "max_allocation_size"), strings.Join(output, "\n"))
 	})
 
 	t.Run("Upload 100% of the allocation should work", func(t *test.SystemTest) {

@@ -359,7 +359,7 @@ func AppendToFile(filename, data string) error {
 
 func KillProcess(port string) (int, error) {
 	// Create a command to get the PID of the process listening on the specified port
-	cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port))
+	cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port)) // #nosec G204
 	out, err := cmd.Output()
 	if err != nil {
 		return 0, fmt.Errorf("error running lsof -i command: %v", err)
@@ -373,7 +373,7 @@ func KillProcess(port string) (int, error) {
 		return 0, fmt.Errorf("error converting PID to integer: %v", err)
 	}
 	// Create a command to kill the process identified by PID
-	killCmd := exec.Command("kill", strconv.Itoa(pid))
+	killCmd := exec.Command("kill", strconv.Itoa(pid)) // #nosec G204
 
 	if err := killCmd.Run(); err != nil {
 		return 0, fmt.Errorf("failed to kill process with PID %d: %w ", pid, err)
@@ -407,7 +407,7 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 		return nil, fmt.Errorf("error splitting command string: %w", err)
 	}
 	// Create a command to start the MinIO server set env and run the command
-	runCmd := exec.Command(cmdParts[0], cmdParts[1:]...)
+	runCmd := exec.Command(cmdParts[0], cmdParts[1:]...) // #nosec G204
 
 	_, err = runCmd.StdoutPipe()
 	if err != nil {
