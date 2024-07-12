@@ -26,7 +26,7 @@ jobs:
           else
               echo "go already exists"
           fi
-  
+
           echo "PATH=$PATH:/usr/local/go/bin" >> $GITHUB_ENV
           export PATH=$PATH:/usr/local/go/bin
           export HOME="/root"
@@ -48,5 +48,5 @@ jobs:
           run_smoke_tests: false
           run_s3mgrt_system_tests: false
           run_challenge_system_tests: false
-          TENDERLY_FORK_ID: ${{ secrets.TENDERLY_FORK_ID }}
+          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ""
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
