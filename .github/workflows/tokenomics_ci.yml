@@ -56,7 +56,7 @@ jobs:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
@@ -75,7 +75,7 @@ jobs:
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.TOKENOMICS_ALLOCATION_TESTS }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
@@ -88,7 +88,7 @@ jobs:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
@@ -107,7 +107,7 @@ jobs:
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.TOKENOMICS_CHALLENGE_REWARD_TESTS }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
@@ -120,7 +120,7 @@ jobs:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
@@ -139,7 +139,7 @@ jobs:
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.TOKENOMICS_ALLOCATION_ADD_OR_REPLACE_BLOBBER_TESTS }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
@@ -152,7 +152,7 @@ jobs:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
@@ -171,7 +171,7 @@ jobs:
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.TOKENOMICS_READ_REWARD_TESTS }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
@@ -189,7 +189,7 @@ jobs:
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.TOKENOMICS_SLASH_REWARD_TESTS }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
@@ -202,7 +202,7 @@ jobs:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
@@ -221,7 +221,7 @@ jobs:
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.TOKENOMICS_MIN_STAKE_TESTS }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
@@ -234,7 +234,7 @@ jobs:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
@@ -253,7 +253,7 @@ jobs:
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.CLIENT_THROTTLING }}
-          TENDERLY_FORK_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
