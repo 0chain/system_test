@@ -575,8 +575,6 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to block_reward did not succeed with specified value")
 	})
-       
-
 }
 
 func getMinerSCConfig(t *test.SystemTest, cliConfigFilename string, retry bool) ([]string, error) {

@@ -174,12 +174,11 @@ func updateFileWithRandomlyGeneratedDataWithWallet(t *test.SystemTest, walletNam
 	return localfile
 }
 
-func updateFileContentWithRandomlyGeneratedData(t *test.SystemTest, allocationID, remotepath string, filename string, size int64) string {
+func updateFileContentWithRandomlyGeneratedData(t *test.SystemTest, allocationID, remotepath, filename string, size int64) string {
 	return updateFileContentWithRandomlyGeneratedDataWithWallet(t, escapedTestName(t), allocationID, remotepath, filename, size)
 }
 
-func updateFileContentWithRandomlyGeneratedDataWithWallet(t *test.SystemTest, walletName, allocationID, remotepath string, filename string, size int64) string {
-
+func updateFileContentWithRandomlyGeneratedDataWithWallet(t *test.SystemTest, walletName, allocationID, remotepath, filename string, size int64) string {
 	err := createFileWithSize(filename, size)
 	require.Nil(t, err)
 

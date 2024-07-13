@@ -1038,8 +1038,7 @@ func generateFileContentAndUpload(t *test.SystemTest, allocationID, remotepath s
 	return generateFileContentAndUploadForWallet(t, escapedTestName(t), allocationID, remotepath, filename, size)
 }
 
-func generateFileContentAndUploadForWallet(t *test.SystemTest, wallet, allocationID, remotepath string, filename string, size int64) string {
-
+func generateFileContentAndUploadForWallet(t *test.SystemTest, wallet, allocationID, remotepath, filename string, size int64) string {
 	err := createFileWithSize(filename, size)
 	require.Nil(t, err)
 

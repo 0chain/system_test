@@ -105,7 +105,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		// Upload initial file
 		localFilePath := generateFileContentAndUpload(t, allocationID, remotepath, localFileName, fileSize)
 
-		//Cleanup
+		// Cleanup
 		err := os.Remove(localFilePath)
 		require.Nil(t, err)
 
@@ -506,7 +506,6 @@ func TestRollbackAllocation(testSetup *testing.T) {
 			go func(path string, size int64) {
 				generateFileContentAndUpload(t, allocationID, remotepath, path, size)
 				defer wg.Done()
-
 			}(filepath, fileSize)
 		}
 		wg.Wait()
@@ -596,7 +595,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		localfilepath = startComponent + randomFileEndComponent
 
 		// as files are created in /tmp directory so no need to remove??
-		//for filename := range files {
+		// for filename := range files {
 		//	err := os.Remove(filename)
 		//	require.Nil(t, err)
 		//}
@@ -659,14 +658,14 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		filesize := int64(1.5 * GB)
 		remotepath := "/"
 		doneUploading := make(chan bool)
-		//var wg sync.WaitGroup
-		//wg.Add(1)
+		// var wg sync.WaitGroup
+		// wg.Add(1)
 		go func() {
-			//defer wg.Done()
+			// defer wg.Done()
 			generateFileAndUpload(t, allocationID, remotepath, filesize)
 			doneUploading <- true
 		}()
-		//wg.Wait()
+		// wg.Wait()
 
 		// Ensure the upload was interrupted
 		select {
@@ -707,7 +706,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		remotepath := "/"
 		doneUploading := make(chan bool)
 
-		//upload a small file to the allocation.
+		// upload a small file to the allocation.
 		smallFilePath := "smallfile.txt"
 		smallFileSize := int64(0.5 * MB)
 		generateFileContentAndUpload(t, allocationID, remotepath, filepath.Base(smallFilePath), smallFileSize)
@@ -748,14 +747,14 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, newSmallFileSize, meta.ActualFileSize, "file size should be same as updated file size")
 
-		//var wg sync.WaitGroup
-		//wg.Add(1)
+		// var wg sync.WaitGroup
+		// wg.Add(1)
 		go func() {
-			//defer wg.Done()
+			// defer wg.Done()
 			generateFileAndUpload(t, allocationID, remotepath, filesize)
 			doneUploading <- true
 		}()
-		//wg.Wait()
+		// wg.Wait()
 
 		// Ensure the upload was interrupted
 		select {
