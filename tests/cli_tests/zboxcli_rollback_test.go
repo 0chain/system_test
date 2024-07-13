@@ -587,7 +587,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		}
 		wg.Wait()
 
-		localFileChecksum := generateChecksum(t, filepath.Join("/tmp", filepath.Base(remoteLocalFileMap[localfilepath])))
+		localFileChecksum := generateChecksum(t, "/tmp"+filepath.Base(remoteLocalFileMap[localfilepath]))
 
 		startComponent := localfilepath
 		randomFileEndComponent := filepath.Base(remoteLocalFileMap[localfilepath])
@@ -658,14 +658,10 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		filesize := int64(1.5 * GB)
 		remotepath := "/"
 		doneUploading := make(chan bool)
-		// var wg sync.WaitGroup
-		// wg.Add(1)
 		go func() {
-			// defer wg.Done()
 			generateFileAndUpload(t, allocationID, remotepath, filesize)
 			doneUploading <- true
 		}()
-		// wg.Wait()
 
 		// Ensure the upload was interrupted
 		select {
@@ -747,10 +743,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Equal(t, newSmallFileSize, meta.ActualFileSize, "file size should be same as updated file size")
 
-		// var wg sync.WaitGroup
-		// wg.Add(1)
 		go func() {
-			// defer wg.Done()
 			generateFileAndUpload(t, allocationID, remotepath, filesize)
 			doneUploading <- true
 		}()

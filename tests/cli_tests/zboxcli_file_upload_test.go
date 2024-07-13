@@ -1034,7 +1034,7 @@ func generateFileAndUploadForWallet(t *test.SystemTest, wallet, allocationID, re
 	return filename
 }
 
-func generateFileContentAndUpload(t *test.SystemTest, allocationID, remotepath string, filename string, size int64) string {
+func generateFileContentAndUpload(t *test.SystemTest, allocationID, remotepath, filename string, size int64) string {
 	return generateFileContentAndUploadForWallet(t, escapedTestName(t), allocationID, remotepath, filename, size)
 }
 
