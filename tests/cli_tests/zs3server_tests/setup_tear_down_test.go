@@ -43,7 +43,7 @@ func globalSetup() {
 	}
 
 	requiredCommands := map[string]string{
-		"mc":    "./mc",
+		"mc":    "../mc",
 		"zbox":  "../zbox",
 		"minio": "../minio",
 		"warp":  "../warp",
