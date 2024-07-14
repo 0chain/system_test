@@ -13,8 +13,11 @@ import (
 func TestZs3serverMixedWarpTests(testSetup *testing.T) {
 	log.Println("Running Warp Mixed Benchmark...")
 	t := test.NewSystemTest(testSetup)
+	config := cliutils.ReadFile(testSetup)
+	_, _ = cliutils.RunMinioServer(config.AccessKey, config.SecretKey)
+	t.Logf("Minio server Started")
+
 	t.RunSequentiallyWithTimeout("Warp Mixed Benchmark", 40*time.Minute, func(t *test.SystemTest) {
-		config := cliutils.ReadFile(testSetup)
 		commandGenerated := "../warp mixed --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --objects=" + "22" + " --duration=" + "30s" + "  --obj.size=" + "256B"
 		log.Println("Command Generated: ", commandGenerated)
 
