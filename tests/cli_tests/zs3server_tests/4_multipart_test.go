@@ -22,6 +22,7 @@ func TestZs3serverMultipartTests(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	config := cliutils.ReadFile(testSetup)
+	_, _ = cliutils.RunMinioServer(config.AccessKey, config.SecretKey)
 
 	commandGenerated := "../warp multipart --parts=500 --part.size=10MiB --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + "  --concurrent " + config.Concurrent + " --duration 30s"
 	log.Println("Command Generated: ", commandGenerated)
