@@ -38,6 +38,5 @@ tests/cli_tests/*.png
 
 .pre-commit-config.yaml
 minio
-warp
 warp-*.csv.zst
 warp-*_output.txt
