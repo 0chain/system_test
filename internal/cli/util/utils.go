@@ -394,7 +394,7 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 }
 
 func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
-	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn  "+ " --console-address :8000"
+	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn  " + " --console-address :8000"
 
 	cmdParts, err := SplitCmdString(cmdString)
 	if err != nil {
@@ -403,16 +403,14 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	// Create a command to start the MinIO server set env and run the command
 	runCmd := exec.Command(cmdParts[0], cmdParts[1:]...) // #nosec G204
 
-			// Create pipes for stdout and stderr
+	// Create pipes for stdout and stderr
 	var stdout, stderr bytes.Buffer
 	runCmd.Stdout = io.MultiWriter(os.Stdout, &stdout)
 	runCmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
 
-
-
 	log.Printf("Generated command: %s %s", runCmd.Path, runCmd.Args)
 
-		// Start the MinIO server command
+	// Start the MinIO server command
 	err = runCmd.Start()
 	if err != nil {
 		return nil, fmt.Errorf("error starting MinIO server: %w", err)
