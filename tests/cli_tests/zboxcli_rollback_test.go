@@ -587,7 +587,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		}
 		wg.Wait()
 
-		localFileChecksum := generateChecksum(t, "/tmp"+filepath.Base(remoteLocalFileMap[localfilepath]))
+		localFileChecksum := generateChecksum(t, "/tmp/"+filepath.Base(remoteLocalFileMap[localfilepath]))
 
 		startComponent := localfilepath
 		randomFileEndComponent := filepath.Base(remoteLocalFileMap[localfilepath])
