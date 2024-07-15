@@ -401,7 +401,7 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	}
 	zcnDir := filepath.Join(currentUser.HomeDir, ".zcn")
 
-	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn --configDir " + zcnDir + " --console-address :8000"
+	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ./minio gateway zcn --configDir " + zcnDir + " --console-address :8000"
 
 	cmdParts, err := SplitCmdString(cmdString)
 	if err != nil {
