@@ -2,6 +2,7 @@ package cliutils
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/rand"
 	"fmt"
 	"io"
@@ -409,13 +410,25 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	// Create a command to start the MinIO server set env and run the command
 	runCmd := exec.Command(cmdParts[0], cmdParts[1:]...) // #nosec G204
 
-	_, err = runCmd.StdoutPipe()
+	pipe, err := runCmd.StdoutPipe()
+	var buf bytes.Buffer
+	multiWriter := io.MultiWriter(os.Stdout, &buf)
+
+	go func() {
+		if _, err := io.Copy(multiWriter, pipe); err != nil {
+			log.Fatalf("Error copying from pipe: %v", err)
+		}
+	}()
+
+	
 	if err != nil {
 		log.Fatalf("Error creating stdout pipe: %v", err)
 	}
-
-	_, _ = runCmd.StderrPipe()
-
+	
+	err_pipe, _ := runCmd.StderrPipe()
+	
+	go LogOutput(err_pipe, test.NewSystemTest(nil))
+	
 	log.Printf("Generated command: %s %s", runCmd.Path, runCmd.Args)
 
 	err = runCmd.Start()
