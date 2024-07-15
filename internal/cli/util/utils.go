@@ -425,9 +425,8 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 		log.Fatalf("Error creating stdout pipe: %v", err)
 	}
 	
-	err_pipe, _ := runCmd.StderrPipe()
+	_, _ = runCmd.StderrPipe()
 	
-	go LogOutput(err_pipe, test.NewSystemTest(nil))
 	
 	log.Printf("Generated command: %s %s", runCmd.Path, runCmd.Args)
 
