@@ -1034,6 +1034,26 @@ func generateFileAndUploadForWallet(t *test.SystemTest, wallet, allocationID, re
 	return filename
 }
 
+func generateFileContentAndUpload(t *test.SystemTest, allocationID, remotepath, filename string, size int64) string {
+	return generateFileContentAndUploadForWallet(t, escapedTestName(t), allocationID, remotepath, filename, size)
+}
+
+func generateFileContentAndUploadForWallet(t *test.SystemTest, wallet, allocationID, remotepath, filename string, size int64) string {
+	err := createFileWithSize(filename, size)
+	require.Nil(t, err)
+
+	// Upload parameters
+	// log command with allocation id, filename and remotepath
+	t.Logf("Uploading file %s to allocation %s with remotepath %s", filename, allocationID, remotepath+filepath.Base(filename))
+	uploadWithParamForWallet(t, wallet, configPath, map[string]interface{}{
+		"allocation": allocationID,
+		"localpath":  filename,
+		"remotepath": remotepath + filepath.Base(filename),
+	})
+
+	return filename
+}
+
 func generateFileAndUploadWithParam(t *test.SystemTest, allocationID, remotepath string, size int64, params map[string]interface{}) string {
 	filename := generateRandomTestFileName(t)
 
