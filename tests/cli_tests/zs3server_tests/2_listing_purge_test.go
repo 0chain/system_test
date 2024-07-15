@@ -18,7 +18,7 @@ func TestZs3serverWarpTests(testSetup *testing.T) {
 
 
 	t.RunWithTimeout("Warp List Benchmark", 40*time.Minute, func(t *test.SystemTest) {
-		commandGenerated := ".../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --duration 30s" + " --obj.size " + config.ObjectSize
+		commandGenerated := "../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --duration 30s" + " --obj.size " + config.ObjectSize
 		log.Println("Command Generated: ", commandGenerated)
 		output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*2)
 		if err != nil {
@@ -47,7 +47,7 @@ func TestZs3serverConcurrentListTests(testSetup *testing.T) {
 
 
 	t.RunWithTimeout("Warp List Benchmark", 40*time.Minute, func(t *test.SystemTest) {
-		commandGenerated := ".../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --objects " + config.ObjectCount + " --concurrent " + config.Concurrent + " --duration 30s" + " --obj.size " + config.ObjectSize
+		commandGenerated := "../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --objects " + config.ObjectCount + " --concurrent " + config.Concurrent + " --duration 30s" + " --obj.size " + config.ObjectSize
 		log.Println("Command Generated: ", commandGenerated)
 
 		output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*2)
