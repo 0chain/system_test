@@ -24,7 +24,7 @@ func TestZs3serverFanoutTests(testSetup *testing.T) {
 	config := cliutils.ReadFile(testSetup)
 	_, _ = cliutils.RunMinioServer(config.AccessKey, config.SecretKey)
 
-	commandGenerated := "./warp fanout --copies=50 --obj.size=512KiB --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + "  --concurrent " + config.Concurrent + " --duration 30s" + " --obj.size " + config.ObjectSize
+	commandGenerated := "../warp fanout --copies=50 --obj.size=512KiB --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + "  --concurrent " + config.Concurrent + " --duration 30s" + " --obj.size " + config.ObjectSize
 	log.Println("Command Generated: ", commandGenerated)
 
 	output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*3)
