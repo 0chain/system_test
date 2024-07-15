@@ -414,11 +414,6 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	var buf bytes.Buffer
 	multiWriter := io.MultiWriter(os.Stdout, &buf)
 
-	go func() {
-		if _, err := io.Copy(multiWriter, pipe); err != nil {
-			log.Fatalf("Error copying from pipe: %v", err)
-		}
-	}()
 
 	
 	if err != nil {
@@ -435,6 +430,12 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 		log.Fatalf("Error starting MinIO server: %v", err)
 	}
 
+
+	go func() {
+		if _, err := io.Copy(multiWriter, pipe); err != nil {
+			log.Fatalf("Error copying from pipe: %v", err)
+		}
+	}()
 	time.Sleep(5 * time.Second)
 	return runCmd, nil
 }
