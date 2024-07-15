@@ -2,6 +2,7 @@ package cliutils
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/rand"
 	"fmt"
 	"io"
@@ -9,7 +10,6 @@ import (
 	"math/big"
 	"os"
 	"os/exec"
-	"os/user"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -394,13 +394,7 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 }
 
 func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
-	currentUser, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
-	zcnDir := filepath.Join(currentUser.HomeDir, ".zcn")
-
-	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn --configDir " + zcnDir + " --console-address :8000"
+	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn  "+ " --console-address :8000"
 
 	cmdParts, err := SplitCmdString(cmdString)
 	if err != nil {
@@ -409,20 +403,32 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	// Create a command to start the MinIO server set env and run the command
 	runCmd := exec.Command(cmdParts[0], cmdParts[1:]...) // #nosec G204
 
-	_, err = runCmd.StdoutPipe()
-	if err != nil {
-		log.Fatalf("Error creating stdout pipe: %v", err)
-	}
+			// Create pipes for stdout and stderr
+	var stdout, stderr bytes.Buffer
+	runCmd.Stdout = io.MultiWriter(os.Stdout, &stdout)
+	runCmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
 
-	_, _ = runCmd.StderrPipe()
+
 
 	log.Printf("Generated command: %s %s", runCmd.Path, runCmd.Args)
 
+		// Start the MinIO server command
 	err = runCmd.Start()
 	if err != nil {
-		log.Fatalf("Error starting MinIO server: %v", err)
+		return nil, fmt.Errorf("error starting MinIO server: %w", err)
 	}
 
+	// Log the generated command and its arguments
+	log.Printf("Generated command: %s %s", runCmd.Path, strings.Join(runCmd.Args[1:], " "))
+
+	// Wait for the command to complete
+	if err != nil {
+		log.Printf("Command execution error: %v", err)
+	}
+
+	// Print stdout and stderr captured during execution
+	fmt.Printf("Stdout:\n%s", stdout.String())
+	fmt.Printf("Stderr:\n%s", stderr.String())
 	time.Sleep(5 * time.Second)
 	return runCmd, nil
 }
