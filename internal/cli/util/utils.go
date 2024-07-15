@@ -422,7 +422,6 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	log.Printf("Generated command: %s %s", runCmd.Path, strings.Join(runCmd.Args[1:], " "))
 
 	// Wait for the command to complete
-	err = runCmd.Wait()
 	if err != nil {
 		log.Printf("Command execution error: %v", err)
 	}
