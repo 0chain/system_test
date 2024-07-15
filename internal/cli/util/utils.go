@@ -410,32 +410,33 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	// Create a command to start the MinIO server set env and run the command
 	runCmd := exec.Command(cmdParts[0], cmdParts[1:]...) // #nosec G204
 
-	pipe, err := runCmd.StdoutPipe()
-	var buf bytes.Buffer
-	multiWriter := io.MultiWriter(os.Stdout, &buf)
+			// Create pipes for stdout and stderr
+	var stdout, stderr bytes.Buffer
+	runCmd.Stdout = io.MultiWriter(os.Stdout, &stdout)
+	runCmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
 
 
-	
-	if err != nil {
-		log.Fatalf("Error creating stdout pipe: %v", err)
-	}
-	
-	_, _ = runCmd.StderrPipe()
-	
-	
+
 	log.Printf("Generated command: %s %s", runCmd.Path, runCmd.Args)
 
+		// Start the MinIO server command
 	err = runCmd.Start()
 	if err != nil {
-		log.Fatalf("Error starting MinIO server: %v", err)
+		return nil, fmt.Errorf("error starting MinIO server: %w", err)
 	}
 
+	// Log the generated command and its arguments
+	log.Printf("Generated command: %s %s", runCmd.Path, strings.Join(runCmd.Args[1:], " "))
 
-	go func() {
-		if _, err := io.Copy(multiWriter, pipe); err != nil {
-			log.Fatalf("Error copying from pipe: %v", err)
-		}
-	}()
+	// Wait for the command to complete
+	err = runCmd.Wait()
+	if err != nil {
+		log.Printf("Command execution error: %v", err)
+	}
+
+	// Print stdout and stderr captured during execution
+	fmt.Printf("Stdout:\n%s", stdout.String())
+	fmt.Printf("Stderr:\n%s", stderr.String())
 	time.Sleep(5 * time.Second)
 	return runCmd, nil
 }

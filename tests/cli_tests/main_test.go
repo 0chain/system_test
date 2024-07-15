@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -20,9 +19,6 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/spf13/viper"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
@@ -125,116 +121,118 @@ var (
 var tenderlyClient *tenderly.Client
 
 func TestMain(m *testing.M) {
-	configPath = os.Getenv("CONFIG_PATH")
-	configDir = os.Getenv("CONFIG_DIR")
+	// configPath = os.Getenv("CONFIG_PATH")
+	// configDir = os.Getenv("CONFIG_DIR")
 
-	if configDir == "" {
-		configDir = getConfigDir()
-	}
+	// if configDir == "" {
+	// 	configDir = getConfigDir()
+	// }
 
-	if configPath == "" {
-		configPath = "./zbox_config.yaml"
-		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
-	}
+	// if configPath == "" {
+	// 	configPath = "./zbox_config.yaml"
+	// 	cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
+	// }
 
-	configDir, _ = filepath.Abs(configDir)
-	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
-		if files, err := filepath.Glob("./config/*.json"); err == nil {
-			for _, f := range files {
-				// skip deleting the SC owner wallet and blobber owner wallet
-				if strings.HasSuffix(f, zcnscOwner+"_wallet.json") ||
-					strings.HasSuffix(f, scOwnerWallet+"_wallet.json") ||
-					strings.HasSuffix(f, blobberOwnerWallet+"_wallet.json") ||
-					strings.HasSuffix(f, miner01NodeDelegateWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, miner02NodeDelegateWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, miner03NodeDelegateWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, sharder01NodeDelegateWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, stakingWallet+"_wallet.json") ||
-					strings.HasSuffix(f, zboxTeamWallet+"_wallet.json") {
-					continue
-				}
-				_ = os.Remove(f)
-			}
-		}
+	// configDir, _ = filepath.Abs(configDir)
+	// if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
+	// 	if files, err := filepath.Glob("./config/*.json"); err == nil {
+	// 		for _, f := range files {
+	// 			// skip deleting the SC owner wallet and blobber owner wallet
+	// 			if strings.HasSuffix(f, zcnscOwner+"_wallet.json") ||
+	// 				strings.HasSuffix(f, scOwnerWallet+"_wallet.json") ||
+	// 				strings.HasSuffix(f, blobberOwnerWallet+"_wallet.json") ||
+	// 				strings.HasSuffix(f, miner01NodeDelegateWalletName+"_wallet.json") ||
+	// 				strings.HasSuffix(f, miner02NodeDelegateWalletName+"_wallet.json") ||
+	// 				strings.HasSuffix(f, miner03NodeDelegateWalletName+"_wallet.json") ||
+	// 				strings.HasSuffix(f, sharder01NodeDelegateWalletName+"_wallet.json") ||
+	// 				strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") ||
+	// 				strings.HasSuffix(f, stakingWallet+"_wallet.json") ||
+	// 				strings.HasSuffix(f, zboxTeamWallet+"_wallet.json") {
+	// 				continue
+	// 			}
+	// 			_ = os.Remove(f)
+	// 		}
+	// 	}
 
-		if files, err := filepath.Glob("./config/*.txt"); err == nil {
-			for _, f := range files {
-				_ = os.Remove(f)
-			}
-		}
+	// 	if files, err := filepath.Glob("./config/*.txt"); err == nil {
+	// 		for _, f := range files {
+	// 			_ = os.Remove(f)
+	// 		}
+	// 	}
 
-		if files, err := filepath.Glob("./tmp/*.txt"); err == nil {
-			for _, f := range files {
-				_ = os.Remove(f)
-			}
-		}
-	}
+	// 	if files, err := filepath.Glob("./tmp/*.txt"); err == nil {
+	// 		for _, f := range files {
+	// 			_ = os.Remove(f)
+	// 		}
+	// 	}
+	// }
 
-	setupConfig()
+	// setupConfig()
 
-	tenderlyClient = tenderly.NewClient(ethereumNodeURL)
+	// tenderlyClient = tenderly.NewClient(ethereumNodeURL)
 
-	// Create a session with AWS
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("us-east-2"), // Replace with your desired AWS region
-		Credentials: credentials.NewStaticCredentials(s3AccessKey, s3SecretKey, ""),
-	})
+	// // Create a session with AWS
+	// sess, err := session.NewSession(&aws.Config{
+	// 	Region:      aws.String("us-east-2"), // Replace with your desired AWS region
+	// 	Credentials: credentials.NewStaticCredentials(s3AccessKey, s3SecretKey, ""),
+	// })
 
-	if err != nil {
-		log.Fatalln("Failed to create AWS session:", err)
-		return
-	}
+	// if err != nil {
+	// 	log.Fatalln("Failed to create AWS session:", err)
+	// 	return
+	// }
 
-	// Create a session with Dropbox
-	sess_dp, err_dp := session.NewSession(&aws.Config{
-		Credentials: credentials.NewStaticCredentials(
-			dropboxAccessToken, "", ""),
-	})
+	// // Create a session with Dropbox
+	// sess_dp, err_dp := session.NewSession(&aws.Config{
+	// 	Credentials: credentials.NewStaticCredentials(
+	// 		dropboxAccessToken, "", ""),
+	// })
 
-	if err_dp != nil {
-		log.Fatalln("Failed to create Dropbox session:", err_dp)
-	}
+	// if err_dp != nil {
+	// 	log.Fatalln("Failed to create Dropbox session:", err_dp)
+	// }
 
-	sess_gd, err_gd := session.NewSession(&aws.Config{
-		Credentials: credentials.NewStaticCredentials(
-			gdriveAccessToken, "", ""),
-	})
+	// sess_gd, err_gd := session.NewSession(&aws.Config{
+	// 	Credentials: credentials.NewStaticCredentials(
+	// 		gdriveAccessToken, "", ""),
+	// })
 
-	if err_gd != nil {
-		log.Fatalln("Failed to create Gdrive session:", err_dp)
-	}
-	// Create an S3 client
-	cloudService := os.Getenv("CLOUD_SERVICE")
+	// if err_gd != nil {
+	// 	log.Fatalln("Failed to create Gdrive session:", err_dp)
+	// }
+	// // Create an S3 client
+	// cloudService := os.Getenv("CLOUD_SERVICE")
 
-	if cloudService == "dropbox" {
-		S3Client = s3.New(sess_dp)
-	} else if cloudService == "gdrive" {
-		S3Client = s3.New(sess_gd)
-	} else {
-		S3Client = s3.New(sess)
-	}
+	// if cloudService == "dropbox" {
+	// 	S3Client = s3.New(sess_dp)
+	// } else if cloudService == "gdrive" {
+	// 	S3Client = s3.New(sess_gd)
+	// } else {
+	// 	S3Client = s3.New(sess)
+	// }
 
-	walletMutex.Lock()
-	// Read the content of the file
-	fileContent, err := os.ReadFile("./config/wallets/wallets.json")
-	if err != nil {
-		log.Println("Error reading file:", err)
-		return
-	}
+	// walletMutex.Lock()
+	// // Read the content of the file
+	// fileContent, err := os.ReadFile("./config/wallets/wallets.json")
+	// if err != nil {
+	// 	log.Println("Error reading file:", err)
+	// 	return
+	// }
 
-	// Parse the JSON data into a list of strings
-	err = json.Unmarshal(fileContent, &wallets)
-	if err != nil {
-		log.Println("Error decoding JSON:", err)
-		return
-	}
+	// // Parse the JSON data into a list of strings
+	// err = json.Unmarshal(fileContent, &wallets)
+	// if err != nil {
+	// 	log.Println("Error decoding JSON:", err)
+	// 	return
+	// }
 
-	walletIdx = 500
+	// walletIdx = 500
 
-	walletMutex.Unlock()
+	// walletMutex.Unlock()
+	config := cliutils.ReadFile(nil)
+	_, _ = cliutils.RunMinioServer(config.AccessKey, config.SecretKey)
 
-	exitRun := m.Run()
+	// exitRun := m.Run()
 
-	os.Exit(exitRun)
+	// os.Exit(exitRun)
 }
