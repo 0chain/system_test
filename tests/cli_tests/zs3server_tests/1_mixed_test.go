@@ -14,7 +14,6 @@ func TestZs3serverMixedWarpTests(testSetup *testing.T) {
 	log.Println("Running Warp Mixed Benchmark...")
 	t := test.NewSystemTest(testSetup)
 	config := cliutils.ReadFile(testSetup)
-	_, _ = cliutils.RunMinioServer(config.AccessKey, config.SecretKey)
 	t.Logf("Minio server Started")
 
 	t.RunSequentiallyWithTimeout("Warp Mixed Benchmark", 40*time.Minute, func(t *test.SystemTest) {
