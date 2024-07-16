@@ -14,7 +14,6 @@ func TestZs3serverWarpTests(testSetup *testing.T) {
 	log.Println("Running Warp List Benchmark...")
 	t := test.NewSystemTest(testSetup)
 	config := cliutils.ReadFile(testSetup)
-	_, _ = cliutils.RunMinioServer(config.AccessKey, config.SecretKey)
 
 	t.RunWithTimeout("Warp List Benchmark", 40*time.Minute, func(t *test.SystemTest) {
 		commandGenerated := "../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --duration 30s" + " --obj.size " + config.ObjectSize
