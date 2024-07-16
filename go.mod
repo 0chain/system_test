@@ -42,7 +42,6 @@ require (
 require (
 	github.com/aws/aws-sdk-go v1.44.331
 	github.com/google/uuid v1.3.0
-	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
