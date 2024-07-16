@@ -394,7 +394,7 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 }
 
 func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
-	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ./minio gateway zcn  " + " --console-address :8000"
+	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn  " + " --console-address :8000"
 
 	cmdParts, err := SplitCmdString(cmdString)
 	if err != nil {

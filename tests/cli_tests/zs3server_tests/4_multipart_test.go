@@ -23,7 +23,7 @@ func TestZs3serverMultipartTests(testSetup *testing.T) {
 
 	config := cliutils.ReadFile(testSetup)
 
-	commandGenerated := "./warp multipart --parts=500 --part.size=5MiB --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + "  --concurrent " + config.Concurrent + " --duration 30s"
+	commandGenerated := "../warp multipart --parts=500 --part.size=5MiB --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + "  --concurrent " + config.Concurrent + " --duration 30s"
 	log.Println("Command Generated: ", commandGenerated)
 
 	output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*2)
