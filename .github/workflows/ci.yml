@@ -166,6 +166,8 @@ jobs:
           run_smoke_tests: ${{ env.RUN_SMOKE_TESTS }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          DROPBOX_ACCESS_TOKEN: ${{ secrets.DROPBOX_ACCESS_TOKEN }}
+          GDRIVE_ACCESS_TOKEN: ${{ secrets.GDRIVE_ACCESS_TOKEN }}
 
       - name: "Remove Tenderly virtual testnet"
         if: always()

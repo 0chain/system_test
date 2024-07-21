@@ -733,6 +733,14 @@ type ReadMarker struct {
 	BlockNumber   int64   `json:"block_number"`
 }
 
+// holds result of repair size
+type RepairSize struct {
+	// upload size in bytes
+	UploadSize uint64 `json:"upload_size"`
+	// download size in bytes
+	DownloadSize uint64 `json:"download_size"`
+}
+
 var StorageKeySettings = []string{
 	"owner_id",
 }
