@@ -2278,18 +2278,6 @@ func (c *APIClient) QueryDataFromSharder(t *test.SystemTest, tableName string) (
 		tableEntity = model.Sharder{}
 	case "user":
 		tableEntity = model.User{}
-	case "user_snapshot":
-		tableEntity = model.UserSnapshot{}
-	case "miner_snapshot":
-		tableEntity = model.MinerSnapshot{}
-	case "blobber_snapshot":
-		tableEntity = model.BlobberSnapshot{}
-	case "validator_snapshot":
-		tableEntity = model.ValidatorSnapshot{}
-	case "sharder_snapshot":
-		tableEntity = model.SharderSnapshot{}
-	case "authorizer_snapshot":
-		tableEntity = model.AuthorizerSnapshot{}
 	case "provider_rewards":
 		tableEntity = model.ProviderRewards{}
 

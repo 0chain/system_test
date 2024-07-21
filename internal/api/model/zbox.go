@@ -1,9 +1,6 @@
 package model
 
 import (
-	"time"
-
-	"github.com/0chain/common/core/currency"
 	"github.com/0chain/gosdk/core/common"
 	"github.com/0chain/system_test/internal/api/util/test"
 	resty "github.com/go-resty/resty/v2"
@@ -226,16 +223,6 @@ type ReferralRankOfUser struct {
 	UserRank   int64 `json:"rank"`
 	UserCount  int64 `json:"count"`
 	ReferrerID int64 `json:"referrer_id"`
-}
-
-type ProviderRewards struct {
-	ID                            uint          `json:"id" gorm:"primarykey"`
-	CreatedAt                     time.Time     `json:"created_at"`
-	UpdatedAt                     time.Time     `json:"updated_at"`
-	ProviderID                    string        `json:"provider_id" gorm:"uniqueIndex"`
-	Rewards                       currency.Coin `json:"rewards"`
-	TotalRewards                  currency.Coin `json:"total_rewards"`
-	RoundServiceChargeLastUpdated int64         `json:"round_service_charge_last_updated"`
 }
 
 type ZboxGraphEndpoint func(*test.SystemTest, *ZboxGraphRequest) (*ZboxGraphInt64Response, *resty.Response, error)

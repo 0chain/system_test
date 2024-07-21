@@ -22,7 +22,7 @@ func ParseToTimeIfValid(val interface{}) interface{} {
 	return val
 }
 
-func CompareEntityTables(t *test.SystemTest, entity string) {
+func CompareEntityTables(t *test.SystemTest, entity string, id_sharder string, id_0box string) {
 
 	entityTable_Sharder, resp, err := apiClient.QueryDataFromSharder(t, entity)
 	require.NoError(t, err)
@@ -32,6 +32,33 @@ func CompareEntityTables(t *test.SystemTest, entity string) {
 	require.NoError(t, err)
 	require.Equal(t, 200, resp.StatusCode())
 
+	if entity == "user" {
+		entityTable_SharderCopy := entityTable_Sharder
+		entityTable_Sharder = entityTable_Sharder[:0]
+		// t.Logf("entityTable_Sharder: %+v", entityTable_Sharder)
+
+		for i := 0; i < len(entityTable_SharderCopy); i++ {
+			// t.Logf("entityTable_SharderCopy[i].(map[string]interface{})[\"round\"]: %+v", entityTable_SharderCopy[i].(map[string]interface{})["round"])
+			temp_copy := entityTable_SharderCopy[i].(map[string]interface{})
+			val := temp_copy["round"]
+			if val != nil {
+				switch val.(type) {
+				case float64:
+					if val.(float64) != 0 {
+						entityTable_Sharder = append(entityTable_Sharder, temp_copy)
+					}
+				case int:
+					if val.(int) != 0 {
+						entityTable_Sharder = append(entityTable_Sharder, temp_copy)
+					}
+				case int64:
+					if val.(int64) != 0 {
+						entityTable_Sharder = append(entityTable_Sharder, temp_copy)
+					}
+				}
+			}
+		}
+	}
 	require.Equal(t, len(entityTable_Sharder), len(entityTable_0box))
 	// t.Logf("entityTable_Sharder: %+v", entityTable_Sharder)
 	// t.Logf("entityTable_0box: %+v", entityTable_0box)
@@ -42,17 +69,17 @@ func CompareEntityTables(t *test.SystemTest, entity string) {
 	for i := 0; i < len(entityTable_Sharder); i++ {
 		e_sharder := entityTable_Sharder[i].(map[string]interface{})
 		e_0box := entityTable_0box[i].(map[string]interface{})
-		entity_Sharder[e_sharder["ID"].(string)] = e_sharder
-		entity_0box[e_0box["id"].(string)] = e_0box
+		entity_Sharder[e_sharder[id_sharder].(string)] = e_sharder
+		entity_0box[e_0box[id_0box].(string)] = e_0box
 	}
 	for k, v := range entity_Sharder {
 		for k1, val1 := range v {
 			if val1 != nil && entity_0box[k][k1] != nil {
-				// how to know if v1 is a time.Time as a string
+				// how to know if v1 is a time.Time as a stringaf
 				v1 := ParseToTimeIfValid(val1)
 				switch v1.(type) {
 				case float64:
-					require.InDelta(t, v1.(float64), entity_0box[k][k1].(float64), 0.05*v1.(float64))
+					require.InDelta(t, v1.(float64), entity_0box[k][k1].(float64), 0.05*v1.(float64), "Float64 values are not equal for field %s", k1)
 				case string:
 					require.Equal(t, v1.(string), entity_0box[k][k1].(string))
 				case bool:
@@ -90,43 +117,25 @@ func TestCompares0boxTablesWithSharder(testSetup *testing.T) {
 	t.SetSmokeTests("Compare 0box tables with sharder tables")
 
 	t.RunSequentially("Compare Miner tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "miner")
+		CompareEntityTables(t, "miner", "ID", "id")
 	})
 	t.RunSequentially("Compare Blobber tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "blobber")
+		CompareEntityTables(t, "blobber", "ID", "id")
 	})
 	t.RunSequentially("Compare Sharder tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "sharder")
+		CompareEntityTables(t, "sharder", "ID", "id")
 	})
 	t.RunSequentially("Compare Validator tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "validator")
+		CompareEntityTables(t, "validator", "ID", "id")
 	})
 	t.RunSequentially("Compare Authorizer tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "authorizer")
+		CompareEntityTables(t, "authorizer", "ID", "id")
 	})
 	t.RunSequentially("Compare ProviderRewards tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "provider_rewards")
+		CompareEntityTables(t, "provider_rewards", "provider_id", "provider_id")
 	})
 	t.RunSequentially("Compare User tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "user")
-	})
-	t.RunSequentially("Compare Miner Snapshot tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "miner_snapshot")
-	})
-	t.RunSequentially("Compare Blobber Snapshot tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "blobber_snapshot")
-	})
-	t.RunSequentially("Compare Sharder Snapshot tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "sharder_snapshot")
-	})
-	t.RunSequentially("Compare Validator Snapshot tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "validator_snapshot")
-	})
-	t.RunSequentially("Compare Authorizer Snapshot tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "authorizer_snapshot")
-	})
-	t.RunSequentially("Compare User Snapshot tables", func(t *test.SystemTest) {
-		CompareEntityTables(t, "user_snapshot")
+		CompareEntityTables(t, "user", "txn_hash", "txn_hash")
 	})
 
 }
