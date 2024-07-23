@@ -17,7 +17,7 @@ jobs:
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=feature/enterprise-blobber" >> $GITHUB_ENV
 
       - name: 'Setup jq'
         uses: dcarbone/install-jq-action@v2.1.0
