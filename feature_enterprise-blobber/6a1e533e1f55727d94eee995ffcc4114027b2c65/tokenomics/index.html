@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subset of 0Chain System test suite [feature_enterprise-blobber/6a1e533e] ran against [dev-2.devnet-0chain.net] at [2024-07-23_23.38.59]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">Subset of 0Chain System test suite [feature_enterprise-blobber/6a1e533e] ran against [dev-2.devnet-0chain.net] at [2024-07-23_23.38.59]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>4</strong>Duration: <strong>1ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>4</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">July 24, 2024 00:06:47</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestAllocationRewards","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":1665.95,"Output":["","    system_test_framework.go:70: Test setup [set storage config to use time_unit as 10 minutes] scheduled at [07-23-2024 23:39:01] \n","    system_test_framework.go:80: Test setup [set storage config to use time_unit as 10 minutes] start at [07-23-2024 23:39:01] \n","    wallet.go:117: Updating storage config...\n","    system_test_framework.go:93: Test setup [set storage config to use time_unit as 10 minutes] exit at [07-23-2024 23:39:04]\n","    wallet.go:48: creating wallet...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:65: faucet output: [No wallet in path  config/TestAllocationRewards_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  8c857fea8725143886198ef59f7ad546d85e7cab1fa10421041f1f26752ffd7d]\n","    blobbers.go:12: Requesting blobber list...\n","    blobbers.go:17: Requesting validator list...\n","    wallet.go:117: Updating storage config...\n","--- PASS: TestAllocationRewards (1665.95s)",""],"Passed":true,"Skipped":false,"TestFileName":"allocation_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestAllocationRewards/Create_+_Upload_+_Cancel_equal_read_price_0.1","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":210.1,"Output":["","    allocation_test.go:162: Test case [Create + Upload + Cancel equal read price 0.1] scheduled at [07-23-2024 23:51:36] \n","    system_test_framework.go:149: Test case [Create + Upload + Cancel equal read price 0.1] start at [07-23-2024 23:51:36] \n","    wallet.go:27: Executing faucet...\n","    allocation_test.go:803: Staking tokens for blobber:  76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:102: Staking tokens...\n","    wallet.go:27: Executing faucet...\n","    allocation_test.go:803: Staking tokens for blobber:  5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:102: Staking tokens...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:102: Staking tokens...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:102: Staking tokens...\n","    wallet.go:48: creating wallet...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:65: faucet output: [Execute faucet smart contract success with txn :  3b488a895e8c596c780684c3708abfd1f8c033667a5de6d9cbe1e175e16a273e]\n","    wallet.go:27: Executing faucet...\n","    allocation.go:134: Creating new allocation...\n","    allocation_test.go:187: allocationId 249f55db8b3800cf97b6e0d4548e5d4ea2e818c2992279a2245d5e5b9cfca72c\n","    allocation_test.go:198: Uploading file  /tmp/8AMlmivdEv_test.txt\n","    allocation.go:190: Uploading file...\n","    allocation.go:217: Get Allocation...\n","    allocation.go:144: Canceling allocation...\n","    allocation.go:217: Get Allocation...\n","    sharders.go:42: getting sharder url...\n","    sharders.go:64: list sharder nodes...\n","    allocation_test.go:710: URL :  http://dev-2.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=249f55db8b3800cf97b6e0d4548e5d4ea2e818c2992279a2245d5e5b9cfca72c\n","    allocation_test.go:735: allocationChallengeRewards map[blobber_rewards:map[5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671:3.815108e+06 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d:3.818362e+06] validator_rewards:map[7b162815cec387fd2d6a83db8aae7d17e717c2323513ce750062906835c72db4:89510 7c8e5922b29aa9a7be01c8cfb97c111958ba6f45a979895a4bdccd5778a7c19d:89502]]\n","    sharders.go:42: getting sharder url...\n","    sharders.go:64: list sharder nodes...\n","    allocation_test.go:636: URL :  http://dev-2.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/cancellation-rewards?allocation_id=249f55db8b3800cf97b6e0d4548e5d4ea2e818c2992279a2245d5e5b9cfca72c\n","    allocation_test.go:243: totalExpectedcancelationReward 3.90625e+07 MovedToChallenge 38736978 MovedBack 30924496\n","    allocation_test.go:247: totalExpectedcancelationReward 3.1250018e+07\n","    allocation_test.go:249: blobber1cancelationReward 15625009\n","    allocation_test.go:250: blobber2cancelationReward 15625009\n","    allocation_test.go:256: Collecting rewards for blobbers count :  2\n","    allocation_test.go:259: collecting rewards for blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:70: Getting wallet...\n","    sharders.go:64: list sharder nodes...\n","    wallet.go:251: Getting balance for cea3adf868209cf2426b626406deca5128706cb83bcfb1a5dc5f945501e1b675...\n","2024/07/23 23:54:55 balanceBefore 179360937500\n","    blobbers.go:32: Fetching stake pool info...\n","    allocation_test.go:781: reward tokens: 1529749520\n","    wallet.go:156: collecting rewards...\n","    sharders.go:64: list sharder nodes...\n","    wallet.go:251: Getting balance for cea3adf868209cf2426b626406deca5128706cb83bcfb1a5dc5f945501e1b675...\n","    allocation_test.go:259: collecting rewards for blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:70: Getting wallet...\n","    sharders.go:64: list sharder nodes...\n","    wallet.go:251: Getting balance for cea3adf868209cf2426b626406deca5128706cb83bcfb1a5dc5f945501e1b675...\n","2024/07/23 23:55:01 balanceBefore 180790687020\n","    blobbers.go:32: Fetching stake pool info...\n","    allocation_test.go:781: reward tokens: 1997748059\n","    wallet.go:156: collecting rewards...\n","    sharders.go:64: list sharder nodes...\n","    wallet.go:251: Getting balance for cea3adf868209cf2426b626406deca5128706cb83bcfb1a5dc5f945501e1b675...\n","    allocation_test.go:162: Test case [Create + Upload + Cancel equal read price 0.1] exit at [07-23-2024 23:55:06]\n","--- PASS: TestAllocationRewards/Create_+_Upload_+_Cancel_equal_read_price_0.1 (210.10s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestAllocationRewards/Create_+_Upload_+_Upgrade_equal_read_price_0.1","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":748.33,"Output":["","    allocation_test.go:74: Test case [Create + Upload + Upgrade equal read price 0.1] scheduled at [07-23-2024 23:39:07] \n","    system_test_framework.go:149: Test case [Create + Upload + Upgrade equal read price 0.1] start at [07-23-2024 23:39:07] \n","    wallet.go:27: Executing faucet...\n","    allocation_test.go:803: Staking tokens for blobber:  76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:102: Staking tokens...\n","    wallet.go:27: Executing faucet...\n","    allocation_test.go:803: Staking tokens for blobber:  5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:102: Staking tokens...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:102: Staking tokens...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:102: Staking tokens...\n","    wallet.go:48: creating wallet...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:65: faucet output: [Execute faucet smart contract success with txn :  3d368cf3ecdc51ce9c2f160c9ae0dd40d75db9654364e44fe89924b618a7a3de]\n","    wallet.go:27: Executing faucet...\n","    allocation.go:134: Creating new allocation...\n","    allocation.go:217: Get Allocation...\n","    allocation.go:190: Uploading file...\n","    allocation.go:217: Get Allocation...\n","    wallet.go:27: Executing faucet...\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    wallet.go:27: Executing faucet...\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    blobbers.go:22: Updating blobber info... wallets/blobber_owner\n","    allocation.go:231: Updating allocation...\n","    allocation.go:217: Get Allocation...\n","    sharders.go:42: getting sharder url...\n","    sharders.go:64: list sharder nodes...\n","    allocation_test.go:710: URL :  http://dev-2.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=6a0a2ed387618557aec067c8525ba6c954ccceed360d14071c31bda6386fd2e7\n","    allocation_test.go:735: allocationChallengeRewards map[blobber_rewards:map[5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671:1.9329647e+07 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d:1.9334325e+07] validator_rewards:map[7b162815cec387fd2d6a83db8aae7d17e717c2323513ce750062906835c72db4:485720 7c8e5922b29aa9a7be01c8cfb97c111958ba6f45a979895a4bdccd5778a7c19d:485722]]\n","    allocation_test.go:154: Collecting rewards for blobbers count :  2\n","    allocation_test.go:157: collecting rewards for blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:70: Getting wallet...\n","    sharders.go:64: list sharder nodes...\n","    wallet.go:251: Getting balance for b227bd285b701a52e3bc02cf4805d0bcd37951fdbb98e90b7b31750c49422df1...\n","2024/07/23 23:51:25 balanceBefore 178970312500\n","    blobbers.go:32: Fetching stake pool info...\n","    allocation_test.go:781: reward tokens: 22251924407\n","    wallet.go:156: collecting rewards...\n","    sharders.go:64: list sharder nodes...\n","    wallet.go:251: Getting balance for b227bd285b701a52e3bc02cf4805d0bcd37951fdbb98e90b7b31750c49422df1...\n","    allocation_test.go:157: collecting rewards for blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:70: Getting wallet...\n","    sharders.go:64: list sharder nodes...\n","    wallet.go:251: Getting balance for b227bd285b701a52e3bc02cf4805d0bcd37951fdbb98e90b7b31750c49422df1...\n","2024/07/23 23:51:31 balanceBefore 201122236907\n","    blobbers.go:32: Fetching stake pool info...\n","    allocation_test.go:781: reward tokens: 24033920203\n","    wallet.go:156: collecting rewards...\n","    sharders.go:64: list sharder nodes...\n","    wallet.go:251: Getting balance for b227bd285b701a52e3bc02cf4805d0bcd37951fdbb98e90b7b31750c49422df1...\n","    allocation_test.go:74: Test case [Create + Upload + Upgrade equal read price 0.1] exit at [07-23-2024 23:51:36]\n","--- PASS: TestAllocationRewards/Create_+_Upload_+_Upgrade_equal_read_price_0.1 (748.33s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestAllocationRewards/External_Party_Upgrades_Allocation","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":698.25,"Output":["","    allocation_test.go:264: Test case [External Party Upgrades Allocation] scheduled at [07-23-2024 23:55:06] \n","    system_test_framework.go:149: Test case [External Party Upgrades Allocation] start at [07-23-2024 23:55:06] \n","    wallet.go:27: Executing faucet...\n","    allocation_test.go:803: Staking tokens for blobber:  76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:102: Staking tokens...\n","    wallet.go:27: Executing faucet...\n","    allocation_test.go:803: Staking tokens for blobber:  5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:102: Staking tokens...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:102: Staking tokens...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:102: Staking tokens...\n","    wallet.go:48: creating wallet...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:65: faucet output: [Execute faucet smart contract success with txn :  fe237466783a6972c3c6473b1c54b27b410f6a3a3bba0dd71720c6a14a308b3d]\n","    allocation.go:134: Creating new allocation...\n","    allocation.go:190: Uploading file...\n","    allocation.go:217: Get Allocation...\n","    allocation.go:231: Updating allocation...\n","    wallet.go:48: creating wallet...\n","    wallet.go:27: Executing faucet...\n","    wallet.go:65: faucet output: [No wallet in path  config/newwallet_wallet.json found. Creating wallet... ZCN wallet created!! Execute faucet smart contract success with txn :  d51e25bb4ea23eab64fd09e92c002aae1d6305bd6731a1adc02c76deb10772f4]\n","    wallet.go:27: Executing faucet...\n","    allocation.go:231: Updating allocation...\n","    allocation.go:217: Get Allocation...\n","    sharders.go:42: getting sharder url...\n","    sharders.go:64: list sharder nodes...\n","    allocation_test.go:710: URL :  http://dev-2.devnet-0chain.net:31101/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=97893d0a1d8c6e23e4cd3fb6231f323cdaba1eed7814e6bf14274579b8d16767\n","    allocation_test.go:735: allocationChallengeRewards map[blobber_rewards:map[5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671:2.0348382e+07 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d:2.0350016e+07] validator_rewards:map[7b162815cec387fd2d6a83db8aae7d17e717c2323513ce750062906835c72db4:516680 7c8e5922b29aa9a7be01c8cfb97c111958ba6f45a979895a4bdccd5778a7c19d:516690]]\n","    allocation_test.go:345: Collecting rewards for blobbers count :  2\n","    allocation_test.go:348: collecting rewards for blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:70: Getting wallet...\n","    sharders.go:64: list sharder nodes...\n","    wallet.go:251: Getting balance for 5580ee62e2f0d83a68878dacb6f5764a9e0193693bf0d7ca92c6de1e1aea38c6...\n","2024/07/24 00:06:34 balanceBefore 90970312500\n","    blobbers.go:32: Fetching stake pool info...\n","    allocation_test.go:781: reward tokens: 7927298463\n","    wallet.go:156: collecting rewards...\n","    sharders.go:64: list sharder nodes...\n","    wallet.go:251: Getting balance for 5580ee62e2f0d83a68878dacb6f5764a9e0193693bf0d7ca92c6de1e1aea38c6...\n","    allocation_test.go:348: collecting rewards for blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:70: Getting wallet...\n","    sharders.go:64: list sharder nodes...\n","    wallet.go:251: Getting balance for 5580ee62e2f0d83a68878dacb6f5764a9e0193693bf0d7ca92c6de1e1aea38c6...\n","2024/07/24 00:06:39 balanceBefore 98797610963\n","    blobbers.go:32: Fetching stake pool info...\n","    allocation_test.go:781: reward tokens: 7501297965\n","    wallet.go:156: collecting rewards...\n","    sharders.go:64: list sharder nodes...\n","    wallet.go:251: Getting balance for 5580ee62e2f0d83a68878dacb6f5764a9e0193693bf0d7ca92c6de1e1aea38c6...\n","    allocation_test.go:264: Test case [External Party Upgrades Allocation] exit at [07-24-2024 00:06:44]\n","--- PASS: TestAllocationRewards/External_Party_Upgrades_Allocation (698.25s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
