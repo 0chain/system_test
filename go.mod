@@ -6,7 +6,7 @@ toolchain go1.22.1
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.14.0-RC2
+	github.com/0chain/gosdk v1.16.1
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
@@ -24,9 +24,11 @@ require (
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/hack-pad/go-webworkers v0.1.0 // indirect
+	github.com/hack-pad/safejs v0.1.1 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.1 // indirect
-	github.com/hitenjain14/fasthttp v0.0.0-20240229173600-722723e15e17 // indirect
+	github.com/hitenjain14/fasthttp v0.0.0-20240527123209-06019e79bff9 // indirect
 	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
