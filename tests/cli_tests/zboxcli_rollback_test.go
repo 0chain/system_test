@@ -22,7 +22,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 	err := os.MkdirAll("tmp", os.ModePerm)
 	require.Nil(t, err)
 
-	t.RunSequentially("rollback allocation after updating a file should work", func(t *test.SystemTest) {
+	t.Run("rollback allocation after updating a file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   4 * MB,
 			"tokens": 9,
@@ -92,7 +92,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.RunSequentially("rollback allocation after updating a file multiple times should work", func(t *test.SystemTest) {
+	t.Run("rollback allocation after updating a file multiple times should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   4 * MB,
 			"tokens": 9,
@@ -151,7 +151,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 		createAllocationTestTeardown(t, allocationID)
 	})
-	t.RunSequentially("rollback allocation after deleting a file should work", func(t *test.SystemTest) {
+	t.Run("rollback allocation after deleting a file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   1 * MB,
 			"tokens": 9,
@@ -205,7 +205,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
-	t.RunSequentially("rollback allocation after moving a file should work", func(t *test.SystemTest) {
+	t.Run("rollback allocation after moving a file should work", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -309,7 +309,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.False(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.RunSequentially("rollback allocation after renaming a file should work", func(t *test.SystemTest) {
+	t.Run("rollback allocation after renaming a file should work", func(t *test.SystemTest) {
 		allocSize := int64(2048)
 		fileSize := int64(256)
 
@@ -413,7 +413,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.False(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.RunSequentially("rollback allocation after duplicating a file should work", func(t *test.SystemTest) {
+	t.Run("rollback allocation after duplicating a file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   2 * MB,
 			"tokens": 10,
@@ -485,7 +485,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.RunSequentially("rollback allocation after multiple files upload and single file update should work", func(t *test.SystemTest) {
+	t.Run("rollback allocation after multiple files upload and single file update should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   4 * MB,
 			"tokens": 9,
@@ -556,7 +556,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.RunSequentially("rollback allocation after multiple files upload and single file delete should work", func(t *test.SystemTest) {
+	t.Run("rollback allocation after multiple files upload and single file delete should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   4 * MB,
 			"tokens": 9,
@@ -649,7 +649,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.RunSequentially("rollback allocation in the middle of updating a large file should work", func(t *test.SystemTest) {
+	t.Run("rollback allocation in the middle of updating a large file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   2 * GB,
 			"tokens": 10,
@@ -692,7 +692,7 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.RunSequentially("rollback allocation after a small file upload in the middle of updating a large file should work", func(t *test.SystemTest) {
+	t.Run("rollback allocation after a small file upload in the middle of updating a large file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   2 * GB,
 			"tokens": 10,
