@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/0chain/system_test/tests/cli_tests"
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -35,20 +36,20 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.RunWithTimeout("Update Expiry Should Work", 15*time.Minute, func(t *test.SystemTest) {
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, cli_tests.configPath)
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update "+
 			"allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
-		ac := cli_tests.getAllocation(t, allocationID)
+		ac := utils.GetAllocation(t, allocationID)
 		require.Less(t, allocationBeforeUpdate.ExpirationDate, ac.ExpirationDate,
 			fmt.Sprint("Expiration Time doesn't match: "+
 				"Before:", allocationBeforeUpdate.ExpirationDate, "After:", ac.ExpirationDate),
@@ -56,21 +57,21 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Size Should Work", func(t *test.SystemTest) {
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, cli_tests.configPath)
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := int64(256)
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"size":       size,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation "+
 			"due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
-		allocations := parseListAllocations(t, cli_tests.configPath)
+		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
 		require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size,
@@ -79,14 +80,14 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Size beyond blobber capacity should fail", func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, cli_tests.configPath)
+		allocationID, _ := setupAndParseAllocation(t, configPath)
 		size := int64(1099511627776000) // 1000 TiB
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"size":       size,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, false)
+		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "Could not update allocation "+
 			"due to error", strings.Join(output, "\n"))
@@ -95,7 +96,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update All Parameters Should Work", func(t *test.SystemTest) {
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, cli_tests.configPath)
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := int64(2048)
 
 		params := createParams(map[string]interface{}{
@@ -103,13 +104,13 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"extend":     true,
 			"size":       size,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
-		allocations := parseListAllocations(t, cli_tests.configPath)
+		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
 		require.True(t, ok, "current allocation not found", allocationID, allocations)
 		require.Less(t, allocationBeforeUpdate.ExpirationDate, ac.ExpirationDate)
@@ -117,32 +118,32 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Negative Size Should Fail", func(t *test.SystemTest) {
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, cli_tests.configPath)
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 		size := int64(-256)
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"size":       size,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error updating allocation:allocation_updating_failed: allocation can't be reduced", output[0])
 
-		alloc := cli_tests.getAllocation(t, allocationID)
+		alloc := utils.GetAllocation(t, allocationID)
 
 		require.Equal(t, allocationBeforeUpdate.Size, alloc.Size)
 		require.Equal(t, allocationBeforeUpdate.ExpirationDate, alloc.ExpirationDate)
 	})
 
 	t.Run("Update Nothing Should Fail", func(t *test.SystemTest) {
-		allocationID := setupAllocation(t, cli_tests.configPath)
+		allocationID := setupAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, false)
+		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
@@ -158,16 +159,16 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation": allocationID,
 			"extend":     true,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, false)
+		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.Equal(t, "Error updating allocation:couldnt_find_allocation: Couldn't find the allocation required for update", output[0])
 	})
 
 	t.RunWithTimeout("Update Other's Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) { // todo: too slow
-		myAllocationID := setupAllocation(t, cli_tests.configPath)
+		myAllocationID := setupAllocation(t, configPath)
 
-		targetWalletName := cli_tests.escapedTestName(t) + "_TARGET"
+		targetWalletName := utils.EscapedTestName(t) + "_TARGET"
 		cli_tests.createWalletForName(targetWalletName)
 
 		size := int64(2048)
@@ -178,7 +179,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"size":       size,
 		})
 
-		output, err := updateAllocation(t, cli_tests.configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -189,7 +190,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation": myAllocationID,
 			"size":       size,
 		})
-		output, err = updateAllocationWithWallet(t, targetWalletName, cli_tests.configPath, params, false)
+		output, err = updateAllocationWithWallet(t, targetWalletName, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
@@ -198,14 +199,14 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Mistake Size Parameter Should Fail", func(t *test.SystemTest) {
-		allocationID := setupAllocation(t, cli_tests.configPath)
+		allocationID := setupAllocation(t, configPath)
 		size := "ab"
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"size":       size,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, false)
+		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
@@ -221,14 +222,14 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	t.RunWithTimeout("Update Allocation flags for forbid and allow file_options should succeed", 8*time.Minute, func(t *test.SystemTest) {
 		cli_tests.createWallet(t)
 
-		allocationID := setupAllocation(t, cli_tests.configPath)
+		allocationID := setupAllocation(t, configPath)
 
 		// Forbid upload
 		params := createParams(map[string]interface{}{
 			"allocation":    allocationID,
 			"forbid_upload": nil,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
@@ -237,7 +238,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc := cli_tests.getAllocation(t, allocationID)
+		alloc := utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(0), alloc.FileOptions&(1<<0))
 
 		// Forbid delete
@@ -246,7 +247,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"forbid_delete": nil,
 		})
 		t.Logf("forbidden delete")
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
@@ -255,7 +256,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc = cli_tests.getAllocation(t, allocationID)
+		alloc = utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(0), alloc.FileOptions&(1<<1))
 
 		// Forbid update
@@ -264,7 +265,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"forbid_update": nil,
 		})
 		t.Logf("forbidden update")
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
@@ -273,7 +274,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc = cli_tests.getAllocation(t, allocationID)
+		alloc = utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(0), alloc.FileOptions&(1<<2))
 
 		// Forbid move
@@ -282,7 +283,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"forbid_move": nil,
 		})
 		t.Logf("forbidden move")
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
@@ -291,7 +292,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc = cli_tests.getAllocation(t, allocationID)
+		alloc = utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(0), alloc.FileOptions&(1<<3))
 
 		// Forbid copy
@@ -300,7 +301,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"forbid_copy": nil,
 		})
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
@@ -309,7 +310,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc = cli_tests.getAllocation(t, allocationID)
+		alloc = utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(0), alloc.FileOptions&(1<<4)) // 63 - 31 = 32 = 00100000
 
 		// Forbid rename
@@ -318,7 +319,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation":    allocationID,
 			"forbid_rename": nil,
 		})
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
@@ -327,7 +328,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc = cli_tests.getAllocation(t, allocationID)
+		alloc = utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(0), alloc.FileOptions&(1<<5))
 
 		// Allow upload
@@ -337,7 +338,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"forbid_upload": false,
 		})
 
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
@@ -346,7 +347,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc = cli_tests.getAllocation(t, allocationID)
+		alloc = utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(1), alloc.FileOptions) // 0 + 1 = 1 = 00000001
 
 		// Allow delete
@@ -355,7 +356,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation":    allocationID,
 			"forbid_delete": false,
 		})
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
@@ -364,7 +365,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc = cli_tests.getAllocation(t, allocationID)
+		alloc = utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(2), alloc.FileOptions&(1<<1))
 
 		// Allow update
@@ -373,7 +374,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation":    allocationID,
 			"forbid_update": false,
 		})
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
@@ -382,7 +383,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc = cli_tests.getAllocation(t, allocationID)
+		alloc = utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(4), alloc.FileOptions&(1<<2)) // 3 + 4 = 7 = 00000111
 
 		// Allow move
@@ -391,7 +392,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"forbid_move": false,
 		})
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
@@ -400,7 +401,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc = cli_tests.getAllocation(t, allocationID)
+		alloc = utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(8), alloc.FileOptions&(1<<3))
 
 		// Allow copy
@@ -409,7 +410,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation":  allocationID,
 			"forbid_copy": false,
 		})
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
@@ -418,7 +419,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc = cli_tests.getAllocation(t, allocationID)
+		alloc = utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(16), alloc.FileOptions&(1<<4))
 
 		// Allow rename
@@ -427,7 +428,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation":    allocationID,
 			"forbid_rename": false,
 		})
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
@@ -436,12 +437,12 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc = cli_tests.getAllocation(t, allocationID)
+		alloc = utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(32), alloc.FileOptions&(1<<5))
 	})
 
 	t.Run("Updating same file options twice should fail", func(w *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, cli_tests.configPath)
+		allocationID, _ := setupAndParseAllocation(t, configPath)
 
 		// Forbid upload
 		params := createParams(map[string]interface{}{
@@ -450,7 +451,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"forbid_delete": nil,
 			"forbid_move":   nil,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -463,7 +464,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"forbid_delete": nil,
 			"forbid_move":   nil,
 		})
-		output, err = updateAllocation(t, cli_tests.configPath, params, false)
+		output, err = updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -471,40 +472,40 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update allocation set_third_party_extendable flag should work", func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, cli_tests.configPath)
+		allocationID, _ := setupAndParseAllocation(t, configPath)
 
 		// set third party extendable
 		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// get allocation
-		alloc := cli_tests.getAllocation(t, allocationID)
+		alloc := utils.GetAllocation(t, allocationID)
 		require.True(t, alloc.ThirdPartyExtendable)
 	})
 
 	t.Run("Update allocation set_third_party_extendable flag should fail if third_party_extendable is already true", func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, cli_tests.configPath)
+		allocationID, _ := setupAndParseAllocation(t, configPath)
 
 		// set third party extendable
 		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// get allocation
-		alloc := cli_tests.getAllocation(t, allocationID)
+		alloc := utils.GetAllocation(t, allocationID)
 		require.True(t, alloc.ThirdPartyExtendable)
 
 		// set third party extendable
@@ -512,30 +513,30 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 		})
-		output, err = updateAllocation(t, cli_tests.configPath, params, false)
+		output, err = updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "changes nothing")
 	})
 
 	t.Run("Update allocation expand by third party if third_party_extendable = false should fail", func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, cli_tests.configPath)
+		allocationID, _ := setupAndParseAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"size":       1,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// get allocation
-		alloc := cli_tests.getAllocation(t, allocationID)
+		alloc := utils.GetAllocation(t, allocationID)
 		require.False(t, alloc.ThirdPartyExtendable)
 
-		nonAllocOwnerWallet := cli_tests.escapedTestName(t) + "_NON_OWNER"
+		nonAllocOwnerWallet := utils.EscapedTestName(t) + "_NON_OWNER"
 
 		cli_tests.createWalletForName(nonAllocOwnerWallet)
 
@@ -544,21 +545,21 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation": allocationID,
 			"size":       2,
 		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, cli_tests.configPath, params, true)
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, true)
 
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
 	})
 
 	t.Run("Update allocation expand by third party if third_party_extendable = true should succeed", func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, cli_tests.configPath)
+		allocationID, _ := setupAndParseAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 		})
 
-		output, err := updateAllocation(t, cli_tests.configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 		if err != nil {
 			require.Equal(t, output[0], "Error updating allocation:allocation_updating_failed: update allocation changes nothing")
 		} else {
@@ -568,10 +569,10 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
-		alloc := cli_tests.getAllocation(t, allocationID)
+		alloc := utils.GetAllocation(t, allocationID)
 		require.True(t, alloc.ThirdPartyExtendable)
 
-		nonAllocOwnerWallet := cli_tests.escapedTestName(t) + "_NON_OWNER"
+		nonAllocOwnerWallet := utils.EscapedTestName(t) + "_NON_OWNER"
 
 		cli_tests.createWalletForName(nonAllocOwnerWallet)
 
@@ -581,12 +582,12 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"size":       2,
 			"extend":     true,
 		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, cli_tests.configPath, params, true)
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, true)
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 
 		// get allocation
-		allocUpdated := cli_tests.getAllocation(t, allocationID)
+		allocUpdated := utils.GetAllocation(t, allocationID)
 		require.Equal(t, alloc.Size+2, allocUpdated.Size)
 
 		require.Nil(t, err)
@@ -594,23 +595,23 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Update allocation any other action than expand by third party regardless of third_party_extendable should fail", 7*time.Minute, func(t *test.SystemTest) {
-		allocationID, _ := setupAndParseAllocation(t, cli_tests.configPath)
+		allocationID, _ := setupAndParseAllocation(t, configPath)
 
 		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 		})
-		output, err := updateAllocation(t, cli_tests.configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// get allocation
-		alloc := cli_tests.getAllocation(t, allocationID)
+		alloc := utils.GetAllocation(t, allocationID)
 		require.True(t, alloc.ThirdPartyExtendable)
 
-		nonAllocOwnerWallet := cli_tests.escapedTestName(t) + "_NON_OWNER"
+		nonAllocOwnerWallet := utils.EscapedTestName(t) + "_NON_OWNER"
 
 		cli_tests.createWalletForName(nonAllocOwnerWallet)
 
@@ -619,7 +620,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation": allocationID,
 			"size":       -100,
 		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, cli_tests.configPath, params, false)
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
 
@@ -634,7 +635,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"forbid_copy":                nil,
 			"set_third_party_extendable": nil,
 		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, cli_tests.configPath, params, false)
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
 
@@ -644,7 +645,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"add_blobber":    "new_blobber_id",
 			"remove_blobber": "blobber_id",
 		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, cli_tests.configPath, params, false)
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
 
@@ -653,12 +654,12 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation": allocationID,
 			"lock":       100,
 		})
-		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, cli_tests.configPath, params, false)
+		output, err = updateAllocationWithWallet(t, nonAllocOwnerWallet, configPath, params, false)
 		require.NotNil(t, err, "no error updating allocation by third party", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
 
 		// get allocation
-		updatedAlloc := cli_tests.getAllocation(t, allocationID)
+		updatedAlloc := utils.GetAllocation(t, allocationID)
 
 		// Note: the zboxcli `getallocation` calls '/storagesc/allocation' API to get allocation and related blobbers,
 		// but we can't rely on the result to assert that nothing changed as the API get fresh blobber data from
@@ -679,19 +680,19 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		allocSize := int64(4096)
 		fileSize := int64(1024)
 
-		allocationID := cli_tests.setupAllocationAndReadLock(t, cli_tests.configPath, map[string]interface{}{
+		allocationID := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
 
 		// faucet tokens
 
-		filename := cli_tests.generateRandomTestFileName(t)
+		filename := utils.GenerateRandomTestFileName(t)
 		err := cli_tests.createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
 		remotePath := "/dir" + filename
-		output, err := cli_tests.uploadFile(t, cli_tests.configPath, map[string]interface{}{
+		output, err := utils.UploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  filename,
@@ -699,8 +700,8 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		wd, _ := os.Getwd()
-		walletFile := filepath.Join(wd, "config", cli_tests.escapedTestName(t)+"_wallet.json")
-		configFile := filepath.Join(wd, "config", cli_tests.configPath)
+		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
 		blobberID, err := cli_tests.GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
@@ -710,7 +711,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"add_blobber":                blobberID,
 		})
 
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		assertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
@@ -724,19 +725,19 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		allocSize := int64(4096)
 		fileSize := int64(1024)
 
-		allocationID := cli_tests.setupAllocationAndReadLock(t, cli_tests.configPath, map[string]interface{}{
+		allocationID := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
 
 		// faucet tokens
 
-		filename := cli_tests.generateRandomTestFileName(t)
+		filename := utils.GenerateRandomTestFileName(t)
 		err := cli_tests.createFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
 		remotePath := "/dir" + filename
-		output, err := cli_tests.uploadFile(t, cli_tests.configPath, map[string]interface{}{
+		output, err := utils.UploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  filename,
@@ -744,8 +745,8 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		wd, _ := os.Getwd()
-		walletFile := filepath.Join(wd, "config", cli_tests.escapedTestName(t)+"_wallet.json")
-		configFile := filepath.Join(wd, "config", cli_tests.configPath)
+		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
 
 		addBlobber, err := cli_tests.GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
@@ -758,7 +759,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"remove_blobber":             removeBlobber,
 		})
 
-		output, err = updateAllocation(t, cli_tests.configPath, params, true)
+		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		assertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
@@ -797,7 +798,7 @@ func parseListAllocations(t *test.SystemTest, cliConfigFilename string) map[stri
 }
 
 func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	return setupAllocationWithWallet(t, cli_tests.escapedTestName(t), cliConfigFilename, extraParams...)
+	return setupAllocationWithWallet(t, utils.EscapedTestName(t), cliConfigFilename, extraParams...)
 }
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
@@ -885,7 +886,7 @@ func createKeyValueParams(params map[string]string) string {
 }
 
 func updateAllocation(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
-	return updateAllocationWithWallet(t, cli_tests.escapedTestName(t), cliConfigFilename, params, retry)
+	return updateAllocationWithWallet(t, utils.EscapedTestName(t), cliConfigFilename, params, retry)
 }
 
 func updateAllocationWithWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
@@ -910,7 +911,7 @@ func listAllocations(t *test.SystemTest, cliConfigFilename string) ([]string, er
 	cmd := fmt.Sprintf(
 		"./zbox listallocations --json --silent "+
 			"--wallet %s --configDir ./config --config %s",
-		cli_tests.escapedTestName(t)+"_wallet.json",
+		utils.EscapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
