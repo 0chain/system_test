@@ -2,25 +2,19 @@ package tokenomics_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/tests/cli_tests"
-	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
-
-	"github.com/stretchr/testify/require"
-
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
+	"github.com/stretchr/testify/require"
 )
 
 var (
 	cancelAllocationRegex = regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`)
-	params                = map[string]interface{}{
-		"size": "10000000", "lock": "5",
-	}
 )
 
 func TestCancelEnterpriseAllocation(testSetup *testing.T) {
@@ -36,18 +30,17 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		output, err := cancelAllocation(t, configPath, allocationID, true)
 		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		cli_tests.assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 	})
 
 	t.RunWithTimeout("Cancel allocation after upload should work", 5*time.Minute, func(t *test.SystemTest) {
-		allocationID, err := utils.CreateNewAllocation(t, configPath, createParams(params))
-		require.Nil(t, err, "Error creating allocation")
+		allocationID := utils.SetupAllocation(t, configPath)
 
-		filename := cli_tests.generateRandomTestFileName(t)
-		err := cli_tests.createFileWithSize(filename, 1*cli_tests.MB)
+		filename := utils.GenerateRandomTestFileName(t)
+		err := utils.CreateFileWithSize(filename, 1*utils.MB)
 		require.Nil(t, err)
 
-		output, err := cli_tests.uploadFile(t, configPath, map[string]interface{}{
+		output, err := utils.UploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": "/",
 			"localpath":  filename,
@@ -60,17 +53,17 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		cli_tests.assertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
 		// create wallet
-		cli_tests.createWallet(t)
+		utils.CreateWallet(t, configPath, nil)
 
 		cmd := fmt.Sprintf(
 			"./zbox alloc-cancel --silent "+
 				"--wallet %s --configDir ./config --config %s",
-			cli_tests.escapedTestName(t)+"_wallet.json",
+			utils.EscapedTestName(t)+"_wallet.json",
 			configPath,
 		)
 
@@ -81,9 +74,9 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
-		otherAllocationID := cli_tests.setupAllocationWithWallet(t, cli_tests.escapedTestName(t)+"_other_wallet.json", configPath)
+		otherAllocationID := utils.SetupAllocationWithWallet(t, utils.EscapedTestName(t)+"_other_wallet.json", configPath)
 
-		cli_tests.createWallet(t)
+		utils.CreateWallet(t, configPath, nil)
 		// otherAllocationID should not be cancelable from this level
 		output, err := cancelAllocation(t, configPath, otherAllocationID, false)
 
@@ -93,7 +86,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
-		cli_tests.createWallet(t)
+		utils.CreateWallet(t, configPath, nil)
 
 		allocationID := "123abc"
 
@@ -110,7 +103,7 @@ func cancelAllocation(t *test.SystemTest, cliConfigFilename, allocationID string
 		"./zbox alloc-cancel --allocation %s --silent "+
 			"--wallet %s --configDir ./config --config %s",
 		allocationID,
-		cli_tests.escapedTestName(t)+"_wallet.json",
+		utils.EscapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
 

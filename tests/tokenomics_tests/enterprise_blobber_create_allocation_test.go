@@ -138,9 +138,8 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		allocationID, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
-		// upload file for designated owner should work
 		file := utils.GenerateRandomTestFileName(t)
-		fileSize := int64(102400) // this is big enough to cause problem with download
+		fileSize := int64(102400)
 		err = utils.CreateFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
@@ -153,7 +152,6 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err = utils.UploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		// upload for creating wallet should fail
 		output, err = utils.UploadFile(t, configPath, uploadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, ""), "Operation needs to be performed by the owner or the payer of the allocation")
@@ -325,7 +323,6 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		allocationID, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err)
 
-		// get allocation
 		var alloc climodel.Allocation
 
 		alloc = utils.GetAllocation(t, allocationID)
@@ -339,7 +336,6 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		// Forbid upload
 		options := map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_upload": nil}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -349,11 +345,10 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		allocationID, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err)
 		alloc := utils.GetAllocation(t, allocationID)
-		require.Equal(t, uint16(62), alloc.FileOptions) // 63 - 1 = 62 (upload mask = 1)
+		require.Equal(t, uint16(62), alloc.FileOptions)
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		// Forbid delete
 		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_delete": nil}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -363,11 +358,10 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		allocationID, err = utils.GetAllocationID(output[0])
 		require.Nil(t, err)
 		alloc = utils.GetAllocation(t, allocationID)
-		require.Equal(t, uint16(61), alloc.FileOptions) // 63 - 2 = 62 (delete mask = 2)
+		require.Equal(t, uint16(61), alloc.FileOptions)
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		// Forbid update
 		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_update": nil}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -377,11 +371,10 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		allocationID, err = utils.GetAllocationID(output[0])
 		require.Nil(t, err)
 		alloc = utils.GetAllocation(t, allocationID)
-		require.Equal(t, uint16(59), alloc.FileOptions) // 63 - 4 = 59 (update mask = 4)
+		require.Equal(t, uint16(59), alloc.FileOptions)
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		// Forbid move
 		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_move": nil}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -391,11 +384,10 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		allocationID, err = utils.GetAllocationID(output[0])
 		require.Nil(t, err)
 		alloc = utils.GetAllocation(t, allocationID)
-		require.Equal(t, uint16(55), alloc.FileOptions) // 63 - 8 = 55 (move mask = 8)
+		require.Equal(t, uint16(55), alloc.FileOptions)
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		// Forbid copy
 		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_copy": nil}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -405,11 +397,10 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		allocationID, err = utils.GetAllocationID(output[0])
 		require.Nil(t, err)
 		alloc = utils.GetAllocation(t, allocationID)
-		require.Equal(t, uint16(47), alloc.FileOptions) // 63 - 16 = 47 (copy mask = 8)
+		require.Equal(t, uint16(47), alloc.FileOptions)
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		// Forbid rename
 		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_rename": nil}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -419,7 +410,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		allocationID, err = utils.GetAllocationID(output[0])
 		require.Nil(t, err)
 		alloc = utils.GetAllocation(t, allocationID)
-		require.Equal(t, uint16(31), alloc.FileOptions) // 63 - 32 = 31 (rename mask = 32)
+		require.Equal(t, uint16(31), alloc.FileOptions)
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 	})
@@ -430,7 +421,6 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		// Forbid update, rename and delete
 		options := map[string]interface{}{"lock": "0.5", "size": 1024}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -440,14 +430,12 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		allocationID, err := utils.GetAllocationID(output[0])
 		require.Nil(t, err)
 
-		// get allocation
 		var alloc climodel.Allocation
 
 		alloc = utils.GetAllocation(t, allocationID)
-		require.Equal(t, false, alloc.ThirdPartyExtendable) // 63 - (2 + 4 + 32) = 25 (update mask = 2, rename = 32, delete = 4)
+		require.Equal(t, false, alloc.ThirdPartyExtendable)
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		// Forbid upload, move and copy
 		options = map[string]interface{}{"lock": "0.5", "size": 1024, "third_party_extendable": nil}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -457,10 +445,9 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		allocationID, err = utils.GetAllocationID(output[0])
 		require.Nil(t, err)
 
-		// get allocation
 		alloc = utils.GetAllocation(t, allocationID)
 		require.NotNil(t, alloc, "error fetching allocation")
-		require.Equal(t, true, alloc.ThirdPartyExtendable) // 63 - (1 + 8 + 16) = 38 (upload mask = 1, move = 8, copy = 16)
+		require.Equal(t, true, alloc.ThirdPartyExtendable)
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 	})
 }
