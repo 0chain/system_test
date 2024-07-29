@@ -22,13 +22,14 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Create enterprise allocation for locking cost equal to the cost calculated should work", func(t *test.SystemTest) {
-		_, _ = utils.CreateWallet(t, configPath, nil)
+		_, _ = utils.CreateWallet(t, configPath)
 
 		options := map[string]interface{}{
 			"cost":        "",
 			"size":        "10000",
 			"read_price":  "0-1",
 			"write_price": "0-1",
+			"enterprise":  "true",
 		}
 		output, err := createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -42,6 +43,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 			"size":        "10000",
 			"read_price":  "0-1",
 			"write_price": "0-1",
+			"enterprise":  "true",
 		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -65,6 +67,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 			"read_price":  "0-1",
 			"write_price": "0-1",
 			"size":        10000,
+			"enterprise":  "true",
 		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -91,6 +94,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 			"read_price":  "0-1",
 			"write_price": "0-1",
 			"size":        10000,
+			"enterprise":  "true",
 		}
 		mustFailCost := -1
 		options = map[string]interface{}{"lock": mustFailCost}
@@ -104,7 +108,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"size": "1024", "lock": "0.5"}
+		options := map[string]interface{}{
+			"size":       "1024",
+			"lock":       "0.5",
+			"enterprise": "true",
+		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -129,6 +137,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 			"lock":             "0.5",
 			"owner":            targetWallet.ClientID,
 			"owner_public_key": targetWallet.ClientPublicKey,
+			"enterprise":       "true",
 		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -148,6 +157,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 			"localpath":  file,
 			"remotepath": "/",
 			"encrypt":    "",
+			"enterprise": "true",
 		}
 		output, err = utils.UploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -165,7 +175,12 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"size": "1024", "parity": "1", "lock": "0.5"}
+		options := map[string]interface{}{
+			"size":       "1024",
+			"parity":     "1",
+			"lock":       "0.5",
+			"enterprise": "true",
+		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -183,7 +198,12 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"size": "1024", "data": "1", "lock": "0.5"}
+		options := map[string]interface{}{
+			"size":       "1024",
+			"data":       "1",
+			"lock":       "0.5",
+			"enterprise": "true",
+		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -201,7 +221,12 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"size": "1024", "read_price": "0-9999", "lock": "0.5"}
+		options := map[string]interface{}{
+			"size":       "1024",
+			"read_price": "0-9999",
+			"lock":       "0.5",
+			"enterprise": "true",
+		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -219,7 +244,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"size": "1024", "write_price": "0-9999", "lock": "0.5"}
+		options := map[string]interface{}{"size": "1024", "write_price": "0-9999", "lock": "0.5", "enterprise": "true"}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -236,7 +261,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"parity": "99", "lock": "0.5", "size": 1024}
+		options := map[string]interface{}{"parity": "99", "lock": "0.5", "size": 1024, "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -249,7 +274,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"data": "99", "lock": "0.5", "size": 1024}
+		options := map[string]interface{}{"data": "99", "lock": "0.5", "size": 1024, "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -262,7 +287,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"data": "30", "parity": "20", "lock": "0.5", "size": 1024}
+		options := map[string]interface{}{"data": "30", "parity": "20", "lock": "0.5", "size": 1024, "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -275,7 +300,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 1024}
+		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 1024, "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -288,7 +313,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"size": 256, "lock": "0.5"}
+		options := map[string]interface{}{"size": 256, "lock": "0.5", "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -301,7 +326,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{}
+		options := map[string]interface{}{"enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
@@ -314,7 +339,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"lock": "0.5", "size": 1024}
+		options := map[string]interface{}{"lock": "0.5", "size": 1024, "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -336,7 +361,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_upload": nil}
+		options := map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_upload": nil, "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -349,7 +374,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_delete": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_delete": nil, "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -362,7 +387,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_update": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_update": nil, "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -375,7 +400,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_move": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_move": nil, "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -388,7 +413,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_copy": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_copy": nil, "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -401,7 +426,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_rename": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_rename": nil, "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -436,7 +461,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Equal(t, false, alloc.ThirdPartyExtendable)
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "third_party_extendable": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "third_party_extendable": nil, "enterprise": "true"}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")

@@ -17,7 +17,7 @@ import (
 
 var (
 	cancelAllocationRegex = regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`)
-	params                = map[string]interface{}{"size": "10000000", "lock": "5"}
+	params                = map[string]interface{}{"size": "10000000", "lock": "5", "enterprise": true}
 )
 
 func TestCancelEnterpriseAllocation(testSetup *testing.T) {

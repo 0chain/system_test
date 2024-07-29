@@ -2,7 +2,6 @@ package tokenomics_tests
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/0chain/system_test/tests/cli_tests"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
@@ -41,6 +40,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
+			"enterprise": true,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 
@@ -752,7 +752,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 
-	options := map[string]interface{}{"size": "10000000", "lock": "5"}
+	options := map[string]interface{}{"size": "10000000", "lock": "5", "enterprise": true}
 
 	for _, params := range extraParams {
 		for k, v := range params {
@@ -760,14 +760,14 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 		}
 	}
 
-	_, err := utils.CreateWalletForName(t, configPath, walletName)
-	require.Nil(t, err)
+	output, err := utils.CreateWalletForName(t, configPath, walletName)
+	require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
 
-	output, err := utils.CreateNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(options))
+	output, err = utils.CreateNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(options))
 	require.NoError(t, err, "create new allocation failed", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
-	allocationID, err := getAllocationID(output[0])
+	allocationID, err := utils.GetAllocationID(output[0])
 	require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 	return allocationID
@@ -776,14 +776,6 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 func assertOutputMatchesAllocationRegex(t *test.SystemTest, re *regexp.Regexp, str string) {
 	match := re.FindStringSubmatch(str)
 	require.True(t, len(match) > 0, "expected allocation to match regex", re, str)
-}
-
-func getAllocationID(str string) (string, error) {
-	match := createAllocationRegex.FindStringSubmatch(str)
-	if len(match) < 2 {
-		return "", errors.New("allocation match not found")
-	}
-	return match[1], nil
 }
 
 func getAllocationCost(str string) (float64, error) {
