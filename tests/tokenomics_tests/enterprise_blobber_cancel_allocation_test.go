@@ -1,7 +1,9 @@
 package tokenomics_tests
 
 import (
+	"encoding/json"
 	"fmt"
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	"regexp"
 	"strings"
 	"testing"
@@ -15,6 +17,7 @@ import (
 
 var (
 	cancelAllocationRegex = regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`)
+	params                = map[string]interface{}{"size": "10000000", "lock": "5"}
 )
 
 func TestCancelEnterpriseAllocation(testSetup *testing.T) {
@@ -24,10 +27,17 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Cancel allocation immediately should work", func(t *test.SystemTest) {
-		allocationID, err := utils.CreateNewAllocation(t, configPath, createParams(params))
+		var allocation climodel.Allocation
+		output, err := utils.CreateNewAllocation(t, configPath, createParams(params))
 		require.Nil(t, err, "Error creating allocation")
 
-		output, err := cancelAllocation(t, configPath, allocationID, true)
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&allocation)
+		require.Nil(t, err, "Error decoding allocation")
+		require.NotNil(t, allocation, "Allocation id is nil")
+
+		allocationID := allocation.ID
+
+		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		utils.AssertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
@@ -86,7 +96,8 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
-		utils.CreateWallet(t, configPath, nil)
+		_, err := utils.CreateWallet(t, configPath, nil)
+		require.Nil(t, err, "Error craeting wallet")
 
 		allocationID := "123abc"
 

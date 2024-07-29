@@ -2,7 +2,9 @@ package utils
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -42,4 +44,24 @@ func CreateParams(params map[string]interface{}) string {
 
 func IntToZCN(balance int64) float64 {
 	return float64(balance) / tokenUnit
+}
+
+func UnitToZCN(unitCost float64, unit string) float64 {
+	switch unit {
+	case "SAS", "sas":
+		unitCost /= 1e10
+		return unitCost
+	case "uZCN", "uzcn":
+		unitCost /= 1e6
+		return unitCost
+	case "mZCN", "mzcn":
+		unitCost /= 1e3
+		return unitCost
+	}
+	return unitCost
+}
+
+func AssertOutputMatchesAllocationRegex(t *test.SystemTest, re *regexp.Regexp, str string) {
+	match := re.FindStringSubmatch(str)
+	require.True(t, len(match) > 0, "expected allocation to match regex", re, str)
 }

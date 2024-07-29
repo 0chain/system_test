@@ -793,7 +793,7 @@ func getAllocationCost(str string) (float64, error) {
 	}
 
 	unit := strings.Fields(str)[6]
-	allocationCostInZCN := utils.unitToZCN(allocationCostInOutput, unit)
+	allocationCostInZCN := utils.UnitToZCN(allocationCostInOutput, unit)
 
 	return allocationCostInZCN, nil
 }

@@ -29,7 +29,7 @@ func SetupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, ex
 		tokens = token
 	}
 
-	allocationID := setupAllocation(t, cliConfigFilename, extraParam)
+	allocationID := SetupAllocation(t, cliConfigFilename, extraParam)
 
 	// Lock half the tokens for read pool
 	readPoolParams := CreateParams(map[string]interface{}{
@@ -57,11 +57,11 @@ func readPoolLockWithWallet(t *test.SystemTest, wallet, cliConfigFilename, param
 	}
 }
 
-func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	return setupAllocationWithWallet(t, EscapedTestName(t), cliConfigFilename, extraParams...)
+func SetupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) string {
+	return SetupAllocationWithWallet(t, EscapedTestName(t), cliConfigFilename, extraParams...)
 }
 
-func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
+func SetupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 2.0
 	// Then create new allocation
 	options := map[string]interface{}{"size": "10000", "lock": "0.5"}
