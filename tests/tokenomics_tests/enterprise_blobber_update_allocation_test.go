@@ -151,7 +151,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update Non-existent Allocation Should Fail", func(t *test.SystemTest) {
-		cli_tests.createWallet(t)
+		_, err := utils.CreateWallet(t, configPath)
 
 		allocationID := "123abc"
 
@@ -169,7 +169,8 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		myAllocationID := setupAllocation(t, configPath)
 
 		targetWalletName := utils.EscapedTestName(t) + "_TARGET"
-		cli_tests.createWalletForName(targetWalletName)
+		_, err := utils.CreateWalletForName(t, configPath, targetWalletName)
+		require.Nil(t, err)
 
 		size := int64(2048)
 
@@ -218,7 +219,8 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Update Allocation flags for forbid and allow file_options should succeed", 8*time.Minute, func(t *test.SystemTest) {
-		cli_tests.createWallet(t)
+		_, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err)
 
 		allocationID := setupAllocation(t, configPath)
 
@@ -504,7 +506,8 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		nonAllocOwnerWallet := utils.EscapedTestName(t) + "_NON_OWNER"
 
-		cli_tests.createWalletForName(nonAllocOwnerWallet)
+		_, err = utils.CreateWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err)
 
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -538,7 +541,8 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		nonAllocOwnerWallet := utils.EscapedTestName(t) + "_NON_OWNER"
 
-		cli_tests.createWalletForName(nonAllocOwnerWallet)
+		_, err = utils.CreateWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err)
 
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -574,7 +578,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		nonAllocOwnerWallet := utils.EscapedTestName(t) + "_NON_OWNER"
 
-		cli_tests.createWalletForName(nonAllocOwnerWallet)
+		_, err = utils.CreateWalletForName(t, configPath, nonAllocOwnerWallet)
 
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -635,7 +639,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		})
 
 		filename := utils.GenerateRandomTestFileName(t)
-		err := cli_tests.createFileWithSize(filename, fileSize)
+		err := utils.CreateFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
 		remotePath := "/dir" + filename
@@ -678,7 +682,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		})
 
 		filename := utils.GenerateRandomTestFileName(t)
-		err := cli_tests.createFileWithSize(filename, fileSize)
+		err := utils.CreateFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
 		remotePath := "/dir" + filename
@@ -756,9 +760,10 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 		}
 	}
 
-	cli_tests.createWalletForName(walletName)
+	_, err := utils.CreateWalletForName(t, configPath, walletName)
+	require.Nil(t, err)
 
-	output, err := cli_tests.createNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(options))
+	output, err := utils.CreateNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(options))
 	require.NoError(t, err, "create new allocation failed", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
@@ -788,7 +793,7 @@ func getAllocationCost(str string) (float64, error) {
 	}
 
 	unit := strings.Fields(str)[6]
-	allocationCostInZCN := cli_tests.unitToZCN(allocationCostInOutput, unit)
+	allocationCostInZCN := utils.unitToZCN(allocationCostInOutput, unit)
 
 	return allocationCostInZCN, nil
 }
