@@ -6,13 +6,19 @@ import (
 	"fmt"
 	"github.com/0chain/common/core/common"
 	"github.com/0chain/gosdk/core/zcncrypto"
+	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
+
+const zboxTeamWallet = "wallets/zbox_team"
+
+var blobbersList []climodel.Blobber
 
 func ListBlobbers(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Requesting blobber list...")
@@ -38,8 +44,34 @@ func StakePoolInfo(t *test.SystemTest, cliConfigFilename, params string) ([]stri
 	t.Log("Fetching stake pool info...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, EscapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
+func GenerateBlobberAuthTickets(t *test.SystemTest) (string, string) {
+	output, err := ListBlobbers(t, configPath, "--json")
+	require.Nil(t, err, "Failed to get blobbers list", strings.Join(output, "\n"))
+	err = json.NewDecoder(strings.NewReader(strings.Join(output, "\n"))).Decode(&blobbersList)
+	require.Nil(t, err, "Error parsing the blobbers list", strings.Join(output, "\n"))
+	require.NotNil(t, blobbersList, "Blobbers list is empty")
 
-func GetBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, zboxTeamWallet, clientID string) (string, error) {
+	// Get auth tickets for all blobbers
+	var blobberAuthTickets string
+	var blobbersIds string
+	wallet, err := GetWalletForName(t, configPath, EscapedTestName(t))
+	require.Nil(t, err, "could not get wallet")
+
+	for i, blobber := range blobbersList {
+		authTicket, err := getBlobberAuthTicket(t, blobber.ID, blobber.BaseURL, zboxTeamWallet, wallet.ClientID)
+		require.Nil(t, err, "could not get auth ticket for blobber", blobber.ID)
+
+		if i == len(blobbersList)-1 {
+			blobberAuthTickets += authTicket
+			blobbersIds += blobber.ID
+			break
+		}
+		blobberAuthTickets += authTicket + ","
+		blobbersIds += blobber.ID + ","
+	}
+	return blobberAuthTickets, blobbersIds
+}
+func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, zboxTeamWallet, clientID string) (string, error) {
 	zboxWallet, err := GetWalletForName(t, configPath, zboxTeamWallet)
 	require.Nil(t, err, "could not get zbox wallet")
 

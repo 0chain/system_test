@@ -1,7 +1,6 @@
 package tokenomics_tests
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 	"regexp"
@@ -19,17 +18,6 @@ import (
 func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Create enterprise allocation for locking cost equal to the cost calculated should work")
-
-	// Get the list of blobbers
-	var blobbersList []climodel.Blobber
-
-	t.TestSetup("Listing all the blobbers", func() {
-		output, err := utils.ListBlobbers(t, configPath, "--json")
-		require.Nil(t, err, "Failed to get blobbers list", strings.Join(output, "\n"))
-		err = json.NewDecoder(strings.NewReader(strings.Join(output, "\n"))).Decode(&blobbersList)
-		require.Nil(t, err, "Error parsing the blobbers list", strings.Join(output, "\n"))
-		require.NotNil(t, blobbersList, "Blobbers list is empty")
-	})
 	t.Parallel()
 
 	t.Run("Create enterprise allocation with blobber auth tickets should pass", func(t *test.SystemTest) {
@@ -38,24 +26,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		// Get auth tickets for all blobbers
-		var blobberAuthTickets string
-		var blobbersIds string
-		wallet, err := utils.GetWalletForName(t, configPath, utils.EscapedTestName(t))
-		require.Nil(t, err, "could not get wallet")
-
-		for i, blobber := range blobbersList {
-			authTicket, err := utils.GetBlobberAuthTicket(t, blobber.ID, blobber.BaseURL, zboxTeamWallet, wallet.ClientID)
-			require.Nil(t, err, "could not get auth ticket for blobber", blobber.ID)
-
-			if i == len(blobbersList)-1 {
-				blobberAuthTickets += authTicket
-				blobbersIds += blobber.ID
-				break
-			}
-			blobberAuthTickets += authTicket + ","
-			blobbersIds += blobber.ID + ","
-		}
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
 
 		// Create enterprise allocation with blobber auth tickets
 		options := map[string]interface{}{
@@ -63,7 +34,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 			"lock":                 "0.5",
 			"enterprise":           true,
 			"blobber_auth_tickets": blobberAuthTickets,
-			"preferred_blobbers":   blobbersIds,
+			"preferred_blobbers":   blobberIds,
 		}
 		output, err = utils.CreateNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -78,12 +49,15 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 	t.Run("Create enterprise allocation for locking cost equal to the cost calculated should work", func(t *test.SystemTest) {
 		_, _ = utils.CreateWallet(t, configPath)
 
+		blobberAuthTickets, blobbersIds := utils.GenerateBlobberAuthTickets(t)
 		options := map[string]interface{}{
-			"cost":        "",
-			"size":        "10000",
-			"read_price":  "0-1",
-			"write_price": "0-1",
-			"enterprise":  true,
+			"cost":                 "",
+			"size":                 "10000",
+			"read_price":           "0-1",
+			"write_price":          "0-1",
+			"enterprise":           true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobbersIds,
 		}
 		output, err := createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -93,11 +67,13 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
 		options = map[string]interface{}{
-			"lock":        allocationCost,
-			"size":        "10000",
-			"read_price":  "0-1",
-			"write_price": "0-1",
-			"enterprise":  true,
+			"lock":                 allocationCost,
+			"size":                 "10000",
+			"read_price":           "0-1",
+			"write_price":          "0-1",
+			"enterprise":           true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobbersIds,
 		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -529,6 +505,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Equal(t, true, alloc.ThirdPartyExtendable)
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 	})
+
 }
 
 func createNewEnterpriseAllocation(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
