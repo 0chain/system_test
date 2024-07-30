@@ -81,6 +81,7 @@ const (
 	validator1Delegate2Wallet       = "wallets/validator1_delegate2"
 	validator2Delegate1Wallet       = "wallets/validator2_delegate1"
 	validator2Delegate2Wallet       = "wallets/validator2_delegate2"
+	zboxTeamWallet                  = "wallets/zbox_team"
 )
 
 var (
@@ -126,7 +127,8 @@ func TestMain(m *testing.M) {
 					strings.HasSuffix(f, miner02NodeDelegateWalletName+"_wallet.json") ||
 					strings.HasSuffix(f, miner03NodeDelegateWalletName+"_wallet.json") ||
 					strings.HasSuffix(f, sharder01NodeDelegateWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") {
+					strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, zboxTeamWallet+"_wallet.json") {
 					continue
 				}
 				_ = os.Remove(f)

@@ -125,7 +125,19 @@ func downloadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename, param 
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
 }
+func CreateNewEnterpriseAllocation(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
+	return createNewEnterpriseAllocationForWallet(t, EscapedTestName(t), cliConfigFilename, params)
+}
 
+func createNewEnterpriseAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, params string) ([]string, error) {
+	t.Logf("Creating new enterprise allocation...")
+	return cliutils.RunCommand(t, fmt.Sprintf(
+		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s --enterprise",
+		params,
+		wallet+"_wallet.json",
+		cliConfigFilename,
+		wallet+"_allocation.txt"), 3, time.Second*5)
+}
 func CreateNewAllocation(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	return CreateNewAllocationForWallet(t, EscapedTestName(t), cliConfigFilename, params)
 }
