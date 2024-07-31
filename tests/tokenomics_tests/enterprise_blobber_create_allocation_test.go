@@ -91,13 +91,15 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
 		options := map[string]interface{}{
-			"cost":        "",
-			"read_price":  "0-1",
-			"write_price": "0-1",
-			"size":        10000,
-			"enterprise":  true,
+			"cost":                 "",
+			"read_price":           "0-1",
+			"write_price":          "0-1",
+			"size":                 10000,
+			"enterprise":           true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds,
 		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -119,12 +121,16 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
 		options := map[string]interface{}{
-			"cost":        "",
-			"read_price":  "0-1",
-			"write_price": "0-1",
-			"size":        10000,
-			"enterprise":  true,
+			"cost":                 "",
+			"read_price":           "0-1",
+			"write_price":          "0-1",
+			"size":                 10000,
+			"enterprise":           true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds,
 		}
 		mustFailCost := -1
 		options = map[string]interface{}{"lock": mustFailCost}
@@ -138,10 +144,14 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
 		options := map[string]interface{}{
-			"size":       "1024",
-			"lock":       "0.5",
-			"enterprise": true,
+			"size":                 "1024",
+			"lock":                 "0.5",
+			"enterprise":           true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds,
 		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -163,11 +173,15 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		targetWallet, err := utils.GetWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "could not get target wallet")
 
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
 		options := map[string]interface{}{
-			"lock":             "0.5",
-			"owner":            targetWallet.ClientID,
-			"owner_public_key": targetWallet.ClientPublicKey,
-			"enterprise":       true,
+			"lock":                 "0.5",
+			"owner":                targetWallet.ClientID,
+			"owner_public_key":     targetWallet.ClientPublicKey,
+			"enterprise":           true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds,
 		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -205,11 +219,15 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
 		options := map[string]interface{}{
-			"size":       "1024",
-			"parity":     "1",
-			"lock":       "0.5",
-			"enterprise": true,
+			"size":                 "1024",
+			"parity":               "1",
+			"lock":                 "0.5",
+			"enterprise":           true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds,
 		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -228,11 +246,15 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
 		options := map[string]interface{}{
-			"size":       "1024",
-			"data":       "1",
-			"lock":       "0.5",
-			"enterprise": true,
+			"size":                 "1024",
+			"data":                 "1",
+			"lock":                 "0.5",
+			"enterprise":           true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds,
 		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -251,11 +273,15 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
 		options := map[string]interface{}{
-			"size":       "1024",
-			"read_price": "0-9999",
-			"lock":       "0.5",
-			"enterprise": true,
+			"size":                 "1024",
+			"read_price":           "0-9999",
+			"lock":                 "0.5",
+			"enterprise":           true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds,
 		}
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
@@ -274,7 +300,17 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"size": "1024", "write_price": "0-9999", "lock": "0.5", "enterprise": true}
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{
+			"size":                 "1024",
+			"write_price":          "0-9999",
+			"lock":                 "0.5",
+			"enterprise":           true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds,
+		}
+
 		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -291,11 +327,13 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"parity": "99", "lock": "0.5", "size": 1024, "enterprise": true}
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"parity": "99", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "Too many blobbers selected")
+		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
 	})
 
 	t.Run("Create enterprise allocation with too large data (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
@@ -304,11 +342,14 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"data": "99", "lock": "0.5", "size": 1024, "enterprise": true}
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"data": "99", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers": blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "Too many blobbers selected")
+		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
 	})
 
 	t.Run("Create enterprise allocation with too large data and parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
@@ -317,11 +358,14 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"data": "30", "parity": "20", "lock": "0.5", "size": 1024, "enterprise": true}
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"data": "30", "parity": "20", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers": blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "Too many blobbers selected")
+		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
 	})
 
 	t.Run("Create enterprise allocation with read price range 0-0 Should Fail", func(t *test.SystemTest) {
@@ -330,11 +374,14 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 1024, "enterprise": true}
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers": blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "Error creating allocation: failed_get_allocation_blobbers: failed to get blobbers for allocation: not enough blobbers to honor the allocation", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "Not enough blobbers to honor the allocation", strings.Join(output, "\n"))
 	})
 
 	t.Run("Create enterprise allocation with size smaller than limit (size < 1024) Should Fail", func(t *test.SystemTest) {
@@ -343,7 +390,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"size": 256, "lock": "0.5", "enterprise": true}
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"size": 256, "lock": "0.5", "enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -356,7 +407,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"enterprise": true}
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
@@ -369,7 +424,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"lock": "0.5", "size": 1024, "enterprise": true}
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"lock": "0.5", "size": 1024, "enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -391,7 +450,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_upload": nil, "enterprise": true}
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_upload": nil, "enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -404,7 +467,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_delete": nil, "enterprise": true}
+		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t)
+
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_delete": nil, "enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -417,7 +484,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_update": nil, "enterprise": true}
+		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t)
+
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_update": nil, "enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -430,7 +501,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_move": nil, "enterprise": true}
+		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t)
+
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_move": nil, "enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -443,7 +518,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_copy": nil, "enterprise": true}
+		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t)
+
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_copy": nil, "enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -456,7 +535,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_rename": nil, "enterprise": true}
+		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t)
+
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_rename": nil, "enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -476,7 +559,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		options := map[string]interface{}{"lock": "0.5", "size": 1024}
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"lock": "0.5", "size": 1024, "enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -491,7 +578,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Equal(t, false, alloc.ThirdPartyExtendable)
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		options = map[string]interface{}{"lock": "0.5", "size": 1024, "third_party_extendable": nil, "enterprise": true}
+		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t)
+
+		options = map[string]interface{}{"lock": "0.5", "size": 1024, "third_party_extendable": nil, "enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
