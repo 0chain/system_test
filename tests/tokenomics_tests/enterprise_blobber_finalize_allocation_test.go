@@ -14,7 +14,8 @@ import (
 func TestFinalizeAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.Parallel()
+	// Finalise success
+	// You need to use same tests cases we have in cancel allocation here. But it's not a priority.
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)

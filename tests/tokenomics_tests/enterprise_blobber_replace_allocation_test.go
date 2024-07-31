@@ -17,7 +17,10 @@ import (
 
 func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.SetSmokeTests("Replace blobber in allocation, should work")
+
+	// Change time unit to 10 minutes
+
+	// Try replacing blobber with 2x price, 0.5x price and same price. Check cost in all scenarios.
 
 	t.RunSequentially("Replace blobber in allocation, should work", func(t *test.SystemTest) {
 		wallet := createWallet(t)

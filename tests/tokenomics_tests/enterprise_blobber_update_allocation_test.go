@@ -30,9 +30,12 @@ var (
 
 func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.SetSmokeTests("Update Expiry Should Work")
 
-	t.Parallel()
+	// 1. Run all update operations one by one.
+	// 2. Run all update operations at once.
+	// Not high priority
+
+	// Change time unit to 10 minutes
 
 	t.RunWithTimeout("Update Expiry Should Work", 15*time.Minute, func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)

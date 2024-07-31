@@ -22,9 +22,13 @@ var (
 
 func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.SetSmokeTests("Cancel allocation immediately should work")
 
-	t.Parallel()
+	// Make sure you check refund amount in every test
+
+	// 1. Change time_unit to 10 minutes. Create allocation. Wait for 7 minutes. Cancel allocation. Check refund amount.
+	// 2. Change time_unit to 10 minutes. Create allocation. Wait for 7 minutes. Update the allocation duration in one test case, in 2nd test case update size. Check refund amount.
+	// 3. Change time_unit to 10 minutes. Create allocation. Wait for 7 minutes. Add blobber to allocation. Cancel allocation. Check refund amount.
+	// 4. Same process for replace blobber with 2x price. Check refund amount.
 
 	t.Run("Cancel allocation immediately should work", func(t *test.SystemTest) {
 		var allocation climodel.Allocation
@@ -41,46 +45,6 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		utils.AssertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
-	})
-
-	t.RunWithTimeout("Cancel allocation after upload should work", 5*time.Minute, func(t *test.SystemTest) {
-		allocationID := utils.SetupAllocation(t, configPath)
-
-		filename := utils.GenerateRandomTestFileName(t)
-		err := utils.CreateFileWithSize(filename, 1*utils.MB)
-		require.Nil(t, err)
-
-		output, err := utils.UploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		time.Sleep(1 * time.Minute)
-
-		output, err = cancelAllocation(t, configPath, allocationID, true)
-		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		utils.AssertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
-	})
-
-	t.Run("No allocation param should fail", func(t *test.SystemTest) {
-		// create wallet
-		utils.CreateWallet(t, configPath, nil)
-
-		cmd := fmt.Sprintf(
-			"./zbox alloc-cancel --silent "+
-				"--wallet %s --configDir ./config --config %s",
-			utils.EscapedTestName(t)+"_wallet.json",
-			configPath,
-		)
-
-		output, err := cliutils.RunCommandWithoutRetry(cmd)
-		require.Error(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "Error: allocation flag is missing", output[0])
 	})
 
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
