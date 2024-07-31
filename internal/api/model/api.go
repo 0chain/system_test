@@ -527,6 +527,7 @@ type BlobberRequirements struct {
 	ExpirationDate  int64      `json:"expiration_date"`
 	ReadPriceRange  PriceRange `json:"read_price_range"`
 	WritePriceRange PriceRange `json:"write_price_range"`
+	Enterprise      bool       `json:"enterprise"`
 }
 
 type PriceRange struct {

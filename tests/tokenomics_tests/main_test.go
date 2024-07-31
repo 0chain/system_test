@@ -2,6 +2,7 @@ package tokenomics_tests
 
 import (
 	"fmt"
+	"github.com/0chain/system_test/internal/api/util/client"
 	"log"
 	"os"
 	"path/filepath"
@@ -89,6 +90,8 @@ var (
 	configDir              string
 	bridgeClientConfigFile string
 	bridgeOwnerConfigFile  string
+	sdkClient              *client.SDKClient
+	apiClient              *client.APIClient
 )
 
 func TestMain(m *testing.M) {
@@ -115,6 +118,10 @@ func TestMain(m *testing.M) {
 	}
 
 	configDir, _ = filepath.Abs(configDir)
+
+	//parsedConfig := config.Parse(configPath)
+	//apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
+	//sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 
 	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
 		if files, err := filepath.Glob("./config/*.json"); err == nil {

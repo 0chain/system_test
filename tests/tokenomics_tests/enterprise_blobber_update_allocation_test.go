@@ -752,7 +752,8 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 
-	options := map[string]interface{}{"size": "10000000", "lock": "5", "enterprise": true}
+	blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+	options := map[string]interface{}{"size": "10000000", "lock": "5", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 
 	for _, params := range extraParams {
 		for k, v := range params {
