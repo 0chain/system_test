@@ -60,8 +60,13 @@ func CreateWalletForName(t *test.SystemTest, cliConfigFilename, name string, opt
 		return cliutils.RunCommand(t, "./zwallet create-wallet "+
 			"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 	}
+	output, err := cliutils.RunCommand(t, "./zwallet create-wallet --silent "+
+		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	if err != nil {
+		return output, err
+	}
 
-	output, err := ExecuteFaucetWithTokensForWallet(t, name, cliConfigFilename, 5)
+	output, err = ExecuteFaucetWithTokensForWallet(t, name, cliConfigFilename, 5)
 	t.Logf("faucet output: %v", output)
 	return output, err
 }

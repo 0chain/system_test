@@ -207,7 +207,7 @@ func createWallet(t *test.SystemTest) *model.Wallet {
 	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
 
-	wallet, err := utils.GetWalletForName(t, configPath, utils.EscapedTestName(t))
+	wallet, err := utils.GetFullWalletForName(t, configPath, utils.EscapedTestName(t))
 	require.Nil(t, err, "Error getting created wallet")
 	require.NotNil(t, wallet, "Error empty wallet")
 

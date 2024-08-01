@@ -48,7 +48,7 @@ func setupConfig() {
 		log.Fatalln(fmt.Errorf("fatal error config file: %s", err))
 	}
 
-	parsedConfig := config.Parse(filepath.Join(".", path, "tokenomics_tests_config.yaml"))
+	parsedConfig = config.Parse(filepath.Join(".", path, "tokenomics_tests_config.yaml"))
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
@@ -92,6 +92,7 @@ var (
 	bridgeOwnerConfigFile  string
 	sdkClient              *client.SDKClient
 	apiClient              *client.APIClient
+	parsedConfig           *config.Config
 )
 
 func TestMain(m *testing.M) {
@@ -118,10 +119,6 @@ func TestMain(m *testing.M) {
 	}
 
 	configDir, _ = filepath.Abs(configDir)
-
-	//parsedConfig := config.Parse(configPath)
-	//apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
-	//sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 
 	if !strings.EqualFold(strings.TrimSpace(os.Getenv("SKIP_CONFIG_CLEANUP")), "true") {
 		if files, err := filepath.Glob("./config/*.json"); err == nil {
@@ -156,6 +153,9 @@ func TestMain(m *testing.M) {
 	}
 
 	setupConfig()
+
+	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
+	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 
 	exitRun := m.Run()
 

@@ -1,7 +1,6 @@
 package tokenomics_tests
 
 import (
-	"encoding/json"
 	"fmt"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"regexp"
@@ -17,7 +16,6 @@ import (
 
 var (
 	cancelAllocationRegex = regexp.MustCompile(`^Allocation canceled with txId : [a-f0-9]{64}$`)
-	params                = map[string]interface{}{"size": "10000000", "lock": "5", "enterprise": true}
 )
 
 func TestCancelEnterpriseAllocation(testSetup *testing.T) {
@@ -31,12 +29,22 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 	// 4. Same process for replace blobber with 2x price. Check refund amount.
 
 	t.Run("Cancel allocation immediately should work", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
+
+		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
 		var allocation climodel.Allocation
-		output, err := utils.CreateNewAllocation(t, configPath, createParams(params))
+
+		params := map[string]interface{}{"size": "10000000", "lock": "5", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
+
+		output, err = utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
 		require.Nil(t, err, "Error creating allocation")
 
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&allocation)
-		require.Nil(t, err, "Error decoding allocation")
+		//TODO: add seperate allocation parsing here.
 		require.NotNil(t, allocation, "Allocation id is nil")
 
 		allocationID := allocation.ID
@@ -48,11 +56,18 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
-		otherAllocationID := utils.SetupAllocationWithWallet(t, utils.EscapedTestName(t)+"_other_wallet.json", configPath)
+		otherAllocationID := utils.SetupEnterpriseAllocationWithWallet(t, utils.EscapedTestName(t)+"_other", configPath)
+		output, err := utils.ExecuteFaucetWithTokensForWallet(t, utils.EscapedTestName(t)+"_other_wallet.json", configPath, 1000)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
-		utils.CreateWallet(t, configPath, nil)
+		output, err = utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
+
+		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+
 		// otherAllocationID should not be cancelable from this level
-		output, err := cancelAllocation(t, configPath, otherAllocationID, false)
+		output, err = cancelAllocation(t, configPath, otherAllocationID, false)
 
 		require.Error(t, err, "expected error canceling allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
@@ -60,7 +75,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Non-existent Allocation Should Fail", func(t *test.SystemTest) {
-		_, err := utils.CreateWallet(t, configPath, nil)
+		_, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error craeting wallet")
 
 		allocationID := "123abc"

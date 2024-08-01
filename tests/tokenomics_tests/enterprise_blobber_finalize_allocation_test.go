@@ -18,7 +18,7 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	// You need to use same tests cases we have in cancel allocation here. But it's not a priority.
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
-		allocationID := setupAllocation(t, configPath)
+		allocationID := utils.SetupEnterpriseAllocation(t, configPath)
 
 		output, err := finalizeAllocation(t, configPath, allocationID, false)
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
@@ -27,7 +27,8 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Finalize Other's Allocation Should Fail", func(t *test.SystemTest) {
-		var otherAllocationID = setupAllocationWithWallet(t, utils.EscapedTestName(t)+"_other_wallet.json", configPath)
+		var otherAllocationID = utils.SetupEnterpriseAllocationWithWallet(t, utils.EscapedTestName(t)+"_other", configPath)
+		//var otherAllocationID = setupAllocationWithWallet(t, utils.EscapedTestName(t)+"_other_wallet.json", configPath)
 
 		// create wallet
 		_, err := utils.CreateWallet(t, configPath)

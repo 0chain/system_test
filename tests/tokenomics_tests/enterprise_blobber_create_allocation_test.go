@@ -171,7 +171,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-		targetWalletName := utils.EscapedTestName(t) + "_TARGET"
+		targetWalletName := utils.EscapedTestName(t)
 		targetWallet, err := utils.GetWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "could not get target wallet")
 

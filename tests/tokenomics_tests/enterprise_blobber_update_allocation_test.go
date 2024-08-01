@@ -43,7 +43,6 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
-			"enterprise": true,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 
@@ -754,6 +753,11 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 }
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
+	output, err := utils.CreateWalletForName(t, configPath, walletName)
+	require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
+
+	output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+	require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 	blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
 	options := map[string]interface{}{"size": "10000000", "lock": "5", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
@@ -764,10 +768,7 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 		}
 	}
 
-	output, err := utils.CreateWalletForName(t, configPath, walletName)
-	require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
-
-	output, err = utils.CreateNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(options))
+	output, err = utils.CreateNewEnterpriseAllocation(t, cliConfigFilename, utils.CreateParams(options))
 	require.NoError(t, err, "create new allocation failed", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 

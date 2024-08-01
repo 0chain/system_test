@@ -105,6 +105,56 @@ func SetupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 	return allocationID
 }
 
+func SetupEnterpriseAllocation(t *test.SystemTest, cliConfigFilename string) string {
+	return SetupEnterpriseAllocationWithWallet(t, EscapedTestName(t), cliConfigFilename)
+}
+
+func SetupEnterpriseAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
+	faucetTokens := 2.0
+	// Then create new allocation
+	options := map[string]interface{}{"size": "10000", "lock": "0.5", "blobber_auth_tickets": "", "preferred_blobbers": ""}
+
+	// Add additional parameters if available
+	// Overwrite with new parameters when available
+	for _, params := range extraParams {
+		// Extract parameters unrelated to upload
+		if tokenStr, ok := params["tokens"]; ok {
+			token, err := strconv.ParseFloat(fmt.Sprintf("%v", tokenStr), 64)
+			require.Nil(t, err)
+			faucetTokens = token
+			delete(params, "tokens")
+		}
+		for k, v := range params {
+			options[k] = v
+		}
+	}
+
+	options["lock"] = faucetTokens / 2
+
+	t.Log("Creating new allocation...", options)
+
+	t.Log("Faucet Tokens : ", faucetTokens)
+
+	// First create a wallet and run faucet command
+	output, err := CreateWalletForName(t, cliConfigFilename, walletName)
+	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
+
+	output, err = ExecuteFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens+10)
+	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+
+	options["blobber_auth_tickets"], options["preferred_blobbers"] = GenerateBlobberAuthTicketsWithWallet(t, walletName)
+
+	output, err = CreateNewEnterpriseAllocationForWallet(t, walletName, cliConfigFilename, CreateParams(options))
+	require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	// Get the allocation ID and return it
+	allocationID, err := GetAllocationID(output[0])
+	require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
+
+	return allocationID
+}
+
 func DownloadFile(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
 	return downloadFileForWallet(t, EscapedTestName(t), cliConfigFilename, param, retry)
 }
@@ -126,10 +176,10 @@ func downloadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename, param 
 	}
 }
 func CreateNewEnterpriseAllocation(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	return createNewEnterpriseAllocationForWallet(t, EscapedTestName(t), cliConfigFilename, params)
+	return CreateNewEnterpriseAllocationForWallet(t, EscapedTestName(t), cliConfigFilename, params)
 }
 
-func createNewEnterpriseAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, params string) ([]string, error) {
+func CreateNewEnterpriseAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Creating new enterprise allocation...")
 	return cliutils.RunCommand(t, fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s --enterprise",
