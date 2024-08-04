@@ -1284,3 +1284,57 @@ func (c *ZboxClient) GetGraphBlobberTotalRewards(t *test.SystemTest, blobberId s
 
 	return &data, resp, err
 }
+
+func (c *ZboxClient) CreateJwtSession(t *test.SystemTest, headers map[string]string) (int64, *resty.Response, error) {
+	t.Logf("creating jwt session owner for userID [%v] using 0box...", headers["X-App-User-ID"])
+	var sessionID int64
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/jwt/session")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &sessionID,
+		Headers:            headers,
+		RequiredStatusCode: 201,
+	}, HttpPOSTMethod)
+
+	return sessionID, resp, err
+}
+
+func (c *ZboxClient) CreateJwtToken(t *test.SystemTest, sessionID int64, headers map[string]string) (*model.ZboxJwtToken, *resty.Response, error) {
+	t.Logf("creating jwt token for userID [%v] and session [%v] using 0box...", headers["X-App-User-ID"], sessionID)
+	var zboxJwtToken *model.ZboxJwtToken
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/jwt/token")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &zboxJwtToken,
+		Headers:            headers,
+		RequiredStatusCode: 201,
+	}, HttpPOSTMethod)
+
+	return zboxJwtToken, resp, err
+}
+
+func (c *ZboxClient) RefreshJwtToken(t *test.SystemTest, token string, headers map[string]string) (*model.ZboxJwtToken, *resty.Response, error) {
+	t.Logf("refreshing jwt token for userID [%v] and token [%v] using 0box...", headers["X-App-User-ID"], token)
+	var zboxJwtToken *model.ZboxJwtToken
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/jwt/token")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &zboxJwtToken,
+		Headers:            headers,
+		RequiredStatusCode: 201,
+	}, HttpPUTMethod)
+
+	return zboxJwtToken, resp, err
+}
