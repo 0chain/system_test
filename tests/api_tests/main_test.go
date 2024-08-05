@@ -22,6 +22,7 @@ var (
 	zs3Client *client.ZS3Client
 	// sdkClient        *client.SDKClient
 	zboxClient       *client.ZboxClient
+	zvaultClient     *client.ZvaultClient
 	chimneyClient    *client.APIClient
 	chimneySdkClient *client.SDKClient
 	sdkClient        *client.SDKClient
@@ -48,6 +49,8 @@ func TestMain(m *testing.M) {
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
 	zs3Client = client.NewZS3Client(parsedConfig.ZS3ServerUrl)
 	zboxClient = client.NewZboxClient(parsedConfig.ZboxUrl)
+	zvaultClient = client.NewZvaultClient(parsedConfig.ZvaultUrl)
+
 	chimneyClient = client.NewAPIClient(parsedConfig.ChimneyTestNetwork)
 	chimneySdkClient = client.NewSDKClient(parsedConfig.ChimneyTestNetwork)
 	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
