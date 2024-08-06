@@ -131,7 +131,7 @@ func SetupEnterpriseAllocationWithWallet(t *test.SystemTest, walletName, cliConf
 
 	options["lock"] = faucetTokens / 2
 
-	t.Log("Creating new allocation...", options)
+	t.Log("Creating new enterprise allocation...", options)
 
 	t.Log("Faucet Tokens : ", faucetTokens)
 
@@ -245,10 +245,10 @@ func GetAllocationID(str string) (string, error) {
 }
 
 func UploadFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
-	return uploadFileForWallet(t, EscapedTestName(t), cliConfigFilename, param, retry)
+	return UploadFileForWallet(t, EscapedTestName(t), cliConfigFilename, param, retry)
 }
 
-func uploadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
+func UploadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Uploading file...")
 
 	p := CreateParams(param)

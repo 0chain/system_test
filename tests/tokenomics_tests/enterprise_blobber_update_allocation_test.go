@@ -718,6 +718,79 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, fref)
 	})
+
+	t.Run("Run all update operations one by one", func(t *test.SystemTest) {
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
+
+		// Extend Allocation
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"extend":     true,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "Error extending allocation", strings.Join(output, "\n"))
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// Increase Allocation Size
+		size := int64(2048)
+		params = createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"size":       size,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "Error increasing allocation size", strings.Join(output, "\n"))
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// Set Third Party Extendable
+		params = createParams(map[string]interface{}{
+			"allocation":                 allocationID,
+			"set_third_party_extendable": nil,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "Error setting third party extendable", strings.Join(output, "\n"))
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// Add Blobber
+		blobberID := "new_blobber_id"
+		params = createParams(map[string]interface{}{
+			"allocation":  allocationID,
+			"add_blobber": blobberID,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "Error adding blobber", strings.Join(output, "\n"))
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// Validate Final Allocation State
+		alloc := utils.GetAllocation(t, allocationID)
+		require.Greater(t, alloc.Size, allocationBeforeUpdate.Size)
+		require.True(t, alloc.ThirdPartyExtendable)
+	})
+
+	t.Run("Run all update operations at once", func(t *test.SystemTest) {
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
+
+		size := int64(2048)
+		blobberID := "new_blobber_id"
+
+		// Combine all update operations
+		params := createParams(map[string]interface{}{
+			"allocation":                 allocationID,
+			"extend":                     true,
+			"size":                       size,
+			"set_third_party_extendable": nil,
+			"add_blobber":                blobberID,
+		})
+
+		output, err := updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "Error updating allocation with all operations at once", strings.Join(output, "\n"))
+		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// Validate Final Allocation State
+		alloc := utils.GetAllocation(t, allocationID)
+		require.Greater(t, alloc.Size, allocationBeforeUpdate.Size)
+		require.True(t, alloc.ThirdPartyExtendable)
+	})
+
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {

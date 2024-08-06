@@ -148,7 +148,9 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
 		options := map[string]interface{}{
 			"cost":                 "",
 			"read_price":           "0-1",
@@ -166,10 +168,16 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
 
 		mustFailCost := allocationCost * 0.8
-		options = map[string]interface{}{"lock": mustFailCost}
-		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
+		options = map[string]interface{}{
+			"lock":                 mustFailCost,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds,
+			"enterprise":           true,
+		}
+
+		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, output[len(output)-1], "not enough tokens to honor the allocation")
+		require.Contains(t, strings.Join(output, "\n"), "not enough tokens to honor the allocation", strings.Join(output, "\n"))
 	})
 
 	t.Run("Create enterprise allocation for locking negative cost should not work", func(t *test.SystemTest) {
@@ -225,10 +233,17 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
+		output, err = utils.CreateWalletForName(t, configPath, utils.EscapedTestName(t)+"_other")
+		require.Nil(t, err, "Error creating other wallet", strings.Join(output, "\n"))
+
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 		targetWalletName := utils.EscapedTestName(t)
 		targetWallet, err := utils.GetWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "could not get target wallet")
+
+		_, err = utils.ExecuteFaucetWithTokensForWallet(t, utils.EscapedTestName(t)+"_other", configPath, 1000)
+		_, err = utils.GetWalletForName(t, configPath, utils.EscapedTestName(t)+"_other")
+		require.Nil(t, err, "could not get other wallet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
 
@@ -258,12 +273,11 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 			"localpath":  file,
 			"remotepath": "/",
 			"encrypt":    "",
-			"enterprise": true,
 		}
 		output, err = utils.UploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		output, err = utils.UploadFile(t, configPath, uploadParams, false)
+		output, err = utils.UploadFileForWallet(t, utils.EscapedTestName(t)+"_other", configPath, uploadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, ""), "Operation needs to be performed by the owner or the payer of the allocation")
 
