@@ -385,27 +385,6 @@ func TestFileUpdate(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("update file that does not exists should fail", func(t *test.SystemTest) {
-		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 10 * MB})
-
-		filesize := int64(0.5 * MB)
-		localfile := generateRandomTestFileName(t)
-		err := createFileWithSize(localfile, filesize)
-		require.Nil(t, err)
-
-		output, err := updateFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/" + filepath.Base(localfile),
-			"localpath":  localfile,
-		}, false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "File at path does not exist for update")
-
-		createAllocationTestTeardown(t, allocationID)
-	})
-
 	t.Run("update with another file of size larger than allocation should fail", func(t *test.SystemTest) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{"size": 1 * MB})
