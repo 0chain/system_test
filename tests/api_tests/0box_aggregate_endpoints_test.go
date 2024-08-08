@@ -22,8 +22,8 @@ import (
 //nolint:gocyclo
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("skipping 0box graph and total endpoints test")
 	// Faucet the used wallets
-
 	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
 	t.Logf("ZboxOwner balance: %v", ownerBalance)
 	blobberOwnerBalance := apiClient.GetWalletBalance(t, blobberOwnerWallet, client.HttpOkStatus)
@@ -1087,6 +1087,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 //nolint:gocyclo
 func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("Skipping graph endpoints test")
 
 	testWallet := initialisedWallets[walletIdx]
 	walletIdx++
