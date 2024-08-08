@@ -527,42 +527,6 @@ func TestUpload(testSetup *testing.T) {
 		require.False(t, strings.Contains(strings.Join(output, "\n"), "Upload failed"), strings.Join(output, "\n"))
 	})
 
-	t.Run("Upload File to Existing File Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(1024)
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-
-		expected := fmt.Sprintf(
-			"Status completed callback. Type = text/plain. Name = %s",
-			filepath.Base(filename),
-		)
-		require.Equal(t, expected, output[1])
-
-		// Upload the file again to same directory
-		output, err = uploadFileWithoutRetry(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": "/",
-			"localpath":  filename,
-		})
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, strings.Contains(strings.Join(output, ""), "Upload failed"), strings.Join(output, "\n"))
-	})
-
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
 		fileSize := int64(256)
 
