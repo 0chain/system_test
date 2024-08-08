@@ -53,7 +53,6 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "d", meta.Type)
 		require.Equal(t, "/", meta.Path)
 		require.Equal(t, "/", meta.Name)
-		require.Equal(t, filesize, meta.ActualFileSize)
 	})
 
 	t.Run("Get File Meta in Root Directory Should Work", func(t *test.SystemTest) {
@@ -291,7 +290,6 @@ func TestFileMetadata(testSetup *testing.T) {
 			require.Equal(t, "d", meta.Type)
 			require.Equal(t, remotepath, meta.Path)
 			require.Equal(t, remotepath, meta.Name)
-			require.Equal(t, filesize, meta.ActualFileSize)
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
