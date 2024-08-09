@@ -3,6 +3,7 @@ package tokenomics_tests
 import (
 	"fmt"
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	"math"
 	"regexp"
 	"strings"
 	"testing"
@@ -37,17 +38,22 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error updating sc config", strings.Join(output, "\n"))
 
 		// Create an allocation
-		allocationID := utils.SetupEnterpriseAllocation(t, configPath)
+		allocOutput := setupAllocation(t, configPath)
+		allocationID, err := utils.GetAllocationID(allocOutput)
 
 		//Faucet transaction
 		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 		require.Nil(t, err, "Error executing facuet transaction", strings.Join(output, "\n"))
-
-		t.Log("Waiting for 7 minutes")
-		time.Sleep(7 * time.Minute) // Wait for 7 minutes
-
-		// Get the allocation details before cancellation
 		//allocBefore := utils.GetAllocation(t, allocationID)
+
+		expectedRefund, err := getAllocationCost(allocOutput)
+		require.Nil(t, err, "Error getting allocation cost")
+
+		balanceBefore, err := utils.GetBalanceZCN(t, configPath)
+		require.Nil(t, err, "Error fetching wallet balance", err)
+
+		//t.Log("Waiting for 7 minutes")
+		//time.Sleep(7 * time.Minute) // Wait for 7 minutes
 
 		// Cancel the allocation
 		output, err = cancelAllocation(t, configPath, allocationID, true)
@@ -56,12 +62,10 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		// Validate that the allocation is canceled and check refund
 		utils.AssertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 
-		//allocAfter := utils.GetAllocation(t, allocationID)
-		//refundAmount := allocBefore.WritePool - allocAfter.WritePool
-		//TODO: create cost funciton
-		//expectedRefund := calculateExpectedRefund(allocBefore, time.Minute*7)
+		balanceAfter, err := utils.GetBalanceZCN(t, configPath)
+		refundAmount := balanceBefore - balanceAfter
 
-		//require.InEpsilon(t, expectedRefund, refundAmount, 0.05, "Refund amount is not as expected")
+		require.InEpsilon(t, expectedRefund, refundAmount, 0.05, "Refund amount is not as expected")
 	})
 	t.RunWithTimeout("Cancel allocation after updating duration check refund amount.", time.Minute*15, func(t *test.SystemTest) {
 		// Setup: Change time_unit to 10 minutes
@@ -71,7 +75,8 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error updating sc config", strings.Join(output, "\n"))
 
 		// Create an allocation
-		allocationID := utils.SetupEnterpriseAllocation(t, configPath)
+		allocOutput := setupAllocation(t, configPath)
+		allocationID, err := utils.GetAllocationID(allocOutput)
 		//Faucet transaction
 		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 		require.Nil(t, err, "Error executing facuet transaction", strings.Join(output, "\n"))
@@ -87,8 +92,8 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		output, err = utils.UpdateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Updating allocation duration failed", strings.Join(output, "\n"))
 
-		// Get the allocation details before cancellation
-		//allocBefore := utils.GetAllocation(t, allocationID)
+		beforeBalance, err := utils.GetBalanceZCN(t, configPath)
+		require.Nil(t, err, "Error fetching balance", beforeBalance)
 
 		// Cancel the allocation
 		output, err = cancelAllocation(t, configPath, allocationID, true)
@@ -253,6 +258,10 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.Equal(t, "Error canceling allocation:alloc_cancel_failed: value not present", output[0])
 	})
+}
+
+func calculateExpectedRefund(before climodel.Allocation, beforeBalance, afterBalance float64) interface{} {
+	return math.Ceil(beforeBalance) - math.Ceil(afterBalance)
 }
 
 func cancelAllocation(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
