@@ -84,6 +84,18 @@ func GenerateBlobberAuthTicketsWithWallet(t *test.SystemTest, walletName string)
 	return blobberAuthTickets, blobbersIds
 }
 
+func GetBlobberAuthTicketWithId(t *test.SystemTest, blobberID, blobberUrl string) (string, error) {
+	return getBlobberAuthTicketForIdWithWallet(t, EscapedTestName(t), blobberID, blobberUrl)
+}
+func getBlobberAuthTicketForIdWithWallet(t *test.SystemTest, walletName, blobberId, blobberUrl string) (string, error) {
+	userWallet, err := GetWalletForName(t, configPath, walletName)
+	if err != nil {
+		return "", err
+	}
+
+	return getBlobberAuthTicket(t, blobberId, blobberUrl, zboxTeamWallet, userWallet.ClientID)
+}
+
 func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, zboxTeamWallet, clientID string) (string, error) {
 	zboxWallet, err := GetWalletForName(t, configPath, zboxTeamWallet)
 	require.Nil(t, err, "could not get zbox wallet")

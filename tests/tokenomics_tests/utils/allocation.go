@@ -43,6 +43,28 @@ func SetupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, ex
 	return allocationID
 }
 
+func SetupEnterpriseAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, extraParam map[string]interface{}) string {
+	tokens := float64(1)
+	if tok, ok := extraParam["tokens"]; ok {
+		token, err := strconv.ParseFloat(fmt.Sprintf("%v", tok), 64)
+		require.Nil(t, err)
+		tokens = token
+	}
+
+	allocationID := SetupEnterpriseAllocation(t, cliConfigFilename, extraParam)
+
+	// Lock half the tokens for read pool
+	readPoolParams := CreateParams(map[string]interface{}{
+		"tokens": tokens / 2,
+	})
+	output, err := ReadPoolLock(t, cliConfigFilename, readPoolParams, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+	require.Equal(t, "locked", output[0])
+
+	return allocationID
+}
+
 func ReadPoolLock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
 	return readPoolLockWithWallet(t, EscapedTestName(t), cliConfigFilename, params, retry)
 }
@@ -105,7 +127,7 @@ func SetupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 	return allocationID
 }
 
-func SetupEnterpriseAllocation(t *test.SystemTest, cliConfigFilename string) string {
+func SetupEnterpriseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	return SetupEnterpriseAllocationWithWallet(t, EscapedTestName(t), cliConfigFilename)
 }
 

@@ -49,7 +49,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Could not update "+
 			"allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		ac := utils.GetAllocation(t, allocationID)
 		require.Less(t, allocationBeforeUpdate.ExpirationDate, ac.ExpirationDate,
@@ -71,7 +71,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Could not update allocation "+
 			"due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
@@ -110,7 +110,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		allocations := parseListAllocations(t, configPath)
 		ac, ok := allocations[allocationID]
@@ -185,7 +185,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "Could not update allocation due to error", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		params = createParams(map[string]interface{}{
 			"allocation": myAllocationID,
@@ -235,7 +235,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc := utils.GetAllocation(t, allocationID)
@@ -251,7 +251,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc = utils.GetAllocation(t, allocationID)
@@ -267,7 +267,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc = utils.GetAllocation(t, allocationID)
@@ -283,7 +283,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc = utils.GetAllocation(t, allocationID)
@@ -299,7 +299,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc = utils.GetAllocation(t, allocationID)
@@ -315,7 +315,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc = utils.GetAllocation(t, allocationID)
@@ -332,7 +332,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc = utils.GetAllocation(t, allocationID)
@@ -348,7 +348,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc = utils.GetAllocation(t, allocationID)
@@ -364,7 +364,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc = utils.GetAllocation(t, allocationID)
@@ -380,7 +380,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc = utils.GetAllocation(t, allocationID)
@@ -396,7 +396,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc = utils.GetAllocation(t, allocationID)
@@ -412,7 +412,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Contains(t, err.Error(), "update allocation changes nothing")
 		} else {
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc = utils.GetAllocation(t, allocationID)
@@ -432,7 +432,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		params = createParams(map[string]interface{}{
 			"allocation":    allocationID,
@@ -458,7 +458,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		alloc := utils.GetAllocation(t, allocationID)
 		require.True(t, alloc.ThirdPartyExtendable)
@@ -475,7 +475,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		alloc := utils.GetAllocation(t, allocationID)
 		require.True(t, alloc.ThirdPartyExtendable)
@@ -501,7 +501,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		alloc := utils.GetAllocation(t, allocationID)
 		require.False(t, alloc.ThirdPartyExtendable)
@@ -535,7 +535,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		} else {
 			require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 			require.Len(t, output, 1)
-			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+			utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
 		alloc := utils.GetAllocation(t, allocationID)
@@ -573,7 +573,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		alloc := utils.GetAllocation(t, allocationID)
 		require.True(t, alloc.ThirdPartyExtendable)
@@ -635,7 +635,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		allocSize := int64(4096)
 		fileSize := int64(1024)
 
-		allocationID := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := utils.SetupEnterpriseAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
@@ -655,19 +655,23 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
-		blobberID, err := cli_tests.GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
+		blobberID, blobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
+
+		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, blobberID, blobberUrl)
+		require.Nil(t, err, "Unable to generate add blobber auth ticket")
 
 		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 			"add_blobber":                blobberID,
+			"add_blobber_auth_ticket":    blobberAuthTicket,
 		})
 
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-		assertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
 		fref, err := cli_tests.VerifyFileRefFromBlobber(walletFile, configFile, allocationID, blobberID, remotePath)
 		require.Nil(t, err)
 		require.NotNil(t, fref)
@@ -678,7 +682,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		allocSize := int64(4096)
 		fileSize := int64(1024)
 
-		allocationID := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := utils.SetupEnterpriseAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
@@ -699,22 +703,27 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
 
-		addBlobber, err := cli_tests.GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
+		addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
-		removeBlobber, err := cli_tests.GetRandomBlobber(walletFile, configFile, allocationID, addBlobber)
+		removeBlobber, err := cli_tests.GetRandomBlobber(walletFile, configFile, allocationID, addBlobberID)
 		require.Nil(t, err)
+
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
+
 		params := createParams(map[string]interface{}{
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
-			"add_blobber":                addBlobber,
+			"add_blobber":                addBlobberID,
+			"add_blobber_auth_ticket":    addBlobberAuthTicket,
 			"remove_blobber":             removeBlobber,
 		})
 
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-		assertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
-		fref, err := cli_tests.VerifyFileRefFromBlobber(walletFile, configFile, allocationID, addBlobber, remotePath)
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
+		fref, err := cli_tests.VerifyFileRefFromBlobber(walletFile, configFile, allocationID, addBlobberID, remotePath)
 		require.Nil(t, err)
 		require.NotNil(t, fref)
 	})
@@ -729,7 +738,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error extending allocation", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// Increase Allocation Size
 		size := int64(2048)
@@ -739,7 +748,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		})
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error increasing allocation size", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// Set Third Party Extendable
 		params = createParams(map[string]interface{}{
@@ -748,17 +757,27 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		})
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error setting third party extendable", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
 
 		// Add Blobber
-		blobberID := "new_blobber_id"
+		blobberID, blobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
+		require.Nil(t, err, "Unable to get blobber not part of allocaiton")
+
+		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, blobberID, blobberUrl)
+		require.Nil(t, err, "Unabel to generate auth ticket for add blobber")
+
 		params = createParams(map[string]interface{}{
-			"allocation":  allocationID,
-			"add_blobber": blobberID,
+			"allocation":              allocationID,
+			"add_blobber":             blobberID,
+			"add_blobber_auth_ticket": blobberAuthTicket,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error adding blobber", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// Validate Final Allocation State
 		alloc := utils.GetAllocation(t, allocationID)
@@ -770,7 +789,17 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 
 		size := int64(2048)
-		blobberID := "new_blobber_id"
+
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
+
+		// Add Blobber
+		blobberID, blobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
+		require.Nil(t, err, "Unable to get blobber not part of allocaiton")
+
+		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, blobberID, blobberUrl)
+		require.Nil(t, err, "Unabel to generate auth ticket for add blobber")
 
 		// Combine all update operations
 		params := createParams(map[string]interface{}{
@@ -779,11 +808,12 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"size":                       size,
 			"set_third_party_extendable": nil,
 			"add_blobber":                blobberID,
+			"add_blobber_auth_ticket":    blobberAuthTicket,
 		})
 
 		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation with all operations at once", strings.Join(output, "\n"))
-		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		// Validate Final Allocation State
 		alloc := utils.GetAllocation(t, allocationID)
@@ -849,11 +879,6 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 	require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 	return allocationID
-}
-
-func assertOutputMatchesAllocationRegex(t *test.SystemTest, re *regexp.Regexp, str string) {
-	match := re.FindStringSubmatch(str)
-	require.True(t, len(match) > 0, "expected allocation to match regex", re, str)
 }
 
 func getAllocationCost(str string) (float64, error) {
