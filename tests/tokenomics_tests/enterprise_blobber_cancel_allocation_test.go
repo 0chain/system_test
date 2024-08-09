@@ -37,23 +37,28 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "Error updating sc config", strings.Join(output, "\n"))
 
-		// Create an allocation
-		allocOutput := setupAllocation(t, configPath)
-		allocationID, err := utils.GetAllocationID(allocOutput)
+		// Create a wallet
+		output, err = utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
 
-		//Faucet transaction
+		// Execute faucet transaction
 		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-		require.Nil(t, err, "Error executing facuet transaction", strings.Join(output, "\n"))
-		//allocBefore := utils.GetAllocation(t, allocationID)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
-		expectedRefund, err := getAllocationCost(allocOutput)
-		require.Nil(t, err, "Error getting allocation cost")
+		// Generate blobber auth tickets
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		// Create allocation
+		params := map[string]interface{}{"size": "10000", "lock": "5", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
+		allocOutput, err := utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
+		require.Nil(t, err, "Error creating allocation")
+		allocationID, err := utils.GetAllocationID(allocOutput)
 
 		balanceBefore, err := utils.GetBalanceZCN(t, configPath)
 		require.Nil(t, err, "Error fetching wallet balance", err)
 
-		//t.Log("Waiting for 7 minutes")
-		//time.Sleep(7 * time.Minute) // Wait for 7 minutes
+		// Wait for 7 minutes
+		time.Sleep(7 * time.Minute)
 
 		// Cancel the allocation
 		output, err = cancelAllocation(t, configPath, allocationID, true)
@@ -63,7 +68,11 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		utils.AssertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 
 		balanceAfter, err := utils.GetBalanceZCN(t, configPath)
+		require.Nil(t, err, "Error fetching wallet balance", err)
 		refundAmount := balanceBefore - balanceAfter
+
+		expectedRefund, err := getAllocationCost(strings.Join(allocOutput, "\n"))
+		require.Nil(t, err, "Error getting allocation cost")
 
 		require.InEpsilon(t, expectedRefund, refundAmount, 0.05, "Refund amount is not as expected")
 	})
@@ -74,26 +83,36 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, "Error updating sc config", strings.Join(output, "\n"))
 
-		// Create an allocation
-		allocOutput := setupAllocation(t, configPath)
-		allocationID, err := utils.GetAllocationID(allocOutput)
-		//Faucet transaction
-		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-		require.Nil(t, err, "Error executing facuet transaction", strings.Join(output, "\n"))
+		// Create a wallet
+		output, err = utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
 
-		t.Log("Waiting for 7 minutes")
-		time.Sleep(7 * time.Minute) // Wait for 7 minutes
+		// Execute faucet transaction
+		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+
+		// Generate blobber auth tickets
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		// Create allocation
+		params := map[string]interface{}{"size": "10000", "lock": "5", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
+		allocOutput, err := utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
+		require.Nil(t, err, "Error creating allocation")
+		allocationID, err := utils.GetAllocationID(strings.Join(allocOutput, "\n"))
+
+		// Wait for 7 minutes
+		time.Sleep(7 * time.Minute)
 
 		// Update the allocation duration
-		params := createParams(map[string]interface{}{
+		updateAllocationParams := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
 		})
-		output, err = utils.UpdateAllocation(t, configPath, params, true)
+		output, err = utils.UpdateAllocation(t, configPath, updateAllocationParams, true)
 		require.Nil(t, err, "Updating allocation duration failed", strings.Join(output, "\n"))
 
-		beforeBalance, err := utils.GetBalanceZCN(t, configPath)
-		require.Nil(t, err, "Error fetching balance", beforeBalance)
+		balanceBefore, err := utils.GetBalanceZCN(t, configPath)
+		require.Nil(t, err, "Error fetching wallet balance", err)
 
 		// Cancel the allocation
 		output, err = cancelAllocation(t, configPath, allocationID, true)
@@ -102,12 +121,14 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		// Validate that the allocation is canceled and check refund
 		utils.AssertOutputMatchesAllocationRegex(t, cancelAllocationRegex, output[0])
 
-		//TODO: create cost funciton
-		//allocAfter := utils.GetAllocation(t, allocationID)
-		//refundAmount := allocBefore.WritePool - allocAfter.WritePool
-		//expectedRefund := calculateExpectedRefund(allocBefore, time.Minute*7)
-		//
-		//require.InEpsilon(t, expectedRefund, refundAmount, 0.05, "Refund amount is not as expected")
+		balanceAfter, err := utils.GetBalanceZCN(t, configPath)
+		require.Nil(t, err, "Error fetching wallet balance", err)
+		refundAmount := balanceBefore - balanceAfter
+
+		expectedRefund, err := getAllocationCost(strings.Join(output, "\n"))
+		require.Nil(t, err, "Error getting allocation cost")
+
+		require.InEpsilon(t, expectedRefund, refundAmount, 0.05, "Refund amount is not as expected")
 	})
 	t.RunWithTimeout("Cancel allocation after adding blobber check the refund amount.", time.Minute*15, func(t *test.SystemTest) {
 		// Setup: Change time_unit to 10 minutes
