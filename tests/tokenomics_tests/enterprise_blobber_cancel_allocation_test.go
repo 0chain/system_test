@@ -70,7 +70,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 
 		// Wait for 7 minutes
 		t.Log("Waiting for 7 minutes ....")
-		//time.Sleep(7 * time.Minute)
+		time.Sleep(7 * time.Minute)
 
 		// Cancel the allocation
 		output, err = cancelAllocation(t, configPath, allocationID, true)
@@ -81,7 +81,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 
 		balanceAfter, err := utils.GetBalanceZCN(t, configPath)
 		require.Nil(t, err, "Error fetching wallet balance", err)
-		refundAmount := balanceBefore - balanceAfter
+		refundAmount := balanceAfter - balanceBefore
 
 		expectedRefund := balanceBeforeCreatingAllocation - balanceBefore
 
@@ -116,7 +116,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 
 		// Wait for 7 minutes
 		t.Log("Waiting for 7 minutes ....")
-		//time.Sleep(7 * time.Minute)
+		time.Sleep(7 * time.Minute)
 
 		balanceAfterCreatingAllocation, err := utils.GetBalanceZCN(t, configPath)
 		require.Nil(t, err, "Error fetching wallet balance")
@@ -141,7 +141,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 
 		balanceAfter, err := utils.GetBalanceZCN(t, configPath)
 		require.Nil(t, err, "Error fetching wallet balance", err)
-		refundAmount := balanceBefore - balanceAfter
+		refundAmount := balanceAfter - balanceBefore
 
 		expectedRefund := balanceBeforeCreatingAllocation - balanceAfterCreatingAllocation
 		require.Nil(t, err, "Error getting allocation cost", strings.Join(allocOutput, "\n"))
@@ -171,7 +171,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		t.Log("Waiting for 7 minutes")
-		//time.Sleep(7 * time.Minute) // Wait for 7 minutes
+		time.Sleep(7 * time.Minute) // Wait for 7 minutes
 
 		// Retrieve a new blobber ID to add to the allocation
 		wd, _ := os.Getwd()
@@ -236,7 +236,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		t.Log("Waiting for 7 minutes")
-		//time.Sleep(7 * time.Minute)
+		time.Sleep(7 * time.Minute)
 
 		// Replace a blobber with another blobber with a higher price
 		wd, _ := os.Getwd()
