@@ -4,7 +4,6 @@ import (
 	"fmt"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/0chain/system_test/tests/cli_tests"
-	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -70,7 +69,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 
 		// Wait for 7 minutes
 		t.Log("Waiting for 7 minutes ....")
-		time.Sleep(7 * time.Minute)
+		//time.Sleep(7 * time.Minute)
 
 		// Cancel the allocation
 		output, err = cancelAllocation(t, configPath, allocationID, true)
@@ -116,7 +115,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 
 		// Wait for 7 minutes
 		t.Log("Waiting for 7 minutes ....")
-		time.Sleep(7 * time.Minute)
+		//time.Sleep(7 * time.Minute)
 
 		balanceAfterCreatingAllocation, err := utils.GetBalanceZCN(t, configPath)
 		require.Nil(t, err, "Error fetching wallet balance")
@@ -153,6 +152,10 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error creating wallet %v", strings.Join(output, "\n"))
 
+		// Faucet transaction
+		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+
 		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			"time_unit": "10m",
 		}, true)
@@ -171,7 +174,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		t.Log("Waiting for 7 minutes")
-		time.Sleep(7 * time.Minute) // Wait for 7 minutes
+		//time.Sleep(7 * time.Minute) // Wait for 7 minutes
 
 		// Retrieve a new blobber ID to add to the allocation
 		wd, _ := os.Getwd()
@@ -216,6 +219,9 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 	t.RunWithTimeout("Cancel allocation after adding a blobber with 2x amount check refund amount", time.Minute*15, func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error creating wallet %v", strings.Join(output, "\n"))
+		// Faucet transaction
+		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		// Setup: Change time_unit to 10 minutes
 		output, err = utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
@@ -236,7 +242,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		t.Log("Waiting for 7 minutes")
-		time.Sleep(7 * time.Minute)
+		//time.Sleep(7 * time.Minute)
 
 		// Replace a blobber with another blobber with a higher price
 		wd, _ := os.Getwd()
@@ -286,24 +292,26 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
 
+		wallet, err := utils.GetWalletForName(t, configPath, utils.EscapedTestName(t))
+		require.Nil(t, err, "Error getting wallet with name %v")
+
+		t.Log("Client id is" + wallet.ClientID)
+
 		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
-
-		var allocation climodel.Allocation
 
 		params := map[string]interface{}{"size": "10000", "lock": "5", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 
 		output, err = utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
 		require.Nil(t, err, "Error creating allocation")
 
-		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 100000000)
+		allocationID, err := utils.GetAllocationID(strings.Join(output, "\n"))
+		require.Nil(t, err, "Error getting allocation id")
+
+		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
-
-		require.NotNil(t, allocation, "Allocation id is nil")
-
-		allocationID := allocation.ID
 
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.NoError(t, err, "cancel allocation failed but should succeed", strings.Join(output, "\n"))
@@ -344,7 +352,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 }
 
 func calculateExpectedRefund(before climodel.Allocation, beforeBalance, afterBalance float64) interface{} {
-	return math.Ceil(beforeBalance) - math.Ceil(afterBalance)
+	return beforeBalance - afterBalance
 }
 
 func cancelAllocation(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {

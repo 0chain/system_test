@@ -1,18 +1,16 @@
 package tokenomics_tests
 
 import (
-	"crypto/rand"
+	"github.com/0chain/system_test/internal/api/util/test"
+	climodel "github.com/0chain/system_test/internal/cli/model"
+	"github.com/0chain/system_test/tests/cli_tests"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
-	"math/big"
+	"github.com/stretchr/testify/require"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/0chain/system_test/internal/api/model"
-	"github.com/0chain/system_test/internal/api/util/client"
-	"github.com/0chain/system_test/internal/api/util/test"
-	"github.com/0chain/system_test/internal/api/util/wait"
-	"github.com/stretchr/testify/require"
 )
 
 func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
@@ -21,239 +19,214 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 	// Change time unit to 10 minutes
 
 	// Try replacing blobber with 2x price, 0.5x price and same price. Check cost in all scenarios.
+	t.Parallel()
 
-	t.RunSequentially("Replace blobber in allocation, should work", func(t *test.SystemTest) {
-		wallet := createWallet(t)
+	t.Run("Replace blobber in allocation, should work", func(t *test.SystemTest) {
+		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
-		sdkClient.SetWallet(t, wallet)
+		//wd, _ := os.Getwd()
+		//walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+		//configFile := filepath.Join(wd, "config", configPath)
 
-		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		//addBlobberID, addBlobberUrl, err := getBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
+		//require.Nil(t, err)
 
-		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		numberOfBlobbersBefore := len(allocation.Blobbers)
+		//addBlobberAuthTicket, err := getBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		//require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
-		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
-
-		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
-
-		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
-
-		var numberOfBlobbersAfter int
-
-		wait.PoolImmediately(t, time.Second*30, func() bool {
-			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-			numberOfBlobbersAfter = len(allocation.Blobbers)
-
-			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			//"add_blobber":             addBlobberID,
+			//"add_blobber_auth_ticket": addBlobberAuthTicket,
+			"remove_blobber": blobberToRemove,
 		})
 
-		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
-		require.True(t, isBlobberExist(newBlobberID, allocation.Blobbers))
+		output, err := updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 	})
 
-	t.RunSequentially("Replace blobber with the same one in allocation, shouldn't work", func(t *test.SystemTest) {
-		wallet := createWallet(t)
+	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *test.SystemTest) {
+		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
-		sdkClient.SetWallet(t, wallet)
+		//blobberAuthTickets, _ := generateBlobberAuthTickets(t)
+		//addBlobberAuthTicket := blobberAuthTickets[0]
 
-		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		numberOfBlobbersBefore := len(allocation.Blobbers)
-
-		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
-
-		apiClient.UpdateAllocationBlobbers(t, wallet, oldBlobberID, oldBlobberID, allocationID, client.TxUnsuccessfulStatus)
-
-		var numberOfBlobbersAfter int
-
-		wait.PoolImmediately(t, time.Second*30, func() bool {
-			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-			numberOfBlobbersAfter = len(allocation.Blobbers)
-
-			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		params := createParams(map[string]interface{}{
+			"allocation":  allocationID,
+			"add_blobber": blobberToRemove,
+			//"add_blobber_auth_ticket": addBlobberAuthTicket,
+			"remove_blobber": blobberToRemove,
 		})
 
-		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
+		output, err := updateAllocation(t, configPath, params, false)
+		require.NotNil(t, err, "Expected error updating allocation but got none", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "blobber already exists in allocation")
 	})
 
-	t.RunSequentially("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *test.SystemTest) {
-		wallet := createWallet(t)
+	t.Run("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *test.SystemTest) {
+		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
-		sdkClient.SetWallet(t, wallet)
+		incorrectBlobberID := "1234abc"
 
-		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		//blobberAuthTickets, _ := generateBlobberAuthTickets(t)
+		//addBlobberAuthTicket := blobberAuthTickets[0]
 
-		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		numberOfBlobbersBefore := len(allocation.Blobbers)
+		params := createParams(map[string]interface{}{
+			"allocation":  allocationID,
+			"add_blobber": incorrectBlobberID,
+			//"add_blobber_auth_ticket": addBlobberAuthTicket,
+			"remove_blobber": blobberToRemove,
+		})
 
-		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-		require.NotZero(t, newBlobberID, "Old blobber ID contains zero value")
+		output, err := updateAllocation(t, configPath, params, false)
+		require.NotNil(t, err, "Expected error updating allocation but got none", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "invalid configuration for given blobber ID")
+	})
 
-		result, err := rand.Int(rand.Reader, big.NewInt(10))
+	t.Run("Check token accounting of a blobber replacing in allocation, should work", func(t *test.SystemTest) {
+		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
+
+		alloc := getAllocation(t, allocationID)
+		require.NotNil(t, alloc)
+
+		//prevReplaceeBlobberStake := alloc.Blobbers[blobberToRemove].Stake
+
+		//wd, _ := os.Getwd()
+		//walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
+		//configFile := filepath.Join(wd, "config", configPath)
+
+		//addBlobberID, addBlobberUrl, err := getBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
+		//require.Nil(t, err)
+
+		//addBlobberAuthTicket, err := getBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		//require.Nil(t, err, "Unable to generate auth ticket for add blobber")
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			//"add_blobber":             addBlobberID,
+			//"add_blobber_auth_ticket": addBlobberAuthTicket,
+			"remove_blobber": blobberToRemove,
+		})
+
+		output, err := updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		updatedAlloc := getAllocation(t, allocationID)
+		require.NotNil(t, updatedAlloc)
+
+		//newReplaceeBlobberStake := updatedAlloc.Blobbers[addBlobberID].Stake
+		//require.Equal(t, prevReplaceeBlobberStake, newReplaceeBlobberStake,
+		//	"Stake should be transferred from old blobber to new")
+	})
+
+	t.RunSequentiallyWithTimeout("Replace blobber in allocation with repair should work", 90*time.Second, func(t *test.SystemTest) {
+		//allocSize := int64(4096)
+		fileSize := int64(1024)
+
+		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
+
+		filename := utils.GenerateRandomTestFileName(t)
+		err := utils.CreateFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
-		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, result.String(), allocationID, client.TxUnsuccessfulStatus)
+		remotePath := "/file" + filename
 
-		var numberOfBlobbersAfter int
+		uploadParams := map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  filename,
+		}
+		output, err := utils.UploadFile(t, configPath, uploadParams, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		//
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
+		//
+		addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
+		require.Nil(t, err)
+		//
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
-		wait.PoolImmediately(t, time.Second*30, func() bool {
-			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-			numberOfBlobbersAfter = len(allocation.Blobbers)
-
-			return numberOfBlobbersAfter == numberOfBlobbersBefore
+		params := createParams(map[string]interface{}{
+			"allocation":              allocationID,
+			"add_blobber":             addBlobberID,
+			"add_blobber_auth_ticket": addBlobberAuthTicket,
+			"remove_blobber":          blobberToRemove,
 		})
 
-		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
+		output, err = updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+		utils.AssertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
+
+		//fref, err := cliutils.VerifyFileRefFromBlobber(walletFile, configFile, allocationID, addBlobberID, remotePath)
+		//require.Nil(t, err)
+		//require.NotNil(t, fref)
 	})
-
-	t.RunSequentially("Check token accounting of a blobber replacing in allocation, should work", func(t *test.SystemTest) {
-		wallet := createWallet(t)
-
-		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
-		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-
-		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-		numberOfBlobbersBefore := len(allocation.Blobbers)
-
-		oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-		require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
-
-		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-		require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
-
-		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		balanceBeforeAllocationUpdate := walletBalance.Balance
-
-		apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
-
-		var numberOfBlobbersAfter int
-
-		wait.PoolImmediately(t, time.Second*30, func() bool {
-			allocation = apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-			numberOfBlobbersAfter = len(allocation.Blobbers)
-
-			return numberOfBlobbersAfter == numberOfBlobbersBefore
-		})
-
-		walletBalance = apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
-		balanceAfterAllocationUpdate := walletBalance.Balance
-
-		require.Equal(t, numberOfBlobbersAfter, numberOfBlobbersBefore)
-		require.Greater(t, balanceBeforeAllocationUpdate, balanceAfterAllocationUpdate)
-	})
-
-	//t.RunSequentiallyWithTimeout("Replace blobber in allocation with repair should work", 90*time.Second, func(t *test.SystemTest) {
-	//	wallet := createWallet(t)
-	//
-	//	sdkClient.SetWallet(t, wallet)
-	//
-	//	blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-	//	allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
-	//	allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
-	//
-	//	uploadOp := sdkClient.AddUploadOperation(t, "", "")
-	//	sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
-	//
-	//	allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
-	//	apiClient.CreateReadPool(t, wallet, 1.0, client.TxSuccessfulStatus)
-	//
-	//	oldBlobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-	//	require.NotZero(t, oldBlobberID, "Old blobber ID contains zero value")
-	//	newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
-	//	require.NotZero(t, newBlobberID, "New blobber ID contains zero value")
-	//	apiClient.UpdateAllocationBlobbers(t, wallet, newBlobberID, oldBlobberID, allocationID, client.TxSuccessfulStatus)
-	//
-	//	time.Sleep(10 * time.Second)
-	//
-	//	alloc, err := sdk.GetAllocation(allocationID)
-	//	require.Nil(t, err)
-	//	// Check for blobber replacement
-	//	notFound := true
-	//	require.True(t, len(alloc.Blobbers) > 0)
-	//	// Check if new blobber is in the same position as old blobber
-	//	require.True(t, alloc.Blobbers[0].ID == newBlobberID)
-	//	for _, blobber := range alloc.Blobbers {
-	//		if blobber.ID == oldBlobberID {
-	//			notFound = false
-	//			break
-	//		}
-	//	}
-	//	require.True(t, notFound, "old blobber should not be in the list")
-	//	// check for repair
-	//	_, _, req, _, err := alloc.RepairRequired("/")
-	//	require.Nil(t, err)
-	//	require.True(t, req)
-	//
-	//	// do repair
-	//	sdkClient.RepairAllocation(t, allocationID)
-	//
-	//	_, err = sdk.GetFileRefFromBlobber(allocationID, newBlobberID, uploadOp.RemotePath)
-	//	require.Nil(t, err)
-	//})
 }
 
-func createWallet(t *test.SystemTest) *model.Wallet {
-	output, err := utils.CreateWallet(t, configPath)
-	require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
+func setupAllocationAndGetRandomBlobber(t *test.SystemTest, cliConfigFilename string) (string, string) {
+	allocationID := setupAllocation(t, cliConfigFilename)
+	//allocation := getAllocation(t, allocationID)
 
-	wallet, err := utils.GetFullWalletForName(t, configPath, utils.EscapedTestName(t))
-	require.Nil(t, err, "Error getting created wallet")
-	require.NotNil(t, wallet, "Error empty wallet")
+	//var blobberList []string
+	//for blobberID := range allocation.Blobbers {
+	//blobberList = append(blobberList, string(blobberID))
+	//}
 
-	//Execute faucet
-	output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-	require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+	//randomBlobber := blobberList[rand.Intn(len(blobberList))]
 
-	//TODO: fix this to properly format the wallet.
-	return &model.Wallet{}
+	return allocationID, ""
 }
 
-func getNotUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes []*model.StorageNode) string {
-	for _, availableStorageNodeID := range *availableStorageNodeIDs {
-		var found bool
-		for _, usedStorageNode := range usedStorageNodes {
-			if usedStorageNode.ID == availableStorageNodeID {
-				found = true
-			}
-		}
-		if !found {
-			return availableStorageNodeID
-		}
-	}
-	return ""
+func getAllocation(t *test.SystemTest, allocationID string) *climodel.Allocation {
+	//wd, _ := os.Getwd()
+	//walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+	//configFile := filepath.Join(wd, "config", configPath)
+	//
+	//params := []string{
+	//	"list-allocations",
+	//	"--id", allocationID,
+	//	"--json",
+	//	"--wallet", walletFile,
+	//	"--configDir", "./config",
+	//	"--config", configFile,
+	//}
+	//
+	//res,err := cliutils.RunCommand(t, "./zbox", params, 2, 2*time.Second)
+	//require.Len(t, res, 1)
+	//
+	//var alloc climodel.Allocation
+	//err := json.Unmarshal([]byte(res[0]), &alloc)
+	//require.NoError(t, err)
+
+	//return &alloc
+	return nil
 }
 
-func getFirstUsedStorageNodeID(availableStorageNodeIDs *[]string, usedStorageNodes []*model.StorageNode) string {
-	for _, availableStorageNodeID := range *availableStorageNodeIDs {
-		for _, usedStorageNode := range usedStorageNodes {
-			if usedStorageNode.ID == availableStorageNodeID {
-				return availableStorageNodeID
-			}
-		}
-	}
-	return ""
-}
+func getAllBlobbers(t *test.SystemTest) []*climodel.Blobber {
+	//wd, _ := os.Getwd()
+	//walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
+	//configFile := filepath.Join(wd, "config", configPath)
+	//
+	//params := []string{
+	//	"blobber-list",
+	//	"--wallet", walletFile,
+	//	"--configDir", "./config",
+	//	"--config", configFile,
+	//	"--json",
+	//}
 
-func getBlobberURL(blobberID string, blobbers []*model.StorageNode) string {
-	for _, blobber := range blobbers {
-		if blobber.ID == blobberID {
-			return blobber.BaseURL
-		}
-	}
-	return ""
-}
+	//output := cliutils.RunCommand(t, "./zbox", params, 3, time.Second*2)
+	//require.Len(t, output, 1)
+	//
+	//var blobbers []*climodel.Blobber
+	//err := json.Unmarshal([]byte(output[0]), &blobbers)
+	//require.Nil(t, err)
 
-func isBlobberExist(blobberID string, blobbers []*model.StorageNode) bool {
-	return getBlobberURL(blobberID, blobbers) != ""
+	return nil
 }
