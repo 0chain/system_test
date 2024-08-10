@@ -37,6 +37,20 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 	// Change time unit to 10 minutes
 
+	t.TestSetup("set storage config to use time_unit as 10 minutes", func() {
+		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "10m",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+	})
+
+	t.Cleanup(func() {
+		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "1h",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+	})
+
 	t.RunWithTimeout("Update Expiry Should Work", 15*time.Minute, func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
 
