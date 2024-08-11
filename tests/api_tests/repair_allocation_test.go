@@ -286,7 +286,10 @@ func TestRepairAllocation(testSetup *testing.T) {
 			format := ""
 			if i%2 == 0 {
 				format = "pdf"
-				fileSize = int64(1024 * 1024 * 300)
+				fileSize = int64(1024 * 1024 * 10)
+			} else if i%3 == 0 {
+				format = "pdf"
+				fileSize = int64(1024 * 1024 * 5)
 			}
 			op := sdkClient.AddUploadOperation(t, path, format, fileSize)
 			ops = append(ops, op)
@@ -353,8 +356,8 @@ func TestRepairSize(testSetup *testing.T) {
 	wallet := createWallet(t)
 	sdkClient.SetWallet(t, wallet)
 	apiClient.CreateReadPool(t, wallet, 0.5, client.TxSuccessfulStatus)
-	
-	t.RunSequentiallyWithTimeout("repair size in case of no blobber failure should be zero", 5 * time.Minute, func(t *test.SystemTest) {
+
+	t.RunSequentiallyWithTimeout("repair size in case of no blobber failure should be zero", 5*time.Minute, func(t *test.SystemTest) {
 		// create allocation with default blobber requirements
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -362,9 +365,9 @@ func TestRepairSize(testSetup *testing.T) {
 		t.Logf("allocationID: %v", allocationID)
 
 		// create and upload a file of 2KB to allocation.
-		op := sdkClient.AddUploadOperation(t, "", "", int64(1024 * 2))
+		op := sdkClient.AddUploadOperation(t, "", "", int64(1024*2))
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
-		
+
 		// assert both upload and download size should be zero
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoErrorf(t, err, "allocation ID %v is not found", allocationID)
@@ -374,8 +377,8 @@ func TestRepairSize(testSetup *testing.T) {
 		require.Equal(t, uint64(0), rs.UploadSize, "upload size doesn't match")
 		require.Equal(t, uint64(0), rs.DownloadSize, "download size doesn't match")
 	})
-	
-	t.RunSequentiallyWithTimeout("repair size on single blobber failure should match", 5 * time.Minute, func(t *test.SystemTest) {
+
+	t.RunSequentiallyWithTimeout("repair size on single blobber failure should match", 5*time.Minute, func(t *test.SystemTest) {
 		// create allocation with default blobber requirements
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
@@ -390,18 +393,18 @@ func TestRepairSize(testSetup *testing.T) {
 		alloc, err := sdk.GetAllocation(allocationID)
 		require.NoErrorf(t, err, "allocation ID %v is not found", allocationID)
 		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
-		op := sdkClient.AddUploadOperation(t, "", "", int64(1024 * 2))
+		op := sdkClient.AddUploadOperation(t, "", "", int64(1024*2))
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op}, client.WithRepair(alloc.Blobbers))
-		
+
 		// assert upload and download size should be 1KB and 2KB respectively
 		rs, err := alloc.RepairSize("/")
 		require.Nil(t, err)
 		t.Logf("repair size: %v", rs)
 		require.Equal(t, uint64(1024), rs.UploadSize, "upload size doesn't match")
-		require.Equal(t, uint64(1024 * 2), rs.DownloadSize, "download size doesn't match")
+		require.Equal(t, uint64(1024*2), rs.DownloadSize, "download size doesn't match")
 	})
 
-	t.RunSequentiallyWithTimeout("repair size with nested directories and two blobber failure should match", 5 * time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("repair size with nested directories and two blobber failure should match", 5*time.Minute, func(t *test.SystemTest) {
 		// create allocation with default blobber requirements
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
@@ -419,31 +422,31 @@ func TestRepairSize(testSetup *testing.T) {
 		ops := []sdk.OperationRequest{
 			sdkClient.AddUploadOperationWithPath(t, allocationID, "/dir1/"),
 			sdkClient.AddUploadOperationWithPath(t, allocationID, "/dir1/"),
-			sdkClient.AddUploadOperationWithPath(t, allocationID, "/"),  
+			sdkClient.AddUploadOperationWithPath(t, allocationID, "/"),
 			sdkClient.AddUploadOperationWithPath(t, allocationID, "/"),
 		}
 		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
-		
+
 		// assert both upload and download size should be 2KB in /dir1
 		rs, err := alloc.RepairSize("/dir1")
 		require.Nilf(t, err, "error getting repair size in /dir1: %v", err)
 		t.Logf("repair size: %v", rs)
-		require.Equal(t, uint64(1024 * 2), rs.UploadSize, "upload size in directory /dir1 doesn't match")
-		require.Equal(t, uint64(1024 * 2), rs.DownloadSize, "download size in directory dir1 doesn't match")
-		
+		require.Equal(t, uint64(1024*2), rs.UploadSize, "upload size in directory /dir1 doesn't match")
+		require.Equal(t, uint64(1024*2), rs.DownloadSize, "download size in directory dir1 doesn't match")
+
 		// with trailing slash
-		// assert both upload and download size should be 2KB in /dir1/ 
+		// assert both upload and download size should be 2KB in /dir1/
 		rs, err = alloc.RepairSize("/dir1/")
 		require.Nilf(t, err, "error getting repair size in /dir1/: %v", err)
 		t.Logf("repair size: %v", rs)
-		require.Equal(t, uint64(1024 * 2), rs.UploadSize, "upload size in directory /dir1/ doesn't match")
-		require.Equal(t, uint64(1024 * 2), rs.DownloadSize, "download size in directory /dir1/ doesn't match")
-		
+		require.Equal(t, uint64(1024*2), rs.UploadSize, "upload size in directory /dir1/ doesn't match")
+		require.Equal(t, uint64(1024*2), rs.DownloadSize, "download size in directory /dir1/ doesn't match")
+
 		// assert both upload and download size should be 4KB in root directory
 		rs, err = alloc.RepairSize("/")
 		require.Nilf(t, err, "error getting repair size in /: %v", err)
 		t.Logf("repair size: %v", rs)
-		require.Equal(t, uint64(1024 * 4), rs.UploadSize, "upload size in root directory doesn't match")
-		require.Equal(t, uint64(1024 * 4), rs.DownloadSize, "download size in root directory doesn't match")
+		require.Equal(t, uint64(1024*4), rs.UploadSize, "upload size in root directory doesn't match")
+		require.Equal(t, uint64(1024*4), rs.DownloadSize, "download size in root directory doesn't match")
 	})
 }
