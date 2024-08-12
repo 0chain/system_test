@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/0chain/system_test/tests/cli_tests"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -290,9 +292,12 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.InEpsilon(t, amountTotalLockedToAlloc, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
 
+		txn, err := getTransacionFromSingleSharder(t, afterAlloc.Tx)
+		require.Nil(t, err)
+
 		// Verify blobber rewards calculations
 		timeUnitInSeconds := int64(600) // 10 minutes
-		durationOfUsedInSeconds := afterAlloc.ExpirationDate - timeUnitInSeconds
+		durationOfUsedInSeconds := int64(txn.CreationDate) - afterAlloc.StartTime
 
 		expectedPaymentToReplacedBlobber := 5e8 * durationOfUsedInSeconds / timeUnitInSeconds
 
@@ -1155,7 +1160,6 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 
 	return allocationID
 }
-
 func getAllocationCost(str string) (float64, error) {
 	allocationCostInOutput, err := strconv.ParseFloat(strings.Fields(str)[5], 64)
 	if err != nil {
@@ -1181,25 +1185,6 @@ func createParams(params map[string]interface{}) string {
 		}
 	}
 	return strings.TrimSpace(builder.String())
-}
-
-func createKeyValueParams(params map[string]string) string {
-	keys := "--keys \""
-	values := "--values \""
-	first := true
-	for k, v := range params {
-		if first {
-			first = false
-		} else {
-			keys += ","
-			values += ","
-		}
-		keys += " " + k
-		values += " " + v
-	}
-	keys += "\""
-	values += "\""
-	return keys + " " + values
 }
 
 func updateAllocation(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
@@ -1232,4 +1217,70 @@ func listAllocations(t *test.SystemTest, cliConfigFilename string) ([]string, er
 		cliConfigFilename,
 	)
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+}
+
+func getTransacionFromSingleSharder(t *test.SystemTest, hash string) (TransactionVerify, error) {
+	sharderBaseUrl := utils.GetSharderUrl(t)
+	requestURL := fmt.Sprintf("%s/v1/transaction/get/confirmation?hash=%s", sharderBaseUrl, hash)
+
+	var result TransactionVerify
+
+	res, _ := http.Get(requestURL) //nolint:gosec
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			return
+		}
+	}(res.Body)
+
+	body, _ := io.ReadAll(res.Body)
+
+	err := json.Unmarshal(body, &result)
+	if err != nil {
+		return TransactionVerify{}, err
+	}
+
+	return result, nil
+}
+
+type TransactionVerify struct {
+	Version           string `json:"version"`
+	Hash              string `json:"hash"`
+	BlockHash         string `json:"block_hash"`
+	PreviousBlockHash string `json:"previous_block_hash"`
+	Txn               struct {
+		Hash              string `json:"hash"`
+		Version           string `json:"version"`
+		ClientId          string `json:"client_id"`
+		PublicKey         string `json:"public_key"`
+		ToClientId        string `json:"to_client_id"`
+		ChainId           string `json:"chain_id"`
+		TransactionData   string `json:"transaction_data"`
+		TransactionValue  int    `json:"transaction_value"`
+		Signature         string `json:"signature"`
+		CreationDate      int    `json:"creation_date"`
+		TransactionFee    int    `json:"transaction_fee"`
+		TransactionNonce  int    `json:"transaction_nonce"`
+		TransactionType   int    `json:"transaction_type"`
+		TransactionOutput string `json:"transaction_output"`
+		TxnOutputHash     string `json:"txn_output_hash"`
+		TransactionStatus int    `json:"transaction_status"`
+	} `json:"txn"`
+	CreationDate      int    `json:"creation_date"`
+	MinerId           string `json:"miner_id"`
+	Round             int    `json:"round"`
+	TransactionStatus int    `json:"transaction_status"`
+	RoundRandomSeed   int64  `json:"round_random_seed"`
+	StateChangesCount int    `json:"state_changes_count"`
+	MerkleTreeRoot    string `json:"merkle_tree_root"`
+	MerkleTreePath    struct {
+		Nodes     []string `json:"nodes"`
+		LeafIndex int      `json:"leaf_index"`
+	} `json:"merkle_tree_path"`
+	ReceiptMerkleTreeRoot string `json:"receipt_merkle_tree_root"`
+	ReceiptMerkleTreePath struct {
+		Nodes     []string `json:"nodes"`
+		LeafIndex int      `json:"leaf_index"`
+	} `json:"receipt_merkle_tree_path"`
 }
