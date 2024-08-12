@@ -50,7 +50,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	require.Nil(t, err, "Error creating configuration wallet", strings.Join(output, "\n"))
 
 	var blobbersList []climodel.Blobber
-	output, err = utils.ListBlobbers(t, configPath, "json")
+	output, err = utils.ListBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error fetching blobbers %v", strings.Join(output, "\n"))
 	require.Len(t, len(output), 1, "Error wrong json format", strings.Join(output, "\n"))
 
