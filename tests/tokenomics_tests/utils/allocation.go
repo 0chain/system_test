@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/0chain/gosdk/core/conf"
+	"github.com/0chain/gosdk/zboxcore/sdk"
+	"github.com/0chain/gosdk/zcncore"
+	"io"
 	"os"
 	"regexp"
 	"strconv"
@@ -85,6 +89,7 @@ func SetupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 
 func SetupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 2.0
+	lockAmountPassed := false
 	// Then create new allocation
 	options := map[string]interface{}{"size": "10000", "lock": "0.5"}
 
@@ -98,12 +103,19 @@ func SetupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 			faucetTokens = token
 			delete(params, "tokens")
 		}
+
+		if _, lockPassed := params["lock"]; lockPassed {
+			lockAmountPassed = true
+		}
+
 		for k, v := range params {
 			options[k] = v
 		}
 	}
 
-	options["lock"] = faucetTokens / 2
+	if !lockAmountPassed {
+		options["lock"] = faucetTokens / 2
+	}
 
 	t.Log("Creating new allocation...", options)
 
@@ -128,53 +140,22 @@ func SetupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 }
 
 func SetupEnterpriseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	return SetupEnterpriseAllocationWithWallet(t, EscapedTestName(t), cliConfigFilename)
+	return SetupEnterpriseAllocationWithWallet(t, EscapedTestName(t), cliConfigFilename, extraParams...)
 }
 
 func SetupEnterpriseAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	faucetTokens := 2.0
-	// Then create new allocation
-	options := map[string]interface{}{"size": "10000", "lock": "0.5", "blobber_auth_tickets": "", "preferred_blobbers": ""}
-
-	// Add additional parameters if available
-	// Overwrite with new parameters when available
-	for _, params := range extraParams {
-		// Extract parameters unrelated to upload
-		if tokenStr, ok := params["tokens"]; ok {
-			token, err := strconv.ParseFloat(fmt.Sprintf("%v", tokenStr), 64)
-			require.Nil(t, err)
-			faucetTokens = token
-			delete(params, "tokens")
-		}
-		for k, v := range params {
-			options[k] = v
-		}
+	if len(extraParams) == 0 {
+		extraParams = append(extraParams, map[string]interface{}{})
 	}
 
-	options["lock"] = faucetTokens / 2
+	extraParams[0]["blobber_auth_tickets"], extraParams[0]["preferred_blobbers"] = GenerateBlobberAuthTicketsWithWallet(t, walletName)
+	extraParams[0]["enterprise"] = true
 
-	t.Log("Creating new enterprise allocation...", options)
+	allocID := SetupAllocationWithWallet(t, walletName, cliConfigFilename, extraParams...)
 
-	t.Log("Faucet Tokens : ", faucetTokens)
+	t.Logf("Enterprise allocation created with ID: %s", allocID)
 
-	// First create a wallet and run faucet command
-	output, err := CreateWalletForName(t, cliConfigFilename, walletName)
-	require.Nil(t, err, "registering wallet failed", strings.Join(output, "\n"))
-
-	output, err = ExecuteFaucetWithTokensForWallet(t, walletName, cliConfigFilename, faucetTokens+10)
-	require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-	options["blobber_auth_tickets"], options["preferred_blobbers"] = GenerateBlobberAuthTicketsWithWallet(t, walletName)
-
-	output, err = CreateNewEnterpriseAllocationForWallet(t, walletName, cliConfigFilename, CreateParams(options))
-	require.Nil(t, err, "create new allocation failed", strings.Join(output, "\n"))
-	require.Len(t, output, 1)
-
-	// Get the allocation ID and return it
-	allocationID, err := GetAllocationID(output[0])
-	require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-
-	return allocationID
+	return allocID
 }
 
 func DownloadFile(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
@@ -341,4 +322,79 @@ func DeleteFile(t *test.SystemTest, walletName, params string, retry bool) ([]st
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
+}
+
+func getBlobberNotPartOfAllocation(walletname, configFile, allocationID string) (*sdk.Blobber, error) {
+	err := InitSDK(walletname, configFile)
+	if err != nil {
+		return nil, err
+	}
+
+	a, err := sdk.GetAllocation(allocationID)
+	if err != nil {
+		return nil, err
+	}
+
+	blobbers, err := sdk.GetBlobbers(true, false)
+	if err != nil {
+		return nil, err
+	}
+
+	allocationBlobsMap := map[string]bool{}
+	for _, b := range a.BlobberDetails {
+		allocationBlobsMap[b.BlobberID] = true
+	}
+
+	for _, blobber := range blobbers {
+		if _, ok := allocationBlobsMap[string(blobber.ID)]; !ok {
+			return blobber, nil
+		}
+	}
+
+	return nil, fmt.Errorf("failed to get blobber not part of allocation")
+}
+
+// GetBlobberNotPartOfAllocation returns a blobber not part of current allocation
+func GetBlobberIdAndUrlNotPartOfAllocation(walletname, configFile, allocationID string) (string, string, error) {
+	blobber, err := getBlobberNotPartOfAllocation(walletname, configFile, allocationID)
+	if err != nil || blobber == nil {
+		return "", "", err
+	}
+	return string(blobber.ID), blobber.BaseURL, err
+}
+
+func InitSDK(wallet, configFile string) error {
+	f, err := os.Open(wallet)
+	if err != nil {
+		return err
+	}
+	clientBytes, err := io.ReadAll(f)
+	if err != nil {
+		return err
+	}
+	walletJSON := string(clientBytes)
+
+	parsed, err := conf.LoadConfigFile(configFile)
+	if err != nil {
+		return err
+	}
+
+	marshal, err := json.Marshal(parsed)
+	if err != nil {
+		return err
+	}
+	err = zcncore.Init(string(marshal))
+	if err != nil {
+		return err
+	}
+
+	err = sdk.InitStorageSDK(
+		walletJSON,
+		parsed.BlockWorker,
+		parsed.ChainID,
+		parsed.SignatureScheme,
+		nil,
+		0,
+	)
+	return err
 }

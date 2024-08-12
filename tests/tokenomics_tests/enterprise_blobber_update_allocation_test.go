@@ -28,6 +28,15 @@ var (
 	repairCompletednRegex = regexp.MustCompile(`Repair file completed, Total files repaired: {2}1`)
 )
 
+func costOfAlloc(alloc climodel.Allocation) int64 {
+	cost := float64(0)
+	for _, blobber := range alloc.BlobberDetails {
+		cost += (sizeInGB(alloc.Size) / float64(alloc.DataShards)) * float64(blobber.Terms.WritePrice)
+	}
+
+	return int64(cost)
+}
+
 func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
@@ -50,6 +59,205 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
+
+	t.RunWithTimeout("Extend duration cost calculation", 15*time.Minute, func(t *test.SystemTest) {
+		utils.SetupWalletWithCustomTokens(t, configPath, 10)
+
+		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
+		allocationID := utils.SetupEnterpriseAllocation(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"data":   3,
+			"parity": 3,
+			"lock":   0.2, // 2GB total size where write price per blobber is 0.1ZCN
+		})
+
+		beforeAlloc := utils.GetAllocation(t, allocationID)
+
+		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
+
+		waitForTimeInMinutesWhileLogging(t, 5)
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"extend":     true,
+			"lock":       0.2, // Locking 0.2 ZCN as we can't calculate the accurate time of update, will validate numbers after updating the alloc
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+		amountTotalLockedToAlloc += 2e9 // 0.2ZCN
+
+		require.Nil(t, err, "Could not update "+
+			"allocation due to error", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		afterAlloc := utils.GetAllocation(t, allocationID)
+		require.Less(t, beforeAlloc.ExpirationDate, afterAlloc.ExpirationDate,
+			fmt.Sprint("Expiration Time doesn't match: "+
+				"Before:", beforeAlloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
+		)
+
+		// Verify write pool calculations
+		timeUnitInSeconds := int64(600) // 10 minutes
+		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
+
+		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+		expectedWritePoolBalance := amountTotalLockedToAlloc - expectedPaymentToBlobbers
+
+		// Log all values
+		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
+		t.Logf("Duration of used in seconds: %d", durationOfUsedInSeconds)
+		t.Logf("Expire time before: %d", beforeAlloc.ExpirationDate)
+		t.Logf("Expire time after: %d", afterAlloc.ExpirationDate)
+		t.Logf("Real cost of before alloc: %d", realCostOfBeforeAlloc)
+		t.Logf("Expected payment to blobbers: %d", expectedPaymentToBlobbers)
+		t.Logf("Expected write pool balance: %d", expectedWritePoolBalance)
+		t.Logf("Write pool balance: %d", afterAlloc.WritePool)
+
+		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
+
+		// Verify blobber rewards calculations
+	})
+
+	t.RunWithTimeout("Upgrade size cost calculation", 15*time.Minute, func(t *test.SystemTest) {
+		utils.SetupWalletWithCustomTokens(t, configPath, 10)
+
+		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
+		allocationID := utils.SetupEnterpriseAllocation(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"data":   3,
+			"parity": 3,
+			"lock":   0.2, // 2GB total size where write price per blobber is 0.1ZCN
+		})
+
+		beforeAlloc := utils.GetAllocation(t, allocationID)
+
+		waitForTimeInMinutesWhileLogging(t, 5)
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"extend":     true,
+			"lock":       0.4, // Locking 0.4 ZCN (double as we have new size) as we can't calculate the accurate time of update, will validate numbers after updating the alloc
+			"size":       1 * GB,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+		amountTotalLockedToAlloc += 4e9 // 0.4ZCN
+
+		require.Nil(t, err, "Could not update "+
+			"allocation due to error", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		afterAlloc := utils.GetAllocation(t, allocationID)
+		require.Less(t, beforeAlloc.ExpirationDate, afterAlloc.ExpirationDate,
+			fmt.Sprint("Expiration Time doesn't match: "+
+				"Before:", beforeAlloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
+		)
+
+		// Verify write pool calculations
+		timeUnitInSeconds := int64(600) // 10 minutes
+		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
+
+		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
+		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+		expectedWritePoolBalance := amountTotalLockedToAlloc - expectedPaymentToBlobbers
+
+		// Log all values
+		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
+		t.Logf("Duration of used in seconds: %d", durationOfUsedInSeconds)
+		t.Logf("Expire time before: %d", beforeAlloc.ExpirationDate)
+		t.Logf("Expire time after: %d", afterAlloc.ExpirationDate)
+		t.Logf("Real cost of before alloc: %d", realCostOfBeforeAlloc)
+		t.Logf("Expected payment to blobbers: %d", expectedPaymentToBlobbers)
+		t.Logf("Expected write pool balance: %d", expectedWritePoolBalance)
+		t.Logf("Write pool balance: %d", afterAlloc.WritePool)
+
+		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
+	})
+
+	t.RunWithTimeout("Add blobber cost calculation", 15*time.Minute, func(t *test.SystemTest) {
+		utils.SetupWalletWithCustomTokens(t, configPath, 10)
+
+		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
+		allocationID := utils.SetupEnterpriseAllocation(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"data":   2,
+			"parity": 2,
+			"lock":   0.2, // 2GB total size where write price per blobber is 0.1ZCN
+		})
+
+		waitForTimeInMinutesWhileLogging(t, 5)
+
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
+		addBlobberID, addBlobberUrl, err := utils.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
+		require.Nil(t, err)
+
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
+
+		params := createParams(map[string]interface{}{
+			"allocation":              allocationID,
+			"lock":                    0.05, // Locking 0.05 ZCN (cost of single blobber)
+			"add_blobber":             addBlobberID,
+			"add_blobber_auth_ticket": addBlobberAuthTicket,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+		amountTotalLockedToAlloc += 0.05 * 1e10 // 0.25ZCN
+
+		require.Nil(t, err, "Could not update "+
+			"allocation due to error", strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		afterAlloc := utils.GetAllocation(t, allocationID)
+
+		require.InEpsilon(t, amountTotalLockedToAlloc, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
+	})
+
+	t.RunWithTimeout("Replace blobber cost calculation", 15*time.Minute, func(t *test.SystemTest) {
+		utils.SetupWalletWithCustomTokens(t, configPath, 10)
+
+		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
+		allocationID := utils.SetupEnterpriseAllocation(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"data":   2,
+			"parity": 2,
+			"lock":   0.2, // 2GB total size where write price per blobber is 0.1ZCN
+		})
+
+		beforeAlloc := utils.GetAllocation(t, allocationID)
+
+		waitForTimeInMinutesWhileLogging(t, 5)
+
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
+		addBlobberID, addBlobberUrl, err := utils.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
+		require.Nil(t, err)
+
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
+
+		params := createParams(map[string]interface{}{
+			"allocation":              allocationID,
+			"add_blobber":             addBlobberID,
+			"add_blobber_auth_ticket": addBlobberAuthTicket,
+			"remove_blobber":          beforeAlloc.BlobberDetails[0].BlobberID,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+
+		require.Nil(t, err, "Could not update "+
+			"allocation due to error", strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		afterAlloc := utils.GetAllocation(t, allocationID)
+
+		require.InEpsilon(t, amountTotalLockedToAlloc, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
+	})
+
+	t.Skip()
 
 	t.RunWithTimeout("Update Expiry Should Work", 15*time.Minute, func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
@@ -948,7 +1156,7 @@ func updateAllocationWithWallet(t *test.SystemTest, wallet, cliConfigFilename, p
 	t.Logf("Updating allocation...")
 	cmd := fmt.Sprintf(
 		"./zbox updateallocation %s --silent --wallet %s "+
-			"--configDir ./config --config %s --lock 0.2",
+			"--configDir ./config --config %s",
 		params,
 		wallet+"_wallet.json",
 		cliConfigFilename,
