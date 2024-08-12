@@ -87,8 +87,6 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			fmt.Sprint("Expiration Time doesn't match: "+
 				"Before:", allocationBeforeUpdate.ExpirationDate, "After:", ac.ExpirationDate),
 		)
-
-		require.InEpsilon(t)
 	})
 
 	t.Run("Update Size Should Work", func(t *test.SystemTest) {

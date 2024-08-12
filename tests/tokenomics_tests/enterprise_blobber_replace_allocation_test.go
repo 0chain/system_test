@@ -2,7 +2,6 @@ package tokenomics_tests
 
 import (
 	"github.com/0chain/system_test/internal/api/util/test"
-	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/0chain/system_test/tests/cli_tests"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 	"github.com/stretchr/testify/require"
@@ -65,8 +64,13 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 
 		alloc := utils.GetAllocation(t, allocationID)
 		require.NotNil(t, alloc)
+		var prevReplaceeBlobberStake int64
 
-		//prevReplaceeBlobberStake := alloc.Blobbers[blobberToRemove].Stake
+		for _, blobber := range alloc.Blobbers {
+			if blobber.ID == blobberToRemove {
+				prevReplaceeBlobberStake = blobber.TotalStake
+			}
+		}
 
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
@@ -92,13 +96,17 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		updatedAlloc := utils.GetAllocation(t, allocationID)
 		require.NotNil(t, updatedAlloc)
 
-		//newReplaceeBlobberStake := updatedAlloc.Blobbers[addBlobberID].Stake
-		//require.Equal(t, prevReplaceeBlobberStake, newReplaceeBlobberStake,
-		//	"Stake should be transferred from old blobber to new")
+		var newReplaceeBlobberStake int64
+		for _, blobber := range updatedAlloc.Blobbers {
+			if blobber.ID == addBlobberID {
+				newReplaceeBlobberStake = blobber.TotalStake
+			}
+		}
+
+		require.Equal(t, prevReplaceeBlobberStake, newReplaceeBlobberStake, "Stake should be transferred from old blobber to new")
 	})
 
 	t.RunSequentiallyWithTimeout("Replace blobber in allocation with repair should work", 90*time.Second, func(t *test.SystemTest) {
-		//allocSize := int64(4096)
 		fileSize := int64(1024)
 
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
@@ -116,14 +124,14 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		}
 		output, err := utils.UploadFile(t, configPath, uploadParams, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		//
+
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
-		//
+
 		addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
-		//
+
 		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
@@ -192,27 +200,4 @@ func setupAllocationAndGetRandomBlobber(t *test.SystemTest, cliConfigFilename st
 	require.Nil(t, err, "Error getting random blobber")
 
 	return allocationID, randomBlobber
-}
-
-func getAllBlobbers(t *test.SystemTest) []*climodel.Blobber {
-	//wd, _ := os.Getwd()
-	//walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
-	//configFile := filepath.Join(wd, "config", configPath)
-	//
-	//params := []string{
-	//	"blobber-list",
-	//	"--wallet", walletFile,
-	//	"--configDir", "./config",
-	//	"--config", configFile,
-	//	"--json",
-	//}
-
-	//output := cliutils.RunCommand(t, "./zbox", params, 3, time.Second*2)
-	//require.Len(t, output, 1)
-	//
-	//var blobbers []*climodel.Blobber
-	//err := json.Unmarshal([]byte(output[0]), &blobbers)
-	//require.Nil(t, err)
-
-	return nil
 }
