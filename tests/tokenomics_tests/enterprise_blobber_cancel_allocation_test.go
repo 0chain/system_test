@@ -104,6 +104,11 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 
 		require.InEpsilon(t, beforeBalance+expectedRefund-1e8, afterBalance, 0.01, "Refund should be credited to client balance after cancel allocation") // 1e8 is transaction fee
 
+		rewardQuery := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseReward, err := getQueryRewards(t, rewardQuery)
+		require.Nil(t, err)
+
+		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 	})
 
 	t.RunWithTimeout("Cancel allocation after updating duration check refund amount.", time.Minute*15, func(t *test.SystemTest) {

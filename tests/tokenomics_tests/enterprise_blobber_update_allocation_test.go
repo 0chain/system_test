@@ -50,9 +50,9 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	require.Nil(t, err, "Error creating configuration wallet", strings.Join(output, "\n"))
 
 	var blobbersList []climodel.Blobber
-	output, err = utils.ListBlobbers(t, configPath, "json")
+	output, err = utils.ListBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error fetching blobbers %v", strings.Join(output, "\n"))
-	require.Len(t, len(output), 1, "Error wrong json format", strings.Join(output, "\n"))
+	require.Len(t, output, 1, "Error wrong json format", strings.Join(output, "\n"))
 
 	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobbersList)
 
@@ -87,7 +87,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
 
-		waitForTimeInMinutesWhileLogging(t, 5)
+		//waitForTimeInMinutesWhileLogging(t, 5)
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -128,6 +128,13 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
 
 		// Verify blobber rewards calculations
+		rewardQuery := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseReward, err := getQueryRewards(t, rewardQuery)
+		require.Nil(t, err)
+
+		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
+
+		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 	})
 
 	t.RunWithTimeout("Upgrade size cost calculation", 15*time.Minute, func(t *test.SystemTest) {
@@ -184,6 +191,15 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		t.Logf("Write pool balance: %d", afterAlloc.WritePool)
 
 		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
+
+		// Verify blobber rewards calculations
+		rewardQuery := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseReward, err := getQueryRewards(t, rewardQuery)
+		require.Nil(t, err)
+
+		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
+
+		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 	})
 
 	t.RunWithTimeout("Add blobber cost calculation", 15*time.Minute, func(t *test.SystemTest) {
@@ -225,6 +241,12 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		afterAlloc := utils.GetAllocation(t, allocationID)
 
 		require.InEpsilon(t, amountTotalLockedToAlloc, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
+
+		rewardQuery := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseReward, err := getQueryRewards(t, rewardQuery)
+		require.Nil(t, err)
+
+		require.InEpsilon(t, 0, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 	})
 
 	t.RunWithTimeout("Replace blobber cost calculation", 15*time.Minute, func(t *test.SystemTest) {
@@ -267,6 +289,20 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		afterAlloc := utils.GetAllocation(t, allocationID)
 
 		require.InEpsilon(t, amountTotalLockedToAlloc, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
+
+		// Verify blobber rewards calculations
+		timeUnitInSeconds := int64(600) // 10 minutes
+		durationOfUsedInSeconds := afterAlloc.ExpirationDate - timeUnitInSeconds
+
+		expectedPaymentToReplacedBlobber := 5e8 * durationOfUsedInSeconds / timeUnitInSeconds
+
+		rewardQuery := fmt.Sprintf("allocation_id='%s' AND provider_id='%s' AND reward_type=%d", allocationID, beforeAlloc.BlobberDetails[0].BlobberID, EnterpriseBlobberReward)
+		enterpriseReward, err := getQueryRewards(t, rewardQuery)
+		require.Nil(t, err)
+
+		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToReplacedBlobber)
+
+		require.InEpsilon(t, expectedPaymentToReplacedBlobber, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 	})
 
 	t.RunWithTimeout("Update Expiry Should Work", 15*time.Minute, func(t *test.SystemTest) {
