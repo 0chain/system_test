@@ -106,8 +106,6 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 
 	})
 
-	t.Skip()
-
 	t.RunWithTimeout("Cancel allocation after updating duration check refund amount.", time.Minute*15, func(t *test.SystemTest) {
 		// Setup: Change time_unit to 10 minutes
 		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{

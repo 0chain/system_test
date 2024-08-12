@@ -269,8 +269,6 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.InEpsilon(t, amountTotalLockedToAlloc, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
 	})
 
-	t.Skip()
-
 	t.RunWithTimeout("Update Expiry Should Work", 15*time.Minute, func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath, map[string]interface{}{
 			"lock": calculateAllocationLock(2, 2, 10000, time.Now().Unix(), time.Now().Unix()+int64(time.Minute*15), blobbersList[0].Terms.WritePrice),
