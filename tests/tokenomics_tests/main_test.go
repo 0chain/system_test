@@ -2,7 +2,6 @@ package tokenomics_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/internal/api/util/client"
 	"log"
 	"os"
 	"path/filepath"
@@ -90,8 +89,6 @@ var (
 	configDir              string
 	bridgeClientConfigFile string
 	bridgeOwnerConfigFile  string
-	sdkClient              *client.SDKClient
-	apiClient              *client.APIClient
 	parsedConfig           *config.Config
 )
 
@@ -153,9 +150,6 @@ func TestMain(m *testing.M) {
 	}
 
 	setupConfig()
-
-	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
-	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 
 	exitRun := m.Run()
 

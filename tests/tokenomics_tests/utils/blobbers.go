@@ -28,6 +28,28 @@ func ListBlobbersWithWallet(t *test.SystemTest, walletName, cliConfigFilename, p
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox ls-blobbers %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, walletName, cliConfigFilename), 3, time.Second*2)
 }
 
+func GetBlobberDetails(t *test.SystemTest, cliConfigFilename, blobberId string) (*climodel.Blobber, error) {
+	return GetBlobberDetailsWithWallet(t, EscapedTestName(t), cliConfigFilename, blobberId)
+}
+
+func GetBlobberDetailsWithWallet(t *test.SystemTest, walletName, cliConfigFilename, blobberId string) (*climodel.Blobber, error) {
+	output, err := ListBlobbersWithWallet(t, walletName, cliConfigFilename, "--json")
+	require.Nil(t, err, "Unable to get blobbers list", strings.Join(output, "\n"))
+	require.Len(t, output, 1, "Error invalid json data for list blobbers")
+
+	var blobberList []climodel.Blobber
+	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
+	require.Nil(t, err, "Error parsing blobbers list")
+
+	for idx, blobber := range blobberList {
+		if blobber.ID == blobberId {
+			return &blobberList[idx], nil
+		}
+	}
+
+	return nil, nil
+}
+
 func ListValidators(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Requesting validator list...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox ls-validators %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, EscapedTestName(t), cliConfigFilename), 3, time.Second*2)

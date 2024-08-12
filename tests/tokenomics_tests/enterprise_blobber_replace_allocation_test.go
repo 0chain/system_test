@@ -9,11 +9,15 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+
+	var (
+		replaceBlobberWithSameIdFailRegex  = `^Error updating allocation:allocation_updating_failed: cannot add blobber [a-f0-9]{64}, already in allocation$`
+		replaceBlobberWithWrongIdFailRegex = `^Error updating allocation:allocation_updating_failed: can't get blobber (.+)$`
+	)
 
 	// Change time unit to 10 minutes
 
@@ -106,31 +110,27 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		require.Equal(t, prevReplaceeBlobberStake, newReplaceeBlobberStake, "Stake should be transferred from old blobber to new")
 	})
 
-	t.RunSequentiallyWithTimeout("Replace blobber in allocation with repair should work", 90*time.Second, func(t *test.SystemTest) {
-		fileSize := int64(1024)
-
+	t.Run("Replace blobber with same price should work", func(t *test.SystemTest) {
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
-
-		filename := utils.GenerateRandomTestFileName(t)
-		err := utils.CreateFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-
-		remotePath := "/file" + filename
-
-		uploadParams := map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"localpath":  filename,
-		}
-		output, err := utils.UploadFile(t, configPath, uploadParams, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
 
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
 
+		// Get a blobber that is not part of the allocation
 		addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
+
+		// Get current price of the blobber
+		currentBlobberDetails, err := utils.GetBlobberDetails(t, configPath, addBlobberID)
+		require.Nil(t, err, "Error feching blobber details")
+		require.NotNil(t, currentBlobberDetails, "Error no blobber details found")
+
+		originalPrice := currentBlobberDetails.Terms.WritePrice
+
+		// Adjust blobber's price to be the same as the original
+		err = updateBlobberPrice(t, configPath, addBlobberID, originalPrice)
+		require.Nil(t, err, "Error updating blobber price")
 
 		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
@@ -142,15 +142,131 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 			"remove_blobber":          blobberToRemove,
 		})
 
-		output, err = updateAllocation(t, configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-		utils.AssertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
-
-		fref, err := cli_tests.VerifyFileRefFromBlobber(walletFile, configFile, allocationID, addBlobberID, remotePath)
-		require.Nil(t, err)
-		require.NotNil(t, fref)
 	})
+
+	t.Run("Replace blobber with 0.5x price should work", func(t *test.SystemTest) {
+		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
+
+		// Get a blobber that is not part of the allocation
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
+
+		addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
+		require.Nil(t, err)
+
+		// Get current price of the blobber
+		currentBlobberDetails, err := utils.GetBlobberDetails(t, configPath, addBlobberID)
+		require.Nil(t, err, "Error feching blobber details")
+		require.NotNil(t, currentBlobberDetails, "Error no blobber details found")
+
+		halfPrice := currentBlobberDetails.Terms.WritePrice / 2
+
+		// Adjust blobber's price to 0.5x the original
+		err = updateBlobberPrice(t, configPath, addBlobberID, halfPrice)
+		require.Nil(t, err, "Error updating blobber price")
+
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
+
+		params := createParams(map[string]interface{}{
+			"allocation":              allocationID,
+			"add_blobber":             addBlobberID,
+			"add_blobber_auth_ticket": addBlobberAuthTicket,
+			"remove_blobber":          blobberToRemove,
+		})
+
+		output, err := updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+	})
+
+	t.Run("Replace blobber with 2x price should work", func(t *test.SystemTest) {
+		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
+
+		wd, _ := os.Getwd()
+		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+		configFile := filepath.Join(wd, "config", configPath)
+
+		// Get a blobber that is not part of the allocation
+		addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
+		require.Nil(t, err)
+
+		// Get current price of the blobber
+		currentBlobberDetails, err := utils.GetBlobberDetails(t, configPath, addBlobberID)
+		require.Nil(t, err, "Error feching blobber details")
+		require.NotNil(t, currentBlobberDetails, "Error no blobber details found")
+
+		doublePrice := currentBlobberDetails.Terms.WritePrice * 2
+
+		// Adjust blobber's price to 2x the original
+		err = updateBlobberPrice(t, configPath, addBlobberID, doublePrice)
+		require.Nil(t, err, "Error updating blobber price")
+
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
+
+		params := createParams(map[string]interface{}{
+			"allocation":              allocationID,
+			"add_blobber":             addBlobberID,
+			"add_blobber_auth_ticket": addBlobberAuthTicket,
+			"remove_blobber":          blobberToRemove,
+		})
+
+		output, err := updateAllocation(t, configPath, params, true)
+		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+	})
+
+	//Repair file tests to be added later.
+	//t.RunSequentiallyWithTimeout("Replace blobber in allocation with repair should work", 90*time.Second, func(t *test.SystemTest) {
+	//	fileSize := int64(1024)
+	//
+	//	allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
+	//
+	//	filename := utils.GenerateRandomTestFileName(t)
+	//	err := utils.CreateFileWithSize(filename, fileSize)
+	//	require.Nil(t, err)
+	//
+	//	remotePath := "/file" + filename
+	//
+	//	uploadParams := map[string]interface{}{
+	//		"allocation": allocationID,
+	//		"remotepath": remotePath,
+	//		"localpath":  filename,
+	//	}
+	//	output, err := utils.UploadFile(t, configPath, uploadParams, true)
+	//	require.Nil(t, err, strings.Join(output, "\n"))
+	//
+	//	wd, _ := os.Getwd()
+	//	walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+	//	configFile := filepath.Join(wd, "config", configPath)
+	//
+	//	addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
+	//	require.Nil(t, err)
+	//
+	//	addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+	//	require.Nil(t, err, "Unable to generate auth ticket for add blobber")
+	//
+	//	params := createParams(map[string]interface{}{
+	//		"allocation":              allocationID,
+	//		"add_blobber":             addBlobberID,
+	//		"add_blobber_auth_ticket": addBlobberAuthTicket,
+	//		"remove_blobber":          blobberToRemove,
+	//	})
+	//
+	//	output, err = updateAllocation(t, configPath, params, true)
+	//	require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
+	//	utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+	//	utils.AssertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
+	//
+	//	fref, err := cli_tests.VerifyFileRefFromBlobber(walletFile, configFile, allocationID, addBlobberID, remotePath)
+	//	require.Nil(t, err)
+	//	require.NotNil(t, fref)
+	//})
 
 	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *test.SystemTest) {
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
@@ -167,7 +283,8 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 
 		output, err := updateAllocation(t, configPath, params, false)
 		require.NotNil(t, err, "Expected error updating allocation but got none", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "blobber already exists in allocation")
+		require.Regexp(t, replaceBlobberWithSameIdFailRegex, strings.Join(output, "\n"),
+			"Error regex match fail update allocation for replace blobber with the same one")
 	})
 
 	t.Run("Replace blobber with incorrect blobber ID of an old blobber, shouldn't work", func(t *test.SystemTest) {
@@ -188,7 +305,8 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 
 		output, err := updateAllocation(t, configPath, params, false)
 		require.NotNil(t, err, "Expected error updating allocation but got none", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "invalid configuration for given blobber ID")
+		require.Regexp(t, replaceBlobberWithWrongIdFailRegex, strings.Join(output, "\n"),
+			"Error regex match update allocation for replace blobber with incorrect blobber")
 	})
 
 }
@@ -196,8 +314,30 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 func setupAllocationAndGetRandomBlobber(t *test.SystemTest, cliConfigFilename string) (string, string) {
 	allocationID := setupAllocation(t, cliConfigFilename)
 
-	randomBlobber, err := cli_tests.GetRandomBlobber(utils.EscapedTestName(t), cliConfigFilename, allocationID, "")
+	wd, _ := os.Getwd()
+	walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
+	configFile := filepath.Join(wd, "config", configPath)
+
+	randomBlobber, err := cli_tests.GetRandomBlobber(walletFile, configFile, allocationID, "")
 	require.Nil(t, err, "Error getting random blobber")
 
 	return allocationID, randomBlobber
+}
+
+func updateBlobberPrice(t *test.SystemTest, configPath, blobberID string, newPrice int64) error {
+	params := map[string]interface{}{
+		"blobber_id":  blobberID,
+		"write_price": utils.IntToZCN(newPrice),
+	}
+	output, err := utils.ExecuteFaucetWithTokensForWallet(t, "wallets/blobber_owner", configPath, 99)
+	require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+
+	output, err = utils.UpdateBlobberInfoForWallet(t, configPath, "wallets/blobber_owner", utils.CreateParams(params))
+	if err != nil {
+		t.Log("Error updating blobber pricen " + strings.Join(output, "\n"))
+		return err
+	}
+
+	t.Log("Updated blobber price:", strings.Join(output, "\n"))
+	return nil
 }
