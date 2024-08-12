@@ -40,7 +40,14 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error creating configuration wallet", strings.Join(output, "\n"))
 
+	var blobbersList []climodel.Blobber
 	output, err = utils.ListBlobbers(t, configPath, "json")
+	require.Nil(t, err, "Error fetching blobbers %v", strings.Join(output, "\n"))
+	require.Len(t, len(output), 1, "Error wrong json format", strings.Join(output, "\n"))
+
+	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobbersList)
+
+	require.Nil(t, err, "Error decoding blobbers json")
 
 	t.TestSetup("set storage config to use time_unit as 10 minutes", func() {
 		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
@@ -58,7 +65,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 	t.RunWithTimeout("Update Expiry Should Work", 15*time.Minute, func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"lock": calculateAllocationLock(2, 2, 10000, time.Now().Unix(), time.Now()+time.Minute*15),
+			"lock": calculateAllocationLock(2, 2, 10000, time.Now().Unix(), time.Now().Unix()+int64(time.Minute*15), blobbersList[0].Terms.WritePrice),
 		})
 
 		params := createParams(map[string]interface{}{
@@ -80,6 +87,8 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			fmt.Sprint("Expiration Time doesn't match: "+
 				"Before:", allocationBeforeUpdate.ExpirationDate, "After:", ac.ExpirationDate),
 		)
+
+		require.InEpsilon(t)
 	})
 
 	t.Run("Update Size Should Work", func(t *test.SystemTest) {
