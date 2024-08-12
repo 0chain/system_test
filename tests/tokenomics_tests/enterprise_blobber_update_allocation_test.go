@@ -46,6 +46,18 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 	// Change time unit to 10 minutes
 
+	output, err := utils.CreateWallet(t, configPath)
+	require.Nil(t, err, "Error creating configuration wallet", strings.Join(output, "\n"))
+
+	var blobbersList []climodel.Blobber
+	output, err = utils.ListBlobbers(t, configPath, "json")
+	require.Nil(t, err, "Error fetching blobbers %v", strings.Join(output, "\n"))
+	require.Len(t, len(output), 1, "Error wrong json format", strings.Join(output, "\n"))
+
+	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobbersList)
+
+	require.Nil(t, err, "Error decoding blobbers json")
+
 	t.TestSetup("set storage config to use time_unit as 10 minutes", func() {
 		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			"time_unit": "10m",
@@ -260,12 +272,17 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	t.Skip()
 
 	t.RunWithTimeout("Update Expiry Should Work", 15*time.Minute, func(t *test.SystemTest) {
-		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath)
+		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath, map[string]interface{}{
+			"lock": calculateAllocationLock(2, 2, 10000, time.Now().Unix(), time.Now().Unix()+int64(time.Minute*15), blobbersList[0].Terms.WritePrice),
+		})
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
 		})
+
+		time.Sleep(5 * time.Minute)
+
 		output, err := updateAllocation(t, configPath, params, true)
 
 		require.Nil(t, err, "Could not update "+
@@ -1041,7 +1058,10 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.Equal(t, len(alloc.Blobbers), len(updatedAlloc.Blobbers))
 	})
+}
 
+func calculateAllocationLock(data, parity, size, exiprationStart, expirationEnd, writePriceBlobber int64) float64 {
+	return float64((size / GB) * (data + parity) / parity * writePriceBlobber)
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
