@@ -17,6 +17,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 	var (
 		replaceBlobberWithSameIdFailRegex  = `^Error updating allocation:allocation_updating_failed: cannot add blobber [a-f0-9]{64}, already in allocation$`
 		replaceBlobberWithWrongIdFailRegex = `^Error updating allocation:allocation_updating_failed: can't get blobber (.+)$`
+		originalBlobberPrices              = make(map[string]int64)
 	)
 
 	// Change time unit to 10 minutes
@@ -32,10 +33,17 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 	})
 
 	t.Cleanup(func() {
+		// Reset the storage config time unit
 		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			"time_unit": "1h",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
+
+		// Reset all modified blobber prices
+		for blobberID, originalPrice := range originalBlobberPrices {
+			err := updateBlobberPrice(t, configPath, blobberID, originalPrice)
+			require.Nil(t, err, "Error resetting blobber price for blobber ID: %s", blobberID)
+		}
 	})
 
 	t.Run("Replace blobber in allocation, should work", func(t *test.SystemTest) {
@@ -117,18 +125,18 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
 
-		// Get a blobber that is not part of the allocation
 		addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
-		// Get current price of the blobber
 		currentBlobberDetails, err := utils.GetBlobberDetails(t, configPath, addBlobberID)
-		require.Nil(t, err, "Error feching blobber details")
+		require.Nil(t, err, "Error fetching blobber details")
 		require.NotNil(t, currentBlobberDetails, "Error no blobber details found")
 
 		originalPrice := currentBlobberDetails.Terms.WritePrice
 
-		// Adjust blobber's price to be the same as the original
+		// Store the original price before changing it
+		originalBlobberPrices[addBlobberID] = originalPrice
+
 		err = updateBlobberPrice(t, configPath, addBlobberID, originalPrice)
 		require.Nil(t, err, "Error updating blobber price")
 
@@ -150,7 +158,6 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 	t.Run("Replace blobber with 0.5x price should work", func(t *test.SystemTest) {
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
-		// Get a blobber that is not part of the allocation
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
@@ -158,14 +165,15 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
-		// Get current price of the blobber
 		currentBlobberDetails, err := utils.GetBlobberDetails(t, configPath, addBlobberID)
-		require.Nil(t, err, "Error feching blobber details")
+		require.Nil(t, err, "Error fetching blobber details")
 		require.NotNil(t, currentBlobberDetails, "Error no blobber details found")
 
 		halfPrice := currentBlobberDetails.Terms.WritePrice / 2
 
-		// Adjust blobber's price to 0.5x the original
+		// Store the original price before changing it
+		originalBlobberPrices[addBlobberID] = currentBlobberDetails.Terms.WritePrice
+
 		err = updateBlobberPrice(t, configPath, addBlobberID, halfPrice)
 		require.Nil(t, err, "Error updating blobber price")
 
@@ -191,18 +199,18 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
 
-		// Get a blobber that is not part of the allocation
 		addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
-		// Get current price of the blobber
 		currentBlobberDetails, err := utils.GetBlobberDetails(t, configPath, addBlobberID)
-		require.Nil(t, err, "Error feching blobber details")
+		require.Nil(t, err, "Error fetching blobber details")
 		require.NotNil(t, currentBlobberDetails, "Error no blobber details found")
 
 		doublePrice := currentBlobberDetails.Terms.WritePrice * 2
 
-		// Adjust blobber's price to 2x the original
+		// Store the original price before changing it
+		originalBlobberPrices[addBlobberID] = currentBlobberDetails.Terms.WritePrice
+
 		err = updateBlobberPrice(t, configPath, addBlobberID, doublePrice)
 		require.Nil(t, err, "Error updating blobber price")
 
