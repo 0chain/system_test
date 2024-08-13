@@ -248,7 +248,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		enterpriseReward, err := getQueryRewards(t, rewardQuery)
 		require.Nil(t, err)
 
-		require.Equal(t, 0, enterpriseReward.TotalReward, "Enterprise blobber reward should be 0")
+		require.Equal(t, float64(0), enterpriseReward.TotalReward, "Enterprise blobber reward should be 0")
 	})
 
 	t.RunWithTimeout("Replace blobber cost calculation", 15*time.Minute, func(t *test.SystemTest) {
