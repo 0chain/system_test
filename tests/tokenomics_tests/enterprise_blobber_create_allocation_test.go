@@ -54,29 +54,6 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 	})*/
 
-	t.Run("Create enterprise allocation without blobber auth tickets should fail", func(t *test.SystemTest) {
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
-
-		_, blobberIds := utils.GenerateBlobberAuthTickets(t)
-
-		options := map[string]interface{}{
-			"size":               "1024",
-			"lock":               "0.5",
-			"enterprise":         true,
-			"preferred_blobbers": blobberIds,
-		}
-		output, err = utils.CreateNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
-
-		require.NotNil(t, err, "expected an error when creating allocation without blobber auth tickets %v", err)
-		require.Len(t, output, 1, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "Not enough blobbers to honor the allocation", "expected error message to mention missing auth tickets %v", strings.Join(output, "\n"))
-
-	})
-
 	t.Run("Create enterprise allocation with blobber auth tickets should pass", func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -141,66 +118,6 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
-	})
-
-	t.Run("Create enterprise allocation for locking cost less than minimum cost should not work", func(t *test.SystemTest) {
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
-
-		options := map[string]interface{}{
-			"cost":                 "",
-			"read_price":           "0-1",
-			"write_price":          "0-1",
-			"size":                 10000,
-			"enterprise":           true,
-			"blobber_auth_tickets": blobberAuthTickets,
-			"preferred_blobbers":   blobberIds,
-		}
-		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-
-		allocationCost, err := getAllocationCost(output[0])
-		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
-
-		mustFailCost := allocationCost * 0.8
-		options = map[string]interface{}{
-			"lock":                 mustFailCost,
-			"blobber_auth_tickets": blobberAuthTickets,
-			"preferred_blobbers":   blobberIds,
-			"enterprise":           true,
-		}
-
-		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "not enough tokens to honor the allocation", strings.Join(output, "\n"))
-	})
-
-	t.Run("Create enterprise allocation for locking negative cost should not work", func(t *test.SystemTest) {
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
-
-		options := map[string]interface{}{
-			"cost":                 "",
-			"read_price":           "0-1",
-			"write_price":          "0-1",
-			"size":                 10000,
-			"enterprise":           true,
-			"blobber_auth_tickets": blobberAuthTickets,
-			"preferred_blobbers":   blobberIds,
-		}
-		mustFailCost := -1
-		options = map[string]interface{}{"lock": mustFailCost}
-		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
-		require.NotNil(t, err, strings.Join(output, "\n"))
 	})
 
 	t.Run("Create enterprise allocation with smallest possible size (1024) Should Work", func(t *test.SystemTest) {
@@ -392,103 +309,6 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create enterprise allocation with too large parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
-
-		options := map[string]interface{}{"parity": "99", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
-		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
-	})
-
-	t.Run("Create enterprise allocation with too large data (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
-
-		options := map[string]interface{}{"data": "99", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
-			"preferred_blobbers": blobberIds}
-		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
-	})
-
-	t.Run("Create enterprise allocation with too large data and parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
-
-		options := map[string]interface{}{"data": "30", "parity": "20", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
-			"preferred_blobbers": blobberIds}
-		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
-	})
-
-	t.Run("Create enterprise allocation with read price range 0-0 Should Fail", func(t *test.SystemTest) {
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
-
-		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
-			"preferred_blobbers": blobberIds}
-		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "Not enough blobbers to honor the allocation", strings.Join(output, "\n"))
-	})
-
-	t.Run("Create enterprise allocation with size smaller than limit (size < 1024) Should Fail", func(t *test.SystemTest) {
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
-
-		options := map[string]interface{}{"size": 256, "lock": "0.5", "enterprise": true,
-			"blobber_auth_tickets": blobberAuthTickets,
-			"preferred_blobbers":   blobberIds}
-		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: allocation_creation_failed: invalid request: insufficient allocation size", output[0], strings.Join(output, "\n"))
-	})
-
-	t.Run("Create enterprise allocation with no parameter (missing lock) Should Fail", func(t *test.SystemTest) {
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
-
-		options := map[string]interface{}{"enterprise": true,
-			"blobber_auth_tickets": blobberAuthTickets,
-			"preferred_blobbers":   blobberIds}
-		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
-		require.NotNil(t, err)
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "missing required 'lock' argument", output[len(output)-1])
-	})
-
 	t.Run("Create enterprise allocation should have all file options permitted by default", func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -666,6 +486,184 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.NotNil(t, alloc, "error fetching allocation")
 		require.Equal(t, true, alloc.ThirdPartyExtendable)
 		createEnterpriseAllocationTestTeardown(t, allocationID)
+	})
+	t.Run("Create enterprise allocation for locking cost less than minimum cost should not work", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{
+			"cost":                 "",
+			"read_price":           "0-1",
+			"write_price":          "0-1",
+			"size":                 10000,
+			"enterprise":           true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds,
+		}
+		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+
+		allocationCost, err := getAllocationCost(output[0])
+		require.Nil(t, err, "could not get allocation cost", strings.Join(output, "\n"))
+
+		mustFailCost := allocationCost * 0.8
+		options = map[string]interface{}{
+			"lock":                 mustFailCost,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds,
+			"enterprise":           true,
+		}
+
+		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "not enough tokens to honor the allocation", strings.Join(output, "\n"))
+	})
+
+	t.Run("Create enterprise allocation for locking negative cost should not work", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{
+			"cost":                 "",
+			"read_price":           "0-1",
+			"write_price":          "0-1",
+			"size":                 10000,
+			"enterprise":           true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds,
+		}
+		mustFailCost := -1
+		options = map[string]interface{}{"lock": mustFailCost}
+		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+	})
+
+	t.Run("Create enterprise allocation without blobber auth tickets should fail", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+
+		_, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{
+			"size":               "1024",
+			"lock":               "0.5",
+			"enterprise":         true,
+			"preferred_blobbers": blobberIds,
+		}
+		output, err = utils.CreateNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
+
+		require.NotNil(t, err, "expected an error when creating allocation without blobber auth tickets %v", err)
+		require.Len(t, output, 1, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "Not enough blobbers to honor the allocation", "expected error message to mention missing auth tickets %v", strings.Join(output, "\n"))
+
+	})
+	t.Run("Create enterprise allocation with too large parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"parity": "99", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
+		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
+	})
+
+	t.Run("Create enterprise allocation with too large data (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"data": "99", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers": blobberIds}
+		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
+	})
+
+	t.Run("Create enterprise allocation with too large data and parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"data": "30", "parity": "20", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers": blobberIds}
+		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
+	})
+
+	t.Run("Create enterprise allocation with read price range 0-0 Should Fail", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers": blobberIds}
+		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Contains(t, output[0], "Not enough blobbers to honor the allocation", strings.Join(output, "\n"))
+	})
+
+	t.Run("Create enterprise allocation with size smaller than limit (size < 1024) Should Fail", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"size": 256, "lock": "0.5", "enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
+		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.True(t, len(output) > 0, "expected output length be at least 1")
+		require.Equal(t, "Error creating allocation: allocation_creation_failed: invalid request: insufficient allocation size", output[0], strings.Join(output, "\n"))
+	})
+
+	t.Run("Create enterprise allocation with no parameter (missing lock) Should Fail", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
+
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+
+		options := map[string]interface{}{"enterprise": true,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"preferred_blobbers":   blobberIds}
+		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
+		require.NotNil(t, err)
+		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+		require.Equal(t, "missing required 'lock' argument", output[len(output)-1])
 	})
 
 }
