@@ -17,12 +17,8 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 	var (
 		replaceBlobberWithSameIdFailRegex  = `^Error updating allocation:allocation_updating_failed: cannot add blobber [a-f0-9]{64}, already in allocation$`
 		replaceBlobberWithWrongIdFailRegex = `^Error updating allocation:allocation_updating_failed: can't get blobber (.+)$`
-		originalBlobberPrices              = make(map[string]int64)
 	)
 
-	// Change time unit to 10 minutes
-
-	// Try replacing blobber with 2x price, 0.5x price and same price. Check cost in all scenarios.
 	t.Parallel()
 
 	t.TestSetup("set storage config to use time_unit as 10 minutes", func() {
@@ -38,12 +34,6 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 			"time_unit": "1h",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-
-		// Reset all modified blobber prices
-		for blobberID, originalPrice := range originalBlobberPrices {
-			err := updateBlobberPrice(t, configPath, blobberID, originalPrice)
-			require.Nil(t, err, "Error resetting blobber price for blobber ID: %s", blobberID)
-		}
 	})
 
 	t.Run("Replace blobber in allocation, should work", func(t *test.SystemTest) {
@@ -118,7 +108,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		require.Equal(t, prevReplaceeBlobberStake, newReplaceeBlobberStake, "Stake should be transferred from old blobber to new")
 	})
 
-	t.Run("Replace blobber with same price should work", func(t *test.SystemTest) {
+	t.RunSequentially("Replace blobber with same price should work", func(t *test.SystemTest) {
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
 		wd, _ := os.Getwd()
@@ -135,8 +125,6 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		originalPrice := currentBlobberDetails.Terms.WritePrice
 
 		// Store the original price before changing it
-		originalBlobberPrices[addBlobberID] = originalPrice
-
 		err = updateBlobberPrice(t, configPath, addBlobberID, originalPrice)
 		require.Nil(t, err, "Error updating blobber price")
 
@@ -153,9 +141,15 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// Ensure the blobber price is reset after the test
+		defer func() {
+			err = updateBlobberPrice(t, configPath, addBlobberID, originalPrice)
+			require.Nil(t, err, "Error resetting blobber price after test")
+		}()
 	})
 
-	t.Run("Replace blobber with 0.5x price should work", func(t *test.SystemTest) {
+	t.RunSequentially("Replace blobber with 0.5x price should work", func(t *test.SystemTest) {
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
 		wd, _ := os.Getwd()
@@ -172,8 +166,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		halfPrice := currentBlobberDetails.Terms.WritePrice / 2
 
 		// Store the original price before changing it
-		originalBlobberPrices[addBlobberID] = currentBlobberDetails.Terms.WritePrice
-
+		originalPrice := currentBlobberDetails.Terms.WritePrice
 		err = updateBlobberPrice(t, configPath, addBlobberID, halfPrice)
 		require.Nil(t, err, "Error updating blobber price")
 
@@ -181,6 +174,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
 		params := createParams(map[string]interface{}{
+			// Ensure the blobber price is reset after the test
 			"allocation":              allocationID,
 			"add_blobber":             addBlobberID,
 			"add_blobber_auth_ticket": addBlobberAuthTicket,
@@ -190,9 +184,14 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		defer func() {
+			err = updateBlobberPrice(t, configPath, addBlobberID, originalPrice)
+			require.Nil(t, err, "Error resetting blobber price after test")
+		}()
 	})
 
-	t.Run("Replace blobber with 2x price should work", func(t *test.SystemTest) {
+	t.RunSequentially("Replace blobber with 2x price should work", func(t *test.SystemTest) {
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
 		wd, _ := os.Getwd()
@@ -209,8 +208,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		doublePrice := currentBlobberDetails.Terms.WritePrice * 2
 
 		// Store the original price before changing it
-		originalBlobberPrices[addBlobberID] = currentBlobberDetails.Terms.WritePrice
-
+		originalPrice := currentBlobberDetails.Terms.WritePrice
 		err = updateBlobberPrice(t, configPath, addBlobberID, doublePrice)
 		require.Nil(t, err, "Error updating blobber price")
 
@@ -227,6 +225,12 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// Ensure the blobber price is reset after the test
+		defer func() {
+			err = updateBlobberPrice(t, configPath, addBlobberID, originalPrice)
+			require.Nil(t, err, "Error resetting blobber price after test")
+		}()
 	})
 
 	//Repair file tests to be added later.

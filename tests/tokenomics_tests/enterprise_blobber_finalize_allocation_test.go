@@ -18,24 +18,30 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 	// You need to use same tests cases we have in cancel allocation here. But it's not a priority.
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
+
 		allocationID := utils.SetupEnterpriseAllocation(t, configPath)
 
-		output, err := finalizeAllocation(t, configPath, allocationID, false)
+		output, err = finalizeAllocation(t, configPath, allocationID, false)
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet", output[0])
 	})
 
 	t.Run("Finalize Other's Allocation Should Fail", func(t *test.SystemTest) {
+		output, err := utils.CreateWalletForName(t, configPath, utils.EscapedTestName(t)+"_other")
+		require.Nil(t, err, "Unable to create wallet", strings.Join(output, "\n"))
+
 		var otherAllocationID = utils.SetupEnterpriseAllocationWithWallet(t, utils.EscapedTestName(t)+"_other", configPath)
 		//var otherAllocationID = setupAllocationWithWallet(t, utils.EscapedTestName(t)+"_other_wallet.json", configPath)
 
 		// create wallet
-		_, err := utils.CreateWallet(t, configPath)
+		_, err = utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error creating wallet")
 
 		// Then try updating with otherAllocationID: should not work
-		output, err := finalizeAllocation(t, configPath, otherAllocationID, false)
+		output, err = finalizeAllocation(t, configPath, otherAllocationID, false)
 
 		// Error should not be nil since finalize is not working
 		require.NotNil(t, err, "expected error finalizing allocation", strings.Join(output, "\n"))

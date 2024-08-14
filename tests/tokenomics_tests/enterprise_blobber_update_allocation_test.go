@@ -310,11 +310,9 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.InEpsilon(t, expectedPaymentToReplacedBlobber, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 	})
 
-	t.Skip()
-
 	t.RunWithTimeout("Update Expiry Should Work", 15*time.Minute, func(t *test.SystemTest) {
 		allocationID, allocationBeforeUpdate := setupAndParseAllocation(t, configPath, map[string]interface{}{
-			"lock": calculateAllocationLock(2, 2, 10000, time.Now().Unix(), time.Now().Unix()+int64(time.Minute*15), blobbersList[0].Terms.WritePrice),
+			"lock": "0.1",
 		})
 
 		params := createParams(map[string]interface{}{
@@ -1102,7 +1100,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 }
 
 func calculateAllocationLock(data, parity, size, exiprationStart, expirationEnd, writePriceBlobber int64) float64 {
-	return float64((size / GB) * (data + parity) / parity * writePriceBlobber)
+	return utils.IntToZCN((size / GB) * (data + parity) / parity * writePriceBlobber)
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
