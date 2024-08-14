@@ -60,7 +60,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		// Create enterprise allocation with blobber auth tickets
 		options := map[string]interface{}{
@@ -83,7 +83,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 	t.Run("Create enterprise allocation for locking cost equal to the cost calculated should work", func(t *test.SystemTest) {
 		_, _ = utils.CreateWallet(t, configPath)
 
-		blobberAuthTickets, blobbersIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobbersIds := utils.GenerateBlobberAuthTickets(t, configPath)
 		options := map[string]interface{}{
 			"cost":                 "",
 			"size":                 "10000",
@@ -126,7 +126,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{
 			"size":                 "1024",
@@ -162,7 +162,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		_, err = utils.GetWalletForName(t, configPath, utils.EscapedTestName(t)+"_other")
 		require.Nil(t, err, "could not get other wallet")
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{
 			"lock":                 "0.5",
@@ -207,7 +207,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{
 			"size":                 "1024",
@@ -234,7 +234,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{
 			"size":                 "1024",
@@ -261,7 +261,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{
 			"size":                 "1024",
@@ -288,7 +288,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{
 			"size":                 "1024",
@@ -315,7 +315,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{"lock": "0.5", "size": 1024, "enterprise": true,
 			"blobber_auth_tickets": blobberAuthTickets,
@@ -341,7 +341,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_upload": nil, "enterprise": true,
 			"blobber_auth_tickets": blobberAuthTickets,
@@ -358,7 +358,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_delete": nil, "enterprise": true,
 			"blobber_auth_tickets": blobberAuthTickets,
@@ -375,7 +375,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_update": nil, "enterprise": true,
 			"blobber_auth_tickets": blobberAuthTickets,
@@ -392,7 +392,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_move": nil, "enterprise": true,
 			"blobber_auth_tickets": blobberAuthTickets,
@@ -409,7 +409,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_copy": nil, "enterprise": true,
 			"blobber_auth_tickets": blobberAuthTickets,
@@ -426,7 +426,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options = map[string]interface{}{"lock": "0.5", "size": 1024, "forbid_rename": nil, "enterprise": true,
 			"blobber_auth_tickets": blobberAuthTickets,
@@ -450,7 +450,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{"lock": "0.5", "size": 1024, "enterprise": true,
 			"blobber_auth_tickets": blobberAuthTickets,
@@ -469,7 +469,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Equal(t, false, alloc.ThirdPartyExtendable)
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 
-		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds = utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options = map[string]interface{}{"lock": "0.5", "size": 1024, "third_party_extendable": nil, "enterprise": true,
 			"blobber_auth_tickets": blobberAuthTickets,
@@ -493,7 +493,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{
 			"cost":                 "",
@@ -530,7 +530,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{
 			"cost":                 "",
@@ -554,7 +554,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
-		_, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		_, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{
 			"size":               "1024",
@@ -575,7 +575,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{"parity": "99", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
@@ -590,7 +590,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{"data": "99", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
 			"preferred_blobbers": blobberIds}
@@ -606,7 +606,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{"data": "30", "parity": "20", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
 			"preferred_blobbers": blobberIds}
@@ -622,7 +622,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
 			"preferred_blobbers": blobberIds}
@@ -638,7 +638,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{"size": 256, "lock": "0.5", "enterprise": true,
 			"blobber_auth_tickets": blobberAuthTickets,
@@ -655,7 +655,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{"enterprise": true,
 			"blobber_auth_tickets": blobberAuthTickets,

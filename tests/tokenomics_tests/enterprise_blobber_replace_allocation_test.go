@@ -46,7 +46,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
-		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, addBlobberID, addBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
 		params := createParams(map[string]interface{}{
@@ -81,7 +81,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
-		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, addBlobberID, addBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
 		params := createParams(map[string]interface{}{
@@ -128,7 +128,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		err = updateBlobberPrice(t, configPath, addBlobberID, originalPrice)
 		require.Nil(t, err, "Error updating blobber price")
 
-		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, addBlobberID, addBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
 		params := createParams(map[string]interface{}{
@@ -170,7 +170,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		err = updateBlobberPrice(t, configPath, addBlobberID, halfPrice)
 		require.Nil(t, err, "Error updating blobber price")
 
-		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, addBlobberID, addBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
 		params := createParams(map[string]interface{}{
@@ -212,7 +212,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		err = updateBlobberPrice(t, configPath, addBlobberID, doublePrice)
 		require.Nil(t, err, "Error updating blobber price")
 
-		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, addBlobberID, addBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
 		params := createParams(map[string]interface{}{
@@ -260,7 +260,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 	//	addBlobberID, addBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 	//	require.Nil(t, err)
 	//
-	//	addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+	//	addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t,configPath, addBlobberID, addBlobberUrl)
 	//	require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 	//
 	//	params := createParams(map[string]interface{}{
@@ -283,7 +283,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 	t.Run("Replace blobber with the same one in allocation, shouldn't work", func(t *test.SystemTest) {
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
-		blobberAuthTickets, _ := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, _ := utils.GenerateBlobberAuthTickets(t, configPath)
 		addBlobberAuthTicket := blobberAuthTickets[0]
 
 		params := createParams(map[string]interface{}{
@@ -304,7 +304,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 
 		incorrectBlobberID := "1234abc"
 
-		blobberAuthTickets, _ := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, _ := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		addBlobberAuthTicket := blobberAuthTickets[0]
 

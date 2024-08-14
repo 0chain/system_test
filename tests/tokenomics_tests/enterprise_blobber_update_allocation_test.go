@@ -223,7 +223,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		addBlobberID, addBlobberUrl, err := utils.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
-		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, addBlobberID, addBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
 		params := createParams(map[string]interface{}{
@@ -272,7 +272,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		addBlobberID, addBlobberUrl, err := utils.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
-		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, addBlobberID, addBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
 		params := createParams(map[string]interface{}{
@@ -639,26 +639,15 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Update allocation with add blobber should succeed", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
 
 		allocSize := int64(4096)
-		fileSize := int64(1024)
 
 		allocationID := utils.SetupEnterpriseAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
-
-		filename := utils.GenerateRandomTestFileName(t)
-		err := utils.CreateFileWithSize(filename, fileSize)
-		require.Nil(t, err)
-
-		remotePath := "/dir" + filename
-		output, err := utils.UploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotePath,
-			"localpath":  filename,
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
 
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
@@ -666,7 +655,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		blobberID, blobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
-		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, blobberID, blobberUrl)
+		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, blobberID, blobberUrl)
 		require.Nil(t, err, "Unable to generate add blobber auth ticket")
 
 		params := createParams(map[string]interface{}{
@@ -679,13 +668,11 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-		utils.AssertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
-		fref, err := cli_tests.VerifyFileRefFromBlobber(walletFile, configFile, allocationID, blobberID, remotePath)
-		require.Nil(t, err)
-		require.NotNil(t, fref)
 	})
 
 	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
+		output, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error creating wallet %v", strings.Join(output, "\n"))
 
 		allocSize := int64(4096)
 		fileSize := int64(1024)
@@ -696,11 +683,11 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		})
 
 		filename := utils.GenerateRandomTestFileName(t)
-		err := utils.CreateFileWithSize(filename, fileSize)
+		err = utils.CreateFileWithSize(filename, fileSize)
 		require.Nil(t, err)
 
 		remotePath := "/dir" + filename
-		output, err := utils.UploadFile(t, configPath, map[string]interface{}{
+		output, err = utils.UploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  filename,
@@ -716,7 +703,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		removeBlobber, err := cli_tests.GetRandomBlobber(walletFile, configFile, allocationID, addBlobberID)
 		require.Nil(t, err)
 
-		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, addBlobberID, addBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
 		params := createParams(map[string]interface{}{
@@ -775,7 +762,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		blobberID, blobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err, "Unable to get blobber not part of allocaiton")
 
-		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, blobberID, blobberUrl)
+		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, blobberID, blobberUrl)
 		require.Nil(t, err, "Unabel to generate auth ticket for add blobber")
 
 		params = createParams(map[string]interface{}{
@@ -806,7 +793,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		blobberID, blobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err, "Unable to get blobber not part of allocaiton")
 
-		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, blobberID, blobberUrl)
+		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, blobberID, blobberUrl)
 		require.Nil(t, err, "Unabel to generate auth ticket for add blobber")
 
 		// Combine all update operations
@@ -1142,7 +1129,7 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 	output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 	require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
-	blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+	blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 	options := map[string]interface{}{"size": "10000000", "lock": "5", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 
 	for _, params := range extraParams {

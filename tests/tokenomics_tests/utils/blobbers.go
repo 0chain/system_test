@@ -16,7 +16,9 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-const zboxTeamWallet = "wallets/zbox_team"
+const zboxTeamWalletName = "wallets/zbox_team"
+
+var zboxTeamWallet *climodel.Wallet
 
 func ListBlobbers(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Requesting blobber list...")
@@ -69,13 +71,13 @@ func StakePoolInfo(t *test.SystemTest, cliConfigFilename, params string) ([]stri
 	t.Log("Fetching stake pool info...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, EscapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
-func GenerateBlobberAuthTickets(t *test.SystemTest) (string, string) {
-	return GenerateBlobberAuthTicketsWithWallet(t, EscapedTestName(t))
+func GenerateBlobberAuthTickets(t *test.SystemTest, configFileName string) (string, string) {
+	return GenerateBlobberAuthTicketsWithWallet(t, EscapedTestName(t), configFileName)
 }
 
-func GenerateBlobberAuthTicketsWithWallet(t *test.SystemTest, walletName string) (string, string) {
+func GenerateBlobberAuthTicketsWithWallet(t *test.SystemTest, walletName, configFileName string) (string, string) {
 	var blobbersList []climodel.Blobber
-	output, err := ListBlobbersWithWallet(t, walletName, configPath, "--json")
+	output, err := ListBlobbersWithWallet(t, walletName, configFileName, "--json")
 	require.Nil(t, err, "Failed to get blobbers list", strings.Join(output, "\n"))
 	require.NotNil(t, output[0], "Empty list blobbers json response")
 
@@ -86,11 +88,11 @@ func GenerateBlobberAuthTicketsWithWallet(t *test.SystemTest, walletName string)
 	// Get auth tickets for all blobbers
 	var blobberAuthTickets string
 	var blobbersIds string
-	wallet, err := GetWalletForName(t, configPath, walletName)
+	wallet, err := GetWalletForName(t, configFileName, walletName)
 	require.Nil(t, err, "could not get wallet")
 
 	for i, blobber := range blobbersList {
-		authTicket, err := getBlobberAuthTicket(t, blobber.ID, blobber.BaseURL, zboxTeamWallet, wallet.ClientID)
+		authTicket, err := getBlobberAuthTicket(t, configFileName, blobber.ID, blobber.BaseURL, zboxTeamWalletName, wallet.ClientID)
 		require.Nil(t, err, "could not get auth ticket for blobber", blobber.ID)
 		require.NotNil(t, authTicket, "could not get auth ticket for blobber %v", blobber)
 		require.NotEqual(t, authTicket, "", "empty auth ticket for blobber %v", blobber)
@@ -106,28 +108,32 @@ func GenerateBlobberAuthTicketsWithWallet(t *test.SystemTest, walletName string)
 	return blobberAuthTickets, blobbersIds
 }
 
-func GetBlobberAuthTicketWithId(t *test.SystemTest, blobberID, blobberUrl string) (string, error) {
-	return getBlobberAuthTicketForIdWithWallet(t, EscapedTestName(t), blobberID, blobberUrl)
+func GetBlobberAuthTicketWithId(t *test.SystemTest, cliConfigFileName, blobberID, blobberUrl string) (string, error) {
+	return getBlobberAuthTicketForIdWithWallet(t, EscapedTestName(t), cliConfigFileName, blobberID, blobberUrl)
 }
-func getBlobberAuthTicketForIdWithWallet(t *test.SystemTest, walletName, blobberId, blobberUrl string) (string, error) {
-	userWallet, err := GetWalletForName(t, configPath, walletName)
+func getBlobberAuthTicketForIdWithWallet(t *test.SystemTest, walletName, cliConfigFileName, blobberId, blobberUrl string) (string, error) {
+	userWallet, err := GetWalletForName(t, cliConfigFileName, walletName)
 	if err != nil {
 		return "", err
 	}
 
-	return getBlobberAuthTicket(t, blobberId, blobberUrl, zboxTeamWallet, userWallet.ClientID)
+	return getBlobberAuthTicket(t, cliConfigFileName, blobberId, blobberUrl, zboxTeamWalletName, userWallet.ClientID)
 }
 
-func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, zboxTeamWallet, clientID string) (string, error) {
-	zboxWallet, err := GetWalletForName(t, configPath, zboxTeamWallet)
-	require.Nil(t, err, "could not get zbox wallet")
+func getBlobberAuthTicket(t *test.SystemTest, cliConfigFileName, blobberID, blobberUrl, zboxTeamWalletName, clientID string) (string, error) {
+	if zboxTeamWallet == nil {
+		zboxWallet, err := GetWalletForName(t, cliConfigFileName, zboxTeamWalletName)
+		require.Nil(t, err, "could not get zbox wallet")
+
+		zboxTeamWallet = zboxWallet
+	}
 
 	var authTicket string
 	signatureScheme := zcncrypto.NewSignatureScheme("bls0chain")
 	_ = signatureScheme.SetPrivateKey("85e2119f494cd40ca524f6342e8bdb7bef2af03fe9a08c8d9c1d9f14d6c64f14")
-	_ = signatureScheme.SetPublicKey(zboxWallet.ClientPublicKey)
+	_ = signatureScheme.SetPublicKey(zboxTeamWallet.ClientPublicKey)
 
-	signature, err := signatureScheme.Sign(hex.EncodeToString([]byte(zboxWallet.ClientPublicKey)))
+	signature, err := signatureScheme.Sign(hex.EncodeToString([]byte(zboxTeamWallet.ClientPublicKey)))
 	if err != nil {
 		return authTicket, err
 	}

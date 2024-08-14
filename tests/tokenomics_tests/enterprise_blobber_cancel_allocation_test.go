@@ -57,7 +57,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 
 		// Create allocation
 		amountTotalLockedToAlloc := int64(5e10)
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 		params := map[string]interface{}{"size": 1 * GB, "lock": amountTotalLockedToAlloc / 1e10, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 		allocOutput, err := utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
 		require.Nil(t, err, "Error creating allocation")
@@ -127,7 +127,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		// Generate blobber auth tickets
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		balanceBeforeCreatingAllocation, err := utils.GetBalanceZCN(t, configPath)
 		require.Nil(t, err, "Error fetching wallet balance")
@@ -187,7 +187,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error updating sc config", strings.Join(output, "\n"))
 
 		// Create an allocation
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 		params := map[string]interface{}{"size": "10000", "lock": "5", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 		allocOutput, err := utils.CreateNewEnterpriseAllocationForWallet(t, utils.EscapedTestName(t), configPath, createParams(params))
 		require.Nil(t, err, "Error creating allocation")
@@ -209,7 +209,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		newBlobberID, newBlobberUrl, err := cli_tests.GetBlobberIdAndUrlNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err, "Unable to get blobber not part of allocation")
 
-		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, newBlobberID, newBlobberUrl)
+		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, newBlobberID, newBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for adding blobber")
 
 		updateAllocationParams := createParams(map[string]interface{}{
@@ -255,7 +255,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error updating sc config", strings.Join(output, "\n"))
 
 		// Create an allocation
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 		params := map[string]interface{}{"size": "10000", "lock": "5", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 		allocOutput, err := utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
 		require.Nil(t, err, "Error creating allocation")
@@ -280,7 +280,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		removeBlobber, err := cli_tests.GetRandomBlobber(walletFile, configFile, allocationID, addBlobberID)
 		require.Nil(t, err)
 
-		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, addBlobberID, addBlobberUrl)
+		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, addBlobberID, addBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for replace blobber")
 
 		updateAllocationParams := createParams(map[string]interface{}{
@@ -325,7 +325,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		params := map[string]interface{}{"size": "10000", "lock": "5", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 
@@ -345,8 +345,11 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
+		output, err := utils.CreateWalletForName(t, configPath, utils.EscapedTestName(t)+"_other")
+		require.Nil(t, err, "Unable to create the wallet", strings.Join(output, "\n"))
+
 		otherAllocationID := utils.SetupEnterpriseAllocationWithWallet(t, utils.EscapedTestName(t)+"_other", configPath)
-		output, err := utils.ExecuteFaucetWithTokensForWallet(t, utils.EscapedTestName(t)+"_other_wallet.json", configPath, 1000)
+		output, err = utils.ExecuteFaucetWithTokensForWallet(t, utils.EscapedTestName(t)+"_other_wallet.json", configPath, 1000)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		output, err = utils.CreateWallet(t, configPath)

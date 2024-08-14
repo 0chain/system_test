@@ -147,7 +147,7 @@ func SetupEnterpriseAllocationWithWallet(t *test.SystemTest, walletName, cliConf
 		extraParams = append(extraParams, map[string]interface{}{})
 	}
 
-	extraParams[0]["blobber_auth_tickets"], extraParams[0]["preferred_blobbers"] = GenerateBlobberAuthTicketsWithWallet(t, walletName)
+	extraParams[0]["blobber_auth_tickets"], extraParams[0]["preferred_blobbers"] = GenerateBlobberAuthTicketsWithWallet(t, walletName, cliConfigFilename)
 	extraParams[0]["enterprise"] = true
 
 	allocID := SetupAllocationWithWallet(t, walletName, cliConfigFilename, extraParams...)
