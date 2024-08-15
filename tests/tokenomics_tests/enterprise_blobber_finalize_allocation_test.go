@@ -2,20 +2,163 @@ package tokenomics_tests
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 	"github.com/stretchr/testify/require"
-	"strings"
-	"testing"
-	"time"
 )
 
-func TestFinalizeAllocation(testSetup *testing.T) {
+var (
+	finalizeAllocationRegex = regexp.MustCompile(`^Allocation finalized with txId : [a-f0-9]{64}$`)
+)
+
+func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	// Finalise success
-	// You need to use same tests cases we have in cancel allocation here. But it's not a priority.
+	t.Parallel()
+
+	t.TestSetup("set storage config to use time_unit as 10 minutes", func() {
+		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "10m",
+		}, true)
+		require.Nil(t, err, "Error updating sc config", strings.Join(output, "\n"))
+	})
+
+	t.Cleanup(func() {
+		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "1h",
+		}, true)
+		require.Nil(t, err, "Error updating sc config", strings.Join(output, "\n"))
+	})
+
+	t.RunWithTimeout("Finalize allocation after waiting for 11 minutes check finalization and balance.", time.Minute*20, func(t *test.SystemTest) {
+		utils.SetupWalletWithCustomTokens(t, configPath, 10)
+
+		wallet, err := utils.GetWalletForName(t, configPath, utils.EscapedTestName(t))
+		require.Equal(t, wallet.ClientID, wallet.ClientID, "Error getting wallet with name %v")
+
+		beforeBalance := utils.GetBalanceFromSharders(t, wallet.ClientID)
+
+		// Create allocation
+		amountTotalLockedToAlloc := int64(5e10)
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
+		params := map[string]interface{}{"size": 1 * GB, "lock": amountTotalLockedToAlloc / 1e10, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
+		allocOutput, err := utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
+		require.Nil(t, err, "Error creating allocation")
+
+		allocationID, err := utils.GetAllocationID(strings.Join(allocOutput, "\n"))
+		require.Nil(t, err, "Error fetching allocation id %v", strings.Join(allocOutput, "\n"))
+
+		beforeAlloc := utils.GetAllocation(t, allocationID)
+
+		afterBalance := utils.GetBalanceFromSharders(t, wallet.ClientID)
+		require.Equal(t, beforeBalance-amountTotalLockedToAlloc-1e8, afterBalance, "Balance should be locked to allocation") // 1e8 is transaction fee
+		beforeBalance = afterBalance
+
+		t.Log("Waiting for 11 minutes ....")
+		waitForTimeInMinutesWhileLogging(t, 11)
+
+		// Finalize the allocation
+		output, err := finalizeAllocation(t, configPath, allocationID, true)
+		require.Nil(t, err, "Finalize allocation failed", strings.Join(output, "\n"))
+
+		// Validate that the allocation is finalized and check balance
+		utils.AssertOutputMatchesAllocationRegex(t, finalizeAllocationRegex, output[0])
+
+		afterAlloc := utils.GetAllocation(t, allocationID)
+		require.True(t, afterAlloc.Finalized, "Allocation should be finalized")
+		require.Equal(t, int64(0), afterAlloc.WritePool, "Write pool balance should be 0")
+
+		afterBalance = utils.GetBalanceFromSharders(t, wallet.ClientID)
+
+		// Calculate expected finalization amount
+		timeUnitInSeconds := int64(600) // 10 minutes
+		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime
+		realCostOfAlloc := costOfAlloc(beforeAlloc)
+		expectedPaymentToBlobbers := realCostOfAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+
+		t.Logf("Time unit in seconds: %v", timeUnitInSeconds)
+		t.Logf("Duration of used in seconds: %v", durationOfUsedInSeconds)
+		t.Logf("Real cost of allocation: %v", realCostOfAlloc)
+		t.Logf("Expected payment to blobbers: %v", expectedPaymentToBlobbers)
+		t.Logf("Before balance: %v", beforeBalance)
+		t.Logf("After balance: %v", afterBalance)
+
+		require.InEpsilon(t, beforeBalance-expectedPaymentToBlobbers-1e8, afterBalance, 0.01, "Finalization should correctly debit client balance") // 1e8 is transaction fee
+
+		rewardQuery := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseReward, err := getQueryRewards(t, rewardQuery)
+		require.Nil(t, err)
+
+		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
+	})
+
+	t.RunWithTimeout("Finalize allocation after updating duration check finalization and balance.", time.Minute*20, func(t *test.SystemTest) {
+		// Setup: Change time_unit to 10 minutes
+		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
+			"time_unit": "10m",
+		}, true)
+		require.Nil(t, err, "Error updating sc config", strings.Join(output, "\n"))
+
+		// Create a wallet
+		output, err = utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
+
+		// Execute faucet transaction
+		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+
+		// Generate blobber auth tickets
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
+
+		balanceBeforeCreatingAllocation, err := utils.GetBalanceZCN(t, configPath)
+		require.Nil(t, err, "Error fetching wallet balance")
+
+		// Create allocation
+		params := map[string]interface{}{"size": "10000", "lock": "5", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
+		allocOutput, err := utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
+		require.Nil(t, err, "Error creating allocation")
+		allocationID, err := utils.GetAllocationID(strings.Join(allocOutput, "\n"))
+
+		// Wait for 11 minutes
+		t.Log("Waiting for 11 minutes ....")
+		waitForTimeInMinutesWhileLogging(t, 11)
+
+		balanceAfterCreatingAllocation, err := utils.GetBalanceZCN(t, configPath)
+		require.Nil(t, err, "Error fetching wallet balance")
+
+		// Update the allocation duration
+		updateAllocationParams := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"extend":     true,
+		})
+		output, err = utils.UpdateAllocation(t, configPath, updateAllocationParams, true)
+		require.Nil(t, err, "Updating allocation duration failed", strings.Join(output, "\n"))
+
+		balanceBefore, err := utils.GetBalanceZCN(t, configPath)
+		require.Nil(t, err, "Error fetching wallet balance", err)
+
+		// Finalize the allocation
+		output, err = finalizeAllocation(t, configPath, allocationID, true)
+		require.Nil(t, err, "Finalize allocation failed", strings.Join(output, "\n"))
+
+		// Validate that the allocation is finalized and check balance
+		utils.AssertOutputMatchesAllocationRegex(t, finalizeAllocationRegex, output[0])
+
+		balanceAfter, err := utils.GetBalanceZCN(t, configPath)
+		require.Nil(t, err, "Error fetching wallet balance", err)
+		finalizationAmount := balanceBefore - balanceAfter
+
+		expectedFinalizationAmount := balanceBeforeCreatingAllocation - balanceAfterCreatingAllocation
+		require.Nil(t, err, "Error getting allocation cost", strings.Join(allocOutput, "\n"))
+
+		require.InEpsilon(t, expectedFinalizationAmount, finalizationAmount, 0.05, "Finalization amount is not as expected")
+	})
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
@@ -70,12 +213,13 @@ func TestFinalizeAllocation(testSetup *testing.T) {
 func finalizeAllocation(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
 	t.Logf("Finalizing allocation...")
 	cmd := fmt.Sprintf(
-		"./zbox alloc-fini --allocation %s "+
-			"--silent --wallet %s --configDir ./config --config %s",
+		"./zbox alloc-fini --allocation %s --silent "+
+			"--wallet %s --configDir ./config --config %s",
 		allocationID,
 		utils.EscapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 	)
+
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
 	} else {
