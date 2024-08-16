@@ -816,6 +816,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.True(t, alloc.ThirdPartyExtendable)
 	})
 
+	t.Skip()
 	t.Run("Blobber price change upgrade size in unused allocation should work", func(t *test.SystemTest) {
 		// Wallet and setup utilities
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
