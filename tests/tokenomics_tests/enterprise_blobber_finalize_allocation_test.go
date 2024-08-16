@@ -98,50 +98,45 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 	})
 
-	t.RunWithTimeout("Finalize allocation after updating duration check finalization and balance.", time.Minute*20, func(t *test.SystemTest) {
-		// Setup: Change time_unit to 10 minutes
-		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "10m",
-		}, true)
-		require.Nil(t, err, "Error updating sc config", strings.Join(output, "\n"))
+	t.RunWithTimeout("Finalize allocation after updating duration and check finalization and balance.", time.Minute*25, func(t *test.SystemTest) {
+		// Setup, wallet creation, and initial balance retrieval
+		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
-		// Create a wallet
-		output, err = utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
+		wallet, err := utils.GetWalletForName(t, configPath, utils.EscapedTestName(t))
 
-		// Execute faucet transaction
-		output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
-
-		// Generate blobber auth tickets
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
-
-		balanceBeforeCreatingAllocation, err := utils.GetBalanceZCN(t, configPath)
-		require.Nil(t, err, "Error fetching wallet balance")
+		require.Nil(t, err, "Error getting wallet")
+		beforeBalance := utils.GetBalanceFromSharders(t, wallet.ClientID)
 
 		// Create allocation
-		params := map[string]interface{}{"size": "10000", "lock": "0.2", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
+		amountTotalLockedToAlloc := int64(2e10)
+
+		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
+
+		params := map[string]interface{}{"size": 1 * GB, "lock": amountTotalLockedToAlloc / 1e10, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
+
 		allocOutput, err := utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
 		require.Nil(t, err, "Error creating allocation")
-		allocationID, err := utils.GetAllocationID(strings.Join(allocOutput, "\n"))
 
-		balanceAfterCreatingAllocation, err := utils.GetBalanceZCN(t, configPath)
-		require.Nil(t, err, "Error fetching wallet balance")
+		allocationID, err := utils.GetAllocationID(strings.Join(allocOutput, "\n"))
+		require.Nil(t, err, "Error fetching allocation id")
+
+		beforeAlloc := utils.GetAllocation(t, allocationID)
+		afterBalance := utils.GetBalanceFromSharders(t, wallet.ClientID)
+
+		require.Equal(t, beforeBalance-amountTotalLockedToAlloc-1e8, afterBalance, "Balance should be locked to allocation")
+
+		beforeBalance = afterBalance
 
 		// Update the allocation duration
 		updateAllocationParams := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
 		})
-		output, err = utils.UpdateAllocation(t, configPath, updateAllocationParams, true)
+		output, err := utils.UpdateAllocation(t, configPath, updateAllocationParams, true)
 		require.Nil(t, err, "Updating allocation duration failed", strings.Join(output, "\n"))
 
-		balanceBefore, err := utils.GetBalanceZCN(t, configPath)
-		require.Nil(t, err, "Error fetching wallet balance", err)
-
-		// Wait for 11 minutes
-		t.Log("Waiting for 11 minutes ....")
-		waitForTimeInMinutesWhileLogging(t, 11)
+		t.Log("Waiting for 10 minutes ....")
+		waitForTimeInMinutesWhileLogging(t, 10)
 
 		// Finalize the allocation
 		output, err = finalizeAllocation(t, configPath, allocationID, true)
@@ -150,14 +145,32 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		// Validate that the allocation is finalized and check balance
 		utils.AssertOutputMatchesAllocationRegex(t, finalizeAllocationRegex, output[0])
 
-		balanceAfter, err := utils.GetBalanceZCN(t, configPath)
-		require.Nil(t, err, "Error fetching wallet balance", err)
-		finalizationAmount := balanceBefore - balanceAfter
+		afterAlloc := utils.GetAllocation(t, allocationID)
+		require.True(t, afterAlloc.Finalized, "Allocation should be finalized")
+		require.Equal(t, int64(0), afterAlloc.WritePool, "Write pool balance should be 0")
 
-		expectedFinalizationAmount := balanceBeforeCreatingAllocation - balanceAfterCreatingAllocation
-		require.Nil(t, err, "Error getting allocation cost", strings.Join(allocOutput, "\n"))
+		afterBalance = utils.GetBalanceFromSharders(t, wallet.ClientID)
 
-		require.InEpsilon(t, expectedFinalizationAmount, finalizationAmount, 0.05, "Finalization amount is not as expected")
+		// Calculate expected finalization amount
+		timeUnitInSeconds := int64(600) // 10 minutes
+		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime
+		realCostOfAlloc := costOfAlloc(beforeAlloc)
+		expectedPaymentToBlobbers := realCostOfAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+
+		t.Logf("Time unit in seconds: %v", timeUnitInSeconds)
+		t.Logf("Duration of used in seconds: %v", durationOfUsedInSeconds)
+		t.Logf("Real cost of allocation: %v", realCostOfAlloc)
+		t.Logf("Expected payment to blobbers: %v", expectedPaymentToBlobbers)
+		t.Logf("Before balance: %v", beforeBalance)
+		t.Logf("After balance: %v", afterBalance)
+
+		require.InEpsilon(t, beforeBalance-expectedPaymentToBlobbers-1e8, afterBalance, 0.01, "Finalization should correctly debit client balance") // 1e8 is transaction fee
+
+		rewardQuery := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseReward, err := getQueryRewards(t, rewardQuery)
+		require.Nil(t, err)
+
+		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 	})
 
 	t.Run("Finalize Non-Expired Allocation Should Fail", func(t *test.SystemTest) {
