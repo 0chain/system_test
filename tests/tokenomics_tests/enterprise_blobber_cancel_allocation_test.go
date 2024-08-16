@@ -132,10 +132,6 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Equal(t, beforeBalance-amountTotalLockedToAlloc-1e8, afterBalance, "Balance should be locked to allocation")
 		beforeBalance = afterBalance
 
-		// Wait for 7 minutes
-		t.Log("Waiting for 7 minutes ....")
-		waitForTimeInMinutesWhileLogging(t, 7)
-
 		// Update the allocation duration
 		updateAllocationParams := createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -184,10 +180,6 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		afterBalance := utils.GetBalanceFromSharders(t, wallet.ClientID)
 		require.Equal(t, beforeBalance-amountTotalLockedToAlloc-1e8, afterBalance, "Balance should be locked to allocation")
 		beforeBalance = afterBalance
-
-		// Wait for 7 minutes
-		t.Log("Waiting for 7 minutes ....")
-		waitForTimeInMinutesWhileLogging(t, 7)
 
 		// Add a blobber
 		wd, _ := os.Getwd()
@@ -247,10 +239,6 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		afterBalance := utils.GetBalanceFromSharders(t, wallet.ClientID)
 		require.Equal(t, beforeBalance-amountTotalLockedToAlloc-1e8, afterBalance, "Balance should be locked to allocation")
 		beforeBalance = afterBalance
-
-		// Wait for 7 minutes
-		t.Log("Waiting for 7 minutes ....")
-		waitForTimeInMinutesWhileLogging(t, 7)
 
 		// Replace a blobber with 2x price
 		wd, _ := os.Getwd()
