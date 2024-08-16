@@ -45,9 +45,9 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		beforeBalance := utils.GetBalanceFromSharders(t, wallet.ClientID)
 
 		// Create allocation
-		amountTotalLockedToAlloc := int64(5e10)
+		amountTotalLockedToAlloc := int64(2e9)
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
-		params := map[string]interface{}{"size": 1 * GB, "lock": amountTotalLockedToAlloc / 1e10, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
+		params := map[string]interface{}{"size": 1 * GB, "lock": "0.2", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 		allocOutput, err := utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
 		require.Nil(t, err, "Error creating allocation")
 
@@ -120,14 +120,10 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error fetching wallet balance")
 
 		// Create allocation
-		params := map[string]interface{}{"size": "10000", "lock": "5", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
+		params := map[string]interface{}{"size": "10000", "lock": "0.2", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 		allocOutput, err := utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
 		require.Nil(t, err, "Error creating allocation")
 		allocationID, err := utils.GetAllocationID(strings.Join(allocOutput, "\n"))
-
-		// Wait for 11 minutes
-		t.Log("Waiting for 11 minutes ....")
-		waitForTimeInMinutesWhileLogging(t, 11)
 
 		balanceAfterCreatingAllocation, err := utils.GetBalanceZCN(t, configPath)
 		require.Nil(t, err, "Error fetching wallet balance")
@@ -142,6 +138,10 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 
 		balanceBefore, err := utils.GetBalanceZCN(t, configPath)
 		require.Nil(t, err, "Error fetching wallet balance", err)
+
+		// Wait for 11 minutes
+		t.Log("Waiting for 11 minutes ....")
+		waitForTimeInMinutesWhileLogging(t, 11)
 
 		// Finalize the allocation
 		output, err = finalizeAllocation(t, configPath, allocationID, true)
