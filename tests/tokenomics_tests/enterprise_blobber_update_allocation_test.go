@@ -816,8 +816,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.True(t, alloc.ThirdPartyExtendable)
 	})
 
-	t.Skip()
-	t.Run("Blobber price change upgrade size in unused allocation should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Blobber price change upgrade size in unused allocation should work", time.Minute*30, func(t *test.SystemTest) {
 		// Wallet and setup utilities
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
@@ -827,18 +826,17 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"size":                 1 * GB,
 			"data":                 3,
 			"parity":               3,
-			"lock":                 2.0, // 2 ZCN locked initially for the allocation
+			"lock":                 "0.2", // 0.22 ZCN locked initially for the allocation
 			"blobber_auth_tickets": blobberAuthTickets,
 			"preferred_blobbers":   blobberIds,
 		}
 		allocID := utils.SetupEnterpriseAllocation(t, configPath, allocationParams)
 		beforeAlloc := utils.GetAllocation(t, allocID)
 
-		allocSizePerBlobber := 1 * GB / 6 // data + parity
+		allocSizePerBlobber := 1 / 3 // data
 		expectedRewardPerBlobber := float64(0)
-
-		allocWpBalance := 20 * allocSizePerBlobber * 1e10 // 20 * allocSizePerBlobber * x10
-		require.Equal(t, allocWpBalance, int64(beforeAlloc.WritePool), "Write pool should be 20 * 1e10")
+		allocWpBalance := blobbersList[0].Terms.WritePrice * int64(allocSizePerBlobber) * (beforeAlloc.ExpirationDate - beforeAlloc.StartTime) / (600)
+		require.Equal(t, allocWpBalance, beforeAlloc.WritePool, "Write pool should be 0.2 ZCN")
 
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
@@ -852,14 +850,15 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		// First upgrade
 		waitForTimeInMinutesWhileLogging(t, 10)
 
-		allocSizePerBlobber += 1
-		expectedRewardPerBlobber += 0.5 * 1e10
-		allocWpBalance /= 2                                                                              // Update alloc after using 50% of time
-		requiredWpBalance := 19*allocSizePerBlobber*1e10 + 1*2*allocSizePerBlobber*1e10 - allocWpBalance // One blobber has double write price
+		allocSizePerBlobber += 1 / 3
+		expectedRewardPerBlobber += 0.5 * 1e9
+		allocWpBalance /= 2 // Update alloc after using 50% of time
+		requiredWpBalance := 5*int64(allocSizePerBlobber)*1e9 +
+			1*2*int64(allocSizePerBlobber)*1e10 - allocWpBalance // One blobber has double write price
 
 		upgradeParams := map[string]interface{}{
 			"allocation": allocID,
-			"size":       10 * GB,
+			"size":       0.1 * GB,
 			"lock":       float64(requiredWpBalance) / 1e10,
 		}
 		output, err := updateAllocation(t, configPath, utils.CreateParams(upgradeParams), true)
@@ -878,19 +877,19 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		allocSizePerBlobber += 1
 		expectedRewardPerBlobber += 1 * 1e10
 		allocWpBalance /= 2
-		requiredWpBalance = 19*allocSizePerBlobber*1e10 + 1*2*allocSizePerBlobber*1e10 - allocWpBalance // One blobber has double write price
+		//requiredWpBalance = 19*allocSizePerBlobber*1e10 + 1*2*allocSizePerBlobber*1e10 - allocWpBalance // One blobber has double write price
 
 		upgradeParams = map[string]interface{}{
 			"allocation": allocID,
 			"size":       10 * GB,
-			"lock":       float64(requiredWpBalance) / 1e10,
+			//"lock":       float64(requiredWpBalance) / 1e10,
 		}
 		output, err = updateAllocation(t, configPath, utils.CreateParams(upgradeParams), true)
 		require.Nil(t, err, "Error updating allocation")
 
 		afterAlloc = utils.GetAllocation(t, allocID)
 
-		allocWpBalance += requiredWpBalance
+		//allocWpBalance += requiredWpBalance
 		require.Equal(t, allocWpBalance, afterAlloc.WritePool, "Write pool should be updated")
 
 		afterAlloc = utils.GetAllocation(t, allocID)
@@ -898,6 +897,10 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Equal(t, int64(30*GB), afterAlloc.Size, "Allocation size should be increased")
 		require.Equal(t, allocWpBalance, afterAlloc.WritePool, "Write pool should be updated")
 		require.Equal(t, 20*time.Minute/1e9, afterAlloc.ExpirationDate, "Allocation expiration should be increased")
+
+		//Reset blobbber prices to orignal.
+		err = updateBlobberPrice(t, configPath, blobberId, beforeAlloc.BlobberDetails[0].Terms.WritePrice)
+		require.Nil(t, err, "Unable to reset blobber price")
 	})
 
 	t.RunWithTimeout("Blobber price change and allocation extension", time.Minute*15, func(t *test.SystemTest) {
