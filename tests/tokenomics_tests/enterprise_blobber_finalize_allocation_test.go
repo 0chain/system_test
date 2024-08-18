@@ -108,7 +108,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		beforeBalance := utils.GetBalanceFromSharders(t, wallet.ClientID)
 
 		// Create allocation
-		amountTotalLockedToAlloc := int64(2e10)
+		amountTotalLockedToAlloc := int64(2e9)
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
@@ -131,6 +131,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		updateAllocationParams := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
+			"lock":       "0.2",
 		})
 		output, err := utils.UpdateAllocation(t, configPath, updateAllocationParams, true)
 		require.Nil(t, err, "Updating allocation duration failed", strings.Join(output, "\n"))
