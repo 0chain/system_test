@@ -1377,7 +1377,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		//expectedRewardPerBloober := float64(0)
-		allocSizePerBloober := float64(1 / 3)
+		allocSizePerBloober := 1
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
@@ -1419,7 +1419,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		//expectedRewardPerBloober = 0.5 * 1e10
 		allocWritePoolBalance /= 2
-		requiredWpBalance := 3*int64(allocSizePerBloober)*1e10 + 1*2*int64(allocSizePerBloober)*1e9 - int64(allocWritePoolBalance)
+		requiredWpBalance := 3*int64(allocSizePerBloober)*1e9 + 1*2*int64(allocSizePerBloober)*1e9 - int64(allocWritePoolBalance)
 
 		// Extend the allocation duration
 		extendParams := map[string]interface{}{
