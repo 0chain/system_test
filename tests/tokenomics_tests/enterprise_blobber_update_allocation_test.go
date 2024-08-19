@@ -980,9 +980,6 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.Equal(t, "Error updating allocation:couldnt_find_allocation: Couldn't find the allocation required for update", output[0])
 
-		//Cleanup
-		output, err = cancelAllocation(t, configPath, allocationID, true)
-		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
 	})
 
