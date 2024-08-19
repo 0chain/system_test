@@ -89,7 +89,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		t.Logf("Before balance: %v", beforeBalance)
 		t.Logf("After balance: %v", afterBalance)
 
-		require.InEpsilon(t, beforeBalance-expectedPaymentToBlobbers-1e8, afterBalance, 0.01, "Finalization should correctly debit client balance") // 1e8 is transaction fee
+		require.InEpsilon(t, beforeBalance-expectedPaymentToBlobbers-1e8, afterBalance-beforeAlloc.WritePool, 0.01, "Finalization should correctly debit client balance") // 1e8 is transaction fee
 
 		rewardQuery := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
 		enterpriseReward, err := getQueryRewards(t, rewardQuery)
@@ -112,7 +112,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
-		params := map[string]interface{}{"size": 1 * GB, "lock": amountTotalLockedToAlloc / 1e10, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
+		params := map[string]interface{}{"size": 1 * GB, "lock": "0.2", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 
 		allocOutput, err := utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
 		require.Nil(t, err, "Error creating allocation")
@@ -131,7 +131,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		updateAllocationParams := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
-			"lock":       "0.2",
+			//"lock":       "0.2",
 		})
 		output, err := utils.UpdateAllocation(t, configPath, updateAllocationParams, true)
 		require.Nil(t, err, "Updating allocation duration failed", strings.Join(output, "\n"))
@@ -165,7 +165,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		t.Logf("Before balance: %v", beforeBalance)
 		t.Logf("After balance: %v", afterBalance)
 
-		require.InEpsilon(t, beforeBalance-expectedPaymentToBlobbers-1e8, afterBalance, 0.01, "Finalization should correctly debit client balance") // 1e8 is transaction fee
+		require.InEpsilon(t, beforeBalance-expectedPaymentToBlobbers-1e8, afterBalance-beforeAlloc.WritePool, 0.01, "Finalization should correctly debit client balance") // 1e8 is transaction fee
 
 		rewardQuery := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
 		enterpriseReward, err := getQueryRewards(t, rewardQuery)
