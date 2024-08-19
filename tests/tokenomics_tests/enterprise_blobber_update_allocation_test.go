@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/0chain/system_test/tests/cli_tests"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
+	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"os"
@@ -1242,6 +1243,9 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		blobberId, err := cli_tests.GetRandomBlobber(walletFile, configFile, allocID, "")
 		require.Nil(t, err, "Error unable to random blobber from allocation")
 
+		blobberDetails, err := utils.GetBlobberDetails(t, configPath, blobberId)
+		require.Nil(t, err, "Unable to fetch blobber details")
+
 		err = updateBlobberPrice(t, configPath, blobberId, beforeAlloc.BlobberDetails[0].Terms.WritePrice*2)
 		require.Nil(t, err, "Unable to update blobber price")
 
@@ -1343,7 +1347,19 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Equal(t, allocWpBalance, afterAlloc.WritePool, "Write pool should be updated")
 		//require.Equal(t, 20*time.Minute/1e9, afterAlloc.ExpirationDate, "Allocation expiration should be increased")  TODO: ask jayash about this timestamp updation.
 
-		//TODO: compare allocation data step.
+		expectedAlloc := beforeAlloc
+		expectedAlloc.ExpirationDate = afterAlloc.ExpirationDate
+		expectedAlloc.WritePool = afterAlloc.WritePool
+		expectedAlloc.Size = afterAlloc.Size
+		for idx, ba := range expectedAlloc.BlobberDetails {
+			ba.Size += (afterAlloc.Size * 2) / int64(afterAlloc.DataShards)
+
+			if ba.BlobberID == blobberId {
+				expectedAlloc.BlobberDetails[idx].Terms.WritePrice = blobberDetails.Terms.WritePrice
+			}
+		}
+
+		compareAllocationData(t, expectedAlloc, afterAlloc)
 
 		t.Cleanup(func() {
 			//Reset blobbber prices to orignal.
@@ -1366,7 +1382,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		// Initial setup parameters
-		allocWritePoolBalance := int64(0.2 * 1e10) // 0.2 ZCN in tokens
+		allocWritePoolBalance := int64(0.4 * 1e10) // 0.2 ZCN in tokens
 		allocationID := utils.SetupEnterpriseAllocationAndReadLock(t, configPath, map[string]interface{}{
 			"data":                 2,
 			"parity":               2,
@@ -1385,6 +1401,10 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		// Get the blobber ID and initial write pool balance
 		blobberID, err := cli_tests.GetRandomBlobber(walletFile, configFile, allocationID, "")
 		require.Nil(t, err, "Failed to get blobber ID")
+
+		blobberDetails, err := utils.GetBlobberDetails(t, configPath, blobberID)
+		require.Nil(t, err, "Error getting blobber details")
+
 		initialAlloc := utils.GetAllocation(t, allocationID)
 
 		require.Equal(t, allocWritePoolBalance, initialAlloc.WritePool, "Write pool should match with the locked amount")
@@ -1454,6 +1474,20 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Equal(t, expectedNewExpiration, updatedAlloc.ExpirationDate, "Allocation expiration time mismatch after extension")
 		require.Equal(t, updatedAlloc.Size, initialAlloc.Size, "Allocation size mismatch after extension")
 
+		expectedAlloc := initialAlloc
+		expectedAlloc.ExpirationDate = updatedAlloc.ExpirationDate
+		expectedAlloc.WritePool = updatedAlloc.WritePool
+		expectedAlloc.Size = updatedAlloc.Size
+		for idx, ba := range expectedAlloc.BlobberDetails {
+			ba.Size += (updatedAlloc.Size * 2) / int64(updatedAlloc.DataShards)
+
+			if ba.BlobberID == blobberID {
+				expectedAlloc.BlobberDetails[idx].Terms.WritePrice = blobberDetails.Terms.WritePrice
+			}
+		}
+
+		compareAllocationData(t, expectedAlloc, updatedAlloc)
+
 		t.Cleanup(func() {
 			// Reset the blobber price to the original value at the end of the test
 			err := updateBlobberPrice(t, configPath, blobberID, initialAlloc.BlobberDetails[0].Terms.WritePrice)
@@ -1465,6 +1499,19 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
 		})
 	})
+}
+
+func compareAllocationData(t *test.SystemTest, beforeAlloc climodel.Allocation, afterAlloc climodel.Allocation) {
+	beforeAllocJson, err := json.Marshal(beforeAlloc)
+	require.NoError(t, err)
+
+	afterAllocJson, err := json.Marshal(afterAlloc)
+	require.NoError(t, err)
+
+	beforeAllocString := string(beforeAllocJson)
+	afterAllocString := string(afterAllocJson)
+
+	assert.JSONEq(t, beforeAllocString, afterAllocString, "Allocation data should be same")
 }
 
 func calculateAllocationLock(data, parity, size, exiprationStart, expirationEnd, writePriceBlobber int64) float64 {
