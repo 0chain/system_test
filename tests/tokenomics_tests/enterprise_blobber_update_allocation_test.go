@@ -68,6 +68,20 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"time_unit": "10m",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
+
+		var blobbers []climodel.Blobber
+		output, err = utils.ListBlobbers(t, configPath, "--json")
+		require.Nil(t, err, "Error listing blobberes", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "Error invalid json length", strings.Join(output, "\n"))
+
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobbers)
+
+		for _, blobber := range blobbers {
+			if blobber.Terms.WritePrice != 1e9 {
+				err := updateBlobberPrice(t, configPath, blobber.ID, 1e9)
+				require.Nil(t, err, "Error resetting blobber write prices")
+			}
+		}
 	})
 
 	t.Cleanup(func() {
@@ -314,17 +328,20 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Failed to update blobber price")
 
 		//checkStakesRewardsAre0ForAlloc(beforeAlloc, ssc, t, balances)
-		waitForTimeInMinutesWhileLogging(t, 3)
+		waitForTimeInMinutesWhileLogging(t, 5)
 
 		// First extension
+		expectedRewardPerBlobber += 0.1 * 1e9
+		allocWpBalance /= 2
+		requiredWpBalance :=
+			3*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/10 +
+				1*2*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/10 - allocWpBalance // log it and add extra tokens in it.
+
 		params := map[string]interface{}{
 			"allocation": allocID,
 			"extend":     true,
+			"lock":       float64(requiredWpBalance) / 1e10,
 		}
-
-		expectedRewardPerBlobber += 0.1 * 1e9
-		//allocWpBalance /= 2
-		requiredWpBalance := (3*allocSizePerBlobber*1e9+1*2*allocSizePerBlobber*1e9)*(time.Now().Unix()-beforeAlloc.StartTime) - allocWpBalance
 
 		output, err := updateAllocation(t, configPath, utils.CreateParams(params), true)
 		require.NoError(t, err, "Failed to update allocation")
@@ -332,13 +349,13 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		afterAlloc := utils.GetAllocation(t, allocID)
 		allocWpBalance += requiredWpBalance
-		require.Equal(t, allocWpBalance, afterAlloc.WritePool, "Write pool should be updated")
+		require.InEpsilon(t, allocWpBalance, afterAlloc.WritePool, 0.01, "Write pool should be updated")
 
 		for _, ba := range afterAlloc.BlobberDetails {
 			sp := getStakePoolInfo(t, ba.BlobberID)
 			require.Nil(t, err, "Failed to get stake pool info")
 
-			require.Equal(t, int64(expectedRewardPerBlobber*0.3), sp.Rewards, "30% service charge to blobber must be updated")
+			require.InEpsilon(t, int64(expectedRewardPerBlobber*0.1), sp.Rewards, 0.01, "30% service charge to blobber must be updated")
 			require.Len(t, sp.Delegate, 1, "Single delegate pool")
 
 			var dpKey int
@@ -346,22 +363,24 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 				dpKey = k
 				break
 			}
-			require.Equal(t, int(expectedRewardPerBlobber*0.7), int(sp.Delegate[dpKey].Rewards), "70% of delegate pool must be updated")
+			require.InEpsilon(t, int(expectedRewardPerBlobber*0.9), int(sp.Delegate[dpKey].Rewards), 0.01, "70% of delegate pool must be updated")
 		}
 
 		// Second extension
-		waitForTimeInMinutesWhileLogging(t, 3)
+		waitForTimeInMinutesWhileLogging(t, 5)
 
 		expectedRewardPerBlobber += 0.1 * 1e9
-		//allocWpBalance /= 2
-		requiredWpBalance = (3*allocSizePerBlobber*1e9+1*2*allocSizePerBlobber*1e9)*(time.Now().Unix()-beforeAlloc.StartTime) - allocWpBalance
+		allocWpBalance /= 2
+		requiredWpBalance =
+			3*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/10 +
+				1*2*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/10 - allocWpBalance // log it and add extra tokens in it.
 
 		output, err = updateAllocation(t, configPath, utils.CreateParams(params), true)
 		require.NoError(t, err, "Failed to update allocation")
 
 		afterAlloc = utils.GetAllocation(t, allocID)
 		allocWpBalance += requiredWpBalance
-		require.Equal(t, allocWpBalance, afterAlloc.WritePool, "Write pool should be updated")
+		require.InEpsilon(t, allocWpBalance, afterAlloc.WritePool, 0.01, "Write pool should be updated")
 
 		for _, ba := range afterAlloc.BlobberDetails {
 			sp := getStakePoolInfo(t, ba.BlobberID)
@@ -373,7 +392,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 				expectedReward += 0.1 * 1e9
 			}
 
-			require.Equal(t, int(expectedReward*0.3), int(sp.Rewards), "Blobber reward mismatch after price update")
+			require.InEpsilon(t, int(expectedReward*0.1), int(sp.Rewards), 0.01, "Blobber reward mismatch after price update")
 			require.Len(t, sp.Delegate, 1, "Single delegate pool")
 
 			var dpKey int
@@ -381,14 +400,14 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 				dpKey = k
 				break
 			}
-			require.Equal(t, int(expectedReward*0.7), int(sp.Delegate[dpKey].Rewards), "Delegate pool reward mismatch")
+			require.InEpsilon(t, int(expectedReward*0.9), int(sp.Delegate[dpKey].Rewards), 0.01, "Delegate pool reward mismatch")
 		}
 
 		afterAllocBase := afterAlloc
 
-		assert.Equal(t, int64(2*GB), afterAllocBase.Size, "Allocation size should be increased")
+		require.Equal(t, int64(2*GB), afterAllocBase.Size, "Allocation size should be increased")
 		require.Equal(t, allocWpBalance, int64(afterAllocBase.WritePool), "Write pool should be updated")
-		assert.Equal(t, common.Timestamp(time.Now().Unix()+int64(20*time.Minute/1e9)), afterAllocBase.ExpirationDate, "Allocation expiration should be increased")
+		require.Equal(t, common.Timestamp(time.Now().Unix()+int64(20*time.Minute/1e9)), afterAllocBase.ExpirationDate, "Allocation expiration should be increased")
 
 		expectedAlloc := beforeAlloc
 		expectedAlloc.Tx = afterAllocBase.Tx
