@@ -108,11 +108,11 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		beforeBalance := utils.GetBalanceFromSharders(t, wallet.ClientID)
 
 		// Create allocation
-		amountTotalLockedToAlloc := int64(2e9)
+		amountTotalLockedToAlloc := int64(1e9 * 2)
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
-		params := map[string]interface{}{"size": 1 * GB, "lock": "0.2", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
+		params := map[string]interface{}{"data": 3, "parity": 3, "size": 1 * GB, "lock": "0.2", "enterprise": true, "blobber_auth_tickets": blobberAuthTickets, "preferred_blobbers": blobberIds}
 
 		allocOutput, err := utils.CreateNewEnterpriseAllocation(t, configPath, createParams(params))
 		require.Nil(t, err, "Error creating allocation")
@@ -125,13 +125,16 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 
 		require.Equal(t, beforeBalance-amountTotalLockedToAlloc-1e8, afterBalance, "Balance should be locked to allocation")
 
+		waitForTimeInMinutesWhileLogging(t, 5)
+
+		requiredWpBalance := 1e9*2*(time.Now().Unix()-beforeAlloc.StartTime)/10 - amountTotalLockedToAlloc
 		beforeBalance = afterBalance
 
 		// Update the allocation duration
 		updateAllocationParams := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
-			//"lock":       "0.2",
+			"lock":       float64(requiredWpBalance) / 1e10,
 		})
 		output, err := utils.UpdateAllocation(t, configPath, updateAllocationParams, true)
 		require.Nil(t, err, "Updating allocation duration failed", strings.Join(output, "\n"))
