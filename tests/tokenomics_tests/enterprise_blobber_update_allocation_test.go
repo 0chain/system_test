@@ -158,10 +158,12 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Unable to update blobber price")
 		t.Logf("Updated Blobber Write Price to: %d", beforeAlloc.BlobberDetails[0].Terms.WritePrice*2)
 
-		waitForTimeInMinutesWhileLogging(t, 1)
+		waitForTimeInMinutesWhileLogging(t, 3)
+
+		afterAlloc := utils.GetAllocation(t, allocID)
 
 		// First upgrade
-		expectedRewardPerBlobber += 1e9 * float64(time.Now().Unix()-beforeAlloc.StartTime) / 10
+		expectedRewardPerBlobber += 1e9 * float64(time.Now().Unix()-beforeAlloc.StartTime) / float64(afterAlloc.ExpirationDate-afterAlloc.StartTime)
 		//expectedRewardPerBlobber += float64(afterBalance - beforeBalance - 1e8)
 
 		allocSizePerBlobber += 1
@@ -180,7 +182,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.NoError(t, err, "Error updating allocation", strings.Join(output, "\n"))
 		t.Logf("Output after first allocation upgrade: %s", strings.Join(output, "\n"))
 
-		afterAlloc := utils.GetAllocation(t, allocID)
+		afterAlloc = utils.GetAllocation(t, allocID)
 		allocWpBalance += requiredWpBalance
 		t.Logf("After first upgrade - New Write Pool Balance: %d", allocWpBalance)
 		t.Logf("Allocation details %+v", afterAlloc)
@@ -204,7 +206,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			require.InEpsilon(t, int(expectedRewardPerBlobber*0.9), int(sp.Delegate[dpKey].Rewards), 0.01, "90% of delegate pool must be updated")
 		}
 
-		waitForTimeInMinutesWhileLogging(t, 1)
+		waitForTimeInMinutesWhileLogging(t, 3)
 
 		// Second upgrade
 		allocSizePerBlobber += 1
