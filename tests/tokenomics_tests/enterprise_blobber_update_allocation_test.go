@@ -330,14 +330,15 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Failed to update blobber price")
 
 		//checkStakesRewardsAre0ForAlloc(beforeAlloc, ssc, t, balances)
-		waitForTimeInMinutesWhileLogging(t, 5)
+		waitForTimeInMinutesWhileLogging(t, 3)
 
 		// First extension
-		expectedRewardPerBlobber += 0.1 * 1e9
-		allocWpBalance /= 2
+		//expectedRewardPerBlobber += 0.1 * 1e9
+		expectedRewardPerBlobber = 1e9 * float64(time.Now().Unix()-beforeAlloc.StartTime) / float64(beforeAlloc.ExpirationDate-beforeAlloc.StartTime)
+		allocWpBalance = int64(float64(allocWpBalance) * (float64(time.Now().Unix()-beforeAlloc.StartTime) / float64(beforeAlloc.ExpirationDate-beforeAlloc.StartTime)))
 		requiredWpBalance :=
-			3*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/10 +
-				1*2*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/10 - allocWpBalance // log it and add extra tokens in it.
+			3*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/600 +
+				1*2*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/600 - allocWpBalance // log it and add extra tokens in it.
 
 		params := map[string]interface{}{
 			"allocation": allocID,
@@ -346,8 +347,8 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		output, err := updateAllocation(t, configPath, utils.CreateParams(params), true)
-		require.NoError(t, err, "Failed to update allocation")
-		require.True(t, strings.Contains(output[0], "Allocation updated successfully"), "Failed to update allocation")
+		require.NoError(t, err, "Failed to update allocation", strings.Join(output, "\n"))
+		require.True(t, strings.Contains(output[0], "Allocation updated successfully"), "Failed to update allocation", strings.Join(output, "\n"))
 
 		afterAlloc := utils.GetAllocation(t, allocID)
 		allocWpBalance += requiredWpBalance
@@ -369,10 +370,12 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		// Second extension
-		waitForTimeInMinutesWhileLogging(t, 5)
+		waitForTimeInMinutesWhileLogging(t, 3)
 
-		expectedRewardPerBlobber += 0.1 * 1e9
-		allocWpBalance /= 2
+		afterAlloc = utils.GetAllocation(t, allocID)
+
+		expectedRewardPerBlobber += 1e9 * float64(time.Now().Unix()-beforeAlloc.StartTime) / float64(beforeAlloc.ExpirationDate-beforeAlloc.StartTime)
+		allocWpBalance = int64(float64(allocWpBalance) * (float64(time.Now().Unix()-beforeAlloc.StartTime) / float64(beforeAlloc.ExpirationDate-beforeAlloc.StartTime)))
 		requiredWpBalance =
 			3*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/10 +
 				1*2*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/10 - allocWpBalance // log it and add extra tokens in it.
@@ -409,7 +412,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.Equal(t, int64(2*GB), afterAllocBase.Size, "Allocation size should be increased")
 		require.Equal(t, allocWpBalance, int64(afterAllocBase.WritePool), "Write pool should be updated")
-		require.Equal(t, common.Timestamp(time.Now().Unix()+int64(20*time.Minute/1e9)), afterAllocBase.ExpirationDate, "Allocation expiration should be increased")
+		require.Equal(t, common.Timestamp(time.Now().Unix()+int64(20*time.Minute)), afterAllocBase.ExpirationDate, "Allocation expiration should be increased")
 
 		expectedAlloc := beforeAlloc
 		expectedAlloc.Tx = afterAllocBase.Tx
