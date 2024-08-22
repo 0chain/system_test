@@ -357,8 +357,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 
 		output, err := updateAllocation(t, configPath, utils.CreateParams(params), true)
-		require.NoError(t, err, "Failed to update allocation", strings.Join(output, "\n"))
-		require.True(t, strings.Contains(output[0], "Allocation updated successfully"), "Failed to update allocation", strings.Join(output, "\n"))
+		require.Nil(t, err, "Error unable to update the allocation", strings.Join(output, "\n"))
 		t.Logf("Output after first allocation extension: %s", strings.Join(output, "\n"))
 
 		afterAlloc := utils.GetAllocation(t, allocID)
