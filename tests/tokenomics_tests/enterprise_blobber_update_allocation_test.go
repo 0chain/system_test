@@ -346,8 +346,8 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		t.Logf("After first extension - Expected Reward per Blobber: %f, Updated Write Pool Balance: %d", expectedRewardPerBlobber, allocWpBalance)
 
 		requiredWpBalance :=
-			3*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/600 +
-				1*2*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/600 - allocWpBalance
+			3*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/10 +
+				1*2*int64(allocSizePerBlobber)*1e9*(time.Now().Unix()-beforeAlloc.StartTime)/10 - allocWpBalance
 		t.Logf("Required Write Pool Balance for first extension: %d", requiredWpBalance)
 
 		params := map[string]interface{}{
