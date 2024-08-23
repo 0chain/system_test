@@ -15,7 +15,7 @@ func TestZs3serverMixedWarpTests(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	_, err := cliutils.RunMinioServer("rootroot", "rootroot")
 	if err != nil {
-		testSetup.Fatalf("Error running server")
+		testSetup.Fatalf("%v", err)
 	}
 
 	config := cliutils.ReadFile(testSetup)
