@@ -396,16 +396,16 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	_, err := RunCommandWithoutRetry(
 		fmt.Sprintf(
-		"../zbox newallocation  --lock 10 --silent --wallet %s --config %s --configDir  %s --allocationFileName %s",
-		"wallet.json",
-		"config.yaml",
-		"./config",
-		"allocation.txt"))
+			"../zbox newallocation  --lock 10 --silent --wallet %s --config %s --configDir  %s --allocationFileName %s",
+			"wallet.json",
+			"config.yaml",
+			"./config",
+			"allocation.txt"))
 
-	if err!= nil {
+	if err != nil {
 		return nil, fmt.Errorf("error running zbox newallocation command: %v", err)
 	}
-	
+
 	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn --configDir ./config " + " --console-address :8000"
 
 	cmdParts, err := SplitCmdString(cmdString)
