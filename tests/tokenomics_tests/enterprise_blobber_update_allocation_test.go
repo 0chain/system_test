@@ -103,7 +103,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			}
 		}
 	})
-	t.RunSequentiallyWithTimeout("Blobber price change extend duration of alloc", 25*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Blobber price change extend duration of alloc", 25*time.Minute, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
@@ -125,8 +125,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"extend":     true,
-			"lock":       0.5, // Locking 0.5 ZCN (double as we have new size and increased blobber write price to twice) as we can't calculate the accurate time of update, will validate numbers after updating the alloc
+			"lock":       0.5,
 			"size":       1 * GB,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
@@ -174,13 +173,12 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		afterUpdate1Alloc := utils.GetAllocation(t, allocationID)
 
-		waitForTimeInMinutesWhileLogging(t, 5)
+		waitForTimeInMinutesWhileLogging(t, 3)
 
 		//Upgrade 2
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"extend":     true,
-			"lock":       0.5, // Locking 0.5 ZCN (double as we have new size) as we can't calculate the accurate time of update, will validate numbers after updating the alloc
+			"lock":       0.5,
 			"size":       1 * GB,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -192,9 +190,9 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		afterAlloc = utils.GetAllocation(t, allocationID)
-		require.Less(t, beforeAlloc.ExpirationDate, afterAlloc.ExpirationDate,
+		require.Less(t, afterUpdate1Alloc.ExpirationDate, afterAlloc.ExpirationDate,
 			fmt.Sprint("Expiration Time doesn't match: "+
-				"Before:", beforeAlloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
+				"Before:", afterUpdate1Alloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
 		)
 
 		// Verify write pool calculations
@@ -235,7 +233,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
 	})
 
-	t.RunSequentiallyWithTimeout("Blobber price change extend unused allocation size should work", 25*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Blobber price change extend unused allocation size should work", 25*time.Minute, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
@@ -252,7 +250,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		err := updateBlobberPrice(t, configPath, blobber.BlobberID, blobber.Terms.WritePrice*2)
 		require.Nil(t, err, "Error updating blobber prices")
 
-		waitForTimeInMinutesWhileLogging(t, 5)
+		waitForTimeInMinutesWhileLogging(t, 3)
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -302,7 +300,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 
-		beforeAlloc = utils.GetAllocation(t, allocationID)
+		afterUpdate1Alloc := utils.GetAllocation(t, allocationID)
 
 		waitForTimeInMinutesWhileLogging(t, 5)
 
@@ -320,23 +318,23 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
 		afterAlloc = utils.GetAllocation(t, allocationID)
-		require.Less(t, beforeAlloc.ExpirationDate, afterAlloc.ExpirationDate,
+		require.Less(t, afterUpdate1Alloc.ExpirationDate, afterAlloc.ExpirationDate,
 			fmt.Sprint("Expiration Time doesn't match: "+
-				"Before:", beforeAlloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
+				"Before:", afterUpdate1Alloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
 		)
 
 		// Verify write pool calculations
 		timeUnitInSeconds = int64(600) // 10 minutes
-		durationOfUsedInSeconds = afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
+		durationOfUsedInSeconds = afterAlloc.ExpirationDate - afterUpdate1Alloc.StartTime - timeUnitInSeconds
 
-		realCostOfBeforeAlloc = costOfAlloc(beforeAlloc)
+		realCostOfBeforeAlloc = costOfAlloc(afterUpdate1Alloc)
 		expectedPaymentToBlobbers = realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedWritePoolBalance = amountTotalLockedToAlloc - expectedPaymentToBlobbers
 
 		// Log all values
 		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
 		t.Logf("Duration of used in seconds: %d", durationOfUsedInSeconds)
-		t.Logf("Expire time before: %d", beforeAlloc.ExpirationDate)
+		t.Logf("Expire time before: %d", afterUpdate1Alloc.ExpirationDate)
 		t.Logf("Expire time after: %d", afterAlloc.ExpirationDate)
 		t.Logf("Real cost of before alloc: %d", realCostOfBeforeAlloc)
 		t.Logf("Expected payment to blobbers: %d", expectedPaymentToBlobbers)
