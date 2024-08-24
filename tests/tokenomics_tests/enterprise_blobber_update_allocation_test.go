@@ -129,6 +129,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation": allocationID,
 			"lock":       0.5,
 			"size":       1 * GB,
+			//"extend":     true,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
 		//timeStampUpdate1Alloc := time.Now().Unix()
@@ -155,7 +156,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedWritePoolBalance := amountTotalLockedToAlloc - expectedPaymentToBlobbers
-		amountTotalLockedToAlloc += expectedPaymentToBlobbers
+		amountTotalLockedToAlloc = expectedWritePoolBalance
 		// Log all values
 		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
 		t.Logf("Duration of used in seconds: %d", durationOfUsedInSeconds)
@@ -187,9 +188,10 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"allocation": allocationID,
 			"lock":       0.5,
 			"size":       1 * GB,
+			//"extend":     true,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
-		amountTotalLockedToAlloc += 5e9 - int64(enterpriseReward.TotalReward) // 0.5ZCN
+		amountTotalLockedToAlloc += 5e9 // 0.5ZCN
 
 		require.Nil(t, err, "Could not update "+
 			"allocation due to error", strings.Join(output, "\n"))
@@ -205,7 +207,9 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		)
 
 		// Verify write pool calculations
-		durationOfUsedInSeconds = afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
+		timeUnitInSeconds = int64(600) // 10 minutes
+		afterFirstUpdateAllocStartTime := afterUpdate1Alloc.ExpirationDate - timeUnitInSeconds
+		durationOfUsedInSeconds = afterAlloc.ExpirationDate - afterFirstUpdateAllocStartTime - timeUnitInSeconds // 50
 
 		realCostOfBeforeAlloc = costOfAlloc(afterUpdate1Alloc)
 		expectedPaymentToBlobbers = realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
@@ -262,6 +266,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		waitForTimeInMinutesWhileLogging(t, 5)
 
+		//First update
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
@@ -288,7 +293,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedWritePoolBalance := amountTotalLockedToAlloc - expectedPaymentToBlobbers
-		//amountTotalLockedToAlloc += expectedPaymentToBlobbers
+		amountTotalLockedToAlloc = expectedWritePoolBalance
 
 		// Log all values
 		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
@@ -316,6 +321,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		waitForTimeInMinutesWhileLogging(t, 5)
 
+		//Second update
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
@@ -339,7 +345,8 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		// Verify write pool calculations
 		timeUnitInSeconds = int64(600) // 10 minutes
-		durationOfUsedInSeconds = afterAlloc.ExpirationDate - afterUpdate1Alloc.StartTime - timeUnitInSeconds
+		afterFirstUpdateAllocStartTime := afterUpdate1Alloc.ExpirationDate - timeUnitInSeconds
+		durationOfUsedInSeconds = afterAlloc.ExpirationDate - afterFirstUpdateAllocStartTime - timeUnitInSeconds // 50
 
 		realCostOfBeforeAlloc = costOfAlloc(afterUpdate1Alloc)
 		expectedPaymentToBlobbers = realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
