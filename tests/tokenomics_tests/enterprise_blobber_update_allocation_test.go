@@ -210,8 +210,9 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		durationOfUsedInSeconds = afterAlloc.ExpirationDate - afterFirstUpdateAllocStartTime - timeUnitInSeconds // 50
 
 		realCostOfBeforeAlloc = costOfAlloc(afterUpdate1Alloc)
-		expectedPaymentToBlobbers += realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
-		expectedWritePoolBalance = amountTotalLockedToAlloc - expectedPaymentToBlobbers
+		expectedPaymentToBlobbersAfterFirstUpdate := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+		expectedPaymentToBlobbers += expectedPaymentToBlobbersAfterFirstUpdate
+		expectedWritePoolBalance = amountTotalLockedToAlloc - expectedPaymentToBlobbersAfterFirstUpdate
 
 		// Log all values
 		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
@@ -347,8 +348,9 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		durationOfUsedInSeconds = afterAlloc.ExpirationDate - afterFirstUpdateAllocStartTime - timeUnitInSeconds // 50
 
 		realCostOfBeforeAlloc = costOfAlloc(afterUpdate1Alloc)
-		expectedPaymentToBlobbers += realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
-		expectedWritePoolBalance = amountTotalLockedToAlloc - expectedPaymentToBlobbers
+		expectedPaymentToBlobbersAfterSecondUpdate := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+		expectedPaymentToBlobbers += expectedPaymentToBlobbersAfterSecondUpdate
+		expectedWritePoolBalance = amountTotalLockedToAlloc - expectedPaymentToBlobbersAfterSecondUpdate
 
 		// Log all values
 		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
