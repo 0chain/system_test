@@ -1,9 +1,10 @@
 package cli_tests
 
 import (
+	"context"
 	"crypto/rand"
-	"encoding/json"
 	"fmt"
+	"github.com/0chain/gosdk/core/client"
 	"io"
 	"math/big"
 	"os"
@@ -11,7 +12,6 @@ import (
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/fileref"
 	"github.com/0chain/gosdk/zboxcore/sdk"
-	"github.com/0chain/gosdk/zcncore"
 )
 
 func InitSDK(wallet, configFile string) error {
@@ -30,11 +30,16 @@ func InitSDK(wallet, configFile string) error {
 		return err
 	}
 
-	marshal, err := json.Marshal(parsed)
-	if err != nil {
-		return err
-	}
-	err = zcncore.Init(string(marshal))
+	err = client.Init(context.Background(), conf.Config{
+		BlockWorker:       parsed.BlockWorker,
+		SignatureScheme:   parsed.SignatureScheme,
+		ChainID:           parsed.ChainID,
+		PreferredBlobbers: nil,
+		MaxTxnQuery:       5,
+		QuerySleepTime:    5,
+		MinSubmit:         10,
+		MinConfirmation:   10,
+	})
 	if err != nil {
 		return err
 	}
