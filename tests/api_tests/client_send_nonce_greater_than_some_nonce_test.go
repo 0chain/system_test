@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	coreClient "github.com/0chain/gosdk/core/client"
 	"github.com/0chain/gosdk/zcncore"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -24,7 +23,8 @@ func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 	wallet1 := initialisedWallets[walletIdx]
 	walletIdx++
 
-	coreClient.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
+	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics), false)
+	require.NoError(t, err)
 
 	faucetAmount := float64(9)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
@@ -64,7 +64,8 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	wallet1 := initialisedWallets[walletIdx]
 	walletIdx++
 
-	coreClient.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
+	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics), false)
+	require.NoError(t, err)
 
 	faucetAmount := float64(9)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
@@ -182,7 +183,8 @@ func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	wallet1 := initialisedWallets[walletIdx]
 	walletIdx++
 
-	coreClient.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
+	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics), false)
+	require.NoError(t, err)
 
 	faucetAmount := float64(9)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
