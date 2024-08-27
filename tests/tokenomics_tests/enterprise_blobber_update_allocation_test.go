@@ -103,7 +103,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			}
 		}
 	})
-	t.RunWithTimeout("Blobber price change extend size of allocation", 25*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Blobber price change extend size of allocation", 25*time.Minute, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
@@ -173,6 +173,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		enterpriseReward, err := getQueryRewards(t, rewardQuery)
 		require.Nil(t, err)
 
+		t.Logf("Enterprise reward: %+v", enterpriseReward)
 		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
 
 		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
@@ -231,6 +232,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		enterpriseReward, err = getQueryRewards(t, rewardQuery)
 		require.Nil(t, err)
 
+		t.Logf("Enterprise reward: %+v", enterpriseReward)
 		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
 
 		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
@@ -245,7 +247,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Blobber price change extend duration of allocation", 25*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Blobber price change extend duration of allocation", 25*time.Minute, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
@@ -311,6 +313,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		enterpriseReward, err := getQueryRewards(t, rewardQuery)
 		require.Nil(t, err)
 
+		t.Logf("Enterprise reward: %+v", enterpriseReward)
 		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
 
 		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
@@ -369,6 +372,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		enterpriseReward, err = getQueryRewards(t, rewardQuery)
 		require.Nil(t, err)
 
+		t.Logf("Enterprise reward: %+v", enterpriseReward)
 		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
 
 		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
@@ -381,8 +385,8 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
 	})
 
-	t.Skip()
-	t.RunSequentiallyWithTimeout("Extend duration cost calculation", 15*time.Minute, func(t *test.SystemTest) {
+	//t.Skip()
+	t.RunWithTimeout("Extend duration cost calculation", 15*time.Minute, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
@@ -397,7 +401,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
 
-		//waitForTimeInMinutesWhileLogging(t, 5)
+		waitForTimeInMinutesWhileLogging(t, 5)
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
