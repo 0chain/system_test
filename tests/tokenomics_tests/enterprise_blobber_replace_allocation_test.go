@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
@@ -38,7 +39,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
-	t.RunSequentially("Replace blobber with 0.5x price should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Replace blobber with 0.5x price should work", time.Minute*15, func(t *test.SystemTest) {
 		// Setup and fetch current allocation details
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
@@ -97,7 +98,8 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
 
 		// Validate the write pool balance after blobber replacement
-		expectedWritePoolBalance := beforeAlloc.WritePool - expectedPaymentToBlobbers
+		expectedWritePoolBalance := beforeAlloc.WritePool - expectedPaymentToBlobbers - int64(1e9/2)
+
 		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match after blobber replacement")
 
 		// Validate the enterprise rewards after blobber replacement
@@ -110,12 +112,20 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		}()
 	})
 
-	t.Run("Check token accounting of a blobber replacing in allocation, should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Check token accounting of a blobber replacing in allocation, should work", time.Minute*15, func(t *test.SystemTest) {
+		utils.SetupWalletWithCustomTokens(t, configPath, 10)
+
+		// Set up allocation and get a random blobber to remove
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
+		// Wait for 5 minutes to simulate usage
+		waitForTimeInMinutesWhileLogging(t, 5)
+
+		// Fetch allocation details before replacement
 		alloc := utils.GetAllocation(t, allocationID)
 		require.NotNil(t, alloc)
 
+		// Calculate the total stake of the blobber to remove
 		var prevReplaceeBlobberStake int64
 		for _, blobber := range alloc.Blobbers {
 			if blobber.ID == blobberToRemove {
@@ -133,6 +143,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		addBlobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, addBlobberID, addBlobberUrl)
 		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
+		// Update allocation to replace blobber
 		params := createParams(map[string]interface{}{
 			"allocation":              allocationID,
 			"add_blobber":             addBlobberID,
@@ -140,13 +151,36 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 			"remove_blobber":          blobberToRemove,
 		})
 
+		waitForTimeInMinutesWhileLogging(t, 5)
+
 		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
+		// Fetch updated allocation details
 		updatedAlloc := utils.GetAllocation(t, allocationID)
 		require.NotNil(t, updatedAlloc)
 
+		// Calculate expected payment to replace blobber
+		timeUnitInSeconds := int64(600) // 10 minutes
+		durationOfUsedInSeconds := updatedAlloc.ExpirationDate - alloc.StartTime - timeUnitInSeconds
+		realCostOfBeforeAlloc := costOfAlloc(alloc)
+		expectedPaymentToReplacedBlobber := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+
+		// Query blobber rewards
+		rewardQuery := fmt.Sprintf("allocation_id='%s' AND provider_id='%s' AND reward_type=%d", allocationID, blobberToRemove, EnterpriseBlobberReward)
+		enterpriseReward, err := getQueryRewards(t, rewardQuery)
+		require.Nil(t, err)
+
+		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToReplacedBlobber)
+
+		// Validate enterprise rewards and write pool balance
+		require.InEpsilon(t, expectedPaymentToReplacedBlobber, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match after blobber replacement")
+
+		expectedWritePoolBalance := alloc.WritePool - expectedPaymentToReplacedBlobber
+		require.InEpsilon(t, expectedWritePoolBalance, updatedAlloc.WritePool, 0.01, "Write pool balance doesn't match after blobber replacement")
+
+		// Validate that stake is transferred from the old blobber to the new blobber
 		var newReplaceeBlobberStake int64
 		for _, blobber := range updatedAlloc.Blobbers {
 			if blobber.ID == addBlobberID {
@@ -157,7 +191,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		require.Equal(t, prevReplaceeBlobberStake, newReplaceeBlobberStake, "Stake should be transferred from old blobber to new")
 	})
 
-	t.RunSequentially("Replace blobber with same price should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Replace blobber with same price should work", time.Minute*15, func(t *test.SystemTest) {
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
 		wd, _ := os.Getwd()
@@ -191,6 +225,8 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		beforeAlloc := utils.GetAllocation(t, allocationID)
 		require.NotNil(t, beforeAlloc, "Allocation should not be nil")
 
+		waitForTimeInMinutesWhileLogging(t, 5)
+
 		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
@@ -201,14 +237,20 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 
 		// Calculate expected payments and refund
 		timeUnitInSeconds := int64(600) // 10 minutes
-		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime
+		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
 		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+		expectedWpBalance := beforeAlloc.WritePool - expectedPaymentToBlobbers
 
-		t.Logf("Expected payment to blobbers: %v", expectedPaymentToBlobbers)
+		query := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseRewards, err := getQueryRewards(t, query)
+		require.Nil(t, err, "Error fetching blobber rewards from sharder query")
+
+		t.Logf("Total blobber rewards: %f,  Expected payment to blobbers: %v", enterpriseRewards.TotalReward, expectedPaymentToBlobbers)
+		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseRewards.TotalReward, 0.01, "Enterprise rewards not matching")
 
 		// Validate the write pool balance after blobber replacement
-		require.InEpsilon(t, beforeAlloc.WritePool-expectedPaymentToBlobbers, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match after blobber replacement")
+		require.InEpsilon(t, expectedWpBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match after blobber replacement")
 
 		// Ensure the blobber price is reset after the test
 		defer func() {
@@ -217,7 +259,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		}()
 	})
 
-	t.RunSequentially("Replace blobber with 0.5x price should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Replace blobber with 0.5x price should work", time.Minute*15, func(t *test.SystemTest) {
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
 		wd, _ := os.Getwd()
@@ -252,6 +294,8 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		beforeAlloc := utils.GetAllocation(t, allocationID)
 		require.NotNil(t, beforeAlloc, "Allocation should not be nil")
 
+		waitForTimeInMinutesWhileLogging(t, 5)
+
 		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
@@ -262,14 +306,22 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 
 		// Calculate expected payments and refund
 		timeUnitInSeconds := int64(600) // 10 minutes
-		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime
+		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
 		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+		expectedWpBalance := beforeAlloc.WritePool - expectedPaymentToBlobbers
 
+		query := fmt.Sprintf("allocation_id='%s' AND reward_query=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseRewards, err := getQueryRewards(t, query)
+		require.Nil(t, err, "Error fetching total blobber rewards")
+
+		t.Logf("Total blobber rewards: %v", enterpriseRewards.TotalReward)
 		t.Logf("Expected payment to blobbers: %v", expectedPaymentToBlobbers)
 
+		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseRewards.TotalReward, 0.01, "Enterprise blobber rewards should match")
+
 		// Validate the write pool balance after blobber replacement
-		require.InEpsilon(t, beforeAlloc.WritePool-expectedPaymentToBlobbers, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match after blobber replacement")
+		require.InEpsilon(t, expectedWpBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match after blobber replacement")
 
 		defer func() {
 			err = updateBlobberPrice(t, configPath, addBlobberID, originalPrice)
@@ -277,7 +329,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		}()
 	})
 
-	t.RunSequentially("Replace blobber with 2x price should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Replace blobber with 2x price should work", time.Minute*15, func(t *test.SystemTest) {
 		allocationID, blobberToRemove := setupAllocationAndGetRandomBlobber(t, configPath)
 
 		wd, _ := os.Getwd()
@@ -312,6 +364,8 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		beforeAlloc := utils.GetAllocation(t, allocationID)
 		require.NotNil(t, beforeAlloc, "Allocation should not be nil")
 
+		waitForTimeInMinutesWhileLogging(t, 5)
+
 		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
@@ -325,11 +379,19 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime
 		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+		expectedWpBalance := beforeAlloc.WritePool - expectedPaymentToBlobbers
 
+		query := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseRewards, err := getQueryRewards(t, query)
+		require.Nil(t, err, "Error fetching blobber rewards")
+
+		t.Logf("Total blobber rewards: %+v", enterpriseRewards)
 		t.Logf("Expected payment to blobbers: %v", expectedPaymentToBlobbers)
 
+		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseRewards.TotalReward, 0.01, "Blobber rewards should match")
+
 		// Validate the write pool balance after blobber replacement
-		require.InEpsilon(t, beforeAlloc.WritePool-expectedPaymentToBlobbers, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match after blobber replacement")
+		require.InEpsilon(t, expectedWpBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match after blobber replacement")
 
 		defer func() {
 			err = updateBlobberPrice(t, configPath, addBlobberID, originalPrice)
