@@ -1289,6 +1289,8 @@ func (c *ZboxClient) CreateJwtSession(t *test.SystemTest, headers map[string]str
 	t.Logf("creating jwt session owner for userID [%v] using 0box...", headers["X-App-User-ID"])
 	var sessionID int64
 
+	headers["X-CSRF-TOKEN"] = X_APP_CSRF
+
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
@@ -1307,6 +1309,8 @@ func (c *ZboxClient) CreateJwtToken(t *test.SystemTest, sessionID int64, headers
 	t.Logf("creating jwt token for userID [%v] and session [%v] using 0box...", headers["X-App-User-ID"], sessionID)
 	var zboxJwtToken *model.ZboxJwtToken
 
+	headers["X-CSRF-TOKEN"] = X_APP_CSRF
+
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
@@ -1324,6 +1328,8 @@ func (c *ZboxClient) CreateJwtToken(t *test.SystemTest, sessionID int64, headers
 func (c *ZboxClient) RefreshJwtToken(t *test.SystemTest, token string, headers map[string]string) (*model.ZboxJwtToken, *resty.Response, error) {
 	t.Logf("refreshing jwt token for userID [%v] and token [%v] using 0box...", headers["X-App-User-ID"], token)
 	var zboxJwtToken *model.ZboxJwtToken
+
+	headers["X-CSRF-TOKEN"] = X_APP_CSRF
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
