@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/0chain/system_test/tests/cli_tests"
 	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"os"
@@ -30,7 +29,7 @@ var (
 	repairCompletednRegex = regexp.MustCompile(`Repair file completed, Total files repaired: {2}1`)
 )
 
-func costOfAlloc(alloc climodel.Allocation) int64 {
+func costOfAlloc(alloc *climodel.Allocation) int64 {
 	cost := float64(0)
 	for _, blobber := range alloc.BlobberDetails {
 		cost += (sizeInGB(alloc.Size) / float64(alloc.DataShards)) * float64(blobber.Terms.WritePrice)
@@ -79,6 +78,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Len(t, output, 1, "Error invalid json length", strings.Join(output, "\n"))
 
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobbers)
+		require.Nil(t, err, "Error decoding blobbers list", strings.Join(output, "\n"))
 
 		for _, blobber := range blobbers {
 			if blobber.Terms.WritePrice != 1e9 {
@@ -106,6 +106,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		t.Logf("Blobber new write price %d", 2*blobber.Terms.WritePrice)
 
 		err := updateBlobberPrice(t, configPath, blobber.BlobberID, blobber.Terms.WritePrice*2)
+		require.Nil(t, err, "Error updating blobber price")
 
 		waitForTimeInMinutesWhileLogging(t, 5)
 
@@ -135,7 +136,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		timeUnitInSeconds := int64(600) // 10 minutes
 		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
 
-		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
+		realCostOfBeforeAlloc := costOfAlloc(&beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedWritePoolBalance := amountTotalLockedToAlloc - expectedPaymentToBlobbers
 		amountTotalLockedToAlloc = expectedWritePoolBalance
@@ -166,7 +167,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		waitForTimeInMinutesWhileLogging(t, 5)
 
-		//Upgrade 2
+		// Upgrade 2
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"lock":       0.5,
@@ -193,7 +194,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		afterFirstUpdateAllocStartTime := afterUpdate1Alloc.ExpirationDate - timeUnitInSeconds
 		durationOfUsedInSeconds = afterAlloc.ExpirationDate - afterFirstUpdateAllocStartTime - timeUnitInSeconds // 50
 
-		realCostOfBeforeAlloc = costOfAlloc(afterUpdate1Alloc)
+		realCostOfBeforeAlloc = costOfAlloc(&afterUpdate1Alloc)
 		expectedPaymentToBlobbersAfterFirstUpdate := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedPaymentToBlobbers += expectedPaymentToBlobbersAfterFirstUpdate
 		expectedWritePoolBalance = amountTotalLockedToAlloc - expectedPaymentToBlobbersAfterFirstUpdate
@@ -220,11 +221,11 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 
-		//reset blobber write price.
+		// reset blobber write price.
 		err = updateBlobberPrice(t, configPath, blobber.BlobberID, blobber.Terms.WritePrice)
 		require.Nil(t, err, "Error resting blobber prices to original")
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -250,7 +251,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		waitForTimeInMinutesWhileLogging(t, 5)
 
-		//First update
+		// First update
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
@@ -274,7 +275,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		timeUnitInSeconds := int64(600) // 10 minutes
 		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
 
-		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
+		realCostOfBeforeAlloc := costOfAlloc(&beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedWritePoolBalance := amountTotalLockedToAlloc - expectedPaymentToBlobbers
 		amountTotalLockedToAlloc = expectedWritePoolBalance
@@ -306,7 +307,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		waitForTimeInMinutesWhileLogging(t, 5)
 
-		//Second update
+		// Second update
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
 			"extend":     true,
@@ -333,7 +334,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		afterFirstUpdateAllocStartTime := afterUpdate1Alloc.ExpirationDate - timeUnitInSeconds
 		durationOfUsedInSeconds = afterAlloc.ExpirationDate - afterFirstUpdateAllocStartTime - timeUnitInSeconds // 50
 
-		realCostOfBeforeAlloc = costOfAlloc(afterUpdate1Alloc)
+		realCostOfBeforeAlloc = costOfAlloc(&afterUpdate1Alloc)
 		expectedPaymentToBlobbersAfterSecondUpdate := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedPaymentToBlobbers += expectedPaymentToBlobbersAfterSecondUpdate
 		expectedWritePoolBalance = amountTotalLockedToAlloc - expectedPaymentToBlobbersAfterSecondUpdate
@@ -360,15 +361,15 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 
-		//Cleanup
+		// Cleanup
 		err = updateBlobberPrice(t, configPath, blobber.BlobberID, blobber.Terms.WritePrice)
+		require.Nil(t, err, "Error updating blobber price")
 
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
 	})
 
-	//t.Skip()
 	t.RunWithTimeout("Extend duration cost calculation", 15*time.Minute, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
@@ -382,7 +383,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		beforeAlloc := utils.GetAllocation(t, allocationID)
 
-		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
+		realCostOfBeforeAlloc := costOfAlloc(&beforeAlloc)
 
 		waitForTimeInMinutesWhileLogging(t, 5)
 
@@ -433,7 +434,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -478,7 +479,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		timeUnitInSeconds := int64(600) // 10 minutes
 		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
 
-		realCostOfBeforeAlloc := costOfAlloc(beforeAlloc)
+		realCostOfBeforeAlloc := costOfAlloc(&beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedWritePoolBalance := amountTotalLockedToAlloc - expectedPaymentToBlobbers
 
@@ -503,7 +504,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -554,7 +555,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		require.Equal(t, float64(0), enterpriseReward.TotalReward, "Enterprise blobber reward should be 0")
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -618,7 +619,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.InEpsilon(t, expectedPaymentToReplacedBlobber, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -649,7 +650,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 				"Before:", allocationBeforeUpdate.ExpirationDate, "After:", ac.ExpirationDate),
 		)
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -677,7 +678,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			fmt.Sprint("Size doesn't match: Before:", allocationBeforeUpdate.Size, "After:", ac.Size),
 		)
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -704,7 +705,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Less(t, allocationBeforeUpdate.ExpirationDate, ac.ExpirationDate)
 		require.Equal(t, allocationBeforeUpdate.Size+size, ac.Size)
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -908,7 +909,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		alloc = utils.GetAllocation(t, allocationID)
 		require.Equal(t, uint16(32), alloc.FileOptions&(1<<5))
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -930,7 +931,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		alloc := utils.GetAllocation(t, allocationID)
 		require.True(t, alloc.ThirdPartyExtendable)
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -976,7 +977,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.Less(t, alloc.ExpirationDate, allocUpdated.ExpirationDate)
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -1013,7 +1014,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -1071,7 +1072,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, fref)
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -1133,7 +1134,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Greater(t, alloc.Size, allocationBeforeUpdate.Size)
 		require.True(t, alloc.ThirdPartyExtendable)
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -1174,7 +1175,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Greater(t, alloc.Size, allocationBeforeUpdate.Size)
 		require.True(t, alloc.ThirdPartyExtendable)
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -1195,7 +1196,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "doesn't have enough free space")
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -1220,7 +1221,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Equal(t, allocationBeforeUpdate.Size, alloc.Size)
 		require.Equal(t, allocationBeforeUpdate.ExpirationDate, alloc.ExpirationDate)
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -1238,7 +1239,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Equal(t, "Error updating allocation:allocation_updating_failed: update allocation changes nothing", output[0])
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -1246,6 +1247,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 	t.Run("Update Non-existent Allocation Should Fail", func(t *test.SystemTest) {
 		_, err := utils.CreateWallet(t, configPath)
+		require.Nil(t, err, "Error creating wallet")
 
 		allocationID := "123abc"
 
@@ -1311,7 +1313,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		)
 		require.Equal(t, expected, output[0])
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -1344,7 +1346,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "changes nothing")
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -1375,7 +1377,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.NotNil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "changes nothing")
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -1411,7 +1413,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "only owner can update the allocation")
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
@@ -1435,6 +1437,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		nonAllocOwnerWallet := utils.EscapedTestName(t) + "_NON_OWNER"
 
 		_, err = utils.CreateWalletForName(t, configPath, nonAllocOwnerWallet)
+		require.Nil(t, err, "Error creating wallet for non allocaiton owner")
 
 		params = createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -1483,24 +1486,11 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.Equal(t, len(alloc.Blobbers), len(updatedAlloc.Blobbers))
 
-		//Cleanup
+		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
 	})
-}
-
-func compareAllocationData(t *test.SystemTest, beforeAlloc climodel.Allocation, afterAlloc climodel.Allocation) {
-	beforeAllocJson, err := json.Marshal(beforeAlloc)
-	require.NoError(t, err)
-
-	afterAllocJson, err := json.Marshal(afterAlloc)
-	require.NoError(t, err)
-
-	beforeAllocString := string(beforeAllocJson)
-	afterAllocString := string(afterAllocJson)
-
-	assert.JSONEq(t, beforeAllocString, afterAllocString, "Allocation data should be same")
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {

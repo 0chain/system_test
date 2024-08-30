@@ -57,6 +57,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 		require.Len(t, output, 1, "Error invalid json length", strings.Join(output, "\n"))
 
 		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobbers)
+		require.Nil(t, err, "Eerror decoding blobbers", strings.Join(output, "\n"))
 
 		for _, blobber := range blobbers {
 			if blobber.Terms.WritePrice != 1e9 {
@@ -509,8 +510,8 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 	})
 }
 
-func setupAllocationAndGetRandomBlobber(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, string) {
-	utils.SetupWalletWithCustomTokens(t, configPath, 10)
+func setupAllocationAndGetRandomBlobber(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (allocationId, randomBlobberId string) {
+	utils.SetupWalletWithCustomTokens(t, cliConfigFilename, 10)
 
 	options := map[string]interface{}{
 		"data":   2,
@@ -525,11 +526,11 @@ func setupAllocationAndGetRandomBlobber(t *test.SystemTest, cliConfigFilename st
 		}
 	}
 
-	allocationID := utils.SetupEnterpriseAllocation(t, configPath, options)
+	allocationID := utils.SetupEnterpriseAllocation(t, cliConfigFilename, options)
 
 	wd, _ := os.Getwd()
 	walletFile := filepath.Join(wd, "config", utils.EscapedTestName(t)+"_wallet.json")
-	configFile := filepath.Join(wd, "config", configPath)
+	configFile := filepath.Join(wd, "config", cliConfigFilename)
 
 	randomBlobber, err := cli_tests.GetRandomBlobber(walletFile, configFile, allocationID, "")
 	require.Nil(t, err, "Error getting random blobber")

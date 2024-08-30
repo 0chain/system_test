@@ -75,7 +75,7 @@ func GenerateBlobberAuthTickets(t *test.SystemTest, configFileName string) (blob
 	return GenerateBlobberAuthTicketsWithWallet(t, EscapedTestName(t), configFileName)
 }
 
-func GenerateBlobberAuthTicketsWithWallet(t *test.SystemTest, walletName, configFileName string) (string, string) {
+func GenerateBlobberAuthTicketsWithWallet(t *test.SystemTest, walletName, configFileName string) (blobberAuthTicket string, blobberIds string) {
 	var blobbersList []climodel.Blobber
 	output, err := ListBlobbersWithWallet(t, walletName, configFileName, "--json")
 	require.Nil(t, err, "Failed to get blobbers list", strings.Join(output, "\n"))

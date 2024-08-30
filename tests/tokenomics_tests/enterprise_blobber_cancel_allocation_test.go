@@ -90,7 +90,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		// Calculate expected refund
 		timeUnitInSeconds := int64(600) // 10 minutes
 		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime
-		realCostOfAlloc := costOfAlloc(beforeAlloc)
+		realCostOfAlloc := costOfAlloc(&beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedRefund := amountTotalLockedToAlloc - expectedPaymentToBlobbers
 
@@ -153,7 +153,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		// Calculate expected refund
 		timeUnitInSeconds := int64(time.Minute * 10)
 		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime
-		realCostOfAlloc := costOfAlloc(beforeAlloc)
+		realCostOfAlloc := costOfAlloc(&beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedRefund := amountTotalLockedToAlloc - expectedPaymentToBlobbers
 
@@ -211,7 +211,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		// Calculate expected refund
 		timeUnitInSeconds := int64(time.Minute * 10)
 		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime
-		realCostOfAlloc := costOfAlloc(beforeAlloc)
+		realCostOfAlloc := costOfAlloc(&beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedRefund := amountTotalLockedToAlloc - expectedPaymentToBlobbers
 
@@ -274,7 +274,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		// Calculate expected refund
 		timeUnitInSeconds := int64(time.Minute * 10)
 		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime
-		realCostOfAlloc := costOfAlloc(beforeAlloc)
+		realCostOfAlloc := costOfAlloc(&beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedRefund := amountTotalLockedToAlloc - expectedPaymentToBlobbers
 
@@ -316,7 +316,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		// Calculate expected refund
 		timeUnitInSeconds := int64(time.Minute * 10)
 		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime
-		realCostOfAlloc := costOfAlloc(beforeAlloc)
+		realCostOfAlloc := costOfAlloc(&beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 		expectedRefund := amountTotalLockedToAlloc - expectedPaymentToBlobbers
 

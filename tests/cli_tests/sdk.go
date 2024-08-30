@@ -90,9 +90,9 @@ func getBlobberNotPartOfAllocation(walletname, configFile, allocationID string) 
 	return nil, fmt.Errorf("failed to get blobber not part of allocation")
 }
 
-// GetBlobberNotPartOfAllocation returns a blobber not part of current allocation
-func GetBlobberIdAndUrlNotPartOfAllocation(walletname, configFile, allocationID string) (string, string, error) {
-	blobber, err := getBlobberNotPartOfAllocation(walletname, configFile, allocationID)
+// GetBlobberIdAndUrlNotPartOfAllocation returns a blobber not part of current allocation
+func GetBlobberIdAndUrlNotPartOfAllocation(walletName, configFile, allocationID string) (blobberId, blobberUrl string, err error) {
+	blobber, err := getBlobberNotPartOfAllocation(walletName, configFile, allocationID)
 	if err != nil || blobber == nil {
 		return "", "", err
 	}

@@ -40,6 +40,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		wallet, err := utils.GetWalletForName(t, configPath, utils.EscapedTestName(t))
+		require.Nil(t, err, "Error getting wallet")
 		require.Equal(t, wallet.ClientID, wallet.ClientID, "Error getting wallet with name %v")
 
 		beforeBalance := utils.GetBalanceFromSharders(t, wallet.ClientID)
@@ -79,7 +80,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		// Calculate expected finalization amount
 		timeUnitInSeconds := int64(600) // 10 minutes
 		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime
-		realCostOfAlloc := costOfAlloc(beforeAlloc)
+		realCostOfAlloc := costOfAlloc(&beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 
 		t.Logf("Time unit in seconds: %v", timeUnitInSeconds)
@@ -158,7 +159,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		// Calculate expected finalization amount
 		timeUnitInSeconds := int64(600) // 10 minutes
 		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime
-		realCostOfAlloc := costOfAlloc(beforeAlloc)
+		realCostOfAlloc := costOfAlloc(&beforeAlloc)
 		expectedPaymentToBlobbers := realCostOfAlloc * durationOfUsedInSeconds / timeUnitInSeconds
 
 		t.Logf("Time unit in seconds: %v", timeUnitInSeconds)
