@@ -2,7 +2,6 @@ package tokenomics_tests
 
 import (
 	"fmt"
-	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/0chain/system_test/tests/cli_tests"
 	"os"
 	"path/filepath"
@@ -51,6 +50,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		wallet, err := utils.GetWalletForName(t, configPath, utils.EscapedTestName(t))
+		require.Nil(t, err, "Error fetching wallet")
 		require.Equal(t, wallet.ClientID, wallet.ClientID, "Error getting wallet with name %v")
 
 		beforeBalance := utils.GetBalanceFromSharders(t, wallet.ClientID)
@@ -357,10 +357,6 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.Equal(t, "Error canceling allocation:alloc_cancel_failed: value not present", output[0])
 	})
-}
-
-func calculateExpectedRefund(before climodel.Allocation, beforeBalance, afterBalance float64) interface{} {
-	return beforeBalance - afterBalance
 }
 
 func cancelAllocation(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {

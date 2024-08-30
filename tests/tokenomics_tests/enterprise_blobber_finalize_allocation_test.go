@@ -194,7 +194,6 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Unable to create wallet", strings.Join(output, "\n"))
 
 		var otherAllocationID = utils.SetupEnterpriseAllocationWithWallet(t, utils.EscapedTestName(t)+"_other", configPath)
-		//var otherAllocationID = setupAllocationWithWallet(t, utils.EscapedTestName(t)+"_other_wallet.json", configPath)
 
 		// create wallet
 		_, err = utils.CreateWallet(t, configPath)

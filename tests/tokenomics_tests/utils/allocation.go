@@ -354,7 +354,7 @@ func getBlobberNotPartOfAllocation(walletname, configFile, allocationID string) 
 }
 
 // GetBlobberNotPartOfAllocation returns a blobber not part of current allocation
-func GetBlobberIdAndUrlNotPartOfAllocation(walletname, configFile, allocationID string) (string, string, error) {
+func GetBlobberIdAndUrlNotPartOfAllocation(walletname, configFile, allocationID string) (blobberId string, blobberUrl string, err error) {
 	blobber, err := getBlobberNotPartOfAllocation(walletname, configFile, allocationID)
 	if err != nil || blobber == nil {
 		return "", "", err

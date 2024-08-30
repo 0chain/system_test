@@ -64,7 +64,6 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 				require.Nil(t, err, "Error resetting blobber write prices")
 			}
 		}
-
 	})
 
 	t.RunSequentiallyWithTimeout("Check token accounting of a blobber replacing in allocation, should work", time.Minute*15, func(t *test.SystemTest) {
@@ -276,7 +275,7 @@ func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
 
 		allocationID := utils.SetupEnterpriseAllocation(t, configPath, params)
 
-		//allocaiton
+		// allocaiton
 		alloc := utils.GetAllocation(t, allocationID)
 		require.NotNil(t, alloc, "Error fetching allocation")
 

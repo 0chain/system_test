@@ -22,38 +22,6 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 	// 2. All blobber should be enteprise
 	// 3.
 
-	/*t.Run("All blobbers should be enterprise", func(t *test.SystemTest) {
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
-		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
-
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t)
-
-		//for _, blobberID := range blobberIds {
-			//isEnterpriseBlobber := checkIfBlobberIsEnterprise(blobberID) // You would need to implement this function
-
-			//require.True(t, isEnterpriseBlobber, "Blobber is not an enterprise blobber", blobberID)
-		//}
-
-		options := map[string]interface{}{
-			"size":                 "1024",
-			"lock":                 "0.5",
-			"enterprise":           true,
-			"blobber_auth_tickets": blobberAuthTickets,
-			"preferred_blobbers":   blobberIds,
-		}
-		output, err = utils.CreateNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
-
-		allocationID, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-		createEnterpriseAllocationTestTeardown(t, allocationID)
-	})*/
-
 	t.Run("Create enterprise allocation with blobber auth tickets should pass", func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
@@ -567,7 +535,6 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.NotNil(t, err, "expected an error when creating allocation without blobber auth tickets %v", err)
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "Not enough blobbers to honor the allocation", "expected error message to mention missing auth tickets %v", strings.Join(output, "\n"))
-
 	})
 	t.Run("Create enterprise allocation with too large parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
@@ -581,7 +548,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
+		require.Contains(t, output[0], "blobbers provided are not enough to honor the allocation")
 	})
 
 	t.Run("Create enterprise allocation with too large data (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
@@ -597,7 +564,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
+		require.Contains(t, output[0], "blobbers provided are not enough to honor the allocation")
 	})
 
 	t.Run("Create enterprise allocation with too large data and parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
@@ -613,7 +580,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
+		require.Contains(t, output[0], "blobbers provided are not enough to honor the allocation")
 	})
 
 	t.Run("Create enterprise allocation with read price range 0-0 Should Fail", func(t *test.SystemTest) {
@@ -665,7 +632,6 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
 		require.Equal(t, "missing required 'lock' argument", output[len(output)-1])
 	})
-
 }
 
 func createNewEnterpriseAllocation(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {

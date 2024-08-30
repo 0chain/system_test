@@ -71,7 +71,7 @@ func StakePoolInfo(t *test.SystemTest, cliConfigFilename, params string) ([]stri
 	t.Log("Fetching stake pool info...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, EscapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
-func GenerateBlobberAuthTickets(t *test.SystemTest, configFileName string) (string, string) {
+func GenerateBlobberAuthTickets(t *test.SystemTest, configFileName string) (blobberAuthTickets string, blobberIds string) {
 	return GenerateBlobberAuthTicketsWithWallet(t, EscapedTestName(t), configFileName)
 }
 

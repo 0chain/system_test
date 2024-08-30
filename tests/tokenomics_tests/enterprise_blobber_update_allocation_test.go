@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -27,7 +26,6 @@ import (
 )
 
 var (
-	createAllocationRegex = regexp.MustCompile(`^Allocation created: (.+)$`)
 	updateAllocationRegex = regexp.MustCompile(`^Allocation updated with txId : [a-f0-9]{64}$`)
 	repairCompletednRegex = regexp.MustCompile(`Repair file completed, Total files repaired: {2}1`)
 )
@@ -117,7 +115,6 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 			"size":       1 * GB,
 		})
 		output, err := updateAllocation(t, configPath, params, true)
-		//timeStampUpdate1Alloc := time.Now().Unix()
 
 		amountTotalLockedToAlloc += 5e9 // 0.5ZCN
 
@@ -1120,7 +1117,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Unable to get blobber not part of allocaiton")
 
 		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, blobberID, blobberUrl)
-		require.Nil(t, err, "Unabel to generate auth ticket for add blobber")
+		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
 		params = createParams(map[string]interface{}{
 			"allocation":              allocationID,
@@ -1156,7 +1153,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Unable to get blobber not part of allocaiton")
 
 		blobberAuthTicket, err := utils.GetBlobberAuthTicketWithId(t, configPath, blobberID, blobberUrl)
-		require.Nil(t, err, "Unabel to generate auth ticket for add blobber")
+		require.Nil(t, err, "Unable to generate auth ticket for add blobber")
 
 		// Combine all update operations
 		params := createParams(map[string]interface{}{
@@ -1506,10 +1503,6 @@ func compareAllocationData(t *test.SystemTest, beforeAlloc climodel.Allocation, 
 	assert.JSONEq(t, beforeAllocString, afterAllocString, "Allocation data should be same")
 }
 
-func calculateAllocationLock(data, parity, size, exiprationStart, expirationEnd, writePriceBlobber int64) float64 {
-	return utils.IntToZCN((size / GB) * (data + parity) / parity * writePriceBlobber)
-}
-
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
 	allocationID := setupAllocation(t, cliConfigFilename, extraParams...)
 
@@ -1690,29 +1683,4 @@ type TransactionVerify struct {
 		Nodes     []string `json:"nodes"`
 		LeafIndex int      `json:"leaf_index"`
 	} `json:"receipt_merkle_tree_path"`
-}
-
-func getStakePoolInfo(t *test.SystemTest, blobberId string) climodel.StakePoolInfo {
-	// Use sp-info to check the staked tokens in blobber's stake pool
-	output, err := stakePoolInfo(t, configPath, createParams(map[string]interface{}{
-		"blobber_id": blobberId,
-		"json":       "",
-	}))
-	require.Nil(t, err, "Error fetching stake pool info", strings.Join(output, "\n"))
-	require.Len(t, output, 1)
-
-	stakePool := climodel.StakePoolInfo{}
-	err = json.Unmarshal([]byte(output[0]), &stakePool)
-	require.Nil(t, err, "Error unmarshalling stake pool info", strings.Join(output, "\n"))
-	require.NotEmpty(t, stakePool)
-
-	sort.Slice(stakePool.Delegate, func(i, j int) bool {
-		return stakePool.Delegate[i].DelegateID < stakePool.Delegate[j].DelegateID
-	})
-
-	return stakePool
-}
-func stakePoolInfo(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	t.Log("Fetching stake pool info...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, utils.EscapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
