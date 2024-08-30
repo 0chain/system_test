@@ -121,13 +121,14 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error fetching allocation id")
 
 		beforeAlloc := utils.GetAllocation(t, allocationID)
+
+		waitForTimeInMinutesWhileLogging(t, 5)
+
 		afterBalance := utils.GetBalanceFromSharders(t, wallet.ClientID)
 
 		require.Equal(t, beforeBalance-amountTotalLockedToAlloc-1e8, afterBalance, "Balance should be locked to allocation")
 
-		waitForTimeInMinutesWhileLogging(t, 5)
-
-		requiredWpBalance := 1e9*2*(time.Now().Unix()-beforeAlloc.StartTime)/10 - amountTotalLockedToAlloc
+		requiredWpBalance := 1e9 * 2
 		beforeBalance = afterBalance
 
 		// Update the allocation duration
@@ -139,8 +140,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.UpdateAllocation(t, configPath, updateAllocationParams, true)
 		require.Nil(t, err, "Updating allocation duration failed", strings.Join(output, "\n"))
 
-		t.Log("Waiting for 10 minutes ....")
-		waitForTimeInMinutesWhileLogging(t, 10)
+		waitForTimeInMinutesWhileLogging(t, 11)
 
 		// Finalize the allocation
 		output, err = finalizeAllocation(t, configPath, allocationID, true)
