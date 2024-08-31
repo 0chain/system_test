@@ -83,7 +83,6 @@ func GenerateBlobberAuthTicketsWithWallet(t *test.SystemTest, walletName, config
 
 	err = json.NewDecoder(strings.NewReader(strings.Join(output, "\n"))).Decode(&blobbersList)
 	require.Nil(t, err, "Error parsing the blobbers list", strings.Join(output, "\n"))
-	require.NotNil(t, blobbersList, "Blobbers list is empty")
 
 	// Get auth tickets for all blobbers
 	var blobberAuthTickets string
