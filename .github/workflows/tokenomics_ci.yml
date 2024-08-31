@@ -67,7 +67,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Enterprise blobber create allocation tests"
-        uses: 0chain/actions/run-system-tests-tokenomics@feat/enterprise-blobber-tests
+        uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
@@ -86,7 +86,7 @@ jobs:
           TENDERLY_VIRTUAL_TESTNET_RPC_ID: ''
 
       - name: "Run Enterprise blobber update allocation tests"
-        uses: 0chain/actions/run-system-tests-tokenomics@feat/enterprise-blobber-tests
+        uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
@@ -105,7 +105,7 @@ jobs:
           TENDERLY_VIRTUAL_TESTNET_RPC_ID: ''
 
       - name: "Run Enterprise blobber replace blobber allocation tests"
-        uses: 0chain/actions/run-system-tests-tokenomics@feat/enterprise-blobber-tests
+        uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
@@ -124,7 +124,7 @@ jobs:
           TENDERLY_VIRTUAL_TESTNET_RPC_ID: ''
 
       - name: "Run Enterprise blobber cancel allocation tests"
-        uses: 0chain/actions/run-system-tests-tokenomics@feat/enterprise-blobber-tests
+        uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
@@ -143,7 +143,7 @@ jobs:
           TENDERLY_VIRTUAL_TESTNET_RPC_ID: ''
 
       - name: "Run Enterprise blobber finalize allocation tests"
-        uses: 0chain/actions/run-system-tests-tokenomics@feat/enterprise-blobber-tests
+        uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
