@@ -52,9 +52,9 @@ jobs:
           echo "CLIENT_THROTTLING=$(echo $(([ -z 'TestClientThrottling' ] && echo '') || echo 'TestClientThrottling'))" >> $GITHUB_ENV
           echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
 
-      - name: "Deploy 0Chain"
+      - name: "Deploy 0Chain with enterprise blobbers"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-enterprise-blobber@feature/enterprise-blobber-tests
+        uses: 0chain/actions/deploy-0chain@feature/enterprise-blobber
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           kube_config: ${{ secrets[format('DEVSTKC', env.RUNNER_NUMBER)] }}
