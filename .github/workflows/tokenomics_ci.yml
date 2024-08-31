@@ -73,6 +73,7 @@ jobs:
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
+          system_tests_branch: feat/enterprise-blobber-tests
           archive_results: true
           run_flaky_tests: false
           run_api_system_tests: false
@@ -94,6 +95,7 @@ jobs:
           deploy_report_page: true
           archive_results: true
           run_flaky_tests: false
+          system_tests_branch: feat/enterprise-blobber-tests
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
@@ -112,6 +114,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
+          system_tests_branch: feat/enterprise-blobber-tests
           run_flaky_tests: false
           run_api_system_tests: false
           run_cli_system_tests: false
@@ -132,6 +135,7 @@ jobs:
           deploy_report_page: true
           archive_results: true
           run_flaky_tests: false
+          system_tests_branch: feat/enterprise-blobber-tests
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
@@ -149,6 +153,7 @@ jobs:
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
+          system_tests_branch: feat/enterprise-blobber-tests
           archive_results: true
           run_flaky_tests: false
           run_api_system_tests: false
