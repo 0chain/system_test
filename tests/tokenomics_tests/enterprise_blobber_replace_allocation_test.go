@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func TestReplaceEnterpriseBlobber(testSetup *testing.T) {
+func TestReplaceEnterpriseBlobberAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	var (
