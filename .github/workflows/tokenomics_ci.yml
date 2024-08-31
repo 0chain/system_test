@@ -65,6 +65,10 @@ jobs:
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ''
+          zs3_client: ''
+          zs3_logsearchapi: ''
+          zs3_minio: ''
 
       - name: "Run Enterprise blobber create allocation tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
