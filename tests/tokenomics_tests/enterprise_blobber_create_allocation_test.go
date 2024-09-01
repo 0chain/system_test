@@ -564,7 +564,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "blobbers provided are not enough to honor the allocation")
+		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
 	})
 
 	t.Run("Create enterprise allocation with too large data (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
@@ -581,7 +581,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "blobbers provided are not enough to honor the allocation")
+		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
 	})
 
 	t.Run("Create enterprise allocation with too large data and parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
@@ -598,7 +598,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Contains(t, output[0], "blobbers provided are not enough to honor the allocation")
+		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation")
 	})
 
 	t.Run("Create enterprise allocation with read price range 0-0 Should Fail", func(t *test.SystemTest) {
@@ -633,7 +633,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: allocation_creation_failed: invalid request: insufficient allocation size", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Error creating allocation: smartcontract: allocation_creation_failed: invalid request: insufficient allocation size", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Create enterprise allocation with no parameter (missing lock) Should Fail", func(t *test.SystemTest) {
