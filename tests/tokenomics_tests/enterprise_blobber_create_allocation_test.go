@@ -26,7 +26,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -93,7 +93,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -123,7 +123,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err = utils.CreateWalletForName(t, configPath, utils.EscapedTestName(t)+"_other")
 		require.Nil(t, err, "Error creating other wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing facuet")
 
 		targetWalletName := utils.EscapedTestName(t)
@@ -179,7 +179,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucets")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -207,7 +207,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -235,7 +235,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -263,7 +263,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -291,7 +291,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -318,7 +318,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -428,7 +428,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -472,7 +472,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -510,7 +510,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -534,7 +534,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
 
 		_, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -555,7 +555,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -571,7 +571,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -588,7 +588,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -605,7 +605,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -622,7 +622,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
@@ -640,7 +640,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
 		require.Nil(t, err, "Error executing faucet")
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
