@@ -370,7 +370,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Extend duration cost calculation", 15*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Extend duration cost calculation", 15*time.Minute, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
@@ -440,7 +440,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Upgrade size cost calculation", 15*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Upgrade size cost calculation", 15*time.Minute, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
@@ -510,7 +510,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Add blobber cost calculation", 15*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Add blobber cost calculation", 15*time.Minute, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
@@ -561,7 +561,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Replace blobber cost calculation", 15*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Replace blobber cost calculation", 15*time.Minute, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
