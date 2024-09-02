@@ -187,7 +187,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		output, err = finalizeAllocation(t, configPath, allocationID, false)
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: allocation is not expired yet", output[0])
+		require.Equal(t, "Error finalizing allocation:smartcontract: fini_alloc_failed: allocation is not expired yet", output[0])
 	})
 
 	t.Run("Finalize Other's Allocation Should Fail", func(t *test.SystemTest) {
@@ -206,7 +206,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		// Error should not be nil since finalize is not working
 		require.NotNil(t, err, "expected error finalizing allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error finalizing allocation:fini_alloc_failed: not allowed, unknown finalization initiator", output[len(output)-1])
+		require.Equal(t, "Error finalizing allocation:smartcontract: fini_alloc_failed: not allowed, unknown finalization initiator", output[len(output)-1])
 	})
 
 	t.Run("No allocation param should fail", func(t *test.SystemTest) {
