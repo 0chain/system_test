@@ -947,7 +947,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		output, err := updateAllocation(t, configPath, params, true)
 		if err != nil {
-			require.Equal(t, output[0], "Error updating allocation:allocation_updating_failed: update allocation changes nothing")
+			require.Equal(t, output[0], "Error updating allocation:smartcontract:allocation_updating_failed: update allocation changes nothing")
 		} else {
 			require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 			require.Len(t, output, 1)
@@ -1214,7 +1214,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error updating allocation:allocation_updating_failed: allocation can't be reduced", output[0])
+		require.Equal(t, "Error updating allocation:smartcontract:allocation_updating_failed: allocation can't be reduced", output[0])
 
 		alloc := utils.GetAllocation(t, allocationID)
 
@@ -1237,7 +1237,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:allocation_updating_failed: update allocation changes nothing", output[0])
+		require.Equal(t, "Error updating allocation:smartcontract:allocation_updating_failed: update allocation changes nothing", output[0])
 
 		// Cleanup
 		output, err = cancelAllocation(t, configPath, allocationID, true)
@@ -1258,7 +1258,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := updateAllocation(t, configPath, params, false)
 
 		require.NotNil(t, err, "expected error updating allocation", strings.Join(output, "\n"))
-		require.Equal(t, "Error updating allocation:couldnt_find_allocation: Couldn't find the allocation required for update", output[0])
+		require.Equal(t, "Error updating allocation:smartcontract:couldnt_find_allocation: Couldn't find the allocation required for update", output[0])
 	})
 
 	t.RunWithTimeout("Update Other's Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) {
@@ -1290,7 +1290,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.NotNil(t, err, "expected error updating "+
 			"allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error updating allocation:allocation_updating_failed: only owner can update the allocation", output[0])
+		require.Equal(t, "Error updating allocation:smartcontract:allocation_updating_failed: only owner can update the allocation", output[0])
 	})
 
 	t.Run("Update Mistake Size Parameter Should Fail", func(t *test.SystemTest) {
