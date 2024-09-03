@@ -13,6 +13,11 @@ type SplitWallet struct {
 	IsSplit       bool      `json:"is_split"`
 }
 
+// GetKeyResponse represents retrieved set of split keys.
+type GetKeyResponse struct {
+	Keys []*SplitKey `json:"keys"`
+}
+
 // SplitKey represents retrieved split key.
 type SplitKey struct {
 	UserID        string `json:"user_id"`

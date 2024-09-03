@@ -3,15 +3,11 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
-)
-
-const (
-	X_USER_ID   = "lWVZRhERosYtXR9MBJh5yJUtweI3"
-	X_JWT_TOKEN = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibFdWWlJoRVJvc1l0WFI5TUJKaDV5SlV0d2VJMyIsImV4cCI6MTcyMjc2OTc5M30.QW1GUdGVi2NERMyrkdIwFNXmZ7ZInaB2er5gY6zOv_xEe8NmmZvn5tGFk2Agc8A1TraPfYWvvnMPvtNu8U6tiA"
 )
 
 type ZvaultClient struct {
@@ -28,10 +24,9 @@ func NewZvaultClient(zvaultEntrypoint string) *ZvaultClient {
 	return zvaultClient
 }
 
-func (c *ZvaultClient) NewZvaultHeaders() map[string]string {
+func (c *ZvaultClient) NewZvaultHeaders(jwtToken string) map[string]string {
 	zvaultHeaders := map[string]string{
-		"X-User-ID":   X_USER_ID,
-		"X-Jwt-Token": X_JWT_TOKEN,
+		"X-Jwt-Token": jwtToken,
 	}
 
 	return zvaultHeaders
@@ -47,7 +42,7 @@ func (c *ZvaultClient) GenerateSplitWallet(t *test.SystemTest, headers map[strin
 	urlBuilder.SetPath("/generate")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                splitWallet,
+		Dst:                &splitWallet,
 		Headers:            headers,
 		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
@@ -65,7 +60,7 @@ func (c *ZvaultClient) GenerateSplitKey(t *test.SystemTest, clientID string, hea
 	urlBuilder.SetPath(fmt.Sprintf("/generate/%s", clientID))
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                splitKey,
+		Dst:                &splitKey,
 		Headers:            headers,
 		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
@@ -92,7 +87,7 @@ func (c *ZvaultClient) Store(t *test.SystemTest, privateKey string, headers map[
 	require.NoError(t, err)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                splitKey,
+		Dst:                &splitKey,
 		Headers:            headers,
 		Body:               body,
 		RequiredStatusCode: 201,
@@ -101,9 +96,9 @@ func (c *ZvaultClient) Store(t *test.SystemTest, privateKey string, headers map[
 	return splitKey, resp, err
 }
 
-func (c *ZvaultClient) GetKeys(t *test.SystemTest, clientID string, headers map[string]string) ([]*model.SplitKey, *resty.Response, error) {
+func (c *ZvaultClient) GetKeys(t *test.SystemTest, clientID string, headers map[string]string) (*model.GetKeyResponse, *resty.Response, error) {
 	t.Logf("get keys for client id [%v] and for jwt token [%v] using zvault...", clientID, headers["X-Jwt-Token"])
-	var splitKey []*model.SplitKey
+	var keys *model.GetKeyResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
@@ -111,12 +106,12 @@ func (c *ZvaultClient) GetKeys(t *test.SystemTest, clientID string, headers map[
 	urlBuilder.SetPath(fmt.Sprintf("/keys/%s", clientID))
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &splitKey,
+		Dst:                &keys,
 		Headers:            headers,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
-	return splitKey, resp, err
+	return keys, resp, err
 }
 
 func (c *ZvaultClient) Revoke(t *test.SystemTest, clientID, publicKey string, headers map[string]string) (*resty.Response, error) {
@@ -192,7 +187,7 @@ func (c *ZvaultClient) ShareWallet(t *test.SystemTest, clientID, publicKey strin
 	require.NoError(t, err)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                splitKey,
+		Dst:                &splitKey,
 		Headers:            headers,
 		Body:               body,
 		RequiredStatusCode: 201,
@@ -211,7 +206,7 @@ func (c *ZvaultClient) GetSharedWallets(t *test.SystemTest, headers map[string]s
 	urlBuilder.SetPath("/wallets/shared")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                splitKey,
+		Dst:                &splitKey,
 		Headers:            headers,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)

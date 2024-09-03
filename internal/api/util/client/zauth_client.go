@@ -3,15 +3,12 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/0chain/gosdk/core/transaction"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/require"
-)
-
-const (
-	X_PEER_PUBLIC_KEY = ""
 )
 
 type ZauthClient struct {
@@ -28,11 +25,10 @@ func NewZauthClient(zauthEntrypoint string) *ZauthClient {
 	return zauthClient
 }
 
-func (c *ZauthClient) NewZauthHeaders() map[string]string {
+func (c *ZauthClient) NewZauthHeaders(jwtToken, peerPublicKey string) map[string]string {
 	zauthHeaders := map[string]string{
-		"X-User-ID":         X_USER_ID,
-		"X-Jwt-Token":       X_JWT_TOKEN,
-		"X-Peer-Public-Key": X_PEER_PUBLIC_KEY,
+		"X-Jwt-Token":       jwtToken,
+		"X-Peer-Public-Key": peerPublicKey,
 	}
 
 	return zauthHeaders
