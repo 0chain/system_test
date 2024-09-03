@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test0BoxJWT(testSetup *testing.T) {
+func TestZauthOperations(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("Create JWT token with user id, which differs from the one used during session creation", func(t *test.SystemTest) {
@@ -21,7 +21,7 @@ func Test0BoxJWT(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotEqual(t, int64(0), sessionID)
 
-		headers["X-App-User-ID"] = client.X_APP_USER_ID_A
+		headers["X-App-User-ID"] = client.X_APP_USER_ID_R
 
 		_, response, err = zboxClient.CreateJwtToken(t, sessionID, headers)
 		require.NoError(t, err)
@@ -61,10 +61,10 @@ func Test0BoxJWT(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotEmpty(t, jwtToken.JwtToken)
 
-		headers["X-App-Client-ID"] = client.X_APP_CLIENT_ID_A
-		headers["X-App-User-ID"] = client.X_APP_USER_ID_A
-		headers["X-App-Client-Key"] = client.X_APP_CLIENT_KEY_A
-		headers["X-App-Client-Signature"] = client.X_APP_CLIENT_SIGNATURE_A
+		headers["X-App-Client-ID"] = client.X_APP_CLIENT_ID_R
+		headers["X-App-User-ID"] = client.X_APP_USER_ID_R
+		headers["X-App-Client-Key"] = client.X_APP_CLIENT_KEY_R
+		headers["X-App-Client-Signature"] = client.X_APP_CLIENT_SIGNATURE_R
 
 		jwtToken, response, err = zboxClient.RefreshJwtToken(t, jwtToken.JwtToken, headers)
 		require.NoError(t, err)
