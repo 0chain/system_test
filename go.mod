@@ -6,7 +6,7 @@ toolchain go1.22.1
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.17.2-0.20240901205049-4d790a6fcabf
+	github.com/0chain/gosdk v1.17.3
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
