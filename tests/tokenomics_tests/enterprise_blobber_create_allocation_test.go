@@ -633,7 +633,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Equal(t, "Error creating allocation: smartcontract: allocation_creation_failed: invalid request: insufficient allocation size", output[0], strings.Join(output, "\n"))
+		require.Equal(t, "Error creating allocation: allocation_creation_failed: invalid request: insufficient allocation size", output[0], strings.Join(output, "\n"))
 	})
 
 	t.Run("Create enterprise allocation with no parameter (missing lock) Should Fail", func(t *test.SystemTest) {

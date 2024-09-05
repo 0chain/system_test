@@ -19,8 +19,8 @@ func TestReplaceEnterpriseBlobberAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	var (
-		replaceBlobberWithSameIdFailRegex  = `^Error updating allocation:smartcontract: allocation_updating_failed: cannot add blobber [a-f0-9]{64}, already in allocation$`
-		replaceBlobberWithWrongIdFailRegex = `^Error updating allocation:smartcontract: allocation_updating_failed: can't get blobber (.+)$`
+		replaceBlobberWithSameIdFailRegex  = `^Error updating allocation:allocation_updating_failed: cannot add blobber [a-f0-9]{64}, already in allocation$`
+		replaceBlobberWithWrongIdFailRegex = `^Error updating allocation:allocation_updating_failed: can't get blobber (.+)$`
 	)
 
 	output, err := utils.CreateWallet(t, configPath)
