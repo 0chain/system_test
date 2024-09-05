@@ -665,7 +665,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		output, err := updateAllocation(t, configPath, params, true)
 		if err != nil {
-			require.Equal(t, output[0], "Error updating allocation:smartcontract :allocation_updating_failed: update allocation changes nothing")
+			require.Equal(t, output[0], "Error updating allocation:allocation_updating_failed: update allocation changes nothing")
 		} else {
 			require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 			require.Len(t, output, 1)
