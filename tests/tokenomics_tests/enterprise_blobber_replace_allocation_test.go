@@ -42,21 +42,6 @@ func TestReplaceEnterpriseBlobberAllocation(testSetup *testing.T) {
 			"time_unit": "10m",
 		}, true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-
-		var blobbers []climodel.Blobber
-		output, err = utils.ListBlobbers(t, configPath, "--json")
-		require.Nil(t, err, "Error listing blobberes", strings.Join(output, "\n"))
-		require.Len(t, output, 1, "Error invalid json length", strings.Join(output, "\n"))
-
-		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobbers)
-		require.Nil(t, err, "Error decoding blobbers list", strings.Join(output, "\n"))
-
-		for _, blobber := range blobbers {
-			if blobber.Terms.WritePrice != 1e9 {
-				err := updateBlobberPrice(t, configPath, blobber.ID, 1e9)
-				require.Nil(t, err, "Error resetting blobber write prices")
-			}
-		}
 	})
 
 	t.Cleanup(func() {
