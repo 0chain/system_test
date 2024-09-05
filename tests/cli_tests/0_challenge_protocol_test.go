@@ -275,8 +275,8 @@ func TestProtocolChallenge(testSetup *testing.T) {
 }
 
 // Generate a random number in the range [0, max)
-func secureRandomInt(max int) (int64, error) {
-	n, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
+func secureRandomInt(maxValue int) (int64, error) {
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(maxValue)))
 	if err != nil {
 		return 0, err
 	}
