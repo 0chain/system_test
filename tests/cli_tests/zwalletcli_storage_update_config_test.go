@@ -147,7 +147,7 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_settings, updating settings: cannot convert key "+configKey+
-			" value "+badValue+" to state.balance: strconv.ParseFloat: parsing "+"\"x\"+: invalid syntax",
+			" value "+badValue+" to state.balance: strconv.ParseFloat: parsing \"x\": invalid syntax",
 			output[0], strings.Join(output, "\n"))
 	})
 }
