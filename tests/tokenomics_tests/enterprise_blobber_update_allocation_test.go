@@ -88,6 +88,289 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		}
 	})
 
+	t.RunSequentiallyWithTimeout("Blobber price change extend size of allocation", 25*time.Minute, func(t *test.SystemTest) {
+		utils.SetupWalletWithCustomTokens(t, configPath, 10)
+
+		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
+		allocationID := utils.SetupEnterpriseAllocation(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"data":   3,
+			"parity": 3,
+			"lock":   0.2, // 2GB total size where write price per blobber is 0.1ZCN
+		})
+
+		beforeAlloc := utils.GetAllocation(t, allocationID)
+		t.Logf("Update 1 Allocation %+v\n", beforeAlloc)
+
+		blobber := beforeAlloc.BlobberDetails[0]
+		t.Logf("Blobber old write price %d", blobber.Terms.WritePrice)
+		t.Logf("Blobber new write price %d", 2*blobber.Terms.WritePrice)
+
+		err := updateBlobberPrice(t, configPath, blobber.BlobberID, blobber.Terms.WritePrice*2)
+		require.Nil(t, err, "Error updating blobber price")
+
+		waitForTimeInMinutesWhileLogging(t, 5)
+
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"lock":       0.5,
+			"size":       1 * GB,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+
+		amountTotalLockedToAlloc += 5e9 // 0.5ZCN
+
+		require.Nil(t, err, "Could not update "+
+			"allocation due to error", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		afterAlloc := utils.GetAllocation(t, allocationID)
+		t.Logf("Update 1 immediate Allocation %+v\n", afterAlloc)
+
+		require.Less(t, beforeAlloc.ExpirationDate, afterAlloc.ExpirationDate,
+			fmt.Sprint("Expiration Time doesn't match: "+
+				"Before:", beforeAlloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
+		)
+
+		// Verify write pool calculations
+		timeUnitInSeconds := int64(600) // 10 minutes
+		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
+
+		realCostOfBeforeAlloc := costOfAlloc(&beforeAlloc)
+		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+		expectedWritePoolBalance := amountTotalLockedToAlloc - expectedPaymentToBlobbers
+		amountTotalLockedToAlloc = expectedWritePoolBalance
+		// Log all values
+		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
+		t.Logf("Duration of used in seconds: %d", durationOfUsedInSeconds)
+		t.Logf("Expire time before: %d", beforeAlloc.ExpirationDate)
+		t.Logf("Expire time after: %d", afterAlloc.ExpirationDate)
+		t.Logf("Real cost of before alloc: %d", realCostOfBeforeAlloc)
+		t.Logf("Expected payment to blobbers: %d", expectedPaymentToBlobbers)
+		t.Logf("Expected write pool balance: %d", expectedWritePoolBalance)
+		t.Logf("Write pool balance: %d", afterAlloc.WritePool)
+
+		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
+
+		// Verify blobber rewards calculations
+		rewardQuery := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseReward, err := getQueryRewards(t, rewardQuery)
+		require.Nil(t, err)
+
+		t.Logf("Enterprise reward: %+v", enterpriseReward)
+		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
+
+		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
+
+		afterUpdate1Alloc := utils.GetAllocation(t, allocationID)
+		t.Logf("Update 1 Allocation %+v\n", afterUpdate1Alloc)
+
+		waitForTimeInMinutesWhileLogging(t, 5)
+
+		// Upgrade 2
+		params = createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"lock":       0.5,
+			"size":       1 * GB,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+		amountTotalLockedToAlloc += 5e9 // 0.5ZCN
+
+		require.Nil(t, err, "Could not update "+
+			"allocation due to error", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		afterAlloc = utils.GetAllocation(t, allocationID)
+		t.Logf("Update 2 Allocation %+v\n", afterAlloc)
+
+		require.Less(t, afterUpdate1Alloc.ExpirationDate, afterAlloc.ExpirationDate,
+			fmt.Sprint("Expiration Time doesn't match: "+
+				"Before:", afterUpdate1Alloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
+		)
+
+		// Verify write pool calculations
+		timeUnitInSeconds = int64(600) // 10 minutes
+		afterFirstUpdateAllocStartTime := afterUpdate1Alloc.ExpirationDate - timeUnitInSeconds
+		durationOfUsedInSeconds = afterAlloc.ExpirationDate - afterFirstUpdateAllocStartTime - timeUnitInSeconds // 50
+
+		realCostOfBeforeAlloc = costOfAlloc(&afterUpdate1Alloc)
+		expectedPaymentToBlobbersAfterFirstUpdate := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+		expectedPaymentToBlobbers += expectedPaymentToBlobbersAfterFirstUpdate
+		expectedWritePoolBalance = amountTotalLockedToAlloc - expectedPaymentToBlobbersAfterFirstUpdate
+
+		// Log all values
+		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
+		t.Logf("Duration of used in seconds: %d", durationOfUsedInSeconds)
+		t.Logf("Expire time before: %d", beforeAlloc.ExpirationDate)
+		t.Logf("Expire time after: %d", afterAlloc.ExpirationDate)
+		t.Logf("Real cost of before alloc: %d", realCostOfBeforeAlloc)
+		t.Logf("Expected payment to blobbers: %d", expectedPaymentToBlobbers)
+		t.Logf("Expected write pool balance: %d", expectedWritePoolBalance)
+		t.Logf("Write pool balance: %d", afterAlloc.WritePool)
+
+		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
+
+		// Verify blobber rewards calculations
+		rewardQuery = fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseReward, err = getQueryRewards(t, rewardQuery)
+		require.Nil(t, err)
+
+		t.Logf("Enterprise reward: %+v", enterpriseReward)
+		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
+
+		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
+
+		// reset blobber write price.
+		err = updateBlobberPrice(t, configPath, blobber.BlobberID, blobber.Terms.WritePrice)
+		require.Nil(t, err, "Error resting blobber prices to original")
+
+		// Cleanup
+		output, err = cancelAllocation(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
+		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
+	})
+
+	t.RunSequentiallyWithTimeout("Blobber price change extend duration of allocation", 25*time.Minute, func(t *test.SystemTest) {
+		utils.SetupWalletWithCustomTokens(t, configPath, 10)
+
+		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
+		allocationID := utils.SetupEnterpriseAllocation(t, configPath, map[string]interface{}{
+			"size":   1 * GB,
+			"data":   3,
+			"parity": 3,
+			"lock":   0.2, // 2GB total size where write price per blobber is 0.1ZCN
+		})
+
+		beforeAlloc := utils.GetAllocation(t, allocationID)
+		t.Logf("Before Allocation %+v\n", beforeAlloc)
+		blobber := beforeAlloc.BlobberDetails[0]
+
+		err := updateBlobberPrice(t, configPath, blobber.BlobberID, blobber.Terms.WritePrice*2)
+		require.Nil(t, err, "Error updating blobber prices")
+
+		waitForTimeInMinutesWhileLogging(t, 5)
+
+		// First update
+		params := createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"extend":     true,
+			"lock":       0.5,
+		})
+		output, err := updateAllocation(t, configPath, params, true)
+		amountTotalLockedToAlloc += 5e9
+
+		require.Nil(t, err, "Could not update "+
+			"allocation due to error", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		afterAlloc := utils.GetAllocation(t, allocationID)
+		require.Less(t, beforeAlloc.ExpirationDate, afterAlloc.ExpirationDate,
+			fmt.Sprint("Expiration Time doesn't match: "+
+				"Before:", beforeAlloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
+		)
+
+		// Verify write pool calculations
+		timeUnitInSeconds := int64(600) // 10 minutes
+		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
+
+		realCostOfBeforeAlloc := costOfAlloc(&beforeAlloc)
+		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+		expectedWritePoolBalance := amountTotalLockedToAlloc - expectedPaymentToBlobbers
+		amountTotalLockedToAlloc = expectedWritePoolBalance
+
+		// Log all values
+		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
+		t.Logf("Duration of used in seconds: %d", durationOfUsedInSeconds)
+		t.Logf("Expire time before: %d", beforeAlloc.ExpirationDate)
+		t.Logf("Expire time after: %d", afterAlloc.ExpirationDate)
+		t.Logf("Real cost of before alloc: %d", realCostOfBeforeAlloc)
+		t.Logf("Expected payment to blobbers: %d", expectedPaymentToBlobbers)
+		t.Logf("Expected write pool balance: %d", expectedWritePoolBalance)
+		t.Logf("Write pool balance: %d", afterAlloc.WritePool)
+
+		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
+
+		// Verify blobber rewards calculations
+		rewardQuery := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseReward, err := getQueryRewards(t, rewardQuery)
+		require.Nil(t, err)
+
+		t.Logf("Enterprise reward: %+v", enterpriseReward)
+		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
+
+		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
+
+		afterUpdate1Alloc := utils.GetAllocation(t, allocationID)
+		t.Logf("Update 1 Allocation %+v\n", afterUpdate1Alloc)
+
+		waitForTimeInMinutesWhileLogging(t, 5)
+
+		// Second update
+		params = createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"extend":     true,
+			"lock":       0.5,
+		})
+		output, err = updateAllocation(t, configPath, params, true)
+		amountTotalLockedToAlloc += 5e9
+
+		require.Nil(t, err, "Could not update "+
+			"allocation due to error", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		afterAlloc = utils.GetAllocation(t, allocationID)
+		t.Logf("Update 2 Allocation %+v\n", afterAlloc)
+
+		require.Less(t, afterUpdate1Alloc.ExpirationDate, afterAlloc.ExpirationDate,
+			fmt.Sprint("Expiration Time doesn't match: "+
+				"Before:", afterUpdate1Alloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
+		)
+
+		// Verify write pool calculations
+		timeUnitInSeconds = int64(600) // 10 minutes
+		afterFirstUpdateAllocStartTime := afterUpdate1Alloc.ExpirationDate - timeUnitInSeconds
+		durationOfUsedInSeconds = afterAlloc.ExpirationDate - afterFirstUpdateAllocStartTime - timeUnitInSeconds // 50
+
+		realCostOfBeforeAlloc = costOfAlloc(&afterUpdate1Alloc)
+		expectedPaymentToBlobbersAfterSecondUpdate := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
+		expectedPaymentToBlobbers += expectedPaymentToBlobbersAfterSecondUpdate
+		expectedWritePoolBalance = amountTotalLockedToAlloc - expectedPaymentToBlobbersAfterSecondUpdate
+
+		// Log all values
+		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
+		t.Logf("Duration of used in seconds: %d", durationOfUsedInSeconds)
+		t.Logf("Expire time before: %d", afterUpdate1Alloc.ExpirationDate)
+		t.Logf("Expire time after: %d", afterAlloc.ExpirationDate)
+		t.Logf("Real cost of before alloc: %d", realCostOfBeforeAlloc)
+		t.Logf("Expected payment to blobbers: %d", expectedPaymentToBlobbers)
+		t.Logf("Expected write pool balance: %d", expectedWritePoolBalance)
+		t.Logf("Write pool balance: %d", afterAlloc.WritePool)
+
+		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
+
+		// Verify blobber rewards calculations
+		rewardQuery = fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
+		enterpriseReward, err = getQueryRewards(t, rewardQuery)
+		require.Nil(t, err)
+
+		t.Logf("Enterprise reward: %+v", enterpriseReward)
+		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
+
+		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
+
+		// Cleanup
+		err = updateBlobberPrice(t, configPath, blobber.BlobberID, blobber.Terms.WritePrice)
+		require.Nil(t, err, "Error updating blobber price")
+
+		output, err = cancelAllocation(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
+		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
+	})
+
 	t.RunWithTimeout("Extend duration cost calculation", 15*time.Minute, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
@@ -1209,290 +1492,6 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
 		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
 	})
-
-	t.RunSequentiallyWithTimeout("Blobber price change extend size of allocation", 25*time.Minute, func(t *test.SystemTest) {
-		utils.SetupWalletWithCustomTokens(t, configPath, 10)
-
-		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
-		allocationID := utils.SetupEnterpriseAllocation(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
-			"data":   3,
-			"parity": 3,
-			"lock":   0.2, // 2GB total size where write price per blobber is 0.1ZCN
-		})
-
-		beforeAlloc := utils.GetAllocation(t, allocationID)
-		t.Logf("Update 1 Allocation %+v\n", beforeAlloc)
-
-		blobber := beforeAlloc.BlobberDetails[0]
-		t.Logf("Blobber old write price %d", blobber.Terms.WritePrice)
-		t.Logf("Blobber new write price %d", 2*blobber.Terms.WritePrice)
-
-		err := updateBlobberPrice(t, configPath, blobber.BlobberID, blobber.Terms.WritePrice*2)
-		require.Nil(t, err, "Error updating blobber price")
-
-		waitForTimeInMinutesWhileLogging(t, 5)
-
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"lock":       0.5,
-			"size":       1 * GB,
-		})
-		output, err := updateAllocation(t, configPath, params, true)
-
-		amountTotalLockedToAlloc += 5e9 // 0.5ZCN
-
-		require.Nil(t, err, "Could not update "+
-			"allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-
-		afterAlloc := utils.GetAllocation(t, allocationID)
-		t.Logf("Update 1 immediate Allocation %+v\n", afterAlloc)
-
-		require.Less(t, beforeAlloc.ExpirationDate, afterAlloc.ExpirationDate,
-			fmt.Sprint("Expiration Time doesn't match: "+
-				"Before:", beforeAlloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
-		)
-
-		// Verify write pool calculations
-		timeUnitInSeconds := int64(600) // 10 minutes
-		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
-
-		realCostOfBeforeAlloc := costOfAlloc(&beforeAlloc)
-		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
-		expectedWritePoolBalance := amountTotalLockedToAlloc - expectedPaymentToBlobbers
-		amountTotalLockedToAlloc = expectedWritePoolBalance
-		// Log all values
-		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
-		t.Logf("Duration of used in seconds: %d", durationOfUsedInSeconds)
-		t.Logf("Expire time before: %d", beforeAlloc.ExpirationDate)
-		t.Logf("Expire time after: %d", afterAlloc.ExpirationDate)
-		t.Logf("Real cost of before alloc: %d", realCostOfBeforeAlloc)
-		t.Logf("Expected payment to blobbers: %d", expectedPaymentToBlobbers)
-		t.Logf("Expected write pool balance: %d", expectedWritePoolBalance)
-		t.Logf("Write pool balance: %d", afterAlloc.WritePool)
-
-		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
-
-		// Verify blobber rewards calculations
-		rewardQuery := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
-		enterpriseReward, err := getQueryRewards(t, rewardQuery)
-		require.Nil(t, err)
-
-		t.Logf("Enterprise reward: %+v", enterpriseReward)
-		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
-
-		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
-
-		afterUpdate1Alloc := utils.GetAllocation(t, allocationID)
-		t.Logf("Update 1 Allocation %+v\n", afterUpdate1Alloc)
-
-		waitForTimeInMinutesWhileLogging(t, 5)
-
-		// Upgrade 2
-		params = createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"lock":       0.5,
-			"size":       1 * GB,
-		})
-		output, err = updateAllocation(t, configPath, params, true)
-		amountTotalLockedToAlloc += 5e9 // 0.5ZCN
-
-		require.Nil(t, err, "Could not update "+
-			"allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-
-		afterAlloc = utils.GetAllocation(t, allocationID)
-		t.Logf("Update 2 Allocation %+v\n", afterAlloc)
-
-		require.Less(t, afterUpdate1Alloc.ExpirationDate, afterAlloc.ExpirationDate,
-			fmt.Sprint("Expiration Time doesn't match: "+
-				"Before:", afterUpdate1Alloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
-		)
-
-		// Verify write pool calculations
-		timeUnitInSeconds = int64(600) // 10 minutes
-		afterFirstUpdateAllocStartTime := afterUpdate1Alloc.ExpirationDate - timeUnitInSeconds
-		durationOfUsedInSeconds = afterAlloc.ExpirationDate - afterFirstUpdateAllocStartTime - timeUnitInSeconds // 50
-
-		realCostOfBeforeAlloc = costOfAlloc(&afterUpdate1Alloc)
-		expectedPaymentToBlobbersAfterFirstUpdate := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
-		expectedPaymentToBlobbers += expectedPaymentToBlobbersAfterFirstUpdate
-		expectedWritePoolBalance = amountTotalLockedToAlloc - expectedPaymentToBlobbersAfterFirstUpdate
-
-		// Log all values
-		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
-		t.Logf("Duration of used in seconds: %d", durationOfUsedInSeconds)
-		t.Logf("Expire time before: %d", beforeAlloc.ExpirationDate)
-		t.Logf("Expire time after: %d", afterAlloc.ExpirationDate)
-		t.Logf("Real cost of before alloc: %d", realCostOfBeforeAlloc)
-		t.Logf("Expected payment to blobbers: %d", expectedPaymentToBlobbers)
-		t.Logf("Expected write pool balance: %d", expectedWritePoolBalance)
-		t.Logf("Write pool balance: %d", afterAlloc.WritePool)
-
-		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
-
-		// Verify blobber rewards calculations
-		rewardQuery = fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
-		enterpriseReward, err = getQueryRewards(t, rewardQuery)
-		require.Nil(t, err)
-
-		t.Logf("Enterprise reward: %+v", enterpriseReward)
-		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
-
-		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
-
-		// reset blobber write price.
-		err = updateBlobberPrice(t, configPath, blobber.BlobberID, blobber.Terms.WritePrice)
-		require.Nil(t, err, "Error resting blobber prices to original")
-
-		// Cleanup
-		output, err = cancelAllocation(t, configPath, allocationID, true)
-		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
-		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
-	})
-
-	t.RunSequentiallyWithTimeout("Blobber price change extend duration of allocation", 25*time.Minute, func(t *test.SystemTest) {
-		utils.SetupWalletWithCustomTokens(t, configPath, 10)
-
-		amountTotalLockedToAlloc := int64(2e9) // 0.2ZCN
-		allocationID := utils.SetupEnterpriseAllocation(t, configPath, map[string]interface{}{
-			"size":   1 * GB,
-			"data":   3,
-			"parity": 3,
-			"lock":   0.2, // 2GB total size where write price per blobber is 0.1ZCN
-		})
-
-		beforeAlloc := utils.GetAllocation(t, allocationID)
-		t.Logf("Before Allocation %+v\n", beforeAlloc)
-		blobber := beforeAlloc.BlobberDetails[0]
-
-		err := updateBlobberPrice(t, configPath, blobber.BlobberID, blobber.Terms.WritePrice*2)
-		require.Nil(t, err, "Error updating blobber prices")
-
-		waitForTimeInMinutesWhileLogging(t, 5)
-
-		// First update
-		params := createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"extend":     true,
-			"lock":       0.5,
-		})
-		output, err := updateAllocation(t, configPath, params, true)
-		amountTotalLockedToAlloc += 5e9
-
-		require.Nil(t, err, "Could not update "+
-			"allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-
-		afterAlloc := utils.GetAllocation(t, allocationID)
-		require.Less(t, beforeAlloc.ExpirationDate, afterAlloc.ExpirationDate,
-			fmt.Sprint("Expiration Time doesn't match: "+
-				"Before:", beforeAlloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
-		)
-
-		// Verify write pool calculations
-		timeUnitInSeconds := int64(600) // 10 minutes
-		durationOfUsedInSeconds := afterAlloc.ExpirationDate - beforeAlloc.StartTime - timeUnitInSeconds
-
-		realCostOfBeforeAlloc := costOfAlloc(&beforeAlloc)
-		expectedPaymentToBlobbers := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
-		expectedWritePoolBalance := amountTotalLockedToAlloc - expectedPaymentToBlobbers
-		amountTotalLockedToAlloc = expectedWritePoolBalance
-
-		// Log all values
-		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
-		t.Logf("Duration of used in seconds: %d", durationOfUsedInSeconds)
-		t.Logf("Expire time before: %d", beforeAlloc.ExpirationDate)
-		t.Logf("Expire time after: %d", afterAlloc.ExpirationDate)
-		t.Logf("Real cost of before alloc: %d", realCostOfBeforeAlloc)
-		t.Logf("Expected payment to blobbers: %d", expectedPaymentToBlobbers)
-		t.Logf("Expected write pool balance: %d", expectedWritePoolBalance)
-		t.Logf("Write pool balance: %d", afterAlloc.WritePool)
-
-		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
-
-		// Verify blobber rewards calculations
-		rewardQuery := fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
-		enterpriseReward, err := getQueryRewards(t, rewardQuery)
-		require.Nil(t, err)
-
-		t.Logf("Enterprise reward: %+v", enterpriseReward)
-		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
-
-		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
-
-		afterUpdate1Alloc := utils.GetAllocation(t, allocationID)
-		t.Logf("Update 1 Allocation %+v\n", afterUpdate1Alloc)
-
-		waitForTimeInMinutesWhileLogging(t, 5)
-
-		// Second update
-		params = createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"extend":     true,
-			"lock":       0.5,
-		})
-		output, err = updateAllocation(t, configPath, params, true)
-		amountTotalLockedToAlloc += 5e9
-
-		require.Nil(t, err, "Could not update "+
-			"allocation due to error", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		utils.AssertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
-
-		afterAlloc = utils.GetAllocation(t, allocationID)
-		t.Logf("Update 2 Allocation %+v\n", afterAlloc)
-
-		require.Less(t, afterUpdate1Alloc.ExpirationDate, afterAlloc.ExpirationDate,
-			fmt.Sprint("Expiration Time doesn't match: "+
-				"Before:", afterUpdate1Alloc.ExpirationDate, "After:", afterAlloc.ExpirationDate),
-		)
-
-		// Verify write pool calculations
-		timeUnitInSeconds = int64(600) // 10 minutes
-		afterFirstUpdateAllocStartTime := afterUpdate1Alloc.ExpirationDate - timeUnitInSeconds
-		durationOfUsedInSeconds = afterAlloc.ExpirationDate - afterFirstUpdateAllocStartTime - timeUnitInSeconds // 50
-
-		realCostOfBeforeAlloc = costOfAlloc(&afterUpdate1Alloc)
-		expectedPaymentToBlobbersAfterSecondUpdate := realCostOfBeforeAlloc * durationOfUsedInSeconds / timeUnitInSeconds
-		expectedPaymentToBlobbers += expectedPaymentToBlobbersAfterSecondUpdate
-		expectedWritePoolBalance = amountTotalLockedToAlloc - expectedPaymentToBlobbersAfterSecondUpdate
-
-		// Log all values
-		t.Logf("Time unit in seconds: %d", timeUnitInSeconds)
-		t.Logf("Duration of used in seconds: %d", durationOfUsedInSeconds)
-		t.Logf("Expire time before: %d", afterUpdate1Alloc.ExpirationDate)
-		t.Logf("Expire time after: %d", afterAlloc.ExpirationDate)
-		t.Logf("Real cost of before alloc: %d", realCostOfBeforeAlloc)
-		t.Logf("Expected payment to blobbers: %d", expectedPaymentToBlobbers)
-		t.Logf("Expected write pool balance: %d", expectedWritePoolBalance)
-		t.Logf("Write pool balance: %d", afterAlloc.WritePool)
-
-		require.InEpsilon(t, expectedWritePoolBalance, afterAlloc.WritePool, 0.01, "Write pool balance doesn't match")
-
-		// Verify blobber rewards calculations
-		rewardQuery = fmt.Sprintf("allocation_id='%s' AND reward_type=%d", allocationID, EnterpriseBlobberReward)
-		enterpriseReward, err = getQueryRewards(t, rewardQuery)
-		require.Nil(t, err)
-
-		t.Logf("Enterprise reward: %+v", enterpriseReward)
-		t.Log("Enterprise reward: ", enterpriseReward.TotalReward, "Expected: ", expectedPaymentToBlobbers)
-
-		require.InEpsilon(t, expectedPaymentToBlobbers, enterpriseReward.TotalReward, 0.01, "Enterprise blobber reward doesn't match")
-
-		// Cleanup
-		err = updateBlobberPrice(t, configPath, blobber.BlobberID, blobber.Terms.WritePrice)
-		require.Nil(t, err, "Error updating blobber price")
-
-		output, err = cancelAllocation(t, configPath, allocationID, true)
-		require.Nil(t, err, "Unable to cancel allocation", strings.Join(output, "\n"))
-		require.Regexp(t, cancelAllocationRegex, strings.Join(output, "\n"), "cancel allcoation fail", strings.Join(output, "\n"))
-	})
-
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
