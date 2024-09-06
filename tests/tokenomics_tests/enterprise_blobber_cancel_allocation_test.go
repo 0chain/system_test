@@ -39,13 +39,6 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error updating sc config", strings.Join(output, "\n"))
 	})
 
-	// Make sure you check refund amount in every test
-
-	// 1. Change time_unit to 10 minutes. Create allocation. Wait for 7 minutes. Cancel allocation. Check refund amount.
-	// 2. Change time_unit to 10 minutes. Create allocation. Wait for 7 minutes. Update the allocation duration in one test case, in 2nd test case update size. Check refund amount.
-	// 3. Change time_unit to 10 minutes. Create allocation. Wait for 7 minutes. Add blobber to allocation. Cancel allocation. Check refund amount.
-	// 4. Same process for replace blobber with 2x price. Check refund amount.
-
 	t.RunWithTimeout("Cancel allocation after waiting for 7 minutes check refund amount.", time.Minute*15, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 

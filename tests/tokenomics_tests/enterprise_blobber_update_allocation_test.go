@@ -41,12 +41,6 @@ func costOfAlloc(alloc *climodel.Allocation) int64 {
 func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	// 1. Run all update operations one by one.
-	// 2. Run all update operations at once.
-	// Not high priority
-
-	// Change time unit to 10 minutes
-
 	output, err := utils.CreateWallet(t, configPath)
 	require.Nil(t, err, "Error creating configuration wallet", strings.Join(output, "\n"))
 

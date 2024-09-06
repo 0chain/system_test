@@ -18,10 +18,6 @@ import (
 func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	// 1. Without auth ticket should fail
-	// 2. All blobber should be enteprise
-	// 3.
-
 	t.Run("Create enterprise allocation with blobber auth tickets should pass", func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
