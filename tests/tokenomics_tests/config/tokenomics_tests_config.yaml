@@ -1,6 +1,6 @@
-block_worker: https://dev-st.devnet-0chain.net/dns
-0box_url: https://0box.dev-st.devnet-0chain.net/dns
-zs3_server_url: https://dev-st.devnet-0chain.net/zs3server/
+block_worker: https://dev.zus.network/dns
+0box_url: https://0box.dev.zus.network/dns
+zs3_server_url: https://dev.zus.network/zs3server/
 ethereum_node_url: "https://rpc.tenderly.co/fork/e753f650-9968-4f58-af77-5f02ace53cdc"
 confirmation_chain_length: 3
 min_confirmation: 50
