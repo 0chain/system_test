@@ -4,13 +4,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/0chain/common/core/common"
 	"github.com/0chain/gosdk/core/zcncrypto"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"strings"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutils "github.com/0chain/system_test/internal/cli/util"

@@ -2,13 +2,14 @@ package tokenomics_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/tests/cli_tests"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/tests/cli_tests"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutils "github.com/0chain/system_test/internal/cli/util"

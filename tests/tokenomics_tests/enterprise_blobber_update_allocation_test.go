@@ -3,8 +3,6 @@ package tokenomics_tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/tests/cli_tests"
-	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 	"io"
 	"net/http"
 	"os"
@@ -15,6 +13,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/tests/cli_tests"
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 

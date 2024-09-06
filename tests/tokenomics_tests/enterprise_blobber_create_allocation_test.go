@@ -2,11 +2,12 @@ package tokenomics_tests
 
 import (
 	"fmt"
-	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/system_test/tests/tokenomics_tests/utils"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 

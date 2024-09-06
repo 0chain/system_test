@@ -3,12 +3,13 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/0chain/system_test/internal/api/model"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/0chain/system_test/internal/api/model"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"

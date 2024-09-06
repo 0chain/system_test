@@ -2,10 +2,11 @@ package utils
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 )
