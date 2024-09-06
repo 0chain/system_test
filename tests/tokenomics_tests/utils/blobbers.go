@@ -43,8 +43,8 @@ func GetBlobberDetailsWithWallet(t *test.SystemTest, walletName, cliConfigFilena
 	err = json.NewDecoder(strings.NewReader(output[0])).Decode(&blobberList)
 	require.Nil(t, err, "Error parsing blobbers list")
 
-	for idx, blobber := range blobberList {
-		if blobber.ID == blobberId {
+	for idx := range blobberList {
+		if blobberList[idx].ID == blobberId {
 			return &blobberList[idx], nil
 		}
 	}
@@ -71,11 +71,11 @@ func StakePoolInfo(t *test.SystemTest, cliConfigFilename, params string) ([]stri
 	t.Log("Fetching stake pool info...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, EscapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
-func GenerateBlobberAuthTickets(t *test.SystemTest, configFileName string) (blobberAuthTickets string, blobberIds string) {
+func GenerateBlobberAuthTickets(t *test.SystemTest, configFileName string) (blobberAuthTickets, blobberIds string) {
 	return GenerateBlobberAuthTicketsWithWallet(t, EscapedTestName(t), configFileName)
 }
 
-func GenerateBlobberAuthTicketsWithWallet(t *test.SystemTest, walletName, configFileName string) (blobberAuthTicket string, blobberIds string) {
+func GenerateBlobberAuthTicketsWithWallet(t *test.SystemTest, walletName, configFileName string) (blobberAuthTicket, blobberIds string) {
 	var blobbersList []climodel.Blobber
 	output, err := ListBlobbersWithWallet(t, walletName, configFileName, "--json")
 	require.Nil(t, err, "Failed to get blobbers list", strings.Join(output, "\n"))
@@ -91,7 +91,8 @@ func GenerateBlobberAuthTicketsWithWallet(t *test.SystemTest, walletName, config
 	wallet, err := GetWalletForName(t, configFileName, walletName)
 	require.Nil(t, err, "could not get wallet")
 
-	for i, blobber := range blobbersList {
+	for i := range blobbersList {
+		blobber := blobbersList[i]
 		authTicket, err := getBlobberAuthTicket(t, configFileName, blobber.ID, blobber.BaseURL, zboxTeamWalletName, wallet.ClientID)
 		require.Nil(t, err, "could not get auth ticket for blobber", blobber.ID)
 		require.NotNil(t, authTicket, "could not get auth ticket for blobber %v", blobber)
