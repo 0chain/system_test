@@ -47,7 +47,7 @@ func setupConfig() {
 		log.Fatalln(fmt.Errorf("fatal error config file: %s", err))
 	}
 
-	parsedConfig := config.Parse(filepath.Join(".", path, "tokenomics_tests_config.yaml"))
+	parsedConfig = config.Parse(filepath.Join(".", path, "tokenomics_tests_config.yaml"))
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
@@ -81,6 +81,7 @@ const (
 	validator1Delegate2Wallet       = "wallets/validator1_delegate2"
 	validator2Delegate1Wallet       = "wallets/validator2_delegate1"
 	validator2Delegate2Wallet       = "wallets/validator2_delegate2"
+	zboxTeamWallet                  = "wallets/zbox_team"
 )
 
 var (
@@ -88,6 +89,7 @@ var (
 	configDir              string
 	bridgeClientConfigFile string
 	bridgeOwnerConfigFile  string
+	parsedConfig           *config.Config
 )
 
 func TestMain(m *testing.M) {
@@ -126,7 +128,8 @@ func TestMain(m *testing.M) {
 					strings.HasSuffix(f, miner02NodeDelegateWalletName+"_wallet.json") ||
 					strings.HasSuffix(f, miner03NodeDelegateWalletName+"_wallet.json") ||
 					strings.HasSuffix(f, sharder01NodeDelegateWalletName+"_wallet.json") ||
-					strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") {
+					strings.HasSuffix(f, sharder02NodeDelegateWalletName+"_wallet.json") ||
+					strings.HasSuffix(f, zboxTeamWallet+"_wallet.json") {
 					continue
 				}
 				_ = os.Remove(f)
