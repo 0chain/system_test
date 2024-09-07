@@ -24,7 +24,7 @@ func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 	wallet1 := initialisedWallets[walletIdx]
 	walletIdx++
 
-	coreClient.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
+	coreClient.SetWallet(false, *wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
 
 	faucetAmount := float64(9)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
@@ -64,7 +64,7 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	wallet1 := initialisedWallets[walletIdx]
 	walletIdx++
 
-	coreClient.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
+	coreClient.SetWallet(false, *wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
 
 	faucetAmount := float64(9)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
@@ -182,7 +182,7 @@ func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	wallet1 := initialisedWallets[walletIdx]
 	walletIdx++
 
-	coreClient.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
+	coreClient.SetWallet(false, *wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
 
 	faucetAmount := float64(9)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
