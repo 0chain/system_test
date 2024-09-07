@@ -16,8 +16,8 @@ import (
 
 func TestRepairSize(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	
-	t.RunSequentiallyWithTimeout("repair size should work", 5 * time.Minute, func(t *test.SystemTest) {
+
+	t.RunSequentiallyWithTimeout("repair size should work", 5*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(1 * MB)
 		fileSize := int64(512 * KB)
 
@@ -55,7 +55,7 @@ func TestRepairSize(testSetup *testing.T) {
 		require.Nilf(t, err, "error unmarshal repair size: %v", err)
 		require.Equal(t, uint64(0), rs.UploadSize, "upload size should be zero")
 		require.Equal(t, uint64(0), rs.DownloadSize, "download size should be zero")
-		
+
 		// optional repairpath
 		output, err = getRepairSize(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
@@ -67,7 +67,6 @@ func TestRepairSize(testSetup *testing.T) {
 		require.Equal(t, uint64(0), rs2.UploadSize, "upload size should be zero")
 		require.Equal(t, uint64(0), rs2.DownloadSize, "download size should be zero")
 	})
-	
 }
 
 func getRepairSize(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
