@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
+	coreClient "github.com/0chain/gosdk/core/client"
 	"io"
 	"os"
 	"regexp"
@@ -14,8 +16,6 @@ import (
 
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
-	"github.com/0chain/gosdk/zcncore"
-
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -379,11 +379,7 @@ func InitSDK(wallet, configFile string) error {
 		return err
 	}
 
-	marshal, err := json.Marshal(parsed)
-	if err != nil {
-		return err
-	}
-	err = zcncore.Init(string(marshal))
+	err = coreClient.Init(context.Background(), parsed)
 	if err != nil {
 		return err
 	}
