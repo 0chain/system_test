@@ -14,10 +14,7 @@ func TestZvaultJWT(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("Perform keys retrieval call with expired JWT token", func(w *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
-		Teardown(t, headers)
-
-		headers = zvaultClient.NewZvaultHeaders(JWT_TOKEN)
+		headers := zvaultClient.NewZvaultHeaders(JWT_TOKEN)
 
 		_, response, err := zvaultClient.GetKeys(t, client.X_APP_CLIENT_ID, headers)
 		require.Error(t, err)
