@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const JWT_TOKEN = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdF91c2VyX2lkX2FsdGVybmF0aXZlIiwiZXhwIjoxNzI1NDAwNzg4fQ.AoZeU7VfPuNntwnOpCjI5WMvSThNRIjgnJAmVfehYq4yOKq3DDXW6qKy8Q124r9WQaT-4pOMNvm3-LnUjYreRQ"
+
 func TestZvaultJWT(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
@@ -15,7 +17,7 @@ func TestZvaultJWT(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		headers = zvaultClient.NewZvaultHeaders("eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdF91c2VyX2lkX2FsdGVybmF0aXZlIiwiZXhwIjoxNzI1NDAwNzg4fQ.AoZeU7VfPuNntwnOpCjI5WMvSThNRIjgnJAmVfehYq4yOKq3DDXW6qKy8Q124r9WQaT-4pOMNvm3-LnUjYreRQ")
+		headers = zvaultClient.NewZvaultHeaders(JWT_TOKEN)
 
 		_, response, err := zvaultClient.GetKeys(t, client.X_APP_CLIENT_ID, headers)
 		require.Error(t, err)

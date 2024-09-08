@@ -68,8 +68,8 @@ func (c *ZvaultClient) GenerateSplitKey(t *test.SystemTest, clientID string, hea
 	return splitKey, resp, err
 }
 
-func (c *ZvaultClient) Store(t *test.SystemTest, privateKey string, headers map[string]string) (*model.SplitWallet, *resty.Response, error) {
-	t.Logf("storing private key [%v] and for jwt token [%v] using zvault...", privateKey, headers["X-Jwt-Token"])
+func (c *ZvaultClient) Store(t *test.SystemTest, privateKey, mnemonic string, headers map[string]string) (*model.SplitWallet, *resty.Response, error) {
+	t.Logf("storing private key [%v], mnemonic [%v] and for jwt token [%v] using zvault...", privateKey, mnemonic, headers["X-Jwt-Token"])
 	var splitKey *model.SplitWallet
 
 	urlBuilder := NewURLBuilder()
@@ -78,6 +78,7 @@ func (c *ZvaultClient) Store(t *test.SystemTest, privateKey string, headers map[
 	urlBuilder.SetPath("/store")
 
 	storeRequest := &model.StoreRequest{
+		Mnemonic:   mnemonic,
 		PrivateKey: privateKey,
 	}
 
@@ -167,7 +168,7 @@ func (c *ZvaultClient) GetWallets(t *test.SystemTest, headers map[string]string)
 	return splitKey, resp, err
 }
 
-func (c *ZvaultClient) ShareWallet(t *test.SystemTest, clientID, publicKey string, headers map[string]string) (*model.SplitWallet, *resty.Response, error) {
+func (c *ZvaultClient) ShareWallet(t *test.SystemTest, userID, publicKey string, headers map[string]string) (*model.SplitWallet, *resty.Response, error) {
 	t.Logf("sharing wallet with public key [%v] for client id [%v] and for jwt token [%v] using zvault...", publicKey, clientID, headers["X-Jwt-Token"])
 	var splitKey *model.SplitWallet
 
@@ -178,7 +179,7 @@ func (c *ZvaultClient) ShareWallet(t *test.SystemTest, clientID, publicKey strin
 
 	storeRequest := &model.ShareWalletRequest{
 		PublicKey:    publicKey,
-		TargetUserID: clientID,
+		TargetUserID: userID,
 	}
 
 	var body []byte

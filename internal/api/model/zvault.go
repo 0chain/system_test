@@ -35,6 +35,7 @@ type SplitKey struct {
 
 // StoreRequest represents store request payload.
 type StoreRequest struct {
+	Mnemonic   string `json:"mnemonic"`
 	PrivateKey string `json:"private_key"`
 }
 
