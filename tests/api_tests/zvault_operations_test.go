@@ -127,7 +127,7 @@ func TestZvaultOperations(testSetup *testing.T) {
 
 		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
 
-		splitWallet, response, err := zvaultClient.Store(t, PRIVATE_KEY, MNEMONIC, headers)
+		splitWallet, response, err := zvaultClient.Store(t, PRIVATE_KEY, "", headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -147,7 +147,7 @@ func TestZvaultOperations(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
-	t.RunSequentially("Store invalid private key without mnemonic", func(t *test.SystemTest) {
+	t.RunSequentially("Store invalid private key with correct mnemonic", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
