@@ -169,7 +169,7 @@ func (c *ZvaultClient) GetWallets(t *test.SystemTest, headers map[string]string)
 }
 
 func (c *ZvaultClient) ShareWallet(t *test.SystemTest, userID, publicKey string, headers map[string]string) (*model.SplitWallet, *resty.Response, error) {
-	t.Logf("sharing wallet with public key [%v] for client id [%v] and for jwt token [%v] using zvault...", publicKey, clientID, headers["X-Jwt-Token"])
+	t.Logf("sharing wallet with public key [%v] for user id [%v] and for jwt token [%v] using zvault...", publicKey, userID, headers["X-Jwt-Token"])
 	var splitKey *model.SplitWallet
 
 	urlBuilder := NewURLBuilder()
