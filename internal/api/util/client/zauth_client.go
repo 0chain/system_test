@@ -34,7 +34,7 @@ func (c *ZauthClient) NewZauthHeaders(jwtToken, peerPublicKey string) map[string
 	return zauthHeaders
 }
 
-func (c *ZauthClient) Setup(t *test.SystemTest, setupWallet model.SetupWallet, headers map[string]string) (*model.SetupResponse, *resty.Response, error) {
+func (c *ZauthClient) Setup(t *test.SystemTest, setupWallet *model.SetupWallet, headers map[string]string) (*model.SetupResponse, *resty.Response, error) {
 	t.Logf("performing setup of split wallet for jwt token [%v] using zauth...", headers["X-Jwt-Token"])
 	var setupResponse *model.SetupResponse
 
@@ -49,7 +49,7 @@ func (c *ZauthClient) Setup(t *test.SystemTest, setupWallet model.SetupWallet, h
 	require.NoError(t, err)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                setupResponse,
+		Dst:                &setupResponse,
 		Headers:            headers,
 		Body:               body,
 		RequiredStatusCode: 201,
