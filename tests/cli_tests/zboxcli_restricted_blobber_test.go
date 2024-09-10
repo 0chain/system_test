@@ -202,7 +202,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
-		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
+		blobberID, err := GetBlobberIDNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
 		setupWallet(t, configPath)
@@ -272,7 +272,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
 
-		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
+		blobberID, err := GetBlobberIDNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 		removeBlobber, err := GetRandomBlobber(walletFile, configFile, allocationID, blobberID)
 		require.Nil(t, err)
