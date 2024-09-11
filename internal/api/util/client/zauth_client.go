@@ -58,7 +58,7 @@ func (c *ZauthClient) Setup(t *test.SystemTest, setupWallet *model.SetupWallet, 
 	return setupResponse, resp, err
 }
 
-func (c *ZauthClient) SignTransaction(t *test.SystemTest, signTransactionRequest transaction.Transaction, headers map[string]string) (*transaction.Transaction, *resty.Response, error) {
+func (c *ZauthClient) SignTransaction(t *test.SystemTest, signTransactionRequest *transaction.Transaction, headers map[string]string) (*transaction.Transaction, *resty.Response, error) {
 	t.Logf("signing transaction for peer public key [%v] and for jwt token [%v] using zauth...", headers["X-Peer-Public-Key"], headers["X-Jwt-Token"])
 	var signTransactionResponse *transaction.Transaction
 
@@ -73,7 +73,7 @@ func (c *ZauthClient) SignTransaction(t *test.SystemTest, signTransactionRequest
 	require.NoError(t, err)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                signTransactionResponse,
+		Dst:                &signTransactionResponse,
 		Headers:            headers,
 		Body:               body,
 		RequiredStatusCode: 201,
@@ -82,7 +82,7 @@ func (c *ZauthClient) SignTransaction(t *test.SystemTest, signTransactionRequest
 	return signTransactionResponse, resp, err
 }
 
-func (c *ZauthClient) SignMessage(t *test.SystemTest, message model.SignMessageRequest, headers map[string]string) (*model.SignMessageResponse, *resty.Response, error) {
+func (c *ZauthClient) SignMessage(t *test.SystemTest, message *model.SignMessageRequest, headers map[string]string) (*model.SignMessageResponse, *resty.Response, error) {
 	t.Logf("signing message for peer public key [%v] and for jwt token [%v] using zauth...", headers["X-Peer-Public-Key"], headers["X-Jwt-Token"])
 	var signMessageResponse *model.SignMessageResponse
 
@@ -97,7 +97,7 @@ func (c *ZauthClient) SignMessage(t *test.SystemTest, message model.SignMessageR
 	require.NoError(t, err)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                signMessageResponse,
+		Dst:                &signMessageResponse,
 		Headers:            headers,
 		Body:               body,
 		RequiredStatusCode: 201,

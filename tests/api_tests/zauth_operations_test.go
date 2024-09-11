@@ -3,16 +3,27 @@ package api_tests
 import (
 	"testing"
 
+	"github.com/0chain/gosdk/core/transaction"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
+	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	CLIENT_ID_A       = "03df8919e4d76f6ffa9e23c388576f0baa02360d6e903a84d69689e0b2b5a28c"
+	PUBLIC_KEY_I      = "ff132aaf4eeb517478c7bdd19ba887dbd909c4527b78ac989f723e5b5c349f03dc5a737071040edd5ba7a593e12264d895ad9cace1a50321886653ca8c366e13"
+	PRIVATE_KEY_B     = "863f94d6deacc75c658db3e22d27c31944fc562aeef6e5b97a31d9e25294111a"
+	PEER_PUBLIC_KEY_I = "f06fe5513831714965ca33080052b3873bb2e785c5d2abd88a2f958e74872617adf6e8c5fe5cb8ed0e0c218cde796707c0a9ef8f7e77756032eada0d5f3c9d00"
+	HASH              = "7a8950d472c3a5a7cf0f27019c4507275d24e0bd3a97e1dedc7d77a132d9d6d3"
+	SIGNATURE         = "5d65c31f8bcf64c259c3e155b78bb4c7c5ea2dae1d0d6da1a8b735f2bda2db84"
 )
 
 func TestZauthOperations(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.RunSequentially("Create JWT token with user id, which differs from the one used during session creation", func(t *test.SystemTest) {
+	t.RunSequentially("Sign transaction with the missing signature", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
@@ -21,14 +32,40 @@ func TestZauthOperations(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotEqual(t, int64(0), sessionID)
 
-		headers["X-App-User-ID"] = client.X_APP_USER_ID_R
-
-		_, response, err = zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
 		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
+
+		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+			UserID:        client.X_APP_USER_ID,
+			ClientID:      CLIENT_ID_A,
+			ClientKey:     PUBLIC_KEY_I,
+			PublicKey:     PUBLIC_KEY_I,
+			PrivateKey:    PRIVATE_KEY_B,
+			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			ExpiredAt:     EXPIRES_AT,
+		}, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		signTransactionPayload := &transaction.Transaction{
+			Hash:      HASH,
+			ClientID:  CLIENT_ID_A,
+			Signature: "",
+		}
+
+		_, response, err = zauthClient.SignTransaction(t, signTransactionPayload, headers)
+		require.Error(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		response, err = zauthClient.Delete(t, CLIENT_ID_A, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
-	t.RunSequentially("Create JWT token with user id, which equals to the one used during session creation", func(t *test.SystemTest) {
+	t.RunSequentially("Sign transaction with the missing peer public key", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
@@ -37,41 +74,40 @@ func TestZauthOperations(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotEqual(t, int64(0), sessionID)
 
-		var jwtToken *model.ZboxJwtToken
-
-		jwtToken, response, err = zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEmpty(t, jwtToken.JwtToken)
-	})
 
-	t.RunSequentially("Refresh JWT token with user id, which differs from the one used by the given old JWT token", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
-		Teardown(t, headers)
+		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, "")
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
+		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+			UserID:        client.X_APP_USER_ID,
+			ClientID:      CLIENT_ID_A,
+			ClientKey:     PUBLIC_KEY_I,
+			PublicKey:     PUBLIC_KEY_I,
+			PrivateKey:    PRIVATE_KEY_B,
+			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			ExpiredAt:     EXPIRES_AT,
+		}, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
 
-		var jwtToken *model.ZboxJwtToken
+		signTransactionPayload := &transaction.Transaction{
+			Hash:      HASH,
+			ClientID:  CLIENT_ID_A,
+			Signature: SIGNATURE,
+		}
 
-		jwtToken, response, err = zboxClient.CreateJwtToken(t, sessionID, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEmpty(t, jwtToken.JwtToken)
-
-		headers["X-App-Client-ID"] = client.X_APP_CLIENT_ID_R
-		headers["X-App-User-ID"] = client.X_APP_USER_ID_R
-		headers["X-App-Client-Key"] = client.X_APP_CLIENT_KEY_R
-		headers["X-App-Client-Signature"] = client.X_APP_CLIENT_SIGNATURE_R
-
-		jwtToken, response, err = zboxClient.RefreshJwtToken(t, jwtToken.JwtToken, headers)
-		require.NoError(t, err)
+		_, response, err = zauthClient.SignTransaction(t, signTransactionPayload, headers)
+		require.Error(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		response, err = zauthClient.Delete(t, CLIENT_ID_A, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
-	t.RunSequentially("Refresh JWT token with incorrect old JWT token", func(t *test.SystemTest) {
+	t.RunSequentially("Sign transaction with the missing split key", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
@@ -80,19 +116,24 @@ func TestZauthOperations(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotEqual(t, int64(0), sessionID)
 
-		var jwtToken *model.ZboxJwtToken
-
-		jwtToken, response, err = zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEmpty(t, jwtToken.JwtToken)
 
-		jwtToken, response, err = zboxClient.RefreshJwtToken(t, "", headers)
-		require.NoError(t, err)
+		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
+
+		signTransactionPayload := &transaction.Transaction{
+			Hash:      HASH,
+			ClientID:  CLIENT_ID_A,
+			Signature: SIGNATURE,
+		}
+
+		_, response, err = zauthClient.SignTransaction(t, signTransactionPayload, headers)
+		require.Error(t, err)
 		require.Equal(t, 500, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
-	t.RunSequentially("Refresh JWT token with user id, which equals to the one used by the given old JWT token", func(t *test.SystemTest) {
+	t.RunSequentially("Sign transaction with correct payload", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
@@ -101,16 +142,155 @@ func TestZauthOperations(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotEqual(t, int64(0), sessionID)
 
-		var jwtToken *model.ZboxJwtToken
-
-		jwtToken, response, err = zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEmpty(t, jwtToken.JwtToken)
 
-		jwtToken, response, err = zboxClient.RefreshJwtToken(t, jwtToken.JwtToken, headers)
+		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
+
+		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+			UserID:        client.X_APP_USER_ID,
+			ClientID:      CLIENT_ID_A,
+			ClientKey:     PUBLIC_KEY_I,
+			PublicKey:     PUBLIC_KEY_I,
+			PrivateKey:    PRIVATE_KEY_B,
+			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			ExpiredAt:     EXPIRES_AT,
+		}, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEmpty(t, jwtToken.JwtToken)
+
+		signTransactionPayload := &transaction.Transaction{
+			Hash:      HASH,
+			ClientID:  CLIENT_ID_A,
+			Signature: SIGNATURE,
+		}
+
+		transaction, response, err := zauthClient.SignTransaction(t, signTransactionPayload, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, transaction.ClientID, CLIENT_ID_A)
+
+		ok, err := crypto.Verify(t, PUBLIC_KEY_I, transaction.Signature, HASH)
+		require.NoError(t, err)
+		require.True(t, ok)
+
+		response, err = zauthClient.Delete(t, CLIENT_ID_A, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	})
+
+	t.RunSequentially("Sign message with the missing peer public key", func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		Teardown(t, headers)
+
+		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotEqual(t, int64(0), sessionID)
+
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, "")
+
+		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+			UserID:        client.X_APP_USER_ID,
+			ClientID:      CLIENT_ID_A,
+			ClientKey:     PUBLIC_KEY_I,
+			PublicKey:     PUBLIC_KEY_I,
+			PrivateKey:    PRIVATE_KEY_B,
+			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			ExpiredAt:     EXPIRES_AT,
+		}, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		signMessageRequest := &model.SignMessageRequest{
+			Hash:      HASH,
+			ClientID:  CLIENT_ID_A,
+			Signature: SIGNATURE,
+		}
+
+		_, response, err = zauthClient.SignMessage(t, signMessageRequest, headers)
+		require.Error(t, err)
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		response, err = zauthClient.Delete(t, CLIENT_ID_A, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	})
+
+	t.RunSequentially("Sign message with the missing split key", func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		Teardown(t, headers)
+
+		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotEqual(t, int64(0), sessionID)
+
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
+
+		signMessageRequest := &model.SignMessageRequest{
+			Hash:      HASH,
+			ClientID:  CLIENT_ID_A,
+			Signature: SIGNATURE,
+		}
+
+		_, response, err = zauthClient.SignMessage(t, signMessageRequest, headers)
+		require.Error(t, err)
+		require.Equal(t, 500, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	})
+
+	t.RunSequentially("Sign message with correct payload", func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		Teardown(t, headers)
+
+		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotEqual(t, int64(0), sessionID)
+
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
+
+		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+			UserID:        client.X_APP_USER_ID,
+			ClientID:      CLIENT_ID_A,
+			ClientKey:     PUBLIC_KEY_I,
+			PublicKey:     PUBLIC_KEY_I,
+			PrivateKey:    PRIVATE_KEY_B,
+			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			ExpiredAt:     EXPIRES_AT,
+		}, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		signMessageRequest := &model.SignMessageRequest{
+			Hash:      HASH,
+			ClientID:  CLIENT_ID_A,
+			Signature: SIGNATURE,
+		}
+
+		message, response, err := zauthClient.SignMessage(t, signMessageRequest, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		ok, err := crypto.Verify(t, PUBLIC_KEY_I, message.Sig, HASH)
+		require.NoError(t, err)
+		require.True(t, ok)
+
+		response, err = zauthClient.Delete(t, CLIENT_ID_A, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 }
