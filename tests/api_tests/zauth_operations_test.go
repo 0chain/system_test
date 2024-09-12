@@ -248,6 +248,48 @@ func TestZauthOperations(testSetup *testing.T) {
 		require.Equal(t, 500, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
+	t.RunSequentially("Sign message with invalid client id in the payload", func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		Teardown(t, headers)
+
+		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotEqual(t, int64(0), sessionID)
+
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
+
+		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+			UserID:        client.X_APP_USER_ID,
+			ClientID:      CLIENT_ID_A,
+			ClientKey:     PUBLIC_KEY_I,
+			PublicKey:     PUBLIC_KEY_I,
+			PrivateKey:    PRIVATE_KEY_B,
+			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			ExpiredAt:     EXPIRES_AT,
+		}, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		signMessageRequest := &model.SignMessageRequest{
+			Hash:      HASH,
+			ClientID:  CLIENT_ID,
+			Signature: SIGNATURE,
+		}
+
+		_, response, err = zauthClient.SignMessage(t, signMessageRequest, headers)
+		require.Error(t, err)
+		require.Equal(t, 500, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		response, err = zauthClient.Delete(t, CLIENT_ID_A, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	})
+
 	t.RunSequentially("Sign message with correct payload", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
@@ -288,6 +330,114 @@ func TestZauthOperations(testSetup *testing.T) {
 		ok, err := crypto.Verify(t, PUBLIC_KEY_I, message.Sig, HASH)
 		require.NoError(t, err)
 		require.True(t, ok)
+
+		response, err = zauthClient.Delete(t, CLIENT_ID_A, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	})
+
+	t.RunSequentially("Revoke not existing split key", func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		Teardown(t, headers)
+
+		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotEqual(t, int64(0), sessionID)
+
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
+
+		response, err = zauthClient.Revoke(t, CLIENT_ID_A, PEER_PUBLIC_KEY_I, headers)
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	})
+
+	t.RunSequentially("Revoke existing split key", func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		Teardown(t, headers)
+
+		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotEqual(t, int64(0), sessionID)
+
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
+
+		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+			UserID:        client.X_APP_USER_ID,
+			ClientID:      CLIENT_ID_A,
+			ClientKey:     PUBLIC_KEY_I,
+			PublicKey:     PUBLIC_KEY_I,
+			PrivateKey:    PRIVATE_KEY_B,
+			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			ExpiredAt:     EXPIRES_AT,
+		}, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		response, err = zauthClient.Revoke(t, CLIENT_ID_A, PEER_PUBLIC_KEY_I, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		response, err = zauthClient.Delete(t, CLIENT_ID_A, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	})
+
+	t.RunSequentially("Delete not existing split key", func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		Teardown(t, headers)
+
+		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotEqual(t, int64(0), sessionID)
+
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
+
+		response, err = zauthClient.Delete(t, CLIENT_ID_A, headers)
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	})
+
+	t.RunSequentially("Delete existing split key", func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		Teardown(t, headers)
+
+		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NotEqual(t, int64(0), sessionID)
+
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
+
+		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+			UserID:        client.X_APP_USER_ID,
+			ClientID:      CLIENT_ID_A,
+			ClientKey:     PUBLIC_KEY_I,
+			PublicKey:     PUBLIC_KEY_I,
+			PrivateKey:    PRIVATE_KEY_B,
+			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			ExpiredAt:     EXPIRES_AT,
+		}, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		response, err = zauthClient.Delete(t, CLIENT_ID_A, headers)
 		require.NoError(t, err)
