@@ -168,9 +168,8 @@ func (c *ZvaultClient) GetWallets(t *test.SystemTest, headers map[string]string)
 	return splitKey, resp, err
 }
 
-func (c *ZvaultClient) ShareWallet(t *test.SystemTest, userID, publicKey string, headers map[string]string) (*model.SplitWallet, *resty.Response, error) {
+func (c *ZvaultClient) ShareWallet(t *test.SystemTest, userID, publicKey string, headers map[string]string) (*resty.Response, error) {
 	t.Logf("sharing wallet with public key [%v] for user id [%v] and for jwt token [%v] using zvault...", publicKey, userID, headers["X-Jwt-Token"])
-	var splitKey *model.SplitWallet
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
@@ -188,18 +187,17 @@ func (c *ZvaultClient) ShareWallet(t *test.SystemTest, userID, publicKey string,
 	require.NoError(t, err)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &splitKey,
 		Headers:            headers,
 		Body:               body,
 		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
 
-	return splitKey, resp, err
+	return resp, err
 }
 
-func (c *ZvaultClient) GetSharedWallets(t *test.SystemTest, headers map[string]string) (*model.SplitWallet, *resty.Response, error) {
+func (c *ZvaultClient) GetSharedWallets(t *test.SystemTest, headers map[string]string) ([]*model.SplitKey, *resty.Response, error) {
 	t.Logf("retrieving shared wallets for jwt token [%v] using zvault...", headers["X-Jwt-Token"])
-	var splitKey *model.SplitWallet
+	var splitKeys []*model.SplitKey
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
@@ -207,10 +205,10 @@ func (c *ZvaultClient) GetSharedWallets(t *test.SystemTest, headers map[string]s
 	urlBuilder.SetPath("/wallets/shared")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &splitKey,
+		Dst:                &splitKeys,
 		Headers:            headers,
 		RequiredStatusCode: 200,
 	}, HttpGETMethod)
 
-	return splitKey, resp, err
+	return splitKeys, resp, err
 }
