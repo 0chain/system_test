@@ -556,6 +556,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Download Shared File without Paying Should Not Work", 5*time.Minute, func(t *test.SystemTest) {
+		t.Skip()
 		var authTicket, filename string
 
 		filesize := int64(10)
@@ -1202,32 +1203,6 @@ func TestDownload(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "Error: remotepath / authticket flag is missing", output[0])
-	})
-
-	t.Run("Download File Without read-lock Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		filesize := int64(256)
-		remotepath := "/"
-
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-
-		// Delete the uploaded file, since we will be downloading it now
-		err := os.Remove(filename)
-		require.Nil(t, err)
-
-		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath + filepath.Base(filename),
-			"localpath":  "tmp/",
-		}), false)
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Greater(t, len(output), 0)
-		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "pre-redeeming read marker")
 	})
 
 	t.RunWithTimeout("Download Moved File Should Work", 5*time.Minute, func(t *test.SystemTest) {

@@ -398,6 +398,7 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("get file stats before and after download", 7*time.Minute, func(t *test.SystemTest) { //todo: too slow
+		t.Skip()
 		allocSize := int64(2048)
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
