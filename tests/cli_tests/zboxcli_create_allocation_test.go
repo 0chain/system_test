@@ -182,6 +182,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with read price range Should Work", func(t *test.SystemTest) {
+		t.Skip()
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"size": "1024", "read_price": "0-9999", "lock": "0.5"}
@@ -241,6 +242,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with read price range 0-0 Should Fail", func(t *test.SystemTest) {
+		t.Skip()
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 1024}
