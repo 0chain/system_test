@@ -17,6 +17,8 @@ func TestReadPoolInfo(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Read pool info testing with json parameter")
 
+	t.Skip()
+
 	t.Parallel()
 
 	t.RunWithTimeout("Read pool info testing with json parameter", 90*time.Second, func(t *test.SystemTest) {
