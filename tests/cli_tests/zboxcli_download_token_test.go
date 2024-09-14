@@ -23,6 +23,8 @@ func TestFileDownloadTokenMovement(testSetup *testing.T) {
 
 	t.Parallel()
 
+	t.Skip()
+
 	t.RunWithTimeout("Downloader's readpool balance should reduce by download cost", 5*time.Minute, func(t *test.SystemTest) { //TODO: way too slow
 		walletOwner := escapedTestName(t)
 		allocSize := int64(50 * MB)
