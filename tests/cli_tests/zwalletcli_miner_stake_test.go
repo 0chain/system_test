@@ -62,7 +62,7 @@ func TestMinerStake(testSetup *testing.T) {
 
 		poolsInfo, err := pollForPoolInfo(t, miner.ID)
 		require.Nil(t, err)
-		require.Equal(t, float64(2.0), intToZCN(poolsInfo.Balance))
+		require.Equal(t, 2.0, intToZCN(poolsInfo.Balance))
 
 		// Unlock should work
 		output, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
@@ -279,6 +279,8 @@ func TestMinerStake(testSetup *testing.T) {
 func pollForPoolInfo(t *test.SystemTest, minerID string) (climodel.DelegatePool, error) {
 	t.Log(`polling for pool info till it is "ACTIVE"...`)
 	timeout := time.After(time.Minute * 5)
+
+	time.Sleep(10 * time.Second)
 
 	var poolsInfo climodel.DelegatePool
 	for {
