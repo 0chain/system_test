@@ -602,7 +602,7 @@ func createFileWithSize(name string, size int64) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(name, buffer, os.ModePerm)
+	return os.WriteFile(name, buffer, os.ModePerm) //nolint:gosec
 }
 
 func generateRandomTestFileName(t *test.SystemTest) string {
