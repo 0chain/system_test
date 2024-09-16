@@ -25,6 +25,8 @@ type Config struct {
 	BlockWorker                 string `yaml:"block_worker"`
 	ZboxUrl                     string `yaml:"0box_url"`
 	DefaultTestCaseTimeout      string `yaml:"default_test_case_timeout"`
+	ZvaultUrl                   string `yaml:"zvault_url"`
+	ZauthUrl                    string `yaml:"zauth_url"`
 	ZS3ServerUrl                string `yaml:"zs3_server_url"`
 	ChimneyTestNetwork          string `yaml:"chimney_test_network"`
 	S3SecretKey                 string `yaml:"s3_secret_key"`

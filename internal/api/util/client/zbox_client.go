@@ -12,14 +12,18 @@ import (
 
 const (
 	X_APP_USER_ID            = "test_user_id"
-	X_APP_ID_TOKEN           = "test_firebase_token"
-	X_APP_CLIENT_ID          = "31f740fb12cf72464419a7e860591058a248b01e34b13cbf71d5a107b7bdc1e9"
-	X_APP_CLIENT_KEY         = "b6d86a895b9ab247b9d19280d142ffb68c3d89833db368d9a2ee9346fa378a05441635a5951d2f6a209c9ca63dc903353739bfa8ba79bad17690fe8e38622e96"
-	X_APP_CLIENT_SIGNATURE   = "d903d0f57c96b052d907afddb62777a1f77a147aee5ed2b5d8bab60a9319b09a"
+	X_APP_CLIENT_ID          = "caae5a9d48b1a0cd01a5da982807d7ad6fcc8a8367b79c6adbe48e7c632544f2"
+	X_APP_CLIENT_KEY         = "91a3a29f4c05b82f2a83f9d4b405976637a4a29f11b1918de30fc319ab87db191b195d9f3e6eecf588e1b83d195931d12760f303c3d1845144f07617022faa8f"
+	X_APP_CLIENT_SIGNATURE   = "6de25e5a202614216610558ec68346a9aca97165e29a12cc047fbeb8c696d420"
+	X_APP_USER_ID_A          = "test_user_id_alternative"
+	X_APP_CLIENT_ID_A        = "2e16f28602959e23e0f5b153e298fc5dbfb02dcb089cfa74bd46f158c2f02ab7"
+	X_APP_CLIENT_KEY_A       = "f615cfbb9154c99bf6e1d87e26397e987ee345c2e98c7a652326a3744f15ea100e22506fccf75515d9379f3275386f4401e2dbd1aafc4ef8f18af58a8c68fc02"
+	X_APP_CLIENT_SIGNATURE_A = "db4bf04ab302a4dde154804334d0eeb512d875585a4092c7776cf3505ba9e793"
 	X_APP_USER_ID_R          = "test_user_id_referred_user"
-	X_APP_CLIENT_ID_R        = "3fb9694ebf47b5a51c050025d9c807c3319a05499b1eb980bbb9f1e27e119c9f"
-	X_APP_CLIENT_KEY_R       = "9a8a960db2dd93eb35f26e8f7e84976349064cae3246da23abd575f05e7ed31bd90726cfcc960e017a9246d080f5419ada219d03758c370208c5b688e5ec7a9c"
-	X_APP_CLIENT_SIGNATURE_R = "6b710d015b9e5e4734c08ac2de79ffeeeb49e53571cce8f71f21e375e5eca916"
+	X_APP_CLIENT_ID_R        = "bcf5f517be521e0ffdb22d1fc26a35abdec8556bcb9ed075244a358df7337cd0"
+	X_APP_CLIENT_KEY_R       = "de9351bbf460c761ea979764831759369ced3c6de38b856e7921eee9cc034323cce23c562c74a0629867fbea33d5009b9f473bc3b766871b65e7cf864ba4301d"
+	X_APP_CLIENT_SIGNATURE_R = "43fa947257ae0b5da8b073f0efeaa2570c4faf66fcabd93407e3597bc34e440b"
+	X_APP_ID_TOKEN           = "test_firebase_token"
 	X_APP_TIMESTAMP          = "123456789"
 	X_APP_CSRF               = "test_csrf_token"
 	X_APP_BLIMP              = "blimp"
@@ -1283,4 +1287,62 @@ func (c *ZboxClient) GetGraphBlobberTotalRewards(t *test.SystemTest, blobberId s
 	}, HttpGETMethod)
 
 	return &data, resp, err
+}
+
+func (c *ZboxClient) CreateJwtSession(t *test.SystemTest, headers map[string]string) (int64, *resty.Response, error) {
+	t.Logf("creating jwt session owner for userID [%v] using 0box...", headers["X-App-User-ID"])
+	var sessionID int64
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/jwt/session")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &sessionID,
+		Headers:            headers,
+		RequiredStatusCode: 201,
+	}, HttpPOSTMethod)
+
+	return sessionID, resp, err
+}
+
+func (c *ZboxClient) CreateJwtToken(t *test.SystemTest, sessionID int64, headers map[string]string) (*model.ZboxJwtToken, *resty.Response, error) {
+	t.Logf("creating jwt token for userID [%v] and session [%v] using 0box...", headers["X-App-User-ID"], sessionID)
+	var zboxJwtToken *model.ZboxJwtToken
+
+	headers["X-JWT-Session-ID"] = strconv.FormatInt(sessionID, 10)
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/jwt/token")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &zboxJwtToken,
+		Headers:            headers,
+		RequiredStatusCode: 201,
+	}, HttpPOSTMethod)
+
+	return zboxJwtToken, resp, err
+}
+
+func (c *ZboxClient) RefreshJwtToken(t *test.SystemTest, token string, headers map[string]string) (*model.ZboxJwtToken, *resty.Response, error) {
+	t.Logf("refreshing jwt token for userID [%v] and token [%v] using 0box...", headers["X-App-User-ID"], token)
+	var zboxJwtToken *model.ZboxJwtToken
+
+	headers["X-Jwt-Token"] = token
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/jwt/token")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &zboxJwtToken,
+		Headers:            headers,
+		RequiredStatusCode: 201,
+	}, HttpPUTMethod)
+
+	return zboxJwtToken, resp, err
 }
