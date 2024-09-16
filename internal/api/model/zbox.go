@@ -197,6 +197,10 @@ type ZboxNftList struct {
 	NftCount int64     `json:"total"`
 }
 
+type ZboxJwtToken struct {
+	JwtToken string `json:"jwt_token"`
+}
+
 type ReferralCodeOfUser struct {
 	ReferrerCode string `json:"referral_code"`
 	ReferrerLink string `json:"referral_link"`
