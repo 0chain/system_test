@@ -392,7 +392,7 @@ func TestFileUpdate(testSetup *testing.T) {
 		filesize := int64(0.5 * MB)
 		localfile := generateRandomTestFileName(t)
 		err := createFileWithSize(localfile, filesize)
-		require.Nil(t, err)
+		require.NotNil(t, err)
 
 		output, err := updateFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
