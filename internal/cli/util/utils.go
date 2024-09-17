@@ -22,6 +22,7 @@ var Logger = getLogger()
 
 func RunCommandWithoutRetry(commandString string) ([]string, error) {
 	command := parseCommand(commandString)
+	Logger.Infof("Running command %s", commandString)
 	commandName := command[0]
 	args := command[1:]
 
@@ -63,6 +64,7 @@ func RunCommandWithRawOutput(commandString string) ([]string, error) {
 }
 
 func RunCommand(t *test.SystemTest, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
+	t.Logf("Running command %s", commandString)
 	red := "\033[31m"
 	yellow := "\033[33m"
 	green := "\033[32m"
@@ -112,6 +114,7 @@ func RunCommand(t *test.SystemTest, commandString string, maxAttempts int, backo
 }
 
 func StartCommand(t *test.SystemTest, commandString string, maxAttempts int, backoff time.Duration) (cmd *exec.Cmd, err error) {
+	t.Logf("Running command %s", commandString)
 	var count int
 	for {
 		count++
@@ -137,6 +140,7 @@ func StartCommand(t *test.SystemTest, commandString string, maxAttempts int, bac
 
 func StartCommandWithoutRetry(commandString string) (cmd *exec.Cmd, err error) {
 	command := parseCommand(commandString)
+	Logger.Infof("Starting command %s", commandString)
 	commandName := command[0]
 	args := command[1:]
 	sanitizedArgs := sanitizeArgs(args)
