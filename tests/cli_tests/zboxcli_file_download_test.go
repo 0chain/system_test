@@ -311,10 +311,10 @@ func TestDownload(testSetup *testing.T) {
 			"localpath":  "tmp/",
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3)
+		require.Len(t, output, 2)
 
-		require.Contains(t, output[2], StatusCompletedCB)
-		require.Contains(t, output[2], filepath.Base(filename))
+		require.Contains(t, output[1], StatusCompletedCB)
+		require.Contains(t, output[1], filepath.Base(filename))
 
 		downloadedFileChecksum := generateChecksum(t, "tmp/"+filepath.Base(filename))
 
@@ -641,7 +641,7 @@ func TestDownload(testSetup *testing.T) {
 		}), false)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
+		require.Len(t, output, 3)
 		aggregatedOutput := strings.Join(output, " ")
 		require.Contains(t, aggregatedOutput, filepath.Base(filename))
 	})
