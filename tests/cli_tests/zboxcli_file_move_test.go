@@ -28,7 +28,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("move root dir to child dir should work", func(t *test.SystemTest) {
 		allocSize := int64(2048000)
-		fileSize := int64(256)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -96,8 +96,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move nested dir to child dir should work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -165,8 +165,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move dir with no file to child dir should work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -234,8 +234,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move dir with multiple files to child dir should work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -303,8 +303,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file to existing directory", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -372,8 +372,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.RunWithTimeout("Move file concurrently to existing directory, should work", 10*time.Minute, func(t *test.SystemTest) { //todo:too slow
-		const allocSize int64 = 2048
-		const fileSize int64 = 256
+		const allocSize int64 = 64 * KB * 2
+		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -455,8 +455,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file to non-existing directory should work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -578,8 +578,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file to same directory (no change) should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -641,8 +641,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file to another directory with existing file with same name should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -733,7 +733,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move non-existing file should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -755,8 +755,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 		createWalletForName(nonAllocOwnerWallet)
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -862,8 +862,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file with allocation move file option forbidden should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)

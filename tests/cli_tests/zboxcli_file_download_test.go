@@ -33,7 +33,7 @@ func TestDownload(testSetup *testing.T) {
 
 	// Success Scenarios
 	t.Run("Download File from Root Directory Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/"
 
@@ -66,7 +66,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Download File Concurrently Should Work from two Different Directory", 6*time.Minute, func(t *test.SystemTest) {
-		allocSize := int64(4096)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(1024)
 		remoteFilePaths := [2]string{"/dir1/", "/dir2/"}
 
@@ -127,7 +127,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File from a Directory Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/dir/"
 
@@ -160,7 +160,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File from Nested Directory Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/nested/dir/"
 
@@ -193,7 +193,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Download Entire Directory Should Work but does not see blobber/issues/588", 3*time.Minute, func(t *test.SystemTest) { // todo: slow
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/nested/dir/"
 
@@ -652,7 +652,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File Thumbnail Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/"
 
@@ -695,7 +695,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download Encrypted File Thumbnail Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/"
 
@@ -739,7 +739,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download to Non-Existent Path Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/"
 
@@ -1079,7 +1079,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.Run("Download File With blockspermarker Flag Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/"
 
@@ -1132,7 +1132,7 @@ func TestDownload(testSetup *testing.T) {
 	t.Run("Download File from Other's Allocation Should Fail", func(t *test.SystemTest) {
 		var otherAllocationID, otherFilename string
 
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/"
 
@@ -1206,7 +1206,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Download Moved File Should Work", 5*time.Minute, func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/"
 

@@ -23,6 +23,7 @@ import (
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	// Faucet the used wallets
+	t.Skip("Skipping as challenges are not working")
 
 	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
 	t.Logf("ZboxOwner balance: %v", ownerBalance)

@@ -675,7 +675,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	t.Run("Update allocation with add blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
-		allocSize := int64(4096)
+		allocSize := int64(64 * KB * 2)
 		fileSize := int64(1024)
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -720,7 +720,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 	t.Run("Update allocation with replace blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
-		allocSize := int64(4096)
+		allocSize := int64(64 * KB * 2)
 		fileSize := int64(1024)
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{

@@ -95,8 +95,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Root Directory Should Work", func(t *test.SystemTest) { // todo: slow
-		const allocSize int64 = 2048
-		const fileSize int64 = 256
+		const allocSize int64 = 64 * KB * 2
+		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -122,8 +122,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Upload file concurrently to root directory, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: slow
-		const allocSize int64 = 2048
-		const fileSize int64 = 256
+		const allocSize int64 = 64 * KB * 2
+		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -172,8 +172,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to a Directory Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(1024)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -199,8 +199,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Upload File to a Directory without Filename Should Work", 60*time.Second, func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(1024)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -244,8 +244,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Nested Directory Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(1024)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -271,8 +271,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File with Thumbnail Should Work", func(t *test.SystemTest) {
-		allocSize := int64(10 * 1024 * 1024)
-		fileSize := int64(256)
+		allocSize := int64(64 * 1024 * 1024)
+		fileSize := int64(64 * KB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -350,7 +350,7 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload Image File Should Work", func(t *test.SystemTest) {
-		allocSize := int64(10 * 1024 * 1024)
+		allocSize := int64(64 * 1024 * 1024)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -528,7 +528,7 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		fileSize := int64(1024)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -588,7 +588,7 @@ func TestUpload(testSetup *testing.T) {
 	t.Run("Upload File to Other's Allocation Should Fail", func(t *test.SystemTest) {
 		var otherAllocationID string
 
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		fileSize := int64(256)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -633,7 +633,7 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload Non-Existent File Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -668,7 +668,7 @@ func TestUpload(testSetup *testing.T) {
 
 	t.Run("Upload to Allocation without remotepath and authticket Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 2048,
+			"size": 64 * KB * 2,
 		})
 
 		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
