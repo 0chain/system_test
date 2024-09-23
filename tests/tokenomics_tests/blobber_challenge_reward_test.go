@@ -75,7 +75,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		// Creating Allocation
 		utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocation(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"tokens": 99,
 			"data":   1,
@@ -98,7 +98,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 
 		// Creating Allocation
 		utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocation(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"tokens": 99,
 			"data":   1,
@@ -122,7 +122,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		// Creating Allocation
 		_ = utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
 
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocation(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"tokens": 99,
 			"data":   1,
@@ -144,7 +144,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		// Creating Allocation
 		_ = utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
 
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocation(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"tokens": 99,
 			"data":   1,
@@ -167,7 +167,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		// Creating Allocation
 		_ = utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
 
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocation(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"tokens": 99,
 			"data":   1,
@@ -189,7 +189,7 @@ func TestBlobberChallengeRewards(testSetup *testing.T) {
 		// Creating Allocation
 		_ = utils.SetupWalletWithCustomTokens(t, configPath, 9.0)
 
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocation(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"tokens": 99,
 			"data":   1,
