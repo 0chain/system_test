@@ -13,7 +13,10 @@ import (
 func TestZs3serverMixedWarpTests(testSetup *testing.T) {
 	log.Println("Running Warp Mixed Benchmark...")
 	t := test.NewSystemTest(testSetup)
-	cliutils.RunMinioServer("rootroot", "rootroot")
+	_, err := cliutils.RunMinioServer("rootroot", "rootroot")
+	if err!=nil{
+		t.Logf(err.Error())
+	}
 	config := cliutils.ReadFile(testSetup)
 	t.Logf("Minio server Started")
 
