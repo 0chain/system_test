@@ -75,7 +75,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		filesize := int64(256)
 		remotepath := "/"
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})

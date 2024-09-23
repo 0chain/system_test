@@ -26,8 +26,6 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 	sdkClient.SetWallet(t, wallet)
 
-	apiClient.CreateReadPool(t, wallet, 0.5, client.TxSuccessfulStatus)
-
 	t.RunSequentially("Repair allocation after single upload should work", func(t *test.SystemTest) {
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
@@ -352,7 +350,6 @@ func TestRepairSize(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	wallet := createWallet(t)
 	sdkClient.SetWallet(t, wallet)
-	apiClient.CreateReadPool(t, wallet, 0.5, client.TxSuccessfulStatus)
 
 	t.RunSequentiallyWithTimeout("repair size in case of no blobber failure should be zero", 5*time.Minute, func(t *test.SystemTest) {
 		// create allocation with default blobber requirements

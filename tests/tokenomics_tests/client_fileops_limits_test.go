@@ -61,7 +61,7 @@ func TestClientThrottling(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocation(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 1,
 			"data":   1,
@@ -102,7 +102,7 @@ func TestClientThrottling(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("File upload should fail on exceeding max number of files", 20*time.Minute, func(t *test.SystemTest) {
-		output, err := utils.CreateWalletForName(t, configPath, "client_wallet_2")
+		output, err := utils.createWalletForName("client_wallet_2")
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
