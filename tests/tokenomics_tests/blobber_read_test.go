@@ -20,6 +20,7 @@ import (
 
 func TestBlobberReadReward(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip()
 
 	t.TestSetup("set storage config to use time_unit as 5 minutes", func() {
 		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{

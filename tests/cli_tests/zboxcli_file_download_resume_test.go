@@ -29,7 +29,7 @@ func TestResumeDownload(testSetup *testing.T) {
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 9,
+			"lock":   9,
 			"data":   3,
 			"parity": 1,
 		})
