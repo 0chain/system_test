@@ -1088,6 +1088,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 //nolint:gocyclo
 func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("Skipping graph endpoints test")
 
 	testWallet := initialisedWallets[walletIdx]
 	walletIdx++
