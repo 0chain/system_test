@@ -26,11 +26,6 @@ var (
 	createAllocationRegex = regexp.MustCompile(`^Allocation created: (.+)$`)
 )
 
-func SetupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, extraParam map[string]interface{}) string {
-	allocationID := setupAllocation(cliConfigFilename, extraParam)
-	return allocationID
-}
-
 func SetupEnterpriseAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, extraParam map[string]interface{}) string {
 	allocationID := SetupEnterpriseAllocation(t, cliConfigFilename, extraParam)
 	return allocationID

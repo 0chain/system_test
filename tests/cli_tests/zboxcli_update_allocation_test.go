@@ -768,7 +768,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
-	allocationID := setupAllocation(cliConfigFilename, extraParams...)
+	allocationID := setupAllocation(t, cliConfigFilename, extraParams...)
 
 	allocations := parseListAllocations(t, cliConfigFilename)
 	allocation, ok := allocations[allocationID]

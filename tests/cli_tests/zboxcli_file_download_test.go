@@ -472,8 +472,7 @@ func TestDownload(testSetup *testing.T) {
 		})
 
 		// Just create a wallet so that we can work further
-		err := createWalletForName(t, configPath)
-		require.Nil(t, err)
+		createWalletForName(configPath)
 
 		// Download file using auth-ticket: should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -532,8 +531,7 @@ func TestDownload(testSetup *testing.T) {
 		})
 
 		// Just create a wallet so that we can work further
-		err := createWalletForName(t, configPath)
-		require.Nil(t, err)
+		createWalletForName(configPath)
 
 		// Download file using auth-ticket: should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -634,8 +632,8 @@ func TestDownload(testSetup *testing.T) {
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
 
-		err = createWalletForName(t, configPath)
-		require.Nil(t, err)
+		createWalletForName(configPath)
+
 		// Download file using auth-ticket: should work
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
