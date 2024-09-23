@@ -415,8 +415,8 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 	t.Run("rollback allocation after duplicating a file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   2 * MB,
-			"tokens": 10,
+			"size": 2 * MB,
+			"lock": 10,
 		})
 
 		remotePath := "/"
@@ -651,8 +651,8 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 	t.Run("rollback allocation in the middle of updating a large file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   2 * GB,
-			"tokens": 10,
+			"size": 2 * GB,
+			"lock": 10,
 		})
 
 		filesize := int64(1.5 * GB)
@@ -694,8 +694,8 @@ func TestRollbackAllocation(testSetup *testing.T) {
 
 	t.Run("rollback allocation after a small file upload in the middle of updating a large file should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   2 * GB,
-			"tokens": 10,
+			"size": 2 * GB,
+			"lock": 10,
 		})
 
 		filesize := int64(1.5 * GB)
