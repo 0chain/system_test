@@ -396,8 +396,8 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	_, err:= RunCommandWithoutRetry( "../zbox newallocation --lock 10 --configDir ./config",
 		)
-	if err!=nil{
-		return nil, fmt.Errorf("error creating allocation")
+	if err != nil {
+		return nil, fmt.Errorf("error running zbox newallocation command: %v", err)
 	}
 	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn --configDir ./config   " + " --console-address :8000"
 

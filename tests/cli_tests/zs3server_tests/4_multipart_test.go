@@ -12,7 +12,6 @@ import (
 )
 
 func TestZs3serverMultipartTests(testSetup *testing.T) {
-	log.Println("Running Warp Multipart Benchmark...")
 	timeout := time.Duration(200 * time.Minute)
 	err := os.Setenv("GO_TEST_TIMEOUT", timeout.String())
 	if err != nil {
@@ -24,13 +23,11 @@ func TestZs3serverMultipartTests(testSetup *testing.T) {
 	config := cliutils.ReadFile(testSetup)
 
 	commandGenerated := "../warp multipart --parts=500 --part.size=5MiB --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + "  --concurrent " + config.Concurrent + " --duration 30s"
-	log.Println("Command Generated: ", commandGenerated)
 
 	output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*2)
 	if err != nil {
 		testSetup.Fatalf("Error running warp multipart: %v\nOutput: %s", err, output)
 	}
-	log.Println("Warp Multipart Output:\n", output)
 	output_string := strings.Join(output, "\n")
 	output_string = strings.Split(output_string, "----------------------------------------")[1]
 	output_string = strings.Split(output_string, "warp: Starting cleanup")[0]
