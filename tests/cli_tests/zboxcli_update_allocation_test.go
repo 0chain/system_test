@@ -678,7 +678,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		allocSize := int64(4096)
 		fileSize := int64(1024)
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
@@ -723,7 +723,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		allocSize := int64(4096)
 		fileSize := int64(1024)
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
@@ -768,7 +768,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
-	allocationID := setupAllocation(t, cliConfigFilename, extraParams...)
+	allocationID := setupAllocation(cliConfigFilename, extraParams...)
 
 	allocations := parseListAllocations(t, cliConfigFilename)
 	allocation, ok := allocations[allocationID]

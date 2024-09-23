@@ -60,7 +60,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks after challenge_generation_gap (given that we have active allocations)", 10*time.Minute, func(t *test.SystemTest) {
-		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
 			"tokens": 9,
 		})
