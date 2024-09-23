@@ -30,8 +30,8 @@ func TestFileUpdate(testSetup *testing.T) {
 	t.Run("update file with thumbnail", func(t *test.SystemTest) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 9,
+			"size": 10 * MB,
+			"lock": 9,
 		})
 
 		filesize := int64(0.5 * MB)
@@ -120,8 +120,8 @@ func TestFileUpdate(testSetup *testing.T) {
 	t.Run("update thumbnail of uploaded file", func(t *test.SystemTest) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 9,
+			"size": 10 * MB,
+			"lock": 9,
 		})
 
 		filesize := int64(0.5 * MB)
@@ -253,8 +253,8 @@ func TestFileUpdate(testSetup *testing.T) {
 	t.Run("update non-encrypted file with encrypted file should work", func(t *test.SystemTest) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 9,
+			"size": 10 * MB,
+			"lock": 9,
 		})
 
 		filesize := int64(0.5 * MB)
@@ -297,8 +297,8 @@ func TestFileUpdate(testSetup *testing.T) {
 	t.Run("update encrypted file with non-encrypted file should work", func(t *test.SystemTest) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 9,
+			"size": 10 * MB,
+			"lock": 9,
 		})
 
 		filesize := int64(0.5 * MB)
@@ -340,8 +340,8 @@ func TestFileUpdate(testSetup *testing.T) {
 	t.Run("update encrypted file with encrypted file should work", func(t *test.SystemTest) {
 		// this sets allocation of 10MB and locks 0.5 ZCN. Default allocation has 2 data shards and 2 parity shards
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 9,
+			"size": 10 * MB,
+			"lock": 9,
 		})
 
 		filesize := int64(0.5 * MB)

@@ -679,8 +679,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		fileSize := int64(1024)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		// faucet tokens
@@ -724,8 +724,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		fileSize := int64(1024)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		// faucet tokens

@@ -37,8 +37,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -70,8 +70,8 @@ func TestDownload(testSetup *testing.T) {
 		remoteFilePaths := [2]string{"/dir1/", "/dir2/"}
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		fileNameOfFirstDirectory := generateFileAndUpload(t, allocationID, remoteFilePaths[0], filesize)
@@ -131,8 +131,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/dir/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -164,8 +164,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/nested/dir/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -197,8 +197,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/nested/dir/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -226,8 +226,8 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share Entire Folder from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
-				"tokens": 9,
+				"size": 10 * 1024,
+				"lock": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 
@@ -276,8 +276,8 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
-				"tokens": 9,
+				"size": 10 * 1024,
+				"lock": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			originalFileChecksum = generateChecksum(t, filename)
@@ -327,8 +327,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateRandomTestFileName(t)
@@ -380,8 +380,8 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocation(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
-				"tokens": 9,
+				"size": 10 * 1024,
+				"lock": 9,
 			})
 			filename = generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{
 				"encrypt": "",
@@ -445,8 +445,8 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
-				"tokens": 9,
+				"size": 10 * 1024,
+				"lock": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			originalFileChecksum = generateChecksum(t, filename)
@@ -500,8 +500,8 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
-				"tokens": 9,
+				"size": 10 * 1024,
+				"lock": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			originalFileChecksum = generateChecksum(t, filename)
@@ -560,8 +560,8 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
-				"tokens": 9,
+				"size": 10 * 1024,
+				"lock": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -652,8 +652,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		thumbnail := escapedTestName(t) + "thumbnail.png"
@@ -695,8 +695,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		thumbnail := escapedTestName(t) + "thumbnail.png"
@@ -739,8 +739,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -777,8 +777,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -830,8 +830,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -861,8 +861,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -917,8 +917,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -950,8 +950,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -984,8 +984,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -1017,8 +1017,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -1047,8 +1047,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -1079,8 +1079,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -1160,8 +1160,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   10000,
-			"tokens": 9,
+			"size": 10000,
+			"lock": 9,
 		})
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -1187,8 +1187,8 @@ func TestDownload(testSetup *testing.T) {
 
 	t.Run("Download from Allocation without other Parameter Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   10000,
-			"tokens": 9,
+			"size": 10000,
+			"lock": 9,
 		})
 
 		output, err := downloadFile(t, configPath, createParams(map[string]interface{}{
@@ -1206,8 +1206,8 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)

@@ -76,8 +76,8 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
