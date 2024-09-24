@@ -1,6 +1,8 @@
 block_worker:  https://dev.zus.network/dns
 0box_url: http://0box.dev.devnet-0chain.net
 0box_phone_number: +917696229925
+zvault_url: http://zvault.dev.devnet-0chain.net
+zauth_url: http://zauth.dev.devnet-0chain.net
 default_test_case_timeout: 45s
 zs3_server_url: https://dev.0chain.net/zs3server/
 chimney_test_network: https://dev.zus.network/dns

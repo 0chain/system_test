@@ -155,6 +155,16 @@ func HashTransaction(request *model.TransactionEntity) {
 	request.Hash = Sha3256([]byte(hashData))
 }
 
+func Verify(t *test.SystemTest, publicKey, signature, hash string) (bool, error) {
+	signScheme, err := NewSignatureScheme("bls0chain")
+	require.NoError(t, err)
+
+	err = signScheme.SetPublicKey(publicKey)
+	require.NoError(t, err)
+
+	return signScheme.Verify(signature, hash)
+}
+
 func blankIfNil(obj interface{}) string {
 	if obj == nil {
 		return ""
