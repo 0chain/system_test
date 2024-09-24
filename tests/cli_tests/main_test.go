@@ -173,8 +173,8 @@ func TestMain(m *testing.M) { //nolint:gocyclo
 
 	setupConfig()
 
-	log.Printf("Ethereum Node URL: %s", ethereumNodeURL)
-	fmt.Println("Ethereum Node URL: ", ethereumNodeURL)
+	log.Fatalf("Ethereum Node URL: %s", ethereumNodeURL)
+	panic("Ethereum Node URL: %s" + ethereumNodeURL)
 
 	tenderlyClient = tenderly.NewClient(ethereumNodeURL)
 
