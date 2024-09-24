@@ -700,7 +700,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
-		blobberID, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
+		blobberID, err := GetBlobberIDNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 
 		params := createParams(map[string]interface{}{
@@ -746,7 +746,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
 
-		addBlobber, err := GetBlobberNotPartOfAllocation(walletFile, configFile, allocationID)
+		addBlobber, err := GetBlobberIDNotPartOfAllocation(walletFile, configFile, allocationID)
 		require.Nil(t, err)
 		removeBlobber, err := GetRandomBlobber(walletFile, configFile, allocationID, addBlobber)
 		require.Nil(t, err)

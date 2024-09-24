@@ -124,7 +124,7 @@ var (
 
 var tenderlyClient *tenderly.Client
 
-func TestMain(m *testing.M) {
+func TestMain(m *testing.M) { //nolint:gocyclo
 	configPath = os.Getenv("CONFIG_PATH")
 	configDir = os.Getenv("CONFIG_DIR")
 
@@ -172,6 +172,9 @@ func TestMain(m *testing.M) {
 	}
 
 	setupConfig()
+
+	log.Printf("Ethereum Node URL: %s", ethereumNodeURL)
+	fmt.Println("Ethereum Node URL: ", ethereumNodeURL)
 
 	tenderlyClient = tenderly.NewClient(ethereumNodeURL)
 
