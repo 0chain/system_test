@@ -51,5 +51,4 @@ func TestZs3serverListTests(testSetup *testing.T) {
 			testSetup.Fatalf("Error appending to file: %v\n", err)
 		}
 	})
-
 }

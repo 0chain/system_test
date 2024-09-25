@@ -28,5 +28,4 @@ func TestZs3serverMixedWarpTests(testSetup *testing.T) {
 			testSetup.Fatalf("Error appending to file: %v\n", err)
 		}
 	})
-
 }
