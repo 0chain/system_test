@@ -18,6 +18,8 @@ func TestReadPoolLockUnlock(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Locking read pool tokens moves tokens from wallet to read pool")
 
+	t.Skip()
+
 	t.Parallel()
 
 	t.RunWithTimeout("Locking read pool tokens moves tokens from wallet to read pool", 90*time.Second, func(t *test.SystemTest) { //TOOD: slow

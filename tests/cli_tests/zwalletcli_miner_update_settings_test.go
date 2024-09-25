@@ -123,7 +123,7 @@ func TestMinerUpdateSettings(testSetup *testing.T) { // nolint cyclomatic comple
 
 		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "update_miner_settings: number_of_delegates greater than max_delegates of SC: 21 \\u003e 20", output[0])
+		require.Equal(t, "update_miner_settings: number_of_delegates greater than max_delegates of SC: 21 > 20", output[0])
 	})
 
 	t.RunSequentially("Miner update num_delegate negative value should fail", func(t *test.SystemTest) {

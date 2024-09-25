@@ -31,6 +31,7 @@ const (
 	ChallengePassReward
 	ChallengeSlashPenalty
 	CancellationChargeReward
+	EnterpriseBlobberReward
 	NumOfRewards
 )
 
