@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -394,7 +395,12 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 }
 
 func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
-	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway --configDir ./config zcn  " + " --console-address :8000"
+	_, err:= RunCommandWithoutRetry( "../zbox newallocation --lock 10 --configDir ./config",
+		)
+	if err != nil {
+		return nil, fmt.Errorf("error running zbox newallocation command: %v", err)
+	}
+	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn --configDir ./config   " + " --console-address :8000"
 
 	cmdParts, err := SplitCmdString(cmdString)
 	if err != nil {
@@ -416,20 +422,71 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 		return nil, fmt.Errorf("error starting MinIO server: %w", err)
 	}
 
-	// Log the generated command and its arguments
-	log.Printf("Generated command: %s %s", runCmd.Path, strings.Join(runCmd.Args[1:], " "))
-
-	// Wait for the command to complete
 	if err != nil {
 		log.Printf("Command execution error: %v", err)
 	}
 
-	// Print stdout and stderr captured during execution
-	fmt.Printf("Stdout:\n%s", stdout.String())
 	fmt.Printf("Stderr:\n%s", stderr.String())
 	time.Sleep(5 * time.Second)
 	return runCmd, nil
 }
+
+
+func GetAllocationID(path string) string {
+	file, err := os.Open(path)
+	if err != nil {
+		log.Printf("Error opening allocation.txt file: %v", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	allocationID := scanner.Text()
+	return allocationID
+}
+
+func KillMinioProcesses() {
+	allocationId := GetAllocationID("config/allocation.txt")
+	deleteCmd := fmt.Sprintf(
+			"../zbox delete --allocation "+
+				"%s --configDir ./config --remotepath /",
+			allocationId,
+		)
+	_, err:= RunCommandWithoutRetry(deleteCmd)
+	if err != nil {
+		log.Printf("Error while deferring command: %v", err)
+	}
+		
+	cmd := exec.Command("lsof", "-ti", ":8000")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("Failed to run lsof command: %v", err)
+	}
+
+	pids := strings.TrimSpace(out.String())
+	if pids == "" {
+		log.Println("MinIO server process not found")
+		return
+	}
+
+	pidList := strings.Split(pids, "\n")
+	for _, pidStr := range pidList {
+		pid, err := strconv.Atoi(strings.TrimSpace(pidStr))
+		if err != nil {
+			log.Printf("Failed to convert pid to int: %v", err)
+			continue
+		}
+		log.Printf("Killing MinIO process with PID: %d", pid)
+		if err := syscall.Kill(pid, syscall.SIGTERM); err != nil {
+			log.Printf("Failed to kill PID %d: %v", pid, err)
+		} else {
+			log.Printf("Successfully sent SIGTERM to PID %d", pid)
+		}
+	}
+}
+
 
 func ReadFileMC(testSetup *testing.T) McConfiguration {
 	var config McConfiguration
@@ -463,5 +520,17 @@ func ReadFileMC(testSetup *testing.T) McConfiguration {
 	config.HostPort = strconv.FormatInt(int64(port), 10)
 	config.SecondaryPort = strconv.FormatInt(int64(s_port), 10)
 	config.Concurrent = strconv.FormatInt(int64(concurrent), 10)
+	return config
+}
+
+
+func SetupMinioConfig(testSetup *testing.T) Configuration {
+	_, err := RunMinioServer("rootroot", "rootroot")
+	if err != nil {
+		testSetup.Fatalf("%v", err)
+	}
+
+	config := ReadFile(testSetup)
+	testSetup.Logf("Minio server Started")
 	return config
 }
