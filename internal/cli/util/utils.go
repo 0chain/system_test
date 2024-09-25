@@ -395,8 +395,7 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 }
 
 func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
-	_, err:= RunCommandWithoutRetry( "../zbox newallocation --lock 10 --configDir ./config",
-		)
+	_, err := RunCommandWithoutRetry("../zbox newallocation --lock 10 --configDir ./config")
 	if err != nil {
 		return nil, fmt.Errorf("error running zbox newallocation command: %v", err)
 	}
@@ -431,7 +430,6 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	return runCmd, nil
 }
 
-
 func GetAllocationID(path string) string {
 	file, err := os.Open(path)
 	if err != nil {
@@ -448,15 +446,15 @@ func GetAllocationID(path string) string {
 func KillMinioProcesses() {
 	allocationId := GetAllocationID("config/allocation.txt")
 	deleteCmd := fmt.Sprintf(
-			"../zbox delete --allocation "+
-				"%s --configDir ./config --remotepath /",
-			allocationId,
-		)
-	_, err:= RunCommandWithoutRetry(deleteCmd)
+		"../zbox delete --allocation "+
+			"%s --configDir ./config --remotepath /",
+		allocationId,
+	)
+	_, err := RunCommandWithoutRetry(deleteCmd)
 	if err != nil {
 		log.Printf("Error while deferring command: %v", err)
 	}
-		
+
 	cmd := exec.Command("lsof", "-ti", ":8000")
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -486,7 +484,6 @@ func KillMinioProcesses() {
 		}
 	}
 }
-
 
 func ReadFileMC(testSetup *testing.T) McConfiguration {
 	var config McConfiguration
@@ -522,7 +519,6 @@ func ReadFileMC(testSetup *testing.T) McConfiguration {
 	config.Concurrent = strconv.FormatInt(int64(concurrent), 10)
 	return config
 }
-
 
 func SetupMinioConfig(testSetup *testing.T) Configuration {
 	_, err := RunMinioServer("rootroot", "rootroot")

@@ -11,11 +11,10 @@ import (
 
 func TestZs3serverPutWarpTests(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	config  := cliutils.SetupMinioConfig(testSetup)
+	config := cliutils.SetupMinioConfig(testSetup)
 	defer cliutils.KillMinioProcesses()
 
 	commandGenerated := "../warp put --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + "  --concurrent " + config.Concurrent + " --duration 30s" + " --obj.size " + config.ObjectSize
-	t.Log("Command: ", commandGenerated)
 	output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*2)
 
 	if err != nil {

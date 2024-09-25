@@ -1,8 +1,6 @@
 package zs3servertests
 
 import (
-	// "log"
-
 	"strings"
 	"testing"
 	"time"
@@ -13,12 +11,11 @@ import (
 
 func TestZs3serverListTests(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	config  := cliutils.SetupMinioConfig(testSetup)
+	config := cliutils.SetupMinioConfig(testSetup)
 	defer cliutils.KillMinioProcesses()
 
 	t.RunSequentiallyWithTimeout("Warp List Benchmark", 40*time.Minute, func(t *test.SystemTest) {
-		commandGenerated := "../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --duration 30s" + " --obj.size " + config.ObjectSize +" --objects " + config.ObjectCount
-		t.Log("Command: ", commandGenerated)
+		commandGenerated := "../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --duration 30s" + " --obj.size " + config.ObjectSize + " --objects " + config.ObjectCount
 		output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*2)
 		if err != nil {
 			testSetup.Fatalf("Error running warp list: %v\nOutput: %s", err, output)
@@ -35,7 +32,6 @@ func TestZs3serverListTests(testSetup *testing.T) {
 			testSetup.Fatalf("Error appending to file: %v\n", err)
 		}
 	})
-
 
 	t.RunSequentiallyWithTimeout("Warp List Benchmark", 40*time.Minute, func(t *test.SystemTest) {
 		commandGenerated := "../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --objects " + config.ObjectCount + " --concurrent " + config.Concurrent + " --duration 30s" + " --obj.size " + config.ObjectSize
