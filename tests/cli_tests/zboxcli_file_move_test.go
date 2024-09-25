@@ -641,7 +641,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file to another directory with existing file with same name should fail", func(t *test.SystemTest) {
-		allocSize := int64(64 * KB * 2)
+		allocSize := int64(64 * KB * 10)
 		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)

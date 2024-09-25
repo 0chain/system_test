@@ -76,7 +76,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 	t.RunSequentially("Repair allocation after update should work", func(t *test.SystemTest) {
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		blobberRequirements.Size = 6096
+		blobberRequirements.Size = 64 * 1024 * 10 * 2
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
