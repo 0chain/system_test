@@ -426,6 +426,7 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	}
 
 	fmt.Printf("Stderr:\n%s", stderr.String())
+	fmt.Printf("Stdout:\n%s", stdout.String())
 	time.Sleep(5 * time.Second)
 	return runCmd, nil
 }
