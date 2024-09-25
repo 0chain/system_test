@@ -113,4 +113,4 @@ require (
 )
 
 // replace github.com/herumi/bls-go-binary => github.com/herumi/bls-go-binary v1.28.2
-replace github.com/0chain/gosdk => ../gosdk
+// replace github.com/0chain/gosdk => ../gosdk
