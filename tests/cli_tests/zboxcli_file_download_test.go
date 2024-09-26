@@ -66,7 +66,7 @@ func TestDownload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Download File Concurrently Should Work from two Different Directory", 6*time.Minute, func(t *test.SystemTest) {
-		allocSize := int64(64 * KB * 2)
+		allocSize := int64(64 * KB * 4)
 		filesize := int64(1024)
 		remoteFilePaths := [2]string{"/dir1/", "/dir2/"}
 
