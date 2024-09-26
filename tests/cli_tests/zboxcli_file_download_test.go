@@ -227,7 +227,7 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share Entire Folder from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
+				"size":   64 * KB * 2,
 				"tokens": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -277,7 +277,7 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
+				"size":   64 * KB * 2,
 				"tokens": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -383,7 +383,7 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
+				"size":   64 * KB * 2,
 				"tokens": 9,
 			})
 			filename = generateFileAndUploadWithParam(t, allocationID, remotepath, filesize, map[string]interface{}{
@@ -448,7 +448,7 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
+				"size":   64 * KB * 2,
 				"tokens": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -504,7 +504,7 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
+				"size":   64 * KB * 2,
 				"tokens": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -565,7 +565,7 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
+				"size":   64 * KB * 2,
 				"tokens": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -613,7 +613,7 @@ func TestDownload(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share File from Another Wallet", func(t *test.SystemTest) {
 			allocationID = setupAllocation(t, configPath, map[string]interface{}{
-				"size": 10 * 1024,
+				"size": 64 * KB * 2,
 				"lock": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -1165,7 +1165,7 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10000,
+			"size":   64 * KB * 2,
 			"tokens": 9,
 		})
 
@@ -1192,7 +1192,7 @@ func TestDownload(testSetup *testing.T) {
 
 	t.Run("Download from Allocation without other Parameter Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10000,
+			"size":   64 * KB * 2,
 			"tokens": 9,
 		})
 
