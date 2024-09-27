@@ -147,7 +147,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.RunWithTimeout("Rename file concurrently to existing directory, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: slow
-		const allocSize int64 = 64 * KB * 2
+		const allocSize int64 = 64 * KB * 4
 		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -784,7 +784,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.RunWithTimeout("Rename and delete file concurrently, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: unacceptably slow
-		const allocSize int64 = 64 * KB * 2
+		const allocSize int64 = 64 * KB * 4
 		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{

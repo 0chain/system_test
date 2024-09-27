@@ -372,7 +372,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.RunWithTimeout("Move file concurrently to existing directory, should work", 10*time.Minute, func(t *test.SystemTest) { //todo:too slow
-		const allocSize int64 = 64 * KB * 2
+		const allocSize int64 = 64 * KB * 4
 		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
