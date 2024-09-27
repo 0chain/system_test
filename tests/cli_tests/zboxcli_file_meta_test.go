@@ -59,7 +59,7 @@ func TestFileMetadata(testSetup *testing.T) {
 
 	t.Run("Get File Meta in Root Directory Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
+			"size": 64 * KB * 2,
 		})
 
 		remotepath := "/"
@@ -219,7 +219,7 @@ func TestFileMetadata(testSetup *testing.T) {
 
 	t.Run("Get File Meta for Encrypted File Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
+			"size": 64 * KB * 2,
 		})
 
 		// First Upload a file to the root directory

@@ -122,7 +122,7 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Upload file concurrently to root directory, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: slow
-		const allocSize int64 = 64 * KB * 2
+		const allocSize int64 = 64 * KB * 4
 		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -431,7 +431,7 @@ func TestUpload(testSetup *testing.T) {
 
 	t.Run("Upload File with Encryption Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
+			"size": 64 * KB * 2,
 		})
 
 		filename := generateRandomTestFileName(t)
