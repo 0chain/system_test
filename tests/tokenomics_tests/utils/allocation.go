@@ -331,13 +331,13 @@ func InitSDK(wallet, configFile string) error {
 		return err
 	}
 
-	err = sdk.InitStorageSDK(
+	err = coreClient.InitSDK(
 		walletJSON,
 		parsed.BlockWorker,
 		parsed.ChainID,
 		parsed.SignatureScheme,
 		nil,
-		0,
+		0, false, true,
 	)
 	return err
 }
