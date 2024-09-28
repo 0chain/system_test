@@ -44,13 +44,14 @@ func InitSDK(wallet, configFile string) error {
 		return err
 	}
 
-	err = sdk.InitStorageSDK(
+	err = client.InitSDK(
 		walletJSON,
 		parsed.BlockWorker,
 		parsed.ChainID,
 		parsed.SignatureScheme,
 		nil,
 		0,
+		false, true,
 	)
 	return err
 }
