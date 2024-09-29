@@ -50,7 +50,6 @@ func TestDownloadDir(testSetup *testing.T) {
 			"localpath":  "tmp/",
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-
 	})
 
 	t.RunWithTimeout("Download Directory Concurrently Should Work for two Different Directory", 6*time.Minute, func(t *test.SystemTest) {
@@ -94,11 +93,8 @@ func TestDownloadDir(testSetup *testing.T) {
 		}
 
 		wg.Wait()
-
 		require.Nil(t, errorList[0], strings.Join(outputList[0], "\n"))
-
 		require.Nil(t, errorList[1], strings.Join(outputList[1], "\n"))
-
 	})
 
 	t.Run("Download Directory from a Directory Should Work", func(t *test.SystemTest) {
@@ -150,7 +146,6 @@ func TestDownloadDir(testSetup *testing.T) {
 			"localpath":  "tmp/",
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-
 	})
 
 	t.RunWithTimeout("Download Entire Directory Should Work but does not see blobber/issues/588", 3*time.Minute, func(t *test.SystemTest) { // todo: slow
@@ -190,9 +185,7 @@ func TestDownloadDir(testSetup *testing.T) {
 				"tokens": 9,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
-
 			require.NotEqual(t, "", filename)
-
 			// Delete the uploaded file from tmp folder if it exist,
 			// since we will be downloading it now
 			err := os.RemoveAll("tmp/" + filepath.Base(filename))
@@ -202,7 +195,6 @@ func TestDownloadDir(testSetup *testing.T) {
 				"allocation": allocationID,
 				"remotepath": remotepath,
 			})
-
 			output, err := shareFolderInAllocation(t, configPath, shareParam)
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
@@ -211,10 +203,8 @@ func TestDownloadDir(testSetup *testing.T) {
 			require.Nil(t, err, "extract auth token failed")
 			require.NotEqual(t, "", authTicket, "Ticket: ", authTicket)
 		})
-
 		// Just create a wallet so that we can work further
 		createWallet(t)
-
 		// Download file using auth-ticket: should work
 		output, err := downloadDirectory(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
