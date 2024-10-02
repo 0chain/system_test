@@ -66,14 +66,13 @@ func TestMain(m *testing.M) {
 	t := test.NewSystemTest(new(testing.T))
 
 	err = coreClient.Init(context.Background(), conf.Config{
-		BlockWorker:       parsedConfig.BlockWorker,
-		SignatureScheme:   "bls0chain",
-		ChainID:           "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe",
-		PreferredBlobbers: nil,
-		MaxTxnQuery:       5,
-		QuerySleepTime:    5,
-		MinSubmit:         10,
-		MinConfirmation:   10,
+		BlockWorker:     parsedConfig.BlockWorker,
+		SignatureScheme: "bls0chain",
+		ChainID:         "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe",
+		MaxTxnQuery:     5,
+		QuerySleepTime:  5,
+		MinSubmit:       10,
+		MinConfirmation: 10,
 	})
 	require.NoError(t, err)
 
