@@ -23,7 +23,6 @@ import (
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	// Faucet the used wallets
-	t.Skip("Skipping as challenges are not working")
 
 	ownerBalance := apiClient.GetWalletBalance(t, ownerWallet, client.HttpOkStatus)
 	t.Logf("ZboxOwner balance: %v", ownerBalance)
@@ -1088,7 +1087,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 //nolint:gocyclo
 func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("Skipping graph endpoints test")
 
 	testWallet := initialisedWallets[walletIdx]
 	walletIdx++
