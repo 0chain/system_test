@@ -31,14 +31,13 @@ func InitSDK(wallet, configFile string) error {
 	}
 
 	err = client.Init(context.Background(), conf.Config{
-		BlockWorker:       parsed.BlockWorker,
-		SignatureScheme:   parsed.SignatureScheme,
-		ChainID:           parsed.ChainID,
-		PreferredBlobbers: nil,
-		MaxTxnQuery:       5,
-		QuerySleepTime:    5,
-		MinSubmit:         10,
-		MinConfirmation:   10,
+		BlockWorker:     parsed.BlockWorker,
+		SignatureScheme: parsed.SignatureScheme,
+		ChainID:         parsed.ChainID,
+		MaxTxnQuery:     5,
+		QuerySleepTime:  5,
+		MinSubmit:       10,
+		MinConfirmation: 10,
 	})
 	if err != nil {
 		return err
@@ -49,7 +48,6 @@ func InitSDK(wallet, configFile string) error {
 		parsed.BlockWorker,
 		parsed.ChainID,
 		parsed.SignatureScheme,
-		nil,
 		0,
 		false, true,
 	)
