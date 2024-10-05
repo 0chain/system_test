@@ -27,12 +27,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
-
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -69,12 +64,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
-
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -111,12 +101,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
-
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -137,12 +122,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
-
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -184,12 +164,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
-
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -226,12 +201,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
-
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -252,12 +222,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
-
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -294,12 +259,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
-
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -340,12 +300,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
-
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -360,12 +315,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
-
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -396,12 +346,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
-
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -416,12 +361,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		sessionID, response, err := zboxClient.CreateJwtSession(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotEqual(t, int64(0), sessionID)
-
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, sessionID, headers)
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 

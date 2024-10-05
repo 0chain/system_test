@@ -39,7 +39,7 @@ func (c *ZvaultClient) GenerateSplitWallet(t *test.SystemTest, headers map[strin
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/generate")
+	urlBuilder.SetPath("/wallet")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:                &splitWallet,
@@ -57,7 +57,7 @@ func (c *ZvaultClient) GenerateSplitKey(t *test.SystemTest, clientID string, hea
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath(fmt.Sprintf("/generate/%s", clientID))
+	urlBuilder.SetPath(fmt.Sprintf("/key/%s", clientID))
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:                &splitKey,
