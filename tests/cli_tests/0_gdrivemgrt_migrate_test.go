@@ -131,7 +131,7 @@ func Test0Gdrive(testSetup *testing.T) {
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "Missing Access Token", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "invalid Google Drive access token", "Output was not as expected", strings.Join(output, "\n"))
 	})
 }
 
