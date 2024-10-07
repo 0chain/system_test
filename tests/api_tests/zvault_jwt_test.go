@@ -3,6 +3,7 @@ package api_tests
 import (
 	"testing"
 
+	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
@@ -21,7 +22,7 @@ func TestZvaultJWT(testSetup *testing.T) {
 		require.Equal(t, 401, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
-	t.RunSequentially("Perform keys retrieval call with JWT token, containing user id, for which there are no keys", func(w *test.SystemTest) {
+	t.RunSequentially("Perform wallets retrieval call with JWT token, containing user id, for which there are no keys", func(w *test.SystemTest) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
@@ -31,10 +32,15 @@ func TestZvaultJWT(testSetup *testing.T) {
 
 		oldHeaders := zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
 
-		splitWallet, response, err := zvaultClient.GenerateSplitWallet(t, oldHeaders)
+		var generateWalletResponse *model.GenerateWalletResponse
+
+		generateWalletResponse, response, err = zvaultClient.GenerateSplitWallet(t, oldHeaders)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, splitWallet)
+
+		response, err = zvaultClient.GenerateSplitKey(t, generateWalletResponse.ClientID, oldHeaders)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		headers = zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
@@ -50,17 +56,19 @@ func TestZvaultJWT(testSetup *testing.T) {
 
 		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
 
-		keys, response, err := zvaultClient.GetKeys(t, splitWallet.ClientID, headers)
+		var keys *model.GetKeyResponse
+
+		keys, response, err = zvaultClient.GetKeys(t, generateWalletResponse.ClientID, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Len(t, keys.Keys, 0)
+		require.Len(t, keys, 0)
 
-		response, err = zvaultClient.Delete(t, splitWallet.ClientID, oldHeaders)
+		response, err = zvaultClient.Delete(t, generateWalletResponse.ClientID, oldHeaders)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
-	t.RunSequentially("Perform keys retrieval call with JWT token, containing user id with present split key", func(w *test.SystemTest) {
+	t.RunSequentially("Perform wallets retrieval call with JWT token, containing user id with present split key", func(w *test.SystemTest) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
@@ -70,18 +78,21 @@ func TestZvaultJWT(testSetup *testing.T) {
 
 		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
 
-		splitWallet, response, err := zvaultClient.GenerateSplitWallet(t, headers)
+		var generateWalletResponse *model.GenerateWalletResponse
+
+		generateWalletResponse, response, err = zvaultClient.GenerateSplitWallet(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.NotNil(t, splitWallet)
 
-		keys, response, err := zvaultClient.GetKeys(t, splitWallet.ClientID, headers)
+		var keys *model.GetKeyResponse
+
+		keys, response, err = zvaultClient.GetKeys(t, generateWalletResponse.ClientID, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Len(t, keys.Keys, 1)
-		require.Equal(t, keys.Keys[0].ClientID, splitWallet.ClientID)
+		require.Len(t, keys, 1)
+		require.Equal(t, keys.Keys[0].ClientID, keys.Keys[0].ClientID)
 
-		response, err = zvaultClient.Delete(t, splitWallet.ClientID, headers)
+		response, err = zvaultClient.Delete(t, generateWalletResponse.ClientID, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})

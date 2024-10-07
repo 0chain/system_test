@@ -32,9 +32,10 @@ func (c *ZvaultClient) NewZvaultHeaders(jwtToken string) map[string]string {
 	return zvaultHeaders
 }
 
-func (c *ZvaultClient) GenerateSplitWallet(t *test.SystemTest, headers map[string]string) (*model.SplitWallet, *resty.Response, error) {
+func (c *ZvaultClient) GenerateSplitWallet(t *test.SystemTest, headers map[string]string) (*model.GenerateWalletResponse, *resty.Response, error) {
 	t.Logf("generating new split wallet for jwt token [%v] using zvault...", headers["X-Jwt-Token"])
-	var splitWallet *model.SplitWallet
+
+	var generateWalletResponse *model.GenerateWalletResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
@@ -42,17 +43,16 @@ func (c *ZvaultClient) GenerateSplitWallet(t *test.SystemTest, headers map[strin
 	urlBuilder.SetPath("/wallet")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &splitWallet,
+		Dst:                &generateWalletResponse,
 		Headers:            headers,
 		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
 
-	return splitWallet, resp, err
+	return generateWalletResponse, resp, err
 }
 
-func (c *ZvaultClient) GenerateSplitKey(t *test.SystemTest, clientID string, headers map[string]string) (*model.SplitWallet, *resty.Response, error) {
+func (c *ZvaultClient) GenerateSplitKey(t *test.SystemTest, clientID string, headers map[string]string) (*resty.Response, error) {
 	t.Logf("generating new split key for client id [%v] and for jwt token [%v] using zvault...", clientID, headers["X-Jwt-Token"])
-	var splitKey *model.SplitWallet
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
@@ -60,17 +60,15 @@ func (c *ZvaultClient) GenerateSplitKey(t *test.SystemTest, clientID string, hea
 	urlBuilder.SetPath(fmt.Sprintf("/key/%s", clientID))
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &splitKey,
 		Headers:            headers,
 		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
 
-	return splitKey, resp, err
+	return resp, err
 }
 
-func (c *ZvaultClient) Store(t *test.SystemTest, privateKey, mnemonic string, headers map[string]string) (*model.SplitWallet, *resty.Response, error) {
+func (c *ZvaultClient) Store(t *test.SystemTest, privateKey, mnemonic string, headers map[string]string) (*resty.Response, error) {
 	t.Logf("storing private key [%v], mnemonic [%v] and for jwt token [%v] using zvault...", privateKey, mnemonic, headers["X-Jwt-Token"])
-	var splitKey *model.SplitWallet
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
@@ -88,31 +86,65 @@ func (c *ZvaultClient) Store(t *test.SystemTest, privateKey, mnemonic string, he
 	require.NoError(t, err)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &splitKey,
 		Headers:            headers,
 		Body:               body,
 		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
 
-	return splitKey, resp, err
+	return resp, err
 }
 
-func (c *ZvaultClient) GetKeys(t *test.SystemTest, clientID string, headers map[string]string) (*model.GetKeyResponse, *resty.Response, error) {
-	t.Logf("get keys for client id [%v] and for jwt token [%v] using zvault...", clientID, headers["X-Jwt-Token"])
-	var keys *model.GetKeyResponse
+func (c *ZvaultClient) UpdateRestrictions(t *test.SystemTest, restrictions []string, headers map[string]string) (*resty.Response, error) {
+	t.Logf("update restrictions for split key [%v] for peer public key [%v] and for jwt token [%v] using zvault...", restrictions, headers["X-Peer-Public-Key"], headers["X-Jwt-Token"])
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath(fmt.Sprintf("/keys/%s", clientID))
+	urlBuilder.SetPath("/restrictions")
+
+	updateRestrictionRequest := &model.UpdateRestrictionsRequest{
+		Restrictions: restrictions,
+	}
+
+	var body []byte
+
+	body, err = json.Marshal(updateRestrictionRequest)
+	require.NoError(t, err)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &keys,
 		Headers:            headers,
-		RequiredStatusCode: 200,
-	}, HttpGETMethod)
+		Body:               body,
+		RequiredStatusCode: 201,
+	}, HttpPUTMethod)
 
-	return keys, resp, err
+	return resp, err
+}
+
+func (c *ZvaultClient) ShareWallet(t *test.SystemTest, userID, publicKey string, headers map[string]string) (*resty.Response, error) {
+	t.Logf("sharing wallet with public key [%v] for user id [%v] and for jwt token [%v] using zvault...", publicKey, userID, headers["X-Jwt-Token"])
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/share")
+
+	storeRequest := &model.ShareWalletRequest{
+		PublicKey:    publicKey,
+		TargetUserID: userID,
+	}
+
+	var body []byte
+
+	body, err = json.Marshal(storeRequest)
+	require.NoError(t, err)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            headers,
+		Body:               body,
+		RequiredStatusCode: 201,
+	}, HttpPOSTMethod)
+
+	return resp, err
 }
 
 func (c *ZvaultClient) Revoke(t *test.SystemTest, clientID, publicKey string, headers map[string]string) (*resty.Response, error) {
@@ -150,6 +182,42 @@ func (c *ZvaultClient) Delete(t *test.SystemTest, clientID string, headers map[s
 	return resp, err
 }
 
+func (c *ZvaultClient) GetRestrictions(t *test.SystemTest, headers map[string]string) ([]string, *resty.Response, error) {
+	t.Logf("get keys for peer public key [%v] and jwt token [%v] using zvault...", headers["X-Peer-Public-Key"], headers["X-Jwt-Token"])
+	var restrictions []string
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/restrictions")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &restrictions,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return restrictions, resp, err
+}
+
+func (c *ZvaultClient) GetKeys(t *test.SystemTest, clientID string, headers map[string]string) (*model.GetKeyResponse, *resty.Response, error) {
+	t.Logf("get keys for client id [%v] and for jwt token [%v] using zvault...", clientID, headers["X-Jwt-Token"])
+	var keys *model.GetKeyResponse
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath(fmt.Sprintf("/keys/%s", clientID))
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &keys,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return keys, resp, err
+}
+
 func (c *ZvaultClient) GetWallets(t *test.SystemTest, headers map[string]string) ([]*model.SplitKey, *resty.Response, error) {
 	t.Logf("get wallets for jwt token [%v] using zvault...", headers["X-Jwt-Token"])
 	var splitKey []*model.SplitKey
@@ -166,33 +234,6 @@ func (c *ZvaultClient) GetWallets(t *test.SystemTest, headers map[string]string)
 	}, HttpGETMethod)
 
 	return splitKey, resp, err
-}
-
-func (c *ZvaultClient) ShareWallet(t *test.SystemTest, userID, publicKey string, headers map[string]string) (*resty.Response, error) {
-	t.Logf("sharing wallet with public key [%v] for user id [%v] and for jwt token [%v] using zvault...", publicKey, userID, headers["X-Jwt-Token"])
-
-	urlBuilder := NewURLBuilder()
-	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
-	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/share")
-
-	storeRequest := &model.ShareWalletRequest{
-		PublicKey:    publicKey,
-		TargetUserID: userID,
-	}
-
-	var body []byte
-
-	body, err = json.Marshal(storeRequest)
-	require.NoError(t, err)
-
-	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Headers:            headers,
-		Body:               body,
-		RequiredStatusCode: 201,
-	}, HttpPOSTMethod)
-
-	return resp, err
 }
 
 func (c *ZvaultClient) GetSharedWallets(t *test.SystemTest, headers map[string]string) ([]*model.SplitKey, *resty.Response, error) {
