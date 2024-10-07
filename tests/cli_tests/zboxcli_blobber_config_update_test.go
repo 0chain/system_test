@@ -64,6 +64,68 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
 
+	// update blobber: version update should work
+	t.RunSequentially("update blobber version should work", func(t *test.SystemTest) {
+		createWallet(t)
+
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "version": 2}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, "blobber settings updated successfully", output[0])
+
+		// get blobber and get updated version
+		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var finalBlobberInfo climodel.BlobberDetails
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		require.Equal(t, 2, finalBlobberInfo.StorageVersion)
+	})
+
+	// update blobber: managing wallet can't be updated
+	// for evrsion 1,2,3 it should fail. for version 4 it should work
+	t.RunSequentially("update blobber managing wallet should fail", func(t *test.SystemTest) {
+		createWallet(t)
+
+		//todo: managing wallet id  ==  client id??
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "managing_wallet": "new_managing_wallet_id"}))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+	})
+
+	// update blobber: managing wallet should be able to udpate delegate wallet
+	t.RunSequentially("update blobber managing wallet should be able to update delegate wallet", func(t *test.SystemTest) {
+		createWallet(t)
+
+		// create a delegate wallet
+		createWalletForName(escapedTestName(t) + "_delegate")
+		delegateWallet, err := getWalletForName(t, configPath, escapedTestName(t)+"_delegate")
+		require.Nil(t, err, "error occurred when getting delegate wallet")
+
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
+			"blobber_id":      intialBlobberInfo.ID,
+			"delegate_wallet": delegateWallet.ClientID}))
+
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
+
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var finalBlobberInfo climodel.BlobberDetails
+		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
+
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		require.Equal(t, delegateWallet.ClientID, finalBlobberInfo.StakePoolSettings.DelegateWallet)
+
+	})
+
 	t.RunSequentially("update blobber capacity should work", func(t *test.SystemTest) {
 		// create wallet for normal user
 		createWallet(t)
@@ -253,6 +315,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, newNotAvailable, finalBlobberInfo.NotAvailable)
 		require.Equal(t, url, finalBlobberInfo.BaseURL)
 	})
+
 	t.RunSequentially("update base_url should work", func(t *test.SystemTest) {
 		createWallet(t)
 

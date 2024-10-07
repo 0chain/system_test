@@ -158,12 +158,6 @@ type Terms struct {
 	WritePrice int64 `json:"write_price"`
 }
 
-type Settings struct {
-	Delegate_wallet string  `json:"delegate_wallet"`
-	Num_delegates   int     `json:"num_delegates"`
-	Service_charge  float64 `json:"service_charge"`
-}
-
 type BlobberInfo struct {
 	Id                       string            `json:"id"`
 	Url                      string            `json:"url"`
@@ -380,6 +374,7 @@ type BlobberDetails struct {
 	IsShutdown        bool              `json:"is_shutdown"`
 	IsRestricted      bool              `json:"is_restricted"`
 	NotAvailable      bool              `json:"not_available"`
+	StorageVersion    int64             `json:"storage_version"`
 }
 
 type Validator struct {
