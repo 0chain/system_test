@@ -251,40 +251,69 @@ func TestZvaultOperations(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
-	// t.RunSequentially("Update restrictions for existing split key", func(t *test.SystemTest) {
-	// 	headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
-	// 	Teardown(t, headers)
+	t.RunSequentially("Update restrictions for existing split key", func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		Teardown(t, headers)
 
-	// 	jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
-	// 	require.NoError(t, err)
-	// 	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-	// 	headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
+		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
 
-	// 	response, err = zvaultClient.Store(t, PRIVATE_KEY, MNEMONIC_A, headers)
-	// 	require.NoError(t, err)
-	// 	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		response, err = zvaultClient.Store(t, PRIVATE_KEY, MNEMONIC_A, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-	// 	response, err = zvaultClient.GenerateSplitKey(t, CLIENT_ID_V, headers)
-	// 	require.NoError(t, err)
-	// 	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		response, err = zvaultClient.GenerateSplitKey(t, CLIENT_ID_V, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-	// 	keys, response, err := zvaultClient.GetKeys(t, CLIENT_ID_V, headers)
-	// 	require.NoError(t, err)
-	// 	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-	// 	require.Len(t, keys.Keys, 1)
-	// 	require.Equal(t, keys.Keys[0].ClientID, CLIENT_ID_V)
+		keys, response, err := zvaultClient.GetKeys(t, CLIENT_ID_V, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Len(t, keys.Keys, 1)
+		require.Equal(t, keys.Keys[0].ClientID, CLIENT_ID_V)
 
-	// 	zvaultClient.Get
+		headers["X-Peer-Public-Key"] = keys.Keys[0].PeerPublicKey
 
-	// 	response, err = zvaultClient.UpdateRestrictions(t, []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET}, headers)
-	// 	require.NoError(t, err)
-	// 	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		response, err = zvaultClient.UpdateRestrictions(t, []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET}, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-	// 	response, err = zvaultClient.Delete(t, CLIENT_ID_V, headers)
-	// 	require.NoError(t, err)
-	// 	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-	// })
+		var restrictions []string
+
+		restrictions, response, err = zvaultClient.GetRestrictions(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Len(t, restrictions, 1)
+		require.Equal(t, restrictions[0], ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET)
+
+		response, err = zvaultClient.Delete(t, CLIENT_ID_V, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	})
+
+	t.RunSequentially("Update restrictions for not existing split key", func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		Teardown(t, headers)
+
+		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
+
+		headers["X-Peer-Public-Key"] = PEER_PUBLIC_KEY
+
+		response, err = zvaultClient.UpdateRestrictions(t, []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET}, headers)
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		_, response, err = zvaultClient.GetRestrictions(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	})
 
 	t.RunSequentially("Generate split key with previously stored private key", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
