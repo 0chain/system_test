@@ -30,7 +30,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 			"size":            "1024",
 			"read_price":      "0-1",
 			"write_price":     "0-1",
-			"storage_version": "2",
+			"storage_version": 2,
 			//"managing_wallet": "config.Configuration.ManagingWallet",
 		}
 
@@ -44,6 +44,25 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		createAllocationTestTeardown(t, allocationID)
+	})
+
+	// todo: in zbox cli, we are not passing storage version but we are using
+	// a constant storage verion in the code. So, we are not able to test this case.
+	// write a negative test case to create the allocation with invalid storage version and managing wallet
+	t.Run("Create allocation with invalid storage version and managing wallet should fail", func(t *test.SystemTest) {
+		_ = setupWallet(t, configPath)
+
+		options := map[string]interface{}{
+			"lock":            "0.5",
+			"size":            "1024",
+			"read_price":      "0-1",
+			"write_price":     "0-1",
+			"storage_version": 0,
+			//"managing_wallet": "config.Configuration.ManagingWallet",
+		}
+
+		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
+		require.NotNil(t, err, strings.Join(output, "\n"))
 	})
 
 	t.Run("Create allocation for locking cost equal to the cost calculated should work", func(t *test.SystemTest) {
