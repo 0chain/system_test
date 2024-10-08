@@ -90,8 +90,17 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	t.RunSequentially("update blobber managing wallet should fail", func(t *test.SystemTest) {
 		createWallet(t)
 
-		//todo: managing wallet id  ==  client id??
+		//todo: check for managing waalet id
 		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "managing_wallet": "new_managing_wallet_id"}))
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+	})
+
+	// update blobber: blobber should not be able to downgrade from v2 to v1
+	t.RunSequentially("update blobber version should fail", func(t *test.SystemTest) {
+		createWallet(t)
+
+		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "version": 1}))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 	})
