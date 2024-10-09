@@ -108,12 +108,6 @@ type Blobber struct {
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 }
 
-type ReadPoolInfo struct {
-	Balance int64   `json:"fmt"`
-	Zcn     float64 `json:"zcn"`
-	Usd     float64 `json:"usd"`
-}
-
 type RecentlyAddedRefResult struct {
 	Offset int    `json:"offset"`
 	Refs   []ORef `json:"refs"`

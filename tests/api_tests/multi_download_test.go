@@ -26,8 +26,6 @@ func TestMultiDownload(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		apiClient.CreateReadPool(t, wallet, float64(1.5), client.TxSuccessfulStatus)
-
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {

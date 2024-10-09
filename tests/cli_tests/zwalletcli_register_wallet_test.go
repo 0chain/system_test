@@ -17,21 +17,6 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func createWalletAndLockReadTokens(t *test.SystemTest, cliConfigFilename string) error {
-	createWalletForName(escapedTestName(t))
-
-	// Lock half the tokens for read pool
-	readPoolParams := createParams(map[string]interface{}{
-		"tokens": 2,
-	})
-	_, err := readPoolLock(t, cliConfigFilename, readPoolParams, true)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func createWallet(t *test.SystemTest) {
 	createWalletForName(escapedTestName(t))
 }
@@ -56,16 +41,6 @@ func createWalletForName(name string) {
 	} else {
 		fmt.Printf("File %s written successfully.\n", walletPath)
 	}
-}
-
-func createWalletForNameAndLockReadTokens(t *test.SystemTest, cliConfigFilename, name string) {
-	var tokens = 2.0
-	createWalletForName(name)
-	readPoolParams := createParams(map[string]interface{}{
-		"tokens": tokens / 2,
-	})
-	_, err := readPoolLockWithWallet(t, name, cliConfigFilename, readPoolParams, true)
-	require.NoErrorf(t, err, "error occurred when locking read pool for %s", name)
 }
 
 func getBalance(t *test.SystemTest, cliConfigFilename string) ([]string, error) {

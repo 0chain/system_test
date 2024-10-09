@@ -48,7 +48,6 @@ const (
 	TransactionFeeGet                  = "/v1/estimate_txn_fee"
 	TransactionGetConfirmation         = "/v1/transaction/get/confirmation"
 	ClientGetBalance                   = "/v1/client/get/balance"
-	ClientReadPool                     = "/v1/screst/:sc_address/getReadPoolStat"
 	GetNetworkDetails                  = "/network"
 	GetFileRef                         = "/v1/file/refs/:allocation_id"
 	GetFileRefPath                     = "/v1/file/referencepath/:allocation_id"
@@ -495,24 +494,6 @@ func (c *APIClient) V1ClientGetBalance(t *test.SystemTest, clientGetBalanceReque
 		SharderServiceProvider)
 
 	return clientGetBalanceResponse, resp, err
-}
-
-func (c *APIClient) V1ClientGetReadPoolBalance(t *test.SystemTest, clientGetReadBalanceRequest model.ClientGetReadPoolBalanceRequest, requiredStatusCode int) (*model.ClientGetReadPoolBalanceResponse, *resty.Response, error) { //nolint
-	var clientGetReadPoolBalanceResponse *model.ClientGetReadPoolBalanceResponse
-
-	urlBuilder := NewURLBuilder().SetPath(ClientReadPool).AddParams("client_id", clientGetReadBalanceRequest.ClientID).SetPathVariable("sc_address", StorageSmartContractAddress)
-
-	resp, err := c.executeForAllServiceProviders(
-		t,
-		urlBuilder,
-		&model.ExecutionRequest{
-			Dst:                &clientGetReadPoolBalanceResponse,
-			RequiredStatusCode: requiredStatusCode,
-		},
-		HttpGETMethod,
-		SharderServiceProvider)
-
-	return clientGetReadPoolBalanceResponse, resp, err
 }
 
 func (c *APIClient) V1SCRestGetAllMiners(t *test.SystemTest, requiredStatusCode int) ([]*model.SCRestGetMinerSharderResponse, *resty.Response, error) {
@@ -1310,27 +1291,6 @@ func (c *APIClient) GetWalletBalance(t *test.SystemTest, wallet *model.Wallet, r
 	return clientGetBalanceResponse
 }
 
-func (c *APIClient) GetReadPoolBalance(t *test.SystemTest, wallet *model.Wallet, requiredStatusCode int) *model.ClientGetReadPoolBalanceResponse {
-	t.Log("Get read pool balance...")
-
-	clientGetReadPoolBalanceResponse, resp, err := c.V1ClientGetReadPoolBalance(
-		t,
-		model.ClientGetReadPoolBalanceRequest{
-			ClientID: wallet.Id,
-		},
-		requiredStatusCode)
-
-	if err != nil {
-		t.Logf("Error getting readpool balance: %v", err)
-		return clientGetReadPoolBalanceResponse
-	}
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, clientGetReadPoolBalanceResponse)
-
-	return clientGetReadPoolBalanceResponse
-}
-
 func (c *APIClient) GetRewardsByQuery(t *test.SystemTest, query string, requiredStatusCode int) *model.QueryRewardsResponse {
 	t.Log("Get rewards by query...")
 
@@ -1730,99 +1690,6 @@ func (c *APIClient) CreateWritePool(t *test.SystemTest, wallet *model.Wallet, al
 	wallet.IncNonce()
 
 	return createWritePoolTransactionGetConfirmationResponse.Hash
-}
-
-// CreateReadPoolWrapper does not provide deep test of used components
-func (c *APIClient) CreateReadPool(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) string {
-	t.Log("Create Read pool...")
-
-	createReadPoolTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:          wallet,
-			ToClientID:      StorageSmartContractAddress,
-			TransactionData: model.NewCreateReadPoolTransactionData(),
-			Value:           tokenomics.IntToZCN(tokens),
-			TxnType:         SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, createReadPoolTransactionPutResponse)
-
-	var createReadPoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		createReadPoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: createReadPoolTransactionPutResponse.Entity.Hash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if createReadPoolTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return createReadPoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	wallet.IncNonce()
-
-	return createReadPoolTransactionGetConfirmationResponse.Hash
-}
-
-func (c *APIClient) UnlockReadPool(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) string {
-	t.Log("Unlock Read pool...")
-
-	unlockReadPoolTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:          wallet,
-			ToClientID:      StorageSmartContractAddress,
-			TransactionData: model.NewUnlockReadPoolTransactionData(),
-			Value:           tokenomics.IntToZCN(0.1),
-			TxnType:         SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, unlockReadPoolTransactionPutResponse)
-
-	var unlockReadPoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		unlockReadPoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: unlockReadPoolTransactionPutResponse.Entity.Hash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if unlockReadPoolTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return unlockReadPoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	wallet.IncNonce()
-
-	return unlockReadPoolTransactionGetConfirmationResponse.Hash
 }
 
 func (c *APIClient) V1SCRestGetStakePoolStat(t *test.SystemTest, scRestGetStakePoolStatRequest model.SCRestGetStakePoolStatRequest, requiredStatusCode int) (*model.SCRestGetStakePoolStatResponse, *resty.Response, error) { //nolint
