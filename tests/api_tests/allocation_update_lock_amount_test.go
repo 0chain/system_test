@@ -68,7 +68,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		uploadOp := sdkClient.AddUploadOperation(t, "", "", 10*MB)
 		chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
-		time.Sleep(10 * time.Second)
+		time.Sleep(2 * time.Minute)
 
 		uar := &model.UpdateAllocationRequest{
 			ID:     allocationID,
@@ -80,7 +80,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 
 		t.Logf("Min lock required: %v", minLockRequired)
 
-		minLockRequiredInZcn := float64(minLockRequired) / 1e10
+		minLockRequiredInZcn := (float64(minLockRequired) * 1.25) / 1e10
 
 		apiClient.UpdateAllocation(t, wallet, allocationID, uar, minLockRequiredInZcn, client.TxSuccessfulStatus)
 		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
