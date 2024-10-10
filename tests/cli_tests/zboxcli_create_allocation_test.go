@@ -21,6 +21,32 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
+	// write a test case to create the allocation with storage version and managing wallet
+	t.Run("Create allocation with storage version and managing wallet", func(t *test.SystemTest) {
+		_ = setupWallet(t, configPath)
+
+		//todo: check managing wallet
+		options := map[string]interface{}{
+			"lock":            "0.5",
+			"size":            "1024",
+			"read_price":      "0-1",
+			"write_price":     "0-1",
+			"storage_version": 2,
+			"managing_wallet": "config.Configuration.ManagingWallet",
+		}
+
+		output, err := createNewAllocation(t, configPath, createParams(options))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
+
+		allocationID, err := getAllocationID(output[0])
+		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
+
+		createAllocationTestTeardown(t, allocationID)
+	})
+
 	t.Run("Create allocation for locking cost equal to the cost calculated should work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
