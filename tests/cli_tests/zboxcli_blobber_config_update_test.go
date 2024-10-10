@@ -83,7 +83,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 
 		//todo: the response blobber version is coming as 0
 		// checkout the reason and then update the asertion condtion below
-		require.Equal(t, 0, finalBlobberInfo.StorageVersion)
+		require.Equal(t, int64(0), finalBlobberInfo.StorageVersion)
 	})
 
 	// update blobber: managing wallet can't be updated
@@ -137,7 +137,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		fmt.Println(finalBlobberInfo.StorageVersion)
 		require.Equal(t, delegateWallet.ClientID, finalBlobberInfo.StakePoolSettings.DelegateWallet)
 	})
 
