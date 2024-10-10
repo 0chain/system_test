@@ -16,6 +16,22 @@
     "SignatureScheme": null
   },
   {
+    "client_id": "306517a2de8b1d994d0951ba45e276cedc1d1dca32c0e9b731066791eaf8dedc",
+    "client_key": "2875211706e5d0262913418e344baaf05794d6b23ce6dc81f71bdddf9096e21684df0141f2b3f03ff79e2a3dc5cf376b628a5bd6c9f5f93806c408f6c603a083",
+    "keys": [
+      {
+        "public_key": "2875211706e5d0262913418e344baaf05794d6b23ce6dc81f71bdddf9096e21684df0141f2b3f03ff79e2a3dc5cf376b628a5bd6c9f5f93806c408f6c603a083",
+        "private_key": "39293962c1064ab6de775e8da8095966f4fed36c4b9d1937ab537c6da2a69414"
+      }
+    ],
+    "mnemonics": "situate myself awkward material blame crucial head trick distance term system labor maximum pond trade disease prevent coach lion planet bounce afford gauge leisure",
+    "version": "1.0",
+    "date_created": "2023-11-26T01:23:58Z",
+    "nonce": 1,
+    "ChainID": "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe",
+    "SignatureScheme": null
+  },
+  {
     "client_id": "22f084e22985a24c779e428cbdb2b2e947d9a5c938a23839ba5644e230e6aa28",
     "client_key": "07cc3036d6ac5b67efb989c03d0eeb9635980910da5a2d58c226315a14b7ac24b9f56ee5e2e6ca5a74b82d9ba33393a3614c436b10a19f14a4197196b04c4724",
     "keys": [

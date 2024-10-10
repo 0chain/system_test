@@ -83,7 +83,7 @@ func TestListFileSystem(testSetup *testing.T) {
 	//FIXME: POSSIBLE BUG: Encrypted file require much more space
 	t.Run("List Encrypted Files Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
+			"size": 64 * KB * 2,
 		})
 
 		// First Upload a file to the root directory

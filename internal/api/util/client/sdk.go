@@ -316,7 +316,7 @@ func (c *SDKClient) AddRenameOperation(t *test.SystemTest, allocationID, remoteP
 	return sdk.OperationRequest{
 		OperationType: constants.FileOperationRename,
 		RemotePath:    remotePath,
-		DestName:      "/" + filepath.Join("", newName),
+		DestName:      newName,
 	}
 }
 
