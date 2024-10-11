@@ -25,14 +25,12 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Run("Create allocation with storage version and managing wallet", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		//todo: check managing wallet
 		options := map[string]interface{}{
 			"lock":            "0.5",
 			"size":            "1024",
 			"read_price":      "0-1",
 			"write_price":     "0-1",
 			"storage_version": 2,
-			"managing_wallet": "config.Configuration.ManagingWallet",
 		}
 
 		output, err := createNewAllocation(t, configPath, createParams(options))
