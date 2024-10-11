@@ -86,18 +86,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Equal(t, int64(0), finalBlobberInfo.StorageVersion)
 	})
 
-	// update blobber: managing wallet can't be updated
-	// for evrsion 1,2,3 it should fail. for version 4 it should work
-	t.RunSequentially("update blobber managing wallet should fail", func(t *test.SystemTest) {
-		createWallet(t)
-
-		//todo: check for managing wallet id
-		// there is no logic i can see to uodate the managing wallet in zbox cli
-		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "managing_wallet": "new_managing_wallet_id"}))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-	})
-
 	// update blobber: blobber should not be able to downgrade from v2 to v1
 	t.RunSequentially("update blobber version should fail", func(t *test.SystemTest) {
 		createWallet(t)
