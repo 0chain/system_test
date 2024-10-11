@@ -21,8 +21,8 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
-	// write a test case to create the allocation with storage version and managing wallet
-	t.Run("Create allocation with storage version and managing wallet", func(t *test.SystemTest) {
+	// write a test case to create the allocation with storage version
+	t.Run("Create allocation with storage version", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{
