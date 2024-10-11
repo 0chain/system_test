@@ -13,11 +13,6 @@ type SplitWallet struct {
 	IsSplit       bool      `json:"is_split"`
 }
 
-// GetKeyResponse represents retrieved set of split keys.
-type GetKeyResponse struct {
-	Keys []*SplitKey `json:"keys"`
-}
-
 // SplitKey represents retrieved split key.
 type SplitKey struct {
 	UserID        string `json:"user_id"`
@@ -39,8 +34,23 @@ type StoreRequest struct {
 	PrivateKey string `json:"private_key"`
 }
 
+// UpdateRestrictionsRequest represents update restrictions request payload.
+type UpdateRestrictionsRequest struct {
+	Restrictions []string `json:"restrictions"`
+}
+
 // ShareWalletRequest represents share wallet request payload.
 type ShareWalletRequest struct {
 	PublicKey    string `json:"public_key"`
 	TargetUserID string `json:"target_user_id"`
+}
+
+// GenerateWalletResponse represents generate wallet response payload.
+type GenerateWalletResponse struct {
+	ClientID string `json:"client_id"`
+}
+
+// GetKeyResponse represents retrieved set of split keys.
+type GetKeyResponse struct {
+	Keys []*SplitKey `json:"keys"`
 }
