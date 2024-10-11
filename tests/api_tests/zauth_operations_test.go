@@ -37,7 +37,7 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID_A,
 			ClientKey:     PUBLIC_KEY_I,
@@ -61,7 +61,7 @@ func TestZauthOperations(testSetup *testing.T) {
 		signTransactionPayload := &transaction.Transaction{
 			Hash:            HASH,
 			ClientID:        CLIENT_ID_A,
-			Signature:       "",
+			Signature:       SIGNATURE,
 			TransactionData: string(data),
 		}
 
@@ -84,7 +84,7 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID_A,
 			ClientKey:     PUBLIC_KEY_I,
@@ -109,12 +109,12 @@ func TestZauthOperations(testSetup *testing.T) {
 		signTransactionPayload := &transaction.Transaction{
 			Hash:            HASH,
 			ClientID:        CLIENT_ID_A,
-			Signature:       "",
+			Signature:       SIGNATURE,
 			TransactionData: string(data),
 		}
 
 		_, response, err = zauthClient.SignTransaction(t, signTransactionPayload, headers)
-		require.Error(t, err)
+		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		response, err = zauthClient.Delete(t, CLIENT_ID_A, headers)
@@ -132,22 +132,33 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID_A,
 			ClientKey:     PUBLIC_KEY_I,
 			PublicKey:     PUBLIC_KEY_I,
 			PrivateKey:    PRIVATE_KEY_B,
 			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			Restrictions:  []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET},
 			ExpiredAt:     EXPIRES_AT,
 		}, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
+		transactionData := transaction.SmartContractTxnData{
+			Name: CANCEL_ALLOCATION_TRANSACTION_TYPE,
+		}
+
+		var data []byte
+
+		data, err = json.Marshal(transactionData)
+		require.NoError(t, err)
+
 		signTransactionPayload := &transaction.Transaction{
-			Hash:      HASH,
-			ClientID:  CLIENT_ID_A,
-			Signature: "",
+			Hash:            HASH,
+			ClientID:        CLIENT_ID_A,
+			Signature:       "",
+			TransactionData: string(data),
 		}
 
 		_, response, err = zauthClient.SignTransaction(t, signTransactionPayload, headers)
@@ -169,22 +180,33 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, "")
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID_A,
 			ClientKey:     PUBLIC_KEY_I,
 			PublicKey:     PUBLIC_KEY_I,
 			PrivateKey:    PRIVATE_KEY_B,
 			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			Restrictions:  []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET},
 			ExpiredAt:     EXPIRES_AT,
 		}, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
+		transactionData := transaction.SmartContractTxnData{
+			Name: CANCEL_ALLOCATION_TRANSACTION_TYPE,
+		}
+
+		var data []byte
+
+		data, err = json.Marshal(transactionData)
+		require.NoError(t, err)
+
 		signTransactionPayload := &transaction.Transaction{
-			Hash:      HASH,
-			ClientID:  CLIENT_ID_A,
-			Signature: SIGNATURE,
+			Hash:            HASH,
+			ClientID:        CLIENT_ID_A,
+			Signature:       SIGNATURE,
+			TransactionData: string(data),
 		}
 
 		_, response, err = zauthClient.SignTransaction(t, signTransactionPayload, headers)
@@ -206,10 +228,20 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
 
+		transactionData := transaction.SmartContractTxnData{
+			Name: CANCEL_ALLOCATION_TRANSACTION_TYPE,
+		}
+
+		var data []byte
+
+		data, err = json.Marshal(transactionData)
+		require.NoError(t, err)
+
 		signTransactionPayload := &transaction.Transaction{
-			Hash:      HASH,
-			ClientID:  CLIENT_ID_A,
-			Signature: SIGNATURE,
+			Hash:            HASH,
+			ClientID:        CLIENT_ID_A,
+			Signature:       SIGNATURE,
+			TransactionData: string(data),
 		}
 
 		_, response, err = zauthClient.SignTransaction(t, signTransactionPayload, headers)
@@ -227,22 +259,33 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID_A,
 			ClientKey:     PUBLIC_KEY_I,
 			PublicKey:     PUBLIC_KEY_I,
 			PrivateKey:    PRIVATE_KEY_B,
 			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			Restrictions:  []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET},
 			ExpiredAt:     EXPIRES_AT,
 		}, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
+		transactionData := transaction.SmartContractTxnData{
+			Name: CANCEL_ALLOCATION_TRANSACTION_TYPE,
+		}
+
+		var data []byte
+
+		data, err = json.Marshal(transactionData)
+		require.NoError(t, err)
+
 		signTransactionPayload := &transaction.Transaction{
-			Hash:      HASH,
-			ClientID:  CLIENT_ID_A,
-			Signature: SIGNATURE,
+			Hash:            HASH,
+			ClientID:        CLIENT_ID_A,
+			Signature:       SIGNATURE,
+			TransactionData: string(data),
 		}
 
 		transaction, response, err := zauthClient.SignTransaction(t, signTransactionPayload, headers)
@@ -269,13 +312,14 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, "")
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID_A,
 			ClientKey:     PUBLIC_KEY_I,
 			PublicKey:     PUBLIC_KEY_I,
 			PrivateKey:    PRIVATE_KEY_B,
 			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			Restrictions:  []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET},
 			ExpiredAt:     EXPIRES_AT,
 		}, headers)
 		require.NoError(t, err)
@@ -327,13 +371,14 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID_A,
 			ClientKey:     PUBLIC_KEY_I,
 			PublicKey:     PUBLIC_KEY_I,
 			PrivateKey:    PRIVATE_KEY_B,
 			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			Restrictions:  []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET},
 			ExpiredAt:     EXPIRES_AT,
 		}, headers)
 		require.NoError(t, err)
@@ -364,13 +409,14 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID_A,
 			ClientKey:     PUBLIC_KEY_I,
 			PublicKey:     PUBLIC_KEY_I,
 			PrivateKey:    PRIVATE_KEY_B,
 			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			Restrictions:  []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET},
 			ExpiredAt:     EXPIRES_AT,
 		}, headers)
 		require.NoError(t, err)
@@ -420,13 +466,14 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID_A,
 			ClientKey:     PUBLIC_KEY_I,
 			PublicKey:     PUBLIC_KEY_I,
 			PrivateKey:    PRIVATE_KEY_B,
 			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			Restrictions:  []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET},
 			ExpiredAt:     EXPIRES_AT,
 		}, headers)
 		require.NoError(t, err)
@@ -466,13 +513,14 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID_A,
 			ClientKey:     PUBLIC_KEY_I,
 			PublicKey:     PUBLIC_KEY_I,
 			PrivateKey:    PRIVATE_KEY_B,
 			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			Restrictions:  []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET},
 			ExpiredAt:     EXPIRES_AT,
 		}, headers)
 		require.NoError(t, err)
@@ -493,11 +541,9 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
 
-		// var keyDetails *model.KeyDetailsResponse
-
 		_, response, err = zauthClient.GetKeyDetails(t, CLIENT_ID_A, headers)
-		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Error(t, err)
+		require.Equal(t, 500, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	t.RunSequentially("Retrieve split key details for existing split key", func(t *test.SystemTest) {
@@ -510,19 +556,22 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID_A,
 			ClientKey:     PUBLIC_KEY_I,
 			PublicKey:     PUBLIC_KEY_I,
 			PrivateKey:    PRIVATE_KEY_B,
 			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			Restrictions:  []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET},
 			ExpiredAt:     EXPIRES_AT,
 		}, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		var keyDetails *model.KeyDetailsResponse
+
+		headers["X-Peer-Public-Key"] = PUBLIC_KEY_I
 
 		keyDetails, response, err = zauthClient.GetKeyDetails(t, CLIENT_ID_A, headers)
 		require.NoError(t, err)
@@ -544,17 +593,20 @@ func TestZauthOperations(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, PEER_PUBLIC_KEY_I)
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID_A,
 			ClientKey:     PUBLIC_KEY_I,
 			PublicKey:     PUBLIC_KEY_I,
 			PrivateKey:    PRIVATE_KEY_B,
 			PeerPublicKey: PEER_PUBLIC_KEY_I,
+			Restrictions:  []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET},
 			ExpiredAt:     EXPIRES_AT,
 		}, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		headers["X-Peer-Public-Key"] = PUBLIC_KEY_I
 
 		var keyDetails *model.KeyDetailsResponse
 
@@ -562,6 +614,8 @@ func TestZauthOperations(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.Equal(t, keyDetails.LastUsed, int64(0))
+
+		headers["X-Peer-Public-Key"] = PEER_PUBLIC_KEY_I
 
 		signMessageRequest := &model.SignMessageRequest{
 			Hash:      HASH,
@@ -572,6 +626,8 @@ func TestZauthOperations(testSetup *testing.T) {
 		_, response, err = zauthClient.SignMessage(t, signMessageRequest, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		headers["X-Peer-Public-Key"] = PUBLIC_KEY_I
 
 		keyDetails, response, err = zauthClient.GetKeyDetails(t, CLIENT_ID_A, headers)
 		require.NoError(t, err)

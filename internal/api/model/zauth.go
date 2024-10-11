@@ -12,11 +12,6 @@ type SetupWallet struct {
 	ExpiredAt     int64    `json:"expired_at"`
 }
 
-// SetupResponse represents response returned after performance of setup operation.
-type SetupResponse struct {
-	Result string `json:"result"`
-}
-
 // SignMessageRequest represents message requested to be signed.
 type SignMessageRequest struct {
 	Hash      string `json:"hash"`

@@ -25,8 +25,8 @@ func TestZauthJWT(testSetup *testing.T) {
 	t.RunSequentially("Perform keys retrieval call with expired JWT token", func(w *test.SystemTest) {
 		headers := zauthClient.NewZauthHeaders(JWT_TOKEN, "")
 
-		_, response, err := zauthClient.Setup(t, &model.SetupWallet{}, headers)
-		require.Error(t, err)
+		response, err := zauthClient.Setup(t, &model.SetupWallet{}, headers)
+		require.NoError(t, err)
 		require.Equal(t, 401, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
@@ -40,7 +40,7 @@ func TestZauthJWT(testSetup *testing.T) {
 
 		oldHeaders := zauthClient.NewZauthHeaders(jwtToken.JwtToken, "")
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID,
 			ClientKey:     CLIENT_KEY,
@@ -85,7 +85,7 @@ func TestZauthJWT(testSetup *testing.T) {
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, "")
 
-		_, response, err = zauthClient.Setup(t, &model.SetupWallet{
+		response, err = zauthClient.Setup(t, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID,
 			ClientKey:     CLIENT_KEY,

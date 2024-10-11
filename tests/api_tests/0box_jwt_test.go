@@ -17,7 +17,7 @@ func Test0BoxJWT(testSetup *testing.T) {
 
 		_, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	t.RunSequentially("Refresh JWT token with user id, which differs from the one used by the given old JWT token", func(t *test.SystemTest) {
@@ -34,7 +34,7 @@ func Test0BoxJWT(testSetup *testing.T) {
 		headers["X-App-Client-Key"] = client.X_APP_CLIENT_KEY_A
 		headers["X-App-Client-Signature"] = client.X_APP_CLIENT_SIGNATURE_A
 
-		jwtToken, response, err = zboxClient.RefreshJwtToken(t, jwtToken.JwtToken, headers)
+		_, response, err = zboxClient.RefreshJwtToken(t, jwtToken.JwtToken, headers)
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
@@ -48,7 +48,7 @@ func Test0BoxJWT(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 		require.NotEmpty(t, jwtToken.JwtToken)
 
-		jwtToken, response, err = zboxClient.RefreshJwtToken(t, "", headers)
+		_, response, err = zboxClient.RefreshJwtToken(t, "", headers)
 		require.NoError(t, err)
 		require.Equal(t, 500, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})

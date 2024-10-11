@@ -61,7 +61,7 @@ func TestZvaultJWT(testSetup *testing.T) {
 		keys, response, err = zvaultClient.GetKeys(t, generateWalletResponse.ClientID, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Len(t, keys, 0)
+		require.Len(t, keys.Keys, 0)
 
 		response, err = zvaultClient.Delete(t, generateWalletResponse.ClientID, oldHeaders)
 		require.NoError(t, err)
@@ -84,12 +84,16 @@ func TestZvaultJWT(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
+		response, err = zvaultClient.GenerateSplitKey(t, generateWalletResponse.ClientID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
 		var keys *model.GetKeyResponse
 
 		keys, response, err = zvaultClient.GetKeys(t, generateWalletResponse.ClientID, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Len(t, keys, 1)
+		require.Len(t, keys.Keys, 1)
 		require.Equal(t, keys.Keys[0].ClientID, keys.Keys[0].ClientID)
 
 		response, err = zvaultClient.Delete(t, generateWalletResponse.ClientID, headers)

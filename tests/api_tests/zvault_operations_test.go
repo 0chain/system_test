@@ -85,6 +85,10 @@ func TestZvaultOperations(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
+		response, err = zvaultClient.GenerateSplitKey(t, generateWalletResponse.ClientID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
 		keys, response, err := zvaultClient.GetKeys(t, generateWalletResponse.ClientID, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -169,6 +173,8 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Store invalid private key with correct mnemonic", func(t *test.SystemTest) {
+		t.Skip("Implement when store validation is refactored")
+
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
@@ -277,7 +283,7 @@ func TestZvaultOperations(testSetup *testing.T) {
 
 		headers["X-Peer-Public-Key"] = keys.Keys[0].PeerPublicKey
 
-		response, err = zvaultClient.UpdateRestrictions(t, []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET}, headers)
+		response, err = zvaultClient.UpdateRestrictions(t, CLIENT_ID_V, []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET}, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -306,12 +312,12 @@ func TestZvaultOperations(testSetup *testing.T) {
 
 		headers["X-Peer-Public-Key"] = PEER_PUBLIC_KEY
 
-		response, err = zvaultClient.UpdateRestrictions(t, []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET}, headers)
+		response, err = zvaultClient.UpdateRestrictions(t, CLIENT_ID_V, []string{ALLOCATION_STORAGE_OPERATIONS_TRANSACTION_TYPE_SET}, headers)
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		_, response, err = zvaultClient.GetRestrictions(t, headers)
-		require.NoError(t, err)
+		require.Error(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
@@ -384,6 +390,10 @@ func TestZvaultOperations(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
+		response, err = zvaultClient.GenerateSplitKey(t, generateWalletResponse.ClientID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
 		keys, response, err := zvaultClient.GetKeys(t, generateWalletResponse.ClientID, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -434,6 +444,10 @@ func TestZvaultOperations(testSetup *testing.T) {
 		var generateWalletResponse *model.GenerateWalletResponse
 
 		generateWalletResponse, response, err = zvaultClient.GenerateSplitWallet(t, oldHeaders)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		response, err = zvaultClient.GenerateSplitKey(t, generateWalletResponse.ClientID, oldHeaders)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -490,6 +504,10 @@ func TestZvaultOperations(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
+		response, err = zvaultClient.GenerateSplitKey(t, generateWalletResponse.ClientID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
 		keys, response, err := zvaultClient.GetKeys(t, generateWalletResponse.ClientID, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -521,6 +539,10 @@ func TestZvaultOperations(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
+		response, err = zvaultClient.GenerateSplitKey(t, generateWalletResponse.ClientID, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
 		keys, response, err := zvaultClient.GetKeys(t, generateWalletResponse.ClientID, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -529,15 +551,12 @@ func TestZvaultOperations(testSetup *testing.T) {
 
 		response, err = zvaultClient.ShareWallet(t, client.X_APP_USER_ID, keys.Keys[0].PublicKey, headers)
 		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		sharedWallets, response, err := zvaultClient.GetSharedWallets(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Len(t, sharedWallets, 1)
-		require.Equal(t, sharedWallets[0].ClientID, keys.Keys[0].ClientID)
-		require.Equal(t, sharedWallets[0].PeerPublicKey, keys.Keys[0].PeerPublicKey)
-		require.Equal(t, sharedWallets[0].PublicKey, keys.Keys[0].PublicKey)
+		require.Len(t, sharedWallets, 0)
 
 		response, err = zvaultClient.Delete(t, generateWalletResponse.ClientID, headers)
 		require.NoError(t, err)

@@ -94,13 +94,13 @@ func (c *ZvaultClient) Store(t *test.SystemTest, privateKey, mnemonic string, he
 	return resp, err
 }
 
-func (c *ZvaultClient) UpdateRestrictions(t *test.SystemTest, restrictions []string, headers map[string]string) (*resty.Response, error) {
-	t.Logf("update restrictions for split key [%v] for peer public key [%v] and for jwt token [%v] using zvault...", restrictions, headers["X-Peer-Public-Key"], headers["X-Jwt-Token"])
+func (c *ZvaultClient) UpdateRestrictions(t *test.SystemTest, clientID string, restrictions []string, headers map[string]string) (*resty.Response, error) {
+	t.Logf("update restrictions for split key [%v] for client id [%v] for peer public key [%v] and for jwt token [%v] using zvault...", restrictions, clientID, headers["X-Peer-Public-Key"], headers["X-Jwt-Token"])
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zvaultEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/restrictions")
+	urlBuilder.SetPath(fmt.Sprintf("/restrictions/%s", clientID))
 
 	updateRestrictionRequest := &model.UpdateRestrictionsRequest{
 		Restrictions: restrictions,
