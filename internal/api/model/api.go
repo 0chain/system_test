@@ -176,6 +176,13 @@ func NewRegisterBlobberTransactionData(scRegisterBlobberRequest *StorageNode) Tr
 	}
 }
 
+func NewKillBlobberTransactionData(killBlobberRequest *StorageNode) TransactionData {
+	return TransactionData{
+		Name:  "kill_blobber",
+		Input: killBlobberRequest,
+	}
+}
+
 func NewCreateFreeAllocationTransactionData(scRestGetFreeAllocationBlobbersResponse *SCRestGetFreeAllocationBlobbersResponse) TransactionData {
 	return TransactionData{
 		Name:  "free_allocation_request",
