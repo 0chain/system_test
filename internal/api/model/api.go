@@ -176,6 +176,13 @@ func NewRegisterBlobberTransactionData(scRegisterBlobberRequest *StorageNode) Tr
 	}
 }
 
+func NewKillBlobberTransactionData(killBlobberRequest *StorageNode) TransactionData {
+	return TransactionData{
+		Name:  "kill_blobber",
+		Input: killBlobberRequest,
+	}
+}
+
 func NewCreateFreeAllocationTransactionData(scRestGetFreeAllocationBlobbersResponse *SCRestGetFreeAllocationBlobbersResponse) TransactionData {
 	return TransactionData{
 		Name:  "free_allocation_request",
@@ -527,6 +534,7 @@ type BlobberRequirements struct {
 	ExpirationDate  int64      `json:"expiration_date"`
 	ReadPriceRange  PriceRange `json:"read_price_range"`
 	WritePriceRange PriceRange `json:"write_price_range"`
+	StorageVersion  int64      `json:"storage_version"`
 }
 
 type PriceRange struct {
@@ -650,6 +658,10 @@ type SCRestGetBlobberResponse struct {
 	ReadData            int64             `json:"read_data"`
 	ChallengesPassed    int64             `json:"challenges_passed"`
 	ChallengesCompleted int64             `json:"challenges_completed"`
+
+	//todo:
+	StorageVersion int64  `json:"storage_version"`
+	ManagingWallet string `json:"managing_wallet"`
 }
 
 type SCRestGetBlobbersResponse struct {
@@ -732,6 +744,8 @@ type StorageNode struct {
 	LastHealthCheck   int64                  `json:"last_health_check"`
 	PublicKey         string                 `json:"-"`
 	StakePoolSettings StakePoolSettings      `json:"stake_pool_settings"`
+	StorageVersion    int64                  `json:"storage_version"`
+	ManagingWallet    string                 `json:"managing_wallet"`
 }
 
 type StorageNodeGeolocation struct {

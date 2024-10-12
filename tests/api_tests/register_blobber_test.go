@@ -17,6 +17,37 @@ func TestRegisterBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 
+	// write a test case to register a blobber with storage version
+	t.Run("Register blobber with storage version", func(t *test.SystemTest) {
+		wallet := createWallet(t)
+
+		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+		t.Logf("wallet balance: %v", wallet)
+		wallet.Nonce = int(walletBalance.Nonce)
+
+		sn := &model.StorageNode{}
+
+		sn.ID = uuid.New().String()
+		sn.BaseURL = generateRandomURL()
+
+		sn.Capacity = 10240 * GB
+		sn.Terms.ReadPrice = 1000000000
+		sn.Terms.WritePrice = 1000000000
+
+		sn.StakePoolSettings.DelegateWallet = "config.Configuration.DelegateWallet"
+		sn.StakePoolSettings.NumDelegates = 2
+		sn.StakePoolSettings.ServiceCharge = 0.2
+
+		//todo: make check to this
+		sn.StorageVersion = 2
+		sn.ManagingWallet = wallet.Id
+
+		apiClient.RegisterBlobberWithIdVerification(t, wallet, sn, 1, wallet.Id)
+
+		// todo: check logic
+		apiClient.KillBlobber(t, wallet, sn, 2)
+})
+
 	t.Run("Write price lower than min_write_price should not allow register", func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
