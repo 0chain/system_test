@@ -30,7 +30,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.ID = uuid.New().String()
 		sn.BaseURL = generateRandomURL()
 
-		sn.Capacity = 10 * GB
+		sn.Capacity = 10240 * GB
 		sn.Terms.ReadPrice = 1000000000
 		sn.Terms.WritePrice = 1000000000
 
@@ -42,8 +42,13 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.StorageVersion = 2
 		sn.ManagingWallet = wallet.Id
 
-		// todo:
-		apiClient.RegisterBlobber(t, wallet, sn, 2, "success")
+		apiClient.RegisterBlobberWithIdVerification(t, wallet, sn, 1, wallet.Id)
+
+		// todo: check logic
+		// t.Cleanup(func() {
+		// 	wallet := createWallet(t)
+		// 	apiClient.RegisterBlobberWithIdVerification(t, wallet, sn, 1, wallet.Id)
+		// })
 	})
 
 	t.Run("Write price lower than min_write_price should not allow register", func(t *test.SystemTest) {
