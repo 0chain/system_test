@@ -962,6 +962,60 @@ func (c *APIClient) RegisterBlobber(t *test.SystemTest,
 	return registerBlobberTransactionPutResponse.Entity.Hash
 }
 
+func (c *APIClient) KillBlobber(t *test.SystemTest,
+	wallet *model.Wallet,
+	storageNode *model.StorageNode,
+	requiredTransactionStatus int) string {
+	t.Log("Killing blobber...")
+
+	killBlobberTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewKillBlobberTransactionData(storageNode),
+			Value:           tokenomics.IntToZCN(0),
+			TxnType:         SCTxType,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, killBlobberTransactionPutResponse)
+
+	var killBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		killBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: killBlobberTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+
+		if err != nil {
+			t.Log("Error killing blobber : ", err)
+			return false
+		}
+
+		if resp == nil {
+			fmt.Println("got nil response : ", resp)
+			return false
+		}
+
+		if killBlobberTransactionGetConfirmationResponse == nil {
+			fmt.Println("got nil txn confirmation response : ", killBlobberTransactionGetConfirmationResponse)
+			return false
+		}
+
+		fmt.Println("killBlobberTransactionGetConfirmationResponse.Status : ", killBlobberTransactionGetConfirmationResponse.Status)
+		fmt.Println(killBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput)
+		return killBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+	return killBlobberTransactionPutResponse.Entity.Hash
+}
+
 func (c *APIClient) RegisterBlobberWithIdVerification(t *test.SystemTest,
 	wallet *model.Wallet,
 	storageNode *model.StorageNode,

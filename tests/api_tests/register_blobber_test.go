@@ -45,11 +45,8 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		apiClient.RegisterBlobberWithIdVerification(t, wallet, sn, 1, wallet.Id)
 
 		// todo: check logic
-		// t.Cleanup(func() {
-		// 	wallet := createWallet(t)
-		// 	apiClient.RegisterBlobberWithIdVerification(t, wallet, sn, 1, wallet.Id)
-		// })
-	})
+		apiClient.KillBlobber(t, wallet, sn, 2)
+})
 
 	t.Run("Write price lower than min_write_price should not allow register", func(t *test.SystemTest) {
 		wallet := createWallet(t)
