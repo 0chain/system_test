@@ -962,6 +962,69 @@ func (c *APIClient) RegisterBlobber(t *test.SystemTest,
 	return registerBlobberTransactionPutResponse.Entity.Hash
 }
 
+func (c *APIClient) RegisterBlobberWithIdVerification(t *test.SystemTest,
+	wallet *model.Wallet,
+	storageNode *model.StorageNode,
+	requiredTransactionStatus int,
+	blobberId string) string {
+	t.Log("Registering blobber...")
+
+	registerBlobberTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewRegisterBlobberTransactionData(storageNode),
+			Value:           tokenomics.IntToZCN(0),
+			TxnType:         SCTxType,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, registerBlobberTransactionPutResponse)
+
+	var registerBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		registerBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: registerBlobberTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+
+		if err != nil {
+			t.Log("Error registering blobber : ", err)
+			return false
+		}
+
+		if resp == nil {
+			t.Log("got nil response : ", resp)
+			return false
+		}
+
+		if registerBlobberTransactionGetConfirmationResponse == nil {
+			t.Log("got nil txn confirmation response : ", registerBlobberTransactionGetConfirmationResponse)
+			return false
+		}
+
+		var storageNode model.StorageNode
+
+		// Unmarshal the JSON string into the StorageNode struct
+		err := json.Unmarshal([]byte(registerBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput), &storageNode)
+		if err != nil {
+			t.Log("Error unmarshalling JSON:", err)
+			return false
+		}
+
+		return registerBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus && storageNode.ID == blobberId
+	})
+
+	wallet.IncNonce()
+
+	return registerBlobberTransactionPutResponse.Entity.Hash
+}
+
 func (c *APIClient) CreateFreeAllocation(t *test.SystemTest,
 	wallet *model.Wallet,
 	scRestGetFreeAllocationBlobbersResponse *model.SCRestGetFreeAllocationBlobbersResponse,
