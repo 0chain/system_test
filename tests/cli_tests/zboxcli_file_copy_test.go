@@ -27,7 +27,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	t.Parallel()
 	t.Run("copy directory to another directry should work", func(t *test.SystemTest) {
 		allocSize := int64(2048000)
-		fileSize := int64(256)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -178,7 +178,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Equal(t, destpath+" directory created", output[0])
 
 		// Upload file
-		fileSize := int64(256)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err = createFileWithSize(file, fileSize)
@@ -290,8 +290,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file to existing directory", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2 * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -363,8 +363,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.RunWithTimeout("Copy file concurrently to existing directory, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: way too slow
-		const allocSize int64 = 2048
-		const fileSize int64 = 256
+		const allocSize int64 = 64 * KB * 2 * 4
+		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -446,8 +446,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file to non-existing directory should work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2 * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -518,8 +518,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file to same directory should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2 * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -581,8 +581,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file to dir with existing children should work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2 * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -644,8 +644,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file to another directory with existing file with same name should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2 * 4)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -757,8 +757,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 		createWalletForName(nonAllocOwnerWallet)
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2 * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -864,8 +864,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("copy file with allocation copy file options forbidden should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2 * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)

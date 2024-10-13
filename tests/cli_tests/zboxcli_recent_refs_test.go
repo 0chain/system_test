@@ -31,7 +31,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 
 	t.Run("Recently Added Refs Should be listed", func(t *test.SystemTest) { //todo: slow
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
+			"size": 64 * KB * 2,
 		})
 
 		t.Logf("Allocation: %s", allocationID)
@@ -89,7 +89,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 
 	t.Run("Refs created 30 seconds ago should not be listed with in-date less than 30 seconds", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
+			"size": 64 * KB * 2,
 		})
 
 		fileSize := int64(10)
@@ -132,7 +132,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 
 	t.Run("Refs of someone else's allocation should return zero refs", func(t *test.SystemTest) { //todo: slow
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
+			"size": 64 * KB * 2,
 		})
 
 		fileSize := int64(10)
@@ -178,7 +178,7 @@ func TestRecentlyAddedRefs(testSetup *testing.T) {
 
 	t.Run("Invalid parameters should return error", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
+			"size": 64 * KB * 2,
 		})
 
 		output, err := listRecentlyAddedRefs(t, configPath, createParams(map[string]interface{}{

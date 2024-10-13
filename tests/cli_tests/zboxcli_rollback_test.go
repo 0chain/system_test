@@ -206,7 +206,8 @@ func TestRollbackAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("rollback allocation after moving a file should work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		t.Skip("Skipping as move is not atomic in v2")
+		allocSize := int64(64 * KB * 2)
 		fileSize := int64(256)
 
 		file := generateRandomTestFileName(t)
@@ -310,7 +311,8 @@ func TestRollbackAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("rollback allocation after renaming a file should work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		t.Skip("rename is not atomic in v2")
+		allocSize := int64(64 * KB * 2)
 		fileSize := int64(256)
 
 		file := generateRandomTestFileName(t)

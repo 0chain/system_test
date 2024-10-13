@@ -71,7 +71,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Download File using Expired Allocation Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/"
 

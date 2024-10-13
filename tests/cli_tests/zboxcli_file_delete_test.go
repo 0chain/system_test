@@ -410,7 +410,7 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Delete file concurrently in existing directory, should work", 5*time.Minute, func(t *test.SystemTest) { // TODO: slow
-		const allocSize int64 = 2048
+		const allocSize int64 = 64 * KB * 2 * 2
 		const fileSize int64 = 256
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
