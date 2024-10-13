@@ -52,11 +52,11 @@ func TestRegisterBlobber(testSetup *testing.T) {
 
 		// get wallet balance
 		walletBalance = apiClient.GetWalletBalance(t, scWallet, client.HttpOkStatus)
-		scWallet.Nonce = int(walletBalance.Nonce)+1
-		
+		scWallet.Nonce = int(walletBalance.Nonce)
+
 		// todo: check logic
 		apiClient.KillBlobber(t, scWallet, killBlobberReq, 1)
-})
+	})
 
 	t.Run("Write price lower than min_write_price should not allow register", func(t *test.SystemTest) {
 		wallet := createWallet(t)

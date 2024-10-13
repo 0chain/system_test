@@ -179,7 +179,7 @@ func NewRegisterBlobberTransactionData(scRegisterBlobberRequest *StorageNode) Tr
 func NewKillBlobberTransactionData(killBlobberRequest *KillBlobberRequest) TransactionData {
 	return TransactionData{
 		Name:  "kill_blobber",
-		Input: killBlobberRequest,
+		Input: *killBlobberRequest,
 	}
 }
 
