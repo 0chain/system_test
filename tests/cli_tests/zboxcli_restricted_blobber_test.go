@@ -177,7 +177,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 
 	t.RunSequentially("Update allocation with add restricted blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
-		allocSize := int64(4096)
+		allocSize := int64(64 * KB * 2)
 		fileSize := int64(1024)
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -246,7 +246,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 
 	t.RunSequentially("Update allocation with replace blobber and add restricted blobber should succeed", func(t *test.SystemTest) {
 		// setup allocation and upload a file
-		allocSize := int64(4096)
+		allocSize := int64(64 * KB * 2)
 		fileSize := int64(1024)
 
 		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{

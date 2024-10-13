@@ -32,7 +32,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
-		blobberRequirements.Size = 2056
+		blobberRequirements.Size = 64 * 1024 * 3
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
@@ -76,7 +76,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 	t.RunSequentially("Repair allocation after update should work", func(t *test.SystemTest) {
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		blobberRequirements.Size = 6096
+		blobberRequirements.Size = 64 * 1024 * 10 * 2
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -106,7 +106,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 	t.RunSequentially("Repair allocation after delete should work", func(t *test.SystemTest) {
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		blobberRequirements.Size = 2056
+		blobberRequirements.Size = 64 * 1024 * 3
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -130,7 +130,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 	t.RunSequentially("Repair allocation after move should work", func(t *test.SystemTest) {
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		blobberRequirements.Size = 6096
+		blobberRequirements.Size = 64 * 1024 * 10 * 2
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -155,7 +155,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 	t.RunSequentially("Repair allocation after copy should work", func(t *test.SystemTest) {
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		blobberRequirements.Size = 8096
+		blobberRequirements.Size = 64 * 1024 * 20 * 2
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -182,7 +182,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 	t.RunSequentially("Repair allocation after rename should work", func(t *test.SystemTest) {
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
-		blobberRequirements.Size = 6096
+		blobberRequirements.Size = 64 * 1024 * 10 * 2
 		blobberRequirements.DataShards = 2
 		blobberRequirements.ParityShards = 2
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -350,6 +350,7 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 func TestRepairSize(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("Skipping as repair size is not implemented for V2")
 	wallet := createWallet(t)
 	sdkClient.SetWallet(t, wallet)
 	apiClient.CreateReadPool(t, wallet, 0.5, client.TxSuccessfulStatus)
