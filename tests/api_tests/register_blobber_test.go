@@ -44,8 +44,11 @@ func TestRegisterBlobber(testSetup *testing.T) {
 
 		apiClient.RegisterBlobberWithIdVerification(t, wallet, sn, 1, wallet.Id)
 
+		var killBlobberReq = &model.KillBlobberRequest{
+			ProviderID: wallet.Id,
+		}
 		// todo: check logic
-		apiClient.KillBlobber(t, wallet, sn, 2)
+		apiClient.KillBlobber(t, wallet, killBlobberReq, 1)
 })
 
 	t.Run("Write price lower than min_write_price should not allow register", func(t *test.SystemTest) {

@@ -964,7 +964,7 @@ func (c *APIClient) RegisterBlobber(t *test.SystemTest,
 
 func (c *APIClient) KillBlobber(t *test.SystemTest,
 	wallet *model.Wallet,
-	storageNode *model.StorageNode,
+	killBlobberRequest *model.KillBlobberRequest,
 	requiredTransactionStatus int) string {
 	t.Log("Killing blobber...")
 
@@ -973,7 +973,7 @@ func (c *APIClient) KillBlobber(t *test.SystemTest,
 		model.InternalTransactionPutRequest{
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
-			TransactionData: model.NewKillBlobberTransactionData(storageNode),
+			TransactionData: model.NewKillBlobberTransactionData(killBlobberRequest),
 			Value:           tokenomics.IntToZCN(0),
 			TxnType:         SCTxType,
 		},

@@ -176,7 +176,7 @@ func NewRegisterBlobberTransactionData(scRegisterBlobberRequest *StorageNode) Tr
 	}
 }
 
-func NewKillBlobberTransactionData(killBlobberRequest *StorageNode) TransactionData {
+func NewKillBlobberTransactionData(killBlobberRequest *KillBlobberRequest) TransactionData {
 	return TransactionData{
 		Name:  "kill_blobber",
 		Input: killBlobberRequest,
@@ -680,6 +680,10 @@ type FreeStorageAssignerRequest struct {
 type FreeAllocationRequest struct {
 	AllocationID string `json:"allocation_id,omitempty"`
 	Marker       string `json:"marker,omitempty"`
+}
+
+type KillBlobberRequest struct {
+	ProviderID string `json:"provider_id,omitempty"`
 }
 
 type SCRestGetAllocationResponse struct {
