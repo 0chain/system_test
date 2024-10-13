@@ -1007,8 +1007,6 @@ func (c *APIClient) KillBlobber(t *test.SystemTest,
 			return false
 		}
 
-		fmt.Println("killBlobberTransactionGetConfirmationResponse.Status : ", killBlobberTransactionGetConfirmationResponse.Status)
-		fmt.Println(killBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput)
 		return killBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus
 	})
 
