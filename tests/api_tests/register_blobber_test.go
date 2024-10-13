@@ -47,8 +47,15 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		var killBlobberReq = &model.KillBlobberRequest{
 			ProviderID: wallet.Id,
 		}
+
+		scWallet := initialiseSCWallet()
+
+		// get wallet balance
+		walletBalance = apiClient.GetWalletBalance(t, scWallet, client.HttpOkStatus)
+		scWallet.Nonce = int(walletBalance.Nonce)+1
+		
 		// todo: check logic
-		apiClient.KillBlobber(t, wallet, killBlobberReq, 1)
+		apiClient.KillBlobber(t, scWallet, killBlobberReq, 1)
 })
 
 	t.Run("Write price lower than min_write_price should not allow register", func(t *test.SystemTest) {
