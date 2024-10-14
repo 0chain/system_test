@@ -21,6 +21,8 @@ func TestRegisterBlobber(testSetup *testing.T) {
 	t.Run("Register blobber with storage version", func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
+		defer killBlobber(t, wallet.Id)
+
 		walletBalance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 		t.Logf("wallet balance: %v", wallet)
 		wallet.Nonce = int(walletBalance.Nonce)
@@ -43,19 +45,6 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.ManagingWallet = wallet.Id
 
 		apiClient.RegisterBlobberWithIdVerification(t, wallet, sn, 1, wallet.Id)
-
-		var killBlobberReq = &model.KillBlobberRequest{
-			ProviderID: wallet.Id,
-		}
-
-		scWallet := initialiseSCWallet()
-
-		// get wallet balance
-		walletBalance = apiClient.GetWalletBalance(t, scWallet, client.HttpOkStatus)
-		scWallet.Nonce = int(walletBalance.Nonce)
-
-		// todo: check logic
-		apiClient.KillBlobber(t, scWallet, killBlobberReq, 1)
 	})
 
 	t.Run("Write price lower than min_write_price should not allow register", func(t *test.SystemTest) {
@@ -185,4 +174,18 @@ func generateRandomString(length int) string {
 
 func generateRandomURL() string {
 	return fmt.Sprintf("http://%s.com/%s", generateRandomString(10), generateRandomString(8))
+}
+
+func killBlobber(t *test.SystemTest, providerId string) {
+	var killBlobberReq = &model.KillBlobberRequest{
+		ProviderID: providerId,
+	}
+
+	scWallet := initialiseSCWallet()
+
+	// get wallet balance
+	walletBalance := apiClient.GetWalletBalance(t, scWallet, client.HttpOkStatus)
+	scWallet.Nonce = int(walletBalance.Nonce)
+
+	apiClient.KillBlobber(t, scWallet, killBlobberReq, 1)
 }
