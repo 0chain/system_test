@@ -32,7 +32,7 @@ func TestUpdateBlobber(testSetup *testing.T) {
 		blobber := apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
 		require.NotEqual(t, wallet.Id, blobber.StakePoolSettings.DelegateWallet)
 
-		blobber.StorageVersion = 2
+		blobber.StorageVersion = 1
 
 		apiClient.UpdateBlobber(t, wallet, blobber, client.TxUnsuccessfulStatus)
 	})
@@ -53,7 +53,7 @@ func TestUpdateBlobber(testSetup *testing.T) {
 		blobber := apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
 		require.NotEqual(t, wallet.Id, blobber.StakePoolSettings.DelegateWallet)
 
-		blobber.StorageVersion = 1
+		blobber.StorageVersion = 0
 
 		apiClient.UpdateBlobber(t, wallet, blobber, client.TxUnsuccessfulStatus)
 	})

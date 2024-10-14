@@ -81,8 +81,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &finalBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		//todo: the response blobber version is coming as 0
-		// checkout the reason and then update the asertion condtion below
 		require.Equal(t, int64(0), finalBlobberInfo.StorageVersion)
 	})
 
@@ -90,8 +88,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	t.RunSequentially("update blobber version should fail", func(t *test.SystemTest) {
 		createWallet(t)
 
-		// todo: Not getting the expected response.
-		// No error is coming where is the logic written for this
 		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "storage_version": 1}))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
@@ -106,7 +102,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		delegateWallet, err := getWalletForName(t, configPath, escapedTestName(t)+"_delegate")
 		require.Nil(t, err, "error occurred when getting delegate wallet")
 
-		// todo: not able to upate the version of blobber. Only v4 will have managing wallet
 		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
 			"blobber_id":      intialBlobberInfo.ID,
 			"delegate_wallet": delegateWallet.ClientID,

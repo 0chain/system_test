@@ -30,7 +30,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 			"size":            "1024",
 			"read_price":      "0-1",
 			"write_price":     "0-1",
-			"storage_version": 2,
+			"storage_version": 1,
 		}
 
 		output, err := createNewAllocation(t, configPath, createParams(options))
