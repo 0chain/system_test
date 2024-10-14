@@ -1,7 +1,6 @@
 package api_tests
 
 import (
-	"math/rand"
 	"encoding/json"
 	"log"
 	"os"
@@ -192,12 +191,8 @@ type WalletFile struct {
 
 func createWallet(t *test.SystemTest) *model.Wallet {
 	walletMutex.Lock()
-
-	// generate random number for wallet idx
-	walletIdx = int64(rand.Intn(len(initialisedWallets)))
-
 	wallet := initialisedWallets[walletIdx]
-	//walletIdx++
+	walletIdx++
 	balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 	wallet.Nonce = int(balance.Nonce)
 	walletMutex.Unlock()
