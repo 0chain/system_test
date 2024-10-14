@@ -35,6 +35,11 @@ func TestUpdateBlobber(testSetup *testing.T) {
 		blobber.StorageVersion = 1
 
 		apiClient.UpdateBlobber(t, wallet, blobber, client.TxUnsuccessfulStatus)
+
+		blobber = apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
+		require.NotEqual(t, wallet.Id, blobber.StakePoolSettings.DelegateWallet)
+
+		require.Equal(t, int64(1), blobber.StorageVersion)
 	})
 
 	t.Run("update blobber: degrade version should not work", func(t *test.SystemTest) {
@@ -56,6 +61,11 @@ func TestUpdateBlobber(testSetup *testing.T) {
 		blobber.StorageVersion = 0
 
 		apiClient.UpdateBlobber(t, wallet, blobber, client.TxUnsuccessfulStatus)
+
+		blobber = apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
+		require.NotEqual(t, wallet.Id, blobber.StakePoolSettings.DelegateWallet)
+
+		require.Equal(t, int64(1), blobber.StorageVersion)
 	})
 
 	t.Run("Update blobber in allocation without correct delegated client, shouldn't work", func(t *test.SystemTest) {
