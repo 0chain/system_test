@@ -18,6 +18,6 @@ func DefaultBlobberRequirements(id, publicKey string) BlobberRequirements {
 		},
 		OwnerId:        id,
 		OwnerPublicKey: publicKey,
-		StorageVersion: 2,
+		StorageVersion: 1,
 	}
 }
