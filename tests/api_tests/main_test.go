@@ -12,7 +12,6 @@ import (
 
 	coreClient "github.com/0chain/gosdk/core/client"
 	"github.com/0chain/gosdk/core/conf"
-	"golang.org/x/exp/rand"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -188,12 +187,8 @@ type WalletFile struct {
 
 func createWallet(t *test.SystemTest) *model.Wallet {
 	walletMutex.Lock()
-
-	// generate random number for wallet idx
-	walletIdx = int64(rand.Intn(len(initialisedWallets)))
-
 	wallet := initialisedWallets[walletIdx]
-	//walletIdx++
+	walletIdx++
 	balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
 	wallet.Nonce = int(balance.Nonce)
 	walletMutex.Unlock()
