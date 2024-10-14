@@ -44,7 +44,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.StorageVersion = 2
 		sn.ManagingWallet = wallet.Id
 
-		apiClient.RegisterBlobberWithIdVerification(t, wallet, sn, 1, wallet.Id)
+		apiClient.RegisterBlobber(t, wallet, sn, 1, wallet.Id, true)
 	})
 
 	t.Run("Write price lower than min_write_price should not allow register", func(t *test.SystemTest) {
@@ -66,7 +66,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.StakePoolSettings.NumDelegates = 2
 		sn.StakePoolSettings.ServiceCharge = 0.2
 
-		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: invalid blobber params: write_price is less than min_write_price allowed")
+		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: invalid blobber params: write_price is less than min_write_price allowed", false)
 	})
 
 	t.Run("Write price higher than max_write_price should not allow register", func(t *test.SystemTest) {
@@ -88,7 +88,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.StakePoolSettings.NumDelegates = 2
 		sn.StakePoolSettings.ServiceCharge = 0.2
 
-		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: invalid blobber params: write_price is greater than max_write_price allowed")
+		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: invalid blobber params: write_price is greater than max_write_price allowed", false)
 	})
 
 	t.Run("Read price higher than max_read_price should not allow register", func(t *test.SystemTest) {
@@ -110,7 +110,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.StakePoolSettings.NumDelegates = 2
 		sn.StakePoolSettings.ServiceCharge = 0.2
 
-		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: invalid blobber params: read_price is greater than max_read_price allowed")
+		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: invalid blobber params: read_price is greater than max_read_price allowed", false)
 	})
 
 	t.Run("Service charge higher than max_service_charge should not allow register", func(t *test.SystemTest) {
@@ -132,7 +132,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.StakePoolSettings.NumDelegates = 2
 		sn.StakePoolSettings.ServiceCharge = 0.6
 
-		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: creating stake pool: invalid stake_pool settings: service_charge (0.600000) is greater than max allowed by SC (0.500000)")
+		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: creating stake pool: invalid stake_pool settings: service_charge (0.600000) is greater than max allowed by SC (0.500000)", false)
 	})
 
 	t.Run("Capacity lower than min_blobber_capacity should not allow register", func(t *test.SystemTest) {
@@ -154,7 +154,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.StakePoolSettings.NumDelegates = 2
 		sn.StakePoolSettings.ServiceCharge = 0.2
 
-		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: invalid blobber params: insufficient blobber capacity")
+		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: invalid blobber params: insufficient blobber capacity", false)
 	})
 }
 
