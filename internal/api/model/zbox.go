@@ -229,5 +229,31 @@ type ReferralRankOfUser struct {
 	ReferrerID int64 `json:"referrer_id"`
 }
 
+type ZboxCoin uint64
+
+type ZboxTransactionDetails struct {
+	Hash              string   `json:"hash"`
+	BlockHash         string   `json:"block_hash"`
+	Round             int64    `json:"round"`
+	Version           string   `json:"version"`
+	ClientId          string   `json:"client_id"`
+	ToClientId        string   `json:"to_client_id"`
+	TransactionData   string   `json:"transaction_data"`
+	Value             ZboxCoin `json:"value"`
+	Signature         string   `json:"signature"`
+	CreationDate      int64    `json:"creation_date"`
+	Fee               ZboxCoin `json:"fee"`
+	Nonce             int64    `json:"nonce"`
+	TransactionType   int      `json:"transaction_type"`
+	TransactionOutput string   `json:"transaction_output"`
+	OutputHash        string   `json:"output_hash"`
+	Status            int      `json:"status"`
+}
+
+type ZboxTransactionsDataResponse struct {
+	PitId        string               `json:"pit_id"`
+	Transactions []ZboxTransactionDetails `json:"transactions"`
+}
+
 type ZboxGraphEndpoint func(*test.SystemTest, *ZboxGraphRequest) (*ZboxGraphInt64Response, *resty.Response, error)
 type ZboxGraphBlobberEndpoint func(*test.SystemTest, string, *ZboxGraphRequest) (*ZboxGraphInt64Response, *resty.Response, error)
