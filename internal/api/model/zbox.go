@@ -251,7 +251,7 @@ type ZboxTransactionDetails struct {
 }
 
 type ZboxTransactionsDataResponse struct {
-	PitId        string               `json:"pit_id"`
+	PitId        string                   `json:"pit_id"`
 	Transactions []ZboxTransactionDetails `json:"transactions"`
 }
 
