@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -12,7 +13,7 @@ import (
 func Test0BoxTransactions(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.RunSequentially("get paginated transactions list while creating pit id", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("get paginated transactions list while creating pit id", 5*time.Second, func(t *test.SystemTest) {
 		txnsData, resp, err := zboxClient.GetTransactionsList(t, "")
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
