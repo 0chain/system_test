@@ -76,7 +76,7 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocation(t, configPath, map[string]interface{}{
 			"size":   1 * GB,
 			"tokens": 1,
 			"data":   1,

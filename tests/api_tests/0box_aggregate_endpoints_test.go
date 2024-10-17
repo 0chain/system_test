@@ -1454,8 +1454,6 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, wallet, allocationBlobbers, 0.1, client.TxSuccessfulStatus)
 
-		apiClient.CreateReadPool(t, wallet, 100, client.TxSuccessfulStatus)
-
 		alloc, _ := sdk.GetAllocation(allocationID)
 
 		targetBlobber := alloc.BlobberDetails[0].BlobberID

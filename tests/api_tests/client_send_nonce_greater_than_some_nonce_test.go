@@ -2,10 +2,12 @@ package api_tests
 
 import (
 	"encoding/json"
+	"github.com/0chain/gosdk/core/transaction"
 	"strconv"
 	"testing"
 	"time"
 
+	coreClient "github.com/0chain/gosdk/core/client"
 	"github.com/0chain/gosdk/zcncore"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -23,8 +25,7 @@ func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 	wallet1 := initialisedWallets[walletIdx]
 	walletIdx++
 
-	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics), false)
-	require.NoError(t, err)
+	coreClient.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
 
 	faucetAmount := float64(9)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
@@ -64,8 +65,7 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	wallet1 := initialisedWallets[walletIdx]
 	walletIdx++
 
-	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics), false)
-	require.NoError(t, err)
+	coreClient.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
 
 	faucetAmount := float64(9)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
@@ -183,8 +183,7 @@ func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	wallet1 := initialisedWallets[walletIdx]
 	walletIdx++
 
-	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics), false)
-	require.NoError(t, err)
+	coreClient.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
 
 	faucetAmount := float64(9)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
@@ -248,27 +247,11 @@ func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	require.Equal(t, txnResp.Request.Hash, confResp.Transaction.Hash)
 }
 
-func GetGlobalConfig(t *test.SystemTest) map[string]interface{} {
-	cb := GlobalCB{
-		Globals: make(map[string]interface{}),
-		doneCh:  make(chan struct{}),
-		errCh:   make(chan error),
-	}
-
-	err := zcncore.GetMinerSCGlobals(&cb)
+func GetGlobalConfig(t *test.SystemTest) map[string]string {
+	res, err := transaction.GetConfig("miner_sc_globals")
 	require.NoError(t, err)
 
-	dur := time.Minute
-	tm := time.NewTimer(dur)
-	select {
-	case <-cb.doneCh:
-	case err := <-cb.errCh:
-		t.Error(err)
-	case <-tm.C:
-		t.Errorf("Timeout occurred while waiting for global config after %v", dur)
-	}
-
-	return cb.Globals
+	return res.Fields
 }
 
 func GetTransactionTimeOut(t *test.SystemTest) time.Duration {
@@ -276,8 +259,7 @@ func GetTransactionTimeOut(t *test.SystemTest) time.Duration {
 	tmKey := "server_chain.transaction.timeout"
 	i, ok := globalConfig[tmKey]
 	require.True(t, ok)
-	s := i.(string)
-	tm, err := strconv.Atoi(s)
+	tm, err := strconv.Atoi(i)
 	require.NoError(t, err)
 	return time.Duration(tm) * time.Second
 }
@@ -287,8 +269,7 @@ func GetFutureNonceConfig(t *test.SystemTest) int {
 	fnKey := "server_chain.transaction.future_nonce" // future nonce key
 	i, ok := globalConfig[fnKey]
 	require.True(t, ok)
-	s := i.(string)
-	n, err := strconv.Atoi(s)
+	n, err := strconv.Atoi(i)
 	require.NoError(t, err)
 	return n
 }

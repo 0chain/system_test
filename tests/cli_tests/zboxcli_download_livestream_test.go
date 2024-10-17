@@ -50,11 +50,6 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 
-		_, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"tokens": 1,
-		}), true)
-		require.Nil(t, err, "error")
-
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
 
@@ -197,11 +192,6 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		}))
 		t.Log(output)
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
-
-		_, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"tokens": 1,
-		}), true)
-		require.Nil(t, err, "error")
 
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]
@@ -351,11 +341,6 @@ func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complex
 		}))
 		t.Log(output)
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
-
-		_, err = readPoolLock(t, configPath, createParams(map[string]interface{}{
-			"tokens": 1,
-		}), true)
-		require.Nil(t, err, "error")
 
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
 		allocationID := strings.Fields(output[0])[2]

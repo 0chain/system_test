@@ -38,7 +38,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation":         allocationID,
@@ -90,7 +90,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation":         allocationID,
@@ -180,7 +180,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation":         allocationID,
@@ -260,7 +260,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
 
@@ -311,7 +311,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -375,7 +375,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
 
@@ -472,7 +472,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
 
@@ -559,7 +559,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
 
@@ -621,7 +621,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation":         allocationID,
@@ -675,7 +675,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation":         allocationID,
@@ -728,7 +728,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -781,7 +781,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -934,7 +934,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		shareParams := map[string]interface{}{
 			"allocation": allocationID,
@@ -988,7 +988,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1046,15 +1046,6 @@ func TestShareFile(testSetup *testing.T) {
 
 		allocationID := strings.Fields(output[0])[2]
 
-		// locking tokens for read pool
-		readPoolParams := createParams(map[string]interface{}{
-			"tokens": 3,
-		})
-		output, err = readPoolLockWithWallet(t, walletOwner, configPath, readPoolParams, true)
-		require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, "locked", output[0])
-
 		// upload file
 		file := generateRandomTestFileName(t)
 		fileSize := int64(102400) // this is big enough to cause problem with download
@@ -1076,7 +1067,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1294,7 +1285,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1356,7 +1347,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1419,7 +1410,7 @@ func TestShareFile(testSetup *testing.T) {
 		// receiver wallet operations
 		receiverWallet := escapedTestName(t) + "_second"
 
-		createWalletForNameAndLockReadTokens(t, configPath, receiverWallet)
+		createWalletForName(receiverWallet)
 
 		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
 		require.Nil(t, err)
@@ -1662,15 +1653,6 @@ func createWalletAndAllocation(t *test.SystemTest, configPath, wallet string) (s
 	require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
 
 	allocationID := strings.Fields(output[0])[2]
-
-	// locking tokens for read pool
-	readPoolParams := createParams(map[string]interface{}{
-		"tokens": 0.4,
-	})
-	output, err = readPoolLockWithWallet(t, wallet, configPath, readPoolParams, true)
-	require.Nil(t, err, "Tokens could not be locked", strings.Join(output, "\n"))
-	require.Len(t, output, 1)
-	require.Equal(t, "locked", output[0])
 
 	walletModel, err := getWalletForName(t, configPath, wallet)
 	require.Nil(t, err)
