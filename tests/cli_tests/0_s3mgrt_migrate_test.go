@@ -59,7 +59,7 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when bucket too large for allocation", func(t *test.SystemTest) {
-		allocSize := int64(5 * KB)
+		allocSize := int64(64 * KB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
