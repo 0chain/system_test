@@ -34,6 +34,7 @@ func Test0BoxTransactions(testSetup *testing.T) {
 		require.NotNil(t, txnByHash, "No transaction received with hash request")
 		require.Equal(t, txnFromZbox.Hash, txnByHash.Hash)
 		require.Equal(t, txnFromZbox.BlockHash, txnDataByHash.BlockHash)
+		require.Equal(t, txnFromZbox.Round, txnDataByHash.Round)
 		require.Equal(t, txnFromZbox.Version, txnByHash.Version)
 		require.Equal(t, txnFromZbox.ClientId, txnByHash.ClientId)
 		require.Equal(t, txnFromZbox.ToClientId, txnByHash.ToClientId)
@@ -46,8 +47,7 @@ func Test0BoxTransactions(testSetup *testing.T) {
 		require.Equal(t, txnFromZbox.Signature, txnByHash.Signature)
 		require.Equal(t, txnFromZbox.Value, txnByHash.TransactionValue)
 		require.Equal(t, txnFromZbox.OutputHash, txnByHash.TxnOutputHash)
-		require.Equal(t, txnFromZbox.Signature, txnByHash.Signature)
-		require.Equal(t, txnFromZbox.CreationDate, txnByHash.CreationDate)
+		require.Equal(t, txnFromZbox.CreationDate/int64(1e9), txnByHash.CreationDate)
 
 		pitId := txnsData.PitId
 		txnsData, resp, err = zboxClient.GetTransactionsList(t, pitId)
@@ -71,6 +71,7 @@ func Test0BoxTransactions(testSetup *testing.T) {
 		require.NotNil(t, txnByHash, "No transaction received with hash request")
 		require.Equal(t, txnFromZbox.Hash, txnByHash.Hash)
 		require.Equal(t, txnFromZbox.BlockHash, txnDataByHash.BlockHash)
+		require.Equal(t, txnFromZbox.Round, txnDataByHash.Round)
 		require.Equal(t, txnFromZbox.Version, txnByHash.Version)
 		require.Equal(t, txnFromZbox.ClientId, txnByHash.ClientId)
 		require.Equal(t, txnFromZbox.ToClientId, txnByHash.ToClientId)
@@ -83,7 +84,6 @@ func Test0BoxTransactions(testSetup *testing.T) {
 		require.Equal(t, txnFromZbox.Signature, txnByHash.Signature)
 		require.Equal(t, txnFromZbox.Value, txnByHash.TransactionValue)
 		require.Equal(t, txnFromZbox.OutputHash, txnByHash.TxnOutputHash)
-		require.Equal(t, txnFromZbox.Signature, txnByHash.Signature)
-		require.Equal(t, txnFromZbox.CreationDate, txnByHash.CreationDate)
+		require.Equal(t, txnFromZbox.CreationDate/int64(1e9), txnByHash.CreationDate)
 	})
 }
