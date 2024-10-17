@@ -1326,3 +1326,20 @@ func (c *ZboxClient) RefreshJwtToken(t *test.SystemTest, token string, headers m
 
 	return zboxJwtToken, resp, err
 }
+
+func (c *ZboxClient) GetTransactionsList(t *test.SystemTest, pitId string) (*model.ZboxTransactionsDataResponse, *resty.Response, error) {
+	t.Logf("Getting transactions data with pitid using 0box...")
+	var txnData model.ZboxTransactionsDataResponse
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/transactions")
+	urlBuilder.queries.Set("pit_id", pitId)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &txnData,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &txnData, resp, err
+}
