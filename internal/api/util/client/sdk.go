@@ -107,8 +107,12 @@ func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet) {
 	require.NoError(t, err, ErrInitStorageSDK)
 }
 
-func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string) (tmpFilePath string, actualSizeUploaded int64) {
-	return c.UploadFileWithParams(t, allocationID, 1024, "")
+func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string, options ...int64) (tmpFilePath string, actualSizeUploaded int64) {
+	fileSize := int64(65636)
+	if len(options) > 0 {
+		fileSize = int64(options[0])
+	}
+	return c.UploadFileWithParams(t, allocationID, fileSize, "")
 }
 
 func (c *SDKClient) UploadFileWithParams(t *test.SystemTest, allocationID string, fileSize int64, path string) (tmpFilePath string, actualSizeUploaded int64) {
@@ -134,11 +138,8 @@ func (c *SDKClient) DeleteFile(t *test.SystemTest, allocationID, fpath string) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
-	sdkAllocation, err := sdk.GetAllocation(allocationID)
-	require.NoError(t, err)
-
-	err = sdkAllocation.DeleteFile("/" + filepath.Join("", filepath.Base(fpath)))
-	require.NoError(t, err)
+	deleteOp := c.AddDeleteOperation(t, allocationID, "/"+filepath.Join("", filepath.Base(fpath)))
+	c.MultiOperation(t, allocationID, []sdk.OperationRequest{deleteOp})
 }
 
 func (c *SDKClient) DownloadFile(t *test.SystemTest, allocationID, remotepath, localpath string) {
