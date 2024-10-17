@@ -35,3 +35,11 @@ tests/cli/__debug_bin
 tests/cli_tests/*.png
 
 **/*.log
+
+.pre-commit-config.yaml
+warp-*.csv.zst
+warp-*_output.txt
+warp
+minio
+mc
+store
