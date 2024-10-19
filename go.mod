@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.17.12-0.20241014173327-bceb3f933c4a
+	github.com/0chain/gosdk v1.18.0-RC1.0.20241019160820-24aad2c5153e
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
