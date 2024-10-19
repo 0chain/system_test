@@ -17,9 +17,6 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-// address of minersc
-const MINER_SC_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
-
 func TestSendAndBalance(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Send with description")
@@ -130,7 +127,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		wantFailureMsg := `Send tokens failed. submit transaction failed. {"error":"insufficient balance to send"}`
+		wantFailureMsg := `Send tokens failed. submit transaction failed: {"error":"insufficient balance to send"}`
 
 		output, err := sendZCN(t, configPath, target.ClientID, "1", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
@@ -143,7 +140,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		createWallet(t)
 
 		invalidClientID := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabb" // more than 64 chars
-		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"error\":\"invalid to client id\"}"
+		wantFailureMsg := "Send tokens failed. submit transaction failed: {\"error\":\"invalid to client id\"}"
 
 		output, err := sendZCN(t, configPath, invalidClientID, "1", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
@@ -183,7 +180,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		wantFailureMsg := `Send tokens failed. submit transaction failed. {"error":"insufficient balance to send"}`
+		wantFailureMsg := `Send tokens failed. submit transaction failed: {"error":"insufficient balance to send"}`
 		tokens := strconv.Itoa(int(balance) + 1)
 
 		output, err := sendZCN(t, configPath, target.ClientID, tokens, "", createParams(map[string]interface{}{}), false)
@@ -228,7 +225,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		}
 		longDesc := string(b)
 
-		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"txn_exceed_max_payload\"," +
+		wantFailureMsg := "Send tokens failed. submit transaction failed: {\"code\":\"txn_exceed_max_payload\"," +
 			"\"error\":\"txn_exceed_max_payload: transaction payload exceeds the max payload (98304)\"}"
 
 		output, err := sendZCN(t, configPath, target.ClientID, "1", longDesc, createParams(map[string]interface{}{}), false)
@@ -244,7 +241,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "Get wallet failed")
 
-		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
+		wantFailureMsg := "Send tokens failed. submit transaction failed: {\"code\":\"invalid_request\"," +
 			"\"error\":\"invalid_request: Invalid request (from and to client should be different)\"}"
 
 		output, err := sendZCN(t, configPath, wallet.ClientID, "1", "", createParams(map[string]interface{}{}), false)
