@@ -109,7 +109,6 @@ func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w
 
 		wg := sync.WaitGroup{}
 		wg.Add(1)
-
 		t.Logf("Test case [%s] scheduled at [%s] ", name, time.Now().Format("01-02-2006 15:04:05"))
 
 		if SmokeTestMode && !s.runAllTestsAsSmoke && len(s.smokeTests) < 1 {
