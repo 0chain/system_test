@@ -28,7 +28,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	t.Parallel()
 
 	t.Run("rename folder should work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 
 		remotePath := "/child"
 
@@ -78,8 +78,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file should work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -147,8 +147,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.RunWithTimeout("Rename file concurrently to existing directory, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: slow
-		const allocSize int64 = 2048
-		const fileSize int64 = 256
+		const allocSize int64 = 64 * KB * 4
+		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -216,8 +216,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file to same filename (no change) shouldn't work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -277,8 +277,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file to with 90-char (below 100-char filename limit)", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -352,8 +352,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file to with 160-char (above 150-char filename limit) should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -426,8 +426,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file to containing special characters", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -543,7 +543,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename root path should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 
 		remotePath := "/"
 		destName := "new_"
@@ -563,7 +563,7 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	}) //todo: too slow
 
 	t.Run("rename non-existing file should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -585,8 +585,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 
 		createWalletForName(nonAllocOwnerWallet)
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -741,8 +741,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.Run("rename file with allocation rename file option forbidden should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -784,8 +784,8 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 	})
 
 	t.RunWithTimeout("Rename and delete file concurrently, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: unacceptably slow
-		const allocSize int64 = 2048
-		const fileSize int64 = 256
+		const allocSize int64 = 64 * KB * 8
+		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,

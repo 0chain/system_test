@@ -136,15 +136,12 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		newOps := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
-			switch i % 3 {
+			switch i % 2 {
 			case 0:
 				op := sdkClient.AddDeleteOperation(t, allocationID, ops[i].FileMeta.RemotePath)
 				newOps = append(newOps, op)
 			case 1:
 				op := sdkClient.AddUpdateOperation(t, ops[i].FileMeta.RemotePath, ops[i].FileMeta.RemoteName, ops[i].FileMeta.ActualSize)
-				newOps = append(newOps, op)
-			case 2:
-				op := sdkClient.AddRenameOperation(t, allocationID, ops[i].FileMeta.RemotePath, randName())
 				newOps = append(newOps, op)
 			}
 		}

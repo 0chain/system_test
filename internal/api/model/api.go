@@ -490,6 +490,7 @@ type SCRestGetAllocationBlobbersResponse struct {
 	Blobbers           *[]string `json:"blobbers"`
 	BlobberAuthTickets []string  `json:"blobber_auth_tickets"`
 	BlobberRequirements
+	StorageVersion int `json:"storage_version"`
 }
 
 type SCRestGetAllocationRequest struct {

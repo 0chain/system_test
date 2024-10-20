@@ -983,7 +983,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
 
-		allocSize := int64(4096)
+		allocSize := int64(64 * KB * 2)
 
 		allocationID := utils.SetupEnterpriseAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
@@ -1020,7 +1020,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error creating wallet %v", strings.Join(output, "\n"))
 
-		allocSize := int64(4096)
+		allocSize := int64(64 * KB * 2)
 		fileSize := int64(1024)
 
 		allocationID := utils.SetupEnterpriseAllocationAndReadLock(t, configPath, map[string]interface{}{

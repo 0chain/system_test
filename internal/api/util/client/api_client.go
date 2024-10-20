@@ -689,6 +689,7 @@ func (c *APIClient) V1SCRestGetAllocation(t *test.SystemTest, scRestGetAllocatio
 
 func (c *APIClient) V1SCRestGetAllocationBlobbers(t *test.SystemTest, scRestGetAllocationBlobbersRequest *model.SCRestGetAllocationBlobbersRequest, requiredStatusCode int) (*model.SCRestGetAllocationBlobbersResponse, *resty.Response, error) { //nolint
 	scRestGetAllocationBlobbersResponse := new(model.SCRestGetAllocationBlobbersResponse)
+	scRestGetAllocationBlobbersResponse.StorageVersion = 1
 
 	data, err := json.Marshal(scRestGetAllocationBlobbersRequest.BlobberRequirements)
 	if err != nil {
@@ -1232,6 +1233,8 @@ func (c *APIClient) GetAllocationBlobbers(t *test.SystemTest, wallet *model.Wall
 			ClientKey:           wallet.PublicKey,
 			BlobberRequirements: *blobberRequirements,
 		}, requiredStatusCode)
+
+	scRestGetAllocationBlobbersResponse.StorageVersion = 1
 
 	if requiredStatusCode == http.StatusOK {
 		require.Nil(t, err)
