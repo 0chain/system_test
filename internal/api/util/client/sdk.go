@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"crypto/rand"
+	"github.com/0chain/gosdk/core/client"
 	"io"
 	"os"
 	"path/filepath"
@@ -96,13 +97,12 @@ func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet) {
 	serializedWallet, err := c.wallet.String()
 	require.NoError(t, err, "failed to serialize wallet object", wallet)
 
-	err = sdk.InitStorageSDK(
+	err = client.InitSDK(
 		serializedWallet,
 		c.blockWorker,
 		"",
 		crypto.BLS0Chain,
-		nil,
-		int64(wallet.Nonce),
+		int64(wallet.Nonce), false, true,
 	)
 	require.NoError(t, err, ErrInitStorageSDK)
 }

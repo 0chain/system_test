@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
+	coreClient "github.com/0chain/gosdk/core/client"
 	"io"
 	"os"
 	"regexp"
@@ -14,8 +16,6 @@ import (
 
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
-	"github.com/0chain/gosdk/zcncore"
-
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -26,62 +26,9 @@ var (
 	createAllocationRegex = regexp.MustCompile(`^Allocation created: (.+)$`)
 )
 
-func SetupAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, extraParam map[string]interface{}) string {
-	tokens := float64(1)
-	if tok, ok := extraParam["tokens"]; ok {
-		token, err := strconv.ParseFloat(fmt.Sprintf("%v", tok), 64)
-		require.Nil(t, err)
-		tokens = token
-	}
-
-	allocationID := SetupAllocation(t, cliConfigFilename, extraParam)
-
-	// Lock half the tokens for read pool
-	readPoolParams := CreateParams(map[string]interface{}{
-		"tokens": tokens / 2,
-	})
-	output, err := ReadPoolLock(t, cliConfigFilename, readPoolParams, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 1)
-	require.Equal(t, "locked", output[0])
-
-	return allocationID
-}
-
 func SetupEnterpriseAllocationAndReadLock(t *test.SystemTest, cliConfigFilename string, extraParam map[string]interface{}) string {
-	tokens := float64(1)
-	if tok, ok := extraParam["tokens"]; ok {
-		token, err := strconv.ParseFloat(fmt.Sprintf("%v", tok), 64)
-		require.Nil(t, err)
-		tokens = token
-	}
-
 	allocationID := SetupEnterpriseAllocation(t, cliConfigFilename, extraParam)
-
-	// Lock half the tokens for read pool
-	readPoolParams := CreateParams(map[string]interface{}{
-		"tokens": tokens / 2,
-	})
-	output, err := ReadPoolLock(t, cliConfigFilename, readPoolParams, true)
-	require.Nil(t, err, strings.Join(output, "\n"))
-	require.Len(t, output, 1)
-	require.Equal(t, "locked", output[0])
-
 	return allocationID
-}
-
-func ReadPoolLock(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
-	return readPoolLockWithWallet(t, EscapedTestName(t), cliConfigFilename, params, retry)
-}
-
-func readPoolLockWithWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
-	t.Logf("Locking read tokens...")
-	cmd := fmt.Sprintf("./zbox rp-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
-	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
-	} else {
-		return cliutils.RunCommandWithoutRetry(cmd)
-	}
 }
 
 func SetupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) string {
@@ -379,22 +326,17 @@ func InitSDK(wallet, configFile string) error {
 		return err
 	}
 
-	marshal, err := json.Marshal(parsed)
-	if err != nil {
-		return err
-	}
-	err = zcncore.Init(string(marshal))
+	err = coreClient.Init(context.Background(), parsed)
 	if err != nil {
 		return err
 	}
 
-	err = sdk.InitStorageSDK(
+	err = coreClient.InitSDK(
 		walletJSON,
 		parsed.BlockWorker,
 		parsed.ChainID,
 		parsed.SignatureScheme,
-		nil,
-		0,
+		0, false, true,
 	)
 	return err
 }
