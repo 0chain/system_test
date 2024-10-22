@@ -97,7 +97,7 @@ jobs:
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
-          system_tests_branch: feat/enterprise-blobber-tests
+          system_tests_branch: fix/tokenomics-enterprise-blobber-tests
           archive_results: true
           run_flaky_tests: false
           use_egosdk: true
@@ -121,7 +121,7 @@ jobs:
           archive_results: true
           run_flaky_tests: false
           use_egosdk: true
-          system_tests_branch: feat/enterprise-blobber-tests
+          system_tests_branch: fix/tokenomics-enterprise-blobber-tests
           custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_api_system_tests: false
           run_cli_system_tests: false
@@ -142,7 +142,7 @@ jobs:
           deploy_report_page: true
           archive_results: true
           use_egosdk: true
-          system_tests_branch: feat/enterprise-blobber-tests
+          system_tests_branch: fix/tokenomics-enterprise-blobber-tests
           run_flaky_tests: false
           run_api_system_tests: false
           custom_go_sdk_version: ${{ inputs.gosdk_version }}
@@ -165,7 +165,7 @@ jobs:
           archive_results: true
           custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_flaky_tests: false
-          system_tests_branch: feat/enterprise-blobber-tests
+          system_tests_branch: fix/tokenomics-enterprise-blobber-tests
           use_egosdk: true
           run_api_system_tests: false
           run_cli_system_tests: false
@@ -184,7 +184,7 @@ jobs:
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
-          system_tests_branch: feat/enterprise-blobber-tests
+          system_tests_branch: fix/tokenomics-enterprise-blobber-tests
           archive_results: true
           custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_flaky_tests: false
