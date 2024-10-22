@@ -13,6 +13,10 @@ on:
         default: 'current-sprint'
         required: true
 
+      gosdk_version:
+        description: 'the gosdk branch from which to build the zbox and zwallet images.'
+        default: ''
+
 jobs:
   system-tests:
     name: "System Tests"
@@ -73,11 +77,12 @@ jobs:
 
       - name: "Deploy 0Chain with enterprise blobbers"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain@feature/enterprise-blobber
+        uses: 0chain/actions/deploy-0chain@feature/add-egosdk-tokenomics-action
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
+          is_enterprise_blobbers: true
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
           TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
@@ -86,15 +91,17 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Enterprise blobber create allocation tests"
-        uses: 0chain/actions/run-system-tests-tokenomics@master
+        uses: 0chain/actions/run-system-tests-tokenomics@feature/add-egosdk-tokenomics-action
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
-          system_tests_branch: feat/enterprise-blobber-tests
+          system_tests_branch: fix/tokenomics-enterprise-blobber-tests
           archive_results: true
           run_flaky_tests: false
+          use_egosdk: true
+          custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
@@ -105,7 +112,7 @@ jobs:
           TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
 
       - name: "Run Enterprise blobber update allocation tests"
-        uses: 0chain/actions/run-system-tests-tokenomics@master
+        uses: 0chain/actions/run-system-tests-tokenomics@feature/add-egosdk-tokenomics-action
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
@@ -113,7 +120,9 @@ jobs:
           deploy_report_page: true
           archive_results: true
           run_flaky_tests: false
-          system_tests_branch: feat/enterprise-blobber-tests
+          use_egosdk: true
+          system_tests_branch: fix/tokenomics-enterprise-blobber-tests
+          custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
@@ -125,16 +134,18 @@ jobs:
           TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
 
       - name: "Run Enterprise blobber replace blobber allocation tests"
-        uses: 0chain/actions/run-system-tests-tokenomics@master
+        uses: 0chain/actions/run-system-tests-tokenomics@feature/add-egosdk-tokenomics-action
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
-          system_tests_branch: feat/enterprise-blobber-tests
+          use_egosdk: true
+          system_tests_branch: fix/tokenomics-enterprise-blobber-tests
           run_flaky_tests: false
           run_api_system_tests: false
+          custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.ENTERPRISE_BLOBBER_REPLACE_ALLOCATION_TESTS }}
@@ -145,15 +156,17 @@ jobs:
           TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
 
       - name: "Run Enterprise blobber cancel allocation tests"
-        uses: 0chain/actions/run-system-tests-tokenomics@master
+        uses: 0chain/actions/run-system-tests-tokenomics@feature/add-egosdk-tokenomics-action
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
+          custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_flaky_tests: false
-          system_tests_branch: feat/enterprise-blobber-tests
+          system_tests_branch: fix/tokenomics-enterprise-blobber-tests
+          use_egosdk: true
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
@@ -165,16 +178,18 @@ jobs:
           TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
 
       - name: "Run Enterprise blobber finalize allocation tests"
-        uses: 0chain/actions/run-system-tests-tokenomics@master
+        uses: 0chain/actions/run-system-tests-tokenomics@feature/add-egosdk-tokenomics-action
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
-          system_tests_branch: feat/enterprise-blobber-tests
+          system_tests_branch: fix/tokenomics-enterprise-blobber-tests
           archive_results: true
+          custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_flaky_tests: false
           run_api_system_tests: false
+          use_egosdk: true
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.ENTERPRISE_BLOBBER_FINALIZE_ALLOCATION_TESTS }}
@@ -404,38 +419,38 @@ jobs:
 
 
 
-  notify_slack_on_failure:
-    runs-on: [ self-hosted, arc-runner ]
-    needs: [ system-tests ]
-    if: always() && (needs.system-tests.result == 'failure')
-    steps:
-      - name: "Notify Slack"
-        run: |
-          payload='{
-          "text": "'"<!here> Tokenomics Nightly Tests - Current Sprint FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
-          "attachments": [
-              {
-              "text": "Tokenomics Nightly Tests - Current sprint: FAILED ⚠️",
-              "color": "#ff0000"
-              }
-          ]
-          }'
-          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
-
-  notify_slack_on_success:
-    runs-on: [ self-hosted, arc-runner ]
-    needs: [ system-tests ]
-    if: always() && (needs.system-tests.result == 'success')
-    steps:
-      - name: "Notify Slack"
-        run: |
-          payload='{
-          "text": "'"<!here> Tokenomics Nightly Tests - Current Sprint PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
-          "attachments": [
-              {
-              "text": "Tokenomics Nightly Tests - Current sprint: PASSED ✅",
-              "color": "#22bb33"
-              }
-          ]
-          }'
-          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+#  notify_slack_on_failure:
+#    runs-on: [ self-hosted, arc-runner ]
+#    needs: [ system-tests ]
+#    if: always() && (needs.system-tests.result == 'failure')
+#    steps:
+#      - name: "Notify Slack"
+#        run: |
+#          payload='{
+#          "text": "'"<!here> Tokenomics Nightly Tests - Current Sprint FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+#          "attachments": [
+#              {
+#              "text": "Tokenomics Nightly Tests - Current sprint: FAILED ⚠️",
+#              "color": "#ff0000"
+#              }
+#          ]
+#          }'
+#          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+#
+#  notify_slack_on_success:
+#    runs-on: [ self-hosted, arc-runner ]
+#    needs: [ system-tests ]
+#    if: always() && (needs.system-tests.result == 'success')
+#    steps:
+#      - name: "Notify Slack"
+#        run: |
+#          payload='{
+#          "text": "'"<!here> Tokenomics Nightly Tests - Current Sprint PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+#          "attachments": [
+#              {
+#              "text": "Tokenomics Nightly Tests - Current sprint: PASSED ✅",
+#              "color": "#22bb33"
+#              }
+#          ]
+#          }'
+#          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
