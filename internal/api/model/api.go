@@ -190,18 +190,6 @@ func NewCreateWritePoolTransactionData(createWritePoolRequest CreateWritePoolReq
 	}
 }
 
-func NewCreateReadPoolTransactionData() TransactionData {
-	return TransactionData{
-		Name: "read_pool_lock",
-	}
-}
-
-func NewUnlockReadPoolTransactionData() TransactionData {
-	return TransactionData{
-		Name: "read_pool_unlock",
-	}
-}
-
 func NewCreateStackPoolTransactionData(createStakePoolRequest CreateStakePoolRequest) TransactionData {
 	return TransactionData{
 		Name:  "stake_pool_lock",
@@ -372,10 +360,6 @@ type ClientGetBalanceResponse struct {
 	Nonce   int64  `json:"nonce"`
 }
 
-type ClientGetReadPoolBalanceRequest struct {
-	ClientID string
-}
-
 type QueryRequest struct {
 	Query string
 }
@@ -387,11 +371,6 @@ type BlockRewardsRequest struct {
 
 type GetAllChallengesForAllocationRequest struct {
 	AllocationID string
-}
-
-type ClientGetReadPoolBalanceResponse struct {
-	UserID  string `json:"user_id" gorm:"uniqueIndex"`
-	Balance int64  `json:"balance"`
 }
 
 type QueryRewardsResponse struct {

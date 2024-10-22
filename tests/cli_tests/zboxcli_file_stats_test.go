@@ -401,7 +401,7 @@ func TestFileStats(testSetup *testing.T) {
 		t.Skip()
 		allocSize := int64(2048)
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})

@@ -894,3 +894,18 @@ func renameFileWithWallet(t *test.SystemTest, cliConfigFilename, wallet string, 
 
 	return cliutils.RunCommand(t, cmd, 3, time.Second*20)
 }
+
+func unitToZCN(unitCost float64, unit string) float64 {
+	switch unit {
+	case "SAS", "sas":
+		unitCost /= 1e10
+		return unitCost
+	case "uZCN", "uzcn":
+		unitCost /= 1e6
+		return unitCost
+	case "mZCN", "mzcn":
+		unitCost /= 1e3
+		return unitCost
+	}
+	return unitCost
+}

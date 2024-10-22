@@ -27,9 +27,9 @@ func TestResumeDownload(testSetup *testing.T) {
 		filesize := int64(600 * MB)
 		remotepath := "/"
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
-			"tokens": 9,
+			"lock":   9,
 			"data":   3,
 			"parity": 1,
 		})
