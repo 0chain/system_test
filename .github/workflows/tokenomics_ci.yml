@@ -13,6 +13,10 @@ on:
         default: 'current-sprint'
         required: true
 
+      gosdk_version:
+        description: 'the gosdk branch from which to build the zbox and zwallet images.'
+        default: ''
+
 jobs:
   system-tests:
     name: "System Tests"
@@ -97,6 +101,7 @@ jobs:
           archive_results: true
           run_flaky_tests: false
           use_egosdk: true
+          custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
@@ -117,6 +122,7 @@ jobs:
           run_flaky_tests: false
           use_egosdk: true
           system_tests_branch: feat/enterprise-blobber-tests
+          custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
@@ -139,6 +145,7 @@ jobs:
           system_tests_branch: feat/enterprise-blobber-tests
           run_flaky_tests: false
           run_api_system_tests: false
+          custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.ENTERPRISE_BLOBBER_REPLACE_ALLOCATION_TESTS }}
@@ -156,6 +163,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
+          custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_flaky_tests: false
           system_tests_branch: feat/enterprise-blobber-tests
           use_egosdk: true
@@ -178,6 +186,7 @@ jobs:
           deploy_report_page: true
           system_tests_branch: feat/enterprise-blobber-tests
           archive_results: true
+          custom_go_sdk_version: ${{ inputs.gosdk_version }}
           run_flaky_tests: false
           run_api_system_tests: false
           use_egosdk: true
