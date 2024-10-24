@@ -955,7 +955,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		nonAllocOwnerWallet := utils.EscapedTestName(t) + "_NON_OWNER"
 
-		_, err = utils.CreateWalletForName(t, configPath, nonAllocOwnerWallet)
+		_, err = utils.createWalletForName(nonAllocOwnerWallet)
 		require.Nil(t, err)
 
 		params = createParams(map[string]interface{}{
@@ -983,7 +983,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
 
-		allocSize := int64(4096)
+		allocSize := int64(64 * KB * 2)
 
 		allocationID := utils.SetupEnterpriseAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
@@ -1020,7 +1020,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error creating wallet %v", strings.Join(output, "\n"))
 
-		allocSize := int64(4096)
+		allocSize := int64(64 * KB * 2)
 		fileSize := int64(1024)
 
 		allocationID := utils.SetupEnterpriseAllocationAndReadLock(t, configPath, map[string]interface{}{
@@ -1261,7 +1261,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 		myAllocationID := setupAllocation(t, configPath)
 
 		targetWalletName := utils.EscapedTestName(t) + "_TARGET"
-		_, err := utils.CreateWalletForName(t, configPath, targetWalletName)
+		_, err := utils.createWalletForName(targetWalletName)
 		require.Nil(t, err)
 
 		size := int64(2048)
@@ -1397,7 +1397,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		nonAllocOwnerWallet := utils.EscapedTestName(t) + "_NON_OWNER"
 
-		_, err = utils.CreateWalletForName(t, configPath, nonAllocOwnerWallet)
+		_, err = utils.createWalletForName(nonAllocOwnerWallet)
 		require.Nil(t, err)
 
 		params = createParams(map[string]interface{}{
@@ -1432,7 +1432,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 
 		nonAllocOwnerWallet := utils.EscapedTestName(t) + "_NON_OWNER"
 
-		_, err = utils.CreateWalletForName(t, configPath, nonAllocOwnerWallet)
+		_, err = utils.createWalletForName(nonAllocOwnerWallet)
 		require.Nil(t, err, "Error creating wallet for non allocaiton owner")
 
 		params = createParams(map[string]interface{}{
@@ -1490,7 +1490,7 @@ func TestUpdateEnterpriseAllocation(testSetup *testing.T) {
 }
 
 func setupAndParseAllocation(t *test.SystemTest, cliConfigFilename string, extraParams ...map[string]interface{}) (string, climodel.Allocation) {
-	allocationID := setupAllocation(t, cliConfigFilename, extraParams...)
+	allocationID := setupAllocation(cliConfigFilename, extraParams...)
 
 	allocations := parseListAllocations(t, cliConfigFilename)
 	allocation, ok := allocations[allocationID]
@@ -1522,7 +1522,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 }
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	output, err := utils.CreateWalletForName(t, configPath, walletName)
+	output, err := utils.createWalletForName(walletName)
 	require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
 
 	output, err = utils.ExecuteFaucetWithTokens(t, configPath, 1000)
