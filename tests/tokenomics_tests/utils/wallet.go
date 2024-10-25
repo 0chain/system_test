@@ -40,8 +40,7 @@ func CreateWallet(t *test.SystemTest, cliConfigFilename string, opt ...createWal
 }
 
 type createWalletOption struct {
-	noPourAndReadPool bool
-	debugLogs         bool
+	debugLogs bool
 }
 
 type createWalletOptionFunc func(*createWalletOption)
@@ -51,11 +50,6 @@ func CreateWalletForName(t *test.SystemTest, cliConfigFilename, name string, opt
 	regOpt := &createWalletOption{}
 	for _, opt := range opts {
 		opt(regOpt)
-	}
-
-	if regOpt.noPourAndReadPool {
-		return cliutils.RunCommand(t, "./zwallet create-wallet --silent "+
-			"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 	}
 
 	if regOpt.debugLogs {
