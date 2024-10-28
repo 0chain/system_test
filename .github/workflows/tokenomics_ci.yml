@@ -95,6 +95,7 @@ jobs:
           deploy_report_page: true
           archive_results: true
           custom_go_sdk_version: feat/enterprise-blobber
+          system_tests_branch: fix/tokenomics-sprint-tests
           run_flaky_tests: false
           run_api_system_tests: false
           run_cli_system_tests: false
@@ -115,6 +116,7 @@ jobs:
           archive_results: true
           run_flaky_tests: false
           custom_go_sdk_version: feat/enterprise-blobber
+          system_tests_branch: fix/tokenomics-sprint-tests
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
@@ -136,6 +138,7 @@ jobs:
           run_flaky_tests: false
           run_api_system_tests: false
           custom_go_sdk_version: feat/enterprise-blobber
+          system_tests_branch: fix/tokenomics-sprint-tests
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.ENTERPRISE_BLOBBER_REPLACE_ALLOCATION_TESTS }}
@@ -156,6 +159,7 @@ jobs:
           run_flaky_tests: false
           run_api_system_tests: false
           custom_go_sdk_version: feat/enterprise-blobber
+          system_tests_branch: fix/tokenomics-sprint-tests
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.ENTERPRISE_BLOBBER_CANCEL_ALLOCATION_TESTS }}
@@ -175,6 +179,7 @@ jobs:
           archive_results: true
           run_flaky_tests: false
           custom_go_sdk_version: feat/enterprise-blobber
+          system_tests_branch: fix/tokenomics-sprint-tests
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
