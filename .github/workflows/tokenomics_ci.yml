@@ -97,6 +97,8 @@ jobs:
           custom_go_sdk_version: feat/enterprise-blobber
           system_tests_branch: fix/tokenomics-sprint-tests
           run_flaky_tests: false
+          zbox_cli_branch: staging
+          zwallet_cli_branch: staging
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
@@ -117,6 +119,8 @@ jobs:
           run_flaky_tests: false
           custom_go_sdk_version: feat/enterprise-blobber
           system_tests_branch: fix/tokenomics-sprint-tests
+          zbox_cli_branch: staging
+          zwallet_cli_branch: staging
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
@@ -138,6 +142,8 @@ jobs:
           run_flaky_tests: false
           run_api_system_tests: false
           custom_go_sdk_version: feat/enterprise-blobber
+          zbox_cli_branch: staging
+          zwallet_cli_branch: staging
           system_tests_branch: fix/tokenomics-sprint-tests
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
@@ -159,6 +165,8 @@ jobs:
           run_flaky_tests: false
           run_api_system_tests: false
           custom_go_sdk_version: feat/enterprise-blobber
+          zbox_cli_branch: staging
+          zwallet_cli_branch: staging
           system_tests_branch: fix/tokenomics-sprint-tests
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
@@ -179,6 +187,8 @@ jobs:
           archive_results: true
           run_flaky_tests: false
           custom_go_sdk_version: feat/enterprise-blobber
+          zbox_cli_branch: staging
+          zwallet_cli_branch: staging
           system_tests_branch: fix/tokenomics-sprint-tests
           run_api_system_tests: false
           run_cli_system_tests: false
