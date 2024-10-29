@@ -319,7 +319,7 @@ func TestCancelEnterpriseAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Cancel Other's Allocation Should Fail", func(t *test.SystemTest) {
-		output, err := utils.createWalletForName(utils.EscapedTestName(t) + "_other")
+		output, err := utils.CreateWalletForName(t, configPath, utils.EscapedTestName(t)+"_other")
 		require.Nil(t, err, "Unable to create the wallet", strings.Join(output, "\n"))
 
 		otherAllocationID := utils.SetupEnterpriseAllocationWithWallet(t, utils.EscapedTestName(t)+"_other", configPath)
