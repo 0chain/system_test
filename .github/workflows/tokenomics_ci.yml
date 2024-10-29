@@ -210,17 +210,17 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@master
-        withfeature/add-egosdk-tokenomics-action
-        repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-        kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-        teardown_condition: "TESTS_PASSED"
-        SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-        TENDERLY_VIRTUAL_TESTNET_ID: ""
-        graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
-        graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-        graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
-        svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+        uses: 0chain/actions/deploy-0chain-2b2v@feature/add-egosdk-tokenomics-action
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Allocation System tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
@@ -242,17 +242,17 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@master
-        withfeature/add-egosdk-tokenomics-action
-        repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-        kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-        teardown_condition: "TESTS_PASSED"
-        SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-        TENDERLY_VIRTUAL_TESTNET_ID: ""
-        graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
-        graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-        graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
-        svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+        uses: 0chain/actions/deploy-0chain-2b2v@feature/add-egosdk-tokenomics-action
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Challenge Reward System tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
@@ -274,17 +274,17 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-3b3v@master
-        withfeature/add-egosdk-tokenomics-action
-        repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-        kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-        teardown_condition: "TESTS_PASSED"
-        SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-        TENDERLY_VIRTUAL_TESTNET_ID: ""
-        graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
-        graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-        graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
-        svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+        uses: 0chain/actions/deploy-0chain-3b3v@feature/add-egosdk-tokenomics-action
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Allocation Add Or Replace Blobber Rewards tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
@@ -306,17 +306,17 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@master
-        withfeature/add-egosdk-tokenomics-action
-        repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-        kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-        teardown_condition: "TESTS_PASSED"
-        SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-        TENDERLY_VIRTUAL_TESTNET_ID: ""
-        graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
-        graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-        graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
-        svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+        uses: 0chain/actions/deploy-0chain-2b2v@feature/add-egosdk-tokenomics-action
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Read Rewards System tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
@@ -356,17 +356,17 @@ jobs:
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-minstake@master
-        withfeature/add-egosdk-tokenomics-action
-        repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-        kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-        teardown_condition: "TESTS_PASSED"
-        SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-        TENDERLY_VIRTUAL_TESTNET_ID: ""
-        graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
-        graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-        graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
-        svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+        uses: 0chain/actions/deploy-0chain-minstake@feature/add-egosdk-tokenomics-action
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Min Stake System tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
