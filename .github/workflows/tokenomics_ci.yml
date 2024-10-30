@@ -73,7 +73,7 @@ jobs:
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
-      - name: "Run Allocation System tests"
+      - name: "Run Challenge Reward System tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
@@ -85,7 +85,7 @@ jobs:
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
-          tokenomics_test_filter: ${{ env.TOKENOMICS_ALLOCATION_TESTS }}
+          tokenomics_test_filter: ${{ env.TOKENOMICS_CHALLENGE_REWARD_TESTS }}
           TENDERLY_VIRTUAL_TESTNET_ID: ""
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
@@ -105,7 +105,7 @@ jobs:
           graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
-      - name: "Run Challenge Reward System tests"
+      - name: "Run Allocation System tests"
         uses: 0chain/actions/run-system-tests-tokenomics@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
@@ -117,7 +117,7 @@ jobs:
           run_api_system_tests: false
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
-          tokenomics_test_filter: ${{ env.TOKENOMICS_CHALLENGE_REWARD_TESTS }}
+          tokenomics_test_filter: ${{ env.TOKENOMICS_ALLOCATION_TESTS }}
           TENDERLY_VIRTUAL_TESTNET_ID: ""
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
