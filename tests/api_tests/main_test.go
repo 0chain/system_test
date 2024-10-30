@@ -1,7 +1,10 @@
 package api_tests
 
 import (
+	"context"
 	"encoding/json"
+	coreClient "github.com/0chain/gosdk/core/client"
+	"github.com/0chain/gosdk/core/conf"
 	"log"
 	"os"
 	"strconv"
@@ -9,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/0chain/gosdk/zcncore"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/config"
@@ -68,7 +70,15 @@ func TestMain(m *testing.M) {
 
 	t := test.NewSystemTest(new(testing.T))
 
-	err = zcncore.Init(getConfigForZcnCoreInit(parsedConfig.BlockWorker))
+	err = coreClient.Init(context.Background(), conf.Config{
+		BlockWorker:     parsedConfig.BlockWorker,
+		SignatureScheme: "bls0chain",
+		ChainID:         "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe",
+		MaxTxnQuery:     5,
+		QuerySleepTime:  5,
+		MinSubmit:       10,
+		MinConfirmation: 10,
+	})
 	require.NoError(t, err)
 
 	blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics

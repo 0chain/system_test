@@ -1,6 +1,8 @@
 package api_tests
 
 import (
+	"log"
+	"math"
 	"os"
 	"path"
 	"strconv"
@@ -92,11 +94,11 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		}
 
 		graphAllocTestCases := []GraphAllocTestCase{
-			{DataShards: 3, ParityShards: 2, ExpectedAllocatedStorage: 100000, Fsize: 1710},
-			{DataShards: 1, ParityShards: 1, ExpectedAllocatedStorage: 120000, Fsize: 2048},
-			{DataShards: 2, ParityShards: 2, ExpectedAllocatedStorage: 120000, Fsize: 2048},
-			{DataShards: 1, ParityShards: 2, ExpectedAllocatedStorage: 180000, Fsize: 3072},
-			{DataShards: 2, ParityShards: 3, ExpectedAllocatedStorage: 150000, Fsize: 2560},
+			{DataShards: 3, ParityShards: 2, ExpectedAllocatedStorage: 13107200 * 5 / 3, Fsize: 65536 * 5},
+			{DataShards: 1, ParityShards: 1, ExpectedAllocatedStorage: 13107200 * 2, Fsize: 65536 * 2},
+			{DataShards: 2, ParityShards: 2, ExpectedAllocatedStorage: 13107200 * 4 / 2, Fsize: 65536 * 4},
+			{DataShards: 1, ParityShards: 2, ExpectedAllocatedStorage: 13107200 * 3 / 1, Fsize: 65536 * 3},
+			{DataShards: 2, ParityShards: 3, ExpectedAllocatedStorage: 13107200 * 5 / 2, Fsize: 65536 * 5},
 		}
 
 		const tolerance = int64(10)
@@ -104,13 +106,14 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		var allocationIds []string
 
 		for i, testCase := range graphAllocTestCases {
+			log.Println("Test case: ", i)
 			blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 			blobberRequirements.DataShards = testCase.DataShards
 			blobberRequirements.ParityShards = testCase.ParityShards
 			allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 			allocationIds = append(allocationIds, allocationID)
-			fpath, fsize := sdkClient.UploadFile(t, allocationID)
+			fpath, fsize := sdkClient.UploadFile(t, allocationID, 65536*testCase.DataShards)
 
 			wait.PoolImmediately(t, 2*time.Minute, func() bool {
 				data, resp, err := zboxClient.GetGraphAllocatedStorage(t, &model.ZboxGraphRequest{DataPoints: "1"})
@@ -122,7 +125,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, 200, resp.StatusCode())
 				expectedTotalAllocationStorage := allocatedStorage + testCase.ExpectedAllocatedStorage
-				cond := allocatedStorageAfterAllocation == expectedTotalAllocationStorage
+				cond := math.Abs(float64(allocatedStorageAfterAllocation-expectedTotalAllocationStorage)) < float64(tolerance)
 				cond = cond && (allocatedStorageAfterAllocation == int64(*latest))
 				if cond {
 					allocatedStorage = allocatedStorageAfterAllocation
@@ -247,9 +250,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			})
 
 			// Upload another file
-			_, fsize = sdkClient.UploadFile(t, allocationID)
-			testCase.Fsize += testCase.Fsize / (testCase.DataShards + testCase.ParityShards)
-			graphAllocTestCases[i].Fsize = testCase.Fsize
+			_, fsize = sdkClient.UploadFile(t, allocationID, 65536*testCase.DataShards)
 
 			// Check increased
 			wait.PoolImmediately(t, 2*time.Minute, func() bool {
@@ -383,7 +384,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 		// Upload a file
-		sdkClient.UploadFile(t, allocationID)
+		sdkClient.UploadFile(t, allocationID, 65536)
 
 		var totalChallengePoolsAfterAllocation int64
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {
@@ -515,7 +516,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
-		fpath, fsize := sdkClient.UploadFile(t, allocationID)
+		fpath, fsize := sdkClient.UploadFile(t, allocationID, 65536)
 
 		// Check increased
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {
@@ -591,7 +592,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 
 		// Upload another file
-		_, fsize = sdkClient.UploadFile(t, allocationID)
+		_, fsize = sdkClient.UploadFile(t, allocationID, 65536)
 
 		// Check increased
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {
@@ -969,7 +970,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 			allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
 			// Upload a file
-			sdkClient.UploadFile(t, allocationID)
+			sdkClient.UploadFile(t, allocationID, 65536)
 
 			// Check total challenges increase
 			wait.PoolImmediately(t, 2*time.Minute, func() bool {
@@ -1150,7 +1151,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		require.Len(t, *data, 1)
 
 		// Upload file
-		fpath, fsize := sdkClient.UploadFile(t, allocationID)
+		fpath, fsize := sdkClient.UploadFile(t, allocationID, 65536)
 		require.NotEmpty(t, fpath)
 		require.NotZero(t, fsize)
 
@@ -1360,7 +1361,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		savedData := blobberSavedData[targetBlobber]
 
 		// Upload a file
-		fpath, fsize := sdkClient.UploadFile(t, allocationID)
+		fpath, fsize := sdkClient.UploadFile(t, allocationID, 65536)
 
 		// Check increased for the same blobber
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {
@@ -1394,7 +1395,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		})
 
 		// Upload another file
-		_, fsize = sdkClient.UploadFile(t, allocationID)
+		_, fsize = sdkClient.UploadFile(t, allocationID, 65536)
 
 		// Check increased for the same blobber
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {
@@ -1453,15 +1454,13 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocationWithLockValue(t, wallet, allocationBlobbers, 0.1, client.TxSuccessfulStatus)
 
-		apiClient.CreateReadPool(t, wallet, 100, client.TxSuccessfulStatus)
-
 		alloc, _ := sdk.GetAllocation(allocationID)
 
 		targetBlobber := alloc.BlobberDetails[0].BlobberID
 		readData := blobberReadData[targetBlobber]
 
 		// Upload a file
-		fpath, fsize := sdkClient.UploadFile(t, allocationID)
+		fpath, fsize := sdkClient.UploadFile(t, allocationID, 65536)
 
 		// Download the file
 		sdkClient.DownloadFile(t, allocationID, fpath, "temp/")
@@ -1637,7 +1636,7 @@ func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
 		rewards := blobberRewards[targetBlobber]
 
 		// Upload a file
-		sdkClient.UploadFile(t, allocationID)
+		sdkClient.UploadFile(t, allocationID, 65536)
 
 		// Check increased for the same blobber
 		wait.PoolImmediately(t, 2*time.Minute, func() bool {

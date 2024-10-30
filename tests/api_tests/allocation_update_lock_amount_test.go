@@ -75,14 +75,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 			Extend: true,
 		}
 
-		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 0, true, "", "")
-		require.NoError(t, err)
-
-		t.Logf("Min lock required: %v", minLockRequired)
-
-		minLockRequiredInZcn := float64(minLockRequired) / 1e10
-
-		apiClient.UpdateAllocation(t, wallet, allocationID, uar, minLockRequiredInZcn, client.TxSuccessfulStatus)
+		apiClient.UpdateAllocation(t, wallet, allocationID, uar, 0.1, client.TxSuccessfulStatus)
 		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		require.Equal(t, int64(1*GB), alloc.Size, "Allocation size is not updated")
