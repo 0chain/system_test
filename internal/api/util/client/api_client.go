@@ -275,12 +275,13 @@ func (c *APIClient) executeForGivenServiceProviders(
 			resp = newResp
 		} else {
 			t.Logf("Miner %s. Response: %s", serviceProvider, string(newResp.Body()))
+			respErrors = append(respErrors, errors.New(fmt.Sprintf("Miner %s. Response: %s", serviceProvider, string(newResp.Body()))))
 			notExpectedExecutionResponseCounter++
 		}
 	}
 
 	if notExpectedExecutionResponseCounter > expectedExecutionResponseCounter {
-		return nil, ErrExecutionConsensus
+		return nil, errors.Join(ErrExecutionConsensus, selectMostFrequentError(respErrors))
 	}
 
 	return resp, selectMostFrequentError(respErrors)
@@ -359,75 +360,87 @@ func (c *APIClient) V1TransactionPutWithNonceAndServiceProviders(
 	internalTransactionPutRequest model.InternalTransactionPutRequest,
 	requiredStatusCode, withNonce int, withProviders []string, options ...float64,
 ) (*model.TransactionPutResponse, *resty.Response, error) { //nolint
+	var (
+		transactionPutResponse *model.TransactionPutResponse
+		resp                   *resty.Response
+		err                    error
+	)
 
-	var transactionPutResponse *model.TransactionPutResponse
-
-	data, err := json.Marshal(internalTransactionPutRequest.TransactionData)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	transactionPutRequest := model.TransactionPutRequest{
-		ClientId:         internalTransactionPutRequest.Wallet.Id,
-		PublicKey:        internalTransactionPutRequest.Wallet.PublicKey,
-		ToClientId:       internalTransactionPutRequest.ToClientID,
-		TransactionNonce: internalTransactionPutRequest.Wallet.Nonce + 1,
-		TxnOutputHash:    TxOutput,
-		TransactionValue: *TxValue,
-		TransactionType:  internalTransactionPutRequest.TxnType,
-		TransactionFee:   int64(TxFee),
-		TransactionData:  string(data),
-		CreationDate:     time.Now().Unix(),
-		Version:          TxVersion,
-	}
-
-	if withNonce != 0 {
-		transactionPutRequest.TransactionNonce = withNonce
-	}
-
-	if len(options) == 0 {
-		if internalTransactionPutRequest.TransactionData.Name == "pour" {
-			transactionPutRequest.TransactionFee = 0
-		} else {
-			fee := estimateTxnFee(t, c, &transactionPutRequest)
-			transactionPutRequest.TransactionFee = fee
+	for retry := 0; retry < 3; retry++ {
+		var data []byte
+		data, err = json.Marshal(internalTransactionPutRequest.TransactionData)
+		if err != nil {
+			return nil, nil, err
 		}
-	} else {
-		transactionPutRequest.TransactionFee = int64(options[0] * 1e10)
+
+		transactionPutRequest := model.TransactionPutRequest{
+			ClientId:         internalTransactionPutRequest.Wallet.Id,
+			PublicKey:        internalTransactionPutRequest.Wallet.PublicKey,
+			ToClientId:       internalTransactionPutRequest.ToClientID,
+			TransactionNonce: internalTransactionPutRequest.Wallet.Nonce + 1,
+			TxnOutputHash:    TxOutput,
+			TransactionValue: *TxValue,
+			TransactionType:  internalTransactionPutRequest.TxnType,
+			TransactionFee:   int64(TxFee),
+			TransactionData:  string(data),
+			CreationDate:     time.Now().Unix(),
+			Version:          TxVersion,
+		}
+
+		if withNonce != 0 {
+			transactionPutRequest.TransactionNonce = withNonce
+		}
+
+		if len(options) == 0 {
+			if internalTransactionPutRequest.TransactionData.Name == "pour" {
+				transactionPutRequest.TransactionFee = 0
+			} else {
+				fee := estimateTxnFee(t, c, &transactionPutRequest)
+				transactionPutRequest.TransactionFee = fee
+			}
+		} else {
+			transactionPutRequest.TransactionFee = int64(options[0] * 1e10)
+		}
+
+		if internalTransactionPutRequest.Value != nil {
+			transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
+		}
+
+		transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+			transactionPutRequest.CreationDate,
+			transactionPutRequest.TransactionNonce,
+			transactionPutRequest.ClientId,
+			transactionPutRequest.ToClientId,
+			transactionPutRequest.TransactionValue,
+			crypto.Sha3256([]byte(transactionPutRequest.TransactionData)))))
+
+		crypto.SignTransaction(t, &transactionPutRequest, internalTransactionPutRequest.Wallet.Keys)
+
+		serviceProviders := c.HealthyServiceProviders.Miners
+		if withProviders != nil {
+			serviceProviders = withProviders
+		}
+
+		resp, err = c.executeForGivenServiceProviders(
+			t,
+			NewURLBuilder().SetPath(TransactionPut),
+			&model.ExecutionRequest{
+				Body:               transactionPutRequest,
+				Dst:                &transactionPutResponse,
+				RequiredStatusCode: requiredStatusCode,
+			},
+			HttpPOSTMethod,
+			serviceProviders)
+
+		transactionPutResponse.Request = transactionPutRequest
+
+		if err != nil && strings.Contains(err.Error(), "invalid transaction nonce") {
+			c.RefreshNonce(t, internalTransactionPutRequest.Wallet, 200)
+			continue
+		}
+
+		break
 	}
-
-	if internalTransactionPutRequest.Value != nil {
-		transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
-	}
-
-	transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
-		transactionPutRequest.CreationDate,
-		transactionPutRequest.TransactionNonce,
-		transactionPutRequest.ClientId,
-		transactionPutRequest.ToClientId,
-		transactionPutRequest.TransactionValue,
-		crypto.Sha3256([]byte(transactionPutRequest.TransactionData)))))
-
-	crypto.SignTransaction(t, &transactionPutRequest, internalTransactionPutRequest.Wallet.Keys)
-
-	serviceProviders := c.HealthyServiceProviders.Miners
-	if withProviders != nil {
-		serviceProviders = withProviders
-	}
-
-	resp, err := c.executeForGivenServiceProviders(
-		t,
-		NewURLBuilder().SetPath(TransactionPut),
-		&model.ExecutionRequest{
-			Body:               transactionPutRequest,
-			Dst:                &transactionPutResponse,
-			RequiredStatusCode: requiredStatusCode,
-		},
-		HttpPOSTMethod,
-		serviceProviders)
-
-	transactionPutResponse.Request = transactionPutRequest
-
 	return transactionPutResponse, resp, err
 }
 
@@ -1292,6 +1305,11 @@ func (c *APIClient) GetWalletBalance(t *test.SystemTest, wallet *model.Wallet, r
 	require.NotNil(t, clientGetBalanceResponse)
 
 	return clientGetBalanceResponse
+}
+
+func (c *APIClient) RefreshNonce(t *test.SystemTest, wallet *model.Wallet, requiredStatusCode int) {
+	wBalance := c.GetWalletBalance(t, wallet, requiredStatusCode)
+	wallet.Nonce = int(wBalance.Nonce)
 }
 
 func (c *APIClient) GetRewardsByQuery(t *test.SystemTest, query string, requiredStatusCode int) *model.QueryRewardsResponse {
