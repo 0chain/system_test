@@ -288,12 +288,11 @@ func TestZauthOperations(testSetup *testing.T) {
 			TransactionData: string(data),
 		}
 
-		transaction, response, err := zauthClient.SignTransaction(t, signTransactionPayload, headers)
+		signature, response, err := zauthClient.SignTransaction(t, signTransactionPayload, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Equal(t, transaction.ClientID, CLIENT_ID_A)
 
-		ok, err := crypto.Verify(t, PUBLIC_KEY_I, transaction.Signature, HASH)
+		ok, err := crypto.Verify(t, PUBLIC_KEY_I, signature, HASH)
 		require.NoError(t, err)
 		require.True(t, ok)
 
