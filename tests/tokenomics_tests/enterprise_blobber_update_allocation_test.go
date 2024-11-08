@@ -1522,7 +1522,7 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 }
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
-	output, err := utils.CreateWalletForName(t, cliConfigFilename, walletName)
+	output, err := utils.CreateWalletForName(t, configPath, walletName)
 	require.Nil(t, err, "Error creating wallet", strings.Join(output, "\n"))
 
 	output, err = utils.ExecuteFaucetWithTokens(t, cliConfigFilename, 1000)
