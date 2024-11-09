@@ -34,9 +34,8 @@ func (c *ZauthClient) NewZauthHeaders(jwtToken, peerPublicKey string) map[string
 	return zauthHeaders
 }
 
-func (c *ZauthClient) Setup(t *test.SystemTest, setupWallet *model.SetupWallet, headers map[string]string) (*model.SetupResponse, *resty.Response, error) {
+func (c *ZauthClient) Setup(t *test.SystemTest, setupWallet *model.SetupWallet, headers map[string]string) (*resty.Response, error) {
 	t.Logf("performing setup of split wallet for jwt token [%v] using zauth...", headers["X-Jwt-Token"])
-	var setupResponse *model.SetupResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zauthEntrypoint)
@@ -49,18 +48,43 @@ func (c *ZauthClient) Setup(t *test.SystemTest, setupWallet *model.SetupWallet, 
 	require.NoError(t, err)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &setupResponse,
 		Headers:            headers,
 		Body:               body,
 		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
 
-	return setupResponse, resp, err
+	return resp, err
 }
 
-func (c *ZauthClient) SignTransaction(t *test.SystemTest, signTransactionRequest *transaction.Transaction, headers map[string]string) (*transaction.Transaction, *resty.Response, error) {
+func (c *ZauthClient) UpdateRestrictions(t *test.SystemTest, clientID string, restrictions []string, headers map[string]string) (*resty.Response, error) {
+	t.Logf("update restrictions for client id [%v] for split key [%v] for peer public key [%v] and for jwt token [%v] using zvault...", clientID, restrictions, headers["X-Peer-Public-Key"], headers["X-Jwt-Token"])
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zauthEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath(fmt.Sprintf("/restrictions/%s", clientID))
+
+	updateRestrictionRequest := &model.UpdateRestrictionsRequest{
+		Restrictions: restrictions,
+	}
+
+	var body []byte
+
+	body, err = json.Marshal(updateRestrictionRequest)
+	require.NoError(t, err)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            headers,
+		Body:               body,
+		RequiredStatusCode: 201,
+	}, HttpPUTMethod)
+
+	return resp, err
+}
+
+func (c *ZauthClient) SignTransaction(t *test.SystemTest, signTransactionRequest *transaction.Transaction, headers map[string]string) (string, *resty.Response, error) {
 	t.Logf("signing transaction for peer public key [%v] and for jwt token [%v] using zauth...", headers["X-Peer-Public-Key"], headers["X-Jwt-Token"])
-	var signTransactionResponse *transaction.Transaction
+	var signTransactionResponse string
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zauthEntrypoint)
@@ -139,4 +163,22 @@ func (c *ZauthClient) Delete(t *test.SystemTest, clientID string, headers map[st
 	}, HttpPOSTMethod)
 
 	return resp, err
+}
+
+func (c *ZauthClient) GetKeyDetails(t *test.SystemTest, clientID string, headers map[string]string) (*model.KeyDetailsResponse, *resty.Response, error) {
+	t.Logf("get keys for client id [%v] peer public key [%v] and jwt token [%v] using zvault...", clientID, headers["X-Peer-Public-Key"], headers["X-Jwt-Token"])
+	var keyDetailsResponse *model.KeyDetailsResponse
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zauthEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath(fmt.Sprintf("/key/%s", clientID))
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &keyDetailsResponse,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return keyDetailsResponse, resp, err
 }

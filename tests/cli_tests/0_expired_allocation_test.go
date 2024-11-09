@@ -71,13 +71,13 @@ func TestExpiredAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Download File using Expired Allocation Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/"
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
