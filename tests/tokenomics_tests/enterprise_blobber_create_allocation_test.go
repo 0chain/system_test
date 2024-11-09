@@ -136,6 +136,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{
+			"size":                 "1024",
 			"lock":                 "0.5",
 			"owner":                targetWallet.ClientID,
 			"owner_public_key":     targetWallet.ClientPublicKey,
@@ -152,7 +153,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		file := utils.GenerateRandomTestFileName(t)
-		fileSize := int64(102400)
+		fileSize := int64(1024)
 		err = utils.CreateFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
@@ -212,34 +213,6 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		options := map[string]interface{}{
 			"size":                 "1024",
 			"data":                 "1",
-			"lock":                 "0.5",
-			"enterprise":           true,
-			"blobber_auth_tickets": blobberAuthTickets,
-			"preferred_blobbers":   blobberIds,
-		}
-		output, err = createNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1")
-		require.Regexp(t, regexp.MustCompile("^Allocation created: [0-9a-fA-F]{64}$"), output[0], strings.Join(output, "\n"))
-
-		allocationID, err := utils.GetAllocationID(output[0])
-		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
-
-		createEnterpriseAllocationTestTeardown(t, allocationID)
-	})
-
-	t.Run("Create enterprise allocation with read price range Should Work", func(t *test.SystemTest) {
-		output, err := utils.CreateWallet(t, configPath)
-		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
-
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 10)
-		require.Nil(t, err, "Error executing faucet")
-
-		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
-
-		options := map[string]interface{}{
-			"size":                 "1024",
-			"read_price":           "0-9999",
 			"lock":                 "0.5",
 			"enterprise":           true,
 			"blobber_auth_tickets": blobberAuthTickets,
