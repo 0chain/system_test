@@ -15,7 +15,6 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	config := cli_utils.ReadFileMC(testSetup)
 
-	
 	if config.UseCommand {
 		runCmd, err := cli_utils.RunMinioServer(config.AccessKey, config.SecretKey, t)
 		if err != nil {
@@ -80,6 +79,5 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 			t.Logf("Error killing the command process")
 		}
 	})
-
 
 }
