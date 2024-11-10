@@ -3,6 +3,7 @@ package cliutils
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"crypto/rand"
 	"fmt"
 	"io"
@@ -394,21 +395,26 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 	}
 }
 
-func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
-	_, err := RunCommandWithoutRetry("../zbox newallocation --lock 10 --configDir ./config")
+func RunMinioServer(accessKey string, secretKey string, t *test.SystemTest) (string, error) {
+	rawOutput, err := RunCommandWithoutRetry("../zbox newallocation --lock 10 --configDir ../config2")
 	if err != nil {
-		return nil, fmt.Errorf("error running zbox newallocation command: %v", err)
+		return "", fmt.Errorf("error running zbox newallocation command: %v", rawOutput)
 	}
-	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn --configDir ./config   " + " --console-address :8000"
+	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn --configDir ../config2   " + " --console-address :8000"
 
 	cmdParts, err := SplitCmdString(cmdString)
 	if err != nil {
-		return nil, fmt.Errorf("error splitting command string: %w", err)
+		return "", fmt.Errorf("error splitting command string: %w", err)
 	}
-	// Create a command to start the MinIO server set env and run the command
-	runCmd := exec.Command(cmdParts[0], cmdParts[1:]...) // #nosec G204
+	ctx := context.Background()
 
-	// Create pipes for stdout and stderr
+
+	runCmd := exec.CommandContext(ctx, cmdParts[0], cmdParts[1:]...)
+
+	runCmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
+
 	var stdout, stderr bytes.Buffer
 	runCmd.Stdout = io.MultiWriter(os.Stdout, &stdout)
 	runCmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
@@ -418,17 +424,14 @@ func RunMinioServer(accessKey, secretKey string) (*exec.Cmd, error) {
 	// Start the MinIO server command
 	err = runCmd.Start()
 	if err != nil {
-		return nil, fmt.Errorf("error starting MinIO server: %w", err)
+		t.Log("Error starting MinIO server: ", err)
+		return "", fmt.Errorf("error starting MinIO server: %w", err)
 	}
+	t.Logf("Stderr:\n%s", stderr.String())
+	t.Logf("Stdout:\n%s", stdout.String())
 
-	if err != nil {
-		log.Printf("Command execution error: %v", err)
-	}
-
-	fmt.Printf("Stderr:\n%s", stderr.String())
-	fmt.Printf("Stdout:\n%s", stdout.String())
-	time.Sleep(5 * time.Second)
-	return runCmd, nil
+	time.Sleep(15 * time.Second)
+	return stdout.String(), nil
 }
 
 func GetAllocationID(path string) string {
@@ -522,7 +525,8 @@ func ReadFileMC(testSetup *testing.T) McConfiguration {
 }
 
 func SetupMinioConfig(testSetup *testing.T) Configuration {
-	_, err := RunMinioServer("rootroot", "rootroot")
+	t := test.NewSystemTest(testSetup)
+	_, err := RunMinioServer("rootroot", "rootroot", t)
 	if err != nil {
 		testSetup.Fatalf("%v", err)
 	}
