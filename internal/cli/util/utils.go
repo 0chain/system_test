@@ -408,7 +408,6 @@ func RunMinioServer(accessKey string, secretKey string, t *test.SystemTest) (str
 	}
 	ctx := context.Background()
 
-
 	runCmd := exec.CommandContext(ctx, cmdParts[0], cmdParts[1:]...)
 
 	runCmd.SysProcAttr = &syscall.SysProcAttr{
