@@ -79,5 +79,4 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 			t.Logf("Error killing the command process")
 		}
 	})
-
 }
