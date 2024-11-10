@@ -395,7 +395,7 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 	}
 }
 
-func RunMinioServer(accessKey string, secretKey string, t *test.SystemTest) (string, error) {
+func RunMinioServer(accessKey, secretKey string, t *test.SystemTest) (string, error) {
 	rawOutput, err := RunCommandWithoutRetry("../zbox newallocation --lock 10 --configDir ../config2")
 	if err != nil {
 		return "", fmt.Errorf("error running zbox newallocation command: %v", rawOutput)
