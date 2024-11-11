@@ -377,11 +377,12 @@ func KillProcess(port string) (int, error) {
 		return 0, fmt.Errorf("no process found for port %s", port)
 	}
 	pid, err := strconv.Atoi(pidStr)
-	if err != nil {
+	if err != nil || pid == 0 {
 		return 0, fmt.Errorf("error converting PID to integer: %v", err)
 	}
+	
 	// Create a command to kill the process identified by PID
-	killCmd := exec.Command("kill", strconv.Itoa(pid)) // #nosec G204
+	killCmd := exec.Command("kill", strconv.Itoa(pid))
 
 	if err := killCmd.Run(); err != nil {
 		return 0, fmt.Errorf("failed to kill process with PID %d: %w ", pid, err)
