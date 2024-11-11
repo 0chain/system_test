@@ -380,7 +380,7 @@ func KillProcess(port string) (int, error) {
 	if err != nil || pid == 0 {
 		return 0, fmt.Errorf("error converting PID to integer: %v", err)
 	}
-	
+
 	// Create a command to kill the process identified by PID
 	killCmd := exec.Command("kill", strconv.Itoa(pid))
 
