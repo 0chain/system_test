@@ -372,7 +372,7 @@ func KillProcess() (int, error) {
 	}
 
 	pid, err := strconv.Atoi(pidStr)
-	if err != nil || pid == 0 {
+	if err != nil || pid <= 0 {
 		return 0, fmt.Errorf("error converting PID to integer: %v", err)
 	}
 
