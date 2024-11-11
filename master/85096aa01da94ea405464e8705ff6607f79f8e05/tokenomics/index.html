@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Subset of 0Chain System test suite [master/85096aa0] ran against [dev-1.devnet-0chain.net] at [2024-11-11_17.40.27]</title>
+    <title>Subset of 0Chain System test suite [master/85096aa0] ran against [dev-1.devnet-0chain.net] at [2024-11-11_17.47.01]</title>
     <style type="text/css">
         body {
             font-family: sans-serif;
@@ -234,22 +234,24 @@
 </head>
 <body>
 <div class="pageHeader">
-    <span class="projectTitle">Subset of 0Chain System test suite [master/85096aa0] ran against [dev-1.devnet-0chain.net] at [2024-11-11_17.40.27]</span>
+    <span class="projectTitle">Subset of 0Chain System test suite [master/85096aa0] ran against [dev-1.devnet-0chain.net] at [2024-11-11_17.47.01]</span>
     <div class="testStats">
-        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>1</strong>Duration: <strong>0s</strong>
-        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>0</strong>
-        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>1</strong>
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>2</strong>Duration: <strong>0s</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>2</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
         </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
         </span>
     </div>
     <span class="testGroupsTitle">Test Groups:</span>
-    <span class="testExecutionDate">November 11, 2024 17:40:46</span>
+    <span class="testExecutionDate">November 11, 2024 18:15:02</span>
 </div>
 <div class="testReportContainer">
     <div class="cardContainer">
         <div id="testResults">
             
-                <div class="testResultGroup  skipped" id="0"></div>
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
             
         </div>
     </div>
@@ -454,7 +456,7 @@ window.GoTestReport = function (elements) {
 
     
 
-    const data = [{"FailureIndicator":"","SkippedIndicator":"skipped","TestResults":[{"TestName":"TestBlobberReadReward","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":0,"Output":["","    blobber_read_test.go:23: \n","--- SKIP: TestBlobberReadReward (0.00s)\n",""],"Passed":false,"Skipped":true,"TestFileName":"blobber_read_test.go","TestFunctionDetail":{"Line":21,"Col":1}}]}]
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberSlashPenalty","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":1679.53,"Output":["","    system_test_framework.go:70: Test setup [set storage config to use time_unit as 10 minutes] scheduled at [11-11-2024 17:47:02] \n","    system_test_framework.go:80: Test setup [set storage config to use time_unit as 10 minutes] start at [11-11-2024 17:47:02] \n","    wallet.go:140: Updating storage config...\n","    system_test_framework.go:93: Test setup [set storage config to use time_unit as 10 minutes] exit at [11-11-2024 17:47:07]\n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  d7939f937840dccf0af2663e6478f8c624dc57de4dae73d7a014c4f4e61432fe]\n","    sharders.go:64: list sharder nodes...\n","    blobber_slash_penalty_test.go:37: prevBlock \u0026{1731347232 d134270e1127641d111c0383c3284b2fffe564bfa8adf32bcce7980933f35b59 HtfthTOADoNDUtmWedjpfCBVfnNlc8ok0q6qfNFuBBg= c6f4b8ce5da386b278ba8c4e6cf98b24b32d15bc675b4d12c95e082079c91937 3661 17 1}\n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  fe8bc74e3c37fd60aeb1de9d5f06af1a70d7021efcf570b479920daf76191140]\n","    blobbers.go:25: Requesting blobber list...\n","    blobbers.go:57: Requesting validator list...\n","    wallet.go:140: Updating storage config...\n","--- PASS: TestBlobberSlashPenalty (1679.53s)",""],"Passed":true,"Skipped":false,"TestFileName":"blobber_slash_penalty_test.go","TestFunctionDetail":{"Line":18,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestBlobberSlashPenalty/Upload_10%_of_allocation_and_Kill_blobber_in_the_middle,_One_blobber_should_get_approx_double_rewards_than_other","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":1658.95,"Output":["","    blobber_slash_penalty_test.go:70: Test case [Upload 10% of allocation and Kill blobber in the middle, One blobber should get approx double rewards than other] scheduled at [11-11-2024 17:47:18] \n","    system_test_framework.go:149: Test case [Upload 10% of allocation and Kill blobber in the middle, One blobber should get approx double rewards than other] start at [11-11-2024 17:47:18] \n","    wallet.go:29: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    wallet.go:125: Staking tokens...\n","    wallet.go:29: Executing faucet...\n","    blobber_challenge_reward_test.go:218: Staking tokens for blobber:  5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    wallet.go:125: Staking tokens...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:125: Staking tokens...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:125: Staking tokens...\n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  387162d0123d4c9a808a01fe6bf20421e4a0168ed553817a2c80eae4f05e3610]\n","    allocation.go:68: Creating new allocation... map[data:1 lock:0.5 parity:1 size:1073741824]\n","    allocation.go:70: Faucet Tokens :  1\n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  344e61f5446e041c91b524b66908f6a88cb13886cf473c352ed91acac748621f]\n","    wallet.go:29: Executing faucet...\n","    allocation.go:146: Creating new allocation...\n","    allocation.go:202: Uploading file...\n","    allocation.go:229: Get Allocation...\n","    blobber_slash_penalty_test.go:134: kill blobber...\n","    blobber_slash_penalty_test.go:138: ./zbox kill-blobber --id 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 --silent --wallet wallets/sc_owner_wallet.json --configDir ./config --config ./zbox_config.yaml\n","    allocation.go:229: Get Allocation...\n","    blobber_slash_penalty_test.go:118: 198906148\n","    sharders.go:42: getting sharder url...\n","    sharders.go:64: list sharder nodes...\n","    allocation_test.go:674: URL :  http://dev-1.devnet-0chain.net:31102/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/total-challenge-rewards?allocation_id=5b860e4f5ce54a976b7a33b0c44acdaa11e252e62c5b24cd7defca416c2db405\n","    allocation_test.go:699: allocationChallengeRewards map[blobber_rewards:map[5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671:3.1780373e+07 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d:9.6981446e+07] validator_rewards:map[7b162815cec387fd2d6a83db8aae7d17e717c2323513ce750062906835c72db4:1.643238e+06 7c8e5922b29aa9a7be01c8cfb97c111958ba6f45a979895a4bdccd5778a7c19d:1.643235e+06]]\n","    blobber_slash_penalty_test.go:122: map[5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671:3.1780373e+07 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d:9.6981446e+07]\n","    blobber_slash_penalty_test.go:127: 9.6981446e+07 3.1780373e+07\n","    blobber_slash_penalty_test.go:70: Test case [Upload 10% of allocation and Kill blobber in the middle, One blobber should get approx double rewards than other] exit at [11-11-2024 18:14:57]\n","--- PASS: TestBlobberSlashPenalty/Upload_10%_of_allocation_and_Kill_blobber_in_the_middle,_One_blobber_should_get_approx_double_rewards_than_other (1658.95s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
 
     const report = window.GoTestReport({
                                          data: data,
