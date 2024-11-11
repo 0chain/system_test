@@ -377,7 +377,7 @@ func KillProcess() (int, error) {
 	}
 
 	// Create a command to kill the process identified by PID
-	killCmd := exec.Command("kill", strconv.Itoa(pid))
+	killCmd := exec.Command("kill", strconv.Itoa(pid)) // #nosec G204: subprocess launched with tainted input
 
 	if err := killCmd.Run(); err != nil {
 		return 0, fmt.Errorf("failed to kill process with PID %d: %w ", pid, err)
@@ -410,7 +410,7 @@ func RunMinioServer(accessKey, secretKey string, t *test.SystemTest) (string, er
 	}
 	ctx := context.Background()
 
-	runCmd := exec.CommandContext(ctx, cmdParts[0], cmdParts[1:]...)
+	runCmd := exec.CommandContext(ctx, cmdParts[0], cmdParts[1:]...) // #nosec G204: subprocess launched with tainted input
 
 	runCmd.SysProcAttr = &syscall.SysProcAttr{
 		Setpgid: true,
