@@ -361,7 +361,13 @@ func AppendToFile(filename, data string) error {
 
 func KillProcess(port string) (int, error) {
 	// Create a command to get the PID of the process listening on the specified port
-	cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port)) // #nosec G204
+
+	p, err := strconv.Atoi(port)
+	if err != nil || p != 9000 {
+		return 0, fmt.Errorf("invalid port: %s", port)
+	}
+
+	cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port))
 	out, err := cmd.Output()
 	if err != nil {
 		return 0, fmt.Errorf("error running lsof -i command: %v", err)
