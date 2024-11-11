@@ -73,7 +73,7 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 		_ = os.Remove("a.txt")
 
 		assert.Contains(t, strings.Join(output, "\n"), "a.txt")
-		_, err = cli_utils.KillProcess("9000")
+		_, err = cli_utils.KillProcess()
 
 		if err != nil {
 			t.Logf("Error killing the command process")

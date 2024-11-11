@@ -359,23 +359,18 @@ func AppendToFile(filename, data string) error {
 	return nil
 }
 
-func KillProcess(port string) (int, error) {
+func KillProcess() (int, error) {
 	// Create a command to get the PID of the process listening on the specified port
-
-	p, err := strconv.Atoi(port)
-	if err != nil || p != 9000 {
-		return 0, fmt.Errorf("invalid port: %s", port)
-	}
-
-	cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port))
+	cmd := exec.Command("lsof", "-t", "-i", ":9000")
 	out, err := cmd.Output()
 	if err != nil {
 		return 0, fmt.Errorf("error running lsof -i command: %v", err)
 	}
 	pidStr := strings.TrimSpace(string(out))
 	if pidStr == "" {
-		return 0, fmt.Errorf("no process found for port %s", port)
+		return 0, fmt.Errorf("no process found for port %s", "9000")
 	}
+
 	pid, err := strconv.Atoi(pidStr)
 	if err != nil || pid == 0 {
 		return 0, fmt.Errorf("error converting PID to integer: %v", err)
