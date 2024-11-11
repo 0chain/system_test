@@ -359,23 +359,25 @@ func AppendToFile(filename, data string) error {
 	return nil
 }
 
-func KillProcess(port string) (int, error) {
+func KillProcess() (int, error) {
 	// Create a command to get the PID of the process listening on the specified port
-	cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%s", port)) // #nosec G204
+	cmd := exec.Command("lsof", "-t", "-i", ":9000")
 	out, err := cmd.Output()
 	if err != nil {
 		return 0, fmt.Errorf("error running lsof -i command: %v", err)
 	}
 	pidStr := strings.TrimSpace(string(out))
 	if pidStr == "" {
-		return 0, fmt.Errorf("no process found for port %s", port)
+		return 0, fmt.Errorf("no process found for port %s", "9000")
 	}
+
 	pid, err := strconv.Atoi(pidStr)
-	if err != nil {
+	if err != nil || pid <= 0 {
 		return 0, fmt.Errorf("error converting PID to integer: %v", err)
 	}
+
 	// Create a command to kill the process identified by PID
-	killCmd := exec.Command("kill", strconv.Itoa(pid)) // #nosec G204
+	killCmd := exec.Command("kill", strconv.Itoa(pid)) // #nosec G204: subprocess launched with tainted input
 
 	if err := killCmd.Run(); err != nil {
 		return 0, fmt.Errorf("failed to kill process with PID %d: %w ", pid, err)
@@ -395,7 +397,7 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 	}
 }
 
-func RunMinioServer(accessKey string, secretKey string, t *test.SystemTest) (string, error) {
+func RunMinioServer(accessKey, secretKey string, t *test.SystemTest) (string, error) {
 	rawOutput, err := RunCommandWithoutRetry("../zbox newallocation --lock 10 --configDir ../config2")
 	if err != nil {
 		return "", fmt.Errorf("error running zbox newallocation command: %v", rawOutput)
@@ -408,8 +410,7 @@ func RunMinioServer(accessKey string, secretKey string, t *test.SystemTest) (str
 	}
 	ctx := context.Background()
 
-
-	runCmd := exec.CommandContext(ctx, cmdParts[0], cmdParts[1:]...)
+	runCmd := exec.CommandContext(ctx, cmdParts[0], cmdParts[1:]...) // #nosec G204: subprocess launched with tainted input
 
 	runCmd.SysProcAttr = &syscall.SysProcAttr{
 		Setpgid: true,
