@@ -65,7 +65,7 @@ jobs:
 
       - name: "Deploy 0Chain with enterprise blobbers"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain@feature/add-egosdk-tokenomics-action
+        uses: 0chain/actions/deploy-0chain@update/eblobber-deploy
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
