@@ -72,6 +72,8 @@ jobs:
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
           is_enterprise_blobbers: 'true'
+          blobber_image: staging
+          validator_image: staging
           TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
