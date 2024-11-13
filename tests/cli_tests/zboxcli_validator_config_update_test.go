@@ -26,15 +26,9 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 			t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
 		}
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		_, err = createWalletForName(t, configPath, blobberOwnerWallet)
-		require.NoError(t, err)
-		_, err = executeFaucetWithTokensForWallet(t, blobberOwnerWallet, configPath, 5)
-		require.NoError(t, err)
-
-		output, err = listValidators(t, configPath, createParams(map[string]interface{}{"json": ""}))
+		output, err := listValidators(t, configPath, createParams(map[string]interface{}{"json": ""}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 
@@ -46,8 +40,7 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 		intialValidatorInfo = validatorList[0]
 
 		t.Cleanup(func() {
-			output, err := createWallet(t, configPath)
-			require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+			createWallet(t)
 
 			output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "num_delegates": intialValidatorInfo.NumDelegates}))
 			require.Nil(t, err, strings.Join(output, "\n"))
@@ -58,12 +51,11 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update validator number of delegates should work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		newNumberOfDelegates := 15
 
-		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "num_delegates": newNumberOfDelegates}))
+		output, err := updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "num_delegates": newNumberOfDelegates}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -79,12 +71,11 @@ func TestValidatorConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update validator service charge should work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		newServiceCharge := 0.1
 
-		output, err = updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "service_charge": newServiceCharge}))
+		output, err := updateValidatorInfo(t, configPath, createParams(map[string]interface{}{"validator_id": intialValidatorInfo.ID, "service_charge": newServiceCharge}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 

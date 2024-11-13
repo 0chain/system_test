@@ -14,11 +14,11 @@ import (
 
 func TestHashnodeRoot(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 	t.SetSmokeTests("Get hashnode root from blobber for an empty allocation should work")
 
-	t.RunSequentially("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
-		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+	t.Run("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
@@ -51,9 +51,8 @@ func TestHashnodeRoot(testSetup *testing.T) {
 		require.Equal(t, getBlobberResponse.Path, "/")
 	})
 
-	t.RunSequentiallyWithTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
-		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+	t.RunWithTimeout("Get hashnode root for non-existent allocation should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: why is this so slow (67s) ?
+		wallet := createWallet(t)
 
 		allocationID := "badallocation"
 
@@ -73,13 +72,12 @@ func TestHashnodeRoot(testSetup *testing.T) {
 		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
 		require.Equal(t, 500, restyResponse.StatusCode())
-		require.Contains(t, string(restyResponse.Body()), "too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders")
+		require.Contains(t, string(restyResponse.Body()), "record not found")
 		require.Nil(t, getBlobberResponse)
 	})
 
-	t.RunSequentially("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
-		wallet := apiClient.CreateWallet(t)
-		apiClient.ExecuteFaucet(t, wallet, client.TxSuccessfulStatus)
+	t.Run("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
+		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)

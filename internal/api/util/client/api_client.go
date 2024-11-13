@@ -6,6 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,33 +26,40 @@ import (
 
 // Contains all used url paths in the client
 const (
-	GetHashNodeRoot              = "/v1/hashnode/root/:allocation"
-	GetBlobbers                  = "/v1/screst/:sc_address/getblobbers"
-	GetMiners                    = "/v1/screst/:sc_address/getMinerList"
-	GetSharders                  = "/v1/screst/:sc_address/getSharderList"
-	GetValidators                = "/v1/screst/:sc_address/validators"
-	GetStakePoolStat             = "/v1/screst/:sc_address/getStakePoolStat"
-	getUserStakePoolStat         = "/v1/screst/:sc_address/getUserStakePoolStat"
-	GetAllocationBlobbers        = "/v1/screst/:sc_address/alloc_blobbers"
-	GetFreeAllocationBlobbers    = "/v1/screst/:sc_address/free_alloc_blobbers"
-	SCRestGetOpenChallenges      = "/v1/screst/:sc_address/openchallenges"
-	MinerGetStatus               = "/v1/miner/get/stats"
-	SharderGetStatus             = "/v1/sharder/get/stats"
-	SCStateGet                   = "/v1/scstate/get"
-	SCRestGetAllocation          = "/v1/screst/:sc_address/allocation"
-	SCRestGetBlobbers            = "/v1/screst/:sc_address/getBlobber"
-	ChainGetStats                = "/v1/chain/get/stats"
-	BlobberGetStats              = "/_stats"
-	ClientPut                    = "/v1/client/put"
-	TransactionPut               = "/v1/transaction/put"
-	TransactionFeeGet            = "/v1/estimate_txn_fee"
-	TransactionGetConfirmation   = "/v1/transaction/get/confirmation"
-	ClientGetBalance             = "/v1/client/get/balance"
-	GetNetworkDetails            = "/network"
-	GetFileRef                   = "/v1/file/refs/:allocation_id"
-	GetFileRefPath               = "/v1/file/referencepath/:allocation_id"
-	GetObjectTree                = "/v1/file/objecttree/:allocation_id"
-	GetLatestFinalizedMagicBlock = "/v1/block/get/latest_finalized_magic_block"
+	GetHashNodeRoot                    = "/v1/hashnode/root/:allocation"
+	GetBlobbers                        = "/v1/screst/:sc_address/getblobbers"
+	GetMiners                          = "/v1/screst/:sc_address/getMinerList"
+	GetSharders                        = "/v1/screst/:sc_address/getSharderList"
+	GetValidators                      = "/v1/screst/:sc_address/validators"
+	GetStakePoolStat                   = "/v1/screst/:sc_address/getStakePoolStat"
+	getUserStakePoolStat               = "/v1/screst/:sc_address/getUserStakePoolStat"
+	GetAllocationBlobbers              = "/v1/screst/:sc_address/alloc_blobbers"
+	GetFreeAllocationBlobbers          = "/v1/screst/:sc_address/free_alloc_blobbers"
+	SCRestGetOpenChallenges            = "/v1/screst/:sc_address/openchallenges"
+	MinerGetStatus                     = "/v1/miner/get/stats"
+	SharderGetStatus                   = "/v1/sharder/get/stats"
+	SCStateGet                         = "/v1/scstate/get"
+	SCRestGetAllocation                = "/v1/screst/:sc_address/allocation"
+	SCRestGetBlobbers                  = "/v1/screst/:sc_address/getBlobber"
+	ChainGetStats                      = "/v1/chain/get/stats"
+	BlobberGetStats                    = "/_stats"
+	ClientPut                          = "/v1/client/put"
+	TransactionPut                     = "/v1/transaction/put"
+	TransactionFeeGet                  = "/v1/estimate_txn_fee"
+	TransactionGetConfirmation         = "/v1/transaction/get/confirmation"
+	ClientGetBalance                   = "/v1/client/get/balance"
+	GetNetworkDetails                  = "/network"
+	GetFileRef                         = "/v1/file/refs/:allocation_id"
+	GetFileRefPath                     = "/v1/file/referencepath/:allocation_id"
+	GetObjectTree                      = "/v1/file/objecttree/:allocation_id"
+	GetLatestFinalizedMagicBlock       = "/v1/block/get/latest_finalized_magic_block"
+	GetLatestFinalizedBlock            = "/v1/block/get/latest_finalized"
+	QueryRewards                       = "/v1/screst/:sc_address/query-rewards"
+	QueryChallengesCount               = "/v1/screst/:sc_address/count-challenges"
+	QueryDelegateRewards               = "/v1/screst/:sc_address/query-delegate-rewards"
+	PartitionSizeFrequency             = "/v1/screst/:sc_address/parition-size-frequency"
+	BlobberPartitionSelectionFrequency = "/v1/screst/:sc_address/blobber-selection-frequency"
+	GetAllChallenges                   = "/v1/screst/:sc_address/all-challenges"
 )
 
 // Contains all used service providers
@@ -265,12 +275,13 @@ func (c *APIClient) executeForGivenServiceProviders(
 			resp = newResp
 		} else {
 			t.Logf("Miner %s. Response: %s", serviceProvider, string(newResp.Body()))
+			respErrors = append(respErrors, errors.New(fmt.Sprintf("Miner %s. Response: %s", serviceProvider, string(newResp.Body()))))
 			notExpectedExecutionResponseCounter++
 		}
 	}
 
 	if notExpectedExecutionResponseCounter > expectedExecutionResponseCounter {
-		return nil, ErrExecutionConsensus
+		return nil, errors.Join(ErrExecutionConsensus, selectMostFrequentError(respErrors))
 	}
 
 	return resp, selectMostFrequentError(respErrors)
@@ -338,82 +349,98 @@ func (c *APIClient) V1ClientPut(t *test.SystemTest, clientPutRequest model.Walle
 func (c *APIClient) V1TransactionPut(
 	t *test.SystemTest,
 	internalTransactionPutRequest model.InternalTransactionPutRequest,
-	requiredStatusCode int,
+	requiredStatusCode int, options ...float64,
 ) (*model.TransactionPutResponse, *resty.Response, error) { //nolint
 
-	return c.V1TransactionPutWithNonceAndServiceProviders(t, internalTransactionPutRequest, requiredStatusCode, 0, nil)
+	return c.V1TransactionPutWithNonceAndServiceProviders(t, internalTransactionPutRequest, requiredStatusCode, 0, nil, options...)
 }
 
 func (c *APIClient) V1TransactionPutWithNonceAndServiceProviders(
 	t *test.SystemTest,
 	internalTransactionPutRequest model.InternalTransactionPutRequest,
-	requiredStatusCode, withNonce int, withProviders []string,
+	requiredStatusCode, withNonce int, withProviders []string, options ...float64,
 ) (*model.TransactionPutResponse, *resty.Response, error) { //nolint
+	var (
+		transactionPutResponse *model.TransactionPutResponse
+		resp                   *resty.Response
+		err                    error
+	)
 
-	var transactionPutResponse *model.TransactionPutResponse
+	for retry := 0; retry < 3; retry++ {
+		var data []byte
+		data, err = json.Marshal(internalTransactionPutRequest.TransactionData)
+		if err != nil {
+			return nil, nil, err
+		}
 
-	data, err := json.Marshal(internalTransactionPutRequest.TransactionData)
-	if err != nil {
-		return nil, nil, err
+		transactionPutRequest := model.TransactionPutRequest{
+			ClientId:         internalTransactionPutRequest.Wallet.Id,
+			PublicKey:        internalTransactionPutRequest.Wallet.PublicKey,
+			ToClientId:       internalTransactionPutRequest.ToClientID,
+			TransactionNonce: internalTransactionPutRequest.Wallet.Nonce + 1,
+			TxnOutputHash:    TxOutput,
+			TransactionValue: *TxValue,
+			TransactionType:  internalTransactionPutRequest.TxnType,
+			TransactionFee:   int64(TxFee),
+			TransactionData:  string(data),
+			CreationDate:     time.Now().Unix(),
+			Version:          TxVersion,
+		}
+
+		if withNonce != 0 {
+			transactionPutRequest.TransactionNonce = withNonce
+		}
+
+		if len(options) == 0 {
+			if internalTransactionPutRequest.TransactionData.Name == "pour" {
+				transactionPutRequest.TransactionFee = 0
+			} else {
+				fee := estimateTxnFee(t, c, &transactionPutRequest)
+				transactionPutRequest.TransactionFee = fee
+			}
+		} else {
+			transactionPutRequest.TransactionFee = int64(options[0] * 1e10)
+		}
+
+		if internalTransactionPutRequest.Value != nil {
+			transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
+		}
+
+		transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
+			transactionPutRequest.CreationDate,
+			transactionPutRequest.TransactionNonce,
+			transactionPutRequest.ClientId,
+			transactionPutRequest.ToClientId,
+			transactionPutRequest.TransactionValue,
+			crypto.Sha3256([]byte(transactionPutRequest.TransactionData)))))
+
+		crypto.SignTransaction(t, &transactionPutRequest, internalTransactionPutRequest.Wallet.Keys)
+
+		serviceProviders := c.HealthyServiceProviders.Miners
+		if withProviders != nil {
+			serviceProviders = withProviders
+		}
+
+		resp, err = c.executeForGivenServiceProviders(
+			t,
+			NewURLBuilder().SetPath(TransactionPut),
+			&model.ExecutionRequest{
+				Body:               transactionPutRequest,
+				Dst:                &transactionPutResponse,
+				RequiredStatusCode: requiredStatusCode,
+			},
+			HttpPOSTMethod,
+			serviceProviders)
+
+		transactionPutResponse.Request = transactionPutRequest
+
+		if err != nil && strings.Contains(err.Error(), "invalid transaction nonce") {
+			c.RefreshNonce(t, internalTransactionPutRequest.Wallet, 200)
+			continue
+		}
+
+		break
 	}
-
-	transactionPutRequest := model.TransactionPutRequest{
-		ClientId:         internalTransactionPutRequest.Wallet.Id,
-		PublicKey:        internalTransactionPutRequest.Wallet.PublicKey,
-		ToClientId:       internalTransactionPutRequest.ToClientID,
-		TransactionNonce: internalTransactionPutRequest.Wallet.Nonce + 1,
-		TxnOutputHash:    TxOutput,
-		TransactionValue: *TxValue,
-		TransactionType:  internalTransactionPutRequest.TxnType,
-		TransactionFee:   TxFee,
-		TransactionData:  string(data),
-		CreationDate:     time.Now().Unix(),
-		Version:          TxVersion,
-	}
-
-	if withNonce != 0 {
-		transactionPutRequest.TransactionNonce = withNonce
-	}
-
-	if internalTransactionPutRequest.TransactionData.Name == "pour" {
-		transactionPutRequest.TransactionFee = 0
-	} else {
-		fee := estimateTxnFee(t, c, &transactionPutRequest)
-		transactionPutRequest.TransactionFee = fee
-	}
-
-	if internalTransactionPutRequest.Value != nil {
-		transactionPutRequest.TransactionValue = *internalTransactionPutRequest.Value
-	}
-
-	transactionPutRequest.Hash = crypto.Sha3256([]byte(fmt.Sprintf("%d:%d:%s:%s:%d:%s",
-		transactionPutRequest.CreationDate,
-		transactionPutRequest.TransactionNonce,
-		transactionPutRequest.ClientId,
-		transactionPutRequest.ToClientId,
-		transactionPutRequest.TransactionValue,
-		crypto.Sha3256([]byte(transactionPutRequest.TransactionData)))))
-
-	crypto.SignTransaction(t, &transactionPutRequest, internalTransactionPutRequest.Wallet.Keys)
-
-	serviceProviders := c.HealthyServiceProviders.Miners
-	if withProviders != nil {
-		serviceProviders = withProviders
-	}
-
-	resp, err := c.executeForGivenServiceProviders(
-		t,
-		NewURLBuilder().SetPath(TransactionPut),
-		&model.ExecutionRequest{
-			Body:               transactionPutRequest,
-			Dst:                &transactionPutResponse,
-			RequiredStatusCode: requiredStatusCode,
-		},
-		HttpPOSTMethod,
-		serviceProviders)
-
-	transactionPutResponse.Request = transactionPutRequest
-
 	return transactionPutResponse, resp, err
 }
 
@@ -619,10 +646,10 @@ func (c *APIClient) V1BlobberGetHashNodeRoot(t *test.SystemTest, blobberGetHashn
 		"ALLOCATION-ID":          blobberGetHashnodeRequest.AllocationID,
 	}
 
-	url := blobberGetHashnodeRequest.URL + "/" + strings.Replace(GetHashNodeRoot, ":allocation", blobberGetHashnodeRequest.AllocationID, 1)
+	blobberGetHashNodeRootURL := blobberGetHashnodeRequest.URL + "/" + strings.Replace(GetHashNodeRoot, ":allocation", blobberGetHashnodeRequest.AllocationID, 1)
 
 	resp, err := c.executeForServiceProvider(t,
-		url,
+		blobberGetHashNodeRootURL,
 		model.ExecutionRequest{
 			Headers:            headers,
 			Dst:                &hashnode,
@@ -656,6 +683,7 @@ func (c *APIClient) V1SCRestGetAllocation(t *test.SystemTest, scRestGetAllocatio
 
 func (c *APIClient) V1SCRestGetAllocationBlobbers(t *test.SystemTest, scRestGetAllocationBlobbersRequest *model.SCRestGetAllocationBlobbersRequest, requiredStatusCode int) (*model.SCRestGetAllocationBlobbersResponse, *resty.Response, error) { //nolint
 	scRestGetAllocationBlobbersResponse := new(model.SCRestGetAllocationBlobbersResponse)
+	scRestGetAllocationBlobbersResponse.StorageVersion = 1
 
 	data, err := json.Marshal(scRestGetAllocationBlobbersRequest.BlobberRequirements)
 	if err != nil {
@@ -680,6 +708,9 @@ func (c *APIClient) V1SCRestGetAllocationBlobbers(t *test.SystemTest, scRestGetA
 		SharderServiceProvider)
 
 	scRestGetAllocationBlobbersResponse.Blobbers = blobbers
+	for range *blobbers {
+		scRestGetAllocationBlobbersResponse.BlobberAuthTickets = append(scRestGetAllocationBlobbersResponse.BlobberAuthTickets, "")
+	}
 	scRestGetAllocationBlobbersResponse.BlobberRequirements = scRestGetAllocationBlobbersRequest.BlobberRequirements
 
 	return scRestGetAllocationBlobbersResponse, resp, err
@@ -794,17 +825,6 @@ func (c *APIClient) V1SharderGetSCState(t *test.SystemTest, scStateGetRequest mo
 	return scStateGetResponse, resp, err
 }
 
-func (c *APIClient) CreateWalletWithMnemonicsInReturnValue(t *test.SystemTest) (wallet *model.Wallet, mnemonic string) {
-	mnemonic = crypto.GenerateMnemonics(t)
-	wallet = c.CreateWalletForMnemonic(t, mnemonic)
-	return
-}
-
-func (c *APIClient) CreateWallet(t *test.SystemTest) *model.Wallet {
-	wallet, _ := c.CreateWalletWithMnemonicsInReturnValue(t)
-	return wallet
-}
-
 func (c *APIClient) CreateWalletForMnemonic(t *test.SystemTest, mnemonic string) *model.Wallet {
 	createdWallet, err := c.CreateWalletForMnemonicWithoutAssertion(t, mnemonic)
 	require.Nil(t, err)
@@ -829,136 +849,6 @@ func (c *APIClient) CreateWalletForMnemonicWithoutAssertion(t *test.SystemTest, 
 	createdWallet := model.Wallet{Id: clientId, PublicKey: keyPair.PublicKey.SerializeToHexStr(), Keys: keyPair}
 
 	return &createdWallet, err
-}
-
-// ExecuteFaucet provides basic assertions
-func (c *APIClient) ExecuteFaucet(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) {
-	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
-	c.ExecuteFaucetWithTokens(t, wallet, 9.0, requiredTransactionStatus)
-}
-
-// ExecuteFaucet provides basic assertions
-func (c *APIClient) ExecuteFaucetWithTokens(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) {
-	t.Log("Execute faucet...")
-
-	pourZCN := tokenomics.IntToZCN(tokens)
-	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:          wallet,
-			ToClientID:      FaucetSmartContractAddress,
-			TransactionData: model.NewFaucetTransactionData(),
-			Value:           pourZCN,
-			TxnType:         SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, faucetTransactionPutResponse)
-
-	var faucetTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		faucetTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: faucetTransactionPutResponse.Entity.Hash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if faucetTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return faucetTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	wallet.IncNonce()
-}
-
-// ExecuteFaucetWithAssertions provides deep assertions
-func (c *APIClient) ExecuteFaucetWithAssertions(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) {
-	t.Log("Execute faucet with assertions...")
-
-	faucetTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:          wallet,
-			ToClientID:      FaucetSmartContractAddress,
-			TransactionData: model.NewFaucetTransactionData(),
-			TxnType:         SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, faucetTransactionPutResponse)
-
-	var faucetTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		faucetTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: faucetTransactionPutResponse.Entity.Hash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if faucetTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return faucetTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	require.True(t, faucetTransactionPutResponse.Async)
-	require.NotNil(t, faucetTransactionPutResponse.Entity)
-	require.NotNil(t, faucetTransactionPutResponse.Entity.ChainId)
-	require.Zero(t, faucetTransactionPutResponse.Entity.TransactionOutput)
-	require.Zero(t, faucetTransactionPutResponse.Entity.TransactionStatus)
-
-	require.Equal(t, faucetTransactionPutResponse.Request.Hash, faucetTransactionPutResponse.Entity.Hash)
-	require.Equal(t, faucetTransactionPutResponse.Request.Version, faucetTransactionPutResponse.Entity.Version)
-	require.Equal(t, faucetTransactionPutResponse.Request.ClientId, faucetTransactionPutResponse.Entity.ClientId)
-	require.Equal(t, faucetTransactionPutResponse.Request.ToClientId, faucetTransactionPutResponse.Entity.ToClientId)
-	require.Equal(t, faucetTransactionPutResponse.Request.PublicKey, faucetTransactionPutResponse.Entity.PublicKey)
-	require.Equal(t, faucetTransactionPutResponse.Request.TransactionData, faucetTransactionPutResponse.Entity.TransactionData)
-	require.Equal(t, faucetTransactionPutResponse.Request.TransactionValue, faucetTransactionPutResponse.Entity.TransactionValue)
-	require.Equal(t, faucetTransactionPutResponse.Request.Signature, faucetTransactionPutResponse.Entity.Signature)
-	require.Equal(t, faucetTransactionPutResponse.Request.CreationDate, faucetTransactionPutResponse.Entity.CreationDate)
-	require.Equal(t, faucetTransactionPutResponse.Request.TransactionFee, faucetTransactionPutResponse.Entity.TransactionFee)
-	require.Equal(t, faucetTransactionPutResponse.Request.TransactionType, faucetTransactionPutResponse.Entity.TransactionType)
-
-	require.Equal(t, TxVersion, faucetTransactionGetConfirmationResponse.Version)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.BlockHash)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.PreviousBlockHash)
-	require.Greater(t, faucetTransactionGetConfirmationResponse.CreationDate, int64(0))
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.MinerID)
-	require.Greater(t, faucetTransactionGetConfirmationResponse.Round, int64(0))
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.Status)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.RoundRandomSeed)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.StateChangesCount)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.MerkleTreeRoot)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.MerkleTreePath)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.ReceiptMerkleTreeRoot)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.ReceiptMerkleTreePath)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.Transaction.TransactionOutput)
-	require.NotNil(t, faucetTransactionGetConfirmationResponse.Transaction.TxnOutputHash)
-
-	wallet.IncNonce()
 }
 
 func (c *APIClient) CreateAllocation(t *test.SystemTest,
@@ -1000,6 +890,7 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 			HttpOkStatus)
 
 		if err != nil {
+			t.Log("Error Creating Alloc : ", err)
 			return false
 		}
 
@@ -1017,6 +908,58 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 	wallet.IncNonce()
 
 	return createAllocationTransactionPutResponse.Entity.Hash
+}
+
+func (c *APIClient) RegisterBlobber(t *test.SystemTest,
+	wallet *model.Wallet,
+	storageNode *model.StorageNode,
+	requiredTransactionStatus int,
+	expectedResponse string) string {
+	t.Log("Registering blobber...")
+
+	registerBlobberTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewRegisterBlobberTransactionData(storageNode),
+			Value:           tokenomics.IntToZCN(0),
+			TxnType:         SCTxType,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, registerBlobberTransactionPutResponse)
+
+	var registerBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		registerBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: registerBlobberTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+
+		if err != nil {
+			t.Log("Error registering blobber : ", err)
+			return false
+		}
+
+		if resp == nil {
+			return false
+		}
+
+		if registerBlobberTransactionGetConfirmationResponse == nil {
+			return false
+		}
+
+		return registerBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus && registerBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput == expectedResponse
+	})
+
+	wallet.IncNonce()
+
+	return registerBlobberTransactionPutResponse.Entity.Hash
 }
 
 func (c *APIClient) CreateFreeAllocation(t *test.SystemTest,
@@ -1074,6 +1017,7 @@ func (c *APIClient) UpdateAllocation(
 	wallet *model.Wallet,
 	allocationID string,
 	uar *model.UpdateAllocationRequest,
+	lock float64,
 	requiredTransactionStatus int) {
 	t.Log("Update allocation...")
 	uar.ID = allocationID
@@ -1083,7 +1027,7 @@ func (c *APIClient) UpdateAllocation(
 			Wallet:          wallet,
 			ToClientID:      StorageSmartContractAddress,
 			TransactionData: model.NewUpdateAllocationTransactionData(uar),
-			Value:           tokenomics.IntToZCN(0.1),
+			Value:           tokenomics.IntToZCN(lock),
 			TxnType:         SCTxType,
 		},
 		HttpOkStatus)
@@ -1134,58 +1078,6 @@ func (c *APIClient) AddFreeStorageAssigner(
 				PublicKey:       wallet.PublicKey,
 				IndividualLimit: 10.0,
 				TotalLimit:      100.0,
-			}),
-			Value:   tokenomics.IntToZCN(0.1),
-			TxnType: SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, freeAllocationTransactionPutResponse)
-	txnHash := freeAllocationTransactionPutResponse.Request.Hash
-
-	var freeAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		freeAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: txnHash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if freeAllocationTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return freeAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	wallet.IncNonce()
-}
-
-func (c *APIClient) MakeAllocationFree(
-	t *test.SystemTest,
-	wallet *model.Wallet,
-	allocationID, marker string,
-	requiredTransactionStatus int) {
-	t.Log("Update allocation...")
-	freeAllocationTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:     wallet,
-			ToClientID: StorageSmartContractAddress,
-			TransactionData: model.NewFreeAllocationTransactionData(&model.FreeAllocationRequest{
-
-				AllocationID: allocationID,
-				Marker:       marker,
 			}),
 			Value:   tokenomics.IntToZCN(0.1),
 			TxnType: SCTxType,
@@ -1335,9 +1227,14 @@ func (c *APIClient) GetAllocationBlobbers(t *test.SystemTest, wallet *model.Wall
 			ClientKey:           wallet.PublicKey,
 			BlobberRequirements: *blobberRequirements,
 		}, requiredStatusCode)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, scRestGetAllocationBlobbersResponse)
+
+	scRestGetAllocationBlobbersResponse.StorageVersion = 1
+
+	if requiredStatusCode == http.StatusOK {
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		require.NotNil(t, scRestGetAllocationBlobbersResponse)
+	}
 
 	return scRestGetAllocationBlobbersResponse
 }
@@ -1410,6 +1307,113 @@ func (c *APIClient) GetWalletBalance(t *test.SystemTest, wallet *model.Wallet, r
 	return clientGetBalanceResponse
 }
 
+func (c *APIClient) RefreshNonce(t *test.SystemTest, wallet *model.Wallet, requiredStatusCode int) {
+	wBalance := c.GetWalletBalance(t, wallet, requiredStatusCode)
+	wallet.Nonce = int(wBalance.Nonce)
+}
+
+func (c *APIClient) GetRewardsByQuery(t *test.SystemTest, query string, requiredStatusCode int) *model.QueryRewardsResponse {
+	t.Log("Get rewards by query...")
+
+	queryRewardsResponse, resp, err := c.V1QueryRewards(
+		t,
+		model.QueryRequest{
+			Query: query,
+		},
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, queryRewardsResponse)
+
+	return queryRewardsResponse
+}
+
+func (c *APIClient) GetChallengesCountByQuery(t *test.SystemTest, query string, requiredStatusCode int) map[string]int64 {
+	t.Log("Get rewards by query...")
+
+	queryRewardsResponse, resp, err := c.V1QueryChallengesCount(
+		t,
+		model.QueryRequest{
+			Query: query,
+		},
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, queryRewardsResponse)
+
+	return queryRewardsResponse
+}
+
+func (c *APIClient) GetAllChallengesForAllocation(t *test.SystemTest, allocationID string, requiredStatusCode int) []*model.Challenge {
+	t.Log("Get all challenges for allocation...")
+
+	getAllChallengesForAllocationResponse, resp, err := c.V1SCRestGetAllChallengesForAllocation(
+		t,
+		allocationID,
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, getAllChallengesForAllocationResponse)
+
+	return getAllChallengesForAllocationResponse
+}
+
+func (c *APIClient) GetDelegateRewardsByQuery(t *test.SystemTest, query string, requiredStatusCode int) map[string]int64 {
+	t.Log("Get rewards by query...")
+
+	queryRewardsResponse, resp, err := c.V1QueryDelegateRewards(
+		t,
+		model.QueryRequest{
+			Query: query,
+		},
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, queryRewardsResponse)
+
+	return queryRewardsResponse
+}
+
+func (c *APIClient) GetBlobberPartitionSelectionFrequency(t *test.SystemTest, start, end int64, requiredStatusCode int) map[string]int64 {
+	t.Log("Get blobber partition selection frequency...")
+
+	blobberPartitionSelectionFrequencyResponse, resp, err := c.V1BlobberPartitionSelectionFrequency(
+		t,
+		model.BlockRewardsRequest{
+			Start: start,
+			End:   end,
+		},
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, blobberPartitionSelectionFrequencyResponse)
+
+	return blobberPartitionSelectionFrequencyResponse
+}
+
+func (c *APIClient) GetPartitionSizeFrequency(t *test.SystemTest, start, end int64, requiredStatusCode int) map[float64]float64 {
+	t.Log("Get partition size frequency...")
+
+	blobberPartitionSelectionFrequencyResponse, resp, err := c.V1PartitionSizeFrequency(
+		t,
+		model.BlockRewardsRequest{
+			Start: start,
+			End:   end,
+		},
+		requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, blobberPartitionSelectionFrequencyResponse)
+
+	return blobberPartitionSelectionFrequencyResponse
+}
+
 func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRestGetBlobberResponse *model.SCRestGetBlobberResponse, requiredTransactionStatus int) {
 	updateBlobberTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
@@ -1453,8 +1457,13 @@ func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRe
 }
 
 // CreateStakePoolWrapper does not provide deep test of used components
-func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID string, requiredTransactionStatus int) string {
+func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, providerType int, providerID string, requiredTransactionStatus int, options ...float64) string {
 	t.Log("Create stake pool...")
+
+	tokens := 1.0
+	if len(options) > 0 {
+		tokens = options[0]
+	}
 
 	createStakePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
 		t,
@@ -1466,7 +1475,7 @@ func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 					ProviderType: providerType,
 					ProviderID:   providerID,
 				}),
-			Value:   tokenomics.IntToZCN(1.0),
+			Value:   tokenomics.IntToZCN(tokens),
 			TxnType: SCTxType,
 		},
 		HttpOkStatus)
@@ -1704,148 +1713,6 @@ func (c *APIClient) CreateWritePool(t *test.SystemTest, wallet *model.Wallet, al
 	return createWritePoolTransactionGetConfirmationResponse.Hash
 }
 
-func (c *APIClient) UnlockWritePool(t *test.SystemTest, wallet *model.Wallet, allocationId string, requiredTransactionStatus int) string {
-	t.Log("Unlock Write pool...")
-
-	unlockWritePoolTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:     wallet,
-			ToClientID: StorageSmartContractAddress,
-			TransactionData: model.NewUnlockWritePoolTransactionData(
-				model.CreateWritePoolRequest{
-					AllocationID: allocationId,
-				}),
-			Value:   tokenomics.IntToZCN(0.1),
-			TxnType: SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, unlockWritePoolTransactionPutResponse)
-
-	var unlockWritePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		unlockWritePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: unlockWritePoolTransactionPutResponse.Entity.Hash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if unlockWritePoolTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return unlockWritePoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	wallet.IncNonce()
-
-	return unlockWritePoolTransactionGetConfirmationResponse.Hash
-}
-
-// CreateReadPoolWrapper does not provide deep test of used components
-func (c *APIClient) CreateReadPool(t *test.SystemTest, wallet *model.Wallet, tokens float64, requiredTransactionStatus int) string {
-	t.Log("Create Read pool...")
-
-	createReadPoolTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:          wallet,
-			ToClientID:      StorageSmartContractAddress,
-			TransactionData: model.NewCreateReadPoolTransactionData(),
-			Value:           tokenomics.IntToZCN(tokens),
-			TxnType:         SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, createReadPoolTransactionPutResponse)
-
-	var createReadPoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		createReadPoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: createReadPoolTransactionPutResponse.Entity.Hash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if createReadPoolTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return createReadPoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	wallet.IncNonce()
-
-	return createReadPoolTransactionGetConfirmationResponse.Hash
-}
-
-func (c *APIClient) UnlockReadPool(t *test.SystemTest, wallet *model.Wallet, requiredTransactionStatus int) string {
-	t.Log("Unlock Read pool...")
-
-	unlockReadPoolTransactionPutResponse, resp, err := c.V1TransactionPut(
-		t,
-		model.InternalTransactionPutRequest{
-			Wallet:          wallet,
-			ToClientID:      StorageSmartContractAddress,
-			TransactionData: model.NewUnlockReadPoolTransactionData(),
-			Value:           tokenomics.IntToZCN(0.1),
-			TxnType:         SCTxType,
-		},
-		HttpOkStatus)
-	require.Nil(t, err)
-	require.NotNil(t, resp)
-	require.NotNil(t, unlockReadPoolTransactionPutResponse)
-
-	var unlockReadPoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-
-	wait.PoolImmediately(t, time.Minute*2, func() bool {
-		unlockReadPoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
-			t,
-			model.TransactionGetConfirmationRequest{
-				Hash: unlockReadPoolTransactionPutResponse.Entity.Hash,
-			},
-			HttpOkStatus)
-		if err != nil {
-			return false
-		}
-
-		if resp == nil {
-			return false
-		}
-
-		if unlockReadPoolTransactionGetConfirmationResponse == nil {
-			return false
-		}
-
-		return unlockReadPoolTransactionGetConfirmationResponse.Status == requiredTransactionStatus
-	})
-
-	wallet.IncNonce()
-
-	return unlockReadPoolTransactionGetConfirmationResponse.Hash
-}
-
 func (c *APIClient) V1SCRestGetStakePoolStat(t *test.SystemTest, scRestGetStakePoolStatRequest model.SCRestGetStakePoolStatRequest, requiredStatusCode int) (*model.SCRestGetStakePoolStatResponse, *resty.Response, error) { //nolint
 	var scRestGetStakePoolStatResponse *model.SCRestGetStakePoolStatResponse
 
@@ -1966,7 +1833,7 @@ func (c *APIClient) GetBlobber(t *test.SystemTest, blobberID string, requiredSta
 func (c *APIClient) V1BlobberGetFileRefs(t *test.SystemTest, blobberGetFileRefsRequest *model.BlobberGetFileRefsRequest, requiredStatusCode int) (*model.BlobberGetFileRefsResponse, *resty.Response, error) {
 	var blobberGetFileResponse *model.BlobberGetFileRefsResponse
 
-	url := blobberGetFileRefsRequest.URL + strings.Replace(GetFileRef, ":allocation_id", blobberGetFileRefsRequest.AllocationID, 1) + "?" + "path=" + blobberGetFileRefsRequest.RemotePath + "&" + "refType=" + blobberGetFileRefsRequest.RefType
+	blobberGetFileRefsURL := blobberGetFileRefsRequest.URL + strings.Replace(GetFileRef, ":allocation_id", blobberGetFileRefsRequest.AllocationID, 1) + "?" + "path=" + blobberGetFileRefsRequest.RemotePath + "&" + "refType=" + blobberGetFileRefsRequest.RefType
 
 	headers := map[string]string{
 		"X-App-Client-Id":        blobberGetFileRefsRequest.ClientID,
@@ -1976,7 +1843,7 @@ func (c *APIClient) V1BlobberGetFileRefs(t *test.SystemTest, blobberGetFileRefsR
 	}
 	resp, err := c.executeForServiceProvider(
 		t,
-		url,
+		blobberGetFileRefsURL,
 		model.ExecutionRequest{
 			Dst:                &blobberGetFileResponse,
 			RequiredStatusCode: requiredStatusCode,
@@ -1989,7 +1856,7 @@ func (c *APIClient) V1BlobberGetFileRefs(t *test.SystemTest, blobberGetFileRefsR
 func (c *APIClient) V1BlobberGetFileRefPaths(t *test.SystemTest, blobberFileRefPathRequest *model.BlobberFileRefPathRequest, requiredStatusCode int) (*model.BlobberFileRefPathResponse, *resty.Response, error) {
 	var blobberFileRefPathResponse *model.BlobberFileRefPathResponse
 
-	url := blobberFileRefPathRequest.URL + strings.Replace(GetFileRefPath, ":allocation_id", blobberFileRefPathRequest.AllocationID, 1) + "?" + "path=" + blobberFileRefPathRequest.Path
+	blobberGetFilePathURL := blobberFileRefPathRequest.URL + strings.Replace(GetFileRefPath, ":allocation_id", blobberFileRefPathRequest.AllocationID, 1) + "?" + "path=" + blobberFileRefPathRequest.Path
 
 	headers := map[string]string{
 		"X-App-Client-Id":        blobberFileRefPathRequest.ClientID,
@@ -1999,7 +1866,7 @@ func (c *APIClient) V1BlobberGetFileRefPaths(t *test.SystemTest, blobberFileRefP
 	}
 	resp, err := c.executeForServiceProvider(
 		t,
-		url,
+		blobberGetFilePathURL,
 		model.ExecutionRequest{
 			Dst:                &blobberFileRefPathResponse,
 			RequiredStatusCode: requiredStatusCode,
@@ -2028,10 +1895,40 @@ func (c *APIClient) V1BlockGetLatestFinalizedMagicBlock(t *test.SystemTest, hash
 	return resp, err
 }
 
+func (c *APIClient) V1BlockGetLatestFinalizedBlock(t *test.SystemTest, requiredStatusCode int) (*model.LatestFinalizedBlock, *resty.Response, error) {
+	t.Log("Get latest finalized block")
+
+	var latestFinalizedBlock *model.LatestFinalizedBlock
+
+	urlBuilder := NewURLBuilder().SetPath(GetLatestFinalizedBlock)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			RequiredStatusCode: requiredStatusCode,
+			Dst:                &latestFinalizedBlock,
+		},
+		HttpPOSTMethod,
+		SharderServiceProvider)
+
+	return latestFinalizedBlock, resp, err
+}
+
+func (c *APIClient) GetLatestFinalizedBlock(t *test.SystemTest, requiredStatusCode int) *model.LatestFinalizedBlock {
+	latestFinalizedBlock, resp, err := c.V1BlockGetLatestFinalizedBlock(t, requiredStatusCode)
+
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, latestFinalizedBlock)
+
+	return latestFinalizedBlock
+}
+
 func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeRequest *model.BlobberObjectTreeRequest, requiredStatusCode int) (*model.BlobberObjectTreePathResponse, *resty.Response, error) {
 	var blobberObjectTreePathResponse *model.BlobberObjectTreePathResponse
 
-	url := blobberObjectTreeRequest.URL + strings.Replace(GetObjectTree, ":allocation_id", blobberObjectTreeRequest.AllocationID, 1) + "?" + "path=" + blobberObjectTreeRequest.Path
+	blobberObjectTreeURL := blobberObjectTreeRequest.URL + strings.Replace(GetObjectTree, ":allocation_id", blobberObjectTreeRequest.AllocationID, 1) + "?" + "path=" + blobberObjectTreeRequest.Path
 
 	headers := map[string]string{
 		"X-App-Client-Id":        blobberObjectTreeRequest.ClientID,
@@ -2041,7 +1938,7 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 	}
 	resp, err := c.executeForServiceProvider(
 		t,
-		url,
+		blobberObjectTreeURL,
 		model.ExecutionRequest{
 			Dst:                &blobberObjectTreePathResponse,
 			RequiredStatusCode: requiredStatusCode,
@@ -2049,6 +1946,124 @@ func (c *APIClient) V1BlobberObjectTree(t *test.SystemTest, blobberObjectTreeReq
 		},
 		HttpGETMethod)
 	return blobberObjectTreePathResponse, resp, err
+}
+
+func (c *APIClient) V1QueryChallengesCount(t *test.SystemTest, queryRequest model.QueryRequest, requiredStatusCode int) (map[string]int64, *resty.Response, error) {
+	var queryResponse map[string]int64
+
+	urlBuilder := NewURLBuilder().SetPath(QueryChallengesCount).AddParams("query", url.QueryEscape(queryRequest.Query)).SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &queryResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return queryResponse, resp, err
+}
+
+func (c *APIClient) V1QueryRewards(t *test.SystemTest, queryRewardsRequest model.QueryRequest, requiredStatusCode int) (*model.QueryRewardsResponse, *resty.Response, error) {
+	var queryRewardsResponse *model.QueryRewardsResponse
+
+	urlBuilder := NewURLBuilder().SetPath(QueryRewards).AddParams("query", url.QueryEscape(queryRewardsRequest.Query)).SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &queryRewardsResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return queryRewardsResponse, resp, err
+}
+
+func (c *APIClient) V1QueryDelegateRewards(t *test.SystemTest, queryRewardsRequest model.QueryRequest, requiredStatusCode int) (map[string]int64, *resty.Response, error) {
+	var queryRewardsResponse map[string]int64
+
+	urlBuilder := NewURLBuilder().SetPath(QueryDelegateRewards).AddParams("query", url.QueryEscape(queryRewardsRequest.Query)).SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &queryRewardsResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return queryRewardsResponse, resp, err
+}
+
+func (c *APIClient) V1BlobberPartitionSelectionFrequency(t *test.SystemTest, request model.BlockRewardsRequest, requiredStatusCode int) (map[string]int64, *resty.Response, error) {
+	var result map[string]int64
+
+	urlBuilder := NewURLBuilder().SetPath(BlobberPartitionSelectionFrequency).AddParams("start", strconv.FormatInt(request.Start, 10)).AddParams("end", strconv.FormatInt(request.End, 10)).SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &result,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return result, resp, err
+}
+
+func (c *APIClient) V1PartitionSizeFrequency(t *test.SystemTest, request model.BlockRewardsRequest, requiredStatusCode int) (map[float64]float64, *resty.Response, error) {
+	var response map[string]int
+
+	result := make(map[float64]float64)
+
+	urlBuilder := NewURLBuilder().SetPath(PartitionSizeFrequency).AddParams("start", strconv.FormatInt(request.Start, 10)).AddParams("end", strconv.FormatInt(request.End, 10)).SetPathVariable("sc_address", StorageSmartContractAddress).SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &response,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	for size, frequency := range response {
+		sizeInFloat, _ := strconv.ParseFloat(size, 64)
+		result[sizeInFloat] = float64(frequency)
+	}
+
+	return result, resp, err
+}
+
+func (c *APIClient) V1SCRestGetAllChallengesForAllocation(t *test.SystemTest, allocationID string, requiredStatusCode int) ([]*model.Challenge, *resty.Response, error) { //nolint
+	var scRestGetAllChallengesForAllocationResponse []*model.Challenge
+
+	urlBuilder := NewURLBuilder().
+		SetPath(GetAllChallenges).
+		SetPathVariable("sc_address", StorageSmartContractAddress).
+		AddParams("allocation_id", allocationID)
+
+	resp, err := c.executeForAllServiceProviders(
+		t,
+		urlBuilder,
+		&model.ExecutionRequest{
+			Dst:                &scRestGetAllChallengesForAllocationResponse,
+			RequiredStatusCode: requiredStatusCode,
+		},
+		HttpGETMethod,
+		SharderServiceProvider)
+
+	return scRestGetAllChallengesForAllocationResponse, resp, err
 }
 
 //----------------------------------------------------------

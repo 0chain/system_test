@@ -24,15 +24,20 @@ const DefaultConfigPath = "./config/api_tests_config.yaml"
 type Config struct {
 	BlockWorker                 string `yaml:"block_worker"`
 	ZboxUrl                     string `yaml:"0box_url"`
-	ZboxPhoneNumber             string `yaml:"0box_phone_number"`
 	DefaultTestCaseTimeout      string `yaml:"default_test_case_timeout"`
+	ZvaultUrl                   string `yaml:"zvault_url"`
+	ZauthUrl                    string `yaml:"zauth_url"`
 	ZS3ServerUrl                string `yaml:"zs3_server_url"`
+	ChimneyTestNetwork          string `yaml:"chimney_test_network"`
 	S3SecretKey                 string `yaml:"s3_secret_key"`
 	S3AccessKey                 string `yaml:"s3_access_key"`
 	EthereumAddress             string `yaml:"ethereum_address"`
 	S3BucketName                string `yaml:"s3_bucket_name"`
+	S3BucketNameAlternate       string `yaml:"s3_bucket_name_alternate"`
 	BlobberOwnerWalletMnemonics string `yaml:"blobber_owner_wallet_mnemonics"`
 	OwnerWalletMnemonics        string `yaml:"owner_wallet_mnemonics"`
+	DropboxAccessToken          string `yaml:"dropboxAccessToken"`
+	GdriveAccessToken           string `yaml:"gdriveAccessToken"`
 }
 
 func Parse(configPath string) *Config {

@@ -68,7 +68,7 @@ func createForm(form map[string]string) (string, io.Reader, error) {
 	return mp.FormDataContentType(), body, nil
 }
 
-func (c *ZS3Client) PutObject(t *test.SystemTest, queryParams, formData map[string]string) (*resty.Response, error) {
+func (c *ZS3Client) Zs3ServerRequest(t *test.SystemTest, queryParams, formData map[string]string) (*resty.Response, error) {
 	ct, body, err := createForm(formData)
 	if err != nil {
 		t.Log(err)

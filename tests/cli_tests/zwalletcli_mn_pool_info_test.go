@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"os"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -55,13 +54,9 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	)
 
 	t.Run("Miner pool info after locking against miner should work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": miner.ID,
 			"tokens":   1,
 		}), true)
@@ -81,13 +76,9 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Miner pool info after locking against sharder should work", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "error executing faucet", strings.Join(output, "\n"))
-
-		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
 			"tokens":     5,
 		}), true)
@@ -108,10 +99,9 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 	})
 
 	t.Run("Miner/Sharder pool info for invalid node id should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
+		output, err := minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
 			"id": "abcdefgh",
 		}), false)
 		require.NotNil(t, err, "expected error when trying to fetch pool info from invalid id")

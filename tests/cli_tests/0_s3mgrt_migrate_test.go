@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -12,7 +13,6 @@ import (
 
 func Test0S3Migration(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("tests are broken - need to investigate")
 
 	if s3SecretKey == "" || s3AccessKey == "" {
 		t.Skip("s3SecretKey or s3AccessKey was missing")
@@ -59,7 +59,7 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when bucket too large for allocation", func(t *test.SystemTest) {
-		allocSize := int64(1 * MB)
+		allocSize := int64(64 * KB)
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
@@ -74,7 +74,7 @@ func Test0S3Migration(testSetup *testing.T) {
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, output[0], "Max size reached for the allocation with this blobber", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, output[0], "max_allocation_size", "Output was not as expected", strings.Join(output, "\n"))
 	})
 
 	t.RunSequentially("Should fail when bucket does not exist", func(t *test.SystemTest) {
@@ -245,5 +245,5 @@ func Test0S3Migration(testSetup *testing.T) {
 
 func migrateFromS3(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Migrating S3 bucket to Zus...")
-	return cliutils.RunCommandWithoutRetry(fmt.Sprintf("./s3mgrt migrate --silent --configDir ./config --config %s --network %s %s", cliConfigFilename, cliConfigFilename, params))
+	return cliutils.RunCommand(t, fmt.Sprintf("./s3mgrt migrate --silent --configDir ./config --config %s --network %s %s", cliConfigFilename, cliConfigFilename, params), 1, time.Second*2)
 }

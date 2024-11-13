@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -19,22 +20,28 @@ import (
 
 func TestBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till authorizers are re-enabled")
-	t.SetSmokeTests("Burning WZCN tokens on balance, should work")
 
-	t.Parallel()
+	t.RunSequentiallyWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
+		err := tenderlyClient.InitBalance(ethereumAddress)
+		require.NoError(t, err)
 
-	t.Run("Burning WZCN tokens on balance, should work", func(t *test.SystemTest) {
-		t.Skip("Skip till runners are updated to newer ubuntu")
-		output, err := burnEth(t, "1", true)
+		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
+		require.NoError(t, err)
+
+		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
 	})
 
-	t.RunWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
-		t.Skip("Skip till runners are updated to newer ubuntu")
-		output, err := burnEth(t, "1", true)
+	t.RunSequentiallyWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
+		err := tenderlyClient.InitBalance(ethereumAddress)
+		require.NoError(t, err)
+
+		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
+		require.NoError(t, err)
+
+		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Verification:")
@@ -51,7 +58,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		var amountInt int
 		amountInt, err = strconv.Atoi(amount)
 		require.Nil(t, err)
-		require.Equal(t, 1, amountInt)
+		require.Equal(t, 1000000000000, amountInt)
 
 		nonce := strings.TrimSpace(strings.Split(output[len(output)-4], ":")[1])
 		var nonceInt int
@@ -60,7 +67,7 @@ func TestBridgeBurn(testSetup *testing.T) {
 		require.GreaterOrEqual(t, nonceInt, 0)
 	})
 
-	t.RunWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*10, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := burnZcn(t, "1", false)
 		require.NotNil(t, err)
 		require.Greater(t, len(output), 0)
@@ -68,21 +75,17 @@ func TestBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.Run("Burning ZCN tokens with available ZCN tokens on balance, should work", func(t *test.SystemTest) {
-		output, err := executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = burnZcn(t, "1", true)
+		createWallet(t)
+		output, err := burnZcn(t, "1", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Transaction completed successfully:")
 	})
 
-	t.RunWithTimeout("Get ZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
-		t.Skip("Skip till runners are updated to newer ubuntu")
-		output, err := executeFaucetWithTokens(t, configPath, 2.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+	t.RunSequentiallyWithTimeout("Get ZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
+		createWallet(t)
 
-		output, err = burnZcn(t, "1", true)
+		output, err := burnZcn(t, "1", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
 		require.Contains(t, output[len(output)-1], "Transaction completed successfully:")
@@ -131,6 +134,8 @@ func burnZcn(t *test.SystemTest, amount string, retry bool) ([]string, error) {
 		escapedTestName(t)+"_wallet.json",
 		configPath,
 	)
+
+	log.Println(cmd)
 
 	if retry {
 		return cliutils.RunCommand(t, cmd, 6, time.Second*10)

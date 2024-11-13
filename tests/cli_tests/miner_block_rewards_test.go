@@ -42,8 +42,7 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
 	t.RunSequentially("Miner share of block rewards", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.NoError(t, err, "registering wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		if !confirmDebugBuild(t) {
 			t.Skip("miner block rewards test skipped as it requires a debug event database")
@@ -289,16 +288,10 @@ func confirmPoolPayments(
 }
 
 func initialiseTest(t *test.SystemTest, wallet string, funds bool) string {
-	output, err := createWalletForName(t, configPath, wallet)
-	require.NoError(t, err, "error creating target wallet", strings.Join(output, "\n"))
-
-	if funds {
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-	}
+	createWalletForName(wallet)
 
 	targetWallet, err := getWalletForName(t, configPath, wallet)
-	require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
+	require.NoError(t, err, "error getting target wallet")
 	return targetWallet.ClientID
 }
 
@@ -500,10 +493,6 @@ func apiGetBalance(t *test.SystemTest, sharderBaseURL, clientID string) (*http.R
 	return http.Get(sharderBaseURL + "/v1/client/get/balance?client_id=" + clientID)
 }
 
-func apiGetBlock(t *test.SystemTest, sharderBaseURL string, round int64) (*http.Response, error) {
-	t.Logf("Gert block for round %d...", round)
-	return http.Get(fmt.Sprintf(sharderBaseURL+"/v1/block/get?content=full&round=%d", round))
-}
 func getMiners(t *test.SystemTest, cliConfigFilename string) ([]string, error) {
 	t.Log("Get miners...")
 	return cliutil.RunCommand(t, "./zwallet ls-miners --active --json --silent --wallet "+escapedTestName(t)+"_wallet.json --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)

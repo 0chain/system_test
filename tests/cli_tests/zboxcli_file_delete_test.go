@@ -6,6 +6,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -15,12 +16,76 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Fixed
 func TestFileDelete(testSetup *testing.T) {
-	//todo: slow operations
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("delete existing file in root directory should work")
 
 	t.Parallel()
+	t.Run("delete non root directory with multiple existing file present should work", func(t *test.SystemTest) {
+		allocationID := setupAllocation(t, configPath)
+		createAllocationTestTeardown(t, allocationID)
+
+		const remotepath = "/"
+		filesize := int64(1 * KB)
+		filename1 := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		filename2 := generateFileAndUpload(t, allocationID, remotepath, filesize)
+		fname1 := filepath.Base(filename1)
+		remoteFilePath1 := path.Join(remotepath, fname1)
+		fname2 := filepath.Base(filename2)
+		remoteFilePath2 := path.Join(remotepath, fname2)
+
+		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf("%s deleted", remotepath), output[0])
+
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteFilePath1,
+			"json":       "",
+		}), true)
+		require.NotNil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
+
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteFilePath2,
+			"json":       "",
+		}), true)
+		require.NotNil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
+	})
+
+	t.Run("delete non-root directory with No existing file should work", func(t *test.SystemTest) {
+		allocationID := setupAllocation(t, configPath)
+		createAllocationTestTeardown(t, allocationID)
+		dirname := "/child"
+		output, err := createDir(t, configPath, allocationID, dirname, true)
+		require.Nil(t, err, "Unexpected create dir failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, dirname+" directory created", output[0])
+
+		output, err = deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": dirname,
+		}), true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf("%s deleted", dirname), output[0])
+
+		output, err = listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": dirname,
+			"json":       "",
+		}), true)
+		require.NotNil(t, err, "List files failed", err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, `error from server list response: {"code":"invalid_parameters","error":"invalid_parameters: Invalid path record not found"}`, output[0], strings.Join(output, "\n"))
+	})
 
 	t.Run("delete existing file in root directory should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
@@ -118,7 +183,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete existing non-root directory should work", func(t *test.SystemTest) {
+	t.Run("delete existing non-root directory with file present should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -179,7 +244,7 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 	})
 
-	t.Run("delete existing root directory should work", func(t *test.SystemTest) {
+	t.Run("delete existing root directory with files present should work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -221,8 +286,7 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete file by not supplying remotepath should fail", func(t *test.SystemTest) {
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": "abc",
@@ -233,8 +297,7 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete file by not supplying allocation ID should fail", func(t *test.SystemTest) {
-		_, err := createWallet(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"remotepath": "/",
@@ -245,6 +308,11 @@ func TestFileDelete(testSetup *testing.T) {
 	})
 
 	t.Run("delete existing file in root directory with wallet balance accounting", func(t *test.SystemTest) {
+		createWallet(t)
+
+		balanceBefore, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
+
 		allocationID := setupAllocation(t, configPath)
 		createAllocationTestTeardown(t, allocationID)
 
@@ -254,9 +322,10 @@ func TestFileDelete(testSetup *testing.T) {
 		fname := filepath.Base(filename)
 		remoteFilePath := path.Join(remotepath, fname)
 
-		balance, err := getBalanceZCN(t, configPath)
+		balanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 1.99, balance)
+		require.Equal(t, balanceBefore-5.01, balanceAfter)
+		balanceBefore = balanceAfter
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -275,9 +344,10 @@ func TestFileDelete(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Equal(t, "null", output[0], strings.Join(output, "\n"))
 
-		balance, err = getBalanceZCN(t, configPath)
+		balanceAfter, err = getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 1.99, balance)
+
+		require.InEpsilon(t, balanceBefore-0.01, balanceAfter, 0.01)
 	})
 
 	t.Run("delete existing file in someone else's allocation should fail", func(t *test.SystemTest) {
@@ -337,6 +407,65 @@ func TestFileDelete(testSetup *testing.T) {
 		}), true)
 		require.Nil(t, err, "List files failed", err, strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), remoteFilePath, strings.Join(output, "\n"))
+	})
+
+	t.RunWithTimeout("Delete file concurrently in existing directory, should work", 5*time.Minute, func(t *test.SystemTest) { // TODO: slow
+		const allocSize int64 = 64 * KB * 2 * 2
+		const fileSize int64 = 256
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		var fileNames [2]string
+
+		const remotePathPrefix = "/"
+
+		var outputList [2][]string
+		var errorList [2]error
+		var wg sync.WaitGroup
+
+		for i, fileName := range fileNames {
+			wg.Add(1)
+			go func(currentFileName string, currentIndex int) {
+				defer wg.Done()
+
+				fileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+				fileNames[currentIndex] = fileName
+
+				remoteFilePath := filepath.Join(remotePathPrefix, fileName)
+
+				op, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
+					"allocation": allocationID,
+					"remotepath": remoteFilePath,
+				}), true)
+
+				errorList[currentIndex] = err
+				outputList[currentIndex] = op
+			}(fileName, i)
+		}
+
+		wg.Wait()
+
+		const expectedPattern = "%s deleted"
+
+		for i := 0; i < 2; i++ {
+			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
+			require.Len(t, outputList, 2, strings.Join(outputList[i], "\n"))
+
+			require.Equal(t, fmt.Sprintf(expectedPattern, fileNames[i]), filepath.Base(outputList[i][0]), "Output is not appropriate")
+		}
+
+		for i := 0; i < 2; i++ {
+			output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": path.Join(remotePathPrefix, fileNames[i]),
+				"json":       "",
+			}), true)
+
+			require.NotNil(t, err, strings.Join(output, "\n"))
+			require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
+		}
 	})
 }
 

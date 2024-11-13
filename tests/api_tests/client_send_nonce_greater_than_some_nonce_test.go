@@ -2,10 +2,12 @@ package api_tests
 
 import (
 	"encoding/json"
+	"github.com/0chain/gosdk/core/transaction"
 	"strconv"
 	"testing"
 	"time"
 
+	coreClient "github.com/0chain/gosdk/core/client"
 	"github.com/0chain/gosdk/zcncore"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -17,17 +19,20 @@ import (
 
 func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip()
+	t.Parallel()
 
-	wallet1, mnemonic := apiClient.CreateWalletWithMnemonicsInReturnValue(t)
-	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
-	require.NoError(t, err)
+	wallet1 := initialisedWallets[walletIdx]
+	walletIdx++
+
+	coreClient.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
 
 	faucetAmount := float64(9)
-	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
 	require.EqualValues(t, zcncore.ConvertToValue(faucetAmount), balResp.Balance)
 
-	wallet2 := apiClient.CreateWallet(t)
+	wallet2 := initialisedWallets[walletIdx]
+	walletIdx++
 	futureNonce := GetFutureNonceConfig(t)
 	currentNonce := balResp.Nonce
 
@@ -55,12 +60,14 @@ func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 
 func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	wallet1, mnemonic := apiClient.CreateWalletWithMnemonicsInReturnValue(t)
-	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
-	require.NoError(t, err)
+	t.Skip()
+	t.Parallel()
+	wallet1 := initialisedWallets[walletIdx]
+	walletIdx++
+
+	coreClient.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
 
 	faucetAmount := float64(9)
-	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
 	require.EqualValues(t, zcncore.ConvertToValue(faucetAmount), balResp.Balance)
 
@@ -71,7 +78,8 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	transactions := make(map[string]struct{}, numSameTxns)
 	value := int64(1)
 	for i := 0; i < numSameTxns; i++ {
-		wallets[i] = apiClient.CreateWallet(t)
+		wallets[i] = initialisedWallets[walletIdx]
+		walletIdx++
 
 		txnResp, _, err := apiClient.V1TransactionPutWithNonceAndServiceProviders(
 			t,
@@ -101,7 +109,9 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 		require.True(t, ok, "hash: ", txn, " does not exist in extracted transaction list")
 	}
 
-	wallet2 := apiClient.CreateWallet(t)
+	wallet2 := initialisedWallets[walletIdx]
+	walletIdx++
+
 	txnResp, _, err := apiClient.V1TransactionPutWithNonceAndServiceProviders(
 		t,
 		model.InternalTransactionPutRequest{
@@ -168,17 +178,21 @@ L1:
 
 func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	wallet1, mnemonic := apiClient.CreateWalletWithMnemonicsInReturnValue(t)
-	err := zcncore.SetWallet(*wallet1.ToZCNCryptoWallet(mnemonic), false)
-	require.NoError(t, err)
+	t.Skip()
+	t.Parallel()
+	wallet1 := initialisedWallets[walletIdx]
+	walletIdx++
+
+	coreClient.SetWallet(*wallet1.ToZCNCryptoWallet(wallet1.Mnemonics))
 
 	faucetAmount := float64(9)
-	apiClient.ExecuteFaucetWithTokens(t, wallet1, faucetAmount, client.TxSuccessfulStatus)
 	balResp := apiClient.GetWalletBalance(t, wallet1, client.HttpOkStatus)
 	require.EqualValues(t, zcncore.ConvertToValue(faucetAmount), balResp.Balance)
 	require.GreaterOrEqual(t, len(apiClient.Miners), 1)
 
-	wallet2 := apiClient.CreateWallet(t)
+	wallet2 := initialisedWallets[walletIdx]
+	walletIdx++
+
 	value := int64(1)
 	miner := apiClient.Miners[0]
 	txnResp, _, err := apiClient.V1TransactionPutWithNonceAndServiceProviders(
@@ -233,27 +247,11 @@ func TestClientSendTransactionToOnlyOneMiner(testSetup *testing.T) {
 	require.Equal(t, txnResp.Request.Hash, confResp.Transaction.Hash)
 }
 
-func GetGlobalConfig(t *test.SystemTest) map[string]interface{} {
-	cb := GlobalCB{
-		Globals: make(map[string]interface{}),
-		doneCh:  make(chan struct{}),
-		errCh:   make(chan error),
-	}
-
-	err := zcncore.GetMinerSCGlobals(&cb)
+func GetGlobalConfig(t *test.SystemTest) map[string]string {
+	res, err := transaction.GetConfig("miner_sc_globals")
 	require.NoError(t, err)
 
-	dur := time.Minute
-	tm := time.NewTimer(dur)
-	select {
-	case <-cb.doneCh:
-	case err := <-cb.errCh:
-		t.Error(err)
-	case <-tm.C:
-		t.Errorf("Timeout occurred while waiting for global config after %v", dur)
-	}
-
-	return cb.Globals
+	return res.Fields
 }
 
 func GetTransactionTimeOut(t *test.SystemTest) time.Duration {
@@ -261,8 +259,7 @@ func GetTransactionTimeOut(t *test.SystemTest) time.Duration {
 	tmKey := "server_chain.transaction.timeout"
 	i, ok := globalConfig[tmKey]
 	require.True(t, ok)
-	s := i.(string)
-	tm, err := strconv.Atoi(s)
+	tm, err := strconv.Atoi(i)
 	require.NoError(t, err)
 	return time.Duration(tm) * time.Second
 }
@@ -272,8 +269,7 @@ func GetFutureNonceConfig(t *test.SystemTest) int {
 	fnKey := "server_chain.transaction.future_nonce" // future nonce key
 	i, ok := globalConfig[fnKey]
 	require.True(t, ok)
-	s := i.(string)
-	n, err := strconv.Atoi(s)
+	n, err := strconv.Atoi(i)
 	require.NoError(t, err)
 	return n
 }

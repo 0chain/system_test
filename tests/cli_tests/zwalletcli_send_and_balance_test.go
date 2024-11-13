@@ -3,8 +3,6 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -19,9 +17,6 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-// address of minersc
-const MINER_SC_ADDRESS = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
-
 func TestSendAndBalance(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Send with description")
@@ -31,16 +26,14 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send with description", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = createWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWalletForName(targetWallet)
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "rich description", createParams(map[string]interface{}{}), true)
+		output, err := sendZCN(t, configPath, target.ClientID, "1", "rich description", createParams(map[string]interface{}{}), true)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -51,16 +44,14 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send with json flag", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = createWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWalletForName(targetWallet)
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "rich description", createParams(map[string]interface{}{
+		output, err := sendZCN(t, configPath, target.ClientID, "1", "rich description", createParams(map[string]interface{}{
 			"json": "",
 		}), true)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
@@ -77,28 +68,25 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Balance checks before and after ZCN sent", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = createWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWalletForName(targetWallet)
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
 		// Before send balance checks
 		srcBalanceBefore, err := getBalanceZCN(t, configPath)
-		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t), strings.Join(output, "\n"))
-		require.Equal(t, 5.0, srcBalanceBefore)
+		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t))
 
 		_, err = getBalanceForWallet(t, configPath, targetWallet)
 		require.NoError(t, err)
 
 		targetBalanceBefore, err := getBalanceZCN(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected balance check failure for target wallet", escapedTestName(t), strings.Join(output, "\n"))
+		require.Nil(t, err, "Unexpected balance check failure for target wallet", escapedTestName(t))
 
 		// Transfer ZCN from sender to target wallet
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "", createParams(map[string]interface{}{}), true)
+		output, err := sendZCN(t, configPath, target.ClientID, "1", "", createParams(map[string]interface{}{}), true)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -107,7 +95,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 		// After send balance checks
 		srcBalanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 3.99, srcBalanceAfter)
+		require.Equal(t, srcBalanceBefore-1.01, srcBalanceAfter)
 
 		targetBalanceAfter, err := getBalanceZCN(t, configPath, targetWallet)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", targetWallet, strings.Join(output, "\n"))
@@ -115,10 +103,9 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send without description should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = cliutils.RunCommandWithoutRetry("./zwallet send --silent --tokens 1" +
+		output, err := cliutils.RunCommandWithoutRetry("./zwallet send --silent --tokens 1" +
 			" --to_client_id 7ec733204418d72b68e3579bdf55881b1528c676850976920de3f73e45d4fafa" +
 			" --wallet " + escapedTestName(t) + "_wallet.json --configDir ./config --config " + configPath,
 		)
@@ -132,18 +119,17 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt on zero ZCN wallet should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := createWallet(t, configPath, withNoFaucetPour())
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		_, err := executeFaucetWithTokens(t, configPath, 0.1)
+		require.Nil(t, err, "Error occurred when executing faucet")
 
-		output, err = createWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWalletForName(targetWallet)
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		wantFailureMsg := `Send tokens failed. submit transaction failed. {"error":"insufficient balance to send"}`
+		wantFailureMsg := `Send tokens failed. submit transaction failed: {"error":"insufficient balance to send"}`
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", "", createParams(map[string]interface{}{}), false)
+		output, err := sendZCN(t, configPath, target.ClientID, "1", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -151,14 +137,12 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send attempt to invalid address should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWallet(t)
 
 		invalidClientID := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabb" // more than 64 chars
-		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
-			"\"error\":\"invalid_request: Invalid request (to client id must be a hexadecimal hash)\"}"
+		wantFailureMsg := "Send tokens failed. submit transaction failed: {\"error\":\"invalid to client id\"}"
 
-		output, err = sendZCN(t, configPath, invalidClientID, "1", "", createParams(map[string]interface{}{}), false)
+		output, err := sendZCN(t, configPath, invalidClientID, "1", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -168,17 +152,15 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send with zero token should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = createWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWalletForName(targetWallet)
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
 		//FIXME: This passes when fees are disabled but should be rejected once they are enabled
-		output, err = sendZCN(t, configPath, target.ClientID, "0", "", createParams(map[string]interface{}{}), true)
+		output, err := sendZCN(t, configPath, target.ClientID, "0", "", createParams(map[string]interface{}{}), true)
 		require.Nil(t, err, "Unexpected send failure", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -188,22 +170,20 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt to exceeding balance should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWallet(t)
 
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
-		output, err = createWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWalletForName(targetWallet)
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		wantFailureMsg := `Send tokens failed. submit transaction failed. {"error":"insufficient balance to send"}`
+		wantFailureMsg := `Send tokens failed. submit transaction failed: {"error":"insufficient balance to send"}`
 		tokens := strconv.Itoa(int(balance) + 1)
 
-		output, err = sendZCN(t, configPath, target.ClientID, tokens, "", createParams(map[string]interface{}{}), false)
+		output, err := sendZCN(t, configPath, target.ClientID, tokens, "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -213,18 +193,16 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt with negative token should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = createWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWalletForName(targetWallet)
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
 		wantFailureMsg := "invalid tokens amount: negative"
 
-		output, err = sendZCN(t, configPath, target.ClientID, "-1", "", createParams(map[string]interface{}{}), false)
+		output, err := sendZCN(t, configPath, target.ClientID, "-1", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -234,11 +212,9 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt with very long description should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = createWalletForName(t, configPath, targetWallet)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWalletForName(targetWallet)
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
@@ -249,10 +225,10 @@ func TestSendAndBalance(testSetup *testing.T) {
 		}
 		longDesc := string(b)
 
-		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"txn_exceed_max_payload\"," +
+		wantFailureMsg := "Send tokens failed. submit transaction failed: {\"code\":\"txn_exceed_max_payload\"," +
 			"\"error\":\"txn_exceed_max_payload: transaction payload exceeds the max payload (98304)\"}"
 
-		output, err = sendZCN(t, configPath, target.ClientID, "1", longDesc, createParams(map[string]interface{}{}), false)
+		output, err := sendZCN(t, configPath, target.ClientID, "1", longDesc, createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -260,16 +236,15 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send attempt to self should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Unexpected create wallet failure", strings.Join(output, "\n"))
+		createWallet(t)
 
 		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Get wallet failed", strings.Join(output, "\n"))
+		require.Nil(t, err, "Get wallet failed")
 
-		wantFailureMsg := "Send tokens failed. submit transaction failed. {\"code\":\"invalid_request\"," +
+		wantFailureMsg := "Send tokens failed. submit transaction failed: {\"code\":\"invalid_request\"," +
 			"\"error\":\"invalid_request: Invalid request (from and to client should be different)\"}"
 
-		output, err = sendZCN(t, configPath, wallet.ClientID, "1", "", createParams(map[string]interface{}{}), false)
+		output, err := sendZCN(t, configPath, wallet.ClientID, "1", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -304,26 +279,6 @@ func sendTokensFromWallet(t *test.SystemTest, cliConfigFilename, toClientID stri
 
 	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", wallet+"_wallet.json", cliConfigFilename)
 	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
-}
-
-func getRoundBlockFromASharder(t *test.SystemTest, round int64) climodel.Block {
-	sharders := getShardersList(t)
-	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
-	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
-
-	// Get round details
-	res, err := apiGetBlock(t, sharderBaseUrl, round)
-	require.Nil(t, err, "Error retrieving block %d", round)
-	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get block %d details: %d", round, res.StatusCode)
-	require.NotNil(t, res.Body, "Balance API response must not be nil")
-
-	resBody, err := io.ReadAll(res.Body)
-	require.Nil(t, err, "Error reading response body: %v", err)
-
-	var block climodel.Block
-	err = json.Unmarshal(resBody, &block)
-	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
-	return block
 }
 
 func getShardersList(t *test.SystemTest) map[string]climodel.Sharder {

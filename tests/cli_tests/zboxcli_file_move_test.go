@@ -26,22 +26,22 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Parallel()
 
-	t.Run("move file to existing directory", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+	t.Run("move root dir to child dir should work", func(t *test.SystemTest) {
+		allocSize := int64(2048000)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
-
+		//nolint: gocritic
+		sourceDir := filepath.Join("/", "child")
 		filename := filepath.Base(file)
-		remotePath := "/child/" + filename
+		remotePath := filepath.Join(sourceDir, filename)
 		destpath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
 		})
-
 		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
@@ -51,7 +51,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -86,7 +86,283 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			if f.Path == destpath+filename {
 				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+	})
+
+	t.Run("move nested dir to child dir should work", func(t *test.SystemTest) {
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
+
+		file := generateRandomTestFileName(t)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		filename := filepath.Base(file)
+		remotePath := "/child/" + filename
+		destpath := "/"
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = text/plain. Name = %s",
+			filepath.Base(file),
+		)
+		require.Equal(t, expected, output[1])
+
+		// move file
+		output, err = moveFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"destpath":   destpath,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf(remotePath+" moved"), output[0])
+
+		// list-all
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 2)
+
+		// check if expected file has been moved
+		foundAtSource := false
+		foundAtDest := false
+		for _, f := range files {
+			if f.Path == remotePath {
+				foundAtSource = true
+			}
+			if f.Path == destpath+filename {
+				foundAtDest = true
+				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+	})
+
+	t.Run("move dir with no file to child dir should work", func(t *test.SystemTest) {
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
+
+		file := generateRandomTestFileName(t)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		filename := filepath.Base(file)
+		remotePath := "/child/" + filename
+		destpath := "/"
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = text/plain. Name = %s",
+			filepath.Base(file),
+		)
+		require.Equal(t, expected, output[1])
+
+		// move file
+		output, err = moveFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"destpath":   destpath,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf(remotePath+" moved"), output[0])
+
+		// list-all
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 2)
+
+		// check if expected file has been moved
+		foundAtSource := false
+		foundAtDest := false
+		for _, f := range files {
+			if f.Path == remotePath {
+				foundAtSource = true
+			}
+			if f.Path == destpath+filename {
+				foundAtDest = true
+				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+	})
+
+	t.Run("move dir with multiple files to child dir should work", func(t *test.SystemTest) {
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
+
+		file := generateRandomTestFileName(t)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		filename := filepath.Base(file)
+		remotePath := "/child/" + filename
+		destpath := "/"
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = text/plain. Name = %s",
+			filepath.Base(file),
+		)
+		require.Equal(t, expected, output[1])
+
+		// move file
+		output, err = moveFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"destpath":   destpath,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf(remotePath+" moved"), output[0])
+
+		// list-all
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 2)
+
+		// check if expected file has been moved
+		foundAtSource := false
+		foundAtDest := false
+		for _, f := range files {
+			if f.Path == remotePath {
+				foundAtSource = true
+			}
+			if f.Path == destpath+filename {
+				foundAtDest = true
+				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+	})
+
+	t.Run("move file to existing directory", func(t *test.SystemTest) {
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
+
+		file := generateRandomTestFileName(t)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		filename := filepath.Base(file)
+		remotePath := "/child/" + filename
+		destpath := "/"
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = text/plain. Name = %s",
+			filepath.Base(file),
+		)
+		require.Equal(t, expected, output[1])
+
+		// move file
+		output, err = moveFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"destpath":   destpath,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf(remotePath+" moved"), output[0])
+
+		// list-all
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 2)
+
+		// check if expected file has been moved
+		foundAtSource := false
+		foundAtDest := false
+		for _, f := range files {
+			if f.Path == remotePath {
+				foundAtSource = true
+			}
+			if f.Path == destpath+filename {
+				foundAtDest = true
+				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -96,8 +372,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.RunWithTimeout("Move file concurrently to existing directory, should work", 10*time.Minute, func(t *test.SystemTest) { //todo:too slow
-		const allocSize int64 = 2048
-		const fileSize int64 = 256
+		const allocSize int64 = 64 * KB * 4
+		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -169,7 +445,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 				_, ok = cliutils.Contains(fileNames[:], f.Name)
 				require.True(t, ok, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -179,8 +455,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file to non-existing directory should work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -203,7 +479,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -237,7 +513,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			if f.Path == destpath+filename {
 				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -247,19 +523,14 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("File move - Users should not be charged for moving a file ", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock":   "5",
-			"size":   4 * MB,
-			"expire": "1h",
+			"lock": "5",
+			"size": 4 * MB,
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -307,8 +578,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file to same directory (no change) should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -331,7 +602,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -343,7 +614,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "move_failed")
+		require.Contains(t, output[0], "Move failed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -361,7 +632,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			if f.Path == remotePath { // nolint:gocritic // this is better than inverted if cond
 				found = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -370,8 +641,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file to another directory with existing file with same name should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 10)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)
@@ -399,7 +670,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -414,7 +685,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Len(t, output, 2)
 
 		expected = fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -426,7 +697,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "move_failed")
+		require.Contains(t, output[0], "Move failed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -445,14 +716,14 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			if f.Path == remotePath {
 				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
 			if f.Path == destpath+filename {
 				foundAtDest = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -462,7 +733,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move non-existing file should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -476,20 +747,19 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "move_failed")
+		require.Contains(t, output[0], "Move failed")
 	})
 
 	t.Run("move file from someone else's allocation should fail", func(t *test.SystemTest) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
-		output, err := createWalletForName(t, configPath, nonAllocOwnerWallet)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWalletForName(nonAllocOwnerWallet)
 
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
-		err = createFileWithSize(file, fileSize)
+		err := createFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
 		filename := filepath.Base(file)
@@ -500,7 +770,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			"size": allocSize,
 		})
 
-		output, err = uploadFile(t, configPath, map[string]interface{}{
+		output, err := uploadFile(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
 			"remotepath": remotePath,
 			"localpath":  file,
@@ -509,7 +779,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.Len(t, output, 2)
 
 		expected := fmt.Sprintf(
-			"Status completed callback. Type = application/octet-stream. Name = %s",
+			"Status completed callback. Type = text/plain. Name = %s",
 			filepath.Base(file),
 		)
 		require.Equal(t, expected, output[1])
@@ -521,7 +791,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, true)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "move_failed")
+		require.Contains(t, output[0], "Move failed")
 
 		// list-all
 		output, err = listAll(t, configPath, allocationID, true)
@@ -540,7 +810,7 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			if f.Path == remotePath {
 				foundAtSource = true
 				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
-				require.GreaterOrEqual(t, f.Size, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
 				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
 				require.NotEmpty(t, f.Hash)
 			}
@@ -554,10 +824,9 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("move file with no allocation param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on move
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = moveFile(t, configPath, map[string]interface{}{
+		output, err := moveFile(t, configPath, map[string]interface{}{
 			"remotepath": "/abc.txt",
 			"destpath":   "/child/",
 		}, false)
@@ -568,10 +837,9 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("move file with no remotepath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on move
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = moveFile(t, configPath, map[string]interface{}{
+		output, err := moveFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
 			"destpath":   "/",
 		}, false)
@@ -582,10 +850,9 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 
 	t.Run("move file with no destpath param should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs on move
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = moveFile(t, configPath, map[string]interface{}{
+		output, err := moveFile(t, configPath, map[string]interface{}{
 			"allocation": "abcdef",
 			"remotepath": "/abc.txt",
 		}, false)
@@ -595,8 +862,8 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.Run("move file with allocation move file option forbidden should fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(256)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		file := generateRandomTestFileName(t)
 		err := createFileWithSize(file, fileSize)

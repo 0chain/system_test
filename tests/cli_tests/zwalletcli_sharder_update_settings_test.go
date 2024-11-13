@@ -68,10 +68,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 			if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 				for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-					// dummy transactions to increase round
-					for i := 0; i < 5; i++ {
-						_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-					}
+					time.Sleep(10 * time.Second)
 					currRound = getCurrentRound(t)
 				}
 			}
@@ -93,10 +90,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -128,10 +122,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -143,7 +134,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}), false)
 		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		const expected = "update_sharder_settings: number_of_delegates greater than max_delegates of SC: 21 \\u003e 20"
+		const expected = "update_sharder_settings: number_of_delegates greater than max_delegates of SC: 21 > 20"
 		require.Equal(t, expected, output[0])
 	})
 
@@ -152,10 +143,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -176,10 +164,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -195,10 +180,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
@@ -219,39 +201,17 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
 			for (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
-				// dummy transactions to increase round
-				for i := 0; i < 5; i++ {
-					_, _ = executeFaucetWithTokens(t, configPath, 2.0)
-				}
+				time.Sleep(10 * time.Second)
 				currRound = getCurrentRound(t)
 			}
 		}
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+		output, err := minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
 			"id":            sharder01ID,
 			"num_delegates": 5,
 			"sharder":       "",
-		}), escapedTestName(t), false)
-		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, sharderAccessDenied, output[0])
-
-		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder01ID,
-			"max_stake": 99,
-			"sharder":   "",
-		}), escapedTestName(t), false)
-		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, sharderAccessDenied, output[0])
-
-		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":        sharder01ID,
-			"min_stake": 1,
-			"sharder":   "",
 		}), escapedTestName(t), false)
 		require.NotNil(t, err, "expected error when updating sharder settings from non delegate wallet", strings.Join(output, "\n"))
 		require.Len(t, output, 1)

@@ -1,6 +1,10 @@
 package cli_tests
 
 import (
+	"encoding/json"
+	"io"
+	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -27,20 +31,14 @@ func TestMinerFeeRewards(testSetup *testing.T) { // nolint:gocyclo // team prefe
 	// The total received by each stake pool is proportional to the tokens they have locked
 	// wither respect to the total locked by the chosen delegate pools.
 	t.RunSequentially("Miner share of fee rewards for transactions", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "error creating wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		wallet, err := getWalletForName(t, configPath, escapedTestName(t)+"_TARGET")
-		require.NoError(t, err, "error getting target wallet", strings.Join(output, "\n"))
+		require.NoError(t, err, "error getting target wallet")
 
 		if !confirmDebugBuild(t) {
 			t.Skip("miner fee rewards test skipped as it requires a debug event database")
 		}
-		output, err = executeFaucetWithTokens(t, configPath, 10)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
 
 		sharderUrl := getSharderUrl(t)
 		minerIds := getSortedMinerIds(t, sharderUrl)
@@ -274,4 +272,30 @@ func checkMinerDelegatePoolFeeAmounts(
 
 func delegateFeeRewards(total int64, share, serviceCharge float64, numProvidersPaid int) int64 {
 	return int64(float64(total) * share * (1 - serviceCharge) / float64(numProvidersPaid))
+}
+
+func apiGetLatestFinalized(sharderBaseURL string) (*http.Response, error) {
+	return http.Get(sharderBaseURL + "/v1/block/get/latest_finalized")
+}
+
+func getLatestFinalizedBlock(t *test.SystemTest) *climodel.LatestFinalizedBlock {
+	createWallet(t)
+
+	sharders := getShardersList(t)
+	sharder := sharders[reflect.ValueOf(sharders).MapKeys()[0].String()]
+	sharderBaseUrl := getNodeBaseURL(sharder.Host, sharder.Port)
+
+	res, err := apiGetLatestFinalized(sharderBaseUrl)
+	require.Nil(t, err, "Error retrieving latest block")
+	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300, "Failed API request to get latest block: %d", res.StatusCode)
+	require.NotNil(t, res.Body, "Latest block API response must not be nil")
+
+	resBody, err := io.ReadAll(res.Body)
+	require.Nil(t, err, "Error reading response body")
+
+	var block climodel.LatestFinalizedBlock
+	err = json.Unmarshal(resBody, &block)
+	require.Nil(t, err, "Error deserializing JSON string `%s`: %v", string(resBody), err)
+
+	return &block
 }

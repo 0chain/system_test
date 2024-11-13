@@ -1,16 +1,17 @@
 package cli_tests
 
 import (
+	"context"
 	"crypto/rand"
 	"fmt"
+	"github.com/0chain/gosdk/core/client"
 	"io"
 	"math/big"
 	"os"
 
+	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/fileref"
 	"github.com/0chain/gosdk/zboxcore/sdk"
-	"github.com/0chain/system_test/internal/api/util/config"
-	"github.com/0chain/system_test/internal/api/util/crypto"
 )
 
 func InitSDK(wallet, configFile string) error {
@@ -24,34 +25,59 @@ func InitSDK(wallet, configFile string) error {
 	}
 	walletJSON := string(clientBytes)
 
-	parsedConfig := config.Parse(configFile)
+	parsed, err := conf.LoadConfigFile(configFile)
+	if err != nil {
+		return err
+	}
 
-	err = sdk.InitStorageSDK(
+	err = client.Init(context.Background(), conf.Config{
+		BlockWorker:     parsed.BlockWorker,
+		SignatureScheme: parsed.SignatureScheme,
+		ChainID:         parsed.ChainID,
+		MaxTxnQuery:     5,
+		QuerySleepTime:  5,
+		MinSubmit:       10,
+		MinConfirmation: 10,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = client.InitSDK(
 		walletJSON,
-		parsedConfig.BlockWorker,
-		"",
-		crypto.BLS0Chain,
-		nil,
+		parsed.BlockWorker,
+		parsed.ChainID,
+		parsed.SignatureScheme,
 		0,
+		false, true,
 	)
 	return err
 }
 
-// GetBlobberNotPartOfAllocation returns a blobber not part of current allocation
-func GetBlobberNotPartOfAllocation(walletname, configFile, allocationID string) (string, error) {
-	err := InitSDK(walletname, configFile)
+// GetBlobberIDNotPartOfAllocation returns a blobber not part of current allocation
+func GetBlobberIDNotPartOfAllocation(walletname, configFile, allocationID string) (string, error) {
+	blobber, err := getBlobberNotPartOfAllocation(walletname, configFile, allocationID)
+
 	if err != nil {
 		return "", err
+	}
+	return string(blobber.ID), err
+}
+
+func getBlobberNotPartOfAllocation(walletname, configFile, allocationID string) (*sdk.Blobber, error) {
+	err := InitSDK(walletname, configFile)
+	if err != nil {
+		return nil, err
 	}
 
 	a, err := sdk.GetAllocation(allocationID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	blobbers, err := sdk.GetBlobbers(true)
+	blobbers, err := sdk.GetBlobbers(true, false)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	allocationBlobsMap := map[string]bool{}
@@ -61,11 +87,20 @@ func GetBlobberNotPartOfAllocation(walletname, configFile, allocationID string) 
 
 	for _, blobber := range blobbers {
 		if _, ok := allocationBlobsMap[string(blobber.ID)]; !ok {
-			return string(blobber.ID), nil
+			return blobber, nil
 		}
 	}
 
-	return "", fmt.Errorf("failed to get blobber not part of allocation")
+	return nil, fmt.Errorf("failed to get blobber not part of allocation")
+}
+
+// GetBlobberIdAndUrlNotPartOfAllocation returns a blobber not part of current allocation
+func GetBlobberIdAndUrlNotPartOfAllocation(walletName, configFile, allocationID string) (blobberId, blobberUrl string, err error) {
+	blobber, err := getBlobberNotPartOfAllocation(walletName, configFile, allocationID)
+	if err != nil || blobber == nil {
+		return "", "", err
+	}
+	return string(blobber.ID), blobber.BaseURL, err
 }
 
 func generateRandomIndex(sliceLen int64) (*big.Int, error) {
@@ -109,7 +144,7 @@ func GetRandomBlobber(walletname, configFile, allocationID, except_blobber strin
 		}
 	}
 
-	if len(randomBlobber) > 0 {
+	if randomBlobber != "" {
 		return randomBlobber, nil
 	}
 	return "", fmt.Errorf("failed to get blobbers")

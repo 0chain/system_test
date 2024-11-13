@@ -23,14 +23,13 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Staked tokens should move from wallet to Provider's stake pool, unstaking should move tokens back to wallet", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		wallet, err := getWallet(t, configPath)
-		require.Nil(t, err, "Error getting wallet", strings.Join(output, "\n"))
+		require.Nil(t, err, "Error getting wallet")
 
 		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
+		output, err := listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -93,7 +92,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		// Unstake the tokens
 		output, err = unstakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-		}))
+		}), true)
 		require.Nil(t, err, "Error unstaking tokens from stake pool", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Equal(t, "tokens unlocked: 10000000000, pool deleted", output[0])
@@ -134,10 +133,9 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens without specifying amount of tokens to lock should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+		output, err := stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": "-",
 		}), false)
 		require.NotNil(t, err, "Expected error when amount of tokens to stake is not specified", strings.Join(output, "\n"))
@@ -146,27 +144,26 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking tokens without specifying provider should generate corresponding error", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
+		output, err := stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"tokens": 1.0,
 		}), false)
 		require.NotNil(t, err, "Expected error when blobber to stake tokens to is not specified", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
-		require.Equal(t, "missing flag: one of 'blobber_id' or 'validator_id' is required", output[0])
+		require.Equal(t, "missing flag: one of 'miner_id', 'sharder_id', 'blobber_id', 'validator_id', 'authorizer_id' is required", output[0])
 	})
 
 	t.Run("Staking more tokens than in wallet should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		_, err := executeFaucetWithTokens(t, configPath, 1.0)
+		require.Nil(t, err, "Error executing faucet")
 
 		// Wallet balance before staking tokens
 		balance, err := getBalanceZCN(t, configPath)
-		require.Nil(t, err, "Error fetching balance", strings.Join(output, "\n"))
+		require.Nil(t, err, "Error fetching balance")
 
 		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
+		output, err := listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -193,23 +190,14 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking 0 tokens against blobber should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-		t.Logf("output: %v", output)
-		txnHash := getTransactionHash(output, false)
+		createWallet(t)
 
 		// Wallet balance before staking tokens
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		t.Logf("wallet balance: %v, txn hash: %v", balance, txnHash)
-		output, err = getTransaction(t, configPath, createParams(map[string]interface{}{
-			"hash": txnHash,
-		}))
-		require.NoError(t, err)
-		t.Logf("transaction output: %v", output)
 
 		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
+		output, err := listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -236,15 +224,14 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking negative tokens should fail", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Wallet balance before staking tokens
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
 		blobbers := []climodel.BlobberInfo{}
-		output, err = listBlobbers(t, configPath, "--json")
+		output, err := listBlobbers(t, configPath, "--json")
 		require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -276,6 +263,7 @@ func listBlobbers(t *test.SystemTest, cliConfigFilename, params string) ([]strin
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox ls-blobbers %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
+//nolint:deadcode,unused
 func getTransaction(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Get transaction list...")
 	return cliutils.RunCommand(t, fmt.Sprintf("./zwallet verify %s --silent --configDir ./config --config %s", params, cliConfigFilename), 3, time.Second*2)
@@ -300,13 +288,18 @@ func stakePoolInfo(t *test.SystemTest, cliConfigFilename, params string) ([]stri
 	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, escapedTestName(t), cliConfigFilename), 3, time.Second*2)
 }
 
-func unstakeTokens(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	return unstakeTokensForWallet(t, cliConfigFilename, escapedTestName(t), params)
+func unstakeTokens(t *test.SystemTest, cliConfigFilename, params string, retry bool) ([]string, error) {
+	return unstakeTokensForWallet(t, cliConfigFilename, escapedTestName(t), params, retry)
 }
 
-func unstakeTokensForWallet(t *test.SystemTest, cliConfigFilename, wallet, params string) ([]string, error) {
+func unstakeTokensForWallet(t *test.SystemTest, cliConfigFilename, wallet, params string, retry bool) ([]string, error) {
 	t.Log("Unlocking tokens from stake pool...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zbox sp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second*2)
+	cmd := fmt.Sprintf("./zbox sp-unlock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename)
+	if retry {
+		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
 }
 
 func getBlobbersList(t *test.SystemTest) []climodel.BlobberInfo {

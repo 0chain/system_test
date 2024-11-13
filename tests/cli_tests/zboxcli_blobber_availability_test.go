@@ -19,13 +19,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 	t.SetSmokeTests("blobber is available switch controls blobber use for allocations")
 
 	t.RunSequentially("blobber is available switch controls blobber use for allocations", func(t *test.SystemTest) {
-		// create and faucet pour tokens
-		output, err := createWallet(t, configPath)
-		require.NoError(t, err, output)
-
-		// update blobber info use owner wallet, so need to faucet pour tokens
-		output, err = createWalletForName(t, configPath, blobberOwnerWallet)
-		require.NoError(t, err, output)
+		createWallet(t)
 
 		startBlobbers := getBlobbers(t)
 		var blobberToDeactivate *model.BlobberDetails
@@ -43,20 +37,16 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		dataShards := 1
 		parityShards := activeBlobbers - dataShards
 
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
+		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   "3.0",
-			"expire": "1h",
 			"size":   "10000",
 		}))
 		require.NoError(t, err, strings.Join(output, "\n"))
 		beforeAllocationId, err := getAllocationID(output[0])
 		require.NoError(t, err, "error getting allocation id")
-		defer createAllocationTestTeardown(t, beforeAllocationId)
+		beforeAllocation := getAllocation(t, beforeAllocationId)
 
 		setNotAvailability(t, blobberToDeactivate.ID, true)
 		t.Cleanup(func() { setNotAvailability(t, blobberToDeactivate.ID, false) })
@@ -72,12 +62,21 @@ func TestBlobberAvailability(testSetup *testing.T) {
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   "3.0",
-			"expire": "1h",
 			"size":   "10000",
 		}))
 		require.Error(t, err, "create allocation should fail")
 		require.Len(t, output, 1)
 		require.True(t, strings.Contains(output[0], "not enough blobbers to honor the allocation"))
+
+		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
+			"allocation": beforeAllocationId,
+			"extend":     true,
+		}), true)
+		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+
+		afterAlloc := getAllocation(t, beforeAllocationId)
+		require.Greater(t, afterAlloc.ExpirationDate, beforeAllocation.ExpirationDate)
+		createAllocationTestTeardown(t, beforeAllocationId)
 
 		setNotAvailability(t, blobberToDeactivate.ID, false)
 		cliutil.Wait(t, 1*time.Second)
@@ -92,7 +91,6 @@ func TestBlobberAvailability(testSetup *testing.T) {
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   "3.0",
-			"expire": "1h",
 			"size":   "10000",
 		}))
 		require.NoError(t, err, strings.Join(output, "\n"))
