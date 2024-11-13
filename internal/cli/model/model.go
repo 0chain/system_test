@@ -58,7 +58,6 @@ type Allocation struct {
 	Owner          string    `json:"owner_id"`
 	OwnerPublicKey string    `json:"owner_public_key"`
 	Payer          string    `json:"payer_id"`
-	MinLockDemand  int64     `json:"min_lock_demand"`
 	Blobbers       []Blobber `json:"blobbers"`
 	// Stats          *AllocationStats          `json:"stats"`
 	TimeUnit    time.Duration `json:"time_unit"`
@@ -90,21 +89,23 @@ type Allocation struct {
 }
 
 type AllocationFile struct {
-	Name string `json:"name"`
-	Path string `json:"path"`
-	Type string `json:"type"`
-	Size int    `json:"size"`
-	Hash string `json:"hash"`
+	Name       string `json:"name"`
+	Path       string `json:"path"`
+	Type       string `json:"type"`
+	Size       int    `json:"size"`
+	Hash       string `json:"hash"`
+	ActualSize int    `json:"actual_size"`
 }
 type Blobber struct {
-	ID      string `json:"id"`
-	Baseurl string `json:"url"`
-}
-
-type ReadPoolInfo struct {
-	Balance int64   `json:"fmt"`
-	Zcn     float64 `json:"zcn"`
-	Usd     float64 `json:"usd"`
+	ID                string            `json:"id"`
+	BaseURL           string            `json:"url"`
+	Terms             Terms             `json:"terms"`     // terms
+	Capacity          int64             `json:"capacity"`  // total blobber capacity
+	Allocated         int64             `json:"allocated"` // allocated capacity
+	TotalStake        int64             `json:"total_stake"`
+	LastHealthCheck   int64             `json:"last_health_check"`
+	PublicKey         string            `json:"-"`
+	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 }
 
 type RecentlyAddedRefResult struct {
@@ -153,8 +154,8 @@ type ListFileResult struct {
 }
 
 type Terms struct {
-	Read_price  int64 `json:"read_price"`
-	Write_price int64 `json:"write_price"`
+	ReadPrice  int64 `json:"read_price"`
+	WritePrice int64 `json:"write_price"`
 }
 
 type Settings struct {
@@ -244,7 +245,6 @@ type BlobberAllocation struct {
 	BlobberID       string `json:"blobber_id"`
 	Size            int64  `json:"size"`
 	Terms           Terms  `json:"terms"`
-	MinLockDemand   int64  `json:"min_lock_demand"`
 	Spent           int64  `json:"spent"`
 	Penalty         int64  `json:"penalty"`
 	ReadReward      int64  `json:"read_reward"`
@@ -378,6 +378,7 @@ type BlobberDetails struct {
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
 	IsKilled          bool              `json:"is_killed"`
 	IsShutdown        bool              `json:"is_shutdown"`
+	IsRestricted      bool              `json:"is_restricted"`
 	NotAvailable      bool              `json:"not_available"`
 }
 
@@ -400,11 +401,12 @@ type FileDiff struct {
 }
 
 type FreeStorageMarker struct {
-	Assigner   string  `json:"assigner,omitempty"`
-	Recipient  string  `json:"recipient"`
-	FreeTokens float64 `json:"free_tokens"`
-	Nonce      int64   `json:"nonce"`
-	Signature  string  `json:"signature,omitempty"`
+	Assigner   string   `json:"assigner,omitempty"`
+	Recipient  string   `json:"recipient"`
+	FreeTokens float64  `json:"free_tokens"`
+	Nonce      int64    `json:"nonce"`
+	Signature  string   `json:"signature,omitempty"`
+	Blobbers   []string `json:"blobbers"`
 }
 
 type WalletFile struct {
@@ -585,6 +587,7 @@ type Challenges struct {
 	AllocationRoot string            `json:"allocation_root"`
 	BlobberID      string            `json:"blobber_id"`
 	Responded      int64             `json:"responded"`
+	RoundCreatedAt int64             `json:"round_created_at"`
 }
 
 type Transaction struct {
@@ -631,8 +634,7 @@ type EventDBTransaction struct {
 type Reward int
 
 const (
-	MinLockDemandReward Reward = iota
-	BlockRewardMiner
+	BlockRewardMiner Reward = iota
 	BlockRewardSharder
 	BlockRewardBlobber
 	FeeRewardMiner
@@ -725,13 +727,20 @@ type ReadMarker struct {
 	BlockNumber   int64   `json:"block_number"`
 }
 
+// holds result of repair size
+type RepairSize struct {
+	// upload size in bytes
+	UploadSize uint64 `json:"upload_size"`
+	// download size in bytes
+	DownloadSize uint64 `json:"download_size"`
+}
+
 var StorageKeySettings = []string{
 	"owner_id",
 }
 
 var StorageFloatSettings = []string{
 	"cancellation_charge",
-	"min_lock_demand",
 	"free_allocation_settings.read_pool_fraction",
 	"validator_reward",
 	"blobber_slash",
@@ -746,8 +755,8 @@ var StorageFloatSettings = []string{
 }
 
 var StorageCurrencySettigs = []string{
-	"max_mint",
 	"min_stake",
+	"min_stake_per_delegate",
 	"max_stake",
 	"readpool.min_lock",
 	"writepool.min_lock",
@@ -765,6 +774,9 @@ var StorageCurrencySettigs = []string{
 }
 
 var StorageIntSettings = []string{
+	"max_challenge_completion_rounds",
+	"challenge_generation_gap",
+	"max_file_size",
 	"min_alloc_size",
 	"min_blobber_capacity",
 	"free_allocation_settings.data_shards",
@@ -773,6 +785,7 @@ var StorageIntSettings = []string{
 	"max_blobbers_per_allocation",
 	"validators_per_challenge",
 	"num_validators_rewarded",
+	"max_blobber_select_for_challenge",
 	"max_delegates",
 	"cost.update_settings",
 	"cost.read_redeem",
@@ -783,24 +796,19 @@ var StorageIntSettings = []string{
 	"cost.cancel_allocation",
 	"cost.add_free_storage_assigner",
 	"cost.free_allocation_request",
-	"cost.free_update_allocation",
 	"cost.blobber_health_check",
 	"cost.update_blobber_settings",
 	"cost.pay_blobber_block_rewards",
-	"cost.challenge_request",
 	"cost.challenge_response",
 	"cost.generate_challenge",
 	"cost.add_validator",
 	"cost.update_validator_settings",
 	"cost.add_blobber",
-	"cost.new_read_pool",
 	"cost.read_pool_lock",
 	"cost.read_pool_unlock",
 	"cost.write_pool_lock",
-	"cost.write_pool_unlock",
 	"cost.stake_pool_lock",
 	"cost.stake_pool_unlock",
-	"cost.stake_pool_pay_interests",
 	"cost.commit_settings_changes",
 	"cost.collect_reward",
 	"cost.kill_blobber",
@@ -813,7 +821,6 @@ var StorageBoolSettings = []string{
 }
 var StorageDurationSettings = []string{
 	"time_unit",
-	"max_challenge_completion_time",
 	"stakepool.min_lock_period",
 	"health_check_period",
 }

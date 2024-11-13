@@ -30,19 +30,17 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 	t.Parallel()
 
 	t.Run("Create Allocation - Locked amount must've been withdrawn from user wallet", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
+		createWallet(t)
 
-		_, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), configPath, 9)
-		require.Nil(t, err)
+		balanceBefore, err := getBalanceZCN(t, configPath)
+		require.NoError(t, err)
 
 		// Lock tokens for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock":   "5",
-			"size":   1 * MB,
-			"expire": "1h",
+			"lock": "5",
+			"size": 1 * MB,
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -50,19 +48,15 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		allocationID := strings.Fields(output[0])[2]
 
 		// Wallet balance should decrease by locked amount
-		balance, err := getBalanceZCN(t, configPath)
+		balanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, 8.99, balance) // lock - fee
+		require.Equal(t, balanceBefore-5.01, balanceAfter) // lock - fee
 
 		createAllocationTestTeardown(t, allocationID)
 	})
 
 	t.Run("Update Allocation by locking more tokens - Locked amount must be withdrawn from user wallet", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "creating wallet failed", strings.Join(output, "\n"))
-
-		_, err = executeFaucetWithTokensForWallet(t, escapedTestName(t), configPath, 9)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// get wallet balance
 		balance, err := getBalanceZCN(t, configPath)
@@ -70,11 +64,10 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 
 		// Lock 5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"lock":   "5",
-			"size":   1 * MB,
-			"expire": "5m",
+			"lock": "5",
+			"size": 1 * MB,
 		})
-		output, err = createNewAllocation(t, configPath, allocParams)
+		output, err := createNewAllocation(t, configPath, allocParams)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -90,7 +83,7 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 
 		params := createParams(map[string]interface{}{
 			"allocation": allocationID,
-			"expiry":     "30m",
+			"extend":     true,
 			"lock":       1,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
@@ -116,12 +109,17 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 	})
 }
 
-func uploadRandomlyGeneratedFile(t *test.SystemTest, allocationID, remotePath string, fileSize int64) string {
-	return uploadRandomlyGeneratedFileWithWallet(t, escapedTestName(t), allocationID, remotePath, fileSize)
+func uploadRandomlyGeneratedFile(t *test.SystemTest, allocationID, remotePath string, fileSize int64, options ...string) string {
+	return uploadRandomlyGeneratedFileWithWallet(t, escapedTestName(t), allocationID, remotePath, fileSize, options...)
 }
 
-func uploadRandomlyGeneratedFileWithWallet(t *test.SystemTest, walletName, allocationID, remotePath string, fileSize int64) string {
+func uploadRandomlyGeneratedFileWithWallet(t *test.SystemTest, walletName, allocationID, remotePath string, fileSize int64, options ...string) string {
 	filename := generateRandomTestFileName(t)
+
+	if len(options) > 0 {
+		filename = options[0]
+	}
+
 	err := createFileWithSize(filename, fileSize)
 	require.Nil(t, err)
 
@@ -136,7 +134,7 @@ func uploadRandomlyGeneratedFileWithWallet(t *test.SystemTest, walletName, alloc
 	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	require.Len(t, output, 2)
-	require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = application/octet-stream. Name = (?P<Filename>.+)`), output[1])
+	require.Regexp(t, regexp.MustCompile(`Status completed callback. Type = text/plain. Name = (?P<Filename>.+)`), output[1])
 	return filename
 }
 
@@ -174,6 +172,23 @@ func updateFileWithRandomlyGeneratedDataWithWallet(t *test.SystemTest, walletNam
 	}, true)
 	require.Nil(t, err, strings.Join(output, "\n"))
 	return localfile
+}
+
+func updateFileContentWithRandomlyGeneratedData(t *test.SystemTest, allocationID, remotepath, filename string, size int64) string {
+	return updateFileContentWithRandomlyGeneratedDataWithWallet(t, escapedTestName(t), allocationID, remotepath, filename, size)
+}
+
+func updateFileContentWithRandomlyGeneratedDataWithWallet(t *test.SystemTest, walletName, allocationID, remotepath, filename string, size int64) string {
+	err := createFileWithSize(filename, size)
+	require.Nil(t, err)
+
+	output, err := updateFileWithWallet(t, walletName, configPath, map[string]interface{}{
+		"allocation": allocationID,
+		"remotepath": remotepath,
+		"localpath":  filename,
+	}, true)
+	require.Nil(t, err, strings.Join(output, "\n"))
+	return filename
 }
 
 func renameFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {

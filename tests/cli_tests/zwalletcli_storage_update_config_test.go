@@ -105,10 +105,9 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 
 	t.RunSequentially("update by non-smartcontract owner should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = updateStorageSCConfig(t, escapedTestName(t), map[string]string{
+		output, err := updateStorageSCConfig(t, escapedTestName(t), map[string]string{
 			"max_read_price": "110",
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
@@ -118,12 +117,11 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 
 	t.RunSequentially("update with bad config key should fail", func(t *test.SystemTest) {
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
 		badKey := "bad key"
 		value := "1"
-		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			badKey: value,
 		}, false)
 		require.Error(t, err, strings.Join(output, "\n"))
@@ -141,16 +139,15 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 		badValue := "x"
 
 		// unused wallet, just added to avoid having the creating new wallet outputs
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
+		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			configKey: badValue,
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1, strings.Join(output, "\n"))
 		require.Equal(t, "update_settings, updating settings: cannot convert key "+configKey+
-			" value "+badValue+" to state.balance: strconv.ParseFloat: parsing \\\"x\\\": invalid syntax",
+			" value "+badValue+" to state.balance: strconv.ParseFloat: parsing \"x\": invalid syntax",
 			output[0], strings.Join(output, "\n"))
 	})
 }

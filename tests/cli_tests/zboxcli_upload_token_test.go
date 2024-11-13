@@ -25,18 +25,13 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 
 	balance := 0.8 // 800.000 mZCN
 	t.Run("Challenge pool should be 0 before any write", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
+		createWallet(t)
 
 		allocParam := createParams(map[string]interface{}{
-			"lock":   balance,
-			"size":   10000,
-			"expire": "10m",
+			"lock": balance,
+			"size": 10000,
 		})
-		output, err = createNewAllocation(t, configPath, allocParam)
+		output, err := createNewAllocation(t, configPath, allocParam)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 
@@ -59,18 +54,13 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 	})
 
 	t.Run("Total balance in blobber pool equals locked tokens", func(t *test.SystemTest) {
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
-
-		output, err = executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "Failed to execute faucet transaction", strings.Join(output, "\n"))
+		createWallet(t)
 
 		allocParam := createParams(map[string]interface{}{
-			"lock":   balance,
-			"size":   10000,
-			"expire": "10m",
+			"lock": balance,
+			"size": 10000,
 		})
-		output, err = createNewAllocation(t, configPath, allocParam)
+		output, err := createNewAllocation(t, configPath, allocParam)
 		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
@@ -85,7 +75,7 @@ func TestFileUploadTokenMovement(testSetup *testing.T) {
 
 func getUploadCostInUnit(t *test.SystemTest, cliConfigFilename, allocationID, localpath string) ([]string, error) {
 	t.Logf("Getting upload cost...")
-	output, err := cliutils.RunCommand(t, "./zbox get-upload-cost --allocation "+allocationID+" --localpath "+localpath+" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	output, err := cliutils.RunCommand(t, "./zbox get-upload-cost --allocation "+allocationID+" --end --localpath "+localpath+" --silent --wallet "+escapedTestName(t)+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 	require.Nil(t, err, "error getting upload cost in unit", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 	return output, err

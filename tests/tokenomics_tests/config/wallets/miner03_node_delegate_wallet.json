@@ -1,0 +1,14 @@
+{
+    "client_id": "bbe8b6abdb54b0642324a103c49f8b04e2623db74cd7f1427cd2d5f0308e674d",
+    "client_key": "0f1d9339776c39a43bcb722dc0fdc0fe0df8ae397b06432b2184c279e41aa81963c45abb3791ca6a939f8c1b6d437f4e30d4c1044c7697eaa1ba55af3198bd22",
+    "keys": [
+        {
+            "public_key": "0f1d9339776c39a43bcb722dc0fdc0fe0df8ae397b06432b2184c279e41aa81963c45abb3791ca6a939f8c1b6d437f4e30d4c1044c7697eaa1ba55af3198bd22",
+            "private_key": "16bb6962b0fa54c83d97f5b139a73148a9015b7f9ae7a2dbc5d34753a94ee01b"
+        }
+    ],
+    "mnemonics": "friend display mask album rebel liar pilot trim dad pupil brand trigger enter pink sad mistake miracle insect glad notable cause diesel pool hard",
+    "version": "1.0",
+    "date_created": "1661370979",
+    "nonce": 0
+}

@@ -40,16 +40,11 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 			t.Skipf("No live feed available right now")
 		}
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock":   5,
-			"expire": "1h",
-			"size":   "10000",
+		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"lock": 5,
+			"size": "10000",
 		}))
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -116,16 +111,11 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 			t.Skipf("No live feed available right now")
 		}
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock":   5,
-			"expire": "1h",
-			"size":   "10000",
+		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"lock": 5,
+			"size": "10000",
 		}))
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -192,16 +182,11 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 			t.Skipf("No live feed available right now")
 		}
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock":   5,
-			"expire": "1h",
-			"size":   "10000",
+		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"lock": 5,
+			"size": "10000",
 		}))
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -266,16 +251,11 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Uploading local webcam feed to allocation should work", 60*time.Second, func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock":   5,
-			"expire": "1h",
-			"size":   "10000",
+		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"lock": 5,
+			"size": "10000",
 		}))
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -336,16 +316,11 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Uploading local webcam feed to allocation with delay specified should work", 60*time.Second, func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock":   5,
-			"expire": "1h",
-			"size":   "10000",
+		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"lock": 5,
+			"size": "10000",
 		}))
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -407,16 +382,11 @@ func TestStreamUploadDownload(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Upload local webcam feed with a different chunknumber must work", 60*time.Second, func(t *test.SystemTest) {
 		t.Skip("github runner has no any audio/camera device to test this feature yet")
 
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, "Failed to create wallet", strings.Join(output, "\n"))
+		createWallet(t)
 
-		output, err = executeFaucetWithTokens(t, configPath, 9.0)
-		require.Nil(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
-		output, err = createNewAllocation(t, configPath, createParams(map[string]interface{}{
-			"lock":   5,
-			"expire": "1h",
-			"size":   "10000",
+		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
+			"lock": 5,
+			"size": "10000",
 		}))
 		require.Nil(t, err, "error creating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)

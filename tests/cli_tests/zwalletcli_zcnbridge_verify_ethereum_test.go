@@ -12,24 +12,29 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	Address = "0x31925839586949a96e72cacf25fed7f47de5faff78adc20946183daf3c4cf230"
-)
-
 func TestBridgeVerify(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("skip till authorizers are re-enabled")
+	t.Skip("Skip till fixed : https://github.com/0chain/system_test/issues/1042")
 	t.SetSmokeTests("Verify ethereum transaction")
 
-	t.Parallel()
+	t.RunSequentiallyWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {
+		err := tenderlyClient.InitBalance(ethereumAddress)
+		require.NoError(t, err)
 
-	t.Run("Verify ethereum transaction", func(t *test.SystemTest) {
-		t.Skip("Skip till fixed")
+		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
+		require.NoError(t, err)
 
-		output, err := verifyBridgeTransaction(t, Address, false)
+		output, err := burnEth(t, "1000000000000", true)
+		require.Nil(t, err, output)
+		require.Greater(t, len(output), 0)
+		require.Contains(t, output[len(output)-1], "Verification:")
+
+		ethTxHash := getTransactionHash(output, true)
+
+		output, err = verifyBridgeTransaction(t, ethTxHash, false)
 		require.Nil(t, err, "error trying to verify transaction", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0)
-		require.Equal(t, "Transaction verification success: "+Address, output[len(output)-1])
+		require.Equal(t, "Transaction verification success: "+ethTxHash, output[len(output)-1])
 	})
 }
 

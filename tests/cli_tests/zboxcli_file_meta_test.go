@@ -53,12 +53,13 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Equal(t, "d", meta.Type)
 		require.Equal(t, "/", meta.Path)
 		require.Equal(t, "/", meta.Name)
-		require.Equal(t, filesize, meta.ActualFileSize)
+		// ActualFileSize is not calculated for directories in v2
+		// require.Equal(t, filesize, meta.ActualFileSize)
 	})
 
 	t.Run("Get File Meta in Root Directory Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
+			"size": 64 * KB * 2,
 		})
 
 		remotepath := "/"
@@ -143,11 +144,10 @@ func TestFileMetadata(testSetup *testing.T) {
 		fname := filepath.Base(filename)
 
 		// Just create a wallet so that we can work further
-		output, err := createWallet(t, configPath)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		createWallet(t)
 
 		// Listing contents of allocationID: should work
-		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
+		output, err := getFileMeta(t, configPath, createParams(map[string]interface{}{
 			"authticket": authTicket,
 			"lookuphash": lookupHash,
 			"json":       "",
@@ -219,7 +219,7 @@ func TestFileMetadata(testSetup *testing.T) {
 
 	t.Run("Get File Meta for Encrypted File Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
+			"size": 64 * KB * 2,
 		})
 
 		// First Upload a file to the root directory
@@ -240,7 +240,7 @@ func TestFileMetadata(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 2)
 
-		expected := fmt.Sprintf("Status completed callback. Type = application/octet-stream. Name = %s", fname)
+		expected := fmt.Sprintf("Status completed callback. Type = text/plain. Name = %s", fname)
 		require.Equal(t, expected, output[1], strings.Join(output, "\n"))
 
 		output, err = getFileMeta(t, configPath, createParams(map[string]interface{}{
@@ -292,7 +292,8 @@ func TestFileMetadata(testSetup *testing.T) {
 			require.Equal(t, "d", meta.Type)
 			require.Equal(t, remotepath, meta.Path)
 			require.Equal(t, remotepath, meta.Name)
-			require.Equal(t, filesize, meta.ActualFileSize)
+			// ActualFileSize is not calculated for directories in v2
+			// require.Equal(t, filesize, meta.ActualFileSize)
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -374,8 +375,7 @@ func TestFileMetadata(testSetup *testing.T) {
 	})
 
 	t.Run("Get File Meta Without Parameter Should Fail", func(t *test.SystemTest) {
-		_, err := createWallet(t, configPath)
-		require.NoError(t, err)
+		createWallet(t)
 
 		output, err := getFileMeta(t, configPath, "", false)
 		require.NotNil(t, err, strings.Join(output, "\n"))

@@ -1,34 +1,44 @@
 package api_tests
 
 import (
+	"context"
 	"encoding/json"
+	coreClient "github.com/0chain/gosdk/core/client"
+	"github.com/0chain/gosdk/core/conf"
 	"log"
 	"os"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
-	"github.com/0chain/gosdk/zcncore"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/config"
-	"github.com/0chain/system_test/internal/api/util/crypto"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 )
 
 var (
-	apiClient                   *client.APIClient
-	zs3Client                   *client.ZS3Client
-	sdkClient                   *client.SDKClient
-	zboxClient                  *client.ZboxClient
-	sdkWallet                   *model.Wallet
-	sdkWalletMnemonics          string
+	apiClient *client.APIClient
+	zs3Client *client.ZS3Client
+	// sdkClient        *client.SDKClient
+	zboxClient       *client.ZboxClient
+	zvaultClient     *client.ZvaultClient
+	zauthClient      *client.ZauthClient
+	chimneyClient    *client.APIClient
+	chimneySdkClient *client.SDKClient
+	sdkClient        *client.SDKClient
+	// sdkWallet                   *model.Wallet
 	ownerWallet                 *model.Wallet
 	ownerWalletMnemonics        string
 	blobberOwnerWallet          *model.Wallet
 	blobberOwnerWalletMnemonics string
 	parsedConfig                *config.Config
+
+	initialisedWallets []*model.Wallet
+	walletIdx          int64
+	walletMutex        sync.Mutex
 )
 
 func TestMain(m *testing.M) {
@@ -39,10 +49,15 @@ func TestMain(m *testing.M) {
 	}
 
 	parsedConfig = config.Parse(configPath)
-	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
 	zs3Client = client.NewZS3Client(parsedConfig.ZS3ServerUrl)
-	zboxClient = client.NewZboxClient(parsedConfig.ZboxUrl, parsedConfig.ZboxPhoneNumber)
+	zboxClient = client.NewZboxClient(parsedConfig.ZboxUrl)
+	zvaultClient = client.NewZvaultClient(parsedConfig.ZvaultUrl)
+	zauthClient = client.NewZauthClient(parsedConfig.ZauthUrl)
+
+	chimneyClient = client.NewAPIClient(parsedConfig.ChimneyTestNetwork)
+	chimneySdkClient = client.NewSDKClient(parsedConfig.ChimneyTestNetwork)
+	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
 
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
 	if err != nil {
@@ -55,17 +70,61 @@ func TestMain(m *testing.M) {
 
 	t := test.NewSystemTest(new(testing.T))
 
-	err = zcncore.Init(getConfigForZcnCoreInit(parsedConfig.BlockWorker))
+	err = coreClient.Init(context.Background(), conf.Config{
+		BlockWorker:     parsedConfig.BlockWorker,
+		SignatureScheme: "bls0chain",
+		ChainID:         "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe",
+		MaxTxnQuery:     5,
+		QuerySleepTime:  5,
+		MinSubmit:       10,
+		MinConfirmation: 10,
+	})
 	require.NoError(t, err)
-	sdkWalletMnemonics = crypto.GenerateMnemonics(t)
-	sdkWallet = apiClient.CreateWalletForMnemonic(t, sdkWalletMnemonics)
-	sdkClient.SetWallet(t, sdkWallet, sdkWalletMnemonics)
 
 	blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics
 	blobberOwnerWallet = apiClient.CreateWalletForMnemonic(t, blobberOwnerWalletMnemonics)
 
 	ownerWalletMnemonics = parsedConfig.OwnerWalletMnemonics
 	ownerWallet = apiClient.CreateWalletForMnemonic(t, ownerWalletMnemonics)
+
+	// Read the content of the file
+	fileContent, err := os.ReadFile("./config/wallets.json")
+	if err != nil {
+		log.Println("Error reading file:", err)
+		return
+	}
+
+	fileWallets := []WalletFile{}
+
+	// Parse the JSON data into a list of strings
+	err = json.Unmarshal(fileContent, &fileWallets)
+	if err != nil {
+		log.Println("Error decoding JSON:", err)
+		return
+	}
+
+	for i := range fileWallets {
+		wallet := fileWallets[i]
+		initialisedWallet := &model.Wallet{
+			Id:        wallet.ClientId,
+			Version:   wallet.Version,
+			PublicKey: wallet.Keys[0].PublicKey,
+			Nonce:     0,
+			Keys:      &model.KeyPair{},
+			Mnemonics: wallet.Mnemonics,
+		}
+
+		err := initialisedWallet.Keys.PublicKey.DeserializeHexStr(wallet.Keys[0].PublicKey)
+		if err != nil {
+			log.Println("Error decoding JSON:", err)
+		}
+		err = initialisedWallet.Keys.PrivateKey.DeserializeHexStr(wallet.Keys[0].PrivateKey)
+		if err != nil {
+			log.Println("Error decoding JSON:", err)
+		}
+
+		initialisedWallets = append(initialisedWallets, initialisedWallet)
+	}
 
 	os.Exit(m.Run())
 }
@@ -83,4 +142,30 @@ func getConfigForZcnCoreInit(blockWorker string) string {
 
 	b, _ := json.Marshal(configMap)
 	return string(b)
+}
+
+type WalletFile struct {
+	ClientId  string `json:"client_id"`
+	ClientKey string `json:"client_key"`
+	Keys      []struct {
+		PublicKey  string `json:"public_key"`
+		PrivateKey string `json:"private_key"`
+	} `json:"keys"`
+	Mnemonics       string      `json:"mnemonics"`
+	Version         string      `json:"version"`
+	DateCreated     time.Time   `json:"date_created"`
+	Nonce           int         `json:"nonce"`
+	ChainID         string      `json:"ChainID"`
+	SignatureScheme interface{} `json:"SignatureScheme"`
+}
+
+func createWallet(t *test.SystemTest) *model.Wallet {
+	walletMutex.Lock()
+	wallet := initialisedWallets[walletIdx]
+	walletIdx++
+	balance := apiClient.GetWalletBalance(t, wallet, client.HttpOkStatus)
+	wallet.Nonce = int(balance.Nonce)
+	walletMutex.Unlock()
+
+	return wallet
 }

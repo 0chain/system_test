@@ -5,6 +5,8 @@ import (
 	"io"
 	"time"
 
+	"github.com/0chain/gosdk/core/common"
+
 	"github.com/0chain/gosdk/core/zcncrypto"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
@@ -39,12 +41,13 @@ type ExecutionRequest struct {
 }
 
 type Wallet struct {
-	Id           string `json:"id"`
+	Id           string `json:"client_id"`
 	Version      string `json:"version"`
 	CreationDate *int   `json:"creation_date"`
-	PublicKey    string `json:"public_key"`
+	PublicKey    string `json:"client_key"`
 	Nonce        int
 	Keys         *KeyPair `json:"-"`
+	Mnemonics    string   `json:"mnemonics"`
 }
 
 type SdkWallet struct {
@@ -166,6 +169,13 @@ func NewCreateAllocationTransactionData(scRestGetAllocationBlobbersResponse *SCR
 	}
 }
 
+func NewRegisterBlobberTransactionData(scRegisterBlobberRequest *StorageNode) TransactionData {
+	return TransactionData{
+		Name:  "add_blobber",
+		Input: *scRegisterBlobberRequest,
+	}
+}
+
 func NewCreateFreeAllocationTransactionData(scRestGetFreeAllocationBlobbersResponse *SCRestGetFreeAllocationBlobbersResponse) TransactionData {
 	return TransactionData{
 		Name:  "free_allocation_request",
@@ -177,25 +187,6 @@ func NewCreateWritePoolTransactionData(createWritePoolRequest CreateWritePoolReq
 	return TransactionData{
 		Name:  "write_pool_lock",
 		Input: &createWritePoolRequest,
-	}
-}
-
-func NewUnlockWritePoolTransactionData(createWritePoolRequest CreateWritePoolRequest) TransactionData {
-	return TransactionData{
-		Name:  "write_pool_unlock",
-		Input: &createWritePoolRequest,
-	}
-}
-
-func NewCreateReadPoolTransactionData() TransactionData {
-	return TransactionData{
-		Name: "read_pool_lock",
-	}
-}
-
-func NewUnlockReadPoolTransactionData() TransactionData {
-	return TransactionData{
-		Name: "read_pool_unlock",
 	}
 }
 
@@ -224,13 +215,6 @@ func NewUnlockMinerStackPoolTransactionData(createStakePoolRequest CreateStakePo
 	return TransactionData{
 		Name:  "deleteFromDelegatePool",
 		Input: &createStakePoolRequest,
-	}
-}
-
-func NewFreeAllocationTransactionData(freeAllocationRequest *FreeAllocationRequest) TransactionData {
-	return TransactionData{
-		Name:  "free_update_allocation",
-		Input: freeAllocationRequest,
 	}
 }
 
@@ -376,6 +360,25 @@ type ClientGetBalanceResponse struct {
 	Nonce   int64  `json:"nonce"`
 }
 
+type QueryRequest struct {
+	Query string
+}
+
+type BlockRewardsRequest struct {
+	Start int64
+	End   int64
+}
+
+type GetAllChallengesForAllocationRequest struct {
+	AllocationID string
+}
+
+type QueryRewardsResponse struct {
+	TotalProviderReward float64 `json:"total_provider_reward"`
+	TotalDelegateReward float64 `json:"total_delegate_reward"`
+	TotalReward         float64 `json:"total_reward"`
+}
+
 type SCStateGetRequest struct {
 	SCAddress, Key string
 }
@@ -417,24 +420,56 @@ type SCRestOpenChallengeResponse struct {
 }
 
 type Challenge struct {
-	ChallengeID             string   `json:"id"`
-	PrevChallengeID         string   `json:"prev_id"`
-	RandomNumber            int64    `json:"seed"`
-	AllocationID            string   `json:"allocation_id"`
-	AllocationRoot          string   `json:"allocation_root"`
-	RespondedAllocationRoot string   `json:"responded_allocation_root"`
-	Status                  int      `json:"status"`
-	Result                  int      `json:"result"`
-	StatusMessage           string   `json:"status_message"`
-	CommitTxnID             string   `json:"commit_txn_id"`
-	BlockNum                int64    `json:"block_num"`
-	RefID                   int64    `json:"-"`
-	LastCommitTxnIDs        []string `json:"last_commit_txn_ids"`
+	ChallengeID    string `json:"challenge_id"`
+	CreatedAt      int64  `json:"created_at"`
+	AllocationID   string `json:"allocation_id"`
+	BlobberID      string `json:"blobber_id"`
+	ValidatorsID   string `json:"validators_id"`
+	Seed           int64  `json:"seed"`
+	AllocationRoot string `json:"allocation_root"`
+	Responded      int64  `json:"responded"`
+	Passed         bool   `json:"passed"`
+	RoundResponded int64  `json:"round_responded"`
+	RoundCreatedAt int64  `json:"round_created_at"`
+	ExpiredN       int    `json:"expired_n"`
+	Timestamp      int64  `json:"timestamp"`
+}
+
+type ChallengeTiming struct {
+	// ChallengeID is the challenge ID generated on blockchain.
+	ChallengeID string `gorm:"column:challenge_id;size:64;primaryKey" json:"id"`
+
+	// CreatedAtChain is when generated on blockchain.
+	CreatedAtChain common.Timestamp `gorm:"created_at_chain" json:"created_at_chain"`
+	// CreatedAtBlobber is when synchronized and created at blobber.
+	CreatedAtBlobber common.Timestamp `gorm:"created_at_blobber" json:"created_at_blobber"`
+	// FileSize is size of file that was randomly selected for challenge
+	FileSize int64 `gorm:"file_size" json:"file_size"`
+	// ProofGenTime is the time taken in millisecond to generate challenge proof for the file
+	ProofGenTime int64 `gorm:"proof_gen_time" json:"proof_gen_time"`
+	// CompleteValidation is when all validation tickets are all received.
+	CompleteValidation common.Timestamp `gorm:"complete_validation" json:"complete_validation"`
+	// TxnSubmission is when challenge response is first sent to blockchain.
+	TxnSubmission common.Timestamp `gorm:"txn_submission" json:"txn_submission"`
+	// TxnVerification is when challenge response is verified on blockchain.
+	TxnVerification common.Timestamp `gorm:"txn_verification" json:"txn_verification"`
+	// Canceled is when challenge is Canceled by blobber due to expiration or bad challenge data (eg. invalid ref or not a file) which is impossible to validate.
+	Canceled common.Timestamp `gorm:"canceled" json:"canceled"`
+	// Expiration is when challenge is marked as expired by blobber.
+	Expiration common.Timestamp `gorm:"expiration" json:"expiration"`
+
+	// ClosedAt is when challenge is closed (eg. expired, canceled, or completed/verified).
+	ClosedAt common.Timestamp `gorm:"column:closed_at;index:idx_closed_at,sort:desc;" json:"closed"`
+
+	// UpdatedAt is when row is last updated.
+	UpdatedAt common.Timestamp `gorm:"column:updated_at;index:idx_updated_at,sort:desc;" json:"updated"`
 }
 
 type SCRestGetAllocationBlobbersResponse struct {
-	Blobbers *[]string `json:"blobbers"`
+	Blobbers           *[]string `json:"blobbers"`
+	BlobberAuthTickets []string  `json:"blobber_auth_tickets"`
 	BlobberRequirements
+	StorageVersion int `json:"storage_version"`
 }
 
 type SCRestGetAllocationRequest struct {
@@ -484,10 +519,10 @@ type UpdateAllocationRequest struct {
 	Name                 string `json:"name"`
 	OwnerID              string `json:"owner_id"`
 	Size                 int64  `json:"size"`
-	Expiration           int64  `json:"expiration_date"`
+	Extend               bool   `json:"extend"`
 	SetImmutable         bool   `json:"set_immutable"`
-	UpdateTerms          bool   `json:"update_terms"`
 	AddBlobberId         string `json:"add_blobber_id"`
+	AddBlobberAuthTicket string `json:"add_blobber_auth_ticket"`
 	RemoveBlobberId      string `json:"remove_blobber_id"`
 	ThirdPartyExtendable bool   `json:"third_party_extendable"`
 	FileOptionsChanged   bool   `json:"file_options_changed"`
@@ -582,17 +617,19 @@ type SCRestGetValidatorResponse struct {
 type SCRestGetValidatorsResponse []SCRestGetValidatorResponse
 
 type SCRestGetBlobberResponse struct {
-	ID                string            `json:"id"`
-	BaseURL           string            `json:"url"`
-	Terms             Terms             `json:"terms"`
-	Capacity          int64             `json:"capacity"`
-	Allocated         int64             `json:"allocated"`
-	LastHealthCheck   int64             `json:"last_health_check"`
-	PublicKey         string            `json:"-"`
-	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
-	TotalStake        int64             `json:"total_stake"`
-	SavedData         int64             `json:"saved_data"`
-	ReadData          int64             `json:"read_data"`
+	ID                  string            `json:"id"`
+	BaseURL             string            `json:"url"`
+	Terms               Terms             `json:"terms"`
+	Capacity            int64             `json:"capacity"`
+	Allocated           int64             `json:"allocated"`
+	LastHealthCheck     int64             `json:"last_health_check"`
+	PublicKey           string            `json:"-"`
+	StakePoolSettings   StakePoolSettings `json:"stake_pool_settings"`
+	TotalStake          int64             `json:"total_stake"`
+	SavedData           int64             `json:"saved_data"`
+	ReadData            int64             `json:"read_data"`
+	ChallengesPassed    int64             `json:"challenges_passed"`
+	ChallengesCompleted int64             `json:"challenges_completed"`
 }
 
 type SCRestGetBlobbersResponse struct {
@@ -634,23 +671,30 @@ type FreeAllocationRequest struct {
 }
 
 type SCRestGetAllocationResponse struct {
-	ID              string           `json:"id"`
-	Tx              string           `json:"tx"`
-	Name            string           `json:"name"`
-	DataShards      int              `json:"data_shards"`
-	ParityShards    int              `json:"parity_shards"`
-	Size            int64            `json:"size"`
-	Expiration      int64            `json:"expiration_date"`
-	Owner           string           `json:"owner_id"`
-	OwnerPublicKey  string           `json:"owner_public_key"`
-	Payer           string           `json:"payer_id"`
-	Blobbers        []*StorageNode   `json:"blobbers"`
-	Stats           *AllocationStats `json:"stats"`
-	TimeUnit        time.Duration    `json:"time_unit"`
-	IsImmutable     bool             `json:"is_immutable"`
-	WritePool       int64            `json:"write_pool"`
-	ReadPriceRange  PriceRange       `json:"read_price_range"`
-	WritePriceRange PriceRange       `json:"write_price_range"`
+	ID                string           `json:"id"`
+	Tx                string           `json:"tx"`
+	Name              string           `json:"name"`
+	DataShards        int              `json:"data_shards"`
+	ParityShards      int              `json:"parity_shards"`
+	Size              int64            `json:"size"`
+	CreatedAt         int64            `json:"created_at"`
+	Expiration        int64            `json:"expiration_date"`
+	Owner             string           `json:"owner_id"`
+	OwnerPublicKey    string           `json:"owner_public_key"`
+	Payer             string           `json:"payer_id"`
+	Blobbers          []*StorageNode   `json:"blobbers"`
+	Stats             *AllocationStats `json:"stats"`
+	TimeUnit          time.Duration    `json:"time_unit"`
+	IsImmutable       bool             `json:"is_immutable"`
+	StartTime         int64            `json:"start_time"`
+	Finalized         bool             `json:"finalized"`
+	Canceled          bool             `json:"canceled"`
+	WritePool         int64            `json:"write_pool"`
+	MovedToChallenge  int64            `json:"moved_to_challenge"`
+	MovedBack         int64            `json:"moved_back"`
+	MovedToValidators int64            `json:"moved_to_validators"`
+	ReadPriceRange    PriceRange       `json:"read_price_range"`
+	WritePriceRange   PriceRange       `json:"write_price_range"`
 }
 
 type StorageNodes struct {
@@ -664,6 +708,7 @@ type StorageNode struct {
 	Terms             Terms                  `json:"terms"`     // terms
 	Capacity          int64                  `json:"capacity"`  // total blobber capacity
 	Allocated         int64                  `json:"allocated"` // allocated capacity
+	TotalStake        int64                  `json:"total_stake"`
 	LastHealthCheck   int64                  `json:"last_health_check"`
 	PublicKey         string                 `json:"-"`
 	StakePoolSettings StakePoolSettings      `json:"stake_pool_settings"`
@@ -735,7 +780,6 @@ type LatestWriteMarker struct {
 }
 
 type BlobberGetFileRefsResponse struct {
-	TotalPages        int                `json:"total_pages"`
 	OffsetPath        string             `json:"offset_path"`
 	Refs              []*RefsData        `json:"refs"`
 	LatestWriteMarker *LatestWriteMarker `json:"latest_write_marker"`
@@ -789,7 +833,6 @@ type Ref struct {
 type BlobberFileRefPathResponse struct {
 	Meta map[string]interface{}        `json:"meta_data"`
 	List []*BlobberFileRefPathResponse `json:"list,omitempty"`
-	Ref  *Ref
 }
 
 type WriteMarker struct {
@@ -952,11 +995,12 @@ type DelegatePool struct {
 }
 
 type FreeStorageMarker struct {
-	Assigner   string  `json:"assigner,omitempty"`
-	Recipient  string  `json:"recipient"`
-	FreeTokens float64 `json:"free_tokens"`
-	Nonce      int64   `json:"nonce"`
-	Signature  string  `json:"signature,omitempty"`
+	Assigner   string   `json:"assigner,omitempty"`
+	Recipient  string   `json:"recipient"`
+	FreeTokens float64  `json:"free_tokens"`
+	Nonce      int64    `json:"nonce"`
+	Signature  string   `json:"signature,omitempty"`
+	Blobbers   []string `json:"blobbers"`
 }
 
 // ----------------------------------------------
@@ -969,3 +1013,13 @@ type SCRestBurnZcnRequest struct {
 //----------------------------------------------
 // End ZCN SC
 //----------------------------------------------
+
+type LatestFinalizedBlock struct {
+	CreationDate      int64  `json:"creation_date"`
+	Hash              string `json:"hash,omitempty"`
+	StateHash         string `json:"state_hash"`
+	MinerId           string `json:"miner_id"`
+	Round             int64  `json:"round"`
+	StateChangesCount int    `json:"state_changes_count"`
+	NumTxns           int    `json:"num_txns"`
+}
