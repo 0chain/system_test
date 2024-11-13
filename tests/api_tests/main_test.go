@@ -1,7 +1,10 @@
 package api_tests
 
 import (
+	"context"
 	"encoding/json"
+	coreClient "github.com/0chain/gosdk/core/client"
+	"github.com/0chain/gosdk/core/conf"
 	"log"
 	"os"
 	"strconv"
@@ -9,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/0chain/gosdk/zcncore"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/config"
@@ -22,6 +24,8 @@ var (
 	zs3Client *client.ZS3Client
 	// sdkClient        *client.SDKClient
 	zboxClient       *client.ZboxClient
+	zvaultClient     *client.ZvaultClient
+	zauthClient      *client.ZauthClient
 	chimneyClient    *client.APIClient
 	chimneySdkClient *client.SDKClient
 	sdkClient        *client.SDKClient
@@ -48,6 +52,9 @@ func TestMain(m *testing.M) {
 	apiClient = client.NewAPIClient(parsedConfig.BlockWorker)
 	zs3Client = client.NewZS3Client(parsedConfig.ZS3ServerUrl)
 	zboxClient = client.NewZboxClient(parsedConfig.ZboxUrl)
+	zvaultClient = client.NewZvaultClient(parsedConfig.ZvaultUrl)
+	zauthClient = client.NewZauthClient(parsedConfig.ZauthUrl)
+
 	chimneyClient = client.NewAPIClient(parsedConfig.ChimneyTestNetwork)
 	chimneySdkClient = client.NewSDKClient(parsedConfig.ChimneyTestNetwork)
 	sdkClient = client.NewSDKClient(parsedConfig.BlockWorker)
@@ -63,7 +70,15 @@ func TestMain(m *testing.M) {
 
 	t := test.NewSystemTest(new(testing.T))
 
-	err = zcncore.Init(getConfigForZcnCoreInit(parsedConfig.BlockWorker))
+	err = coreClient.Init(context.Background(), conf.Config{
+		BlockWorker:     parsedConfig.BlockWorker,
+		SignatureScheme: "bls0chain",
+		ChainID:         "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe",
+		MaxTxnQuery:     5,
+		QuerySleepTime:  5,
+		MinSubmit:       10,
+		MinConfirmation: 10,
+	})
 	require.NoError(t, err)
 
 	blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics

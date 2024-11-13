@@ -412,7 +412,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		allocSize := 1 * GB
 
 		// 1. Create an allocation with 1 data shard and 1 parity shard.
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"data":   1,
 			"tokens": 99,
@@ -523,7 +523,7 @@ func TestAddOrReplaceBlobberAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
 		allocSize := 1 * GB // 1. Create an allocation with 1 data shard and 1 parity shard.
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"data":   1,
 			"tokens": 99,
