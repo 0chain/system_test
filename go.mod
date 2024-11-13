@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.18.0-RC1.0.20241019160820-24aad2c5153e
+	github.com/0chain/gosdk v1.18.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
@@ -47,7 +47,7 @@ require (
 )
 
 require (
-	github.com/0chain/common v1.13.1-0.20240926135437-61b88d39bbbd
+	github.com/0chain/common v1.18.3
 	github.com/Luzifer/go-openssl/v3 v3.1.0 // indirect
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
