@@ -95,8 +95,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Root Directory Should Work", func(t *test.SystemTest) { // todo: slow
-		const allocSize int64 = 2048
-		const fileSize int64 = 256
+		const allocSize int64 = 64 * KB * 2
+		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -122,8 +122,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Upload file concurrently to root directory, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: slow
-		const allocSize int64 = 2048
-		const fileSize int64 = 256
+		const allocSize int64 = 64 * KB * 4
+		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -172,8 +172,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to a Directory Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(1024)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -199,8 +199,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Upload File to a Directory without Filename Should Work", 60*time.Second, func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(1024)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -244,8 +244,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Nested Directory Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
-		fileSize := int64(1024)
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(64 * KB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -271,8 +271,8 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File with Thumbnail Should Work", func(t *test.SystemTest) {
-		allocSize := int64(10 * 1024 * 1024)
-		fileSize := int64(256)
+		allocSize := int64(64 * 1024 * 1024)
+		fileSize := int64(64 * KB)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -350,7 +350,7 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload Image File Should Work", func(t *test.SystemTest) {
-		allocSize := int64(10 * 1024 * 1024)
+		allocSize := int64(64 * 1024 * 1024)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -359,7 +359,7 @@ func TestUpload(testSetup *testing.T) {
 		filename := escapedTestName(t) + "image.png"
 		//nolint
 		fileBytes, _ := base64.StdEncoding.DecodeString(`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`)
-		err := os.WriteFile(filename, fileBytes, os.ModePerm)
+		err := os.WriteFile(filename, fileBytes, os.ModePerm) //nolint:gosec
 		require.Nil(t, err, "failed to generate thumbnail", err)
 
 		output, err := uploadFile(t, configPath, map[string]interface{}{
@@ -431,7 +431,7 @@ func TestUpload(testSetup *testing.T) {
 
 	t.Run("Upload File with Encryption Should Work", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 10000,
+			"size": 64 * KB * 2,
 		})
 
 		filename := generateRandomTestFileName(t)
@@ -528,7 +528,7 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Existing File Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		fileSize := int64(1024)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -588,7 +588,7 @@ func TestUpload(testSetup *testing.T) {
 	t.Run("Upload File to Other's Allocation Should Fail", func(t *test.SystemTest) {
 		var otherAllocationID string
 
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 		fileSize := int64(256)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -633,7 +633,7 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload Non-Existent File Should Fail", func(t *test.SystemTest) {
-		allocSize := int64(2048)
+		allocSize := int64(64 * KB * 2)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size": allocSize,
@@ -668,7 +668,7 @@ func TestUpload(testSetup *testing.T) {
 
 	t.Run("Upload to Allocation without remotepath and authticket Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 2048,
+			"size": 64 * KB * 2,
 		})
 
 		output, err := uploadFileWithoutRetry(t, configPath, map[string]interface{}{
@@ -1019,6 +1019,26 @@ func generateFileAndUpload(t *test.SystemTest, allocationID, remotepath string, 
 func generateFileAndUploadForWallet(t *test.SystemTest, wallet, allocationID, remotepath string, size int64) string {
 	filename := generateRandomTestFileName(t)
 
+	err := createFileWithSize(filename, size)
+	require.Nil(t, err)
+
+	// Upload parameters
+	// log command with allocation id, filename and remotepath
+	t.Logf("Uploading file %s to allocation %s with remotepath %s", filename, allocationID, remotepath+filepath.Base(filename))
+	uploadWithParamForWallet(t, wallet, configPath, map[string]interface{}{
+		"allocation": allocationID,
+		"localpath":  filename,
+		"remotepath": remotepath + filepath.Base(filename),
+	})
+
+	return filename
+}
+
+func generateFileContentAndUpload(t *test.SystemTest, allocationID, remotepath, filename string, size int64) string {
+	return generateFileContentAndUploadForWallet(t, escapedTestName(t), allocationID, remotepath, filename, size)
+}
+
+func generateFileContentAndUploadForWallet(t *test.SystemTest, wallet, allocationID, remotepath, filename string, size int64) string {
 	err := createFileWithSize(filename, size)
 	require.Nil(t, err)
 

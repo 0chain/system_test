@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/0chain/system_test/internal/api/model"
+
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -38,8 +40,7 @@ func CreateWallet(t *test.SystemTest, cliConfigFilename string, opt ...createWal
 }
 
 type createWalletOption struct {
-	noPourAndReadPool bool
-	debugLogs         bool
+	debugLogs bool
 }
 
 type createWalletOptionFunc func(*createWalletOption)
@@ -51,17 +52,17 @@ func CreateWalletForName(t *test.SystemTest, cliConfigFilename, name string, opt
 		opt(regOpt)
 	}
 
-	if regOpt.noPourAndReadPool {
-		return cliutils.RunCommand(t, "./zwallet create-wallet --silent "+
-			"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
-	}
-
 	if regOpt.debugLogs {
 		return cliutils.RunCommand(t, "./zwallet create-wallet "+
 			"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
 	}
+	output, err := cliutils.RunCommand(t, "./zwallet create-wallet --silent "+
+		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+	if err != nil {
+		return output, err
+	}
 
-	output, err := ExecuteFaucetWithTokensForWallet(t, name, cliConfigFilename, 5)
+	output, err = ExecuteFaucetWithTokensForWallet(t, name, cliConfigFilename, 5)
 	t.Logf("faucet output: %v", output)
 	return output, err
 }
@@ -78,6 +79,28 @@ func GetWalletForName(t *test.SystemTest, cliConfigFilename, name string) (*clim
 	require.Len(t, output, 1)
 
 	var wallet *climodel.Wallet
+
+	err = json.Unmarshal([]byte(output[0]), &wallet)
+	if err != nil {
+		t.Errorf("failed to unmarshal the result into wallet")
+		return nil, err
+	}
+
+	return wallet, err
+}
+
+func GetFullWalletForName(t *test.SystemTest, cliConfigFilename, name string) (*model.Wallet, error) {
+	t.Logf("Getting wallet...")
+	output, err := cliutils.RunCommand(t, "./zbox getwallet --json --silent "+
+		"--wallet "+name+"_wallet.json"+" --configDir ./config --config "+cliConfigFilename, 3, time.Second*2)
+
+	if err != nil {
+		return nil, err
+	}
+
+	require.Len(t, output, 1)
+
+	var wallet *model.Wallet
 
 	err = json.Unmarshal([]byte(output[0]), &wallet)
 	if err != nil {

@@ -25,6 +25,13 @@ jobs:
         with:
           github-token: ${{ github.token }}
 
+      - name: 'Setup jq'
+        uses: dcarbone/install-jq-action@v2.1.0
+        with:
+          version: '1.7'
+          force: 'false'
+
+
       - name: "Config: Run tests against existing 0Chain network"
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
         run: |
@@ -44,41 +51,13 @@ jobs:
           echo "TOKENOMICS_SLASH_REWARD_TESTS=$(echo $(([ -z 'TestBlobberSlashPenalty' ] && echo '') || echo 'TestBlobberSlashPenalty'))" >> $GITHUB_ENV
           echo "TOKENOMICS_BLOCK_REWARD_TESTS=$(echo $(([ -z 'TestBlockRewardsForBlobbers' ] && echo '') || echo 'TestBlockRewardsForBlobbers'))" >> $GITHUB_ENV
           echo "TOKENOMICS_MIN_STAKE_TESTS=$(echo $(([ -z 'TestMinStakeForProviders' ] && echo '') || echo 'TestMinStakeForProviders'))" >> $GITHUB_ENV
+          echo "ENTERPRISE_BLOBBER_CREATE_ALLOCATION_TESTS=$(echo $(([ -z 'TestCreateEnterpriseAllocation' ] && echo '') || echo 'TestCreateEnterpriseAllocation'))" >> $GITHUB_ENV
+          echo "ENTERPRISE_BLOBBER_UPDATE_ALLOCATION_TESTS=$(echo $(([ -z 'TestUpdateEnterpriseAllocation' ] && echo '') || echo 'TestUpdateEnterpriseAllocation'))" >> $GITHUB_ENV
+          echo "ENTERPRISE_BLOBBER_REPLACE_ALLOCATION_TESTS=$(echo $(([ -z 'TestReplaceEnterpriseBlobberAllocation' ] && echo '') || echo 'TestReplaceEnterpriseBlobberAllocation'))" >> $GITHUB_ENV
+          echo "ENTERPRISE_BLOBBER_CANCEL_ALLOCATION_TESTS=$(echo $(([ -z 'TestCancelEnterpriseAllocation' ] && echo '') || echo 'TestCancelEnterpriseAllocation'))" >> $GITHUB_ENV
+          echo "ENTERPRISE_BLOBBER_FINALIZE_ALLOCATION_TESTS=$(echo $(([ -z 'TestFinalizeEnterpriseAllocation' ] && echo '') || echo 'TestFinalizeEnterpriseAllocation'))" >> $GITHUB_ENV
           echo "CLIENT_THROTTLING=$(echo $(([ -z 'TestClientThrottling' ] && echo '') || echo 'TestClientThrottling'))" >> $GITHUB_ENV
           echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
-
-
-      - name: "Deploy 0Chain"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain-2b2v@master
-        with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
-          teardown_condition: "TESTS_PASSED"
-          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_VIRTUAL_TESTNET_ID: ""
-          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
-          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-
-      - name: "Run Allocation System tests"
-        uses: 0chain/actions/run-system-tests-tokenomics@master
-        with:
-          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          network: ${{ env.NETWORK_URL }}
-          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-          deploy_report_page: true
-          archive_results: true
-          run_flaky_tests: false
-          run_api_system_tests: false
-          run_cli_system_tests: false
-          run_tokenomics_system_tests: true
-          tokenomics_test_filter: ${{ env.TOKENOMICS_ALLOCATION_TESTS }}
-          TENDERLY_VIRTUAL_TESTNET_ID: ""
-          run_smoke_tests: ${{ inputs.run_smoke_tests }}
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
 
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
@@ -107,6 +86,38 @@ jobs:
           run_cli_system_tests: false
           run_tokenomics_system_tests: true
           tokenomics_test_filter: ${{ env.TOKENOMICS_CHALLENGE_REWARD_TESTS }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+      - name: "Deploy 0Chain"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-0chain-2b2v@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://rpc.tenderly.co/fork/""
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+
+      - name: "Run Allocation System tests"
+        uses: 0chain/actions/run-system-tests-tokenomics@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.TOKENOMICS_ALLOCATION_TESTS }}
           TENDERLY_VIRTUAL_TESTNET_ID: ""
           run_smoke_tests: ${{ inputs.run_smoke_tests }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
@@ -261,8 +272,8 @@ jobs:
 
 
   notify_slack_on_failure:
-    runs-on: [self-hosted, arc-runner]
-    needs: [system-tests]
+    runs-on: [ self-hosted, arc-runner ]
+    needs: [ system-tests ]
     if: always() && (needs.system-tests.result == 'failure')
     steps:
       - name: "Notify Slack"
@@ -279,8 +290,8 @@ jobs:
           curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
 
   notify_slack_on_success:
-    runs-on: [self-hosted, arc-runner]
-    needs: [system-tests]
+    runs-on: [ self-hosted, arc-runner ]
+    needs: [ system-tests ]
     if: always() && (needs.system-tests.result == 'success')
     steps:
       - name: "Notify Slack"

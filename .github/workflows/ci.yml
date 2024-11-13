@@ -38,7 +38,7 @@ jobs:
           sudo apt-get -y install build-essential nghttp2 libnghttp2-dev libssl-dev
       - uses: actions/setup-go@v3
         with:
-          go-version: '1.21'
+          go-version: '1.22'
       - uses: actions/checkout@v3
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
@@ -47,27 +47,6 @@ jobs:
           skip-build-cache: true
           skip-pkg-cache: true
           only-new-issues: true
-
-  ensure-master-is-green:
-    # if: github.ref != 'refs/heads/master'
-    name: "Ensure master is green"
-    runs-on: arc-runner
-    steps:
-      - name: Check CI
-        id: check-ci
-        uses: 0chain/actions/get-build-state@master
-        with:
-          github_token: ${{ github.token }}
-          repository: "0chain/system_test"
-          sha: master
-      - name: Success
-        if: ${{ env.BUILD_STATE == 'success' }}
-        run: echo "master is successful!"
-      - name: Not Successful
-        if: ${{ env.BUILD_STATE != 'success' }}
-        run: |
-          echo "master is NOT successful! was: [${{ env.BUILD_STATE }}]"
-          exit 1
 
   system-tests:
     name: "System Tests"

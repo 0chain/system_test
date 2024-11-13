@@ -31,6 +31,7 @@ const (
 	ChallengePassReward
 	ChallengeSlashPenalty
 	CancellationChargeReward
+	EnterpriseBlobberReward
 	NumOfRewards
 )
 
@@ -268,7 +269,7 @@ func TestMinStakeForProviders(testSetup *testing.T) {
 
 		time.Sleep(30 * time.Second)
 
-		allocationId := utils.SetupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationId := utils.SetupAllocation(t, configPath, map[string]interface{}{
 			"size":   100 * MB,
 			"tokens": 10,
 			"data":   3,

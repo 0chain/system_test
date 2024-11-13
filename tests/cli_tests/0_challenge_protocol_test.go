@@ -60,9 +60,9 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Number of challenges between 2 blocks should be equal to the number of blocks after challenge_generation_gap (given that we have active allocations)", 10*time.Minute, func(t *test.SystemTest) {
-		allocationId := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
-			"tokens": 9,
+		allocationId := setupAllocation(t, configPath, map[string]interface{}{
+			"size": 10 * MB,
+			"lock": 9,
 		})
 
 		remotepath := "/dir/"
@@ -275,8 +275,8 @@ func TestProtocolChallenge(testSetup *testing.T) {
 }
 
 // Generate a random number in the range [0, max)
-func secureRandomInt(max int) (int64, error) {
-	n, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
+func secureRandomInt(maxValue int) (int64, error) {
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(maxValue)))
 	if err != nil {
 		return 0, err
 	}

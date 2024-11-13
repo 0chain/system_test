@@ -1,0 +1,233 @@
+name: "Enterprise Blobbers Tokenomics Nightly Tests - Sprint"
+concurrency:
+  group: "tokenomics-nightly-tests-${{ github.ref }}-${{ github.event_name }}"
+  cancel-in-progress: true
+on:
+  schedule:
+    # Runs every morning at 2am UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      repo_snapshots_branch:
+        description: 'branch of repo-snapshots to derive images and branches from.'
+        default: 'current-sprint'
+        required: true
+
+jobs:
+  system-tests:
+    name: "System Tests"
+    runs-on: [ tests-suite ]
+    timeout-minutes: 3600
+    steps:
+      - name: "Get current PR"
+        uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+        with:
+          github-token: ${{ github.token }}
+
+      - name: 'Setup jq'
+        uses: dcarbone/install-jq-action@v2.1.0
+        with:
+          version: '1.7'
+          force: 'false'
+
+      - name: "Create Tenderly virtual testnet"
+        run: |
+          echo "TENDERLY_CREATION_INFO=$(curl -X POST \
+           -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
+           -H "Content-Type: application/json" \
+           -d '{"slug":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","displayName":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","description":"","visibility":"TEAM","tags":{"purpose":"development"},"networkConfig":{"networkId":"1","blockNumber":"18512782","chainConfig":{"chainId":"1"},"baseFeePerGas":"1"},"explorerConfig":{"enabled":false,"verificationVisibility":"bytecode"},"syncState":false}' \
+           https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container)" >> $GITHUB_ENV
+
+      - name: "Parse Tenderly virtual testnet creation transaction result"
+        run: |
+          echo "TENDERLY_VIRTUAL_TESTNET_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.id')" >> $GITHUB_ENV
+          echo "TENDERLY_VIRTUAL_TESTNET_RPC_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.connectivityConfig.endpoints[0].id')" >> $GITHUB_ENV
+
+      - name: "Config: Run tests against existing 0Chain network"
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
+        run: |
+          echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
+          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
+
+      - name: "Config: Deploy new 0Chain network then run tests against it"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        run: |
+          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
+          echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
+          echo "ENTERPRISE_BLOBBER_CREATE_ALLOCATION_TESTS=$(echo $(([ -z 'TestCreateEnterpriseAllocation' ] && echo '') || echo 'TestCreateEnterpriseAllocation'))" >> $GITHUB_ENV
+          echo "ENTERPRISE_BLOBBER_UPDATE_ALLOCATION_TESTS=$(echo $(([ -z 'TestUpdateEnterpriseAllocation' ] && echo '') || echo 'TestUpdateEnterpriseAllocation'))" >> $GITHUB_ENV
+          echo "ENTERPRISE_BLOBBER_REPLACE_ALLOCATION_TESTS=$(echo $(([ -z 'TestReplaceEnterpriseBlobberAllocation' ] && echo '') || echo 'TestReplaceEnterpriseBlobberAllocation'))" >> $GITHUB_ENV
+          echo "ENTERPRISE_BLOBBER_CANCEL_ALLOCATION_TESTS=$(echo $(([ -z 'TestCancelEnterpriseAllocation' ] && echo '') || echo 'TestCancelEnterpriseAllocation'))" >> $GITHUB_ENV
+          echo "ENTERPRISE_BLOBBER_FINALIZE_ALLOCATION_TESTS=$(echo $(([ -z 'TestFinalizeEnterpriseAllocation' ] && echo '') || echo 'TestFinalizeEnterpriseAllocation'))" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
+
+      - name: "Deploy 0Chain with enterprise blobbers"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-0chain@feature/add-egosdk-tokenomics-action
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          is_enterprise_blobbers: 'true'
+          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
+          graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
+          graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
+          graphnode_ethereum_node_url: https://virtual.mainnet.rpc.tenderly.co/${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+
+      - name: "Run Enterprise blobber create allocation tests"
+        uses: 0chain/actions/run-system-tests-tokenomics@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          custom_go_sdk_version: feat/enterprise-blobber
+          run_flaky_tests: false
+          zbox_cli_branch: staging
+          zwallet_cli_branch: staging
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.ENTERPRISE_BLOBBER_CREATE_ALLOCATION_TESTS }}
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
+
+      - name: "Run Enterprise blobber update allocation tests"
+        uses: 0chain/actions/run-system-tests-tokenomics@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          custom_go_sdk_version: feat/enterprise-blobber
+          zbox_cli_branch: staging
+          zwallet_cli_branch: staging
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.ENTERPRISE_BLOBBER_UPDATE_ALLOCATION_TESTS }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
+
+      - name: "Run Enterprise blobber replace blobber allocation tests"
+        uses: 0chain/actions/run-system-tests-tokenomics@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          run_api_system_tests: false
+          custom_go_sdk_version: feat/enterprise-blobber
+          zbox_cli_branch: staging
+          zwallet_cli_branch: staging
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.ENTERPRISE_BLOBBER_REPLACE_ALLOCATION_TESTS }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
+
+      - name: "Run Enterprise blobber cancel allocation tests"
+        uses: 0chain/actions/run-system-tests-tokenomics@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          run_api_system_tests: false
+          custom_go_sdk_version: feat/enterprise-blobber
+          zbox_cli_branch: staging
+          zwallet_cli_branch: staging
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.ENTERPRISE_BLOBBER_CANCEL_ALLOCATION_TESTS }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
+
+      - name: "Run Enterprise blobber finalize allocation tests"
+        uses: 0chain/actions/run-system-tests-tokenomics@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: false
+          custom_go_sdk_version: feat/enterprise-blobber
+          zbox_cli_branch: staging
+          zwallet_cli_branch: staging
+          run_api_system_tests: false
+          run_cli_system_tests: false
+          run_tokenomics_system_tests: true
+          tokenomics_test_filter: ${{ env.ENTERPRISE_BLOBBER_FINALIZE_ALLOCATION_TESTS }}
+          TENDERLY_VIRTUAL_TESTNET_ID: ""
+          run_smoke_tests: ${{ inputs.run_smoke_tests }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
+
+      - name: "Remove Tenderly virtual testnet"
+        if: always()
+        run: |
+          curl -X DELETE \
+            -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
+            -H "Content-Type: application/json" \
+            https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}
+
+
+  notify_slack_on_failure:
+    runs-on: [ self-hosted, arc-runner ]
+    needs: [ system-tests ]
+    if: always() && (needs.system-tests.result == 'failure')
+    steps:
+      - name: "Notify Slack"
+        run: |
+          payload='{
+          "text": "'"<!here> Enterprise Blobber Tokenomics Nightly Tests - Current Sprint FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "attachments": [
+              {
+              "text": "Enterprise Blobber Tokenomics Nightly Tests - Current sprint: FAILED ⚠️",
+              "color": "#ff0000"
+              }
+          ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+
+  notify_slack_on_success:
+    runs-on: [ self-hosted, arc-runner ]
+    needs: [ system-tests ]
+    if: always() && (needs.system-tests.result == 'success')
+    steps:
+      - name: "Notify Slack"
+        run: |
+          payload='{
+          "text": "'"<!here> Enterprise Blobber Tokenomics Nightly Tests - Current Sprint PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "attachments": [
+              {
+              "text": "Enterprise Blobber Tokenomics Nightly Tests - Current sprint: PASSED ✅",
+              "color": "#22bb33"
+              }
+          ]
+          }'
+          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
