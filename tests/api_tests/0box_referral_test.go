@@ -57,7 +57,7 @@ func Test0BoxReferral(testSetup *testing.T) {
 		require.NotNil(t, zboxRferral)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		_, response, err = zboxClient.CreateOwner(t, referralHeaders, map[string]string{"username": "referred_user"})
+		_, response, err = zboxClient.CreateOwner(t, referralHeaders, map[string]string{"username": "referred_user", "email": "dbiecougwbfvcsoo@gmail.com", "phone_number": "+15446424343"})
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
@@ -89,7 +89,7 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 		require.NotNil(t, zboxRferral)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		_, response, err = zboxClient.CreateOwner(t, referralHeaders, map[string]string{"username": "referred_user"})
+		_, response, err = zboxClient.CreateOwner(t, referralHeaders, map[string]string{"username": "referred_user", "email": "hfwdwhbacboabowrs@gmail.com", "phone_number": "+14446424343"})
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
