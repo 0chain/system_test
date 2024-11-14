@@ -179,7 +179,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		// Wait for allocation to expire
-		cliutils.Wait(t, time.Minute*2)
+		cliutils.Wait(t, time.Minute*1)
 
 		output, err = finalizeAllocation(t, configPath, allocationID, true)
 		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
