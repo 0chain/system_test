@@ -1317,9 +1317,9 @@ func TestShareFile(testSetup *testing.T) {
 		})
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "Error while initializing encryption")
+		require.Contains(t, aggregatedOutput, "Error while initializing encryption invalid encryption key: Encryption key mismatch")
 	})
 
 	t.RunWithTimeout("Share folder with encrypted file using auth ticket - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
