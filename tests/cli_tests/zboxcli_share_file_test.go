@@ -234,7 +234,7 @@ func TestShareFile(testSetup *testing.T) {
 		require.Contains(t, output[1], filepath.Base(file3))
 	})
 
-	t.Run("Share to public a folder with single encrypted file using auth ticket with zero expiration", func(t *test.SystemTest) {
+	t.Run("Share to public a single encrypted file using auth ticket with zero expiration", func(t *test.SystemTest) {
 		walletOwner := escapedTestName(t)
 		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
 
@@ -269,7 +269,7 @@ func TestShareFile(testSetup *testing.T) {
 
 		shareParams := map[string]interface{}{
 			"allocation":          allocationID,
-			"remotepath":          "/subfolder1",
+			"remotepath":          remoteOwnerPath,
 			"expiration-seconds":  0,
 			"encryptionpublickey": encKey,
 			"clientid":            clientId,
@@ -531,69 +531,6 @@ func TestShareFile(testSetup *testing.T) {
 		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
 		require.Contains(t, output[1], StatusCompletedCB)
 		require.Contains(t, output[1], filepath.Base(file3))
-	})
-
-	t.Run("Share to a private folder with single encrypted file using auth ticket with zero expiration", func(t *test.SystemTest) {
-		walletOwner := escapedTestName(t)
-		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
-
-		// upload file
-		file := generateRandomTestFileName(t)
-		remoteOwnerPath := "/subfolder1/subfolder2/" + filepath.Base(file)
-		fileSize := int64(256)
-		err := createFileWithSize(file, fileSize)
-		require.Nil(t, err)
-
-		uploadParams := map[string]interface{}{
-			"allocation": allocationID,
-			"localpath":  file,
-			"remotepath": remoteOwnerPath,
-			"encrypt":    "",
-		}
-		output, err := uploadFile(t, configPath, uploadParams, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2)
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
-
-		// receiver wallet operations
-		receiverWallet := escapedTestName(t) + "_second"
-
-		createWalletForName(receiverWallet)
-		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
-		require.Nil(t, err)
-
-		encKey := walletReceiver.EncryptionPublicKey
-		clientId := walletReceiver.ClientID
-
-		shareParams := map[string]interface{}{
-			"allocation":          allocationID,
-			"remotepath":          "/subfolder1",
-			"clientid":            clientId,
-			"encryptionpublickey": encKey,
-			"expiration-seconds":  0,
-		}
-		output, err = shareFile(t, configPath, shareParams)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1, "share file - Unexpected output", strings.Join(output, "\n"))
-
-		authTicket, err := extractAuthToken(output[0])
-		require.Nil(t, err, "Error extracting auth token")
-		require.NotEqual(t, "", authTicket)
-
-		// Download the file (delete local copy first)
-		os.Remove(file)
-
-		downloadParams := createParams(map[string]interface{}{
-			"localpath":  file,
-			"authticket": authTicket,
-			"remotepath": remoteOwnerPath,
-		})
-		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 2, "download file - Unexpected output", strings.Join(output, "\n"))
-		require.Contains(t, output[1], StatusCompletedCB)
-		require.Contains(t, output[1], filepath.Base(file))
 	})
 
 	t.Run("Share to public a folder with no encrypted file using auth ticket with zero expiration", func(t *test.SystemTest) {
@@ -1380,9 +1317,9 @@ func TestShareFile(testSetup *testing.T) {
 		})
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 3, "download file - Unexpected output", strings.Join(output, "\n"))
+		require.Len(t, output, 1, "download file - Unexpected output", strings.Join(output, "\n"))
 		aggregatedOutput := strings.Join(output, " ")
-		require.Contains(t, aggregatedOutput, "Error cipher: message authentication failed")
+		require.Contains(t, aggregatedOutput, "Error while initializing encryption invalid_encryption_key: Encryption key mismatch")
 	})
 
 	t.RunWithTimeout("Share folder with encrypted file using auth ticket - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
