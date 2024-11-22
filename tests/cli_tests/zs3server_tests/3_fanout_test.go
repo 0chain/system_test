@@ -18,9 +18,8 @@ func TestZs3serverFanoutTests(testSetup *testing.T) {
 		log.Printf("Error setting environment variable: %v", err)
 	}
 
+	config := cliutils.ReadFile(testSetup)
 	t := test.NewSystemTest(testSetup)
-	config := cliutils.SetupMinioConfig(testSetup)
-	defer cliutils.KillMinioProcesses()
 
 	commandGenerated := "../warp fanout --copies=50 --obj.size=512KiB --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + "  --concurrent " + config.Concurrent + " --duration 30s" + " --obj.size " + config.ObjectSize
 

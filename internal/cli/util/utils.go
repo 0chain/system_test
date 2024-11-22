@@ -3,7 +3,6 @@ package cliutils
 import (
 	"bufio"
 	"bytes"
-	"context"
 	"crypto/rand"
 	"fmt"
 	"io"
@@ -397,44 +396,6 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 	}
 }
 
-func RunMinioServer(accessKey, secretKey string, t *test.SystemTest) (string, error) {
-	rawOutput, err := RunCommandWithoutRetry("../zbox newallocation --lock 10 --configDir ../config2")
-	if err != nil {
-		return "", fmt.Errorf("error running zbox newallocation command: %v", rawOutput)
-	}
-	cmdString := "export MINIO_ROOT_USER=" + accessKey + " && export MINIO_ROOT_PASSWORD=" + secretKey + " && ../minio gateway zcn --configDir ../config2   " + " --console-address :8000"
-
-	cmdParts, err := SplitCmdString(cmdString)
-	if err != nil {
-		return "", fmt.Errorf("error splitting command string: %w", err)
-	}
-	ctx := context.Background()
-
-	runCmd := exec.CommandContext(ctx, cmdParts[0], cmdParts[1:]...) // #nosec G204: subprocess launched with tainted input
-
-	runCmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid: true,
-	}
-
-	var stdout, stderr bytes.Buffer
-	runCmd.Stdout = io.MultiWriter(os.Stdout, &stdout)
-	runCmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
-
-	log.Printf("Generated command: %s %s", runCmd.Path, runCmd.Args)
-
-	// Start the MinIO server command
-	err = runCmd.Start()
-	if err != nil {
-		t.Log("Error starting MinIO server: ", err)
-		return "", fmt.Errorf("error starting MinIO server: %w", err)
-	}
-	t.Logf("Stderr:\n%s", stderr.String())
-	t.Logf("Stdout:\n%s", stdout.String())
-
-	time.Sleep(15 * time.Second)
-	return stdout.String(), nil
-}
-
 func GetAllocationID(path string) string {
 	file, err := os.Open(path)
 	if err != nil {
@@ -522,17 +483,5 @@ func ReadFileMC(testSetup *testing.T) McConfiguration {
 	config.HostPort = strconv.FormatInt(int64(port), 10)
 	config.SecondaryPort = strconv.FormatInt(int64(s_port), 10)
 	config.Concurrent = strconv.FormatInt(int64(concurrent), 10)
-	return config
-}
-
-func SetupMinioConfig(testSetup *testing.T) Configuration {
-	t := test.NewSystemTest(testSetup)
-	_, err := RunMinioServer("rootroot", "rootroot", t)
-	if err != nil {
-		testSetup.Fatalf("%v", err)
-	}
-
-	config := ReadFile(testSetup)
-	testSetup.Logf("Minio server Started")
 	return config
 }

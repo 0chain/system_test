@@ -10,9 +10,8 @@ import (
 )
 
 func TestZs3serverListTests(testSetup *testing.T) {
+	config := cliutils.ReadFile(testSetup)
 	t := test.NewSystemTest(testSetup)
-	config := cliutils.SetupMinioConfig(testSetup)
-	defer cliutils.KillMinioProcesses()
 
 	t.RunSequentiallyWithTimeout("Warp List Benchmark", 40*time.Minute, func(t *test.SystemTest) {
 		commandGenerated := "../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --duration 30s" + " --obj.size " + config.ObjectSize + " --objects " + config.ObjectCount

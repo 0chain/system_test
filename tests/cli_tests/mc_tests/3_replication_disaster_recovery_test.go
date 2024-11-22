@@ -15,14 +15,6 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	config := cli_utils.ReadFileMC(testSetup)
 
-	if config.UseCommand {
-		runCmd, err := cli_utils.RunMinioServer(config.AccessKey, config.SecretKey, t)
-		if err != nil {
-			testSetup.Fatalf("%v", err)
-		}
-		testSetup.Logf(runCmd)
-	}
-
 	t.RunWithTimeout("Test for replication", 4000*time.Second, func(t *test.SystemTest) {
 		t.Log(config.Server, "server")
 		command_primary := "../mc alias set primary http://" + config.Server + ":" + config.HostPort + " " + config.AccessKey + " " + config.SecretKey + " --api S3v2"
