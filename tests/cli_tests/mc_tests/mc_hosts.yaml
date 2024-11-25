@@ -1,10 +1,10 @@
 server: 37.27.203.97
-port: 8000
+port: 9000
 # access_key: someminiouser
 # secret_key: someminiopassword
 concurrent: 900
 secondary_server: 37.27.203.97
-secondary_port: 8000
+secondary_port: 9000
 use_command: True
 # server: 65.109.152.43
 # port: 9001

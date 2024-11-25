@@ -2,7 +2,6 @@ package cliutils
 
 import (
 	"bufio"
-	"bytes"
 	"crypto/rand"
 	"fmt"
 	"io"
@@ -14,7 +13,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"syscall"
 	"testing"
 	"time"
 
@@ -407,48 +405,6 @@ func GetAllocationID(path string) string {
 	scanner.Scan()
 	allocationID := scanner.Text()
 	return allocationID
-}
-
-func KillMinioProcesses() {
-	allocationId := GetAllocationID("config/allocation.txt")
-	deleteCmd := fmt.Sprintf(
-		"../zbox delete --allocation "+
-			"%s --configDir ./config --remotepath /",
-		allocationId,
-	)
-	_, err := RunCommandWithoutRetry(deleteCmd)
-	if err != nil {
-		log.Printf("Error while deferring command: %v", err)
-	}
-
-	cmd := exec.Command("lsof", "-ti", ":8000")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-
-	if err := cmd.Run(); err != nil {
-		log.Fatalf("Failed to run lsof command: %v", err)
-	}
-
-	pids := strings.TrimSpace(out.String())
-	if pids == "" {
-		log.Println("MinIO server process not found")
-		return
-	}
-
-	pidList := strings.Split(pids, "\n")
-	for _, pidStr := range pidList {
-		pid, err := strconv.Atoi(strings.TrimSpace(pidStr))
-		if err != nil {
-			log.Printf("Failed to convert pid to int: %v", err)
-			continue
-		}
-		log.Printf("Killing MinIO process with PID: %d", pid)
-		if err := syscall.Kill(pid, syscall.SIGTERM); err != nil {
-			log.Printf("Failed to kill PID %d: %v", pid, err)
-		} else {
-			log.Printf("Successfully sent SIGTERM to PID %d", pid)
-		}
-	}
 }
 
 func ReadFileMC(testSetup *testing.T) McConfiguration {
