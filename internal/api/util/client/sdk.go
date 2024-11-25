@@ -3,11 +3,12 @@ package client
 import (
 	"bytes"
 	"crypto/rand"
-	"github.com/0chain/gosdk/core/client"
 	"io"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/0chain/gosdk/core/client"
 
 	"github.com/0chain/gosdk/constants"
 	"github.com/0chain/gosdk/core/conf"
@@ -102,7 +103,7 @@ func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet) {
 		c.blockWorker,
 		"",
 		crypto.BLS0Chain,
-		int64(wallet.Nonce), false, true,
+		int64(wallet.Nonce), false, true, false,
 	)
 	require.NoError(t, err, ErrInitStorageSDK)
 }

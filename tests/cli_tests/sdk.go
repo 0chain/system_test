@@ -4,10 +4,11 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"github.com/0chain/gosdk/core/client"
 	"io"
 	"math/big"
 	"os"
+
+	"github.com/0chain/gosdk/core/client"
 
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/fileref"
@@ -49,7 +50,7 @@ func InitSDK(wallet, configFile string) error {
 		parsed.ChainID,
 		parsed.SignatureScheme,
 		0,
-		false, true,
+		false, true, false,
 	)
 	return err
 }

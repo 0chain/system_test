@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	coreClient "github.com/0chain/gosdk/core/client"
 	"io"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	coreClient "github.com/0chain/gosdk/core/client"
 
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
@@ -336,7 +337,7 @@ func InitSDK(wallet, configFile string) error {
 		parsed.BlockWorker,
 		parsed.ChainID,
 		parsed.SignatureScheme,
-		0, false, true,
+		0, false, true, false,
 	)
 	return err
 }
