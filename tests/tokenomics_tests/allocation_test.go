@@ -311,7 +311,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 
 		// register a new wallet
 		nonAllocationOwnerWallet := "newwallet"
-		output, err = utils.createWalletForName(nonAllocationOwnerWallet)
+		output, err = utils.CreateWalletForName(t, configPath, nonAllocationOwnerWallet)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 		_, err = utils.ExecuteFaucetWithTokensForWallet(t, nonAllocationOwnerWallet, configPath, 9)
 		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))

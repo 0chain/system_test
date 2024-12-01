@@ -82,9 +82,9 @@ func (c *ZauthClient) UpdateRestrictions(t *test.SystemTest, clientID string, re
 	return resp, err
 }
 
-func (c *ZauthClient) SignTransaction(t *test.SystemTest, signTransactionRequest *transaction.Transaction, headers map[string]string) (*transaction.Transaction, *resty.Response, error) {
+func (c *ZauthClient) SignTransaction(t *test.SystemTest, signTransactionRequest *transaction.Transaction, headers map[string]string) (string, *resty.Response, error) {
 	t.Logf("signing transaction for peer public key [%v] and for jwt token [%v] using zauth...", headers["X-Peer-Public-Key"], headers["X-Jwt-Token"])
-	var signTransactionResponse *transaction.Transaction
+	var signTransactionResponse string
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zauthEntrypoint)
