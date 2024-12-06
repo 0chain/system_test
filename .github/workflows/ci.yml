@@ -113,6 +113,10 @@ jobs:
           echo "TENDERLY_VIRTUAL_TESTNET_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.id')" >> $GITHUB_ENV
           echo "TENDERLY_VIRTUAL_TESTNET_RPC_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.connectivityConfig.endpoints[0].id')" >> $GITHUB_ENV
 
+      - name: "Deploy Minio Server"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-minio@add_cli_mc_warp_minio
+
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-0chain@add_cli_mc_warp_minio
@@ -126,10 +130,6 @@ jobs:
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
           graphnode_ethereum_node_url: https://virtual.mainnet.rpc.tenderly.co/${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
-
-      - name: "Deploy Minio Server"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-minio@add_cli_mc_warp_minio
 
       - name: "Run System tests"
         uses: 0chain/actions/run-system-tests@add_cli_mc_warp_minio
