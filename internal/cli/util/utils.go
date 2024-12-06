@@ -1,17 +1,23 @@
 package cliutils
 
 import (
+	"bufio"
 	"crypto/rand"
 	"fmt"
+	"io"
+	"log"
 	"math/big"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
+	"testing"
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	"gopkg.in/yaml.v2"
 
 	"github.com/0chain/system_test/internal/cli/util/specific"
 
@@ -19,6 +25,27 @@ import (
 )
 
 var Logger = getLogger()
+
+type Configuration struct {
+	Server      string
+	HostPort    string
+	AccessKey   string
+	SecretKey   string
+	Concurrent  string
+	ObjectSize  string
+	ObjectCount string
+}
+
+type McConfiguration struct {
+	Server          string
+	HostPort        string
+	AccessKey       string
+	SecretKey       string
+	Concurrent      string
+	SecondaryPort   string
+	SecondaryServer string
+	UseCommand      bool
+}
 
 func RunCommandWithoutRetry(commandString string) ([]string, error) {
 	command := parseCommand(commandString)
@@ -259,4 +286,158 @@ func GetSubPaths(p string) (paths []string, err error) {
 	}
 
 	return
+}
+
+func ReadFile(testSetup *testing.T) Configuration {
+	var config Configuration
+
+	file, err := os.Open("hosts.yaml")
+	if err != nil {
+		testSetup.Fatalf("Error opening hosts.yaml file: %v\n", err)
+	}
+	defer file.Close()
+
+	decoder := yaml.NewDecoder(file)
+	var hosts map[string]interface{}
+	err = decoder.Decode(&hosts)
+	if err != nil {
+		testSetup.Fatalf("Error decoding hosts.yaml file: %v\n", err)
+	}
+
+	config.AccessKey = hosts["access_key"].(string)
+	config.SecretKey = hosts["secret_key"].(string)
+	port := hosts["port"].(int)
+	concurrent := hosts["concurrent"].(int)
+	config.ObjectSize = hosts["object_size"].(string)
+	objectCount := hosts["object_count"].(int)
+	config.Server = hosts["server"].(string)
+	config.HostPort = strconv.FormatInt(int64(port), 10)
+	config.ObjectCount = strconv.FormatInt(int64(objectCount), 10)
+	config.Concurrent = strconv.FormatInt(int64(concurrent), 10)
+	return config
+}
+
+func ReadFileAllocation() (data, parity, lock, accessKey, secretKey string) {
+	file, err := os.Open("allocation.yaml")
+	if err != nil {
+		log.Fatalf("Error opening allocation.yaml file: %v", err)
+	}
+	defer file.Close()
+
+	decoder := yaml.NewDecoder(file)
+	var allocationData map[string]interface{}
+
+	if err := decoder.Decode(&allocationData); err != nil {
+		log.Printf("Error decoding allocation.yaml file: %v", err)
+	}
+	data_int := allocationData["data"].(int)
+	parity_int := allocationData["parity"].(int)
+	lock_int := allocationData["lock"].(int)
+	accessKey = allocationData["access_key"].(string)
+	secretKey = allocationData["secret_key"].(string)
+
+	data = strconv.FormatInt(int64(data_int), 10)
+	parity = strconv.FormatInt(int64(parity_int), 10)
+	lock = strconv.FormatInt(int64(lock_int), 10)
+	return data, parity, lock, accessKey, secretKey
+}
+
+func AppendToFile(filename, data string) error {
+	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if _, err := file.WriteString(data); err != nil {
+		return err
+	}
+	return nil
+}
+
+func KillProcess() (int, error) {
+	// Create a command to get the PID of the process listening on the specified port
+	cmd := exec.Command("lsof", "-t", "-i", ":9000")
+	out, err := cmd.Output()
+	if err != nil {
+		return 0, fmt.Errorf("error running lsof -i command: %v", err)
+	}
+	pidStr := strings.TrimSpace(string(out))
+	if pidStr == "" {
+		return 0, fmt.Errorf("no process found for port %s", "9000")
+	}
+
+	pid, err := strconv.Atoi(pidStr)
+	if err != nil || pid <= 0 {
+		return 0, fmt.Errorf("error converting PID to integer: %v", err)
+	}
+
+	// Create a command to kill the process identified by PID
+	killCmd := exec.Command("kill", strconv.Itoa(pid)) // #nosec G204: subprocess launched with tainted input
+
+	if err := killCmd.Run(); err != nil {
+		return 0, fmt.Errorf("failed to kill process with PID %d: %w ", pid, err)
+	}
+
+	return pid, nil
+}
+
+func SplitCmdString(cmdString string) ([]string, error) {
+	return []string{"sh", "-c", cmdString}, nil
+}
+
+func LogOutput(stdout io.Reader, t *test.SystemTest) {
+	scanner := bufio.NewScanner(stdout)
+	for scanner.Scan() {
+		t.Logf("[MinIO stdout] %s", scanner.Text())
+	}
+}
+
+func GetAllocationID(path string) string {
+	file, err := os.Open(path)
+	if err != nil {
+		log.Printf("Error opening allocation.txt file: %v", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	allocationID := scanner.Text()
+	return allocationID
+}
+
+func ReadFileMC(testSetup *testing.T) McConfiguration {
+	var config McConfiguration
+
+	file, err := os.Open("mc_hosts.yaml")
+	if err != nil {
+		testSetup.Fatalf("Error opening hosts.yaml file: %v\n", err)
+	}
+	defer file.Close()
+
+	decoder := yaml.NewDecoder(file)
+	var hosts map[string]interface{}
+	err = decoder.Decode(&hosts)
+	if err != nil {
+		testSetup.Fatalf("Error decoding mc_hosts.yaml file: %v\n", err)
+	}
+
+	config.AccessKey = hosts["access_key"].(string)
+	config.SecretKey = hosts["secret_key"].(string)
+	port := hosts["port"].(int)
+	concurrent := hosts["concurrent"].(int)
+	config.Server = hosts["server"].(string)
+	config.SecondaryServer = hosts["secondary_server"].(string)
+	s_port := hosts["secondary_port"].(int)
+	use_command, ok := hosts["use_command"].(bool)
+
+	if !ok {
+		use_command = false
+	}
+	config.UseCommand = use_command
+	config.HostPort = strconv.FormatInt(int64(port), 10)
+	config.SecondaryPort = strconv.FormatInt(int64(s_port), 10)
+	config.Concurrent = strconv.FormatInt(int64(concurrent), 10)
+	return config
 }

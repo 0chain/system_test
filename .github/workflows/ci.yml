@@ -5,32 +5,32 @@ concurrency:
   cancel-in-progress: true
 on:
   push:
-    branches: [ master, staging, sprint* ]
+    branches: [master, staging, sprint*]
   pull_request:
   workflow_dispatch:
     inputs:
       repo_snapshots_branch:
-        description: 'branch of repo-snapshots to derive images and branches from.'
-        default: 'current-sprint'
+        description: "branch of repo-snapshots to derive images and branches from."
+        default: "current-sprint"
         required: true
       existing_network:
-        description: '(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]'
-        default: ''
+        description: "(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]"
+        default: ""
         required: false
       test_file_filter:
-        description: 'Comma separated list of test files to run (eg. zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result'
-        default: ''
+        description: "Comma separated list of test files to run (eg. zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result"
+        default: ""
         required: false
       run_smoke_tests:
-        description: 'Only run smoke tests (subset of system tests for fast feedback)'
-        default: 'false'
+        description: "Only run smoke tests (subset of system tests for fast feedback)"
+        default: "false"
         required: false
 
 jobs:
   golangci:
     # if: github.event_name == 'push'
     name: "lint"
-    runs-on: [ arc-runner ]
+    runs-on: [arc-runner]
     steps:
       - name: Install Packages
         run: |
@@ -38,7 +38,7 @@ jobs:
           sudo apt-get -y install build-essential nghttp2 libnghttp2-dev libssl-dev
       - uses: actions/setup-go@v3
         with:
-          go-version: '1.22'
+          go-version: "1.22"
       - uses: actions/checkout@v3
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
@@ -50,7 +50,7 @@ jobs:
 
   system-tests:
     name: "System Tests"
-    runs-on: [ tests-suite ]
+    runs-on: [tests-suite]
     timeout-minutes: 360
     steps:
       - name: "Get current PR"
@@ -60,7 +60,7 @@ jobs:
           github-token: ${{ github.token }}
 
       - name: "Set PR status as pending"
-        uses: 0chain/actions/set-pr-status@master
+        uses: 0chain/actions/set-pr-status@add_cli_mc_warp_minio
         if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
@@ -94,11 +94,11 @@ jobs:
               echo RUN_SMOKE_TESTS=false >> $GITHUB_ENV
           fi
 
-      - name: 'Setup jq'
+      - name: "Setup jq"
         uses: dcarbone/install-jq-action@v2.1.0
         with:
-          version: '1.7'
-          force: 'false'
+          version: "1.7"
+          force: "false"
 
       - name: "Create Tenderly virtual testnet"
         run: |
@@ -113,9 +113,13 @@ jobs:
           echo "TENDERLY_VIRTUAL_TESTNET_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.id')" >> $GITHUB_ENV
           echo "TENDERLY_VIRTUAL_TESTNET_RPC_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.connectivityConfig.endpoints[0].id')" >> $GITHUB_ENV
 
+      - name: "Deploy Minio Server"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-minio@add_cli_mc_warp_minio
+
       - name: "Deploy 0Chain"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain@master
+        uses: 0chain/actions/deploy-0chain@add_cli_mc_warp_minio
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
@@ -128,7 +132,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@master
+        uses: 0chain/actions/run-system-tests@add_cli_mc_warp_minio
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
@@ -158,7 +162,7 @@ jobs:
 
       - name: "Set PR status as ${{ job.status }}"
         if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
-        uses: 0chain/actions/set-pr-status@master
+        uses: 0chain/actions/set-pr-status@add_cli_mc_warp_minio
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
           description: "System tests with default config ${{ job.status }}"
@@ -171,7 +175,7 @@ jobs:
   set-build-conclusion:
     name: "Set build conclusion"
     if: ${{ always() && github.ref == 'refs/heads/master' &&  github.event_name != 'workflow_dispatch' }}
-    needs: [ golangci, system-tests ]
+    needs: [golangci, system-tests]
     runs-on: self-hosted
     steps:
       - uses: technote-space/workflow-conclusion-action@v3
@@ -184,7 +188,7 @@ jobs:
         uses: Sibz/github-status-action@v1
         with:
           authToken: ${{secrets.SVC_ACCOUNT_SECRET}}
-          context: '0Chain System Tests CI'
+          context: "0Chain System Tests CI"
           description: "Build status: ${{ env.WORKFLOW_CONCLUSION }}"
           state: ${{ env.WORKFLOW_CONCLUSION }}
           sha: ${{github.event.pull_request.head.sha || github.sha}}

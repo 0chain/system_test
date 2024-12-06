@@ -1160,7 +1160,7 @@ func TestDownload(testSetup *testing.T) {
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   64 * KB * 2,
+			"size": 64 * KB * 2,
 			"lock": 9,
 		})
 
@@ -1187,7 +1187,7 @@ func TestDownload(testSetup *testing.T) {
 
 	t.Run("Download from Allocation without other Parameter Should Fail", func(t *test.SystemTest) {
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   64 * KB * 2,
+			"size": 64 * KB * 2,
 			"lock": 9,
 		})
 
