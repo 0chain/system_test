@@ -32,7 +32,7 @@ jobs:
            -H "Content-Type: application/json" \
            -d '{"slug":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","displayName":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","description":"","visibility":"TEAM","tags":{"purpose":"development"},"networkConfig":{"networkId":"1","blockNumber":"18512782","chainConfig":{"chainId":"1"},"baseFeePerGas":"1"},"explorerConfig":{"enabled":false,"verificationVisibility":"bytecode"},"syncState":false}' \
            https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container)" >> $GITHUB_ENV
-          
+
       - name: "Parse Tenderly virtual testnet creation transaction result"
         run: |
           echo "TENDERLY_VIRTUAL_TESTNET_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.id')" >> $GITHUB_ENV
@@ -52,7 +52,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run System tests"
-        uses: 0chain/actions/run-system-tests@master
+        uses: 0chain/actions/run-system-tests@feat/extract-tenderly-tests-to-run-them-once-on-nightly-runs
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
@@ -62,6 +62,7 @@ jobs:
           run_flaky_tests: true
           run_api_system_tests: true
           run_cli_system_tests: true
+          run_tenderly_tests: true
           run_tokenomics_system_tests: false
           run_smoke_tests: false
           test_file_filter: ${{ env.TEST_FILE_FILTER }}

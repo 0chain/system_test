@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAuthorizerRewards(testSetup *testing.T) {
+func Test0TenderlyAuthorizerRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentiallyWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {

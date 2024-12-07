@@ -18,7 +18,7 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestBridgeBurn(testSetup *testing.T) {
+func Test0TenderlyBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentiallyWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {

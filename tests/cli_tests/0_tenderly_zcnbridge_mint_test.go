@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBridgeMint(testSetup *testing.T) {
+func Test0TenderlyBridgeMint(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentiallyWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {

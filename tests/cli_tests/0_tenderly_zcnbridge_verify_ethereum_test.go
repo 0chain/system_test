@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBridgeVerify(testSetup *testing.T) {
+func Test0TenderlyBridgeVerify(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.Skip("Skip till fixed : https://github.com/0chain/system_test/issues/1042")
 	t.SetSmokeTests("Verify ethereum transaction")
