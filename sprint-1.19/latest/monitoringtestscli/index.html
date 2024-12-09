@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain System test suite: Monitoring tests [sprint-1.19/ab461bae] ran against [dev-2.devnet-0chain.net] at [2024-12-08_23.07.00]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain System test suite: Monitoring tests [sprint-1.19/ab461bae] ran against [dev-2.devnet-0chain.net] at [2024-12-08_23.07.00]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>4</strong>Duration: <strong>1ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>4</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">December 9, 2024 00:31:19</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMonitoringCompareMPTAndEventsDBData","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.21,"Output":["","2024/12/09 00:31:18 Creating wallet for TestMonitoringCompareMPTAndEventsDBData with walletIdx 501\n","File ./config/TestMonitoringCompareMPTAndEventsDBData_wallet.json written successfully.\n","    zzzzwalletcli_compare_stats_test.go:27: Default Config File  ./zbox_config.yaml\n","2024/12/09 00:31:18 https://dev-2.devnet-0chain.net/miner02 is UP!\n","2024/12/09 00:31:18 https://dev-2.devnet-0chain.net/miner01 is UP!\n","2024/12/09 00:31:18 https://dev-2.devnet-0chain.net/miner03 is UP!\n","2024/12/09 00:31:18 https://dev-2.devnet-0chain.net/sharder02 is UP!\n","2024/12/09 00:31:18 https://dev-2.devnet-0chain.net/sharder01 is UP!\n","2024/12/09 00:31:18 https://dev-2.devnet-0chain.net/blobber03 is UP!\n","2024/12/09 00:31:18 https://dev-2.devnet-0chain.net/blobber05 is UP!\n","2024/12/09 00:31:18 https://dev-2.devnet-0chain.net/blobber02 is UP!\n","2024/12/09 00:31:18 https://dev-2.devnet-0chain.net/blobber01 is UP!\n","    zzzzwalletcli_compare_stats_test.go:57: Fetched blobber URL: https://dev-2.devnet-0chain.net/blobber03\n","    zzzzwalletcli_compare_stats_test.go:57: Fetched blobber URL: https://dev-2.devnet-0chain.net/blobber05\n","    zzzzwalletcli_compare_stats_test.go:57: Fetched blobber URL: https://dev-2.devnet-0chain.net/blobber02\n","    zzzzwalletcli_compare_stats_test.go:57: Fetched blobber URL: https://dev-2.devnet-0chain.net/blobber01\n","    zzzzwalletcli_compare_stats_test.go:159: Fetched blobber URL: https://dev-2.devnet-0chain.net/sharder02\n","    zzzzwalletcli_compare_stats_test.go:159: Fetched blobber URL: https://dev-2.devnet-0chain.net/sharder01\n","    zzzzwalletcli_compare_stats_test.go:224: Fetched miner URL: https://dev-2.devnet-0chain.net/miner02\n","    zzzzwalletcli_compare_stats_test.go:224: Fetched miner URL: https://dev-2.devnet-0chain.net/miner01\n","    zzzzwalletcli_compare_stats_test.go:224: Fetched miner URL: https://dev-2.devnet-0chain.net/miner03\n","--- PASS: TestMonitoringCompareMPTAndEventsDBData (0.21s)",""],"Passed":true,"Skipped":false,"TestFileName":"zzzzwalletcli_compare_stats_test.go","TestFunctionDetail":{"Line":24,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMonitoringCompareMPTAndEventsDBData/Compare_data_in_MPT_with_events_DB_for_Miners","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.01,"Output":["","    zzzzwalletcli_compare_stats_test.go:228: Test case [Compare data in MPT with events DB for Miners] scheduled at [12-09-2024 00:31:18] \n","    system_test_framework.go:149: Test case [Compare data in MPT with events DB for Miners] start at [12-09-2024 00:31:18] \n","    zzzzwalletcli_compare_stats_test.go:244: map[SimpleNode:map[BuildTag:7c1d98db54a19d2736404919eb461d6e7ce492dd Delete:false Host:dev-2.devnet-0chain.net LastHealthCheck:1733698657 LastSettingUpdateRound:0 N2NHost:dev-2.devnet-0chain.net NodeType:1 Path:miner01 Port:31201 Provider:map[HasBeenKilled:false HasBeenShutDown:false ID:73ad5727612116c025bb4405bf3adb4a4a04867ae508c51cf885395bffc8a949 LastHealthCheck:0 ProviderType:1] PublicKey:257acfae61512fb1f4a886b0dbe949dc94497132448d1674f37f912c00e3ba1c6d4555ac58b44d4f8fe7228fb55c1f888ae3aa7901068eefd022613f05999415 ShortName:localhost.m01 TotalStaked:40000000000] StakePool:map[HasBeenKilled:false Minter:0 Pools:map[010b908608d5c506cc3451c13b2f51c9b243927cb2fe026bbb4c6f4b92837eff:map[Balance:40000000000 DelegateID:010b908608d5c506cc3451c13b2f51c9b243927cb2fe026bbb4c6f4b92837eff Reward:1103738400000 RoundCreated:22082 StakedAt:1733703274 Status:0]] Reward:2340278539900 Settings:map[DelegateWallet:9636ab821fd93a37740ab4c6a27d9e2cf3a4072b4bc8fd1c6048f9c3ef9cf2a8 M","axNumDelegates:20 MinStake:0 ServiceChargeRatio:0.1]]]\n","    zzzzwalletcli_compare_stats_test.go:247: Retrieved simple node from MPT\n","    zzzzwalletcli_compare_stats_test.go:244: map[SimpleNode:map[BuildTag:7c1d98db54a19d2736404919eb461d6e7ce492dd Delete:false Host:dev-2.devnet-0chain.net LastHealthCheck:1733704060 LastSettingUpdateRound:0 N2NHost:dev-2.devnet-0chain.net NodeType:1 Path:miner03 Port:31203 Provider:map[HasBeenKilled:false HasBeenShutDown:false ID:c6f4b8ce5da386b278ba8c4e6cf98b24b32d15bc675b4d12c95e082079c91937 LastHealthCheck:0 ProviderType:1] PublicKey:b5b91306a507aa0605be7a42cfc8a3a80e7747a95a9c5fe152836f6ae61666150a2d3f72fbf5368bd088740ae579eece77b798d79c00edc4ad63cdf3095b3424 ShortName:localhost.m03 TotalStaked:10000000000] StakePool:map[HasBeenKilled:false Minter:0 Pools:map[ed471641eb141834452b0bca489ae505e1ac6fcdb02f5a87718ec8119d4ddcee:map[Balance:10000000000 DelegateID:ed471641eb141834452b0bca489ae505e1ac6fcdb02f5a87718ec8119d4ddcee Reward:1177012800000 RoundCreated:22016 StakedAt:1733703198 Status:0]] Reward:2414431037300 Settings:map[DelegateWallet:bbe8b6abdb54b0642324a103c49f8b04e2623db74cd7f1427cd2d5f0308e674d M","axNumDelegates:20 MinStake:0 ServiceChargeRatio:0.1]]]\n","    zzzzwalletcli_compare_stats_test.go:247: Retrieved simple node from MPT\n","    zzzzwalletcli_compare_stats_test.go:228: Test case [Compare data in MPT with events DB for Miners] exit at [12-09-2024 00:31:18]\n","--- PASS: TestMonitoringCompareMPTAndEventsDBData/Compare_data_in_MPT_with_events_DB_for_Miners (0.01s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMonitoringCompareMPTAndEventsDBData/Compare_data_in_MPT_with_events_DB_for_Sharders","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0,"Output":["","    zzzzwalletcli_compare_stats_test.go:162: Test case [Compare data in MPT with events DB for Sharders] scheduled at [12-09-2024 00:31:18] \n","    system_test_framework.go:149: Test case [Compare data in MPT with events DB for Sharders] start at [12-09-2024 00:31:18] \n","    zzzzwalletcli_compare_stats_test.go:172: \u0026{{ea26431f8adb7061766f1d6bbcc3b292d70dd59960d857f04b8a75e6a5bbe04f dev-2.devnet-0chain.net dev-2.devnet-0chain.net 31101 {0 0} sharder01 824fb17dd958235a06f4c670b6254a9223ae18dcd2962d088c7054819e9d0f164ac1aa2ad4223a8a42529b7ce9ccb32017771aabdf7aaca2031590fc33882601 localhost.s01 7c1d98db54a19d2736404919eb461d6e7ce492dd 0 false sharder 1733704016 0 0 0} {map[] 0 {b888ae3400b67a47362aad7d6263fcfeb6585fe696e8d182d3bb4f4a9d737bae 0 0 20 0.1} 0} 0}\n","    zzzzwalletcli_compare_stats_test.go:179: map[SimpleNode:map[BuildTag:7c1d98db54a19d2736404919eb461d6e7ce492dd Delete:false Host:dev-2.devnet-0chain.net LastHealthCheck:1733704016 LastSettingUpdateRound:0 N2NHost:dev-2.devnet-0chain.net NodeType:2 Path:sharder01 Port:31101 Provider:map[HasBeenKilled:false HasBeenShutDown:false ID:ea26431f8adb7061766f1d6bbcc3b292d70dd59960d857f04b8a75e6a5bbe04f LastHealthCheck:0 ProviderType:2] PublicKey:824fb17dd958235a06f4c670b6254a9223ae18dcd2962d088c7054819e9d0f164ac1aa2ad4223a8a42529b7ce9ccb32017771aabdf7aaca2031590fc33882601 ShortName:localhost.s01 TotalStaked:0] StakePool:map[HasBeenKilled:false Minter:0 Pools:map[] Reward:27766471357650 Settings:map[DelegateWallet:b888ae3400b67a47362aad7d6263fcfeb6585fe696e8d182d3bb4f4a9d737bae MaxNumDelegates:20 MinStake:0 ServiceChargeRatio:0.1]]]\n","    zzzzwalletcli_compare_stats_test.go:182: Retrieved simple node from MPT\n","    zzzzwalletcli_compare_stats_test.go:162: Test case [Compare data in MPT with events DB for Sharders] exit at [12-09-2024 00:31:18]\n","--- PASS: TestMonitoringCompareMPTAndEventsDBData/Compare_data_in_MPT_with_events_DB_for_Sharders (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestMonitoringCompareMPTAndEventsDBData/Compare_data_in_MPT_with_events_DB_for_blobbers","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.01,"Output":["","    zzzzwalletcli_compare_stats_test.go:61: Test case [Compare data in MPT with events DB for blobbers] scheduled at [12-09-2024 00:31:18] \n","    system_test_framework.go:149: Test case [Compare data in MPT with events DB for blobbers] start at [12-09-2024 00:31:18] \n","    zzzzwalletcli_compare_stats_test.go:70: Blobber ID: 48592ae54bcd3f6e4f36f6e94b95247afb1addcf4704a87967f6e5f25bcb625e, URL: https://dev-2.devnet-0chain.net/blobber03\n","    zzzzwalletcli_compare_stats_test.go:71: *** Blobber Response Body from Events DB ***\n","    zzzzwalletcli_compare_stats_test.go:72: \u0026{48592ae54bcd3f6e4f36f6e94b95247afb1addcf4704a87967f6e5f25bcb625e https://dev-2.devnet-0chain.net/blobber03 {0 1000000000} 211152551936 54506125237 1733704233  {591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8 0 0 50 0.1} 160000000000 3086614528 0 1543 1547}\n","    zzzzwalletcli_compare_stats_test.go:73: ***\n","    zzzzwalletcli_compare_stats_test.go:76: https://dev-2.devnet-0chain.net/sharder02/v1/scstate/get?key=provider:48592ae54bcd3f6e4f36f6e94b95247afb1addcf4704a87967f6e5f25bcb625e\n","    zzzzwalletcli_compare_stats_test.go:87: *** Blobber Response Body from MPT datastructure ***\n","    zzzzwalletcli_compare_stats_test.go:88: map[Allocated:54506125237 BaseURL:https://dev-2.devnet-0chain.net/blobber03 Capacity:211152551936 DataReadLastRewardRound:0 IsEnterprise:false IsRestricted:false LastRewardDataReadRound:0 ManagingWallet:\u003cnil\u003e NotAvailable:false Provider:map[HasBeenKilled:false HasBeenShutDown:false ID:48592ae54bcd3f6e4f36f6e94b95247afb1addcf4704a87967f6e5f25bcb625e LastHealthCheck:1733704233 ProviderType:3] PublicKey:f8c0b793ab8ebf1bc53f3387370e6c1690c3b116ee6f96a0c50359e55888971075863b208ae461a6fe06f859a32211e1b901bc1bb2fc281bd5bbd28f0949cf0f RewardRound:map[StartRound:27210 Timestamp:1733704275] SavedData:3086614528 StakePoolSettings:map[DelegateWallet:591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8 MaxNumDelegates:50 MinStake:0 ServiceChargeRatio:0.1] StorageVersion:1 Terms:map[ReadPrice:0 WritePrice:1000000000] version:v4]\n","    zzzzwalletcli_compare_stats_test.go:89: ***\n","    zzzzwalletcli_compare_stats_test.go:93: Retrieved provider node from MPT\n","    zzzzwalletcli_compare_stats_test.go:97: Retrieved terms node from MPT\n","    zzzzwalletcli_compare_stats_test.go:101: Retrieved stakePoolSettings node from MPT\n","    zzzzwalletcli_compare_stats_test.go:70: Blobber ID: 45d0de870ee7cd36f83fd633c9989b9e640f0b386c639aa6c178923f3e968fc1, URL: https://dev-2.devnet-0chain.net/blobber05\n","    zzzzwalletcli_compare_stats_test.go:71: *** Blobber Response Body from Events DB ***\n","    zzzzwalletcli_compare_stats_test.go:72: \u0026{45d0de870ee7cd36f83fd633c9989b9e640f0b386c639aa6c178923f3e968fc1 https://dev-2.devnet-0chain.net/blobber05 {0 1000000000} 211284738048 20106051893 1733704244  {591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8 0 0 50 0.1} 170000000000 3060662272 0 1277 1287}\n","    zzzzwalletcli_compare_stats_test.go:73: ***\n","    zzzzwalletcli_compare_stats_test.go:76: https://dev-2.devnet-0chain.net/sharder02/v1/scstate/get?key=provider:45d0de870ee7cd36f83fd633c9989b9e640f0b386c639aa6c178923f3e968fc1\n","    zzzzwalletcli_compare_stats_test.go:87: *** Blobber Response Body from MPT datastructure ***\n","    zzzzwalletcli_compare_stats_test.go:88: map[Allocated:20106051893 BaseURL:https://dev-2.devnet-0chain.net/blobber05 Capacity:211284738048 DataReadLastRewardRound:0 IsEnterprise:false IsRestricted:false LastRewardDataReadRound:0 ManagingWallet:\u003cnil\u003e NotAvailable:false Provider:map[HasBeenKilled:false HasBeenShutDown:false ID:45d0de870ee7cd36f83fd633c9989b9e640f0b386c639aa6c178923f3e968fc1 LastHealthCheck:1733704244 ProviderType:3] PublicKey:49635f60432c6107c28d8030aedecc43d5db6379027206d3618e698200b3b1133240e05a83b062765fe62e1cfc03f14dd76cb7034d94c66e8cdbfe6a37da9ba0 RewardRound:map[StartRound:27150 Timestamp:1733704268] SavedData:3060662272 StakePoolSettings:map[DelegateWallet:591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8 MaxNumDelegates:50 MinStake:0 ServiceChargeRatio:0.1] StorageVersion:1 Terms:map[ReadPrice:0 WritePrice:1000000000] version:v4]\n","    zzzzwalletcli_compare_stats_test.go:89: ***\n","    zzzzwalletcli_compare_stats_test.go:93: Retrieved provider node from MPT\n","    zzzzwalletcli_compare_stats_test.go:97: Retrieved terms node from MPT\n","    zzzzwalletcli_compare_stats_test.go:101: Retrieved stakePoolSettings node from MPT\n","    zzzzwalletcli_compare_stats_test.go:70: Blobber ID: 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671, URL: https://dev-2.devnet-0chain.net/blobber02\n","    zzzzwalletcli_compare_stats_test.go:71: *** Blobber Response Body from Events DB ***\n","    zzzzwalletcli_compare_stats_test.go:72: \u0026{5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 https://dev-2.devnet-0chain.net/blobber02 {0 1000000000} 211298111488 17958109493 1733704240  {591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8 0 0 50 0.1} 170000000000 3060531200 0 1318 1320}\n","    zzzzwalletcli_compare_stats_test.go:73: ***\n","    zzzzwalletcli_compare_stats_test.go:76: https://dev-2.devnet-0chain.net/sharder02/v1/scstate/get?key=provider:5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671\n","    zzzzwalletcli_compare_stats_test.go:87: *** Blobber Response Body from MPT datastructure ***\n","    zzzzwalletcli_compare_stats_test.go:88: map[Allocated:17958109493 BaseURL:https://dev-2.devnet-0chain.net/blobber02 Capacity:211298111488 DataReadLastRewardRound:0 IsEnterprise:false IsRestricted:false LastRewardDataReadRound:0 ManagingWallet:\u003cnil\u003e NotAvailable:false Provider:map[HasBeenKilled:false HasBeenShutDown:false ID:5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 LastHealthCheck:1733704240 ProviderType:3] PublicKey:b03d5f158364c040f49d9feeaedfcb014fc64bb106135abba8099b8e7ff65e1beafdffd649eadaf23b0daa739e319894ee85504c339336acbb1d06b87246b084 RewardRound:map[StartRound:27180 Timestamp:1733704272] SavedData:3060531200 StakePoolSettings:map[DelegateWallet:591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8 MaxNumDelegates:50 MinStake:0 ServiceChargeRatio:0.1] StorageVersion:1 Terms:map[ReadPrice:0 WritePrice:1000000000] version:v4]\n","    zzzzwalletcli_compare_stats_test.go:89: ***\n","    zzzzwalletcli_compare_stats_test.go:93: Retrieved provider node from MPT\n","    zzzzwalletcli_compare_stats_test.go:97: Retrieved terms node from MPT\n","    zzzzwalletcli_compare_stats_test.go:101: Retrieved stakePoolSettings node from MPT\n","    zzzzwalletcli_compare_stats_test.go:70: Blobber ID: 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d, URL: https://dev-2.devnet-0chain.net/blobber01\n","    zzzzwalletcli_compare_stats_test.go:71: *** Blobber Response Body from Events DB ***\n","    zzzzwalletcli_compare_stats_test.go:72: \u0026{76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d https://dev-2.devnet-0chain.net/blobber01 {0 1000000000} 211347898368 13371845 1733704221  {591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8 0 0 50 0.1} 170000000000 262144 0 117 118}\n","    zzzzwalletcli_compare_stats_test.go:73: ***\n","    zzzzwalletcli_compare_stats_test.go:76: https://dev-2.devnet-0chain.net/sharder02/v1/scstate/get?key=provider:76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d\n","    zzzzwalletcli_compare_stats_test.go:87: *** Blobber Response Body from MPT datastructure ***\n","    zzzzwalletcli_compare_stats_test.go:88: map[Allocated:13371845 BaseURL:https://dev-2.devnet-0chain.net/blobber01 Capacity:211347898368 DataReadLastRewardRound:0 IsEnterprise:false IsRestricted:false LastRewardDataReadRound:0 ManagingWallet:\u003cnil\u003e NotAvailable:false Provider:map[HasBeenKilled:false HasBeenShutDown:false ID:76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d LastHealthCheck:1733704221 ProviderType:3] PublicKey:e49de9a0c6377a9f6f5a9a925592e52aaad375f087bab97b7df890ab1a7eaf0c6c19d730f4f09be5d19857630f962c5b829ee0e9db35e5435f6560da6dfc6793 RewardRound:map[StartRound:27120 Timestamp:1733704260] SavedData:262144 StakePoolSettings:map[DelegateWallet:591d6d0d5642bdbc924756ca2647b4b59adce0acd02a487ecc4d1bd4669293a8 MaxNumDelegates:50 MinStake:0 ServiceChargeRatio:0.1] StorageVersion:1 Terms:map[ReadPrice:0 WritePrice:1000000000] version:v4]\n","    zzzzwalletcli_compare_stats_test.go:89: ***\n","    zzzzwalletcli_compare_stats_test.go:93: Retrieved provider node from MPT\n","    zzzzwalletcli_compare_stats_test.go:97: Retrieved terms node from MPT\n","    zzzzwalletcli_compare_stats_test.go:101: Retrieved stakePoolSettings node from MPT\n","    zzzzwalletcli_compare_stats_test.go:61: Test case [Compare data in MPT with events DB for blobbers] exit at [12-09-2024 00:31:18]\n","--- PASS: TestMonitoringCompareMPTAndEventsDBData/Compare_data_in_MPT_with_events_DB_for_blobbers (0.01s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
