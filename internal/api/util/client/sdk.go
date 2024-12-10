@@ -3,7 +3,9 @@ package client
 import (
 	"bytes"
 	"crypto/rand"
+	"fmt"
 	"github.com/0chain/gosdk/core/client"
+	"github.com/0chain/gosdk/zcncore"
 	"io"
 	"os"
 	"path/filepath"
@@ -98,13 +100,19 @@ func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet) {
 	require.NoError(t, err, "failed to serialize wallet object", wallet)
 
 	err = client.InitSDK(
-		serializedWallet,
+		"{}",
 		c.blockWorker,
 		"",
 		crypto.BLS0Chain,
-		int64(wallet.Nonce), false, true,
+		int64(wallet.Nonce), true,
 	)
 	require.NoError(t, err, ErrInitStorageSDK)
+
+	err = zcncore.SetGeneralWalletInfo(serializedWallet, crypto.BLS0Chain)
+	if err != nil {
+		fmt.Println("Error in sdk init", err)
+		os.Exit(1)
+	}
 }
 
 func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string, options ...int64) (tmpFilePath string, actualSizeUploaded int64) {
