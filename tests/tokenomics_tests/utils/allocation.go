@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	coreClient "github.com/0chain/gosdk/core/client"
+	"github.com/0chain/gosdk/zcncore"
 	"io"
 	"os"
 	"regexp"
@@ -332,11 +333,22 @@ func InitSDK(wallet, configFile string) error {
 	}
 
 	err = coreClient.InitSDK(
-		walletJSON,
+		"{}",
 		parsed.BlockWorker,
 		parsed.ChainID,
 		parsed.SignatureScheme,
-		0, false, true,
+		0, true,
 	)
+
+	err = zcncore.SetGeneralWalletInfo(walletJSON, parsed.SignatureScheme)
+	if err != nil {
+		fmt.Println("Error in sdk init", err)
+		os.Exit(1)
+	}
+
+	if coreClient.GetClient().IsSplit {
+		zcncore.RegisterZauthServer(parsed.ZauthServer)
+	}
+
 	return err
 }
