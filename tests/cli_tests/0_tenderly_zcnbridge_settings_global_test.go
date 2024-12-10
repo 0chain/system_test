@@ -30,7 +30,7 @@ type BridgeConfig struct {
 	} `json:"fields"`
 }
 
-func TestZCNBridgeGlobalSettings(testSetup *testing.T) {
+func Test0TenderlyZCNBridgeGlobalSettings(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("should allow update of min_mint_amount")
 

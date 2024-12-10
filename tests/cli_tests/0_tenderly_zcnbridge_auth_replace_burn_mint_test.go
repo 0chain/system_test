@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
+func Test0TenderlyReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	err := tenderlyClient.InitBalance(ethereumAddress)

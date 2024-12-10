@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestValidatorConfigUpdate(testSetup *testing.T) {
+func Test0TenderlyValidatorConfigUpdate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("update validator number of delegates should work")
 

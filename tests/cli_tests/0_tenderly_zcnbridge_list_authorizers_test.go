@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestListAuthorizers(testSetup *testing.T) {
+func Test0TenderlyListAuthorizers(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("List authorizers should work")
 

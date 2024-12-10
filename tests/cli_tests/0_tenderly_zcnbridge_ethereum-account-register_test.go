@@ -27,7 +27,7 @@ const (
 	password = "password"
 )
 
-func TestEthRegisterAccount(testSetup *testing.T) {
+func Test0TenderlyEthRegisterAccount(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Register ethereum account in local key storage")
 
