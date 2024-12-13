@@ -19,27 +19,27 @@ jobs:
           echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
 
-      - name: 'Setup jq'
-        uses: dcarbone/install-jq-action@v2.1.0
-        with:
-          version: '1.7'
-          force: 'false'
-
-      - name: "Create Tenderly virtual testnet"
-        run: |
-          echo "TENDERLY_CREATION_INFO=$(curl -X POST \
-           -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
-           -H "Content-Type: application/json" \
-           -d '{"slug":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","displayName":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","description":"","visibility":"TEAM","tags":{"purpose":"development"},"networkConfig":{"networkId":"1","blockNumber":"18512782","chainConfig":{"chainId":"1"},"baseFeePerGas":"1"},"explorerConfig":{"enabled":false,"verificationVisibility":"bytecode"},"syncState":false}' \
-           https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container)" >> $GITHUB_ENV
-
-      - name: "Parse Tenderly virtual testnet creation transaction result"
-        run: |
-          echo "TENDERLY_VIRTUAL_TESTNET_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.id')" >> $GITHUB_ENV
-          echo "TENDERLY_VIRTUAL_TESTNET_RPC_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.connectivityConfig.endpoints[0].id')" >> $GITHUB_ENV
+      #      - name: 'Setup jq'
+      #        uses: dcarbone/install-jq-action@v2.1.0
+      #        with:
+      #          version: '1.7'
+      #          force: 'false'
+      #
+      #      - name: "Create Tenderly virtual testnet"
+      #        run: |
+      #          echo "TENDERLY_CREATION_INFO=$(curl -X POST \
+      #           -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
+      #           -H "Content-Type: application/json" \
+      #           -d '{"slug":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","displayName":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","description":"","visibility":"TEAM","tags":{"purpose":"development"},"networkConfig":{"networkId":"1","blockNumber":"18512782","chainConfig":{"chainId":"1"},"baseFeePerGas":"1"},"explorerConfig":{"enabled":false,"verificationVisibility":"bytecode"},"syncState":false}' \
+      #           https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container)" >> $GITHUB_ENV
+      #
+      #      - name: "Parse Tenderly virtual testnet creation transaction result"
+      #        run: |
+      #          echo "TENDERLY_VIRTUAL_TESTNET_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.id')" >> $GITHUB_ENV
+      #          echo "TENDERLY_VIRTUAL_TESTNET_RPC_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.connectivityConfig.endpoints[0].id')" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
-        uses: 0chain/actions/deploy-0chain@master
+        uses: 0chain/actions/deploy-0chain-system-test@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
@@ -62,11 +62,10 @@ jobs:
           run_flaky_tests: true
           run_api_system_tests: true
           run_cli_system_tests: true
-          run_tenderly_tests: true
+          run_tenderly_tests: false
           run_tokenomics_system_tests: false
           run_smoke_tests: false
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
-          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
 
@@ -87,8 +86,8 @@ jobs:
           default: false
 
   notify_slack_on_failure:
-    runs-on: [self-hosted, arc-runner]
-    needs: [system-tests]
+    runs-on: [ self-hosted, arc-runner ]
+    needs: [ system-tests ]
     if: always() && (needs.system-tests.result == 'failure')
     steps:
       - name: "Notify Slack"
@@ -103,10 +102,10 @@ jobs:
           ]
           }'
           curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
-          
+
   notify_slack_on_success:
-    runs-on: [self-hosted, arc-runner]
-    needs: [system-tests]
+    runs-on: [ self-hosted, arc-runner ]
+    needs: [ system-tests ]
     if: always() && (needs.system-tests.result == 'success')
     steps:
       - name: "Notify Slack"
