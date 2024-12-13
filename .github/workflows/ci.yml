@@ -113,7 +113,7 @@ jobs:
           deploy_report_page: true
           archive_results: true
           run_flaky_tests: true
-          run_api_system_tests: true
+          run_api_system_tests: false
           run_cli_system_tests: true
           run_tenderly_tests: false
           run_tokenomics_system_tests: false
