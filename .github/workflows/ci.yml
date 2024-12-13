@@ -53,6 +53,48 @@ jobs:
     runs-on: [tests-suite]
     timeout-minutes: 360
     steps:
+      # Add SSH key setup before existing steps
+      - name: Setup SSH
+        uses: webfactor/ssh-agent@v0.5.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add SSH Host to Known Hosts
+        run: |
+          ssh-keyscan -H 12.34.3.8 >> ~/.ssh/known_hosts
+
+      - name: Deploy Minio via SSH
+        run: |
+          ssh ${{ secrets.SSH_USER }}@12.34.3.8 << 'EOF'
+            # Ensure Minio is installed
+            wget -O minio https://dl.min.io/server/minio/release/linux-amd64/minio
+            chmod +x minio
+            sudo mv minio /usr/local/bin/
+
+            # Prepare data directory
+            sudo mkdir -p /mnt/minio/data
+            sudo chown -R $USER:$USER /mnt/minio/data
+
+            # Start Minio server
+            export MINIO_ROOT_USER=${{ secrets.MINIO_ACCESS_KEY }}
+            export MINIO_ROOT_PASSWORD=${{ secrets.MINIO_SECRET_KEY }}
+
+            # Kill existing Minio processes
+            pkill -f minio || true
+
+            # Start Minio in background
+            nohup minio server \
+              --address 37.27.203.97:9000 \
+              --console-address 37.27.203.97:9001 \
+              /mnt/minio/data > /tmp/minio.log 2>&1 &
+
+            # Wait and verify Minio is running
+            sleep 10
+            ps aux | grep minio
+            nc -z 12.34.3.8 9000 || exit 1
+          EOF
+
+      # Existing steps continue...
       - name: "Get current PR"
         uses: jwalton/gh-find-current-pr@v1
         id: findPr
