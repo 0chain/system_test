@@ -104,10 +104,10 @@ jobs:
           graphnode_ethereum_node_url: https://virtual.mainnet.rpc.tenderly.co/${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
-      - name: "Remove Tenderly virtual testnet"
-        if: always()
-        run: |
-          curl -X DELETE \
-            -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
-            -H "Content-Type: application/json" \
-            https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}
+      # - name: "Remove Tenderly virtual testnet"
+      #   if: always()
+      #   run: |
+      #     curl -X DELETE \
+      #       -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
+      #       -H "Content-Type: application/json" \
+      #       https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}
