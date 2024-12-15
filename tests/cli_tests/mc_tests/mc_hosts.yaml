@@ -1,9 +1,9 @@
-server: 37.27.203.97
+server: localhost
 port: 9000
 # access_key: someminiouser
 # secret_key: someminiopassword
 concurrent: 900
-secondary_server: 37.27.203.97
+secondary_server: localhost
 secondary_port: 9000
 use_command: True
 # server: 65.109.152.43

@@ -1,4 +1,4 @@
-server: 37.27.203.97
+server: localhost
 port: 9000
 # access_key: someminiouser
 # secret_key: someminiopassword
