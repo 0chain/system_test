@@ -336,7 +336,7 @@ func InitSDK(wallet, configFile string) error {
 		parsed.BlockWorker,
 		parsed.ChainID,
 		parsed.SignatureScheme,
-		0, false, true,
+		0, false,
 	)
 	return err
 }
