@@ -55,7 +55,6 @@ func TestRepairSize(testSetup *testing.T) {
 		require.Nilf(t, err, "error unmarshal repair size: %v", err)
 		require.Equal(t, uint64(0), rs.UploadSize, "upload size should be zero")
 		require.Equal(t, uint64(0), rs.DownloadSize, "download size should be zero")
-
 		// optional repairpath
 		output, err = getRepairSize(t, configPath, map[string]interface{}{
 			"allocation": allocationID,
