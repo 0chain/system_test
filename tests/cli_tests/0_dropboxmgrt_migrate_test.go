@@ -27,13 +27,13 @@ func Test0Dropbox(testSetup *testing.T) {
 		})
 
 		output, _ := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
-			"access-token": dropboxAccessToken,
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"allocation":   allocationId,
-			"source":       "dropbox",
-			"config":       configPath,
-			"configDir":    configDir,
-			"skip":         1,
+			"access-key": dropboxAccessToken,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"allocation": allocationId,
+			"source":     "dropbox",
+			"config":     configPath,
+			"configDir":  configDir,
+			"skip":       1,
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
@@ -46,13 +46,13 @@ func Test0Dropbox(testSetup *testing.T) {
 		})
 
 		output, err := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
-			"access-token": dropboxAccessToken,
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"allocation":   allocationID,
-			"source":       "dropbox",
-			"config":       configPath,
-			"configDir":    configDir,
-			"skip":         1,
+			"access-key": dropboxAccessToken,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"allocation": allocationID,
+			"source":     "dropbox",
+			"config":     configPath,
+			"configDir":  configDir,
+			"skip":       1,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -66,11 +66,11 @@ func Test0Dropbox(testSetup *testing.T) {
 		})
 
 		output, _ := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
-			"access-token": dropboxAccessToken,
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"source":       "dropbox",
-			"config":       configPath,
-			"configDir":    configDir,
+			"access-key": dropboxAccessToken,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"source":     "dropbox",
+			"config":     configPath,
+			"configDir":  configDir,
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
@@ -83,12 +83,12 @@ func Test0Dropbox(testSetup *testing.T) {
 		})
 
 		output, err := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
-			"access-token": "invalid",
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"source":       "dropbox",
-			"config":       configPath,
-			"configDir":    configDir,
-			"allocation":   allocationID,
+			"access-key": "invalid",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"source":     "dropbox",
+			"config":     configPath,
+			"configDir":  configDir,
+			"allocation": allocationID,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -112,7 +112,7 @@ func Test0Dropbox(testSetup *testing.T) {
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "Missing Access Token", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "invalid Client token", "Output was not as expected", strings.Join(output, "\n"))
 	})
 	t.RunSequentially("Should fail when source is invalid", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
@@ -121,12 +121,12 @@ func Test0Dropbox(testSetup *testing.T) {
 		})
 
 		output, err := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"source":       "invalid",
-			"config":       configPath,
-			"configDir":    configDir,
-			"allocation":   allocationID,
-			"access-token": dropboxAccessToken,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"source":     "invalid",
+			"config":     configPath,
+			"configDir":  configDir,
+			"allocation": allocationID,
+			"access-key": dropboxAccessToken,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))

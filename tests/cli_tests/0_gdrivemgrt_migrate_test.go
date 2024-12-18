@@ -27,12 +27,12 @@ func Test0Gdrive(testSetup *testing.T) {
 		})
 
 		output, _ := migrateFromGdrive(t, configPath, createParams(map[string]interface{}{
-			"access-token": gdriveAccessToken,
-			"allocation":   allocationID,
-			"source":       "google_drive",
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"config":       configPath,
-			"configDir":    configDir,
+			"access-key": gdriveAccessToken,
+			"allocation": allocationID,
+			"source":     "google_drive",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"config":     configPath,
+			"configDir":  configDir,
 		}))
 		require.GreaterOrEqual(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
@@ -45,12 +45,12 @@ func Test0Gdrive(testSetup *testing.T) {
 		})
 
 		output, err := migrateFromGdrive(t, configPath, createParams(map[string]interface{}{
-			"access-token": gdriveAccessToken,
-			"allocation":   allocationID,
-			"source":       "google_drive",
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"config":       configPath,
-			"configDir":    configDir,
+			"access-key": gdriveAccessToken,
+			"allocation": allocationID,
+			"source":     "google_drive",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"config":     configPath,
+			"configDir":  configDir,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -65,12 +65,12 @@ func Test0Gdrive(testSetup *testing.T) {
 		})
 
 		output, err := migrateFromGdrive(t, configPath, createParams(map[string]interface{}{
-			"access-token": gdriveAccessToken,
-			"allocation":   allocationID,
-			"source":       "google_drive",
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"config":       configPath,
-			"configDir":    configDir,
+			"access-key": gdriveAccessToken,
+			"allocation": allocationID,
+			"source":     "google_drive",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"config":     configPath,
+			"configDir":  configDir,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -85,11 +85,11 @@ func Test0Gdrive(testSetup *testing.T) {
 		})
 
 		output, _ := migrateFromGdrive(t, configPath, createParams(map[string]interface{}{
-			"access-token": dropboxAccessToken,
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"source":       "google_drive",
-			"config":       configPath,
-			"configDir":    configDir,
+			"access-key": gdriveAccessToken,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"source":     "google_drive",
+			"config":     configPath,
+			"configDir":  configDir,
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
@@ -102,12 +102,12 @@ func Test0Gdrive(testSetup *testing.T) {
 		})
 
 		output, err := migrateFromGdrive(t, configPath, createParams(map[string]interface{}{
-			"access-token": "invalid",
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"source":       "google_drive",
-			"config":       configPath,
-			"configDir":    configDir,
-			"allocation":   allocationID,
+			"access-key": "invalid",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"source":     "google_drive",
+			"config":     configPath,
+			"configDir":  configDir,
+			"allocation": allocationID,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -131,7 +131,7 @@ func Test0Gdrive(testSetup *testing.T) {
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "Missing Access Token", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "invalid Google Drive access token", "Output was not as expected", strings.Join(output, "\n"))
 	})
 }
 
