@@ -14,16 +14,9 @@ import (
 
 func Test0TenderlyBridgeVerify(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip("Skip till fixed : https://github.com/0chain/system_test/issues/1042")
 	t.SetSmokeTests("Verify ethereum transaction")
 
 	t.RunSequentiallyWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {
-		err := tenderlyClient.InitBalance(ethereumAddress)
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
-		require.NoError(t, err)
-
 		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)

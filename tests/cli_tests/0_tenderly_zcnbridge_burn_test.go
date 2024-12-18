@@ -22,12 +22,6 @@ func Test0TenderlyBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentiallyWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
-		err := tenderlyClient.InitBalance(ethereumAddress)
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
-		require.NoError(t, err)
-
 		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
@@ -35,12 +29,6 @@ func Test0TenderlyBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
-		err := tenderlyClient.InitBalance(ethereumAddress)
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
-		require.NoError(t, err)
-
 		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)

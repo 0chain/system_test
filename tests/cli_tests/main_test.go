@@ -122,11 +122,10 @@ var (
 	walletMutex sync.Mutex
 )
 
-var tenderlyClient *tenderly.Client
-
 func TestMain(m *testing.M) { //nolint:gocyclo
 	configPath = os.Getenv("CONFIG_PATH")
 	configDir = os.Getenv("CONFIG_DIR")
+	tenderlyEnabled := os.Getenv("TENDERLY_ENABLED")
 
 	if configDir == "" {
 		configDir = getConfigDir()
@@ -176,7 +175,19 @@ func TestMain(m *testing.M) { //nolint:gocyclo
 	log.Printf("Ethereum Node URL: %s", ethereumNodeURL)
 	fmt.Println("Ethereum Node URL: ", ethereumNodeURL)
 
-	tenderlyClient = tenderly.NewClient(ethereumNodeURL)
+	tenderlyClient := tenderly.NewClient(ethereumNodeURL)
+
+	if tenderlyEnabled != "" {
+		err := tenderlyClient.InitBalance(ethereumAddress)
+		if err != nil {
+			cliutils.Logger.Fatalln(err.Error())
+		}
+
+		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
+		if err != nil {
+			cliutils.Logger.Fatalln(err.Error())
+		}
+	}
 
 	// Create a session with AWS
 	sess, err := session.NewSession(&aws.Config{
