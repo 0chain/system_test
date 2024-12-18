@@ -966,8 +966,8 @@ func (c *APIClient) RegisterBlobber(t *test.SystemTest,
 			}
 
 			return registerBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus && storageNode.ID == expectedResponse
-
 		}
+
 		return registerBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus && registerBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput == expectedResponse
 	})
 
