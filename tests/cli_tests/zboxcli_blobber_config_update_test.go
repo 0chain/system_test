@@ -113,7 +113,6 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 
 			require.Equal(t, intialBlobberInfo.StakePoolSettings.DelegateWallet, finalBlobberInfo.StakePoolSettings.DelegateWallet)
 		})
-
 	})
 
 	t.RunSequentially("update blobber capacity should work", func(t *test.SystemTest) {
