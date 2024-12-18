@@ -131,7 +131,6 @@ func TestMain(m *testing.M) {
 }
 
 func initialiseSCWallet() *model.Wallet {
-
 	// read the file sc_owner_wallet.json
 	fileContent, err := os.ReadFile("./config/sc_owner_wallet.json")
 	if err != nil {
