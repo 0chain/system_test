@@ -99,20 +99,7 @@ jobs:
         with:
           version: "1.7"
           force: "false"
-
-      - name: "Create Tenderly virtual testnet"
-        run: |
-          echo "TENDERLY_CREATION_INFO=$(curl -X POST \
-           -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
-           -H "Content-Type: application/json" \
-           -d '{"slug":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","displayName":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","description":"","visibility":"TEAM","tags":{"purpose":"development"},"networkConfig":{"networkId":"1","blockNumber":"18512782","chainConfig":{"chainId":"1"},"baseFeePerGas":"1"},"explorerConfig":{"enabled":false,"verificationVisibility":"bytecode"},"syncState":false}' \
-           https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container)" >> $GITHUB_ENV
-
-      - name: "Parse Tenderly virtual testnet creation transaction result"
-        run: |
-          echo "TENDERLY_VIRTUAL_TESTNET_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.id')" >> $GITHUB_ENV
-          echo "TENDERLY_VIRTUAL_TESTNET_RPC_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.connectivityConfig.endpoints[0].id')" >> $GITHUB_ENV
-
+          
       - name: "Deploy Minio Server"
         if: github.event_name == 'push' || github.event.inputs.existing_network == ''
         uses: 0chain/actions/deploy-minio@master
