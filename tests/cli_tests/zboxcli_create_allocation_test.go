@@ -498,7 +498,7 @@ func createNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename,
 }
 
 func createNewAllocationWithoutRetry(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	fmt.Println(params)
+	t.Logf("params values %v...", params)
 	return cliutils.RunCommandWithoutRetry(fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
