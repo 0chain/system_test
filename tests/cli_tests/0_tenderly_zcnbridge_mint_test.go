@@ -15,6 +15,10 @@ import (
 func Test0TenderlyBridgeMint(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	if !tenderlyInitialized {
+		t.Skip("Tenderly has not been initialized properly!")
+	}
+
 	t.RunSequentiallyWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
 		createWallet(t)
 
@@ -76,7 +80,7 @@ func mintWrappedZcnTokens(t *test.SystemTest, retry bool) ([]string, error) {
 		escapedTestName(t)+"_wallet.json",
 	)
 	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+		return cliutils.RunCommand(t, cmd, 2, time.Second*2)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
@@ -94,7 +98,7 @@ func resetUserNonce(t *test.SystemTest, retry bool) ([]string, error) {
 	)
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
+		return cliutils.RunCommand(t, cmd, 2, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}

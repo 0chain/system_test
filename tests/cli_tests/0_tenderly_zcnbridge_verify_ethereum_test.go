@@ -14,6 +14,11 @@ import (
 
 func Test0TenderlyBridgeVerify(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+
+	if !tenderlyInitialized {
+		t.Skip("Tenderly has not been initialized properly!")
+	}
+
 	t.SetSmokeTests("Verify ethereum transaction")
 
 	t.RunSequentiallyWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {
@@ -40,7 +45,7 @@ func verifyBridgeTransaction(t *test.SystemTest, address string, retry bool) ([]
 		configDir,
 	)
 	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+		return cliutils.RunCommand(t, cmd, 2, time.Second*2)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}

@@ -19,6 +19,10 @@ import (
 func Test0TenderlyAuthorizerRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	if !tenderlyInitialized {
+		t.Skip("Tenderly has not been initialized properly!")
+	}
+
 	t.RunSequentiallyWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {
 		createWallet(t)
 

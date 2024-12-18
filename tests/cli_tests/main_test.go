@@ -120,6 +120,8 @@ var (
 	wallets     []json.RawMessage
 	walletIdx   int64
 	walletMutex sync.Mutex
+
+	tenderlyInitialized bool
 )
 
 func TestMain(m *testing.M) { //nolint:gocyclo
@@ -180,12 +182,14 @@ func TestMain(m *testing.M) { //nolint:gocyclo
 	if tenderlyEnabled != "" {
 		err := tenderlyClient.InitBalance(ethereumAddress)
 		if err != nil {
-			cliutils.Logger.Fatalln(err.Error())
-		}
-
-		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
-		if err != nil {
-			cliutils.Logger.Fatalln(err.Error())
+			cliutils.Logger.Error(err.Error())
+		} else {
+			err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
+			if err != nil {
+				cliutils.Logger.Error(err.Error())
+			} else {
+				tenderlyInitialized = true
+			}
 		}
 	}
 
