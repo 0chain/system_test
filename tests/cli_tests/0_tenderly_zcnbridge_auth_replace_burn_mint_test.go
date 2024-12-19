@@ -15,11 +15,9 @@ import (
 func Test0TenderlyReplaceAuthorizerBurnZCNAndMintWZCN(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	err := tenderlyClient.InitBalance(ethereumAddress)
-	require.NoError(t, err)
-
-	err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
-	require.NoError(t, err)
+	if !tenderlyInitialized {
+		t.Skip("Tenderly has not been initialized properly!")
+	}
 
 	authsIDKeys := map[string]string{
 		"d6e9b3222434faa043c683d1a939d6a0fa2818c4d56e794974d64a32005330d3": "b41d6232f11e0feefe895483688410216b3b1101e5db55044b22f0342fc18718b96b3124c9373dd116c50bd9b60512f28930a0e5771e58ecdc7d5bc2b570111a",
@@ -119,7 +117,7 @@ func burnZCN(t *test.SystemTest, amount string, retry bool) ([]string, error) {
 		amount)
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
+		return cliutils.RunCommand(t, cmd, 2, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
@@ -136,7 +134,7 @@ func mintWZCN(t *test.SystemTest, retry bool) ([]string, error) {
 		escapedTestName(t)+"_wallet.json")
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
+		return cliutils.RunCommand(t, cmd, 2, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
