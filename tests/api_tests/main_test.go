@@ -3,14 +3,15 @@ package api_tests
 import (
 	"context"
 	"encoding/json"
-	coreClient "github.com/0chain/gosdk/core/client"
-	"github.com/0chain/gosdk/core/conf"
 	"log"
 	"os"
 	"strconv"
 	"sync"
 	"testing"
 	"time"
+
+	coreClient "github.com/0chain/gosdk/core/client"
+	"github.com/0chain/gosdk/core/conf"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -127,6 +128,45 @@ func TestMain(m *testing.M) {
 	}
 
 	os.Exit(m.Run())
+}
+
+func initialiseSCWallet() *model.Wallet {
+	// read the file sc_owner_wallet.json
+	fileContent, err := os.ReadFile("./config/sc_owner_wallet.json")
+	if err != nil {
+		log.Println("Error reading file:", err)
+		return nil
+	}
+
+	fileWallet := WalletFile{}
+
+	// Parse the JSON data into a list of strings
+	err = json.Unmarshal(fileContent, &fileWallet)
+
+	if err != nil {
+		log.Println("Error decoding JSON:", err)
+		return nil
+	}
+
+	wallet := &model.Wallet{
+		Id:        fileWallet.ClientId,
+		Version:   fileWallet.Version,
+		PublicKey: fileWallet.Keys[0].PublicKey,
+		Nonce:     0,
+		Keys:      &model.KeyPair{},
+		Mnemonics: fileWallet.Mnemonics,
+	}
+
+	err = wallet.Keys.PublicKey.DeserializeHexStr(fileWallet.Keys[0].PublicKey)
+	if err != nil {
+		log.Println("Error decoding JSON:", err)
+	}
+	err = wallet.Keys.PrivateKey.DeserializeHexStr(fileWallet.Keys[0].PrivateKey)
+	if err != nil {
+		log.Println("Error decoding JSON:", err)
+	}
+
+	return wallet
 }
 
 func getConfigForZcnCoreInit(blockWorker string) string {
