@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.18.0
+	github.com/0chain/gosdk v1.18.13-0.20241209154844-07366a2c2666
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
@@ -44,6 +44,7 @@ require (
 require (
 	github.com/aws/aws-sdk-go v1.44.331
 	github.com/google/uuid v1.3.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (

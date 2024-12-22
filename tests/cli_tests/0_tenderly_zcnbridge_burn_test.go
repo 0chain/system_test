@@ -18,16 +18,14 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 )
 
-func TestBridgeBurn(testSetup *testing.T) {
+func Test0TenderlyBridgeBurn(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	if !tenderlyInitialized {
+		t.Skip("Tenderly has not been initialized properly!")
+	}
+
 	t.RunSequentiallyWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
-		err := tenderlyClient.InitBalance(ethereumAddress)
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
-		require.NoError(t, err)
-
 		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err)
 		require.Greater(t, len(output), 0)
@@ -35,12 +33,6 @@ func TestBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
-		err := tenderlyClient.InitBalance(ethereumAddress)
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
-		require.NoError(t, err)
-
 		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
@@ -155,7 +147,7 @@ func burnEth(t *test.SystemTest, amount string, retry bool) ([]string, error) {
 	cmd += fmt.Sprintf(" --wallet %s --configDir ./config --config %s ", escapedTestName(t)+"_wallet.json", configPath)
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
+		return cliutils.RunCommand(t, cmd, 2, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
@@ -191,7 +183,7 @@ func getWrappedZcnBurnTicket(t *test.SystemTest, hash string, retry bool) ([]str
 	)
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
+		return cliutils.RunCommand(t, cmd, 2, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}

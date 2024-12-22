@@ -12,16 +12,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBridgeMint(testSetup *testing.T) {
+func Test0TenderlyBridgeMint(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	if !tenderlyInitialized {
+		t.Skip("Tenderly has not been initialized properly!")
+	}
+
 	t.RunSequentiallyWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
-		err := tenderlyClient.InitBalance(ethereumAddress)
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
-		require.NoError(t, err)
-
 		createWallet(t)
 
 		output, err := resetUserNonce(t, true)
@@ -40,12 +38,6 @@ func TestBridgeMint(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Mint ZCN tokens", time.Minute*10, func(t *test.SystemTest) {
-		err := tenderlyClient.InitBalance(ethereumAddress)
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
-		require.NoError(t, err)
-
 		createWallet(t)
 
 		output, err := burnEth(t, "1000000000000", true)
@@ -88,7 +80,7 @@ func mintWrappedZcnTokens(t *test.SystemTest, retry bool) ([]string, error) {
 		escapedTestName(t)+"_wallet.json",
 	)
 	if retry {
-		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+		return cliutils.RunCommand(t, cmd, 2, time.Second*2)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
@@ -106,7 +98,7 @@ func resetUserNonce(t *test.SystemTest, retry bool) ([]string, error) {
 	)
 
 	if retry {
-		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
+		return cliutils.RunCommand(t, cmd, 2, time.Second*10)
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
