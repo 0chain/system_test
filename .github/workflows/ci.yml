@@ -109,7 +109,7 @@ jobs:
         uses: 0chain/actions/deploy-0chain-system-test@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          zvault_image: "pr-24-f8e6e2fd"
+          zvault_image: "pr-24-49fd8dc3"
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
