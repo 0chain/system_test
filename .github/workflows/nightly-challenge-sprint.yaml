@@ -7,6 +7,11 @@ on:
     # Runs every morning at 2am UTC
     - cron: '0 2 * * *'
   workflow_dispatch:
+    inputs:
+      repo_snapshots_branch:
+        description: 'branch of repo-snapshots to derive images and branches from.'
+        default: 'current-sprint'
+        required: true
 
 jobs:
   system-tests:
@@ -17,26 +22,13 @@ jobs:
         run: |
           echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=current-sprint" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
 
       - name: 'Setup jq'
         uses: dcarbone/install-jq-action@v2.1.0
         with:
           version: '1.7'
           force: 'false'
-
-      - name: "Create Tenderly virtual testnet"
-        run: |
-          echo "TENDERLY_CREATION_INFO=$(curl -X POST \
-           -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
-           -H "Content-Type: application/json" \
-           -d '{"slug":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","displayName":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","description":"","visibility":"TEAM","tags":{"purpose":"development"},"networkConfig":{"networkId":"1","blockNumber":"18512782","chainConfig":{"chainId":"1"},"baseFeePerGas":"1"},"explorerConfig":{"enabled":false,"verificationVisibility":"bytecode"},"syncState":false}' \
-           https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container)" >> $GITHUB_ENV
-
-      - name: "Parse Tenderly virtual testnet creation transaction result"
-        run: |
-          echo "TENDERLY_VIRTUAL_TESTNET_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.id')" >> $GITHUB_ENV
-          echo "TENDERLY_VIRTUAL_TESTNET_RPC_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.connectivityConfig.endpoints[0].id')" >> $GITHUB_ENV
 
       - name: "Deploy 0Chain"
         uses: 0chain/actions/deploy-0chain@master
@@ -45,10 +37,10 @@ jobs:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
+          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ""
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: https://virtual.mainnet.rpc.tenderly.co/${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
+          graphnode_ethereum_node_url: ""
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run Challenge System tests"
@@ -64,20 +56,13 @@ jobs:
           run_cli_system_tests: false
           run_tokenomics_system_tests: false
           run_smoke_tests: false
+          run_tenderly_tests: false
           run_s3mgrt_system_tests: false
           run_challenge_system_tests: true
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
-          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
+          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ""
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-
-      - name: "Remove Tenderly virtual testnet"
-        if: always()
-        run: |
-          curl -X DELETE \
-            -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
-            -H "Content-Type: application/json" \
-            https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}
 
   notify_slack_on_failure:
     runs-on: [self-hosted, arc-runner]

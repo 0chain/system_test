@@ -78,6 +78,9 @@ To run the entire test suite (minus tests for known broken features) run:
 ```bash
 cp $ZBOX_LOCATION ./tests/cli_tests/ # Copy zbox CLI to test folder
 cp $ZWALLET_LOCATION ./tests/cli_tests/ # Copy zwallet CLI to test folder
+cp $MC_LOCATION ./tests/cli_tests/ #Copy MC CLI to test folder
+cp $WARP_LOCATION ./tests/cli_tests/ #Copy WARP CLI to test folder
+cp $MINIO_LOCATION ./tests/cli_tests/ #Copy MINIO CLI to test folder
 cd ./tests/cli_tests/
 go test -run "^Test[^___]*$" ./... -v
 ```

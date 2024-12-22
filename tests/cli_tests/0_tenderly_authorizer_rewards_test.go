@@ -16,16 +16,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAuthorizerRewards(testSetup *testing.T) {
+func Test0TenderlyAuthorizerRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	if !tenderlyInitialized {
+		t.Skip("Tenderly has not been initialized properly!")
+	}
+
 	t.RunSequentiallyWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {
-		err := tenderlyClient.InitBalance(ethereumAddress)
-		require.NoError(t, err)
-
-		err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
-		require.NoError(t, err)
-
 		createWallet(t)
 
 		feeRewardAuthorizerQuery := fmt.Sprintf("reward_type = %d", model.FeeRewardAuthorizer)

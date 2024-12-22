@@ -1,0 +1,12 @@
+server: localhost
+port: 9000
+# access_key: someminiouser
+# secret_key: someminiopassword
+concurrent: 1
+object_size: 256B
+object_count: 22
+# server: 65.109.152.43
+# port: 9000
+access_key: rootroot
+secret_key: rootroot
+# concurrent: 900
