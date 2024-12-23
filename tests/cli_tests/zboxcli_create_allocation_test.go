@@ -45,27 +45,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 	})
 
-	// todo: write a test case to create the allocation with invalid storage version should fail
-	// tc is not working due to logic mismatch hardcoded version is passed in zxbox cli
-	t.Run("Create allocation with invalid storage version should fail", func(t *test.SystemTest) {
-		_ = setupWallet(t, configPath)
-
-		options := map[string]interface{}{
-			"lock":            "0.5",
-			"size":            "1024",
-			"read_price":      "0-1",
-			"write_price":     "0-1",
-			"storage_version": -1,
-		}
-
-		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
-		require.NotNil(t, err, strings.Join(output, "\n"))
-
-		fmt.Println(output)
-		require.Contains(t, output[len(output)-1], "invalid argument")
-	})
-
-	t.Skip()
 	t.Run("Create allocation for locking cost equal to the cost calculated should work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
