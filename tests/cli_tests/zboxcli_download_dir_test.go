@@ -32,7 +32,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		filesize := int64(256)
 		remotepath := "/dir1"
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
@@ -57,7 +57,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		filesize := int64(1024)
 		remoteFilePaths := [2]string{"/dir1/", "/dir2/"}
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
@@ -102,7 +102,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		filesize := int64(256)
 		remotepath := "/dir/dir1"
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
@@ -128,7 +128,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		filesize := int64(256)
 		remotepath := "/nested/dir/"
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
@@ -153,7 +153,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		filesize := int64(256)
 		remotepath := "/nested/dir/"
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
@@ -180,7 +180,7 @@ func TestDownloadDir(testSetup *testing.T) {
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share Entire Folder from Another Wallet", func(t *test.SystemTest) {
-			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			allocationID := setupAllocation(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 9,
 			})
@@ -222,7 +222,7 @@ func TestDownloadDir(testSetup *testing.T) {
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share Directory from Another Wallet", func(t *test.SystemTest) {
-			allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+			allocationID := setupAllocation(t, configPath, map[string]interface{}{
 				"size":   10 * 1024,
 				"tokens": 9,
 			})
@@ -250,8 +250,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		})
 
 		// Just create a wallet so that we can work further
-		err := createWalletAndLockReadTokens(t, configPath)
-		require.Nil(t, err)
+		createWallet(t)
 
 		// Download file using auth-ticket: should work
 		output, err := downloadDirectory(t, configPath, createParams(map[string]interface{}{
@@ -266,7 +265,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		filesize := int64(10)
 		remotepath := "/dirx"
 
-		allocationID := setupAllocationAndReadLock(t, configPath, map[string]interface{}{
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   allocSize,
 			"tokens": 9,
 		})
