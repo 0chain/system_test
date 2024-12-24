@@ -33,8 +33,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		remotepath := "/dir1"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -57,8 +56,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		remoteFilePaths := [2]string{"/dir1/", "/dir2/"}
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
 		})
 
 		fileNameOfFirstDirectory := generateFileAndUpload(t, allocationID, remoteFilePaths[0], filesize)
@@ -102,8 +100,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		remotepath := "/dir/dir1"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -126,8 +123,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		remotepath := "/nested/dir/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -150,8 +146,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		remotepath := "/nested/dir/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
@@ -177,8 +172,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share Entire Folder from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
-				"tokens": 9,
+				"size": 10 * 1024,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
@@ -219,8 +213,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share Directory from Another Wallet", func(t *test.SystemTest) {
 			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size":   10 * 1024,
-				"tokens": 9,
+				"size": 10 * 1024,
 			})
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 
@@ -262,8 +255,7 @@ func TestDownloadDir(testSetup *testing.T) {
 		remotepath := "/dirx"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
 		})
 
 		filename := generateRandomTestFileName(t)
