@@ -38,7 +38,6 @@ func TestDownloadDir(testSetup *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-		// originalFileChecksum := generateChecksum(t, filename)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -108,7 +107,6 @@ func TestDownloadDir(testSetup *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-		// originalFileChecksum := generateChecksum(t, filename)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
@@ -120,7 +118,6 @@ func TestDownloadDir(testSetup *testing.T) {
 			"localpath":  "tmp/",
 		}), true)
 		require.Nil(t, err, strings.Join(output, "\n"))
-
 	})
 
 	t.Run("Download Directory from Nested Directory Should Work", func(t *test.SystemTest) {
@@ -134,7 +131,6 @@ func TestDownloadDir(testSetup *testing.T) {
 		})
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
-		// originalFileChecksum := generateChecksum(t, filename)
 
 		// Delete the uploaded file, since we will be downloading it now
 		err := os.Remove(filename)
