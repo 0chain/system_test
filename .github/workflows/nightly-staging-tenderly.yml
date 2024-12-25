@@ -1,11 +1,11 @@
-name: "0Chain Nightly Tests - Staging"
+name: "0Chain Nightly Tests - Staging(Tenderly)"
 concurrency:
   group: "nightly-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
 on:
   schedule:
-    # Runs every morning at 2am UTC
-    - cron: '0 2 * * *'
+    # Runs every morning at 6am UTC
+    - cron: '0 6 */2 * *'
   workflow_dispatch:
 
 jobs:
@@ -25,6 +25,19 @@ jobs:
           version: '1.7'
           force: 'false'
 
+      - name: "Create Tenderly virtual testnet"
+        run: |
+          echo "TENDERLY_CREATION_INFO=$(curl -X POST \
+           -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
+           -H "Content-Type: application/json" \
+           -d '{"slug":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","displayName":"mainnet-dev-${{ env.RUNNER_NUMBER }}-${{ github.run_id }}","description":"","visibility":"TEAM","tags":{"purpose":"development"},"networkConfig":{"networkId":"1","blockNumber":"18512782","chainConfig":{"chainId":"1"},"baseFeePerGas":"1"},"explorerConfig":{"enabled":false,"verificationVisibility":"bytecode"},"syncState":false}' \
+           https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container)" >> $GITHUB_ENV
+
+      - name: "Parse Tenderly virtual testnet creation transaction result"
+        run: |
+          echo "TENDERLY_VIRTUAL_TESTNET_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.id')" >> $GITHUB_ENV
+          echo "TENDERLY_VIRTUAL_TESTNET_RPC_ID=$(echo '${{ env.TENDERLY_CREATION_INFO }}' | jq -r '.container.connectivityConfig.endpoints[0].id')" >> $GITHUB_ENV
+
       - name: "Deploy 0Chain"
         uses: 0chain/actions/deploy-0chain@master
         with:
@@ -32,10 +45,10 @@ jobs:
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
-          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
-          graphnode_ethereum_node_url: ""
+          graphnode_ethereum_node_url: https://virtual.mainnet.rpc.tenderly.co/${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
 
       - name: "Run System tests"
@@ -49,13 +62,21 @@ jobs:
           run_flaky_tests: true
           run_api_system_tests: true
           run_cli_system_tests: true
-          run_tenderly_tests: false
+          run_tenderly_tests: true
           run_tokenomics_system_tests: false
           run_smoke_tests: false
           test_file_filter: ${{ env.TEST_FILE_FILTER }}
-          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ""
+          TENDERLY_VIRTUAL_TESTNET_RPC_ID: ${{ env.TENDERLY_VIRTUAL_TESTNET_RPC_ID }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+      - name: "Remove Tenderly virtual testnet"
+        if: always()
+        run: |
+          curl -X DELETE \
+            -H "x-access-key: ${{ secrets.TENDERLY_SECRET }}" \
+            -H "Content-Type: application/json" \
+            https://api.tenderly.co/api/v1/account/zus_network/project/project/testnet/container/${{ env.TENDERLY_VIRTUAL_TESTNET_ID }}
 
       - name: "Check if should send slack notification"
         if: failure()
