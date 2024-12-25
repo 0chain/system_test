@@ -94,10 +94,10 @@ jobs:
       - name: "Notify Slack"
         run: |
           payload='{
-          "text": "'"<!here> 0Chain Nightly Tests - Staging FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "text": "'"<!here> 0Chain Nightly Tests - Staging(Tenderly) FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
           "attachments": [
               {
-              "text": "0Chain Nightly Tests - Staging FAILED ⚠️",
+              "text": "0Chain Nightly Tests - Staging(Tenderly) FAILED ⚠️",
               "color": "#ff0000"
               }
           ]
@@ -112,10 +112,10 @@ jobs:
       - name: "Notify Slack"
         run: |
           payload='{
-          "text": "'"<!here> 0Chain Nightly Tests - Staging PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+          "text": "'"<!here> 0Chain Nightly Tests - Staging(Tenderly) PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
           "attachments": [
               {
-              "text": "0Chain Nightly Tests - Staging PASSED ✅",
+              "text": "0Chain Nightly Tests - Staging(Tenderly) PASSED ✅",
               "color": "#22bb33"
               }
           ]
