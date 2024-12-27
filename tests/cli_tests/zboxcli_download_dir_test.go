@@ -195,9 +195,7 @@ func TestDownloadDir(testSetup *testing.T) {
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share Directory from Another Wallet", func(t *test.SystemTest) {
-			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size": 10 * 1024,
-			})
+			allocationID := setupAllocation(t, configPath)
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 
 			require.NotEqual(t, "", filename)
