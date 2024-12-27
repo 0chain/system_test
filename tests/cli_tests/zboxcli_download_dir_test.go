@@ -28,13 +28,10 @@ func TestDownloadDir(testSetup *testing.T) {
 
 	// Success Scenarios
 	t.Run("Download Directory from Root Directory Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/dir1"
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
+		allocationID := setupAllocation(t, configPath)
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
@@ -51,13 +48,10 @@ func TestDownloadDir(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Download Directory Concurrently Should Work for two Different Directory", 6*time.Minute, func(t *test.SystemTest) {
-		allocSize := int64(4096)
 		filesize := int64(1024)
 		remoteFilePaths := [2]string{"/dir1/", "/dir2/"}
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
+		allocationID := setupAllocation(t, configPath)
 
 		fileNameOfFirstDirectory := generateFileAndUpload(t, allocationID, remoteFilePaths[0], filesize)
 		fileNameOfSecondDirectory := generateFileAndUpload(t, allocationID, remoteFilePaths[1], filesize)
@@ -95,13 +89,10 @@ func TestDownloadDir(testSetup *testing.T) {
 	})
 
 	t.Run("Download Directory from a Directory Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/dir/dir1"
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
+		allocationID := setupAllocation(t, configPath)
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
@@ -118,13 +109,10 @@ func TestDownloadDir(testSetup *testing.T) {
 	})
 
 	t.Run("Download Directory from Nested Directory Should Work", func(t *test.SystemTest) {
-		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/nested/dir/"
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
+		allocationID := setupAllocation(t, configPath)
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
@@ -141,13 +129,10 @@ func TestDownloadDir(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Download Entire Directory Should Work but does not see blobber/issues/588", 3*time.Minute, func(t *test.SystemTest) { // todo: slow
-		allocSize := int64(2048)
 		filesize := int64(256)
 		remotepath := "/nested/dir/"
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
+		allocationID := setupAllocation(t, configPath)
 
 		filename := generateFileAndUpload(t, allocationID, remotepath, filesize)
 
@@ -171,9 +156,7 @@ func TestDownloadDir(testSetup *testing.T) {
 
 		// This test creates a separate wallet and allocates there, test nesting is required to create another wallet json file
 		t.Run("Share Entire Folder from Another Wallet", func(t *test.SystemTest) {
-			allocationID := setupAllocation(t, configPath, map[string]interface{}{
-				"size": 10 * 1024,
-			})
+			allocationID := setupAllocation(t, configPath)
 			filename = generateFileAndUpload(t, allocationID, remotepath, filesize)
 			require.NotEqual(t, "", filename)
 			// Delete the uploaded file from tmp folder if it exist,
@@ -250,13 +233,10 @@ func TestDownloadDir(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Download  Directory having Encrypted files Should Work", 5*time.Minute, func(t *test.SystemTest) {
-		allocSize := int64(10 * MB)
 		filesize := int64(10)
 		remotepath := "/dirx"
 
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
+		allocationID := setupAllocation(t, configPath)
 
 		filename := generateRandomTestFileName(t)
 		err := createFileWithSize(filename, filesize)
