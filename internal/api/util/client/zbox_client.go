@@ -106,7 +106,7 @@ func (c *ZboxClient) VerifyOtpDetails(t *test.SystemTest, headers, verifyOtpInpu
 		FormData:           verifyOtpInput,
 		Headers:            headers,
 		RequiredStatusCode: 200,
-	}, HttpGETMethod)
+	}, HttpPOSTMethod)
 	return zboxMessageRes, resp, err
 }
 
