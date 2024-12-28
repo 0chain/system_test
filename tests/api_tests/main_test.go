@@ -3,14 +3,15 @@ package api_tests
 import (
 	"context"
 	"encoding/json"
-	coreClient "github.com/0chain/gosdk/core/client"
-	"github.com/0chain/gosdk/core/conf"
 	"log"
 	"os"
 	"strconv"
 	"sync"
 	"testing"
 	"time"
+
+	coreClient "github.com/0chain/gosdk/core/client"
+	"github.com/0chain/gosdk/core/conf"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -127,21 +128,6 @@ func TestMain(m *testing.M) {
 	}
 
 	os.Exit(m.Run())
-}
-
-func getConfigForZcnCoreInit(blockWorker string) string {
-	configMap := map[string]interface{}{
-		"block_worker":              blockWorker,
-		"signature_scheme":          "bls0chain",
-		"min_submit":                50,
-		"min_confirmation":          50,
-		"confirmation_chain_length": 3,
-		"max_txn_query":             5,
-		"query_sleep_time":          5,
-	}
-
-	b, _ := json.Marshal(configMap)
-	return string(b)
 }
 
 type WalletFile struct {
