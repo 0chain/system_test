@@ -92,22 +92,22 @@ func (c *ZboxClient) NewZboxHeaders_R(appType string) map[string]string {
 	return zboxHeaders
 }
 
-func (c *ZboxClient) CreateOwner(t *test.SystemTest, headers, owner map[string]string) (*model.ZboxOwner, *resty.Response, error) {
-	t.Logf("creating owner for userID [%v] using 0box...", headers["X-App-User-ID"])
-	var zboxOwner *model.ZboxOwner
+func (c *ZboxClient) VerifyOtpDetails(t *test.SystemTest, headers, verifyOtpInput map[string]string) (*model.ZboxMessageResponse, *resty.Response, error) {
+	t.Logf("verify otp and creating owner for userID [%v] using 0box...", headers["X-App-User-ID"])
+	var zboxMessageRes *model.ZboxMessageResponse
 
 	urlBuilder := NewURLBuilder()
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
-	urlBuilder.SetPath("/v2/owner")
+	urlBuilder.SetPath("/v2/twilio/phone/verify/signup")
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
-		Dst:                &zboxOwner,
-		FormData:           owner,
+		Dst:                &zboxMessageRes,
+		FormData:           verifyOtpInput,
 		Headers:            headers,
-		RequiredStatusCode: 201,
+		RequiredStatusCode: 200,
 	}, HttpPOSTMethod)
-	return zboxOwner, resp, err
+	return zboxMessageRes, resp, err
 }
 
 func (c *ZboxClient) UpdateOwner(t *test.SystemTest, headers, owner map[string]string) (*model.ZboxMessageResponse, *resty.Response, error) {

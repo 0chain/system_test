@@ -4,11 +4,12 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
-	"github.com/0chain/gosdk/core/client"
-	"github.com/0chain/gosdk/zcncore"
 	"io"
 	"math/big"
 	"os"
+
+	"github.com/0chain/gosdk/core/client"
+	"github.com/0chain/gosdk/zcncore"
 
 	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/fileref"
@@ -51,11 +52,14 @@ func InitSDK(wallet, configFile string) error {
 		parsed.SignatureScheme,
 		0, true,
 	)
+	if err != nil {
+		return err
+	}
 
 	err = zcncore.SetGeneralWalletInfo(walletJSON, parsed.SignatureScheme)
 	if err != nil {
 		fmt.Println("Error in sdk init", err)
-		os.Exit(1)
+		return err
 	}
 
 	if client.GetClient().IsSplit {

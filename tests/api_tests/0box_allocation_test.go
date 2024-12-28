@@ -19,8 +19,8 @@ func NewTestAllocation() map[string]string {
 }
 
 func Create0boxTestAllocation(t *test.SystemTest, headers map[string]string) error {
-	ownerInput := NewTestOwner()
-	_, _, err := zboxClient.CreateOwner(t, headers, ownerInput)
+	verifyOtpInput := NewVerifyOtpDetails()
+	_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
 	if err != nil {
 		return err
 	}
