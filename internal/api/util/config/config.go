@@ -38,6 +38,8 @@ type Config struct {
 	OwnerWalletMnemonics        string `yaml:"owner_wallet_mnemonics"`
 	DropboxAccessToken          string `yaml:"dropboxAccessToken"`
 	GdriveAccessToken           string `yaml:"gdriveAccessToken"`
+	ConnectionString		    string `yaml:"connectionString"`
+	AccountName					string `yaml:"accountName"`
 }
 
 func Parse(configPath string) *Config {

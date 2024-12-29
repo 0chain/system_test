@@ -60,6 +60,8 @@ func setupConfig() {
 	s3BucketNameAlternate = parsedConfig.S3BucketNameAlternate
 	dropboxAccessToken = parsedConfig.DropboxAccessToken
 	gdriveAccessToken = parsedConfig.GdriveAccessToken
+	accountName = parsedConfig.AccountName
+	connectionString = parsedConfig.ConnectionString
 
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
@@ -111,6 +113,8 @@ var (
 	S3Client              *s3.S3
 	dropboxAccessToken    string
 	gdriveAccessToken     string
+	connectionString 	  string
+	accountName 		  string
 )
 
 var (
