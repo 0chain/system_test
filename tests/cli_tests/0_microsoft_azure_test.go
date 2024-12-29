@@ -32,13 +32,13 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 
 		output, _ := migrateFromMicrosoftAzure(t, configPath, createParams(map[string]interface{}{
 			"connection-string": connectionString,
-			"account-name": accountName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationId,
-			"source":     "azure",
-			"config":     configPath,
-			"configDir":  configDir,
-			"skip":       1,
+			"account-name":      accountName,
+			"wallet":            escapedTestName(t) + "_wallet.json",
+			"allocation":        allocationId,
+			"source":            "azure",
+			"config":            configPath,
+			"configDir":         configDir,
+			"skip":              1,
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
@@ -52,13 +52,13 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 
 		output, err := migrateFromMicrosoftAzure(t, configPath, createParams(map[string]interface{}{
 			"connection-string": connectionString,
-			"account-name": accountName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationId,
-			"source":     "azure",
-			"config":     configPath,
-			"configDir":  configDir,
-			"skip":       1,
+			"account-name":      accountName,
+			"wallet":            escapedTestName(t) + "_wallet.json",
+			"allocation":        allocationId,
+			"source":            "azure",
+			"config":            configPath,
+			"configDir":         configDir,
+			"skip":              1,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -68,12 +68,12 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 	t.RunSequentially("Should fail when allocation flag missing", func(t *test.SystemTest) {
 		output, _ := migrateFromMicrosoftAzure(t, configPath, createParams(map[string]interface{}{
 			"connection-string": connectionString,
-			"account-name": accountName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"source":     "azure",
-			"config":     configPath,
-			"configDir":  configDir,
-			"skip":       1,
+			"account-name":      accountName,
+			"wallet":            escapedTestName(t) + "_wallet.json",
+			"source":            "azure",
+			"config":            configPath,
+			"configDir":         configDir,
+			"skip":              1,
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
@@ -87,13 +87,13 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 
 		output, err := migrateFromMicrosoftAzure(t, configPath, createParams(map[string]interface{}{
 			"connection-string": "invalid",
-			"account-name": accountName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationId,
-			"source":     "azure",
-			"config":     configPath,
-			"configDir":  configDir,
-			"skip":       1,
+			"account-name":      accountName,
+			"wallet":            escapedTestName(t) + "_wallet.json",
+			"allocation":        allocationId,
+			"source":            "azure",
+			"config":            configPath,
+			"configDir":         configDir,
+			"skip":              1,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -109,12 +109,12 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 
 		output, err := migrateFromMicrosoftAzure(t, configPath, createParams(map[string]interface{}{
 			"account-name": accountName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationId,
-			"source":     "azure",
-			"config":     configPath,
-			"configDir":  configDir,
-			"skip":       1,
+			"wallet":       escapedTestName(t) + "_wallet.json",
+			"allocation":   allocationId,
+			"source":       "azure",
+			"config":       configPath,
+			"configDir":    configDir,
+			"skip":         1,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -129,12 +129,12 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 
 		output, err := migrateFromMicrosoftAzure(t, configPath, createParams(map[string]interface{}{
 			"account-name": accountName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationId,
-			"source":     "azure",
-			"config":     configPath,
-			"configDir":  configDir,
-			"skip":       1,
+			"wallet":       escapedTestName(t) + "_wallet.json",
+			"allocation":   allocationId,
+			"source":       "invalid",
+			"config":       configPath,
+			"configDir":    configDir,
+			"skip":         1,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -147,7 +147,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 		func() {
 			defer func() {
 				if r := recover(); r != nil {
-					fmt.Println("Panic occurred:", r) 
+					fmt.Println("Panic occurred:", r)
 					t.Log("Test passed even though a panic occurred")
 					require.Equal(t, "", "")
 				}

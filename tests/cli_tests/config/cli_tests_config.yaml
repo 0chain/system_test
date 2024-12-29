@@ -5,3 +5,11 @@ s3_bucket_name:
 s3_bucket_name_alternate: alternate-test-bucket
 dropboxAccessToken: 
 gdriveAccessToken:
+connectionString:
+accountName:
+googleCloudAccessToken:
+googleCloudRefreshToken:
+googleClientId:
+googleClientSecret:
+oneDriveAccessToken:
+oneDriveRefreshToken:

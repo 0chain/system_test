@@ -441,3 +441,11 @@ func ReadFileMC(testSetup *testing.T) McConfiguration {
 	config.Concurrent = strconv.FormatInt(int64(concurrent), 10)
 	return config
 }
+
+func MigrateFromS3migration(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
+	t.Logf("Migrating Azure container  to Zus...")
+	t.Logf(fmt.Sprintf("params %v", params))
+	t.Logf(fmt.Sprintf("cli %v", cliConfigFilename))
+	t.Logf(fmt.Sprintf("./s3migration migrate  %s", params))
+	return RunCommand(t, fmt.Sprintf("./s3migration migrate  %s", params), 1, time.Hour*2)
+}
