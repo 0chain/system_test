@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
+	cli_utils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,7 +25,7 @@ func Test0Dropbox(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, _ := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
+		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"access-key": dropboxAccessToken,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationId,
@@ -45,7 +44,7 @@ func Test0Dropbox(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"access-key": dropboxAccessToken,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
@@ -65,7 +64,7 @@ func Test0Dropbox(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, _ := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
+		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"access-key": dropboxAccessToken,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"source":     "dropbox",
@@ -82,7 +81,7 @@ func Test0Dropbox(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"access-key": "invalid",
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"source":     "dropbox",
@@ -102,7 +101,7 @@ func Test0Dropbox(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"source":     "dropbox",
 			"config":     configPath,
@@ -120,7 +119,7 @@ func Test0Dropbox(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"source":     "invalid",
 			"config":     configPath,
@@ -153,12 +152,4 @@ func Test0Dropbox(testSetup *testing.T) {
 			})
 		}()
 	})
-}
-
-func migrateFromDropbox(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	t.Logf("Migrating Dropbox  to Zus...")
-	t.Logf(fmt.Sprintf("params %v", params))
-	t.Logf(fmt.Sprintf("cli %v", cliConfigFilename))
-	t.Logf(fmt.Sprintf("./s3migration migrate  %s", params))
-	return cliutils.RunCommand(t, fmt.Sprintf("./s3migration migrate  %s", params), 1, time.Hour*2)
 }

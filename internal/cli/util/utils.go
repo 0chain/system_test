@@ -443,7 +443,7 @@ func ReadFileMC(testSetup *testing.T) McConfiguration {
 }
 
 func MigrateFromS3migration(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	t.Logf("Migrating Azure container  to Zus...")
+	t.Logf("Migrating Cloud Service  to Zus...")
 	t.Logf(fmt.Sprintf("params %v", params))
 	t.Logf(fmt.Sprintf("cli %v", cliConfigFilename))
 	t.Logf(fmt.Sprintf("./s3migration migrate  %s", params))
