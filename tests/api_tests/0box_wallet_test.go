@@ -17,8 +17,8 @@ func NewTestWallet() map[string]string {
 }
 
 func Create0boxTestWallet(t *test.SystemTest, headers map[string]string) error {
-	ownerInput := NewTestOwner()
-	_, _, err := zboxClient.CreateOwner(t, headers, ownerInput)
+	verifyOtpInput := NewVerifyOtpDetails()
+	_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
 	if err != nil {
 		return err
 	}
@@ -47,8 +47,8 @@ func Test0BoxWallet(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		ownerInput := NewTestOwner()
-		_, _, err := zboxClient.CreateOwner(t, headers, ownerInput)
+		verifyOtpInput := NewVerifyOtpDetails()
+		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
 		require.NoError(t, err)
 
 		walletInput := NewTestWallet()
@@ -69,8 +69,8 @@ func Test0BoxWallet(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		ownerInput := NewTestOwner()
-		_, _, err := zboxClient.CreateOwner(t, headers, ownerInput)
+		verifyOtpInput := NewVerifyOtpDetails()
+		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
 		require.NoError(t, err)
 
 		walletInput := NewTestWallet()
@@ -87,8 +87,8 @@ func Test0BoxWallet(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		ownerInput := NewTestOwner()
-		_, _, err := zboxClient.CreateOwner(t, headers, ownerInput)
+		verifyOtpInput := NewVerifyOtpDetails()
+		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
 		require.NoError(t, err)
 
 		walletInput := NewTestWallet()
@@ -111,8 +111,8 @@ func Test0BoxWallet(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		ownerInput := NewTestOwner()
-		_, _, err := zboxClient.CreateOwner(t, headers, ownerInput)
+		verifyOtpInput := NewVerifyOtpDetails()
+		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
 		require.NoError(t, err)
 
 		walletInput := NewTestWallet()
@@ -130,8 +130,8 @@ func Test0BoxWallet(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		ownerInput := NewTestOwner()
-		_, _, err := zboxClient.CreateOwner(t, headers, ownerInput)
+		verifyOtpInput := NewVerifyOtpDetails()
+		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
 		require.NoError(t, err)
 
 		walletInput := NewTestWallet()
@@ -159,8 +159,8 @@ func Test0BoxWallet(testSetup *testing.T) {
 		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
 		Teardown(t, headers)
 
-		ownerInput := NewTestOwner()
-		_, _, err := zboxClient.CreateOwner(t, headers, ownerInput)
+		verifyOtpInput := NewVerifyOtpDetails()
+		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
 		require.NoError(t, err)
 
 		walletInput := NewTestWallet()
