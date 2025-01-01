@@ -59,7 +59,16 @@ func setupConfig() {
 	s3bucketName = parsedConfig.S3BucketName
 	s3BucketNameAlternate = parsedConfig.S3BucketNameAlternate
 	dropboxAccessToken = parsedConfig.DropboxAccessToken
+	dropboxRefreshToken = parsedConfig.DropboxRefreshToken
 	gdriveAccessToken = parsedConfig.GdriveAccessToken
+	accountName = parsedConfig.AccountName
+	connectionString = parsedConfig.ConnectionString
+	googleCloudConsoleAccessToken = parsedConfig.GoogleCloudAccessToken
+	googleCloudConsoleRefreshToken = parsedConfig.GoogleCloudRefreshToken
+	googleClientId = parsedConfig.GoogleClientId
+	googleClientSecret = parsedConfig.GoogleClientSecret
+	oneDriveAccessToken = parsedConfig.OneDriveAccessToken
+	oneDriveRefreshToken = parsedConfig.OneDriveRefreshToken
 
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
@@ -101,16 +110,25 @@ var (
 	sharder01ID string
 	sharder02ID string
 
-	ethereumNodeURL       string
-	tokenAddress          string
-	ethereumAddress       string
-	s3SecretKey           string
-	s3AccessKey           string
-	s3bucketName          string
-	s3BucketNameAlternate string
-	S3Client              *s3.S3
-	dropboxAccessToken    string
-	gdriveAccessToken     string
+	ethereumNodeURL                string
+	tokenAddress                   string
+	ethereumAddress                string
+	s3SecretKey                    string
+	s3AccessKey                    string
+	s3bucketName                   string
+	s3BucketNameAlternate          string
+	S3Client                       *s3.S3
+	dropboxAccessToken             string
+	dropboxRefreshToken            string
+	gdriveAccessToken              string
+	connectionString               string
+	accountName                    string
+	googleCloudConsoleAccessToken  string
+	googleCloudConsoleRefreshToken string
+	googleClientId                 string
+	googleClientSecret             string
+	oneDriveAccessToken            string
+	oneDriveRefreshToken           string
 )
 
 var (
@@ -213,6 +231,7 @@ func TestMain(m *testing.M) { //nolint:gocyclo
 		log.Fatalln("Failed to create Dropbox session:", err_dp)
 	}
 
+	// Create a session with Gdrive
 	sess_gd, err_gd := session.NewSession(&aws.Config{
 		Credentials: credentials.NewStaticCredentials(
 			gdriveAccessToken, "", ""),

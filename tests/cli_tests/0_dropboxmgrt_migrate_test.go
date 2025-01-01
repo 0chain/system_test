@@ -4,18 +4,17 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
+	cli_utils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
 func Test0Dropbox(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	if dropboxAccessToken == "" {
-		t.Skip("dropbox Access Token was missing")
+	if dropboxAccessToken == "" || dropboxRefreshToken == "" {
+		t.Skip("Missing Required Tokens for Dropbox migration")
 	}
 
 	t.SetSmokeTests("Should migrate existing Dropbox folder and files successfully")
@@ -26,16 +25,16 @@ func Test0Dropbox(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, _ := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
-			"access-token": dropboxAccessToken,
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"allocation":   allocationId,
-			"source":       "dropbox",
-			"config":       configPath,
-			"configDir":    configDir,
-			"skip":         1,
+		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
+			"access-key": dropboxAccessToken,
+			"secret-key": dropboxRefreshToken,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"allocation": allocationId,
+			"source":     "dropbox",
+			"config":     configPath,
+			"configDir":  configDir,
+			"skip":       1,
 		}))
-
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
 	})
 
@@ -45,14 +44,15 @@ func Test0Dropbox(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
-			"access-token": dropboxAccessToken,
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"allocation":   allocationID,
-			"source":       "dropbox",
-			"config":       configPath,
-			"configDir":    configDir,
-			"skip":         1,
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
+			"access-key": dropboxAccessToken,
+			"secret-key": dropboxRefreshToken,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"allocation": allocationID,
+			"source":     "dropbox",
+			"config":     configPath,
+			"configDir":  configDir,
+			"skip":       1,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -65,12 +65,13 @@ func Test0Dropbox(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, _ := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
-			"access-token": dropboxAccessToken,
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"source":       "dropbox",
-			"config":       configPath,
-			"configDir":    configDir,
+		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
+			"access-key": dropboxAccessToken,
+			"secret-key": dropboxRefreshToken,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"source":     "dropbox",
+			"config":     configPath,
+			"configDir":  configDir,
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
@@ -82,13 +83,14 @@ func Test0Dropbox(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
-			"access-token": "invalid",
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"source":       "dropbox",
-			"config":       configPath,
-			"configDir":    configDir,
-			"allocation":   allocationID,
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
+			"access-key": "invalid",
+			"secret-key": "invalid",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"source":     "dropbox",
+			"config":     configPath,
+			"configDir":  configDir,
+			"allocation": allocationID,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -102,7 +104,7 @@ func Test0Dropbox(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"source":     "dropbox",
 			"config":     configPath,
@@ -110,9 +112,10 @@ func Test0Dropbox(testSetup *testing.T) {
 			"allocation": allocationID,
 		}))
 
+		t.Logf("EXpected log  %v", strings.Join(output, "\n"))
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "Missing Access Token", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "Missing fields: access key, secret key")
 	})
 	t.RunSequentially("Should fail when source is invalid", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
@@ -120,45 +123,45 @@ func Test0Dropbox(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromDropbox(t, configPath, createParams(map[string]interface{}{
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"source":       "invalid",
-			"config":       configPath,
-			"configDir":    configDir,
-			"allocation":   allocationID,
-			"access-token": dropboxAccessToken,
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
+			"access-key": dropboxAccessToken,
+			"secret-key": dropboxRefreshToken,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"source":     "invalid",
+			"config":     configPath,
+			"configDir":  configDir,
+			"allocation": allocationID,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "invalid source", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "invalid source. Supported sources: s3, google_drive, dropbox, onedrive, azure, google_cloud_storage")
 	})
 
 	t.RunSequentially("Should fail when folder too large for allocation", func(t *test.SystemTest) {
 		allocSize := int64(5 * KB)
-		func() {
-			defer func() {
-				// recover from panic if one occurred
-				if r := recover(); r != nil {
-					fmt.Println("Panic occurred:", r) // Log the panic
-					t.Log("Test passed even though a panic occurred")
-					// Set the test status to passed
-					require.Equal(t, "", "")
-				}
-			}()
-
-			// Set up allocation with wallet
-			_ = setupAllocation(t, configPath, map[string]interface{}{
-				"size": allocSize,
-			})
+		var err error
+		defer func() {
+			require.Contains(t, err.Error(), "allocation match not found")
 		}()
+		_, err = setupAllocationWithWalletWithoutTest(t, escapedTestName(t)+"_wallet.json", configPath, map[string]interface{}{
+			"size": allocSize,
+		})
 	})
 }
 
-func migrateFromDropbox(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	t.Logf("Migrating Dropbox  to Zus...")
-	t.Logf(fmt.Sprintf("params %v", params))
-	t.Logf(fmt.Sprintf("cli %v", cliConfigFilename))
-	t.Logf(fmt.Sprintf("./s3migration migrate  %s", params))
-	return cliutils.RunCommand(t, fmt.Sprintf("./s3migration migrate  %s", params), 1, time.Hour*2)
+func setupAllocationWithWalletWithoutTest(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) (string, error) {
+	options := map[string]interface{}{"size": "10000000", "lock": "5"}
+
+	for _, params := range extraParams {
+		for k, v := range params {
+			options[k] = v
+		}
+	}
+	createWalletForName(walletName)
+	output, _ := createNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(options))
+	defer func() {
+		fmt.Printf("err: %v\n", output)
+	}()
+	return getAllocationID(output[0])
 }

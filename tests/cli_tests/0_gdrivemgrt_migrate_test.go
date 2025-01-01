@@ -1,13 +1,11 @@
 package cli_tests
 
 import (
-	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
+	cli_utils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,13 +24,13 @@ func Test0Gdrive(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, _ := migrateFromGdrive(t, configPath, createParams(map[string]interface{}{
-			"access-token": gdriveAccessToken,
-			"allocation":   allocationID,
-			"source":       "google_drive",
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"config":       configPath,
-			"configDir":    configDir,
+		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
+			"access-key": gdriveAccessToken,
+			"allocation": allocationID,
+			"source":     "google_drive",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"config":     configPath,
+			"configDir":  configDir,
 		}))
 		require.GreaterOrEqual(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
@@ -44,13 +42,13 @@ func Test0Gdrive(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromGdrive(t, configPath, createParams(map[string]interface{}{
-			"access-token": gdriveAccessToken,
-			"allocation":   allocationID,
-			"source":       "google_drive",
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"config":       configPath,
-			"configDir":    configDir,
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
+			"access-key": gdriveAccessToken,
+			"allocation": allocationID,
+			"source":     "google_drive",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"config":     configPath,
+			"configDir":  configDir,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -64,13 +62,13 @@ func Test0Gdrive(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromGdrive(t, configPath, createParams(map[string]interface{}{
-			"access-token": gdriveAccessToken,
-			"allocation":   allocationID,
-			"source":       "google_drive",
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"config":       configPath,
-			"configDir":    configDir,
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
+			"access-key": gdriveAccessToken,
+			"allocation": allocationID,
+			"source":     "google_drive",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"config":     configPath,
+			"configDir":  configDir,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -84,12 +82,12 @@ func Test0Gdrive(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, _ := migrateFromGdrive(t, configPath, createParams(map[string]interface{}{
-			"access-token": dropboxAccessToken,
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"source":       "google_drive",
-			"config":       configPath,
-			"configDir":    configDir,
+		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
+			"access-key": gdriveAccessToken,
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"source":     "google_drive",
+			"config":     configPath,
+			"configDir":  configDir,
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
@@ -101,13 +99,13 @@ func Test0Gdrive(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromGdrive(t, configPath, createParams(map[string]interface{}{
-			"access-token": "invalid",
-			"wallet":       escapedTestName(t) + "_wallet.json",
-			"source":       "google_drive",
-			"config":       configPath,
-			"configDir":    configDir,
-			"allocation":   allocationID,
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
+			"access-key": "invalid",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"source":     "google_drive",
+			"config":     configPath,
+			"configDir":  configDir,
+			"allocation": allocationID,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -121,7 +119,7 @@ func Test0Gdrive(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromGdrive(t, configPath, createParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"source":     "google_drive",
 			"config":     configPath,
@@ -131,14 +129,6 @@ func Test0Gdrive(testSetup *testing.T) {
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "Missing Access Token", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "invalid Google Drive access token", "Output was not as expected", strings.Join(output, "\n"))
 	})
-}
-
-func migrateFromGdrive(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	t.Logf("Migrating Gdrive  to Zus...")
-	t.Logf(fmt.Sprintf("params %v", params))
-	t.Logf(fmt.Sprintf("cli %v", cliConfigFilename))
-	t.Logf(fmt.Sprintf("./s3migration migrate  %s", params))
-	return cliutils.RunCommand(t, fmt.Sprintf("./s3migration migrate  %s", params), 1, time.Hour*2)
 }
