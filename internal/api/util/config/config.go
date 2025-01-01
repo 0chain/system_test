@@ -37,6 +37,7 @@ type Config struct {
 	BlobberOwnerWalletMnemonics string `yaml:"blobber_owner_wallet_mnemonics"`
 	OwnerWalletMnemonics        string `yaml:"owner_wallet_mnemonics"`
 	DropboxAccessToken          string `yaml:"dropboxAccessToken"`
+	DropboxRefreshToken         string `yaml:"dropboxRefreshToken"`
 	GdriveAccessToken           string `yaml:"gdriveAccessToken"`
 	ConnectionString            string `yaml:"connectionString"`
 	AccountName                 string `yaml:"accountName"`

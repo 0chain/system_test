@@ -59,6 +59,7 @@ func setupConfig() {
 	s3bucketName = parsedConfig.S3BucketName
 	s3BucketNameAlternate = parsedConfig.S3BucketNameAlternate
 	dropboxAccessToken = parsedConfig.DropboxAccessToken
+	dropboxRefreshToken = parsedConfig.DropboxRefreshToken
 	gdriveAccessToken = parsedConfig.GdriveAccessToken
 	accountName = parsedConfig.AccountName
 	connectionString = parsedConfig.ConnectionString
@@ -118,6 +119,7 @@ var (
 	s3BucketNameAlternate          string
 	S3Client                       *s3.S3
 	dropboxAccessToken             string
+	dropboxRefreshToken            string
 	gdriveAccessToken              string
 	connectionString               string
 	accountName                    string
