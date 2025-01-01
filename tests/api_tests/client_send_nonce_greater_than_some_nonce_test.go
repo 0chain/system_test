@@ -2,10 +2,11 @@ package api_tests
 
 import (
 	"encoding/json"
-	"github.com/0chain/gosdk/core/transaction"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/0chain/gosdk/core/transaction"
 
 	coreClient "github.com/0chain/gosdk/core/client"
 	"github.com/0chain/gosdk/zcncore"

@@ -57,9 +57,14 @@ func Test0BoxReferral(testSetup *testing.T) {
 		require.NotNil(t, zboxRferral)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		_, response, err = zboxClient.CreateOwner(t, referralHeaders, map[string]string{"username": "referred_user", "email": "dbiecougwbfvcsoo@gmail.com", "phone_number": "+15446424343"})
+		verifyOtpInput := NewVerifyOtpDetails()
+		verifyOtpInput["user_id"] = client.X_APP_USER_ID_R
+		verifyOtpInput["username"] = "referred_user"
+		verifyOtpInput["email"] = "dbiecougwbfvcsoo@gmail.com"
+		verifyOtpInput["phone_number"] = "+15446424343"
+		_, _, err = zboxClient.VerifyOtpDetails(t, referralHeaders, verifyOtpInput)
 		require.NoError(t, err)
-		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		zboxWallet, response, err := zboxClient.CreateWallet(t, referralHeaders, map[string]string{
 			"name":    "referred_wallet",
@@ -89,9 +94,15 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 		require.NotNil(t, zboxRferral)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		_, response, err = zboxClient.CreateOwner(t, referralHeaders, map[string]string{"username": "referred_user", "email": "hfwdwhbacboabowrs@gmail.com", "phone_number": "+14446424343"})
+		verifyOtpInput := NewVerifyOtpDetails()
+		verifyOtpInput["user_id"] = client.X_APP_USER_ID_R
+		verifyOtpInput["username"] = "referred_user"
+		verifyOtpInput["email"] = "dbiecougwbfvcsoo@gmail.com"
+		verifyOtpInput["phone_number"] = "+15446424343"
+		_, response, err = zboxClient.VerifyOtpDetails(t, referralHeaders, verifyOtpInput)
 		require.NoError(t, err)
-		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		zboxWallet, response, err := zboxClient.CreateWallet(t, referralHeaders, map[string]string{
 			"name":    "referred_wallet",
