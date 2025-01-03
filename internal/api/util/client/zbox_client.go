@@ -23,6 +23,11 @@ const (
 	X_APP_CLIENT_ID_R        = "bcf5f517be521e0ffdb22d1fc26a35abdec8556bcb9ed075244a358df7337cd0"
 	X_APP_CLIENT_KEY_R       = "de9351bbf460c761ea979764831759369ced3c6de38b856e7921eee9cc034323cce23c562c74a0629867fbea33d5009b9f473bc3b766871b65e7cf864ba4301d"
 	X_APP_CLIENT_SIGNATURE_R = "43fa947257ae0b5da8b073f0efeaa2570c4faf66fcabd93407e3597bc34e440b"
+	//TODO: verify client B info
+	X_APP_USER_ID_B          = "test_user_id_B"
+	X_APP_CLIENT_ID_B        = "fc6ed0246c8bb4f7251acf521c81d7fdb3f042a7bb2234a032723c9bba8dda9b"
+	X_APP_CLIENT_KEY_B       = "92843dc9dafc041e88b778356bf39533606911828d50f420fb24e0cc2dcc4b06a8ed6dc0f083c988bc8cc64c7525f943dff8d1ece4955e456c450d34faf8da12"
+	X_APP_CLIENT_SIGNATURE_B = "11648e1f79b90419166c13f09d9bdf15e32105591c1f94d461aa82c569480f17"
 	X_APP_ID_TOKEN           = "test_firebase_token"
 	X_APP_TIMESTAMP          = "123456789"
 	X_APP_CSRF               = "test_csrf_token"
@@ -586,6 +591,80 @@ func (c *ZboxClient) DeleteShareinfo(t *test.SystemTest, headers map[string]stri
 		RequiredStatusCode: 200,
 	}, HttpDELETEMethod)
 	return message, resp, err
+}
+
+func (c *ZboxClient) CreateShareRequest(t *test.SystemTest, headers, shareRequestData map[string]string) (*model.ZboxMessageDataResponse[int64], *resty.Response, error) {
+	t.Logf("Posting ShareRequest using 0box...")
+	var out model.ZboxMessageDataResponse[int64]
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/sharereq")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &out,
+		FormData:           shareRequestData,
+		Headers:            headers,
+		RequiredStatusCode: 201,
+	}, HttpPOSTMethod)
+	return &out, resp, err
+}
+
+func (c *ZboxClient) GetReceivedShareReq(t *test.SystemTest, headers map[string]string, queryParams map[string]string) (*model.ZboxMessageDataResponse[[]model.ZboxShareRequest], *resty.Response, error) {
+	t.Logf("Getting received share requests for [%v] using 0box...", headers["X-App-User-ID"])
+	var out model.ZboxMessageDataResponse[[]model.ZboxShareRequest]
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/sharereq/received")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &out,
+		QueryParams:        queryParams,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &out, resp, err
+}
+
+func (c *ZboxClient) GetRequestedShareReq(t *test.SystemTest, headers map[string]string, queryParams map[string]string) (*model.ZboxMessageDataResponse[[]model.ZboxShareRequest], *resty.Response, error) {
+	t.Logf("Getting requested share requests for [%v] using 0box...", headers["X-App-User-ID"])
+	var out model.ZboxMessageDataResponse[[]model.ZboxShareRequest]
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/sharereq/requested")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &out,
+		QueryParams:        queryParams,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return &out, resp, err
+}
+
+func (c *ZboxClient) UpdateShareReq(t *test.SystemTest, headers, updateShareReqData map[string]string) (*model.ZboxMessageDataResponse[model.ZboxShareRequest], *resty.Response, error) {
+	t.Logf("Updating ShareRequest using 0box...")
+	var out model.ZboxMessageDataResponse[model.ZboxShareRequest]
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/sharereq")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &out,
+		FormData:           updateShareReqData,
+		Headers:            headers,
+		RequiredStatusCode: 201,
+	}, HttpPUTMethod)
+	return &out, resp, err
 }
 
 func (c *ZboxClient) CreateNftCollection(t *test.SystemTest, headers, nfCollectionData map[string]string) (*model.ZboxNftCollection, *resty.Response, error) {
