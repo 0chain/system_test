@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subset of 0Chain System test suite [fix_enterprise-blobber-tests/b1792570] ran against [dev-5.devnet-0chain.net] at [2025-01-03_19.10.14]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">Subset of 0Chain System test suite [fix_enterprise-blobber-tests/b1792570] ran against [dev-5.devnet-0chain.net] at [2025-01-03_19.10.14]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>19</strong>Duration: <strong>1ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>19</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>0</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">January 3, 2025 19:10:50</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup  " id="0"></div>
+            
+                <div class="testResultGroup  " id="1"></div>
+            
+                <div class="testResultGroup  " id="2"></div>
+            
+                <div class="testResultGroup  " id="3"></div>
+            
+                <div class="testResultGroup  " id="4"></div>
+            
+                <div class="testResultGroup  " id="5"></div>
+            
+                <div class="testResultGroup  " id="6"></div>
+            
+                <div class="testResultGroup  " id="7"></div>
+            
+                <div class="testResultGroup  " id="8"></div>
+            
+                <div class="testResultGroup  " id="9"></div>
+            
+                <div class="testResultGroup  " id="10"></div>
+            
+                <div class="testResultGroup  " id="11"></div>
+            
+                <div class="testResultGroup  " id="12"></div>
+            
+                <div class="testResultGroup  " id="13"></div>
+            
+                <div class="testResultGroup  " id="14"></div>
+            
+                <div class="testResultGroup  " id="15"></div>
+            
+                <div class="testResultGroup  " id="16"></div>
+            
+                <div class="testResultGroup  " id="17"></div>
+            
+                <div class="testResultGroup  " id="18"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":0,"Output":["","--- PASS: TestCreateEnterpriseAllocation (0.00s)",""],"Passed":true,"Skipped":false,"TestFileName":"enterprise_blobber_create_allocation_test.go","TestFunctionDetail":{"Line":19,"Col":1}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_for_another_owner_should_Work","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":12.46,"Output":["","    enterprise_blobber_create_allocation_test.go:116: Test case [Create enterprise allocation for another owner should Work] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation for another owner should Work] start at [01-03-2025 19:10:19] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  7d60552dc910d8ca256dd3fbde5ca8c4c43fa9565dbcc482bb32128690168d17]\n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  e9135371ab1ef746c0d62e74e0c353e8fd479ee24965bdc0cd9cd2c40eab5645]\n","    wallet.go:29: Executing faucet...\n","    wallet.go:71: Getting wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:71: Getting wallet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:615: Creating new allocation...\n","    allocation.go:204: Uploading file...\n","    allocation.go:204: Uploading file...\n","    enterprise_blobber_create_allocation_test.go:116: Test case [Create enterprise allocation for another owner should Work] exit at [01-03-2025 19:10:29]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_for_another_owner_should_Work (12.46s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_for_locking_cost_equal_to_the_cost_calculated_should_work","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":6.53,"Output":["","    enterprise_blobber_create_allocation_test.go:49: Test case [Create enterprise allocation for locking cost equal to the cost calculated should work] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation for locking cost equal to the cost calculated should work] start at [01-03-2025 19:10:25] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  41c4259c26f265cb9f0eaf2e345c476cca41f3f6e0d8600a2464770d570272d4]\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:615: Creating new allocation...\n","    enterprise_blobber_create_allocation_test.go:615: Creating new allocation...\n","    enterprise_blobber_create_allocation_test.go:49: Test case [Create enterprise allocation for locking cost equal to the cost calculated should work] exit at [01-03-2025 19:10:29]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_for_locking_cost_equal_to_the_cost_calculated_should_work (6.53s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_for_locking_cost_less_than_minimum_cost_should_not_work","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":22.09,"Output":["","    enterprise_blobber_create_allocation_test.go:440: Test case [Create enterprise allocation for locking cost less than minimum cost should not work] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation for locking cost less than minimum cost should not work] start at [01-03-2025 19:10:28] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  2c56c60bceef549f269fd4b659949a38772c2f581e4af18612182678cf079331]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:615: Creating new allocation...\n","    enterprise_blobber_create_allocation_test.go:615: Creating new allocation...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: allocation_creation_failed: not enough tokens to honor the allocation cost 149011 \u003c 4000000000]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: allocation_creation_failed: not enough tokens to honor the allocation cost 149011 \u003c 4000000000]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [Error creating allocation: allocation_creation_failed: not enough tokens to honor the allocation cost 149011 \u003c 4000000000]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/03 19:10:47.773090 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk        [INFO]   2025/01/03 19:10:47.773183 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31mError creating allocation: allocation_creation_failed: not enough tokens to honor the allocation cost 149011 \u003c 4000000000\n","    enterprise_blobber_create_allocation_test.go:440: Test case [Create enterprise allocation for locking cost less than minimum cost should not work] exit at [01-03-2025 19:10:50]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_for_locking_cost_less_than_minimum_cost_should_not_work (22.09s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_for_locking_negative_cost_should_not_work","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":4.41,"Output":["","    enterprise_blobber_create_allocation_test.go:478: Test case [Create enterprise allocation for locking negative cost should not work] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation for locking negative cost should not work] start at [01-03-2025 19:10:19] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  c9e785b23baf969df4b423eb5a906deca4754b2f66e1e4915e606f461895494f]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:478: Test case [Create enterprise allocation for locking negative cost should not work] exit at [01-03-2025 19:10:23]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_for_locking_negative_cost_should_not_work (4.41s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_should_have_all_file_options_permitted_by_default","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":8.98,"Output":["","    enterprise_blobber_create_allocation_test.go:259: Test case [Create enterprise allocation should have all file options permitted by default] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation should have all file options permitted by default] start at [01-03-2025 19:10:19] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  c876bb90898cb8082bf6dea4bcce5ad58dbe05d2bd1bed2bfeca66075d143c22]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    allocation.go:231: Get Allocation...\n","    enterprise_blobber_create_allocation_test.go:259: Test case [Create enterprise allocation should have all file options permitted by default] exit at [01-03-2025 19:10:25]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_should_have_all_file_options_permitted_by_default (8.98s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_third_party_extendable_should_be_false_by_default_and_change_with_flags","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":13.48,"Output":["","    enterprise_blobber_create_allocation_test.go:396: Test case [Create enterprise allocation third_party_extendable should be false by default and change with flags] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation third_party_extendable should be false by default and change with flags] start at [01-03-2025 19:10:19] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  0449ed9524e025dfbdd0ad4ceeb9b3c68a5f65201ca967827c1ae0fd08e1e3a5]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    allocation.go:231: Get Allocation...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    allocation.go:231: Get Allocation...\n","    enterprise_blobber_create_allocation_test.go:396: Test case [Create enterprise allocation third_party_extendable should be false by default and change with flags] exit at [01-03-2025 19:10:28]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_third_party_extendable_should_be_false_by_default_and_change_with_flags (13.48s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_blobber_auth_tickets_should_pass","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":8.98,"Output":["","    enterprise_blobber_create_allocation_test.go:22: Test case [Create enterprise allocation with blobber auth tickets should pass] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation with blobber auth tickets should pass] start at [01-03-2025 19:10:19] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  2aab033ba4ee9d0156f9415d715b7a42c0c81bdfa450c58ed917806ecfc7ad26]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    allocation.go:135: Creating new enterprise allocation...\n","    enterprise_blobber_create_allocation_test.go:22: Test case [Create enterprise allocation with blobber auth tickets should pass] exit at [01-03-2025 19:10:25]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_blobber_auth_tickets_should_pass (8.98s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_data_specified_Should_Work","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":8.65,"Output":["","    enterprise_blobber_create_allocation_test.go:203: Test case [Create enterprise allocation with data specified Should Work] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation with data specified Should Work] start at [01-03-2025 19:10:19] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  2cabcb63a02a9700d1127200d21be7fd657379b659531e953b94fb23fdadd940]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:615: Creating new allocation...\n","    enterprise_blobber_create_allocation_test.go:203: Test case [Create enterprise allocation with data specified Should Work] exit at [01-03-2025 19:10:25]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_data_specified_Should_Work (8.65s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_no_parameter_(missing_lock)_Should_Fail","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":4.59,"Output":["","    enterprise_blobber_create_allocation_test.go:591: Test case [Create enterprise allocation with no parameter (missing lock) Should Fail] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation with no parameter (missing lock) Should Fail] start at [01-03-2025 19:10:25] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  698cb0cdd622a3842f3df5e23d4dd091ca919e2e35197bdb7fc147c5e261d714]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:591: Test case [Create enterprise allocation with no parameter (missing lock) Should Fail] exit at [01-03-2025 19:10:30]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_no_parameter_(missing_lock)_Should_Fail (4.59s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_parity_specified_Should_Work","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":8.05,"Output":["","    enterprise_blobber_create_allocation_test.go:175: Test case [Create enterprise allocation with parity specified Should Work] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation with parity specified Should Work] start at [01-03-2025 19:10:19] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  6b7a50b94446e13aa304b1dd593d4eb91792d03f1788e6308fb33d3b25b389f3]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:615: Creating new allocation...\n","    enterprise_blobber_create_allocation_test.go:175: Test case [Create enterprise allocation with parity specified Should Work] exit at [01-03-2025 19:10:24]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_parity_specified_Should_Work (8.05s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_size_smaller_than_limit_(size_\u003c_1024)_Should_Fail","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":6.44,"Output":["","    enterprise_blobber_create_allocation_test.go:573: Test case [Create enterprise allocation with size smaller than limit (size \u003c 1024) Should Fail] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation with size smaller than limit (size \u003c 1024) Should Fail] start at [01-03-2025 19:10:19] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  c086f41123648ad0b3dd7cff761967797b9dfb029c4b17ab2592e80218007990]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:573: Test case [Create enterprise allocation with size smaller than limit (size \u003c 1024) Should Fail] exit at [01-03-2025 19:10:25]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_size_smaller_than_limit_(size_\u003c_1024)_Should_Fail (6.44s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_smallest_possible_size_(1024)_Should_Work","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":7.68,"Output":["","    enterprise_blobber_create_allocation_test.go:89: Test case [Create enterprise allocation with smallest possible size (1024) Should Work] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation with smallest possible size (1024) Should Work] start at [01-03-2025 19:10:23] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  4d5c876596c6c7bc9acc996087217f5ab94affeec62c153db5fa8525ccb48077]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:615: Creating new allocation...\n","    enterprise_blobber_create_allocation_test.go:89: Test case [Create enterprise allocation with smallest possible size (1024) Should Work] exit at [01-03-2025 19:10:29]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_smallest_possible_size_(1024)_Should_Work (7.68s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_some_forbidden_file_options_flags_should_pass_and_show_in_allocation","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":30.17,"Output":["","    enterprise_blobber_create_allocation_test.go:286: Test case [Create enterprise allocation with some forbidden file options flags should pass and show in allocation] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation with some forbidden file options flags should pass and show in allocation] start at [01-03-2025 19:10:19] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  b93b05e7593841474be82e76edf5969bc952d4c1a3ac3a761a42bdefc6e06f01]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    allocation.go:231: Get Allocation...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    allocation.go:231: Get Allocation...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    allocation.go:231: Get Allocation...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    allocation.go:231: Get Allocation...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    allocation.go:231: Get Allocation...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    allocation.go:231: Get Allocation...\n","    enterprise_blobber_create_allocation_test.go:286: Test case [Create enterprise allocation with some forbidden file options flags should pass and show in allocation] exit at [01-03-2025 19:10:36]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_some_forbidden_file_options_flags_should_pass_and_show_in_allocation (30.17s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_too_large_data_(Greater_than_the_number_of_blobbers)_Should_Fail","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":6.56,"Output":["","    enterprise_blobber_create_allocation_test.go:539: Test case [Create enterprise allocation with too large data (Greater than the number of blobbers) Should Fail] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation with too large data (Greater than the number of blobbers) Should Fail] start at [01-03-2025 19:10:19] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  829acbbba1c5eb4653312dc8ae6eaf93794c638805f7e0ba3f6de9779d90a429]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:539: Test case [Create enterprise allocation with too large data (Greater than the number of blobbers) Should Fail] exit at [01-03-2025 19:10:25]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_too_large_data_(Greater_than_the_number_of_blobbers)_Should_Fail (6.56s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_too_large_data_and_parity_(Greater_than_the_number_of_blobbers)_Should_Fail","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":6.42,"Output":["","    enterprise_blobber_create_allocation_test.go:556: Test case [Create enterprise allocation with too large data and parity (Greater than the number of blobbers) Should Fail] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation with too large data and parity (Greater than the number of blobbers) Should Fail] start at [01-03-2025 19:10:27] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  c7a47e69ba3a90187e9ff90cb99a4ab6cf89f21de98768860c785f43891ff9e2]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:556: Test case [Create enterprise allocation with too large data and parity (Greater than the number of blobbers) Should Fail] exit at [01-03-2025 19:10:34]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_too_large_data_and_parity_(Greater_than_the_number_of_blobbers)_Should_Fail (6.42s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_too_large_parity_(Greater_than_the_number_of_blobbers)_Should_Fail","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":6.4,"Output":["","    enterprise_blobber_create_allocation_test.go:523: Test case [Create enterprise allocation with too large parity (Greater than the number of blobbers) Should Fail] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation with too large parity (Greater than the number of blobbers) Should Fail] start at [01-03-2025 19:10:27] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  8c35bdf8aa99465688b0b11d63e9e5f6844474e336c384e0d93b9218e68ae7e3]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:523: Test case [Create enterprise allocation with too large parity (Greater than the number of blobbers) Should Fail] exit at [01-03-2025 19:10:33]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_too_large_parity_(Greater_than_the_number_of_blobbers)_Should_Fail (6.40s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_write_price_range_Should_Work","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":8.97,"Output":["","    enterprise_blobber_create_allocation_test.go:231: Test case [Create enterprise allocation with write price range Should Work] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation with write price range Should Work] start at [01-03-2025 19:10:19] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  6c10d67f8beb9c0f6f6c018d12ba89bcf823a810f019d746f20d13f66ed7d9af]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    enterprise_blobber_create_allocation_test.go:615: Creating new allocation...\n","    enterprise_blobber_create_allocation_test.go:231: Test case [Create enterprise allocation with write price range Should Work] exit at [01-03-2025 19:10:25]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_with_write_price_range_Should_Work (8.97s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"","SkippedIndicator":"","TestResults":[{"TestName":"TestCreateEnterpriseAllocation/Create_enterprise_allocation_without_blobber_auth_tickets_should_fail","Package":"github.com/0chain/system_test/tests/tokenomics_tests","ElapsedTime":22.86,"Output":["","    enterprise_blobber_create_allocation_test.go:502: Test case [Create enterprise allocation without blobber auth tickets should fail] scheduled at [01-03-2025 19:10:19] \n","","","    system_test_framework.go:148: Test case [Create enterprise allocation without blobber auth tickets should fail] start at [01-03-2025 19:10:19] \n","    wallet.go:49: creating wallet...\n","    wallet.go:29: Executing faucet...\n","    wallet.go:66: faucet output: [Execute faucet smart contract success with txn :  b4a061971d9f1804c7e4bd259279f89b07eebcca4f99f5495af99514926c35dc]\n","    wallet.go:29: Executing faucet...\n","    blobbers.go:30: Requesting blobber list...\n","    wallet.go:71: Getting wallet...\n","    allocation.go:135: Creating new enterprise allocation...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber ff6424d80c49e57b7c2f0621b726f55efc6ca9ce327bdff89ef364adb8278b22 auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 48592ae54bcd3f6e4f36f6e94b95247afb1addcf4704a87967f6e5f25bcb625e auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 3812b813bdbba23d548442add2e49d24edd1a178ba0e8daf878599270a2be0ae auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 45d0de870ee7cd36f83fd633c9989b9e640f0b386c639aa6c178923f3e968fc1 auth ticket verification fa","iled: invalid_auth_ticket: empty auth ticket]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber ff6424d80c49e57b7c2f0621b726f55efc6ca9ce327bdff89ef364adb8278b22 auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 48592ae54bcd3f6e4f36f6e94b95247afb1addcf4704a87967f6e5f25bcb625e auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 3812b813bdbba23d548442add2e49d24edd1a178ba0e8daf878599270a2be0ae auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 45d0de870ee7cd36f83fd633c9989b9e640f0b386c639aa6c178923f3e968fc1 auth ticket verification fa","iled: invalid_auth_ticket: empty auth ticket]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [Error creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber ff6424d80c49e57b7c2f0621b726f55efc6ca9ce327bdff89ef364adb8278b22 auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 48592ae54bcd3f6e4f36f6e94b95247afb1addcf4704a87967f6e5f25bcb625e auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 3812b813bdbba23d548442add2e49d24edd1a178ba0e8daf878599270a2be0ae auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 45d0de870ee7cd36f83fd633c9989b9e640f0b386c639aa6c178923f3e968fc1 au","th ticket verification failed: invalid_auth_ticket: empty auth ticket]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/03 19:10:39.738823 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk        [INFO]   2025/01/03 19:10:39.738911 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31mError creating allocation: allocation_creation_failed: Not enough blobbers to honor the allocation: blobber ff6424d80c49e57b7c2f0621b726f55efc6ca9ce327bdff89ef364adb8278b22 auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 5064a8e0ce29a8e92d43a93c6b8a0a786e89d53642df65ad721ebd6915d32671 auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 48592ae54bcd3f6e4f36f6e94b95247afb1addcf4704a87967f6e5f25bcb625e auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 76a781712267e84136f84853040fd95c03c62c9a9444a94b9ce74b5d30d6340d auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 3812b813bdbba23d548442add2e49d24edd1a178ba0e8daf878599270a2be0ae auth ticket verification failed: invalid_auth_ticket: empty auth ticket, blobber 45d0de870ee7cd36f83fd633c9989b9e640f0b386c639aa6c178923f3e968fc1 auth ticket verification failed: invalid_auth_ticket: empty auth ticket\n","    enterprise_blobber_create_allocation_test.go:502: Test case [Create enterprise allocation without blobber auth tickets should fail] exit at [01-03-2025 19:10:41]\n","--- PASS: TestCreateEnterpriseAllocation/Create_enterprise_allocation_without_blobber_auth_tickets_should_fail (22.86s)",""],"Passed":true,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
