@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>0Chain System test suite: Kill tests [share-access-request/76529a34] ran against [dev-7.devnet-0chain.net] at [2025-01-04_06.24.53]</title>
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            background-color: #f3f3f3;
+            border-top: 2px #dee6e8 solid;
+            margin: 0;
+        }
+
+        div.pageHeader span.projectTitle {
+            font-family: serif;
+            font-size: 2em;
+            padding-left: 56px;
+            padding-top: 80px;
+            display: block;
+            color: #a5a5a5;
+            text-shadow: 0 -1px 1px white;
+        }
+
+        div.pageHeader div.testStats {
+            position: absolute;
+            top: 7px;
+            right: 52px;
+            font-size: 0.8em;
+            color: #a2a2a2;
+        }
+
+        div.pageHeader div.testStats span.indicator {
+            font-size: 2em;
+            position: relative;
+            top: 5px;
+            text-shadow: 0 1px 0 white;
+        }
+
+        div.pageHeader div.testStats span strong {
+            margin-right: 16px;
+        }
+
+        div.pageHeader div.testStats span.total {
+            border-right: 1px #afafaf dotted;
+            background: #8298af;
+        }
+
+        div.pageHeader div.testStats span.passed {
+            border-right: 1px #afafaf dotted;
+            background: #6fca83;
+        }
+
+        div.pageHeader div.testStats span.skipped {
+            background: #bababa;
+        }
+
+        div.pageHeader div.testStats span.failed {
+            background: #ff7676;
+        }
+
+        div.pageHeader div.testStats span {
+            margin-right: 1px;
+            height: 55px;
+            padding: 20px 8px 18px;
+            color: white;
+        }
+
+        div.pageHeader .testGroupsTitle {
+            margin: 16px 32px 8px 40px;
+            font-size: 0.9em;
+            color: darkgrey;
+            display: inline-block;
+        }
+
+        div.pageHeader .testExecutionDate {
+            display: inline-block;
+            position: absolute;
+            right: 10px;
+            margin: 14px 32px 8px 40px;
+            color: #9e9e9e;
+            font-size: 0.9em;
+        }
+
+        .testReportContainer {
+            padding: 0 32px 32px 32px;
+        }
+
+        .cardContainer {
+            padding: 16px 16px 16px;
+            box-shadow: 0 4px 4px #d4d4d4;
+            background-color: white;
+        }
+
+        #testResults {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .testResultGroup {
+            width: 24px;
+            height: 24px;
+            background-color: #43c143;
+            margin-left: 1px;
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .testResultGroup.selected {
+            border: 1px white solid;
+            background-color: black !important;
+        }
+
+        .testResultGroup.skipped {
+            border: 2px gray solid;
+        }
+
+        .testResultGroup.failed {
+            background-color: red;
+        }
+
+        .cardContainer.testGroupList,
+        .cardContainer.testDetail {
+            margin-top: 16px;
+            padding: 16px;
+        }
+
+        .cardContainer.testGroupList {
+            color: #9c9c9c;
+            padding: 0;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            cursor: default;
+            border-bottom: 1px #dadada dotted;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #139e13;
+            pointer-events: none;
+            display: inline-block;
+            overflow: hidden;
+            float: left;
+            padding-top: 10px;
+            padding-left: 20px;
+            padding-right: 12px;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.skipped {
+            color: gray;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testStatus.failed {
+            color: red;
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testTitle {
+            font-size: 0.9em;
+            padding: 12px 0 10px;
+            display: inline-block;
+            pointer-events: none;
+            color: #525252;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            width: calc(100% - 110px);
+        }
+
+        .cardContainer.testGroupList .testGroupRow span.testDuration {
+            pointer-events: none;
+        }
+
+        .cardContainer.testGroupList .testGroupRow {
+            position: relative;
+            border-left: 4px #43c143 solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.skipped {
+            color: gray;
+            border-left: 4px gray solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow.failed {
+            color: red;
+            border-left: 4px red solid;
+        }
+
+        .cardContainer.testGroupList .testGroupRow:hover {
+            background-color: #fffaea;
+            transition: 0.250s;
+        }
+
+        .cardContainer .testOutput {
+            padding: 8px 16px 24px 16px;
+        }
+
+        .cardContainer .console {
+            display: block;
+            font-family: monospace;
+            padding: 10px;
+            background-color: #424242;
+            color: #1aff00;
+            border-bottom: 1px #1aff00 dotted;
+            overflow: auto;
+            font-size: 1.1em;
+        }
+
+        .cardContainer .testOutput .testDetail {
+            border-bottom: 1px #d0d0d0 solid;
+            padding: 16px;
+            background-color: #e6e6e6;
+            border-radius: 0 0 4px 4px;
+            color: dimgrey;
+            font-size: 0.8em;
+        }
+
+        .cardContainer .console.skipped{
+            color: #d9d9d9;
+        }
+
+        .cardContainer .console.failed {
+            color: #ffb2b2;
+        }
+
+        .cardContainer .testDuration {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            text-align: right;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="pageHeader">
+    <span class="projectTitle">0Chain System test suite: Kill tests [share-access-request/76529a34] ran against [dev-7.devnet-0chain.net] at [2025-01-04_06.24.53]</span>
+    <div class="testStats">
+        <span class="total"><span class="indicator">&boxbox;</span> Total: <strong>11</strong>Duration: <strong>3ms</strong>
+        </span><span class="passed"><span class="indicator">&check;</span> Passed: <strong>0</strong>
+        </span><span class="skipped"><span class="indicator">&dash;</span> Skipped: <strong>0</strong>
+        </span><span class="failed"><span class="indicator">&cross;</span> Failed: <strong>11</strong>
+        </span>
+    </div>
+    <span class="testGroupsTitle">Test Groups:</span>
+    <span class="testExecutionDate">January 4, 2025 08:41:34</span>
+</div>
+<div class="testReportContainer">
+    <div class="cardContainer">
+        <div id="testResults">
+            
+                <div class="testResultGroup failed " id="0"></div>
+            
+                <div class="testResultGroup failed " id="1"></div>
+            
+                <div class="testResultGroup failed " id="2"></div>
+            
+                <div class="testResultGroup failed " id="3"></div>
+            
+                <div class="testResultGroup failed " id="4"></div>
+            
+                <div class="testResultGroup failed " id="5"></div>
+            
+                <div class="testResultGroup failed " id="6"></div>
+            
+                <div class="testResultGroup failed " id="7"></div>
+            
+                <div class="testResultGroup failed " id="8"></div>
+            
+                <div class="testResultGroup failed " id="9"></div>
+            
+                <div class="testResultGroup failed " id="10"></div>
+            
+        </div>
+    </div>
+    <div class="cardContainer testGroupList" id="testGroupList"></div>
+</div>
+<script type="application/javascript">
+    /**
+ * @typedef TestStatus
+ * @property {string} TestName
+ * @property {string} Package
+ * @property {number} ElapsedTime
+ * @property {Array.<string>} Output
+ * @property {boolean} Passed
+ * @property {boolean} Skipped
+ */
+class TestStatus {}
+
+/**
+ * @typedef TestGroupData
+ * @type {object}
+ * @property {string} FailureIndicator
+ * @property {string} SkippedIndicator
+ * @property {Array.<TestStatus>}
+ */
+class TestGroupData {}
+
+/**
+ * @typedef TestResults
+ * @type {Array.<TestGroupData>}
+ */
+class TestResults extends Array {}
+
+/**
+ * @typedef SelectedItems
+ * @property {HTMLElement|EventTarget} testResults
+ * @property {String} selectedTestGroupColor
+ */
+class SelectedItems {}
+
+/**
+ * @typedef GoTestReportElements
+ * @property {TestResults} data
+ * @property {HTMLElement} testResultsElem
+ * @property {HTMLElement} testGroupListElem
+ */
+class GoTestReportElements {}
+
+
+/**
+ * Main entry point for GoTestReport.
+ * @param {GoTestReportElements} elements
+ * @returns {{testResultsClickHandler: testResultsClickHandler}}
+ * @constructor
+ */
+window.GoTestReport = function (elements) {
+  const /**@type {SelectedItems}*/ selectedItems = {
+    testResults: null,
+    selectedTestGroupColor: null
+  }
+
+  function addEventData(event) {
+    if (event.data == null) {
+      event.data = {target: event.target}
+    }
+    return event
+  }
+
+
+  const goTestReport = {
+    /**
+     * Invoked when a user clicks on one of the test group div elements.
+     * @param {HTMLElement} target The element associated with the test group.
+     * @param {boolean} shiftKey If pressed, all of test detail associated to the test group is shown.
+     * @param {TestResults} data
+     * @param {SelectedItems} selectedItems
+     * @param {function(target: Element, data: TestResults)} testGroupListHandler
+     */
+    testResultsClickHandler: function (target,
+                                       shiftKey,
+                                       data,
+                                       selectedItems,
+                                       testGroupListHandler) {
+
+      if (target.classList.contains('testResultGroup') === false) {
+        return
+      }
+      if (selectedItems.testResults != null) {
+        let testResultsElement = /**@type {HTMLElement}*/ selectedItems.testResults
+        testResultsElement.classList.remove("selected")
+        testResultsElement.style.backgroundColor = selectedItems.selectedTestGroupColor
+      }
+      const testGroupId = /**@type {number}*/ target.id
+      if ((target.id === undefined)
+        || (data[testGroupId] === undefined)
+        || (data[testGroupId]['TestResults'] === undefined)) {
+        return
+      }
+      const testResults = /**@type {TestResults}*/ data[testGroupId]['TestResults']
+      let testGroupList = /**@type {string}*/ ''
+      selectedItems.selectedTestGroupColor = getComputedStyle(target).getPropertyValue('background-color')
+      selectedItems.testResults = target
+      target.classList.add("selected")
+      for (let i = 0; i < testResults.length; i++) {
+        const testResult = /**@type {TestGroupData}*/ testResults[i]
+        const testPassed = /**@type {boolean}*/ testResult.Passed
+        const testSkipped = /**@type {boolean}*/ testResult.Skipped
+        const testPassedStatus = /**@type {string}*/ (testPassed) ? '' : (testSkipped ? 'skipped' : 'failed')
+        const testId = /**@type {string}*/ target.attributes['id'].value
+        testGroupList += `<div class="testGroupRow ${testPassedStatus}" data-groupid="${testId}" data-index="${i}">
+        <span class="testStatus ${testPassedStatus}">${(testPassed) ? '&check' : (testSkipped ? '&dash' : '&cross')};</span>
+        <span class="testTitle">${testResult.TestName}</span>
+        <span class="testDuration"><span>${testResult.ElapsedTime}s </span>⏱</span>
+      </div>`
+      }
+      const testGroupListElem = elements.testGroupListElem
+      testGroupListElem.innerHTML = ''
+      testGroupListElem.innerHTML = testGroupList
+
+      if (shiftKey) {
+        testGroupListElem.querySelectorAll('.testGroupRow')
+                         .forEach((elem) => testGroupListHandler(elem, data))
+      } else if (testResults.length === 1) {
+        testGroupListHandler(testGroupListElem.querySelector('.testGroupRow'), data)
+      }
+    },
+
+    /**
+     *
+     * @param {Element} target
+     * @param {TestResults} data
+     */
+    testGroupListHandler: function (target, data) {
+      const attribs = target['attributes']
+      if (attribs.hasOwnProperty('data-groupid')) {
+        const groupId = /**@type {number}*/ attribs['data-groupid'].value
+        const testIndex = /**@type {number}*/ attribs['data-index'].value
+        const testStatus = /**@type {TestStatus}*/ data[groupId]['TestResults'][testIndex]
+        const testOutputDiv = /**@type {HTMLDivElement}*/ target.querySelector('div.testOutput')
+
+        if (testOutputDiv == null) {
+          const testOutputDiv = document.createElement('div')
+          testOutputDiv.classList.add('testOutput')
+          const consolePre = document.createElement('pre')
+          consolePre.classList.add('console')
+          const testDetailDiv = document.createElement('div')
+          testDetailDiv.classList.add('testDetail')
+          const packageNameDiv = document.createElement('div')
+          packageNameDiv.classList.add('package')
+          packageNameDiv.innerHTML = `<strong>Package:</strong> ${testStatus.Package}`
+          const testFileNameDiv = document.createElement('div')
+          testFileNameDiv.classList.add('filename')
+          if (testStatus.TestFileName.trim() === "") {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> n/a &nbsp;&nbsp;`
+          } else {
+            testFileNameDiv.innerHTML = `<strong>Filename:</strong> ${testStatus.TestFileName} &nbsp;&nbsp;`
+            testFileNameDiv.innerHTML += `<strong>Line:</strong> ${testStatus.TestFunctionDetail.Line} `
+            testFileNameDiv.innerHTML += `<strong>Col:</strong> ${testStatus.TestFunctionDetail.Col}`
+          }
+          testDetailDiv.insertAdjacentElement('beforeend', packageNameDiv)
+          testDetailDiv.insertAdjacentElement('beforeend', testFileNameDiv)
+          testOutputDiv.insertAdjacentElement('afterbegin', consolePre)
+          testOutputDiv.insertAdjacentElement('beforeend', testDetailDiv)
+          target.insertAdjacentElement('beforeend', testOutputDiv)
+
+          if (testStatus.Passed) {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.remove('failed')
+          } else if (testStatus.Skipped) {
+            consolePre.classList.add('skipped')
+            consolePre.classList.remove('failed')
+          } else {
+            consolePre.classList.remove('skipped')
+            consolePre.classList.add('failed')
+          }
+          consolePre.textContent = testStatus.Output.join('')
+        } else {
+          testOutputDiv.remove()
+        }
+      }
+    }
+  }
+
+  //+------------------------+
+  //|    setup DOM events    |
+  //+------------------------+
+  elements.testResultsElem
+          .addEventListener('click', event =>
+            goTestReport.testResultsClickHandler(/**@type {HTMLElement}*/ addEventData(event).data.target,
+                                                 event.shiftKey,
+                                                 elements.data,
+                                                 selectedItems,
+                                                 goTestReport.testGroupListHandler))
+
+  elements.testGroupListElem
+          .addEventListener('click', event =>
+            goTestReport.testGroupListHandler(/**@type {Element}*/ event.target,
+                                              elements.data))
+
+  return goTestReport
+}
+
+
+    
+
+    const data = [{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestKillBlobber","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.04,"Output":["","","","","","","","","","","","","","","","","",""],"Passed":false,"Skipped":false,"TestFileName":"zboxcli_kill_blobber_test.go","TestFunctionDetail":{"Line":22,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestKillBlobber/kill_blobber_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.03,"Output":["","    zboxcli_kill_blobber_test.go:139: Test case [kill blobber by non-smartcontract owner should fail] scheduled at [01-04-2025 08:31:26] \n","    system_test_framework.go:148: Test case [kill blobber by non-smartcontract owner should fail] start at [01-04-2025 08:31:26] \n","2025/01/04 08:31:26 Creating wallet for TestKillBlobber-kill_blobber_by_non-smartcontract_owner_should_fail with walletIdx 502\n","File ./config/TestKillBlobber-kill_blobber_by_non-smartcontract_owner_should_fail_wallet.json written successfully.\n","    zboxcli_stake_unstake_token_test.go:262: Requesting blobber list...\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:313\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:142\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tShould be true\n","        \tTest:       \tTestKillBlobber/kill_blobber_by_non-smartcontract_owner_should_fail\n","        \tMessages:   \tNo blobbers found in blobber list\n","    zboxcli_kill_blobber_test.go:139: Test case [kill blobber by non-smartcontract owner should fail] exit at [01-04-2025 08:31:26]\n","","","    zboxcli_kill_blobber_test.go:139: Test case [kill blobber by non-smartcontract owner should fail] scheduled at [01-04-2025 08:34:45] \n","    system_test_framework.go:148: Test case [kill blobber by non-smartcontract owner should fail] start at [01-04-2025 08:34:45] \n","2025/01/04 08:34:45 Creating wallet for TestKillBlobber-kill_blobber_by_non-smartcontract_owner_should_fail with walletIdx 501\n","File ./config/TestKillBlobber-kill_blobber_by_non-smartcontract_owner_should_fail_wallet.json written successfully.\n","    zboxcli_stake_unstake_token_test.go:262: Requesting blobber list...\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:313\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:142\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tShould be true\n","        \tTest:       \tTestKillBlobber/kill_blobber_by_non-smartcontract_owner_should_fail\n","        \tMessages:   \tNo blobbers found in blobber list\n","    zboxcli_kill_blobber_test.go:139: Test case [kill blobber by non-smartcontract owner should fail] exit at [01-04-2025 08:34:45]\n","","","    zboxcli_kill_blobber_test.go:139: Test case [kill blobber by non-smartcontract owner should fail] scheduled at [01-04-2025 08:38:10] \n","    system_test_framework.go:148: Test case [kill blobber by non-smartcontract owner should fail] start at [01-04-2025 08:38:10] \n","2025/01/04 08:38:10 Creating wallet for TestKillBlobber-kill_blobber_by_non-smartcontract_owner_should_fail with walletIdx 501\n","File ./config/TestKillBlobber-kill_blobber_by_non-smartcontract_owner_should_fail_wallet.json written successfully.\n","    zboxcli_stake_unstake_token_test.go:262: Requesting blobber list...\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:313\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:142\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tShould be true\n","        \tTest:       \tTestKillBlobber/kill_blobber_by_non-smartcontract_owner_should_fail\n","        \tMessages:   \tNo blobbers found in blobber list\n","    zboxcli_kill_blobber_test.go:139: Test case [kill blobber by non-smartcontract owner should fail] exit at [01-04-2025 08:38:10]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestKillBlobber/killed_blobber_is_not_available_for_allocations","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.03,"Output":["","    zboxcli_kill_blobber_test.go:28: Test case [killed blobber is not available for allocations] scheduled at [01-04-2025 08:31:26] \n","    system_test_framework.go:148: Test case [killed blobber is not available for allocations] start at [01-04-2025 08:31:26] \n","2025/01/04 08:31:26 Creating wallet for TestKillBlobber-killed_blobber_is_not_available_for_allocations with walletIdx 501\n","File ./config/TestKillBlobber-killed_blobber_is_not_available_for_allocations_wallet.json written successfully.\n","    zboxcli_stake_unstake_token_test.go:262: Requesting blobber list...\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:313\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:31\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tShould be true\n","        \tTest:       \tTestKillBlobber/killed_blobber_is_not_available_for_allocations\n","        \tMessages:   \tNo blobbers found in blobber list\n","    zboxcli_kill_blobber_test.go:28: Test case [killed blobber is not available for allocations] exit at [01-04-2025 08:31:26]\n","","","    zboxcli_kill_blobber_test.go:28: Test case [killed blobber is not available for allocations] scheduled at [01-04-2025 08:34:44] \n","    system_test_framework.go:148: Test case [killed blobber is not available for allocations] start at [01-04-2025 08:34:44] \n","2025/01/04 08:34:44 Creating wallet for TestKillBlobber-killed_blobber_is_not_available_for_allocations with walletIdx 501\n","File ./config/TestKillBlobber-killed_blobber_is_not_available_for_allocations_wallet.json written successfully.\n","    zboxcli_stake_unstake_token_test.go:262: Requesting blobber list...\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:313\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:31\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tShould be true\n","        \tTest:       \tTestKillBlobber/killed_blobber_is_not_available_for_allocations\n","        \tMessages:   \tNo blobbers found in blobber list\n","    zboxcli_kill_blobber_test.go:28: Test case [killed blobber is not available for allocations] exit at [01-04-2025 08:34:44]\n","","","    zboxcli_kill_blobber_test.go:28: Test case [killed blobber is not available for allocations] scheduled at [01-04-2025 08:38:09] \n","    system_test_framework.go:148: Test case [killed blobber is not available for allocations] start at [01-04-2025 08:38:09] \n","2025/01/04 08:38:09 Creating wallet for TestKillBlobber-killed_blobber_is_not_available_for_allocations with walletIdx 501\n","File ./config/TestKillBlobber-killed_blobber_is_not_available_for_allocations_wallet.json written successfully.\n","    zboxcli_stake_unstake_token_test.go:262: Requesting blobber list...\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:313\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:31\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tShould be true\n","        \tTest:       \tTestKillBlobber/killed_blobber_is_not_available_for_allocations\n","        \tMessages:   \tNo blobbers found in blobber list\n","    zboxcli_kill_blobber_test.go:28: Test case [killed blobber is not available for allocations] exit at [01-04-2025 08:38:09]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestKillBlobber/shutdown_blobber_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.04,"Output":["","    zboxcli_kill_blobber_test.go:274: Test case [shutdown blobber by non-smartcontract owner should fail] scheduled at [01-04-2025 08:31:27] \n","    system_test_framework.go:148: Test case [shutdown blobber by non-smartcontract owner should fail] start at [01-04-2025 08:31:27] \n","2025/01/04 08:31:27 Creating wallet for TestKillBlobber-shutdown_blobber_by_non-smartcontract_owner_should_fail with walletIdx 504\n","File ./config/TestKillBlobber-shutdown_blobber_by_non-smartcontract_owner_should_fail_wallet.json written successfully.\n","    zboxcli_stake_unstake_token_test.go:262: Requesting blobber list...\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:313\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:277\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tShould be true\n","        \tTest:       \tTestKillBlobber/shutdown_blobber_by_non-smartcontract_owner_should_fail\n","        \tMessages:   \tNo blobbers found in blobber list\n","    zboxcli_kill_blobber_test.go:274: Test case [shutdown blobber by non-smartcontract owner should fail] exit at [01-04-2025 08:31:27]\n","","","    zboxcli_kill_blobber_test.go:274: Test case [shutdown blobber by non-smartcontract owner should fail] scheduled at [01-04-2025 08:34:47] \n","    system_test_framework.go:148: Test case [shutdown blobber by non-smartcontract owner should fail] start at [01-04-2025 08:34:47] \n","2025/01/04 08:34:47 Creating wallet for TestKillBlobber-shutdown_blobber_by_non-smartcontract_owner_should_fail with walletIdx 501\n","File ./config/TestKillBlobber-shutdown_blobber_by_non-smartcontract_owner_should_fail_wallet.json written successfully.\n","    zboxcli_stake_unstake_token_test.go:262: Requesting blobber list...\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:313\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:277\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tShould be true\n","        \tTest:       \tTestKillBlobber/shutdown_blobber_by_non-smartcontract_owner_should_fail\n","        \tMessages:   \tNo blobbers found in blobber list\n","    zboxcli_kill_blobber_test.go:274: Test case [shutdown blobber by non-smartcontract owner should fail] exit at [01-04-2025 08:34:47]\n","","","    zboxcli_kill_blobber_test.go:274: Test case [shutdown blobber by non-smartcontract owner should fail] scheduled at [01-04-2025 08:38:12] \n","    system_test_framework.go:148: Test case [shutdown blobber by non-smartcontract owner should fail] start at [01-04-2025 08:38:12] \n","2025/01/04 08:38:12 Creating wallet for TestKillBlobber-shutdown_blobber_by_non-smartcontract_owner_should_fail with walletIdx 501\n","File ./config/TestKillBlobber-shutdown_blobber_by_non-smartcontract_owner_should_fail_wallet.json written successfully.\n","    zboxcli_stake_unstake_token_test.go:262: Requesting blobber list...\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:313\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:277\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tShould be true\n","        \tTest:       \tTestKillBlobber/shutdown_blobber_by_non-smartcontract_owner_should_fail\n","        \tMessages:   \tNo blobbers found in blobber list\n","    zboxcli_kill_blobber_test.go:274: Test case [shutdown blobber by non-smartcontract owner should fail] exit at [01-04-2025 08:38:13]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestKillBlobber/shutdowned_blobber_is_not_available_for_allocations","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":0.06,"Output":["","    zboxcli_kill_blobber_test.go:159: Test case [shutdowned blobber is not available for allocations] scheduled at [01-04-2025 08:31:26] \n","    system_test_framework.go:148: Test case [shutdowned blobber is not available for allocations] start at [01-04-2025 08:31:26] \n","2025/01/04 08:31:26 Creating wallet for TestKillBlobber-shutdowned_blobber_is_not_available_for_allocations with walletIdx 503\n","File ./config/TestKillBlobber-shutdowned_blobber_is_not_available_for_allocations_wallet.json written successfully.\n","    zboxcli_stake_unstake_token_test.go:262: Requesting blobber list...\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:313\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:162\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tShould be true\n","        \tTest:       \tTestKillBlobber/shutdowned_blobber_is_not_available_for_allocations\n","        \tMessages:   \tNo blobbers found in blobber list\n","    zboxcli_kill_blobber_test.go:159: Test case [shutdowned blobber is not available for allocations] exit at [01-04-2025 08:31:27]\n","","","    zboxcli_kill_blobber_test.go:159: Test case [shutdowned blobber is not available for allocations] scheduled at [01-04-2025 08:34:46] \n","    system_test_framework.go:148: Test case [shutdowned blobber is not available for allocations] start at [01-04-2025 08:34:46] \n","2025/01/04 08:34:46 Creating wallet for TestKillBlobber-shutdowned_blobber_is_not_available_for_allocations with walletIdx 501\n","File ./config/TestKillBlobber-shutdowned_blobber_is_not_available_for_allocations_wallet.json written successfully.\n","    zboxcli_stake_unstake_token_test.go:262: Requesting blobber list...\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:313\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:162\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tShould be true\n","        \tTest:       \tTestKillBlobber/shutdowned_blobber_is_not_available_for_allocations\n","        \tMessages:   \tNo blobbers found in blobber list\n","    zboxcli_kill_blobber_test.go:159: Test case [shutdowned blobber is not available for allocations] exit at [01-04-2025 08:34:46]\n","","","    zboxcli_kill_blobber_test.go:159: Test case [shutdowned blobber is not available for allocations] scheduled at [01-04-2025 08:38:11] \n","    system_test_framework.go:148: Test case [shutdowned blobber is not available for allocations] start at [01-04-2025 08:38:11] \n","2025/01/04 08:38:11 Creating wallet for TestKillBlobber-shutdowned_blobber_is_not_available_for_allocations with walletIdx 501\n","File ./config/TestKillBlobber-shutdowned_blobber_is_not_available_for_allocations_wallet.json written successfully.\n","    zboxcli_stake_unstake_token_test.go:262: Requesting blobber list...\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:313\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zboxcli_kill_blobber_test.go:162\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tShould be true\n","        \tTest:       \tTestKillBlobber/shutdowned_blobber_is_not_available_for_allocations\n","        \tMessages:   \tNo blobbers found in blobber list\n","    zboxcli_kill_blobber_test.go:159: Test case [shutdowned blobber is not available for allocations] exit at [01-04-2025 08:38:11]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestKillMiner","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":49.12,"Output":["","2025/01/04 08:33:05 Creating wallet for TestKillMiner with walletIdx 508\n","File ./config/TestKillMiner_wallet.json written successfully.\n","    miner_block_rewards_test.go:414: getting sharder url...\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    miner_block_rewards_test.go:441: getting miner or sharder nodes...\n","","","2025/01/04 08:36:28 Creating wallet for TestKillMiner with walletIdx 501\n","File ./config/TestKillMiner_wallet.json written successfully.\n","    miner_block_rewards_test.go:414: getting sharder url...\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    miner_block_rewards_test.go:441: getting miner or sharder nodes...\n","","","2025/01/04 08:37:19 Creating wallet for TestKillMiner with walletIdx 501\n","File ./config/TestKillMiner_wallet.json written successfully.\n","    miner_block_rewards_test.go:414: getting sharder url...\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    miner_block_rewards_test.go:441: getting miner or sharder nodes...\n","","","2025/01/04 08:39:55 Creating wallet for TestKillMiner with walletIdx 501\n","File ./config/TestKillMiner_wallet.json written successfully.\n","    miner_block_rewards_test.go:414: getting sharder url...\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    miner_block_rewards_test.go:441: getting miner or sharder nodes...\n","","","2025/01/04 08:40:45 Creating wallet for TestKillMiner with walletIdx 501\n","File ./config/TestKillMiner_wallet.json written successfully.\n","    miner_block_rewards_test.go:414: getting sharder url...\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    miner_block_rewards_test.go:441: getting miner or sharder nodes...\n",""],"Passed":false,"Skipped":false,"TestFileName":"zzzwalletcli_kill_miner_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestKillMiner/Killed_miner_does_not_receive_rewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":49.09,"Output":["","    zzzwalletcli_kill_miner_test.go:52: Test case [Killed miner does not receive rewards] scheduled at [01-04-2025 08:33:54] \n","    system_test_framework.go:148: Test case [Killed miner does not receive rewards] start at [01-04-2025 08:33:54] \n","2025/01/04 08:33:54 Creating wallet for TestKillMiner-Killed_miner_does_not_receive_rewards with walletIdx 510\n","File ./config/TestKillMiner-Killed_miner_does_not_receive_rewards_wallet.json written successfully.\n","    zzzwalletcli_kill_miner_test.go:77: kill miner...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=18229dc7103a0d86ee06a2ab30ed78e173b098db94913c0688f05284eed97da5: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=18229dc7103a0d86ee06a2ab30ed78e173b098db94913c0688f05284eed97da5: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=d405b814d5fb01d3b195117d06e09a97cbea48737629e8d5bb9cc5b56c21a4e9: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=d405b814d5fb01d3b195117d06e09a97cbea48737629e8d5bb9cc5b56c21a4e9: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=a281db5619427ddbdcd2ed3fc603220943c92c129691ecfaaaf6b0280f836e05: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=a281db5619427ddbdcd2ed3fc603220943c92c129691ecfaaaf6b0280f836e05: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/04 08:34:32.533029 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk [INFO]   2025/01/04 08:34:32.533127 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31m[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=b68b0567b693d23e31e01ed2452adcaa3892862da298e7e632c9b4b9fa223d4a: [400] {\"error\":\"unexpected end of JSON input\"}\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=b68b0567b693d23e31e01ed2452adcaa3892862da298e7e632c9b4b9fa223d4a: [400] {\"error\":\"unexpected end of JSON input\"}\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zzzwalletcli_kill_miner_test.go:58\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tReceived unexpected error:\n","        \t            \texit status 1\n","        \tTest:       \tTestKillMiner/Killed_miner_does_not_receive_rewards\n","        \tMessages:   \t[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=a281db5619427ddbdcd2ed3fc603220943c92c129691ecfaaaf6b0280f836e05: [400] {\"error\":\"unexpected end of JSON input\"}\n","        \t            \thttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=a281db5619427ddbdcd2ed3fc603220943c92c129691ecfaaaf6b0280f836e05: [400] {\"error\":\"unexpected end of JSON input\"}\n","    zzzwalletcli_kill_miner_test.go:52: Test case [Killed miner does not receive rewards] exit at [01-04-2025 08:34:43]\n","","","    zzzwalletcli_kill_miner_test.go:52: Test case [Killed miner does not receive rewards] scheduled at [01-04-2025 08:37:19] \n","    system_test_framework.go:148: Test case [Killed miner does not receive rewards] start at [01-04-2025 08:37:19] \n","2025/01/04 08:37:19 Creating wallet for TestKillMiner-Killed_miner_does_not_receive_rewards with walletIdx 502\n","File ./config/TestKillMiner-Killed_miner_does_not_receive_rewards_wallet.json written successfully.\n","    zzzwalletcli_kill_miner_test.go:77: kill miner...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=9dd1b7a471ab667215f861817fa1b27c2813fc29cbe1ce3e8156a1f9a2d3eac4: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=9dd1b7a471ab667215f861817fa1b27c2813fc29cbe1ce3e8156a1f9a2d3eac4: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=fa15b8999c146a85734543230e2a3c52908a03c1da35943c77edd3743eba6d35: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=fa15b8999c146a85734543230e2a3c52908a03c1da35943c77edd3743eba6d35: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=868572f020e9a9e4072ae9e9a1a5760e80e12d11f28a62a2365ef15a79109272: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=868572f020e9a9e4072ae9e9a1a5760e80e12d11f28a62a2365ef15a79109272: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/04 08:37:57.652447 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk [INFO]   2025/01/04 08:37:57.652561 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31m[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=d0babd3cbd68fb8473281fdc09dca8475d8718405d34e6b8fe449149ead8bc60: [400] {\"error\":\"unexpected end of JSON input\"}\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=d0babd3cbd68fb8473281fdc09dca8475d8718405d34e6b8fe449149ead8bc60: [400] {\"error\":\"unexpected end of JSON input\"}\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zzzwalletcli_kill_miner_test.go:58\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tReceived unexpected error:\n","        \t            \texit status 1\n","        \tTest:       \tTestKillMiner/Killed_miner_does_not_receive_rewards\n","        \tMessages:   \t[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=868572f020e9a9e4072ae9e9a1a5760e80e12d11f28a62a2365ef15a79109272: [400] {\"error\":\"unexpected end of JSON input\"}\n","        \t            \thttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=868572f020e9a9e4072ae9e9a1a5760e80e12d11f28a62a2365ef15a79109272: [400] {\"error\":\"unexpected end of JSON input\"}\n","    zzzwalletcli_kill_miner_test.go:52: Test case [Killed miner does not receive rewards] exit at [01-04-2025 08:38:08]\n","","","    zzzwalletcli_kill_miner_test.go:52: Test case [Killed miner does not receive rewards] scheduled at [01-04-2025 08:40:45] \n","    system_test_framework.go:148: Test case [Killed miner does not receive rewards] start at [01-04-2025 08:40:45] \n","2025/01/04 08:40:45 Creating wallet for TestKillMiner-Killed_miner_does_not_receive_rewards with walletIdx 502\n","File ./config/TestKillMiner-Killed_miner_does_not_receive_rewards_wallet.json written successfully.\n","    zzzwalletcli_kill_miner_test.go:77: kill miner...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=b5966c18637e5b029f795015bd8b4a0bafaf98856ea540a0fdd8185476ecf2e3: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=b5966c18637e5b029f795015bd8b4a0bafaf98856ea540a0fdd8185476ecf2e3: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=bba154162429a7d19f70fc723d56b925264e62edbfc03d0e58144c0742a24c76: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=bba154162429a7d19f70fc723d56b925264e62edbfc03d0e58144c0742a24c76: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=6a193dbdffe527b4be225724dd8dbaf4c361b2473484d964e1d72790fb735365: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=6a193dbdffe527b4be225724dd8dbaf4c361b2473484d964e1d72790fb735365: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/04 08:41:23.329016 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk [INFO]   2025/01/04 08:41:23.329282 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31m[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=80a76dd3a0d9839ee990914eb9259d713153f720047e5badb2d0a18b72d8466c: [400] {\"error\":\"unexpected end of JSON input\"}\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=80a76dd3a0d9839ee990914eb9259d713153f720047e5badb2d0a18b72d8466c: [400] {\"error\":\"unexpected end of JSON input\"}\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zzzwalletcli_kill_miner_test.go:58\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tReceived unexpected error:\n","        \t            \texit status 1\n","        \tTest:       \tTestKillMiner/Killed_miner_does_not_receive_rewards\n","        \tMessages:   \t[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=6a193dbdffe527b4be225724dd8dbaf4c361b2473484d964e1d72790fb735365: [400] {\"error\":\"unexpected end of JSON input\"}\n","        \t            \thttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=6a193dbdffe527b4be225724dd8dbaf4c361b2473484d964e1d72790fb735365: [400] {\"error\":\"unexpected end of JSON input\"}\n","    zzzwalletcli_kill_miner_test.go:52: Test case [Killed miner does not receive rewards] exit at [01-04-2025 08:41:34]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestKillMiner/kill_miner_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":49.05,"Output":["","    zzzwalletcli_kill_miner_test.go:42: Test case [kill miner by non-smartcontract owner should fail] scheduled at [01-04-2025 08:33:05] \n","    system_test_framework.go:148: Test case [kill miner by non-smartcontract owner should fail] start at [01-04-2025 08:33:05] \n","2025/01/04 08:33:05 Creating wallet for TestKillMiner-kill_miner_by_non-smartcontract_owner_should_fail with walletIdx 509\n","File ./config/TestKillMiner-kill_miner_by_non-smartcontract_owner_should_fail_wallet.json written successfully.\n","    zzzwalletcli_kill_miner_test.go:77: kill miner...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=555fb8b179845ae401a1a08191686388a48a827192f6d04282740c7eba839c58: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=555fb8b179845ae401a1a08191686388a48a827192f6d04282740c7eba839c58: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=34523bd66e351d1796a15bc687a065cb576ebc8f772ecf3cfa9ec831ddba034b: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=34523bd66e351d1796a15bc687a065cb576ebc8f772ecf3cfa9ec831ddba034b: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=dc15bda1033b9679e1e649a2990cd9f4f57acc282cf34e678dbdc3a6344f1aad: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=dc15bda1033b9679e1e649a2990cd9f4f57acc282cf34e678dbdc3a6344f1aad: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/04 08:33:43.483463 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk [INFO]   2025/01/04 08:33:43.483577 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31m[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=847adf65d8314cc2639386a9ec90100af3774ef61687b07fc3929e81aa494586: [400] {\"error\":\"unexpected end of JSON input\"}\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=847adf65d8314cc2639386a9ec90100af3774ef61687b07fc3929e81aa494586: [400] {\"error\":\"unexpected end of JSON input\"}\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zzzwalletcli_kill_miner_test.go:48\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \t\"[[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=dc15bda1033b9679e1e649a2990cd9f4f57acc282cf34e678dbdc3a6344f1aad: [400] {\"error\":\"unexpected end of JSON input\"} https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=dc15bda1033b9679e1e649a2990cd9f4f57acc282cf34e678dbdc3a6344f1aad: [400] {\"error\":\"unexpected end of JSON input\"}]\" should have 1 item(s), but has 3\n","        \tTest:       \tTestKillMiner/kill_miner_by_non-smartcontract_owner_should_fail\n","    zzzwalletcli_kill_miner_test.go:42: Test case [kill miner by non-smartcontract owner should fail] exit at [01-04-2025 08:33:54]\n","","","    zzzwalletcli_kill_miner_test.go:42: Test case [kill miner by non-smartcontract owner should fail] scheduled at [01-04-2025 08:36:28] \n","    system_test_framework.go:148: Test case [kill miner by non-smartcontract owner should fail] start at [01-04-2025 08:36:28] \n","2025/01/04 08:36:28 Creating wallet for TestKillMiner-kill_miner_by_non-smartcontract_owner_should_fail with walletIdx 502\n","File ./config/TestKillMiner-kill_miner_by_non-smartcontract_owner_should_fail_wallet.json written successfully.\n","    zzzwalletcli_kill_miner_test.go:77: kill miner...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=709a91e837161b677fa952837f45c4527b755f3c08007909125a96834390e80c: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=709a91e837161b677fa952837f45c4527b755f3c08007909125a96834390e80c: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=1f468ced21e83e857d34877593ab5e045f8dab96a5361485f3f221a93b0f90ee: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=1f468ced21e83e857d34877593ab5e045f8dab96a5361485f3f221a93b0f90ee: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=77745e1fde064bb608860bdf05e0ce148a2b4e71eb0805078741ac2ca1fabaf0: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=77745e1fde064bb608860bdf05e0ce148a2b4e71eb0805078741ac2ca1fabaf0: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/04 08:37:06.730777 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk [INFO]   2025/01/04 08:37:06.730906 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31m[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=1f71184952d546a3b584464a039f55e93c495cce1749d5af07c0ffa81498e984: [400] {\"error\":\"unexpected end of JSON input\"}\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=1f71184952d546a3b584464a039f55e93c495cce1749d5af07c0ffa81498e984: [400] {\"error\":\"unexpected end of JSON input\"}\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zzzwalletcli_kill_miner_test.go:48\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \t\"[[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=77745e1fde064bb608860bdf05e0ce148a2b4e71eb0805078741ac2ca1fabaf0: [400] {\"error\":\"unexpected end of JSON input\"} https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=77745e1fde064bb608860bdf05e0ce148a2b4e71eb0805078741ac2ca1fabaf0: [400] {\"error\":\"unexpected end of JSON input\"}]\" should have 1 item(s), but has 3\n","        \tTest:       \tTestKillMiner/kill_miner_by_non-smartcontract_owner_should_fail\n","    zzzwalletcli_kill_miner_test.go:42: Test case [kill miner by non-smartcontract owner should fail] exit at [01-04-2025 08:37:18]\n","","","    zzzwalletcli_kill_miner_test.go:42: Test case [kill miner by non-smartcontract owner should fail] scheduled at [01-04-2025 08:39:55] \n","    system_test_framework.go:148: Test case [kill miner by non-smartcontract owner should fail] start at [01-04-2025 08:39:55] \n","2025/01/04 08:39:55 Creating wallet for TestKillMiner-kill_miner_by_non-smartcontract_owner_should_fail with walletIdx 502\n","File ./config/TestKillMiner-kill_miner_by_non-smartcontract_owner_should_fail_wallet.json written successfully.\n","    zzzwalletcli_kill_miner_test.go:77: kill miner...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=6df13b2914d9b94be8eec8a76ad3fc40c03a27dab5cde361950fb130f8f4f584: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=6df13b2914d9b94be8eec8a76ad3fc40c03a27dab5cde361950fb130f8f4f584: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=bf11b29639ff2e219beaf2de3f935874d11e4bdc8ae7776cfd645a70100257f1: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=bf11b29639ff2e219beaf2de3f935874d11e4bdc8ae7776cfd645a70100257f1: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=23975e83462fd79897705a156423a18c5f8c9723b4aa1e27d5c2d83910eec186: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=23975e83462fd79897705a156423a18c5f8c9723b4aa1e27d5c2d83910eec186: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/04 08:40:33.311245 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk [INFO]   2025/01/04 08:40:33.311352 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31m[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=b6acde9c56b8a580eac6f69ade0a3abe6b732218faee805c53682a210fb533a6: [400] {\"error\":\"unexpected end of JSON input\"}\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=b6acde9c56b8a580eac6f69ade0a3abe6b732218faee805c53682a210fb533a6: [400] {\"error\":\"unexpected end of JSON input\"}\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zzzwalletcli_kill_miner_test.go:48\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \t\"[[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=23975e83462fd79897705a156423a18c5f8c9723b4aa1e27d5c2d83910eec186: [400] {\"error\":\"unexpected end of JSON input\"} https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=23975e83462fd79897705a156423a18c5f8c9723b4aa1e27d5c2d83910eec186: [400] {\"error\":\"unexpected end of JSON input\"}]\" should have 1 item(s), but has 3\n","        \tTest:       \tTestKillMiner/kill_miner_by_non-smartcontract_owner_should_fail\n","    zzzwalletcli_kill_miner_test.go:42: Test case [kill miner by non-smartcontract owner should fail] exit at [01-04-2025 08:40:44]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestKillSharder","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":49.78,"Output":["","2025/01/04 08:31:27 Creating wallet for TestKillSharder with walletIdx 505\n","File ./config/TestKillSharder_wallet.json written successfully.\n","    miner_block_rewards_test.go:414: getting sharder url...\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    miner_block_rewards_test.go:441: getting miner or sharder nodes...\n","","","2025/01/04 08:34:48 Creating wallet for TestKillSharder with walletIdx 501\n","File ./config/TestKillSharder_wallet.json written successfully.\n","    miner_block_rewards_test.go:414: getting sharder url...\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    miner_block_rewards_test.go:441: getting miner or sharder nodes...\n","","","2025/01/04 08:35:38 Creating wallet for TestKillSharder with walletIdx 501\n","File ./config/TestKillSharder_wallet.json written successfully.\n","    miner_block_rewards_test.go:414: getting sharder url...\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    miner_block_rewards_test.go:441: getting miner or sharder nodes...\n","","","2025/01/04 08:38:14 Creating wallet for TestKillSharder with walletIdx 501\n","File ./config/TestKillSharder_wallet.json written successfully.\n","    miner_block_rewards_test.go:414: getting sharder url...\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    miner_block_rewards_test.go:441: getting miner or sharder nodes...\n","","","2025/01/04 08:39:04 Creating wallet for TestKillSharder with walletIdx 501\n","File ./config/TestKillSharder_wallet.json written successfully.\n","    miner_block_rewards_test.go:414: getting sharder url...\n","    miner_block_rewards_test.go:478: list sharder nodes...\n","    miner_block_rewards_test.go:441: getting miner or sharder nodes...\n",""],"Passed":false,"Skipped":false,"TestFileName":"zzwalletcli_kill_sharder_test.go","TestFunctionDetail":{"Line":20,"Col":1}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestKillSharder/Killed_sharder_does_not_receive_rewards","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":49.72,"Output":["","    zzwalletcli_kill_sharder_test.go:52: Test case [Killed sharder does not receive rewards] scheduled at [01-04-2025 08:32:16] \n","    system_test_framework.go:148: Test case [Killed sharder does not receive rewards] start at [01-04-2025 08:32:16] \n","2025/01/04 08:32:16 Creating wallet for TestKillSharder-Killed_sharder_does_not_receive_rewards with walletIdx 507\n","File ./config/TestKillSharder-Killed_sharder_does_not_receive_rewards_wallet.json written successfully.\n","    zzwalletcli_kill_sharder_test.go:76: kill sharder...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=1e1a886a1fb6a68a9b4f7f8ba4baeb35e421fc925d8d095aa6407b2c872d6dd2: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=1e1a886a1fb6a68a9b4f7f8ba4baeb35e421fc925d8d095aa6407b2c872d6dd2: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=02a7a633369a833cb6dd09f4b890a4e91483f4682f685ab72efdef938da84276: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=02a7a633369a833cb6dd09f4b890a4e91483f4682f685ab72efdef938da84276: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=8a39821af8a8e0d60d6bf5c4a3146c7db221ea5b9c59fcf5a7637c14c21a01d4: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=8a39821af8a8e0d60d6bf5c4a3146c7db221ea5b9c59fcf5a7637c14c21a01d4: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/04 08:32:54.107447 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk [INFO]   2025/01/04 08:32:54.107577 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31m[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=02bc02acf5bd7243def69dc496450a729d4dc2aada32c35e3211460a5eaaab6f: [400] {\"error\":\"unexpected end of JSON input\"}\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=02bc02acf5bd7243def69dc496450a729d4dc2aada32c35e3211460a5eaaab6f: [400] {\"error\":\"unexpected end of JSON input\"}\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zzwalletcli_kill_sharder_test.go:57\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tReceived unexpected error:\n","        \t            \texit status 1\n","        \tTest:       \tTestKillSharder/Killed_sharder_does_not_receive_rewards\n","        \tMessages:   \t[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=8a39821af8a8e0d60d6bf5c4a3146c7db221ea5b9c59fcf5a7637c14c21a01d4: [400] {\"error\":\"unexpected end of JSON input\"}\n","        \t            \thttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=8a39821af8a8e0d60d6bf5c4a3146c7db221ea5b9c59fcf5a7637c14c21a01d4: [400] {\"error\":\"unexpected end of JSON input\"}\n","    zzwalletcli_kill_sharder_test.go:52: Test case [Killed sharder does not receive rewards] exit at [01-04-2025 08:33:05]\n","","","    zzwalletcli_kill_sharder_test.go:52: Test case [Killed sharder does not receive rewards] scheduled at [01-04-2025 08:35:38] \n","    system_test_framework.go:148: Test case [Killed sharder does not receive rewards] start at [01-04-2025 08:35:38] \n","2025/01/04 08:35:38 Creating wallet for TestKillSharder-Killed_sharder_does_not_receive_rewards with walletIdx 502\n","File ./config/TestKillSharder-Killed_sharder_does_not_receive_rewards_wallet.json written successfully.\n","    zzwalletcli_kill_sharder_test.go:76: kill sharder...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=e34915e586bbaa68b7c9122ebeb6009934d062c785beda70fb86ba103f2248ec: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=e34915e586bbaa68b7c9122ebeb6009934d062c785beda70fb86ba103f2248ec: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=c313002465eab8a3e5421a9eb6d32cc9af595684b56e202b1912fb0bb989df6d: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=c313002465eab8a3e5421a9eb6d32cc9af595684b56e202b1912fb0bb989df6d: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=729dbbc8e7522e616286b8d88a91d4e9c593c450af1d42c9011761d82273ee4d: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=729dbbc8e7522e616286b8d88a91d4e9c593c450af1d42c9011761d82273ee4d: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/04 08:36:16.468732 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk [INFO]   2025/01/04 08:36:16.469035 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31m[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=81078f8040287b298178454baa045b5a9ec727ab963bfe54a05a285cd64ea0ce: [400] {\"error\":\"unexpected end of JSON input\"}\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=81078f8040287b298178454baa045b5a9ec727ab963bfe54a05a285cd64ea0ce: [400] {\"error\":\"unexpected end of JSON input\"}\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zzwalletcli_kill_sharder_test.go:57\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tReceived unexpected error:\n","        \t            \texit status 1\n","        \tTest:       \tTestKillSharder/Killed_sharder_does_not_receive_rewards\n","        \tMessages:   \t[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=729dbbc8e7522e616286b8d88a91d4e9c593c450af1d42c9011761d82273ee4d: [400] {\"error\":\"unexpected end of JSON input\"}\n","        \t            \thttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=729dbbc8e7522e616286b8d88a91d4e9c593c450af1d42c9011761d82273ee4d: [400] {\"error\":\"unexpected end of JSON input\"}\n","    zzwalletcli_kill_sharder_test.go:52: Test case [Killed sharder does not receive rewards] exit at [01-04-2025 08:36:27]\n","","","    zzwalletcli_kill_sharder_test.go:52: Test case [Killed sharder does not receive rewards] scheduled at [01-04-2025 08:39:04] \n","    system_test_framework.go:148: Test case [Killed sharder does not receive rewards] start at [01-04-2025 08:39:04] \n","2025/01/04 08:39:04 Creating wallet for TestKillSharder-Killed_sharder_does_not_receive_rewards with walletIdx 502\n","File ./config/TestKillSharder-Killed_sharder_does_not_receive_rewards_wallet.json written successfully.\n","    zzwalletcli_kill_sharder_test.go:76: kill sharder...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=a3b64136aa414e1697c38c9e56239ff96c63609e8bd6f8f602cc2031b1568024: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=a3b64136aa414e1697c38c9e56239ff96c63609e8bd6f8f602cc2031b1568024: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=3341d09b87e9f371fe18b01f6563194e9500937f2f3c0806dfc48b910a5b4562: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=3341d09b87e9f371fe18b01f6563194e9500937f2f3c0806dfc48b910a5b4562: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=94fe8624013cb089d592a39164d249f7e378bd3ffd8e4e0b0f2f1c7980e5c246: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=94fe8624013cb089d592a39164d249f7e378bd3ffd8e4e0b0f2f1c7980e5c246: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/04 08:39:43.234056 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk [INFO]   2025/01/04 08:39:43.234154 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31m[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=0863cc7478f8769e640d660ac189272e5bb2ee7eb2468ac0d425f6d2ec5894a0: [400] {\"error\":\"unexpected end of JSON input\"}\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=0863cc7478f8769e640d660ac189272e5bb2ee7eb2468ac0d425f6d2ec5894a0: [400] {\"error\":\"unexpected end of JSON input\"}\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zzwalletcli_kill_sharder_test.go:57\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \tReceived unexpected error:\n","        \t            \texit status 1\n","        \tTest:       \tTestKillSharder/Killed_sharder_does_not_receive_rewards\n","        \tMessages:   \t[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","        \t            \thttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=94fe8624013cb089d592a39164d249f7e378bd3ffd8e4e0b0f2f1c7980e5c246: [400] {\"error\":\"unexpected end of JSON input\"}\n","        \t            \thttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=94fe8624013cb089d592a39164d249f7e378bd3ffd8e4e0b0f2f1c7980e5c246: [400] {\"error\":\"unexpected end of JSON input\"}\n","    zzwalletcli_kill_sharder_test.go:52: Test case [Killed sharder does not receive rewards] exit at [01-04-2025 08:39:54]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]},{"FailureIndicator":"failed","SkippedIndicator":"","TestResults":[{"TestName":"TestKillSharder/kill_sharder_by_non-smartcontract_owner_should_fail","Package":"github.com/0chain/system_test/tests/cli_tests","ElapsedTime":49.49,"Output":["","    zzwalletcli_kill_sharder_test.go:42: Test case [kill sharder by non-smartcontract owner should fail] scheduled at [01-04-2025 08:31:27] \n","    system_test_framework.go:148: Test case [kill sharder by non-smartcontract owner should fail] start at [01-04-2025 08:31:27] \n","2025/01/04 08:31:27 Creating wallet for TestKillSharder-kill_sharder_by_non-smartcontract_owner_should_fail with walletIdx 506\n","File ./config/TestKillSharder-kill_sharder_by_non-smartcontract_owner_should_fail_wallet.json written successfully.\n","    zzwalletcli_kill_sharder_test.go:76: kill sharder...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=a68bb7a783ee4263f7f88b89b8622fdcc4aebfd7dc39aa7e83302477279cb88a: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=a68bb7a783ee4263f7f88b89b8622fdcc4aebfd7dc39aa7e83302477279cb88a: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=b0a183d55874dde67dc283125c875d7ef58655ed389daa6311dfbf93d3b61a45: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=b0a183d55874dde67dc283125c875d7ef58655ed389daa6311dfbf93d3b61a45: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=6d13e08765d32d57eba6cd9185de35fd0b5081ec6fb487724d94350210494587: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=6d13e08765d32d57eba6cd9185de35fd0b5081ec6fb487724d94350210494587: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/04 08:32:05.131629 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk [INFO]   2025/01/04 08:32:05.131729 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31m[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=fcc1ba7a3748e052743f3be1d9ea6918a2c3d700bf8256ab972bda207a378951: [400] {\"error\":\"unexpected end of JSON input\"}\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=fcc1ba7a3748e052743f3be1d9ea6918a2c3d700bf8256ab972bda207a378951: [400] {\"error\":\"unexpected end of JSON input\"}\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zzwalletcli_kill_sharder_test.go:48\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \t\"[[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=6d13e08765d32d57eba6cd9185de35fd0b5081ec6fb487724d94350210494587: [400] {\"error\":\"unexpected end of JSON input\"} https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=6d13e08765d32d57eba6cd9185de35fd0b5081ec6fb487724d94350210494587: [400] {\"error\":\"unexpected end of JSON input\"}]\" should have 1 item(s), but has 3\n","        \tTest:       \tTestKillSharder/kill_sharder_by_non-smartcontract_owner_should_fail\n","    zzwalletcli_kill_sharder_test.go:42: Test case [kill sharder by non-smartcontract owner should fail] exit at [01-04-2025 08:32:16]\n","","","    zzwalletcli_kill_sharder_test.go:42: Test case [kill sharder by non-smartcontract owner should fail] scheduled at [01-04-2025 08:34:48] \n","    system_test_framework.go:148: Test case [kill sharder by non-smartcontract owner should fail] start at [01-04-2025 08:34:48] \n","2025/01/04 08:34:48 Creating wallet for TestKillSharder-kill_sharder_by_non-smartcontract_owner_should_fail with walletIdx 502\n","File ./config/TestKillSharder-kill_sharder_by_non-smartcontract_owner_should_fail_wallet.json written successfully.\n","    zzwalletcli_kill_sharder_test.go:76: kill sharder...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=0edfbe31a77f215226017d85194b97950536f25ad137393589389baf59fcd617: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=0edfbe31a77f215226017d85194b97950536f25ad137393589389baf59fcd617: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=a7a909f97f1b55ed7449901f3eebd5788c7453e34adcdafa5a0b00d4d9b6e818: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=a7a909f97f1b55ed7449901f3eebd5788c7453e34adcdafa5a0b00d4d9b6e818: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=333e1bf91d8d486e11d999cd9a0d424d8349065681dfe5fbde09de3d584c8449: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=333e1bf91d8d486e11d999cd9a0d424d8349065681dfe5fbde09de3d584c8449: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/04 08:35:26.366551 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk [INFO]   2025/01/04 08:35:26.366648 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31m[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=a1ecde88a3f9cea1d9fce37ec4ec74a3b0da57043d0746d04c2f4a94d5bd642e: [400] {\"error\":\"unexpected end of JSON input\"}\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=a1ecde88a3f9cea1d9fce37ec4ec74a3b0da57043d0746d04c2f4a94d5bd642e: [400] {\"error\":\"unexpected end of JSON input\"}\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zzwalletcli_kill_sharder_test.go:48\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \t\"[[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=333e1bf91d8d486e11d999cd9a0d424d8349065681dfe5fbde09de3d584c8449: [400] {\"error\":\"unexpected end of JSON input\"} https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=333e1bf91d8d486e11d999cd9a0d424d8349065681dfe5fbde09de3d584c8449: [400] {\"error\":\"unexpected end of JSON input\"}]\" should have 1 item(s), but has 3\n","        \tTest:       \tTestKillSharder/kill_sharder_by_non-smartcontract_owner_should_fail\n","    zzwalletcli_kill_sharder_test.go:42: Test case [kill sharder by non-smartcontract owner should fail] exit at [01-04-2025 08:35:37]\n","","","    zzwalletcli_kill_sharder_test.go:42: Test case [kill sharder by non-smartcontract owner should fail] scheduled at [01-04-2025 08:38:14] \n","    system_test_framework.go:148: Test case [kill sharder by non-smartcontract owner should fail] start at [01-04-2025 08:38:14] \n","2025/01/04 08:38:14 Creating wallet for TestKillSharder-kill_sharder_by_non-smartcontract_owner_should_fail with walletIdx 502\n","File ./config/TestKillSharder-kill_sharder_by_non-smartcontract_owner_should_fail_wallet.json written successfully.\n","    zzwalletcli_kill_sharder_test.go:76: kill sharder...\n","    utils.go:109: \u001b[33mCommand failed on attempt [1/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=84ed2549cabef3c8bb00d54794ec238c027afc640802c17ba9db4887d03f608f: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=84ed2549cabef3c8bb00d54794ec238c027afc640802c17ba9db4887d03f608f: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:109: \u001b[33mCommand failed on attempt [2/3] due to error [exit status 1]. Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=ac11cd0c3c4fe832f8ea720418f86bb780ea92365bc64ba7cbefda2566411676: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=ac11cd0c3c4fe832f8ea720418f86bb780ea92365bc64ba7cbefda2566411676: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:125: \u001b[31mCommand failed on final attempt [3/3] due to error [exit status 1]. Command String: [] Output: [[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=feee8c88a36decf4f579eaeca02546343bea90232a11be85ee52bd55adbe9737: [400] {\"error\":\"unexpected end of JSON input\"} -\u003cNEWLINE\u003e- https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=feee8c88a36decf4f579eaeca02546343bea90232a11be85ee52bd55adbe9737: [400] {\"error\":\"unexpected end of JSON input\"}]\n","    utils.go:128: \u001b[31mThe verbose output for the command is:\n","    utils.go:132: \u001b[31m0chain-core-sdk [INFO]   2025/01/04 08:38:52.225129 wallet_base.go:193: ******* Wallet SDK Version:v1.17.11-269-g7fd90660 ******* (SetLogFile)\n","    utils.go:132: \u001b[31m0box-sdk [INFO]   2025/01/04 08:38:52.225198 sdk.go:95: ******* Storage SDK Version: v1.17.11-269-g7fd90660 *******\n","    utils.go:132: \u001b[31m[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=3bd92949b859ae3310346050ea25e7292440c8bc2cc4403ec6023309f7f81c89: [400] {\"error\":\"unexpected end of JSON input\"}\n","    utils.go:132: \u001b[31mhttps://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=3bd92949b859ae3310346050ea25e7292440c8bc2cc4403ec6023309f7f81c89: [400] {\"error\":\"unexpected end of JSON input\"}\n","    assertions.go:363: \n","        \tError Trace:\t/root/actions-runner7/_work/system_test/system_test/tests/cli_tests/zzwalletcli_kill_sharder_test.go:48\n","        \t            \t\t\t\t/root/actions-runner7/_work/system_test/system_test/internal/api/util/test/system_test_framework.go:149\n","        \t            \t\t\t\t/root/actions-runner7/_work/_tool/go/1.22.1/x64/src/runtime/asm_amd64.s:1695\n","        \tError:      \t\"[[txn] too less sharders to confirm it: min_confirmation is 50%, but got 0/2 sharders https://dev-7.devnet-0chain.net/sharder01/v1/transaction/get/confirmation?hash=feee8c88a36decf4f579eaeca02546343bea90232a11be85ee52bd55adbe9737: [400] {\"error\":\"unexpected end of JSON input\"} https://dev-7.devnet-0chain.net/sharder02/v1/transaction/get/confirmation?hash=feee8c88a36decf4f579eaeca02546343bea90232a11be85ee52bd55adbe9737: [400] {\"error\":\"unexpected end of JSON input\"}]\" should have 1 item(s), but has 3\n","        \tTest:       \tTestKillSharder/kill_sharder_by_non-smartcontract_owner_should_fail\n","    zzwalletcli_kill_sharder_test.go:42: Test case [kill sharder by non-smartcontract owner should fail] exit at [01-04-2025 08:39:03]\n",""],"Passed":false,"Skipped":false,"TestFileName":"","TestFunctionDetail":{"Line":0,"Col":0}}]}]
+
+    const report = window.GoTestReport({
+                                         data: data,
+                                         testResultsElem: document.getElementById('testResults'),
+                                         testGroupListElem: document.getElementById('testGroupList')
+                                       });
+
+
+</script>
+</body>
+</html>
