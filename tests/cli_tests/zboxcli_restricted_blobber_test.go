@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -331,7 +332,7 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 		return authTicket, err
 	}
 
-	url := blobberUrl + "/v1/auth/generate?client_id=" + clientID
+	url := blobberUrl + "/v1/auth/generate?client_id=" + clientID + "&round_expiry=" + strconv.FormatInt(1000000000000000, 10)
 	req, err := http.NewRequest("GET", url, http.NoBody)
 	if err != nil {
 		return authTicket, err
