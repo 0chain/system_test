@@ -23,7 +23,6 @@ const (
 	X_APP_CLIENT_ID_R        = "bcf5f517be521e0ffdb22d1fc26a35abdec8556bcb9ed075244a358df7337cd0"
 	X_APP_CLIENT_KEY_R       = "de9351bbf460c761ea979764831759369ced3c6de38b856e7921eee9cc034323cce23c562c74a0629867fbea33d5009b9f473bc3b766871b65e7cf864ba4301d"
 	X_APP_CLIENT_SIGNATURE_R = "43fa947257ae0b5da8b073f0efeaa2570c4faf66fcabd93407e3597bc34e440b"
-	//TODO: verify client B info
 	X_APP_USER_ID_B          = "test_user_id_B"
 	X_APP_CLIENT_ID_B        = "fc6ed0246c8bb4f7251acf521c81d7fdb3f042a7bb2234a032723c9bba8dda9b"
 	X_APP_CLIENT_KEY_B       = "92843dc9dafc041e88b778356bf39533606911828d50f420fb24e0cc2dcc4b06a8ed6dc0f083c988bc8cc64c7525f943dff8d1ece4955e456c450d34faf8da12"
@@ -604,7 +603,7 @@ func (c *ZboxClient) CreateShareRequest(t *test.SystemTest, headers, shareReques
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:                &out,
-		FormData:           shareRequestData,
+		Body:               shareRequestData,
 		Headers:            headers,
 		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
@@ -664,6 +663,24 @@ func (c *ZboxClient) UpdateShareReq(t *test.SystemTest, headers, updateShareReqD
 		Headers:            headers,
 		RequiredStatusCode: 201,
 	}, HttpPUTMethod)
+	return &out, resp, err
+}
+
+func (c *ZboxClient) DeleteShareReq(t *test.SystemTest, headers, queryParams map[string]string) (*model.ZboxMessageDataResponse[int64], *resty.Response, error) {
+	t.Logf("Deleting ShareRequest using 0box...")
+	var out model.ZboxMessageDataResponse[int64]
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/sharereq")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &out,
+		QueryParams:        queryParams,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpDELETEMethod)
 	return &out, resp, err
 }
 
