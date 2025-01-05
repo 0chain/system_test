@@ -11,6 +11,9 @@ on:
         description: 'branch of repo-snapshots to derive images and branches from.'
         default: 'current-sprint'
         required: true
+      is_enterprise:
+        description: 'deploy network with enterprise blobbers'
+        default: false
       existing_network:
         description: '(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]'
         default: ''
@@ -78,13 +81,13 @@ jobs:
           force: 'false'
 
       - name: "Deploy 0Chain"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
-        uses: 0chain/actions/deploy-0chain@master
+        uses: 0chain/actions/deploy-0chain@feature/add-egosdk-tokenomics-action
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          kube_config: ${{ secrets[format('DEVSTKC', env.RUNNER_NUMBER)] }}
+          kube_config: ${{ secrets[format('DEVKC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
+          is_enterprise_blobbers: '${{ inputs.is_enterprise }}'
           TENDERLY_VIRTUAL_TESTNET_RPC_ID: ""
           graphnode_sc: ${{ secrets.GRAPHNODE_SC }}
           graphnode_network: ${{ secrets.GRAPHNODE_NETWORK }}
