@@ -84,7 +84,7 @@ jobs:
         uses: 0chain/actions/deploy-0chain@feature/add-egosdk-tokenomics-action
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
-          kube_config: ${{ secrets[format('DEVKC', env.RUNNER_NUMBER)] }}
+          kube_config: ${{ secrets[format('DEVSTKC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
           SUBGRAPH_API_URL: ${{ secrets.SUBGRAPH_API_URL }}
           is_enterprise_blobbers: '${{ inputs.is_enterprise }}'
