@@ -26,6 +26,7 @@ func Test0Gdrive(testSetup *testing.T) {
 
 		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"access-key": gdriveAccessToken,
+			"secret-key": gdriveRefreshToken,
 			"allocation": allocationID,
 			"source":     "google_drive",
 			"wallet":     escapedTestName(t) + "_wallet.json",
@@ -44,6 +45,7 @@ func Test0Gdrive(testSetup *testing.T) {
 
 		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"access-key": gdriveAccessToken,
+			"secret-key": gdriveRefreshToken,
 			"allocation": allocationID,
 			"source":     "google_drive",
 			"wallet":     escapedTestName(t) + "_wallet.json",
@@ -64,6 +66,7 @@ func Test0Gdrive(testSetup *testing.T) {
 
 		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"access-key": gdriveAccessToken,
+			"secret-key": gdriveRefreshToken,
 			"allocation": allocationID,
 			"source":     "google_drive",
 			"wallet":     escapedTestName(t) + "_wallet.json",
@@ -84,6 +87,7 @@ func Test0Gdrive(testSetup *testing.T) {
 
 		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"access-key": gdriveAccessToken,
+			"secret-key": gdriveRefreshToken,
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"source":     "google_drive",
 			"config":     configPath,
@@ -101,6 +105,7 @@ func Test0Gdrive(testSetup *testing.T) {
 
 		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"access-key": "invalid",
+			"secret-key": "invalid",
 			"wallet":     escapedTestName(t) + "_wallet.json",
 			"source":     "google_drive",
 			"config":     configPath,
@@ -127,8 +132,9 @@ func Test0Gdrive(testSetup *testing.T) {
 			"allocation": allocationID,
 		}))
 
+		t.Logf("EXpected log  %v", strings.Join(output, "\n"))
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "invalid Google Drive access token", "Output was not as expected", strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, "\n"), "Missing fields: access key, secret key")
 	})
 }
