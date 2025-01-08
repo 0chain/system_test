@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
-	cliutils "github.com/0chain/system_test/internal/cli/util"
+	cli_utils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -30,8 +29,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, _ := migrateFromMicrosoftAzure(t, configPath, createParams(map[string]interface{}{
-			"connection-string": connectionString,
+		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"account-name":      accountName,
 			"wallet":            escapedTestName(t) + "_wallet.json",
 			"allocation":        allocationId,
@@ -39,6 +37,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 			"config":            configPath,
 			"configDir":         configDir,
 			"skip":              1,
+			"connection-string": connectionString,
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
@@ -50,8 +49,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromMicrosoftAzure(t, configPath, createParams(map[string]interface{}{
-			"connection-string": connectionString,
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"account-name":      accountName,
 			"wallet":            escapedTestName(t) + "_wallet.json",
 			"allocation":        allocationId,
@@ -59,6 +57,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 			"config":            configPath,
 			"configDir":         configDir,
 			"skip":              1,
+			"connection-string": connectionString,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -66,14 +65,14 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when allocation flag missing", func(t *test.SystemTest) {
-		output, _ := migrateFromMicrosoftAzure(t, configPath, createParams(map[string]interface{}{
-			"connection-string": connectionString,
+		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"account-name":      accountName,
 			"wallet":            escapedTestName(t) + "_wallet.json",
 			"source":            "azure",
 			"config":            configPath,
 			"configDir":         configDir,
 			"skip":              1,
+			"connection-string": connectionString,
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
@@ -85,7 +84,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromMicrosoftAzure(t, configPath, createParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"connection-string": "invalid",
 			"account-name":      accountName,
 			"wallet":            escapedTestName(t) + "_wallet.json",
@@ -107,7 +106,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromMicrosoftAzure(t, configPath, createParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"account-name": accountName,
 			"wallet":       escapedTestName(t) + "_wallet.json",
 			"allocation":   allocationId,
@@ -127,7 +126,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 			"size": allocSize,
 		})
 
-		output, err := migrateFromMicrosoftAzure(t, configPath, createParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"account-name": accountName,
 			"wallet":       escapedTestName(t) + "_wallet.json",
 			"allocation":   allocationId,
@@ -157,12 +156,4 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 			})
 		}()
 	})
-}
-
-func migrateFromMicrosoftAzure(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	t.Logf("Migrating Azure container  to Zus...")
-	t.Logf(fmt.Sprintf("params %v", params))
-	t.Logf(fmt.Sprintf("cli %v", cliConfigFilename))
-	t.Logf(fmt.Sprintf("./s3migration migrate  %s", params))
-	return cliutils.RunCommand(t, fmt.Sprintf("./s3migration migrate  %s", params), 1, time.Hour*2)
 }
