@@ -89,7 +89,6 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when connection string is invalid", func(t *test.SystemTest) {
-
 		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"connection-string": "invalid",
 			"account-name":      accountName,
