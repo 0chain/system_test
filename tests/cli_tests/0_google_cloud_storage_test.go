@@ -29,15 +29,15 @@ func Test0GoogleCloudStorage(testSetup *testing.T) {
 		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"client-id":     googleClientId,
 			"client-secret": googleClientSecret,
-			"access-key":  googleCloudStorageAccessToken,
-			"secret-key": googleCloudStorageRefreshToken,
+			"access-key":    googleCloudStorageAccessToken,
+			"secret-key":    googleCloudStorageRefreshToken,
 			"wallet":        escapedTestName(t) + "_wallet.json",
 			"allocation":    allocationId,
 			"source":        "google_cloud_storage",
 			"config":        configPath,
 			"configDir":     configDir,
 			"skip":          1,
-			"wd": "0chainmigration",
+			"wd":            "0chainmigration",
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
@@ -52,15 +52,15 @@ func Test0GoogleCloudStorage(testSetup *testing.T) {
 		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
 			"client-id":     googleClientId,
 			"client-secret": googleClientSecret,
-			"access-key":  googleCloudStorageAccessToken,
-			"secret-key": googleCloudStorageRefreshToken,
+			"access-key":    googleCloudStorageAccessToken,
+			"secret-key":    googleCloudStorageRefreshToken,
 			"wallet":        escapedTestName(t) + "_wallet.json",
 			"allocation":    allocationId,
 			"source":        "google_cloud_storage",
 			"config":        configPath,
 			"configDir":     configDir,
 			"skip":          1,
-			"wd": "0chainmigration",
+			"wd":            "0chainmigration",
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -85,7 +85,7 @@ func Test0GoogleCloudStorage(testSetup *testing.T) {
 			"config":        configPath,
 			"configDir":     configDir,
 			"skip":          1,
-			"wd": "0chainmigration",
+			"wd":            "0chainmigration",
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
@@ -103,7 +103,7 @@ func Test0GoogleCloudStorage(testSetup *testing.T) {
 			"config":        configPath,
 			"configDir":     configDir,
 			"skip":          1,
-			"wd": "0chainmigration",
+			"wd":            "0chainmigration",
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -123,7 +123,7 @@ func Test0GoogleCloudStorage(testSetup *testing.T) {
 			"config":        configPath,
 			"configDir":     configDir,
 			"skip":          1,
-			"wd": "0chainmigration",
+			"wd":            "0chainmigration",
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -142,8 +142,7 @@ func Test0GoogleCloudStorage(testSetup *testing.T) {
 			"config":        configPath,
 			"configDir":     configDir,
 			"skip":          1,
-			"wd": "0chainmigration",
-
+			"wd":            "0chainmigration",
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
