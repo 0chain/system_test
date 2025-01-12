@@ -19,6 +19,13 @@ func Test0OneDrive(testSetup *testing.T) {
 
 	t.SetSmokeTests("Should migrate existing files and folder from Microsoft OneDrive successfully")
 
+	allocSize := int64(50 * MB)
+	test_allocationId := setupAllocation(t, configPath, map[string]interface{}{
+		"size": allocSize,
+	})
+	test_walletName := escapedTestName(t)
+	createWalletForName(test_walletName)
+
 	t.RunSequentially("Should migrate existing Micrsoft OneDrive folder and files  successfully", func(t *test.SystemTest) {
 		allocSize := int64(50 * MB)
 		allocationId := setupAllocation(t, configPath, map[string]interface{}{
@@ -26,14 +33,14 @@ func Test0OneDrive(testSetup *testing.T) {
 		})
 
 		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
-			"access-token":  oneDriveAccessToken,
-			"refresh-token": oneDriveRefreshToken,
-			"wallet":        escapedTestName(t) + "_wallet.json",
-			"allocation":    allocationId,
-			"source":        "onedrive",
-			"config":        configPath,
-			"configDir":     configDir,
-			"skip":          1,
+			"access-key": "'" + oneDriveAccessToken + "'",
+			"secret-key": "'" + oneDriveRefreshToken + "'",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"allocation": allocationId,
+			"source":     "onedrive",
+			"config":     configPath,
+			"configDir":  configDir,
+			"skip":       1,
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
@@ -46,14 +53,14 @@ func Test0OneDrive(testSetup *testing.T) {
 		})
 
 		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
-			"access-token":  oneDriveAccessToken,
-			"refresh-token": oneDriveRefreshToken,
-			"wallet":        escapedTestName(t) + "_wallet.json",
-			"allocation":    allocationId,
-			"source":        "onedrive",
-			"config":        configPath,
-			"configDir":     configDir,
-			"skip":          1,
+			"access-key": "'" + oneDriveAccessToken + "'",
+			"secret-key": "'" + oneDriveRefreshToken + "'",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"allocation": allocationId,
+			"source":     "onedrive",
+			"config":     configPath,
+			"configDir":  configDir,
+			"skip":       1,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -61,56 +68,52 @@ func Test0OneDrive(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when allocation flag missing", func(t *test.SystemTest) {
-		output, _ := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
-			"access-token":  oneDriveAccessToken,
-			"refresh-token": oneDriveRefreshToken,
-			"wallet":        escapedTestName(t) + "_wallet.json",
-			"source":        "onedrive",
-			"config":        configPath,
-			"configDir":     configDir,
-			"skip":          1,
+		// Prepare the parameters in the desired order using Param structs
+		createWalletForName(escapedTestName(t))
+
+		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
+			"access-key": "'" + oneDriveAccessToken + "'",
+			"secret-key": "'" + oneDriveRefreshToken + "'",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"source":     "onedrive",
+			"config":     configPath,
+			"configDir":  configDir,
+			"skip":       1,
 		}))
 
+		fmt.Printf("Output: %v\n", output)
+		fmt.Printf("Error: %v\n", err)
 		require.Contains(t, strings.Join(output, "\n"), "allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
 	})
 
 	t.RunSequentially("Should fail when token and refresh token is invalid", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		allocationId := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
+		createWalletForName(escapedTestName(t))
 		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
-			"access-token":  "invalid",
-			"refresh-token": "invalid",
-			"wallet":        escapedTestName(t) + "_wallet.json",
-			"allocation":    allocationId,
-			"source":        "onedrive",
-			"config":        configPath,
-			"configDir":     configDir,
-			"skip":          1,
+			"access-key": "invalid",
+			"secret-key": "invalid",
+			"wallet":     escapedTestName(t) + "_wallet.json",
+			"allocation": test_allocationId,
+			"source":     "onedrive",
+			"config":     configPath,
+			"configDir":  configDir,
+			"skip":       1,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, "\n"), "invalid Client token: invalid client credentials/", "Output was not as expected", err)
+		require.Contains(t, strings.Join(output, "\n"), "invalid Access token: InvalidAuthenticationToken", "Output was not as expected", err)
 	})
 
 	t.RunSequentially("Should fail when source is invalid", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		allocationId := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
 		output, err := cli_utils.MigrateFromS3migration(t, configPath, createParams(map[string]interface{}{
-			"access-token":  oneDriveAccessToken,
-			"refresh-token": oneDriveRefreshToken,
-			"wallet":        escapedTestName(t) + "_wallet.json",
-			"allocation":    allocationId,
-			"source":        "src",
-			"config":        configPath,
-			"configDir":     configDir,
-			"skip":          1,
+			"access-key": oneDriveAccessToken,
+			"secret-key": oneDriveRefreshToken,
+			"wallet":     test_walletName + "_wallet.json",
+			"allocation": test_allocationId,
+			"source":     "src",
+			"config":     configPath,
+			"configDir":  configDir,
+			"skip":       1,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -120,17 +123,12 @@ func Test0OneDrive(testSetup *testing.T) {
 
 	t.RunSequentially("Should fail when folder too large for allocation", func(t *test.SystemTest) {
 		allocSize := int64(5 * KB)
-		func() {
-			defer func() {
-				if r := recover(); r != nil {
-					fmt.Println("Panic occurred:", r)
-					t.Log("Test passed even though a panic occurred")
-					require.Equal(t, "", "")
-				}
-			}()
-			_ = setupAllocation(t, configPath, map[string]interface{}{
-				"size": allocSize,
-			})
+		var err error
+		defer func() {
+			require.Contains(t, err.Error(), "allocation match not found")
 		}()
+		_, err = setupAllocationWithWalletWithoutTest(t, escapedTestName(t)+"_wallet.json", configPath, map[string]interface{}{
+			"size": allocSize,
+		})
 	})
 }

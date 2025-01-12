@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -814,6 +813,9 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 	createWalletForName(walletName)
 
 	output, err := createNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(options))
+	defer func() {
+		fmt.Printf("err: %v\n", err)
+	}()
 	require.NoError(t, err, "create new allocation failed", strings.Join(output, "\n"))
 	require.Len(t, output, 1)
 
@@ -853,12 +855,13 @@ func createParams(params map[string]interface{}) string {
 	var builder strings.Builder
 
 	for k, v := range params {
-		if v == nil {
-			_, _ = builder.WriteString(fmt.Sprintf("--%s ", k))
-		} else if reflect.TypeOf(v).String() == "bool" {
-			_, _ = builder.WriteString(fmt.Sprintf("--%s=%v ", k, v))
-		} else {
-			_, _ = builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
+		switch v := v.(type) {
+		case nil:
+			builder.WriteString(fmt.Sprintf("--%s ", k))
+		case bool:
+			builder.WriteString(fmt.Sprintf("--%s=%v ", k, v))
+		default:
+			builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
 		}
 	}
 	return strings.TrimSpace(builder.String())

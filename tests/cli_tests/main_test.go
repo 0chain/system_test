@@ -61,10 +61,12 @@ func setupConfig() {
 	dropboxAccessToken = parsedConfig.DropboxAccessToken
 	dropboxRefreshToken = parsedConfig.DropboxRefreshToken
 	gdriveAccessToken = parsedConfig.GdriveAccessToken
+	gdriveRefreshToken = parsedConfig.GdriveRefreshToken
 	accountName = parsedConfig.AccountName
 	connectionString = parsedConfig.ConnectionString
-	googleCloudConsoleAccessToken = parsedConfig.GoogleCloudAccessToken
-	googleCloudConsoleRefreshToken = parsedConfig.GoogleCloudRefreshToken
+	containerName = parsedConfig.ContainerName
+	googleCloudStorageAccessToken = parsedConfig.GoogleCloudAccessToken
+	googleCloudStorageRefreshToken = parsedConfig.GoogleCloudRefreshToken
 	googleClientId = parsedConfig.GoogleClientId
 	googleClientSecret = parsedConfig.GoogleClientSecret
 	oneDriveAccessToken = parsedConfig.OneDriveAccessToken
@@ -121,10 +123,12 @@ var (
 	dropboxAccessToken             string
 	dropboxRefreshToken            string
 	gdriveAccessToken              string
+	gdriveRefreshToken             string
 	connectionString               string
 	accountName                    string
-	googleCloudConsoleAccessToken  string
-	googleCloudConsoleRefreshToken string
+	containerName                  string
+	googleCloudStorageAccessToken  string
+	googleCloudStorageRefreshToken string
 	googleClientId                 string
 	googleClientSecret             string
 	oneDriveAccessToken            string

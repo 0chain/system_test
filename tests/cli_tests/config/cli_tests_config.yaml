@@ -1,12 +1,15 @@
 default_test_case_timeout: 3m
-s3_access_key: 
-s3_secret_key: 
+s3_access_key:
+s3_secret_key:
 s3_bucket_name:
 s3_bucket_name_alternate: alternate-test-bucket
-dropboxAccessToken: 
+dropboxAccessToken:
+dropboxRefreshToken:
 gdriveAccessToken:
+gdriveRefreshToken:
 connectionString:
 accountName:
+container:
 googleCloudAccessToken:
 googleCloudRefreshToken:
 googleClientId:

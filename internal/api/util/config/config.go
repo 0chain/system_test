@@ -39,8 +39,10 @@ type Config struct {
 	DropboxAccessToken          string `yaml:"dropboxAccessToken"`
 	DropboxRefreshToken         string `yaml:"dropboxRefreshToken"`
 	GdriveAccessToken           string `yaml:"gdriveAccessToken"`
+	GdriveRefreshToken          string `yaml:"gdriveRefreshToken"`
 	ConnectionString            string `yaml:"connectionString"`
 	AccountName                 string `yaml:"accountName"`
+	ContainerName               string `yaml:"container"`
 	GoogleCloudAccessToken      string `yaml:"googleCloudAccessToken"`
 	GoogleCloudRefreshToken     string `yaml:"googleCloudRefreshToken"`
 	GoogleClientId              string `yaml:"googleClientId"`
