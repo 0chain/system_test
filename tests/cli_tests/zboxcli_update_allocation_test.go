@@ -857,11 +857,11 @@ func createParams(params map[string]interface{}) string {
 	for k, v := range params {
 		switch v := v.(type) {
 		case nil:
-			builder.WriteString(fmt.Sprintf("--%s ", k))
+			_, _ = builder.WriteString(fmt.Sprintf("--%s ", k))
 		case bool:
-			builder.WriteString(fmt.Sprintf("--%s=%v ", k, v))
+			_, _ = builder.WriteString(fmt.Sprintf("--%s=%v ", k, v))
 		default:
-			builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
+			_, _ = builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
 		}
 	}
 	return strings.TrimSpace(builder.String())
