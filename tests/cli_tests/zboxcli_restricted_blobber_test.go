@@ -84,7 +84,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		// Setup wallet and create allocation
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "force": "true"}
+		options := map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "force": "true", "auth_round_expiry": 1000000000000000}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
