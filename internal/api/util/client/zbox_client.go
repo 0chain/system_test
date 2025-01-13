@@ -554,6 +554,25 @@ func (c *ZboxClient) GetShareInfoReceived(t *test.SystemTest, headers map[string
 	return ZboxShareInfoList, resp, err
 }
 
+func (c *ZboxClient) GetShareInfoReceivedWithParams(t *test.SystemTest, headers map[string]string, queryParams map[string]string) (*model.ZboxMessageDataShareinfoResponse, *resty.Response, error) {
+	t.Logf("Getting share Info for [%v] using 0box...", headers["X-App-User-ID"])
+	var ZboxShareInfoList *model.ZboxMessageDataShareinfoResponse
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/shareinfo/received")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &ZboxShareInfoList,
+		QueryParams:        queryParams,
+		Headers:            headers,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return ZboxShareInfoList, resp, err
+}
+
 func (c *ZboxClient) CreateShareInfo(t *test.SystemTest, headers, shareinfoData map[string]string) (*model.ZboxMessageResponse, *resty.Response, error) {
 	t.Logf("Posting ShareInfo using 0box...")
 	var message *model.ZboxMessageResponse
