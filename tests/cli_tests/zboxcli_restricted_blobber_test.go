@@ -115,7 +115,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 			}
 		}
 
-		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": preferredBlobbers, "blobber_auth_tickets": blobberAuthTickets, "force": "true"}
+		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": preferredBlobbers, "blobber_auth_tickets": blobberAuthTickets, "force": "true", "auth_round_expiry": 1000000000000000}
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
