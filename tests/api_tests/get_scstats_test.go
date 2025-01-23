@@ -15,6 +15,8 @@ func TestGetSCStats(testSetup *testing.T) {
 
 	t.Parallel()
 
+	// TODO : Fix blocks finalized API
+
 	t.Run("Get miner stats call should return successfully", func(t *test.SystemTest) {
 		// TODO: fix miner stats blocks finalised
 		minerGetStatsResponse, resp, err := apiClient.V1MinerGetStats(t, client.HttpOkStatus)
