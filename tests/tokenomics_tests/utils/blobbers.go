@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/0chain/common/core/common"
-	"github.com/0chain/gosdk/core/zcncrypto"
+	"github.com/0chain/gosdk_common/core/zcncrypto"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/stretchr/testify/require"
 
