@@ -13,11 +13,11 @@ import (
 	"strings"
 	"time"
 
-	coreClient "github.com/0chain/gosdk/core/client"
-	"github.com/0chain/gosdk/zcncore"
+	coreClient "github.com/0chain/gosdk_common/core/client"
+	"github.com/0chain/gosdk_common/zcncore"
 
-	"github.com/0chain/gosdk/core/conf"
 	"github.com/0chain/gosdk/zboxcore/sdk"
+	"github.com/0chain/gosdk_common/core/conf"
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"

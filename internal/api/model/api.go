@@ -5,9 +5,9 @@ import (
 	"io"
 	"time"
 
-	"github.com/0chain/gosdk/core/common"
+	"github.com/0chain/gosdk_common/core/common"
 
-	"github.com/0chain/gosdk/core/zcncrypto"
+	"github.com/0chain/gosdk_common/core/zcncrypto"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"gorm.io/gorm"

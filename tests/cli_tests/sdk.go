@@ -8,12 +8,12 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/0chain/gosdk/core/client"
-	"github.com/0chain/gosdk/zcncore"
+	"github.com/0chain/gosdk_common/core/client"
+	"github.com/0chain/gosdk_common/zcncore"
 
-	"github.com/0chain/gosdk/core/conf"
-	"github.com/0chain/gosdk/zboxcore/fileref"
 	"github.com/0chain/gosdk/zboxcore/sdk"
+	"github.com/0chain/gosdk_common/core/conf"
+	"github.com/0chain/gosdk_common/zboxcore/fileref"
 )
 
 func InitSDK(wallet, configFile string) error {
