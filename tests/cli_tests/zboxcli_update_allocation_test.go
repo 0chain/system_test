@@ -851,7 +851,6 @@ func getAllocationCost(str string) (float64, error) {
 
 func createParams(params map[string]interface{}) string {
 	var builder strings.Builder
-	params["enterprise"] = true
 	for k, v := range params {
 		if v == nil {
 			_, _ = builder.WriteString(fmt.Sprintf("--%s ", k))
