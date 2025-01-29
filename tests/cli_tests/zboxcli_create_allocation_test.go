@@ -474,6 +474,7 @@ func createNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename,
 	} else {
 		params = enterprise // If params is empty, just set the new field
 	}
+	fmt.Printf("new allocation params... %s", params)
 	return cliutils.RunCommand(t, fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
