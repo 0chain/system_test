@@ -469,7 +469,7 @@ func createNewAllocation(t *test.SystemTest, cliConfigFilename, params string) (
 func createNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Creating new allocation...")
 	return cliutils.RunCommand(t, fmt.Sprintf(
-		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s --enterprise",
+		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
 		wallet+"_wallet.json",
 		cliConfigFilename,
