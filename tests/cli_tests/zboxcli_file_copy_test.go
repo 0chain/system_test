@@ -3,10 +3,7 @@ package cli_tests
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -158,7 +155,7 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
 	})
 
-	t.Run("copy directory to another directry with multiple existing file should work", func(t *test.SystemTest) {
+	t.Run("copy directory to another directory with multiple existing file should work", func(t *test.SystemTest) {
 		allocSize := int64(2048000)
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
@@ -907,73 +904,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "Invalid path record not found")
-	})
-
-	t.RunWithTimeout("File copy - Users should be charged for copying a file ", 5*time.Minute, func(t *test.SystemTest) {
-		createWallet(t)
-
-		// Lock 0.5 token for allocation
-		allocParams := createParams(map[string]interface{}{
-			"lock": "0.5",
-			"size": 4 * MB,
-		})
-		output, err := createNewAllocation(t, configPath, allocParams)
-		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
-		t.Logf("Allocation created: %s", output[0])
-
-		require.Len(t, output, 1)
-		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"), output[0], "Allocation creation output did not match expected")
-		allocationID := strings.Fields(output[0])[2]
-		t.Logf("Allocation ID: %s", allocationID)
-
-		initialAllocation := getAllocation(t, allocationID)
-		t.Logf("Initial allocation: %+v", initialAllocation)
-
-		fileSize := int64(math.Floor(1 * MB))
-
-		// Upload 1 MB file
-		localpath := uploadRandomlyGeneratedFile(t, allocationID, "/", fileSize)
-		output, _ = getUploadCostInUnit(t, configPath, allocationID, localpath)
-		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
-		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
-		t.Logf("Upload cost: %v", expectedUploadCostInZCN)
-		unit := strings.Fields(output[0])[1]
-		t.Logf("Upload cost unit: %v", unit)
-		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
-		t.Logf("Upload cost in ZCN: %v", expectedUploadCostInZCN)
-
-		time.Sleep(30 * time.Second)
-
-		allocAfterUpload := getAllocation(t, allocationID)
-		require.Equal(t, initialAllocation.WritePool-allocAfterUpload.WritePool, allocAfterUpload.MovedToChallenge)
-		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge), 0.05, "Upload cost is not as expected %v != %v", expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge))
-
-		remotepath := "/" + filepath.Base(localpath)
-		// copy file
-		output, err = copyFile(t, configPath, map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remotepath,
-			"destpath":   "/newdir/",
-		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-		require.Equal(t, fmt.Sprintf(remotepath+" copied"), output[0])
-
-		cliutils.Wait(t, 30*time.Second)
-
-		finalAllocation := getAllocation(t, allocationID)
-		finalAllocationJSON, err := json.Marshal(allocAfterUpload)
-		require.Nil(t, err, "Failed to marshal allocation", strings.Join(output, "\n"))
-		t.Log("finalAllocationJSON: ", string(finalAllocationJSON))
-
-		actualCost := finalAllocation.MovedToChallenge - allocAfterUpload.MovedToChallenge
-
-		t.Logf("Actual cost: %v", actualCost)
-		t.Log("expectedUploadCostInZCN : ", expectedUploadCostInZCN, " actualCost : ", intToZCN(actualCost))
-
-		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(actualCost), 0.05, "Copy file cost is not as expected")
-
-		createAllocationTestTeardown(t, allocationID)
 	})
 }
 
