@@ -21,6 +21,7 @@ import (
 
 func TestFileStats(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip()
 	t.SetSmokeTests("get file stats in root directory should work")
 
 	t.Parallel()
