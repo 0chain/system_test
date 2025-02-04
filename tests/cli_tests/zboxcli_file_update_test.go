@@ -3,7 +3,6 @@ package cli_tests
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"math"
 	"os"
 	"path/filepath"
