@@ -7,7 +7,7 @@ toolchain go1.23.1
 require (
 	github.com/0chain/errors v1.0.3
 	github.com/0chain/gosdk v1.18.14
-	github.com/0chain/gosdk_common v0.0.0-20250203211137-32f7f9862646
+	github.com/0chain/gosdk_common v0.0.0-20250204070817-3c82b7ad6a9f
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
@@ -115,6 +115,6 @@ require (
 )
 
 // replace github.com/herumi/bls-go-binary => github.com/herumi/bls-go-binary v1.28.2
-replace github.com/0chain/gosdk => github.com/0chain/egosdk v1.18.6-0.20250203211702-dcf5a694cc10
+replace github.com/0chain/gosdk => github.com/0chain/egosdk v1.18.6-0.20250204071300-93191f4aa124
 
 // replace github.com/0chain/gosdk => ../gosdk
