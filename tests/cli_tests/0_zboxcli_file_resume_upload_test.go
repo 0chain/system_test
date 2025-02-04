@@ -127,9 +127,8 @@ func TestResumeUpload(testSetup *testing.T) {
 		require.Contains(t, output[1], "file_store_error: Error committing to file store. hash_mismatch:")
 		require.Error(t, err)
 		////asserting error
-		expected := fmt.Sprintf(
-			"exit status 1",
-		)
+		expected:= "exit status 1"
+		
 		require.Equal(t, expected, err.Error())
 	})
 

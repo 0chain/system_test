@@ -18,6 +18,7 @@ import (
 
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/gosdk_common/core/conf"
+	"github.com/0chain/gosdk_common/zboxcore/commonsdk"
 	"github.com/0chain/system_test/internal/api/util/test"
 	climodel "github.com/0chain/system_test/internal/cli/model"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
@@ -273,7 +274,7 @@ func DeleteFile(t *test.SystemTest, walletName, params string, retry bool) ([]st
 	}
 }
 
-func getBlobberNotPartOfAllocation(walletname, configFile, allocationID string) (*sdk.Blobber, error) {
+func getBlobberNotPartOfAllocation(walletname, configFile, allocationID string) (*commonsdk.Blobber, error) {
 	err := InitSDK(walletname, configFile)
 	if err != nil {
 		return nil, err
@@ -284,7 +285,7 @@ func getBlobberNotPartOfAllocation(walletname, configFile, allocationID string) 
 		return nil, err
 	}
 
-	blobbers, err := sdk.GetBlobbers(true, false)
+	blobbers, err := commonsdk.GetBlobbers(true, false)
 	if err != nil {
 		return nil, err
 	}
