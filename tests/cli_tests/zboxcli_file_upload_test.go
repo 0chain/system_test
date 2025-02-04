@@ -9,8 +9,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -702,8 +700,6 @@ func TestUpload(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotContains(t, output[0], filename)
 	})
-
-	
 
 	t.RunSequentiallyWithTimeout("stream tests for different formats", 20*time.Minute, func(t *test.SystemTest) {
 		sampleVideos := [][]string{
