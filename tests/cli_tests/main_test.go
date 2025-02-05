@@ -90,9 +90,9 @@ var (
 	sharder01ID string
 	sharder02ID string
 
-	ethereumNodeURL                string
-	tokenAddress                   string
-	ethereumAddress                string
+	ethereumNodeURL string
+	tokenAddress    string
+	ethereumAddress string
 )
 
 var (

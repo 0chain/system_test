@@ -24,7 +24,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 	t.SetSmokeTests("Should migrate existing files and folder from Microsoft Azure Container successfully")
 
 	t.RunSequentially("Should migrate existing Microsoft Azure folder and files  successfully", func(t *test.SystemTest) {
-		allocationId := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath,  map[string]interface{}{
+		allocationId := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath, map[string]interface{}{
 			"size": shared.AllocSize,
 		})
 
@@ -41,17 +41,17 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 		}))
 
 		totalCount, totalMigrated, err := cli_utils.GetmigratedDataID(output)
-		
+
 		if err != nil {
 			t.Fatal(err)
 		}
 		require.Equal(t, totalCount, totalMigrated, "Total count of migrated files is not equal to total migrated files")
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
-	
+
 	})
 
 	t.RunSequentially("Should migrate empty folder successfully", func(t *test.SystemTest) {
-		allocationId := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath,  map[string]interface{}{
+		allocationId := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath, map[string]interface{}{
 			"size": shared.AllocSize,
 		})
 
@@ -106,14 +106,14 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 
 	t.RunSequentially("Should fail when connection string is missing", func(t *test.SystemTest) {
 		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
-			"account-name":      shared.ConfigData.AccountName,
-			"container":         shared.ConfigData.ContainerName,
-			"wallet":            shared.DefaultWallet,
-			"allocation":        shared.DefaultAllocationId,
-			"source":            "azure",
-			"config":            shared.ConfigPath,
-			"configDir":         shared.ConfigDir,
-			"skip":              0,
+			"account-name": shared.ConfigData.AccountName,
+			"container":    shared.ConfigData.ContainerName,
+			"wallet":       shared.DefaultWallet,
+			"allocation":   shared.DefaultAllocationId,
+			"source":       "azure",
+			"config":       shared.ConfigPath,
+			"configDir":    shared.ConfigDir,
+			"skip":         0,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))

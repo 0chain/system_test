@@ -19,7 +19,7 @@ func Test0Gdrive(testSetup *testing.T) {
 	t.SetSmokeTests("Should migrate existing Gdrive folder and files successfully")
 
 	t.RunSequentially("Should migrate existing Gdrive folder and files  successfully", func(t *test.SystemTest) {
-		allocationID := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath,  map[string]interface{}{
+		allocationID := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath, map[string]interface{}{
 			"size": shared.AllocSize,
 		})
 		output, _ := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
@@ -30,12 +30,12 @@ func Test0Gdrive(testSetup *testing.T) {
 			"wallet":     EscapedTestName(t) + "_wallet.json",
 			"config":     shared.ConfigPath,
 			"configDir":  shared.ConfigDir,
-			"skip": 0,
+			"skip":       0,
 		}))
 		require.GreaterOrEqual(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
 
 		totalCount, totalMigrated, err := cli_utils.GetmigratedDataID(output)
-		
+
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -52,7 +52,7 @@ func Test0Gdrive(testSetup *testing.T) {
 			"wallet":     shared.DefaultWallet,
 			"config":     shared.ConfigPath,
 			"configDir":  shared.ConfigDir,
-			"skip": 0,
+			"skip":       0,
 		}))
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
@@ -68,7 +68,7 @@ func Test0Gdrive(testSetup *testing.T) {
 			"wallet":     shared.DefaultWallet,
 			"config":     shared.ConfigPath,
 			"configDir":  shared.ConfigDir,
-			"skip": 0,
+			"skip":       0,
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
@@ -83,7 +83,7 @@ func Test0Gdrive(testSetup *testing.T) {
 			"wallet":     shared.DefaultWallet,
 			"config":     shared.ConfigPath,
 			"configDir":  shared.ConfigDir,
-			"skip": 0,
+			"skip":       0,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -98,7 +98,7 @@ func Test0Gdrive(testSetup *testing.T) {
 			"wallet":     shared.DefaultWallet,
 			"config":     shared.ConfigPath,
 			"configDir":  shared.ConfigDir,
-			"skip": 0,
+			"skip":       0,
 		}))
 
 		t.Logf("EXpected log  %v", strings.Join(output, "\n"))

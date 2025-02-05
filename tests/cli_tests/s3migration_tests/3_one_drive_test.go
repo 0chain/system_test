@@ -21,7 +21,7 @@ func Test0OneDrive(testSetup *testing.T) {
 	t.SetSmokeTests("Should migrate existing files and folder from Microsoft OneDrive successfully")
 
 	t.RunSequentially("Should migrate existing Micrsoft OneDrive folder and files  successfully", func(t *test.SystemTest) {
-		allocationId := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath,  map[string]interface{}{
+		allocationId := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath, map[string]interface{}{
 			"size": shared.AllocSize,
 		})
 

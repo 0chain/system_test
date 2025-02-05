@@ -9,16 +9,16 @@ import (
 )
 
 var (
-	ConfigData  util.Config
-	WalletMutex sync.Mutex
-	Wallets     []json.RawMessage
-	WalletIdx   int64
-	S3Client    *s3.S3
-	ConfigDir   string
-	ConfigPath  string
-	RootPath    string
+	ConfigData          util.Config
+	WalletMutex         sync.Mutex
+	Wallets             []json.RawMessage
+	WalletIdx           int64
+	S3Client            *s3.S3
+	ConfigDir           string
+	ConfigPath          string
+	RootPath            string
 	DefaultAllocationId string
-	DefaultWallet  string
+	DefaultWallet       string
 )
 
 const (

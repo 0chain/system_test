@@ -20,10 +20,9 @@ func Test0Dropbox(testSetup *testing.T) {
 
 	t.SetSmokeTests("Should migrate existing Dropbox folder and files successfully")
 
-
 	t.RunSequentially("Should migrate existing Dropbox folder and files  successfully", func(t *test.SystemTest) {
 		allocSize := int64(50 * shared.MB)
-		allocationID := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath,  map[string]interface{}{
+		allocationID := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath, map[string]interface{}{
 			"size": allocSize,
 		})
 		output, _ := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
@@ -34,7 +33,7 @@ func Test0Dropbox(testSetup *testing.T) {
 			"wallet":     EscapedTestName(t) + "_wallet.json",
 			"config":     shared.ConfigPath,
 			"configDir":  shared.ConfigDir,
-			"skip": 0,
+			"skip":       0,
 		}))
 
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
@@ -49,9 +48,8 @@ func Test0Dropbox(testSetup *testing.T) {
 			"wallet":     shared.DefaultAllocationId,
 			"config":     shared.ConfigPath,
 			"configDir":  shared.ConfigDir,
-			"skip": 0,
+			"skip":       0,
 		}))
-
 
 		require.Nil(t, err, "Unexpected migration failure", strings.Join(output, "\n"))
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
@@ -65,9 +63,8 @@ func Test0Dropbox(testSetup *testing.T) {
 			"wallet":     shared.DefaultWallet,
 			"config":     shared.ConfigPath,
 			"configDir":  shared.ConfigDir,
-			"skip": 0,
+			"skip":       0,
 		}))
-
 
 		require.Contains(t, strings.Join(output, "\n"), "allocation id is missing", "Output was not as expected", strings.Join(output, "\n"))
 	})
@@ -81,7 +78,7 @@ func Test0Dropbox(testSetup *testing.T) {
 			"wallet":     shared.DefaultWallet,
 			"config":     shared.ConfigPath,
 			"configDir":  shared.ConfigDir,
-			"skip": 0,
+			"skip":       0,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -96,9 +93,9 @@ func Test0Dropbox(testSetup *testing.T) {
 			"wallet":     shared.DefaultWallet,
 			"config":     shared.ConfigPath,
 			"configDir":  shared.ConfigDir,
-			"skip": 0,
+			"skip":       0,
 		}))
-		
+
 		t.Logf("EXpected log  %v", strings.Join(output, "\n"))
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
@@ -126,7 +123,7 @@ func setupAllocationWithWalletWithoutTest(t *test.SystemTest, walletName, cliCon
 		}
 	}
 	cli_utils.CreateWalletForName(shared.RootPath, walletName)
-	output, _ := cli_utils.CreateNewAllocationForWallet(t, walletName, cliConfigFilename,shared.RootPath,  cli_utils.CreateParams(options))
+	output, _ := cli_utils.CreateNewAllocationForWallet(t, walletName, cliConfigFilename, shared.RootPath, cli_utils.CreateParams(options))
 	defer func() {
 		fmt.Printf("err: %v\n", output)
 	}()
