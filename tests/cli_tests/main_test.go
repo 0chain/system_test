@@ -19,11 +19,6 @@ import (
 
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/spf13/viper"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 func setupDefaultConfig() {
@@ -54,23 +49,6 @@ func setupConfig() {
 
 	parsedConfig := config.Parse(filepath.Join(".", path, "cli_tests_config.yaml"))
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
-	s3AccessKey = parsedConfig.S3AccessKey
-	s3SecretKey = parsedConfig.S3SecretKey
-	s3bucketName = parsedConfig.S3BucketName
-	s3BucketNameAlternate = parsedConfig.S3BucketNameAlternate
-	dropboxAccessToken = parsedConfig.DropboxAccessToken
-	dropboxRefreshToken = parsedConfig.DropboxRefreshToken
-	gdriveAccessToken = parsedConfig.GdriveAccessToken
-	gdriveRefreshToken = parsedConfig.GdriveRefreshToken
-	accountName = parsedConfig.AccountName
-	connectionString = parsedConfig.ConnectionString
-	containerName = parsedConfig.ContainerName
-	googleCloudStorageAccessToken = parsedConfig.GoogleCloudAccessToken
-	googleCloudStorageRefreshToken = parsedConfig.GoogleCloudRefreshToken
-	googleClientId = parsedConfig.GoogleClientId
-	googleClientSecret = parsedConfig.GoogleClientSecret
-	oneDriveAccessToken = parsedConfig.OneDriveAccessToken
-	oneDriveRefreshToken = parsedConfig.OneDriveRefreshToken
 
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
@@ -115,24 +93,6 @@ var (
 	ethereumNodeURL                string
 	tokenAddress                   string
 	ethereumAddress                string
-	s3SecretKey                    string
-	s3AccessKey                    string
-	s3bucketName                   string
-	s3BucketNameAlternate          string
-	S3Client                       *s3.S3
-	dropboxAccessToken             string
-	dropboxRefreshToken            string
-	gdriveAccessToken              string
-	gdriveRefreshToken             string
-	connectionString               string
-	accountName                    string
-	containerName                  string
-	googleCloudStorageAccessToken  string
-	googleCloudStorageRefreshToken string
-	googleClientId                 string
-	googleClientSecret             string
-	oneDriveAccessToken            string
-	oneDriveRefreshToken           string
 )
 
 var (
@@ -212,47 +172,6 @@ func TestMain(m *testing.M) { //nolint:gocyclo
 				tenderlyInitialized = true
 			}
 		}
-	}
-
-	// Create a session with AWS
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("us-east-2"), // Replace with your desired AWS region
-		Credentials: credentials.NewStaticCredentials(s3AccessKey, s3SecretKey, ""),
-	})
-
-	if err != nil {
-		log.Fatalln("Failed to create AWS session:", err)
-		return
-	}
-
-	// Create a session with Dropbox
-	sess_dp, err_dp := session.NewSession(&aws.Config{
-		Credentials: credentials.NewStaticCredentials(
-			dropboxAccessToken, "", ""),
-	})
-
-	if err_dp != nil {
-		log.Fatalln("Failed to create Dropbox session:", err_dp)
-	}
-
-	// Create a session with Gdrive
-	sess_gd, err_gd := session.NewSession(&aws.Config{
-		Credentials: credentials.NewStaticCredentials(
-			gdriveAccessToken, "", ""),
-	})
-
-	if err_gd != nil {
-		log.Fatalln("Failed to create Gdrive session:", err_dp)
-	}
-	// Create an S3 client
-	cloudService := os.Getenv("CLOUD_SERVICE")
-
-	if cloudService == "dropbox" {
-		S3Client = s3.New(sess_dp)
-	} else if cloudService == "gdrive" {
-		S3Client = s3.New(sess_gd)
-	} else {
-		S3Client = s3.New(sess)
 	}
 
 	walletMutex.Lock()
