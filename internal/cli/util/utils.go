@@ -587,30 +587,29 @@ func getAllocationID(str string) (string, error) {
 	return match[1], nil
 }
 
-func GetmigratedDataID(output []string) (int, int, error) {
+func GetmigratedDataID(output []string) (totalMigrated int, totalCount int, err error) {
 
 	pattern := `total count :: (\d+)`
-	re := regexp.MustCompile(pattern)
-	match := re.FindStringSubmatch(strings.Join(output, "\n"))
+    re := regexp.MustCompile(pattern)
+    match := re.FindStringSubmatch(strings.Join(output, "\n"))
 
-	pattern2 := `Total migrated objects :: (\d+)`
-	re2 := regexp.MustCompile(pattern2)
-	match_2 := re2.FindStringSubmatch(strings.Join(output, "\n"))
+    pattern2 := `Total migrated objects :: (\d+)`
+    re2 := regexp.MustCompile(pattern2)
+    match_2 := re2.FindStringSubmatch(strings.Join(output, "\n"))
 
-	if len(match) > 1 && len(match_2) > 1 {
+    if len(match) > 1 && len(match_2) > 1 {
+        totalCount, err = strconv.Atoi(match[1])
+        if err != nil {
+            return 
+        }
 
-		totalCount, err := strconv.Atoi(match[1])
+        totalMigrated, err = strconv.Atoi(match_2[1])
+        if err != nil {
+            return 
+        }
 
-		if err != nil {
-			return 0, 0, err
-		}
-		totalMigrated, err := strconv.Atoi(match_2[1])
+        return totalMigrated, totalCount, nil
+    }
 
-		if err != nil {
-			return 0, 0, err
-		}
-
-		return totalMigrated, totalCount, nil
-	}
-	return 0, 0, errors.New("no match found")
+    return 0, 0, errors.New("no match found")
 }
