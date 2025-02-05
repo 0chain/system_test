@@ -35,7 +35,6 @@ var (
 	WalletMutex sync.Mutex
 	Wallets     []json.RawMessage
 	WalletIdx   int64
-	mu          sync.Mutex
 )
 
 func GetWallets() []json.RawMessage {
@@ -587,7 +586,7 @@ func getAllocationID(str string) (string, error) {
 	return match[1], nil
 }
 
-func GetmigratedDataID(output []string) (totalMigrated int, totalCount int, err error) {
+func GetmigratedDataID(output []string) (totalMigrated, totalCount int, err error) {
 
 	pattern := `total count :: (\d+)`
 	re := regexp.MustCompile(pattern)

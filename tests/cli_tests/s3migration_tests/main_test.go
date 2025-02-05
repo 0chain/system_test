@@ -38,8 +38,8 @@ func setupConfig() {
 	}
 
 	shared.ConfigPath = "config.yaml"
-	shared.RootPath = filepath.Join(dir, "../")
-	path := filepath.Join(dir, "../config")
+	path := filepath.Clean(filepath.Join(dir, "../config"))
+	shared.RootPath  = filepath.Clean(filepath.Join(dir, "../"))
 
 	viper.SetConfigName("nodes")
 	viper.SetConfigType("yaml")
@@ -47,10 +47,7 @@ func setupConfig() {
 
 	parsedConfig := config.Parse(filepath.Join(path, "cli_tests_config.yaml"))
 
-	// Setup shared config with parsedConfig
-	shared.SetupConfig(*parsedConfig)
-
-	// Other logic...
+	shared.SetupConfig(parsedConfig)
 }
 
 func defaultData() {
@@ -76,13 +73,11 @@ func EscapedTestName(t *test.SystemTest) string {
 }
 
 func GetConfigDir() string {
-	var configDir string
 	curr, err := os.Getwd()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	configDir = filepath.Join(curr, "../config")
-	return configDir
+	return filepath.Clean(filepath.Join(curr, "../config"))
 }
 
 func TestMain(m *testing.M) {
@@ -154,6 +149,6 @@ func TestMain(m *testing.M) {
 
 	defaultData()
 
-	// exitRun := m.Run()
-	// os.Exit(exitRun)
+	exitRun := m.Run()
+	os.Exit(exitRun)
 }

@@ -47,7 +47,6 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 		}
 		require.Equal(t, totalCount, totalMigrated, "Total count of migrated files is not equal to total migrated files")
 		require.Contains(t, strings.Join(output, "\n"), "Migration completed successfully", "Output was not as expected", strings.Join(output, "\n"))
-
 	})
 
 	t.RunSequentially("Should migrate empty folder successfully", func(t *test.SystemTest) {
