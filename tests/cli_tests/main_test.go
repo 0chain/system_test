@@ -20,9 +20,6 @@ import (
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/spf13/viper"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
@@ -54,12 +51,6 @@ func setupConfig() {
 
 	parsedConfig := config.Parse(filepath.Join(".", path, "cli_tests_config.yaml"))
 	defaultTestTimeout, err := time.ParseDuration(parsedConfig.DefaultTestCaseTimeout)
-	s3AccessKey = parsedConfig.S3AccessKey
-	s3SecretKey = parsedConfig.S3SecretKey
-	s3bucketName = parsedConfig.S3BucketName
-	s3BucketNameAlternate = parsedConfig.S3BucketNameAlternate
-	dropboxAccessToken = parsedConfig.DropboxAccessToken
-	gdriveAccessToken = parsedConfig.GdriveAccessToken
 
 	if err != nil {
 		log.Printf("Default test case timeout could not be parsed so has defaulted to [%v]", test.DefaultTestTimeout)
@@ -109,8 +100,6 @@ var (
 	s3bucketName          string
 	s3BucketNameAlternate string
 	S3Client              *s3.S3
-	dropboxAccessToken    string
-	gdriveAccessToken     string
 )
 
 var (
@@ -192,44 +181,18 @@ func TestMain(m *testing.M) { //nolint:gocyclo
 		}
 	}
 
-	// Create a session with AWS
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("us-east-2"), // Replace with your desired AWS region
-		Credentials: credentials.NewStaticCredentials(s3AccessKey, s3SecretKey, ""),
-	})
-
-	if err != nil {
-		log.Fatalln("Failed to create AWS session:", err)
-		return
-	}
-
-	// Create a session with Dropbox
-	sess_dp, err_dp := session.NewSession(&aws.Config{
-		Credentials: credentials.NewStaticCredentials(
-			dropboxAccessToken, "", ""),
-	})
-
-	if err_dp != nil {
-		log.Fatalln("Failed to create Dropbox session:", err_dp)
-	}
-
-	sess_gd, err_gd := session.NewSession(&aws.Config{
-		Credentials: credentials.NewStaticCredentials(
-			gdriveAccessToken, "", ""),
-	})
-
-	if err_gd != nil {
-		log.Fatalln("Failed to create Gdrive session:", err_dp)
-	}
-	// Create an S3 client
-	cloudService := os.Getenv("CLOUD_SERVICE")
-
-	if cloudService == "dropbox" {
-		S3Client = s3.New(sess_dp)
-	} else if cloudService == "gdrive" {
-		S3Client = s3.New(sess_gd)
-	} else {
-		S3Client = s3.New(sess)
+	if tenderlyEnabled != "" {
+		err := tenderlyClient.InitBalance(ethereumAddress)
+		if err != nil {
+			cliutils.Logger.Error(err.Error())
+		} else {
+			err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
+			if err != nil {
+				cliutils.Logger.Error(err.Error())
+			} else {
+				tenderlyInitialized = true
+			}
+		}
 	}
 
 	walletMutex.Lock()
