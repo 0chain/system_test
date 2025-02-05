@@ -2,7 +2,6 @@ package s3migration_tests
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -60,9 +59,8 @@ func defaultData() {
 
 	defaultWallet := "default"
 	cli_utils.CreateWalletForName(shared.RootPath, defaultWallet)
-
-	fmt.Fprintf(os.Stdout, "Default allocation ID: %s\n", defaultAllocationId)
-	fmt.Fprintf(os.Stdout, "Default wallet: %s\n", defaultWallet)
+	shared.DefaultAllocationId = defaultAllocationId
+	shared.DefaultWallet = defaultWallet
 }
 
 func EscapedTestName(t *test.SystemTest) string {
