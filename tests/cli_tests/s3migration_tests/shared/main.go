@@ -28,6 +28,6 @@ const (
 	AllocSize = int64(50 * MB)
 )
 
-func SetupConfig(parsedConfig *util.Config)() {
+func SetupConfig(parsedConfig *util.Config) {
 	ConfigData = *parsedConfig
 }

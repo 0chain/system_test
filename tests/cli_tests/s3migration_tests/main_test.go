@@ -38,8 +38,8 @@ func setupConfig() {
 	}
 
 	shared.ConfigPath = "config.yaml"
-	path := filepath.Clean(filepath.Join(dir, "../config"))
-	shared.RootPath  = filepath.Clean(filepath.Join(dir, "../"))
+	path := filepath.Clean(filepath.Join(dir, "/config"))
+	shared.RootPath = dir
 
 	viper.SetConfigName("nodes")
 	viper.SetConfigType("yaml")
@@ -77,7 +77,7 @@ func GetConfigDir() string {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return filepath.Clean(filepath.Join(curr, "../config"))
+	return filepath.Clean(filepath.Join(curr, "config"))
 }
 
 func TestMain(m *testing.M) {
