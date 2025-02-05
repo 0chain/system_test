@@ -587,7 +587,6 @@ func getAllocationID(str string) (string, error) {
 }
 
 func GetmigratedDataID(output []string) (totalMigrated, totalCount int, err error) {
-
 	pattern := `total count :: (\d+)`
 	re := regexp.MustCompile(pattern)
 	match := re.FindStringSubmatch(strings.Join(output, "\n"))
