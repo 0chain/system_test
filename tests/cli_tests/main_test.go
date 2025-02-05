@@ -174,6 +174,20 @@ func TestMain(m *testing.M) { //nolint:gocyclo
 		}
 	}
 
+	if tenderlyEnabled != "" {
+		err := tenderlyClient.InitBalance(ethereumAddress)
+		if err != nil {
+			cliutils.Logger.Error(err.Error())
+		} else {
+			err = tenderlyClient.InitErc20Balance(tokenAddress, ethereumAddress)
+			if err != nil {
+				cliutils.Logger.Error(err.Error())
+			} else {
+				tenderlyInitialized = true
+			}
+		}
+	}
+
 	walletMutex.Lock()
 	// Read the content of the file
 	fileContent, err := os.ReadFile("./config/wallets/wallets.json")

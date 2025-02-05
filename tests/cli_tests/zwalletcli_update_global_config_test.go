@@ -55,10 +55,15 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 
 		// ensure revert in config is run regardless of test result
 		defer func() {
-			_, _ = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+			output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey,
 				"values": oldValue,
 			}, true)
+
+			require.Nil(t, err, strings.Join(output, "\n"))
+
+			config := getGlobalConfiguration(t, true)
+			require.Equal(t, oldValue, config[configKey], "old value %s for config was not set", oldValue, configKey)
 		}()
 
 		output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
@@ -100,10 +105,16 @@ func TestUpdateGlobalConfig(testSetup *testing.T) {
 
 		// ensure revert in config is run regardless of test result
 		defer func() {
-			_, _ = updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
+			output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
 				"keys":   configKey1 + "," + configKey2,
 				"values": oldValue1 + "," + oldValue2,
 			}, true)
+
+			require.Nil(t, err, strings.Join(output, "\n"))
+
+			config := getGlobalConfiguration(t, true)
+			require.Equal(t, oldValue1, config[configKey1], "old value %s for config was not set", oldValue1, configKey1)
+			require.Equal(t, oldValue2, config[configKey2], "old value %s for config was not set", oldValue2, configKey2)
 		}()
 
 		output, err := updateGlobalConfigWithWallet(t, scOwnerWallet, map[string]interface{}{
