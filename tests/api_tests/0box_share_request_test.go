@@ -95,11 +95,32 @@ func TestShareRequest(testSetup *testing.T) {
 	}
 	requestedClientID2 := client.X_APP_CLIENT_ID_R
 
+	prevSharedUserHeaders := map[string]string{
+		"X-App-Client-ID":        client.X_APP_CLIENT_ID_C,
+		"X-App-Client-Key":       client.X_APP_CLIENT_KEY_C,
+		"X-App-Timestamp":        client.X_APP_TIMESTAMP,
+		"X-App-ID-TOKEN":         client.X_APP_ID_TOKEN,
+		"X-App-User-ID":          client.X_APP_USER_ID_C,
+		"X-CSRF-TOKEN":           client.X_APP_CSRF,
+		"X-App-Client-Signature": client.X_APP_CLIENT_SIGNATURE_C,
+		"X-APP-TYPE":             client.X_APP_VULT,
+	}
+	prevUserInfo := map[string]string{
+		"username":       "random_user",
+		"email":          "random_email",
+		"phone_number":   "+919876543215",
+		"otp":            "123456",
+		"firebase_token": "test_firebase_token",
+		"user_id":        client.X_APP_USER_ID_C,
+	}
+	prevSharedClientID := client.X_APP_CLIENT_ID_C
+
 	// create wallet for receivedClientID, requestedClientID, requestedClientID2
 	Teardown(w, receivedUserHeaders)
 	Teardown(w, receivedUser2Headers)
 	Teardown(w, requestedUserHeaders)
 	Teardown(w, requestedUser2Headers)
+	Teardown(w, prevSharedUserHeaders)
 	err := Create0boxTestWalletCustom(w, receivedUserHeaders, receivedOwnerInfo, NewTestWallet())
 	require.NoError(w, err)
 	err = Create0boxTestWalletCustom(w, receivedUser2Headers, receivedOwner2Info, NewTestWallet())
@@ -108,10 +129,18 @@ func TestShareRequest(testSetup *testing.T) {
 	require.NoError(w, err)
 	err = Create0boxTestWalletCustom(w, requestedUser2Headers, requestedOwner2Info, NewTestWallet())
 	require.NoError(w, err)
+	err = Create0boxTestWalletCustom(w, prevSharedUserHeaders, prevUserInfo, NewTestWallet())
+	require.NoError(w, err)
+
+	// reqId1: requestedClientID --> receivedClientID (file1)
+	// reqId2: requestedClientID --> receivedClientID (file2)
+	// reqId3: requestedClientID2 --> receivedClientID 
+	// reqId4: requestedClientID2 --> receivedClientID2
+
 
 	// data
 	authTicket1, err := convertToAuthTicket(map[string]string{
-		"client_id":      requestedClientID,
+		"client_id":      prevSharedClientID,
 		"owner_id":       receivedClientID,
 		"file_name":      "file1.png",
 		"file_path_hash": "16a55237cfd477cca9f87cb51d14b1e64c6e87592429e9e471470ad177ddbe0a",
@@ -123,8 +152,15 @@ func TestShareRequest(testSetup *testing.T) {
 		"owner_id":    receivedClientID,
 		"lookup_hash": "16a55237cfd477cca9f87cb51d14b1e64c6e87592429e9e471470ad177ddbe0a",
 	}
-	authTicket2, err := convertToAuthTicket(map[string]string{
+	approvalAuthTicket1, err := convertToAuthTicket(map[string]string{
 		"client_id":      requestedClientID,
+		"owner_id":       receivedClientID,
+		"file_name":      "file1.png",
+		"file_path_hash": "16a55237cfd477cca9f87cb51d14b1e64c6e87592429e9e471470ad177ddbe0a",
+	})
+	require.NoError(w, err, "error creating approvalAuthTicket1")
+	authTicket2, err := convertToAuthTicket(map[string]string{
+		"client_id":      prevSharedClientID,
 		"owner_id":       receivedClientID,
 		"file_name":      "file2.png",
 		"file_path_hash": "16a55237cfd477cca9f87cb51d14b1e64c6e87592429e9e471470ad177ddbe0b",
@@ -136,7 +172,7 @@ func TestShareRequest(testSetup *testing.T) {
 		"lookup_hash": "16a55237cfd477cca9f87cb51d14b1e64c6e87592429e9e471470ad177ddbe0b",
 	}
 	authTicket3, err := convertToAuthTicket(map[string]string{
-		"client_id":      requestedClientID2,
+		"client_id":      prevSharedClientID,
 		"owner_id":       receivedClientID,
 		"file_name":      "file3.png",
 		"file_path_hash": "16a55237cfd477cca9f87cb51d14b1e64c6e87592429e9e471470ad177ddbe0a",
@@ -148,12 +184,20 @@ func TestShareRequest(testSetup *testing.T) {
 		"lookup_hash": "16a55237cfd477cca9f87cb51d14b1e64c6e87592429e9e471470ad177ddbe0a",
 	}
 	authTicket4, err := convertToAuthTicket(map[string]string{
-		"client_id":      requestedClientID2,
+		"client_id":      prevSharedClientID,
 		"owner_id":       receivedClientID2,
 		"file_name":      "file4.png",
 		"file_path_hash": "16a55237cfd477cca9f87cb51d14b1e64c6e87592429e9e471470ad177ddbe0c",
 	})
 	require.NoError(w, err, "error creating authTicket3")
+	approvalAuthTicket4, err := convertToAuthTicket(map[string]string{
+		"client_id":      prevSharedClientID,
+		"owner_id":       receivedClientID2,
+		"file_name":      "file4.png",
+		"file_path_hash": "16a55237cfd477cca9f87cb51d14b1e64c6e87592429e9e471470ad177ddbe0c",
+	})
+	require.NoError(w, err, "error creating approvalAuthTicket4")
+	
 	shareRequestData4 := map[string]string{
 		"auth_ticket": authTicket4,
 		"owner_id":    receivedClientID2,
@@ -304,6 +348,7 @@ func TestShareRequest(testSetup *testing.T) {
 			"id":     strconv.FormatInt(reqId1, 10),
 			"status": "1",
 			"link":   randomLink,
+			"auth_ticket": approvalAuthTicket1,
 		})
 		require.NoError(t, err, "error updating reqId1")
 		require.Equal(t, uint8(1), dataResp.Data.Status, "reqId1 should be approved")
@@ -316,6 +361,7 @@ func TestShareRequest(testSetup *testing.T) {
 		require.NoError(t, err, "error verifying shareinfo exists")
 		require.Len(t, resp.Data, 1)
 		require.Equal(t, resp.Data[0].Receiver, requestedClientID)
+		require.Equal(t, approvalAuthTicket1, resp.Data[0].AuthTicket, "share_info authticket should be updated")
 
 		// approve or decline reqId1 again should fail
 		_, restyResp, _ := zboxClient.UpdateShareReq(t, receivedUserHeaders, map[string]string{
@@ -362,9 +408,10 @@ func TestShareRequest(testSetup *testing.T) {
 			"id":     strconv.FormatInt(reqId4, 10),
 			"status": "1",
 			"link":   randomLink,
+			"auth_ticket": approvalAuthTicket4,
 		})
 		require.NoError(t, err, "error updating reqId4")
-		require.Equal(t, uint8(1), dataResp.Data.Status, "reqId4 should be declined")
+		require.Equal(t, uint8(1), dataResp.Data.Status, "reqId4 should be approved")
 	})
 
 	w.RunSequentially("verify re-request for approved and declined shareReq", func(t *test.SystemTest) {
