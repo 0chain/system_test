@@ -508,6 +508,9 @@ func ExecuteFaucetWithTokensForWallet(t *test.SystemTest, wallet, cliConfigFilen
 }
 
 func CreateWalletForName(rootPath, name string) {
+	if name == "" {
+		name = "default"
+	}
 	walletPath := fmt.Sprintf("%s/config/%s_wallet.json", rootPath, name)
 
 	// check if wallet already exists
@@ -529,13 +532,16 @@ func CreateWalletForName(rootPath, name string) {
 	}
 }
 
-func SetupAllocation(t *test.SystemTest, cliConfigFilename, rootPath string, extraParams ...map[string]interface{}) string {
+func SetupAllocation(t *test.SystemTest, cliConfigFilename, rootPath string, extraParams ...map[string]interface{}, ) string {
 	return setupAllocationWithWallet(t, EscapedTestName(t), cliConfigFilename, rootPath, extraParams...)
 }
 
 func CreateNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, rootPath, params string) ([]string, error) {
 	t.Log(cliConfigFilename, "configdir path")
-	return RunCommand(t, fmt.Sprintf(
+	if (wallet == "") {
+		wallet = "default"
+	}
+	command := fmt.Sprintf(
 		"%s/zbox newallocation %s --silent --wallet %s --configDir %s --config %s --allocationFileName %s",
 		rootPath,
 		params,
@@ -543,7 +549,8 @@ func CreateNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename,
 		cliConfigFilename,
 		"config.yaml",
 		wallet+"_allocation.txt",
-	), 3, time.Second*5)
+	)
+	return RunCommand(t, command, 3, time.Second*5)
 }
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename, rootPath string, extraParams ...map[string]interface{}) string {
