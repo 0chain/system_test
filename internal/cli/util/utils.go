@@ -463,9 +463,8 @@ func ReadFileMC(testSetup *testing.T) McConfiguration {
 	return config
 }
 
-func MigrateFromS3migration(t *test.SystemTest, params string) ([]string, error) {
-	commandGenerated := fmt.Sprintf("../s3migration migrate  %s", params)
-	t.Log(commandGenerated)
+func MigrateFromCloud(t *test.SystemTest, params string) ([]string, error) {
+	commandGenerated := fmt.Sprintf("../s3mgrt migrate  %s", params)
 	return RunCommand(t, commandGenerated, 1, time.Hour*2)
 }
 
@@ -532,13 +531,13 @@ func CreateWalletForName(rootPath, name string) {
 	}
 }
 
-func SetupAllocation(t *test.SystemTest, cliConfigFilename, rootPath string, extraParams ...map[string]interface{}, ) string {
+func SetupAllocation(t *test.SystemTest, cliConfigFilename, rootPath string, extraParams ...map[string]interface{}) string {
 	return setupAllocationWithWallet(t, EscapedTestName(t), cliConfigFilename, rootPath, extraParams...)
 }
 
 func CreateNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, rootPath, params string) ([]string, error) {
 	t.Log(cliConfigFilename, "configdir path")
-	if (wallet == "") {
+	if wallet == "" {
 		wallet = "default"
 	}
 	command := fmt.Sprintf(
@@ -594,7 +593,7 @@ func getAllocationID(str string) (string, error) {
 }
 
 func GetmigratedDataID(output []string) (totalMigrated, totalCount int, err error) {
-	pattern := `total count :: (\d+)`
+	pattern := `Total files ::(\d+)`
 	re := regexp.MustCompile(pattern)
 	match := re.FindStringSubmatch(strings.Join(output, "\n"))
 
@@ -617,4 +616,19 @@ func GetmigratedDataID(output []string) (totalMigrated, totalCount int, err erro
 	}
 
 	return 0, 0, errors.New("no match found")
+}
+
+func GetFileStats(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
+	t.Logf("Getting file stats...")
+	cmd := fmt.Sprintf(
+		"./zbox stats %s --silent --wallet %s --configDir ./config --config %s",
+		param,
+		EscapedTestName(t)+"_wallet.json",
+		cliConfigFilename,
+	)
+	if retry {
+		return RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return RunCommandWithoutRetry(cmd)
+	}
 }

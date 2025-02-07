@@ -25,10 +25,10 @@ func Test0OneDrive(testSetup *testing.T) {
 			"size": shared.AllocSize,
 		})
 
-		output, _ := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, _ := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": "'" + shared.ConfigData.OneDriveAccessToken + "'",
 			"secret-key": "'" + shared.ConfigData.OneDriveRefreshToken + "'",
-			"wallet":     EscapedTestName(t) + "_wallet.json",
+			"wallet":     cli_utils.EscapedTestName(t) + "_wallet.json",
 			"allocation": allocationId,
 			"source":     "onedrive",
 			"config":     shared.ConfigPath,
@@ -40,10 +40,10 @@ func Test0OneDrive(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should migrate empty folder successfully", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": "'" + shared.ConfigData.OneDriveAccessToken + "'",
 			"secret-key": "'" + shared.ConfigData.OneDriveRefreshToken + "'",
-			"wallet":     EscapedTestName(t) + "_wallet.json",
+			"wallet":     cli_utils.EscapedTestName(t) + "_wallet.json",
 			"allocation": shared.DefaultAllocationId,
 			"source":     "onedrive",
 			"config":     shared.ConfigPath,
@@ -56,7 +56,7 @@ func Test0OneDrive(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when allocation flag missing", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": "'" + shared.ConfigData.OneDriveAccessToken + "'",
 			"secret-key": "'" + shared.ConfigData.OneDriveRefreshToken + "'",
 			"wallet":     shared.DefaultWallet,
@@ -72,7 +72,7 @@ func Test0OneDrive(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when token and refresh token is invalid", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": "invalid",
 			"secret-key": "invalid",
 			"wallet":     shared.DefaultWallet,
@@ -89,7 +89,7 @@ func Test0OneDrive(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when source is invalid", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": "'" + shared.ConfigData.OneDriveAccessToken + "'",
 			"secret-key": "'" + shared.ConfigData.OneDriveRefreshToken + "'",
 			"source":     "invalid",
@@ -111,7 +111,7 @@ func Test0OneDrive(testSetup *testing.T) {
 		defer func() {
 			require.Contains(t, err.Error(), "allocation match not found")
 		}()
-		_, err = setupAllocationWithWalletWithoutTest(t, EscapedTestName(t)+"_wallet.json", shared.ConfigPath, map[string]interface{}{
+		_, err = setupAllocationWithWalletWithoutTest(t, cli_utils.EscapedTestName(t)+"_wallet.json", shared.ConfigPath, map[string]interface{}{
 			"size": allocSize,
 		})
 	})

@@ -24,12 +24,12 @@ func Test0GoogleCloudStorage(testSetup *testing.T) {
 			"size": shared.AllocSize,
 		})
 
-		output, _ := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, _ := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"client-id":     shared.ConfigData.GoogleClientId,
 			"client-secret": shared.ConfigData.GoogleClientSecret,
 			"access-key":    shared.ConfigData.GoogleCloudAccessToken,
 			"secret-key":    shared.ConfigData.GoogleCloudRefreshToken,
-			"wallet":        EscapedTestName(t) + "_wallet.json",
+			"wallet":        cli_utils.EscapedTestName(t) + "_wallet.json",
 			"allocation":    allocationId,
 			"source":        "google_cloud_storage",
 			"config":        shared.ConfigPath,
@@ -52,12 +52,12 @@ func Test0GoogleCloudStorage(testSetup *testing.T) {
 			"size": shared.AllocSize,
 		})
 
-		output, _ := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, _ := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"client-id":     shared.ConfigData.GoogleClientId,
 			"client-secret": shared.ConfigData.GoogleClientSecret,
 			"access-key":    shared.ConfigData.GoogleCloudAccessToken,
 			"secret-key":    shared.ConfigData.GoogleCloudRefreshToken,
-			"wallet":        EscapedTestName(t) + "_wallet.json",
+			"wallet":        cli_utils.EscapedTestName(t) + "_wallet.json",
 			"allocation":    allocationId,
 			"source":        "google_cloud_storage",
 			"config":        shared.ConfigPath,
@@ -76,7 +76,7 @@ func Test0GoogleCloudStorage(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when allocation flag missing", func(t *test.SystemTest) {
-		output, _ := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, _ := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"client-id":     shared.ConfigData.GoogleClientId,
 			"client-secret": shared.ConfigData.GoogleClientSecret,
 			"access-key":    shared.ConfigData.GoogleCloudAccessToken,
@@ -93,7 +93,7 @@ func Test0GoogleCloudStorage(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when client credentials is invalid", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"client-id":     shared.ConfigData.GoogleClientId,
 			"client-secret": shared.ConfigData.GoogleClientSecret,
 			"access-key":    shared.ConfigData.GoogleCloudAccessToken,
@@ -112,7 +112,7 @@ func Test0GoogleCloudStorage(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when key is invalid", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"client-id":     shared.ConfigData.GoogleClientId,
 			"client-secret": shared.ConfigData.GoogleClientSecret,
 			"access-key":    "invalid",
@@ -131,7 +131,7 @@ func Test0GoogleCloudStorage(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when source is invalid", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"client-id":     shared.ConfigData.GoogleClientId,
 			"client-secret": shared.ConfigData.GoogleClientSecret,
 			"access-key":    shared.ConfigData.GoogleCloudAccessToken,
