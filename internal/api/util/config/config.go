@@ -37,7 +37,18 @@ type Config struct {
 	BlobberOwnerWalletMnemonics string `yaml:"blobber_owner_wallet_mnemonics"`
 	OwnerWalletMnemonics        string `yaml:"owner_wallet_mnemonics"`
 	DropboxAccessToken          string `yaml:"dropboxAccessToken"`
+	DropboxRefreshToken         string `yaml:"dropboxRefreshToken"`
 	GdriveAccessToken           string `yaml:"gdriveAccessToken"`
+	GdriveRefreshToken          string `yaml:"gdriveRefreshToken"`
+	ConnectionString            string `yaml:"connectionString"`
+	AccountName                 string `yaml:"accountName"`
+	ContainerName               string `yaml:"container"`
+	GoogleCloudAccessToken      string `yaml:"googleCloudAccessToken"`
+	GoogleCloudRefreshToken     string `yaml:"googleCloudRefreshToken"`
+	GoogleClientId              string `yaml:"googleClientId"`
+	GoogleClientSecret          string `yaml:"googleClientSecret"`
+	OneDriveAccessToken         string `yaml:"oneDriveAccessToken"`
+	OneDriveRefreshToken        string `yaml:"oneDriveRefreshToken"`
 }
 
 func Parse(configPath string) *Config {
