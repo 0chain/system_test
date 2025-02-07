@@ -116,7 +116,6 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when access key invalid", func(t *test.SystemTest) {
-
 		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": "invalid",
 			"secret-key": shared.ConfigData.S3SecretKey,
@@ -171,7 +170,6 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when access and secret key invalid", func(t *test.SystemTest) {
-
 		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": "invalid",
 			"secret-key": "invalid",

@@ -95,10 +95,6 @@ var (
 	ethereumNodeURL       string
 	tokenAddress          string
 	ethereumAddress       string
-	s3SecretKey           string
-	s3AccessKey           string
-	s3bucketName          string
-	s3BucketNameAlternate string
 	S3Client              *s3.S3
 )
 
