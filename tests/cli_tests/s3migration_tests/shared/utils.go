@@ -2,7 +2,7 @@ package shared
 
 import (
 	"crypto/rand"
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -135,7 +135,7 @@ func GetUniqueShortObjKey(objectKey string) string {
 
 	if len(objectKey) > maxLength {
 		// Generate a SHA-1 hash of the object key
-		hash := sha1.New() // #nosec
+		hash := sha256.New() // #nosec
 		_, _ = hash.Write([]byte(objectKey))
 		hashSum := hash.Sum(nil)
 
