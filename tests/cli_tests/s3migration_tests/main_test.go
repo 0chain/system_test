@@ -37,14 +37,15 @@ func setupConfig() {
 	}
 
 	shared.ConfigPath = "config.yaml"
-	path := filepath.Clean(filepath.Join(dir, "config"))
-	shared.RootPath = dir
+	rootPath := filepath.Dir(dir)
+	shared.RootPath = rootPath
+	configPath := filepath.Join(shared.RootPath,"config")
 
 	viper.SetConfigName("nodes")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(path)
+	viper.AddConfigPath(configPath)
 
-	parsedConfig := config.Parse(filepath.Join(path, "cli_tests_config.yaml"))
+	parsedConfig := config.Parse(filepath.Join(configPath, "cli_tests_config.yaml"))
 
 	shared.SetupConfig(parsedConfig)
 }
@@ -52,15 +53,12 @@ func setupConfig() {
 func defaultData() {
 	t := testing.T{}
 	system_test := test.NewSystemTest(&t)
-
 	defaultAllocationId := cli_utils.SetupAllocation(system_test, shared.ConfigData.ConnectionString, shared.RootPath, map[string]interface{}{
 		"size": shared.AllocSize,
 	})
 
-	defaultWallet := "default"
-	cli_utils.CreateWalletForName(shared.RootPath, defaultWallet)
 	shared.DefaultAllocationId = defaultAllocationId
-	shared.DefaultWallet = defaultWallet
+	shared.DefaultWallet = "default_wallet.json"
 }
 
 func EscapedTestName(t *test.SystemTest) string {
@@ -75,7 +73,8 @@ func GetConfigDir() string {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return filepath.Clean(filepath.Join(curr, "config"))
+	parentDirectory := filepath.Dir(curr)
+	return filepath.Clean(filepath.Join(parentDirectory, "config"))
 }
 
 func TestMain(m *testing.M) {
@@ -121,15 +120,16 @@ func TestMain(m *testing.M) {
 	}
 
 	if shared.ConfigPath == "" {
-		shared.ConfigPath = "./config.yaml"
+		shared.ConfigPath = "config.yaml"
 	}
 
 	shared.ConfigDir, _ = filepath.Abs(shared.ConfigDir)
 
+
 	setupConfig()
 
 	shared.WalletMutex.Lock()
-	fileContent, err := os.ReadFile("../config/wallets/wallets.json")
+	fileContent, err := os.ReadFile(shared.ConfigDir + "/wallets/wallets.json")
 	if err != nil {
 		log.Println("Error reading file:", err)
 		return
@@ -144,7 +144,6 @@ func TestMain(m *testing.M) {
 	cliutils.SetWallets(shared.Wallets)
 	shared.WalletIdx = 500
 	shared.WalletMutex.Unlock()
-
 	defaultData()
 
 	exitRun := m.Run()
