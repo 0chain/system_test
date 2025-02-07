@@ -12,7 +12,7 @@ import (
 
 func Test0Gdrive(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-
+	t.Log(shared.ConfigData.GdriveAccessToken)
 	if shared.ConfigData.GdriveAccessToken == "" {
 		t.Skip("Gdrive Access Token was missing")
 	}
@@ -22,12 +22,12 @@ func Test0Gdrive(testSetup *testing.T) {
 		allocationID := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath, map[string]interface{}{
 			"size": shared.AllocSize,
 		})
-		output, _ := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, _ := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": shared.ConfigData.GdriveAccessToken,
 			"secret-key": shared.ConfigData.GdriveRefreshToken,
 			"allocation": allocationID,
 			"source":     "google_drive",
-			"wallet":     EscapedTestName(t) + "_wallet.json",
+			"wallet":     cli_utils.EscapedTestName(t) + "_wallet.json",
 			"config":     shared.ConfigPath,
 			"configDir":  shared.ConfigDir,
 			"skip":       0,
@@ -35,7 +35,6 @@ func Test0Gdrive(testSetup *testing.T) {
 		require.GreaterOrEqual(t, len(output), 1, "More/Less output was returned than expected", strings.Join(output, "\n"))
 
 		totalCount, totalMigrated, err := cli_utils.GetmigratedDataID(output)
-
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -44,7 +43,7 @@ func Test0Gdrive(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when folder does not exist", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": shared.ConfigData.GdriveAccessToken,
 			"secret-key": shared.ConfigData.GdriveRefreshToken,
 			"allocation": shared.DefaultAllocationId,
@@ -61,7 +60,7 @@ func Test0Gdrive(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when allocation flag missing", func(t *test.SystemTest) {
-		output, _ := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, _ := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": shared.ConfigData.GdriveAccessToken,
 			"secret-key": shared.ConfigData.GdriveRefreshToken,
 			"source":     "google_drive",
@@ -75,7 +74,7 @@ func Test0Gdrive(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when access token invalid", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": "invalid",
 			"secret-key": "invalid",
 			"allocation": shared.DefaultAllocationId,
@@ -92,7 +91,7 @@ func Test0Gdrive(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when access key missing", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"allocation": shared.DefaultAllocationId,
 			"source":     "google_drive",
 			"wallet":     shared.DefaultWallet,

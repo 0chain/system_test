@@ -22,10 +22,13 @@ var (
 )
 
 const (
-	KB        = 1024      // kilobyte
-	MB        = 1024 * KB // megabyte
-	GB        = 1024 * MB // gigabyte
-	AllocSize = int64(50 * MB)
+	KB         = 1024      // kilobyte
+	MB         = 1024 * KB // megabyte
+	GB         = 1024 * MB // gigabyte
+	AllocSize  = int64(50 * MB)
+	Chunksize  = 64 * 1024
+	DirPrefix  = "dir"
+	DirMaxRand = 1000
 )
 
 func SetupConfig(parsedConfig *util.Config) {

@@ -10,7 +10,6 @@ import (
 
 	"github.com/0chain/system_test/internal/api/util/config"
 	"github.com/0chain/system_test/internal/api/util/test"
-	cli_utils "github.com/0chain/system_test/internal/cli/util"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/0chain/system_test/tests/cli_tests/s3migration_tests/shared"
 	"github.com/aws/aws-sdk-go/aws"
@@ -39,7 +38,7 @@ func setupConfig() {
 	shared.ConfigPath = "config.yaml"
 	rootPath := filepath.Dir(dir)
 	shared.RootPath = rootPath
-	configPath := filepath.Join(shared.RootPath,"config")
+	configPath := filepath.Join(shared.RootPath, "config")
 
 	viper.SetConfigName("nodes")
 	viper.SetConfigType("yaml")
@@ -53,7 +52,7 @@ func setupConfig() {
 func defaultData() {
 	t := testing.T{}
 	system_test := test.NewSystemTest(&t)
-	defaultAllocationId := cli_utils.SetupAllocation(system_test, shared.ConfigData.ConnectionString, shared.RootPath, map[string]interface{}{
+	defaultAllocationId := cliutils.SetupAllocation(system_test, shared.ConfigDir, shared.RootPath, map[string]interface{}{
 		"size": shared.AllocSize,
 	})
 
@@ -124,7 +123,6 @@ func TestMain(m *testing.M) {
 	}
 
 	shared.ConfigDir, _ = filepath.Abs(shared.ConfigDir)
-
 
 	setupConfig()
 

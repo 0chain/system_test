@@ -25,12 +25,12 @@ func Test0Dropbox(testSetup *testing.T) {
 		allocationID := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath, map[string]interface{}{
 			"size": allocSize,
 		})
-		output, _ := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, _ := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": shared.ConfigData.DropboxAccessToken,
 			"secret-key": shared.ConfigData.DropboxRefreshToken,
 			"allocation": allocationID,
 			"source":     "dropbox",
-			"wallet":     EscapedTestName(t) + "_wallet.json",
+			"wallet":     cli_utils.EscapedTestName(t) + "_wallet.json",
 			"config":     shared.ConfigPath,
 			"configDir":  shared.ConfigDir,
 			"skip":       0,
@@ -40,7 +40,7 @@ func Test0Dropbox(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should migrate empty folder successfully", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": shared.ConfigData.DropboxAccessToken,
 			"secret-key": shared.ConfigData.DropboxRefreshToken,
 			"allocation": shared.DefaultAllocationId,
@@ -56,7 +56,7 @@ func Test0Dropbox(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when allocation flag missing", func(t *test.SystemTest) {
-		output, _ := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, _ := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": shared.ConfigData.DropboxAccessToken,
 			"secret-key": shared.ConfigData.DropboxRefreshToken,
 			"source":     "dropbox",
@@ -70,7 +70,7 @@ func Test0Dropbox(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when access token invalid", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": "invalid",
 			"secret-key": "invalid",
 			"allocation": shared.DefaultAllocationId,
@@ -87,7 +87,7 @@ func Test0Dropbox(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when access key missing", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"allocation": shared.DefaultAllocationId,
 			"source":     "dropbox",
 			"wallet":     shared.DefaultWallet,
@@ -108,7 +108,7 @@ func Test0Dropbox(testSetup *testing.T) {
 		defer func() {
 			require.Contains(t, err.Error(), "allocation match not found")
 		}()
-		_, err = setupAllocationWithWalletWithoutTest(t, EscapedTestName(t)+"_wallet.json", shared.ConfigPath, map[string]interface{}{
+		_, err = setupAllocationWithWalletWithoutTest(t, cli_utils.EscapedTestName(t)+"_wallet.json", shared.ConfigPath, map[string]interface{}{
 			"size": allocSize,
 		})
 	})

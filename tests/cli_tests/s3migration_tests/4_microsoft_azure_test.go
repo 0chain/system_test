@@ -28,11 +28,11 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 			"size": shared.AllocSize,
 		})
 
-		output, _ := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, _ := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"account-name":      shared.ConfigData.AccountName,
 			"container":         shared.ConfigData.ContainerName,
 			"connection-string": "'" + shared.ConfigData.ConnectionString + "'",
-			"wallet":            EscapedTestName(t) + "_wallet.json",
+			"wallet":            cli_utils.EscapedTestName(t) + "_wallet.json",
 			"allocation":        allocationId,
 			"source":            "azure",
 			"config":            shared.ConfigPath,
@@ -54,11 +54,11 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 			"size": shared.AllocSize,
 		})
 
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"account-name":      shared.ConfigData.AccountName,
 			"container":         shared.ConfigData.ContainerName,
 			"connection-string": "'" + shared.ConfigData.ConnectionString + "'",
-			"wallet":            EscapedTestName(t) + "_wallet.json",
+			"wallet":            cli_utils.EscapedTestName(t) + "_wallet.json",
 			"allocation":        allocationId,
 			"source":            "azure",
 			"config":            shared.ConfigPath,
@@ -71,7 +71,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when allocation flag missing", func(t *test.SystemTest) {
-		output, _ := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, _ := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"account-name":      shared.ConfigData.AccountName,
 			"container":         shared.ConfigData.ContainerName,
 			"connection-string": "'" + shared.ConfigData.ConnectionString + "'",
@@ -86,7 +86,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when connection string is invalid", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"account-name":      shared.ConfigData.AccountName,
 			"container":         shared.ConfigData.ContainerName,
 			"connection-string": "invalid",
@@ -104,7 +104,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when connection string is missing", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"account-name": shared.ConfigData.AccountName,
 			"container":    shared.ConfigData.ContainerName,
 			"wallet":       shared.DefaultWallet,
@@ -120,7 +120,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 		require.Contains(t, strings.Join(output, "\n"), "Missing fields: connection string", "Output was not as expected", strings.Join(output, "\n"))
 	})
 	t.RunSequentially("Should fail when source is invalid", func(t *test.SystemTest) {
-		output, err := cli_utils.MigrateFromS3migration(t, cli_utils.CreateParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"account-name":      shared.ConfigData.AccountName,
 			"container":         shared.ConfigData.ContainerName,
 			"connection-string": "'" + shared.ConfigData.ConnectionString + "'",
@@ -143,7 +143,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 		defer func() {
 			require.Contains(t, err.Error(), "allocation match not found")
 		}()
-		_, err = setupAllocationWithWalletWithoutTest(t, EscapedTestName(t)+"_wallet.json", shared.ConfigPath, map[string]interface{}{
+		_, err = setupAllocationWithWalletWithoutTest(t, cli_utils.EscapedTestName(t)+"_wallet.json", shared.ConfigPath, map[string]interface{}{
 			"size": size,
 		})
 	})
