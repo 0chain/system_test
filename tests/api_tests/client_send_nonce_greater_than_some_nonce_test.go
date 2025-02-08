@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/0chain/gosdk/core/transaction"
+	"github.com/0chain/gosdk_common/core/transaction"
 
-	coreClient "github.com/0chain/gosdk/core/client"
-	"github.com/0chain/gosdk/zcncore"
+	coreClient "github.com/0chain/gosdk_common/core/client"
+	"github.com/0chain/gosdk_common/zcncore"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"

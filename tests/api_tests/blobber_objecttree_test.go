@@ -6,7 +6,7 @@ import (
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
-	"github.com/0chain/gosdk/core/encryption"
+	"github.com/0chain/gosdk_common/core/encryption"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"

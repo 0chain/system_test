@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/0chain/gosdk/zboxcore/sdk"
+	"github.com/0chain/gosdk_common/zboxcore/commonsdk"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -37,7 +38,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 			Size: 1 * GB,
 		}
 
-		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 1*GB, false, "", "")
+		minLockRequired, err := commonsdk.GetUpdateAllocationMinLock(allocationID, 1*GB, false, "", "")
 		require.NoError(t, err)
 
 		minLockRequiredInZcn := float64(minLockRequired) / 1e10
@@ -109,7 +110,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 			AddBlobberId: newBlobberID,
 		}
 
-		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 0, false, newBlobberID, "")
+		minLockRequired, err := commonsdk.GetUpdateAllocationMinLock(allocationID, 0, false, newBlobberID, "")
 		require.NoError(t, err)
 
 		t.Logf("Min lock required: %v", minLockRequired)
@@ -138,7 +139,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 			Extend: true,
 		}
 
-		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 0, true, "", "")
+		minLockRequired, err := commonsdk.GetUpdateAllocationMinLock(allocationID, 0, true, "", "")
 		require.NoError(t, err)
 
 		t.Logf("Min lock required: %v", minLockRequired)
@@ -174,7 +175,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 			AddBlobberId: newBlobberID,
 		}
 
-		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 0, false, newBlobberID, "")
+		minLockRequired, err := commonsdk.GetUpdateAllocationMinLock(allocationID, 0, false, newBlobberID, "")
 		require.NoError(t, err)
 
 		t.Logf("Min lock required: %v", minLockRequired)
@@ -214,7 +215,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 			RemoveBlobberId: removeBlobberID,
 		}
 
-		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 0, false, newBlobberID, removeBlobberID)
+		minLockRequired, err := commonsdk.GetUpdateAllocationMinLock(allocationID, 0, false, newBlobberID, removeBlobberID)
 		require.NoError(t, err)
 
 		t.Logf("Min lock required: %v", minLockRequired)
@@ -243,7 +244,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 			Size: 1 * GB,
 		}
 
-		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 1*GB, false, "", "")
+		minLockRequired, err := commonsdk.GetUpdateAllocationMinLock(allocationID, 1*GB, false, "", "")
 		require.NoError(t, err)
 
 		minLockRequiredInZcn := float64(minLockRequired) / 1e10
