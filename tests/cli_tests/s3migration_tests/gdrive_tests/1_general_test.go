@@ -1,4 +1,4 @@
-package s3migration_tests
+package gdrive_tests
 
 import (
 	"strings"

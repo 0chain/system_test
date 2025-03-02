@@ -49,6 +49,10 @@ type Config struct {
 	GoogleClientSecret          string `yaml:"googleClientSecret"`
 	OneDriveAccessToken         string `yaml:"oneDriveAccessToken"`
 	OneDriveRefreshToken        string `yaml:"oneDriveRefreshToken"`
+	BoxAccessToken              string `yaml:"boxAccessToken"`
+	BoxRefreshToken             string `yaml:"boxRefreshToken"`
+	BoxClientId                 string `yaml:"boxClientId"`
+	BoxClientSecret             string `yaml:"boxClientSecret"`
 }
 
 func Parse(configPath string) *Config {

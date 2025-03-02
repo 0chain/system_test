@@ -1,4 +1,4 @@
-package s3migration_tests
+package azure_tests
 
 import (
 	"strings"
@@ -143,7 +143,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 		defer func() {
 			require.Contains(t, err.Error(), "allocation match not found")
 		}()
-		_, err = setupAllocationWithWalletWithoutTest(t, cli_utils.EscapedTestName(t)+"_wallet.json", shared.ConfigPath, map[string]interface{}{
+		_, err = shared.SetupAllocationWithWalletWithoutTest(t, cli_utils.EscapedTestName(t)+"_wallet.json", shared.ConfigPath, map[string]interface{}{
 			"size": size,
 		})
 	})
