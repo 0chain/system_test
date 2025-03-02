@@ -16,3 +16,7 @@ googleClientId:
 googleClientSecret:
 oneDriveAccessToken:
 oneDriveRefreshToken:
+boxAccessToken:
+boxRefreshToken:
+boxClientId:
+boxClientSecret:
