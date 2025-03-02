@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test0OneDrive(testSetup *testing.T) {
+func TestOneDrive(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	if shared.ConfigData.OneDriveAccessToken == "" || shared.ConfigData.OneDriveRefreshToken == "" {
