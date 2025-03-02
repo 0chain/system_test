@@ -1,7 +1,6 @@
-package s3migration_tests
+package dropbox_tests
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -108,24 +107,8 @@ func Test0Dropbox(testSetup *testing.T) {
 		defer func() {
 			require.Contains(t, err.Error(), "allocation match not found")
 		}()
-		_, err = setupAllocationWithWalletWithoutTest(t, cli_utils.EscapedTestName(t)+"_wallet.json", shared.ConfigPath, map[string]interface{}{
+		_, err = shared.SetupAllocationWithWalletWithoutTest(t, cli_utils.EscapedTestName(t)+"_wallet.json", shared.ConfigPath, map[string]interface{}{
 			"size": allocSize,
 		})
 	})
-}
-
-func setupAllocationWithWalletWithoutTest(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) (string, error) {
-	options := map[string]interface{}{"size": "10000000", "lock": "5"}
-
-	for _, params := range extraParams {
-		for k, v := range params {
-			options[k] = v
-		}
-	}
-	cli_utils.CreateWalletForName(shared.RootPath, walletName)
-	output, _ := cli_utils.CreateNewAllocationForWallet(t, walletName, cliConfigFilename, shared.RootPath, cli_utils.CreateParams(options))
-	defer func() {
-		fmt.Printf("err: %v\n", output)
-	}()
-	return cli_utils.GetAllocationID(output[0])
 }
