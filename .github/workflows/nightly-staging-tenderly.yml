@@ -4,8 +4,8 @@ concurrency:
   cancel-in-progress: true
 on:
   schedule:
-    # Runs every two days at 6am UTC
-    - cron: '0 6 */2 * *'
+    # Runs every five days at 6am UTC
+    - cron: '0 6 */5 * *'
   workflow_dispatch:
 
 jobs:
