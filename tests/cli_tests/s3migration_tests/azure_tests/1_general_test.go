@@ -17,10 +17,13 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 		t.Skip("Missing Account name for required for migration")
 	}
 
-	if shared.ConfigData.ConnectionString == "" {
-		t.Skip("Missing Connection String required for migration")
+	if shared.ConfigData.ContainerName == "" {
+		t.Skip("Missing Container Name required for migration")
 	}
 
+	if shared.ConfigData.AzureAccessKey == "" {
+		t.Skip("Missing Access Key required for migration")
+	}
 	t.SetSmokeTests("Should migrate existing files and folder from Microsoft Azure Container successfully")
 
 	t.RunSequentially("Should migrate existing Microsoft Azure folder and files  successfully", func(t *test.SystemTest) {
@@ -31,7 +34,7 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 		output, _ := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"account-name":      shared.ConfigData.AccountName,
 			"container":         shared.ConfigData.ContainerName,
-			"connection-string": "'" + shared.ConfigData.ConnectionString + "'",
+			"access-key":        shared.ConfigData.AzureAccessKey,
 			"wallet":            cli_utils.EscapedTestName(t) + "_wallet.json",
 			"allocation":        allocationId,
 			"source":            "azure",

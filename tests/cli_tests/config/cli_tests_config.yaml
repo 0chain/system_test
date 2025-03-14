@@ -10,6 +10,7 @@ gdriveRefreshToken:
 connectionString:
 accountName:
 container:
+azureAccessKey:
 googleCloudAccessToken:
 googleCloudRefreshToken:
 googleClientId:

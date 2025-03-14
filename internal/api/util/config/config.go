@@ -43,6 +43,7 @@ type Config struct {
 	ConnectionString            string `yaml:"connectionString"`
 	AccountName                 string `yaml:"accountName"`
 	ContainerName               string `yaml:"container"`
+	AzureAccessKey              string `yaml:"azureAccessKey"`
 	GoogleCloudAccessToken      string `yaml:"googleCloudAccessToken"`
 	GoogleCloudRefreshToken     string `yaml:"googleCloudRefreshToken"`
 	GoogleClientId              string `yaml:"googleClientId"`
