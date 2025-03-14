@@ -32,15 +32,15 @@ func Test0MicrosoftAzure(testSetup *testing.T) {
 		})
 
 		output, _ := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
-			"account-name":      shared.ConfigData.AccountName,
-			"container":         shared.ConfigData.ContainerName,
-			"access-key":        shared.ConfigData.AzureAccessKey,
-			"wallet":            cli_utils.EscapedTestName(t) + "_wallet.json",
-			"allocation":        allocationId,
-			"source":            "azure",
-			"config":            shared.ConfigPath,
-			"configDir":         shared.ConfigDir,
-			"skip":              0,
+			"account-name": shared.ConfigData.AccountName,
+			"container":    shared.ConfigData.ContainerName,
+			"access-key":   shared.ConfigData.AzureAccessKey,
+			"wallet":       cli_utils.EscapedTestName(t) + "_wallet.json",
+			"allocation":   allocationId,
+			"source":       "azure",
+			"config":       shared.ConfigPath,
+			"configDir":    shared.ConfigDir,
+			"skip":         0,
 		}))
 
 		totalCount, totalMigrated, err := cli_utils.GetmigratedDataID(output)
