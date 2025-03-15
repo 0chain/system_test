@@ -71,6 +71,7 @@ jobs:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          system_tests_branch: fix/enterprise-blobber-tests
           deploy_report_page: true
           archive_results: true
           custom_go_sdk_version: feat/enterprise-blobber
@@ -93,6 +94,7 @@ jobs:
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
+          system_tests_branch: fix/enterprise-blobber-tests
           archive_results: true
           run_flaky_tests: false
           custom_go_sdk_version: feat/enterprise-blobber
@@ -115,6 +117,7 @@ jobs:
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
+          system_tests_branch: fix/enterprise-blobber-tests
           archive_results: true
           run_flaky_tests: false
           run_api_system_tests: false
@@ -138,6 +141,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
+          system_tests_branch: fix/enterprise-blobber-tests
           run_flaky_tests: false
           run_api_system_tests: false
           custom_go_sdk_version: feat/enterprise-blobber
@@ -160,6 +164,7 @@ jobs:
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
           deploy_report_page: true
           archive_results: true
+          system_tests_branch: fix/enterprise-blobber-tests
           run_flaky_tests: false
           custom_go_sdk_version: feat/enterprise-blobber
           zbox_cli_branch: staging
@@ -174,38 +179,38 @@ jobs:
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
           TENDERLY_VIRTUAL_TESTNET_RPC_ID: ""
 
-  notify_slack_on_failure:
-    runs-on: [ self-hosted, arc-runner ]
-    needs: [ system-tests ]
-    if: always() && (needs.system-tests.result == 'failure')
-    steps:
-      - name: "Notify Slack"
-        run: |
-          payload='{
-          "text": "'"<!here> Enterprise Blobber Tokenomics Nightly Tests - Current Sprint FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
-          "attachments": [
-              {
-              "text": "Enterprise Blobber Tokenomics Nightly Tests - Current sprint: FAILED ⚠️",
-              "color": "#ff0000"
-              }
-          ]
-          }'
-          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
-
-  notify_slack_on_success:
-    runs-on: [ self-hosted, arc-runner ]
-    needs: [ system-tests ]
-    if: always() && (needs.system-tests.result == 'success')
-    steps:
-      - name: "Notify Slack"
-        run: |
-          payload='{
-          "text": "'"<!here> Enterprise Blobber Tokenomics Nightly Tests - Current Sprint PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
-          "attachments": [
-              {
-              "text": "Enterprise Blobber Tokenomics Nightly Tests - Current sprint: PASSED ✅",
-              "color": "#22bb33"
-              }
-          ]
-          }'
-          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+#  notify_slack_on_failure:
+#    runs-on: [ self-hosted, arc-runner ]
+#    needs: [ system-tests ]
+#    if: always() && (needs.system-tests.result == 'failure')
+#    steps:
+#      - name: "Notify Slack"
+#        run: |
+#          payload='{
+#          "text": "'"<!here> Enterprise Blobber Tokenomics Nightly Tests - Current Sprint FAILED on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+#          "attachments": [
+#              {
+#              "text": "Enterprise Blobber Tokenomics Nightly Tests - Current sprint: FAILED ⚠️",
+#              "color": "#ff0000"
+#              }
+#          ]
+#          }'
+#          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
+#
+#  notify_slack_on_success:
+#    runs-on: [ self-hosted, arc-runner ]
+#    needs: [ system-tests ]
+#    if: always() && (needs.system-tests.result == 'success')
+#    steps:
+#      - name: "Notify Slack"
+#        run: |
+#          payload='{
+#          "text": "'"<!here> Enterprise Blobber Tokenomics Nightly Tests - Current Sprint PASSING on $(echo ${GITHUB_REF#refs/heads/})!.\n View the test results on Github: https://github.com/0chain/system_test/actions/runs/${{ github.run_id }}"'",
+#          "attachments": [
+#              {
+#              "text": "Enterprise Blobber Tokenomics Nightly Tests - Current sprint: PASSED ✅",
+#              "color": "#22bb33"
+#              }
+#          ]
+#          }'
+#          curl -X POST -H 'Content-type: application/json' --data "${payload}" ${{ secrets.DEVOPS_CHANNEL_WEBHOOK_URL }}
