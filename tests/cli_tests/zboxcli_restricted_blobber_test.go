@@ -3,6 +3,7 @@ package cli_tests
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -21,6 +22,10 @@ import (
 
 func TestRestrictedBlobbers(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+
+	//Auth Ticket Round expiry we can add a big round number to create the allocation.
+	authTokenRoundExpiry := int(1e9)
+
 	t.SetSmokeTests("Create allocation for locking cost equal to the cost calculated should work")
 
 	t.TestSetup("register wallet and get blobbers", func() {
@@ -92,9 +97,9 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		wallet, err := getWallet(t, configPath)
 		require.Nil(t, err, "could not get wallet")
 
-		blobber1AuthTicket, err := getBlobberAuthTicket(t, blobber1.Id, blobber1.Url, wallet.ClientID)
+		blobber1AuthTicket, err := getBlobberAuthTicket(t, blobber1.Id, blobber1.Url, wallet.ClientID, authTokenRoundExpiry)
 		require.Nil(t, err, "could not get blobber1 auth ticket")
-		blobber2AuthTicket, err := getBlobberAuthTicket(t, blobber2.Id, blobber2.Url, wallet.ClientID)
+		blobber2AuthTicket, err := getBlobberAuthTicket(t, blobber2.Id, blobber2.Url, wallet.ClientID, authTokenRoundExpiry)
 		require.Nil(t, err, "could not get blobber2 auth ticket")
 
 		var preferredBlobbers, blobberAuthTickets string
@@ -114,7 +119,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 			}
 		}
 
-		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": preferredBlobbers, "blobber_auth_tickets": blobberAuthTickets, "force": "true"}
+		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": preferredBlobbers, "blobber_auth_tickets": blobberAuthTickets, "auth_round_expiry": authTokenRoundExpiry, "force": "true"}
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -216,7 +221,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 			"is_restricted": false,
 		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
-		addBlobberAuthTicket, err := getBlobberAuthTicket(t, blobberID, addBlobber.BaseURL, wallet.ClientID)
+		addBlobberAuthTicket, err := getBlobberAuthTicket(t, blobberID, addBlobber.BaseURL, wallet.ClientID, authTokenRoundExpiry)
 		require.Nil(t, err)
 
 		t.Cleanup(func() {
@@ -287,7 +292,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 			"is_restricted": false,
 		}))
 		require.Nil(t, err, strings.Join(output, "\n"))
-		addBlobberAuthTicket, err := getBlobberAuthTicket(t, blobberID, addBlobber.BaseURL, wallet.ClientID)
+		addBlobberAuthTicket, err := getBlobberAuthTicket(t, blobberID, addBlobber.BaseURL, wallet.ClientID, authTokenRoundExpiry)
 		require.Nil(t, err)
 
 		t.Cleanup(func() {
@@ -317,7 +322,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 	})
 }
 
-func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID string) (string, error) {
+func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID string, authTokenRoundExpiry int) (string, error) {
 	zboxWallet, err := getWalletForName(t, configPath, zboxTeamWallet)
 	require.Nil(t, err, "could not get zbox wallet")
 
@@ -331,7 +336,7 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 		return authTicket, err
 	}
 
-	url := blobberUrl + "/v1/auth/generate?client_id=" + clientID
+	url := blobberUrl + fmt.Sprintf("/v1/auth/generate?client_id=%s&round=%d", clientID, authTokenRoundExpiry)
 	req, err := http.NewRequest("GET", url, http.NoBody)
 	if err != nil {
 		return authTicket, err
