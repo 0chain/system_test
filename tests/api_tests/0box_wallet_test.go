@@ -30,6 +30,18 @@ func Create0boxTestWallet(t *test.SystemTest, headers map[string]string) error {
 	return nil
 }
 
+func Create0boxTestWalletCustom(t *test.SystemTest, headers, verifyOtpInput, walletInput map[string]string) error {
+	_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
+	if err != nil {
+		return err
+	}
+	_, _, err = zboxClient.CreateWallet(t, headers, walletInput)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func Test0BoxWallet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
