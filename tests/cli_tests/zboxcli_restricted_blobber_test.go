@@ -3,13 +3,13 @@ package cli_tests
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"github.com/0chain/errors"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -335,22 +335,22 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 	})
 }
 
-func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID string, authTokenRoundExpiry int) (string, error) {
+func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberURL, clientID string, authTokenRoundExpiry int) (string, error) {
 	zboxWallet, err := getWalletForName(t, configPath, zboxTeamWallet)
 	require.Nil(t, err, "could not get zbox wallet")
 
 	var authTicket string
 	signatureScheme := zcncrypto.NewSignatureScheme("bls0chain")
-	_ = signatureScheme.SetPrivateKey("85e2119f494cd40ca524f6342e8bdb7bef2af03fe9a08c8d9c1d9f14d6c64f14")
+	_ = signatureScheme.SetPrivateKey("26e4adfa189350df06bf1983569e03a50fb69d6112386e76610e8b08cc90a009")
 	_ = signatureScheme.SetPublicKey(zboxWallet.ClientPublicKey)
 
-	signature, err := signatureScheme.Sign(hex.EncodeToString([]byte(fmt.Sprintf("%s_%d", zboxWallet.ClientPublicKey, authTokenRoundExpiry))))
+	signature, err := signatureScheme.Sign(hex.EncodeToString([]byte(zboxWallet.ClientPublicKey)))
 	if err != nil {
 		return authTicket, err
 	}
 
-	url := blobberUrl + fmt.Sprintf("/v1/auth/generate?client_id=%s&round=%d", clientID, authTokenRoundExpiry)
-	req, err := http.NewRequest("GET", url, http.NoBody)
+	url := blobberURL + "/v1/auth/generate?client_id=" + clientID + "&round=" + strconv.FormatInt(int64(authTokenRoundExpiry), 10)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return authTicket, err
 	}
@@ -367,12 +367,11 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 	if err != nil {
 		var body []byte
 		body, err = ioutil.ReadAll(resp.Body)
-		return "", errors.Newf(err.Error(), string(body))
+		return "", errors.Wrap(err, string(body))
 	}
 	authTicket = responseMap["auth_ticket"]
 	if authTicket == "" {
-		return "", common.NewError("500", "Error getting auth ticket from blobber")
+		common.NewError("500", "Error getting auth ticket from blobber")
 	}
-
 	return authTicket, nil
 }
