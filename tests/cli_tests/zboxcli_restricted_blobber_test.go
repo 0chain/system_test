@@ -121,7 +121,16 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 			}
 		}
 
-		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": preferredBlobbers, "blobber_auth_tickets": blobberAuthTickets, "auth_round_expiry": authTokenRoundExpiry, "force": "true"}
+		options = map[string]interface{}{
+			"size":                 "1024",
+			"data":                 "3",
+			"parity":               "3",
+			"lock":                 "0.5",
+			"preferred_blobbers":   preferredBlobbers,
+			"blobber_auth_tickets": blobberAuthTickets,
+			"auth_round_expiry":    authTokenRoundExpiry,
+			"force":                "true",
+		}
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -239,6 +248,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 			"allocation":                 allocationID,
 			"set_third_party_extendable": nil,
 			"add_blobber":                blobberID,
+			"auth_round_expiry":          authTokenRoundExpiry,
 			"add_blobber_auth_ticket":    addBlobberAuthTicket,
 		})
 
@@ -311,6 +321,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 			"set_third_party_extendable": nil,
 			"add_blobber":                blobberID,
 			"add_blobber_auth_ticket":    addBlobberAuthTicket,
+			"auth_round_expiry":          authTokenRoundExpiry,
 			"remove_blobber":             removeBlobber,
 		})
 
