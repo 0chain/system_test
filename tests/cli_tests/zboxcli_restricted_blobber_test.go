@@ -4,6 +4,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/0chain/errors"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -331,7 +333,7 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 	_ = signatureScheme.SetPrivateKey("85e2119f494cd40ca524f6342e8bdb7bef2af03fe9a08c8d9c1d9f14d6c64f14")
 	_ = signatureScheme.SetPublicKey(zboxWallet.ClientPublicKey)
 
-	signature, err := signatureScheme.Sign(hex.EncodeToString([]byte(zboxWallet.ClientPublicKey)))
+	signature, err := signatureScheme.Sign(hex.EncodeToString([]byte(fmt.Sprintf("%s_%d", zboxWallet.ClientPublicKey, authTokenRoundExpiry))))
 	if err != nil {
 		return authTicket, err
 	}
@@ -352,7 +354,9 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 	var responseMap map[string]string
 	err = json.NewDecoder(resp.Body).Decode(&responseMap)
 	if err != nil {
-		return "", err
+		var body []byte
+		body, err = ioutil.ReadAll(resp.Body)
+		return "", errors.Newf(err.Error(), string(body))
 	}
 	authTicket = responseMap["auth_ticket"]
 	if authTicket == "" {
