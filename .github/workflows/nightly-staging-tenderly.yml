@@ -41,7 +41,7 @@ jobs:
       - name: "Deploy 0Chain"
         uses: 0chain/actions/deploy-0chain@master
         with:
-          authorizer_image: "pr-167-6b324abb"
+          authorizer_image: "pr-167-f4713b83"
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
           kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
           teardown_condition: "TESTS_PASSED"
