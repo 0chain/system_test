@@ -19,6 +19,8 @@ func Test0TenderlyBridgeVerify(testSetup *testing.T) {
 		t.Skip("Tenderly has not been initialized properly!")
 	}
 
+	time.Sleep(20 * time.Second)
+
 	t.SetSmokeTests("Verify ethereum transaction")
 
 	t.RunSequentiallyWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {

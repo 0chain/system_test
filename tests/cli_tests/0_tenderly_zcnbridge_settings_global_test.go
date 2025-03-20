@@ -36,6 +36,8 @@ func Test0TenderlyZCNBridgeGlobalSettings(testSetup *testing.T) {
 
 	defaultParams := getDefaultConfig(t)
 
+	time.Sleep(20 * time.Second)
+
 	t.RunSequentially("should allow update of min_mint_amount", func(t *test.SystemTest) {
 		t.Cleanup(func() {
 			_ = updateAndVerify(t, "min_mint", fmt.Sprintf("%v", tokenomics.ZcnToInt(defaultParams["min_mint"])))

@@ -31,6 +31,8 @@ func Test0TenderlyEthRegisterAccount(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Register ethereum account in local key storage")
 
+	time.Sleep(20 * time.Second)
+
 	t.RunSequentially("Register ethereum account in local key storage", func(t *test.SystemTest) {
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, password, mnemonic, false)

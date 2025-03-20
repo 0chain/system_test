@@ -19,6 +19,8 @@ func Test0TenderlyBridgeMint(testSetup *testing.T) {
 		t.Skip("Tenderly has not been initialized properly!")
 	}
 
+	time.Sleep(20 * time.Second)
+
 	t.RunSequentiallyWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
 		createWallet(t)
 

@@ -16,6 +16,8 @@ import (
 )
 
 func Test0TenderlyValidatorConfigUpdate(testSetup *testing.T) {
+	time.Sleep(20 * time.Second)
+
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("update validator number of delegates should work")
 

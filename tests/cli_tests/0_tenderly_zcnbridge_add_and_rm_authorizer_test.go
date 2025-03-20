@@ -12,6 +12,8 @@ import (
 )
 
 func Test0TenderlyZCNBridgeAuthorizerRegisterAndDelete(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
+	time.Sleep(20 * time.Second)
+
 	t := test.NewSystemTest(testSetup)
 	createWallet(t)
 

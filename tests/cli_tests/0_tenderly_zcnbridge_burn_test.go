@@ -25,6 +25,8 @@ func Test0TenderlyBridgeBurn(testSetup *testing.T) {
 		t.Skip("Tenderly has not been initialized properly!")
 	}
 
+	time.Sleep(20 * time.Second)
+
 	t.RunSequentiallyWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
 		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err)
