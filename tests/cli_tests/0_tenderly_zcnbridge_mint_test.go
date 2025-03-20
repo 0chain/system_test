@@ -20,7 +20,7 @@ func Test0TenderlyBridgeMint(testSetup *testing.T) {
 	}
 
 	t.RunSequentiallyWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		createWallet(t)
 
@@ -40,7 +40,7 @@ func Test0TenderlyBridgeMint(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Mint ZCN tokens", time.Minute*10, func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		createWallet(t)
 

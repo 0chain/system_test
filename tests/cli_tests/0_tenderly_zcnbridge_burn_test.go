@@ -26,7 +26,7 @@ func Test0TenderlyBridgeBurn(testSetup *testing.T) {
 	}
 
 	t.RunSequentiallyWithTimeout("Burning WZCN tokens on balance, should work", time.Minute*10, func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err)
@@ -35,7 +35,7 @@ func Test0TenderlyBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Get WZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err, output)
@@ -64,7 +64,7 @@ func Test0TenderlyBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Burning ZCN tokens without ZCN tokens on balance, shouldn't work", time.Minute*10, func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		output, err := burnZcn(t, "1", false)
 		require.NotNil(t, err)
@@ -73,7 +73,7 @@ func Test0TenderlyBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.Run("Burning ZCN tokens with available ZCN tokens on balance, should work", func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		createWallet(t)
 		output, err := burnZcn(t, "1", true)
@@ -83,7 +83,7 @@ func Test0TenderlyBridgeBurn(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Get ZCN burn ticket, should work", time.Minute*10, func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		createWallet(t)
 

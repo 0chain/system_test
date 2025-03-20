@@ -16,7 +16,7 @@ func Test0TenderlyZCNBridgeAuthorizerRegisterAndDelete(testSetup *testing.T) { /
 	createWallet(t)
 
 	t.RunSequentially("Register authorizer to DEX smartcontract", func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		output, err := scRegisterAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", true)
 		require.NoError(t, err, "error trying to register authorizer to DEX sc: %s", strings.Join(output, "\n"))
@@ -24,7 +24,7 @@ func Test0TenderlyZCNBridgeAuthorizerRegisterAndDelete(testSetup *testing.T) { /
 	})
 
 	t.RunSequentially("Remove authorizer from DEX smartcontract", func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		output, err := scRemoveAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", true)
 		require.NoError(t, err, strings.Join(output, "\n"))

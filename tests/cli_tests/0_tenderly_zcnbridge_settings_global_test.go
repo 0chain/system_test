@@ -37,7 +37,7 @@ func Test0TenderlyZCNBridgeGlobalSettings(testSetup *testing.T) {
 	defaultParams := getDefaultConfig(t)
 
 	t.RunSequentially("should allow update of min_mint_amount", func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		t.Cleanup(func() {
 			_ = updateAndVerify(t, "min_mint", fmt.Sprintf("%v", tokenomics.ZcnToInt(defaultParams["min_mint"])))
@@ -51,7 +51,7 @@ func Test0TenderlyZCNBridgeGlobalSettings(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("should allow update of min_burn_amount", func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		t.Cleanup(func() {
 			_ = updateAndVerify(t, "min_burn", fmt.Sprintf("%v", tokenomics.ZcnToInt(defaultParams["min_burn"])))
@@ -65,7 +65,7 @@ func Test0TenderlyZCNBridgeGlobalSettings(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("should allow update of min_stake_amount", func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		t.Cleanup(func() {
 			_ = updateAndVerify(t, "min_stake", fmt.Sprintf("%v", tokenomics.ZcnToInt(defaultParams["min_stake"])))
@@ -79,7 +79,7 @@ func Test0TenderlyZCNBridgeGlobalSettings(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("should allow update of max_fee", func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		t.Cleanup(func() {
 			_ = updateAndVerify(t, "max_fee", "100")
@@ -93,7 +93,7 @@ func Test0TenderlyZCNBridgeGlobalSettings(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("should allow update of percent_authorizers", func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		t.Cleanup(func() {
 			_ = updateAndVerify(t, "percent_authorizers", fmt.Sprintf("%v", defaultParams["percent_authorizers"]))
@@ -107,7 +107,7 @@ func Test0TenderlyZCNBridgeGlobalSettings(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("should allow update of min_authorizers", func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		t.Cleanup(func() {
 			_ = updateAndVerify(t, "min_authorizers", fmt.Sprintf("%v", defaultParams["min_authorizers"]))
@@ -121,7 +121,7 @@ func Test0TenderlyZCNBridgeGlobalSettings(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("should allow update of owner_id", func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		newOwner := escapedTestName(t)
 

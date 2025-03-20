@@ -24,7 +24,7 @@ func Test0TenderlyAuthorizerRewards(testSetup *testing.T) {
 	}
 
 	t.RunSequentiallyWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		createWallet(t)
 

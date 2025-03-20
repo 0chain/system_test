@@ -32,7 +32,7 @@ func Test0TenderlyEthRegisterAccount(testSetup *testing.T) {
 	t.SetSmokeTests("Register ethereum account in local key storage")
 
 	t.RunSequentially("Register ethereum account in local key storage", func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, password, mnemonic, false)
@@ -42,7 +42,7 @@ func Test0TenderlyEthRegisterAccount(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("List ethereum account registered in local key storage", func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, password, mnemonic, false)

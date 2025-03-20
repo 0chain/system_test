@@ -22,7 +22,7 @@ func Test0TenderlyBridgeVerify(testSetup *testing.T) {
 	t.SetSmokeTests("Verify ethereum transaction")
 
 	t.RunSequentiallyWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {
-		time.Sleep(30 * time.Second)
+		time.Sleep(time.Minute)
 
 		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err, output)
