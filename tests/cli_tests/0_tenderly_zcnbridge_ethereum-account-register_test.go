@@ -31,9 +31,9 @@ func Test0TenderlyEthRegisterAccount(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Register ethereum account in local key storage")
 
-	time.Sleep(20 * time.Second)
-
 	t.RunSequentially("Register ethereum account in local key storage", func(t *test.SystemTest) {
+		time.Sleep(30 * time.Second)
+
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, password, mnemonic, false)
 		require.Nil(t, err, "error trying to register ethereum account", strings.Join(output, "\n"))
@@ -42,6 +42,8 @@ func Test0TenderlyEthRegisterAccount(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("List ethereum account registered in local key storage", func(t *test.SystemTest) {
+		time.Sleep(30 * time.Second)
+
 		deleteDefaultAccountInStorage(t, address)
 		output, err := importAccount(t, password, mnemonic, false)
 		require.NoError(t, err, strings.Join(output, "\n"))

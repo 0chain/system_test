@@ -12,18 +12,20 @@ import (
 )
 
 func Test0TenderlyZCNBridgeAuthorizerRegisterAndDelete(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.
-	time.Sleep(20 * time.Second)
-
 	t := test.NewSystemTest(testSetup)
 	createWallet(t)
 
 	t.RunSequentially("Register authorizer to DEX smartcontract", func(t *test.SystemTest) {
+		time.Sleep(30 * time.Second)
+
 		output, err := scRegisterAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", true)
 		require.NoError(t, err, "error trying to register authorizer to DEX sc: %s", strings.Join(output, "\n"))
 		t.Log("register authorizer DEX SC successfully")
 	})
 
 	t.RunSequentially("Remove authorizer from DEX smartcontract", func(t *test.SystemTest) {
+		time.Sleep(30 * time.Second)
+
 		output, err := scRemoveAuthorizer(t, "0xEa36456C79caD6Dd941Fe552285594C7217Fe258", true)
 		require.NoError(t, err, strings.Join(output, "\n"))
 		t.Log("remove authorizer DEX SC successfully")

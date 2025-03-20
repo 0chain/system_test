@@ -23,9 +23,9 @@ func Test0TenderlyAuthorizerRewards(testSetup *testing.T) {
 		t.Skip("Tenderly has not been initialized properly!")
 	}
 
-	time.Sleep(20 * time.Second)
-
 	t.RunSequentiallyWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {
+		time.Sleep(30 * time.Second)
+
 		createWallet(t)
 
 		feeRewardAuthorizerQuery := fmt.Sprintf("reward_type = %d", model.FeeRewardAuthorizer)

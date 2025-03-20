@@ -18,9 +18,9 @@ func Test0TenderlyListAuthorizers(testSetup *testing.T) {
 
 	t.Parallel()
 
-	time.Sleep(20 * time.Second)
-
 	t.Run("List authorizers should work", func(t *test.SystemTest) {
+		time.Sleep(30 * time.Second)
+
 		output, err := getAuthorizersList(t, true)
 
 		require.Nil(t, err, "error trying to get the list of authorizers", strings.Join(output, "\n"))

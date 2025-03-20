@@ -16,8 +16,6 @@ import (
 )
 
 func Test0TenderlyValidatorConfigUpdate(testSetup *testing.T) {
-	time.Sleep(20 * time.Second)
-
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("update validator number of delegates should work")
 
@@ -53,6 +51,8 @@ func Test0TenderlyValidatorConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update validator number of delegates should work", func(t *test.SystemTest) {
+		time.Sleep(30 * time.Second)
+
 		createWallet(t)
 
 		newNumberOfDelegates := 15
@@ -73,6 +73,8 @@ func Test0TenderlyValidatorConfigUpdate(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update validator service charge should work", func(t *test.SystemTest) {
+		time.Sleep(30 * time.Second)
+
 		createWallet(t)
 
 		newServiceCharge := 0.1

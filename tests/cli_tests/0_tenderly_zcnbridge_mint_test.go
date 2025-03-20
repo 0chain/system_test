@@ -19,9 +19,9 @@ func Test0TenderlyBridgeMint(testSetup *testing.T) {
 		t.Skip("Tenderly has not been initialized properly!")
 	}
 
-	time.Sleep(20 * time.Second)
-
 	t.RunSequentiallyWithTimeout("Mint WZCN tokens", time.Minute*10, func(t *test.SystemTest) {
+		time.Sleep(30 * time.Second)
+
 		createWallet(t)
 
 		output, err := resetUserNonce(t, true)
@@ -40,6 +40,8 @@ func Test0TenderlyBridgeMint(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Mint ZCN tokens", time.Minute*10, func(t *test.SystemTest) {
+		time.Sleep(30 * time.Second)
+
 		createWallet(t)
 
 		output, err := burnEth(t, "1000000000000", true)

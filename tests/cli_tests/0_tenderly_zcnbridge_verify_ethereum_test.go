@@ -19,11 +19,11 @@ func Test0TenderlyBridgeVerify(testSetup *testing.T) {
 		t.Skip("Tenderly has not been initialized properly!")
 	}
 
-	time.Sleep(20 * time.Second)
-
 	t.SetSmokeTests("Verify ethereum transaction")
 
 	t.RunSequentiallyWithTimeout("Verify ethereum transaction", time.Minute*10, func(t *test.SystemTest) {
+		time.Sleep(30 * time.Second)
+
 		output, err := burnEth(t, "1000000000000", true)
 		require.Nil(t, err, output)
 		require.Greater(t, len(output), 0)
