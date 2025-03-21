@@ -324,7 +324,7 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 
 	var authTicket string
 	signatureScheme := zcncrypto.NewSignatureScheme("bls0chain")
-	_ = signatureScheme.SetPrivateKey("85e2119f494cd40ca524f6342e8bdb7bef2af03fe9a08c8d9c1d9f14d6c64f14")
+	_ = signatureScheme.SetPrivateKey("26e4adfa189350df06bf1983569e03a50fb69d6112386e76610e8b08cc90a009")
 	_ = signatureScheme.SetPublicKey(zboxWallet.ClientPublicKey)
 
 	signature, err := signatureScheme.Sign(hex.EncodeToString([]byte(zboxWallet.ClientPublicKey)))
