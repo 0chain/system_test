@@ -1,7 +1,11 @@
 package api_tests
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/client"
 
@@ -10,8 +14,18 @@ import (
 )
 
 func NewTestAllocation() map[string]string {
+	// Generate a unique string using the current timestamp
+	uniqueString := fmt.Sprintf("%d", time.Now().UnixNano())
+
+	// Create a new hash
+	hasher := sha256.New()
+	hasher.Write([]byte(uniqueString))
+
+	// Get the hash and convert it to a hexadecimal string
+	id := hex.EncodeToString(hasher.Sum(nil))
+
 	return map[string]string{
-		"id":              "165f0f8e557c430929784035df7eeacf7a3ff795f10d76c8707409bba31cb617",
+		"id":              id,
 		"description":     "test_allocation_description",
 		"name":            "test_allocation_name",
 		"allocation_type": "external_drive",
@@ -79,6 +93,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		allocInput := NewTestAllocation()
+		allocInput["id"] = "c0360331837a7376d27007614e124db83811e4416dd2f1577345dd96c8621bf6"
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
