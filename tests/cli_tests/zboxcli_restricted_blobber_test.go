@@ -7,12 +7,13 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/0chain/common/core/common"
-	"github.com/0chain/gosdk/core/zcncrypto"
+	"github.com/0chain/gosdk_common/core/zcncrypto"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -83,7 +84,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		// Setup wallet and create allocation
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "force": "true"}
+		options := map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "force": "true", "auth_round_expiry": 1000000000}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
@@ -114,7 +115,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 			}
 		}
 
-		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": preferredBlobbers, "blobber_auth_tickets": blobberAuthTickets, "force": "true"}
+		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": preferredBlobbers, "blobber_auth_tickets": blobberAuthTickets, "force": "true", "auth_round_expiry": 1000000000}
 		output, err = createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -323,7 +324,7 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 
 	var authTicket string
 	signatureScheme := zcncrypto.NewSignatureScheme("bls0chain")
-	_ = signatureScheme.SetPrivateKey("85e2119f494cd40ca524f6342e8bdb7bef2af03fe9a08c8d9c1d9f14d6c64f14")
+	_ = signatureScheme.SetPrivateKey("26e4adfa189350df06bf1983569e03a50fb69d6112386e76610e8b08cc90a009")
 	_ = signatureScheme.SetPublicKey(zboxWallet.ClientPublicKey)
 
 	signature, err := signatureScheme.Sign(hex.EncodeToString([]byte(zboxWallet.ClientPublicKey)))
@@ -331,7 +332,7 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberUrl, clientID st
 		return authTicket, err
 	}
 
-	url := blobberUrl + "/v1/auth/generate?client_id=" + clientID
+	url := blobberUrl + "/v1/auth/generate?client_id=" + clientID + "&round=" + strconv.FormatInt(1000000000, 10)
 	req, err := http.NewRequest("GET", url, http.NoBody)
 	if err != nil {
 		return authTicket, err

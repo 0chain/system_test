@@ -8,12 +8,13 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/0chain/gosdk/core/client"
-	"github.com/0chain/gosdk/zcncore"
+	"github.com/0chain/gosdk_common/core/client"
+	"github.com/0chain/gosdk_common/zcncore"
 
-	"github.com/0chain/gosdk/core/conf"
-	"github.com/0chain/gosdk/zboxcore/fileref"
 	"github.com/0chain/gosdk/zboxcore/sdk"
+	"github.com/0chain/gosdk_common/core/conf"
+	"github.com/0chain/gosdk_common/zboxcore/commonsdk"
+	"github.com/0chain/gosdk_common/zboxcore/fileref"
 )
 
 func InitSDK(wallet, configFile string) error {
@@ -78,7 +79,7 @@ func GetBlobberIDNotPartOfAllocation(walletname, configFile, allocationID string
 	return string(blobber.ID), err
 }
 
-func getBlobberNotPartOfAllocation(walletname, configFile, allocationID string) (*sdk.Blobber, error) {
+func getBlobberNotPartOfAllocation(walletname, configFile, allocationID string) (*commonsdk.Blobber, error) {
 	err := InitSDK(walletname, configFile)
 	if err != nil {
 		return nil, err
@@ -89,7 +90,7 @@ func getBlobberNotPartOfAllocation(walletname, configFile, allocationID string) 
 		return nil, err
 	}
 
-	blobbers, err := sdk.GetBlobbers(true, false)
+	blobbers, err := commonsdk.GetBlobbers(true, false)
 	if err != nil {
 		return nil, err
 	}

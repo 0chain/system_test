@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/0chain/gosdk/zboxcore/sdk"
+	"github.com/0chain/gosdk_common/zboxcore/commonsdk"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
@@ -204,7 +205,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 			require.InEpsilon(t, queryReward.TotalReward*(1.0-blobber.StakePoolSettings.ServiceCharge), queryReward.TotalDelegateReward, standardErrorMargin, "Expected delegate reward is not equal to actual")
 
 			// Compare Stakepool Rewards
-			blobberStakePools, err := sdk.GetStakePoolInfo(sdk.ProviderBlobber, blobber.ID)
+			blobberStakePools, err := commonsdk.GetStakePoolInfo(commonsdk.ProviderBlobber, blobber.ID)
 			require.NoError(t, err, "Error while getting blobber stake pool info")
 
 			totalStakePoolBalance := float64(blobberStakePools.Balance)

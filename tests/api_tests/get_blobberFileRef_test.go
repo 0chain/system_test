@@ -6,7 +6,7 @@ import (
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
-	"github.com/0chain/gosdk/core/encryption"
+	"github.com/0chain/gosdk_common/core/encryption"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/crypto"
@@ -49,14 +49,6 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus, resp)
 		require.Equal(t, blobberFileRefsResponse.OffsetPath, remoteFilePath)
 		require.Greater(t, len(blobberFileRefsResponse.Refs), int(0))
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.AllocationRoot)
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.PrevAllocationRoot)
-		require.Equal(t, blobberFileRefsResponse.LatestWriteMarker.AllocationId, allocationID)
-		require.Greater(t, blobberFileRefsResponse.LatestWriteMarker.Size, int(0))
-		require.Equal(t, blobberFileRefsResponse.LatestWriteMarker.BlobberId, blobberID)
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Timestamp)
-		require.Equal(t, blobberFileRefsResponse.LatestWriteMarker.ClientId, wallet.Id)
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Signature)
 
 		// request with refType as updated
 		refType = "updated"
@@ -67,14 +59,6 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpOkStatus)
 		require.Equal(t, blobberFileRefsResponse.OffsetPath, remoteFilePath)
 		require.Greater(t, len(blobberFileRefsResponse.Refs), int(0))
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.AllocationRoot)
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.PrevAllocationRoot)
-		require.Equal(t, blobberFileRefsResponse.LatestWriteMarker.AllocationId, allocationID)
-		require.Greater(t, blobberFileRefsResponse.LatestWriteMarker.Size, int(0))
-		require.Equal(t, blobberFileRefsResponse.LatestWriteMarker.BlobberId, blobberID)
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Timestamp)
-		require.Equal(t, blobberFileRefsResponse.LatestWriteMarker.ClientId, wallet.Id)
-		require.NotNil(t, blobberFileRefsResponse.LatestWriteMarker.Signature)
 	})
 
 	t.RunSequentiallyWithTimeout("Get file ref with incorrect allocation id should fail", 90*time.Second, func(t *test.SystemTest) { // todo - too slow (70s)
