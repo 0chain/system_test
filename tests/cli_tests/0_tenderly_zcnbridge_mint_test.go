@@ -38,6 +38,8 @@ func Test0TenderlyBridgeMint(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Mint ZCN tokens", time.Minute*10, func(t *test.SystemTest) {
+		t.Skip("Skip due to Tenderly rate throttling")
+
 		createWallet(t)
 
 		output, err := burnEth(t, "1000000000000", true)
