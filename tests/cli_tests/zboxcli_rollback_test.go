@@ -205,6 +205,111 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
 
+	t.Run("rollback allocation after moving a file should work", func(t *test.SystemTest) {
+		t.Skip("Skipping as move is not atomic in v2")
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(256)
+
+		file := generateRandomTestFileName(t)
+		err := createFileWithSize(file, fileSize)
+		require.Nil(t, err)
+
+		filename := filepath.Base(file)
+		remotePath := "/child/" + filename
+		destpath := "/"
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  file,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = text/plain. Name = %s",
+			filepath.Base(file),
+		)
+		require.Equal(t, expected, output[1])
+		time.Sleep(1 * time.Second)
+		// move file
+		output, err = moveFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"destpath":   destpath,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		require.Equal(t, fmt.Sprintf(remotePath+" moved"), output[0])
+
+		// list-all
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var files []climodel.AllocationFile
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 2)
+
+		// check if expected file has been moved
+		foundAtSource := false
+		foundAtDest := false
+		for _, f := range files {
+			if f.Path == remotePath {
+				foundAtSource = true
+			}
+			if f.Path == destpath+filename {
+				foundAtDest = true
+				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.False(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
+		require.True(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+
+		// rollback
+		output, err = rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
+			"allocation": allocationID,
+		}))
+		t.Log(strings.Join(output, "\n"))
+		require.NoError(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		output, err = listAll(t, configPath, allocationID, true)
+		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		files = []climodel.AllocationFile{}
+		err = json.NewDecoder(strings.NewReader(output[0])).Decode(&files)
+		require.Nil(t, err, "Error deserializing JSON string `%s`: %v", strings.Join(output, "\n"), err)
+		require.Len(t, files, 2)
+
+		// check if expected file has been moved
+		foundAtSource = false
+		foundAtDest = false
+		for _, f := range files {
+			if f.Path == remotePath {
+				foundAtSource = true
+			}
+			if f.Path == destpath+filename {
+				foundAtDest = true
+				require.Equal(t, filename, f.Name, strings.Join(output, "\n"))
+				require.Equal(t, f.ActualSize, int(fileSize), strings.Join(output, "\n"))
+				require.Equal(t, "f", f.Type, strings.Join(output, "\n"))
+				require.NotEmpty(t, f.Hash)
+			}
+		}
+		require.True(t, foundAtSource, "file is found at source: ", strings.Join(output, "\n"))
+		require.False(t, foundAtDest, "file not found at destination: ", strings.Join(output, "\n"))
+	})
+
 	t.Run("rollback allocation after renaming a file should work", func(t *test.SystemTest) {
 		t.Skip("rename is not atomic in v2")
 		allocSize := int64(64 * KB * 2)

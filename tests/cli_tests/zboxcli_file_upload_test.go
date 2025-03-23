@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -525,6 +527,42 @@ func TestUpload(testSetup *testing.T) {
 		require.False(t, strings.Contains(strings.Join(output, "\n"), "Upload failed"), strings.Join(output, "\n"))
 	})
 
+	t.Run("Upload File to Existing File Should Fail", func(t *test.SystemTest) {
+		allocSize := int64(64 * KB * 2)
+		fileSize := int64(1024)
+
+		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+			"size": allocSize,
+		})
+
+		filename := generateRandomTestFileName(t)
+		err := createFileWithSize(filename, fileSize)
+		require.Nil(t, err)
+
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		expected := fmt.Sprintf(
+			"Status completed callback. Type = text/plain. Name = %s",
+			filepath.Base(filename),
+		)
+		require.Equal(t, expected, output[1])
+
+		// Upload the file again to same directory
+		output, err = uploadFileWithoutRetry(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/",
+			"localpath":  filename,
+		})
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.True(t, strings.Contains(strings.Join(output, ""), "Upload failed"), strings.Join(output, "\n"))
+	})
+
 	t.Run("Upload File to Non-Existent Allocation Should Fail", func(t *test.SystemTest) {
 		fileSize := int64(256)
 
@@ -699,6 +737,75 @@ func TestUpload(testSetup *testing.T) {
 		}), false)
 		require.Nil(t, err)
 		require.NotContains(t, output[0], filename)
+	})
+
+	t.RunWithTimeout("Tokens should move from write pool balance to challenge pool acc. to expected upload cost", 10*time.Minute, func(t *test.SystemTest) {
+		createWallet(t)
+
+		allocParam := createParams(map[string]interface{}{
+			"lock": 0.8,
+			"size": 10485760,
+		})
+		output, err := createNewAllocation(t, configPath, allocParam)
+		require.Nil(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
+
+		require.Len(t, output, 1)
+		matcher := regexp.MustCompile("Allocation created: ([a-f0-9]{64})")
+		require.Regexp(t, matcher, output[0], "Allocation creation output did not match expected")
+
+		allocationID := strings.Fields(output[0])[2]
+
+		// Write pool balance should increment to 1
+		initialAllocation := getAllocation(t, allocationID)
+		require.Equal(t, 0.8, intToZCN(initialAllocation.WritePool))
+
+		// Get Challenge-Pool info after upload
+		output, err = challengePoolInfo(t, configPath, allocationID)
+		require.Nil(t, err, "Could not fetch challenge pool", strings.Join(output, "\n"))
+
+		challengePool := climodel.ChallengePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &challengePool)
+		require.Nil(t, err, "Error unmarshalling challenge pool info", strings.Join(output, "\n"))
+
+		filename := generateRandomTestFileName(t)
+		err = createFileWithSize(filename, 1024*1024*0.5)
+		require.Nil(t, err, "error while generating file: ", err)
+
+		// upload a dummy 5 MB file
+		uploadWithParam(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  filename,
+			"remotepath": "/",
+		})
+
+		output, _ = getUploadCostInUnit(t, configPath, allocationID, filename)
+		expectedUploadCostInZCN, err := strconv.ParseFloat(strings.Fields(output[0])[0], 64)
+		require.Nil(t, err, "Cost couldn't be parsed to float", strings.Join(output, "\n"))
+		unit := strings.Fields(output[0])[1]
+		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
+
+		cliutils.Wait(t, 30*time.Second)
+
+		finalAllocation := getAllocation(t, allocationID)
+
+		// Get Challenge-Pool info after upload
+		output, err = challengePoolInfo(t, configPath, allocationID)
+		require.Nil(t, err, "Could not fetch challenge pool", strings.Join(output, "\n"))
+
+		challengePool = climodel.ChallengePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &challengePool)
+		require.Nil(t, err, "Error unmarshalling challenge pool info", strings.Join(output, "\n"))
+
+		require.Regexp(t, regexp.MustCompile(fmt.Sprintf("([a-f0-9]{64}):challengepool:%s", allocationID)), challengePool.Id)
+		require.IsType(t, int64(1), challengePool.StartTime)
+		require.IsType(t, int64(1), challengePool.Expiration)
+		require.IsType(t, int64(1), challengePool.Balance)
+		require.False(t, challengePool.Finalized)
+
+		totalChangeInWritePool := intToZCN(initialAllocation.WritePool - finalAllocation.WritePool)
+
+		require.InEpsilon(t, expectedUploadCostInZCN, totalChangeInWritePool, 0.05, "expected write pool balance to decrease by [%v] but has actually decreased by [%v]", expectedUploadCostInZCN, totalChangeInWritePool)
+		require.InEpsilon(t, totalChangeInWritePool, intToZCN(challengePool.Balance), 0.05, "expected challenge pool balance to match deducted amount from write pool [%v] but balance was actually [%v]", totalChangeInWritePool, intToZCN(challengePool.Balance))
 	})
 
 	t.RunSequentiallyWithTimeout("stream tests for different formats", 20*time.Minute, func(t *test.SystemTest) {

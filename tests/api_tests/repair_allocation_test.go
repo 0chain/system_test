@@ -351,4 +351,97 @@ func TestRepairSize(testSetup *testing.T) {
 	t.Skip("Skipping as repair size is not implemented for V2")
 	wallet := createWallet(t)
 	sdkClient.SetWallet(t, wallet)
+
+	t.RunSequentiallyWithTimeout("repair size in case of no blobber failure should be zero", 5*time.Minute, func(t *test.SystemTest) {
+		// create allocation with default blobber requirements
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		t.Logf("allocationID: %v", allocationID)
+
+		// create and upload a file of 2KB to allocation.
+		op := sdkClient.AddUploadOperation(t, "", "", int64(1024*2))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op})
+
+		// assert both upload and download size should be zero
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoErrorf(t, err, "allocation ID %v is not found", allocationID)
+		rs, err := alloc.RepairSize("/")
+		require.Nil(t, err)
+		t.Logf("repair size: %v", rs)
+		require.Equal(t, uint64(0), rs.UploadSize, "upload size doesn't match")
+		require.Equal(t, uint64(0), rs.DownloadSize, "download size doesn't match")
+	})
+
+	t.RunSequentiallyWithTimeout("repair size on single blobber failure should match", 5*time.Minute, func(t *test.SystemTest) {
+		// create allocation with default blobber requirements
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 2
+		blobberRequirements.Size = 2056
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		t.Logf("allocationID: %v", allocationID)
+
+		// create and upload a file of 2KB to allocation.
+		// one blobber url is set invalid to mimic failure.
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoErrorf(t, err, "allocation ID %v is not found", allocationID)
+		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
+		op := sdkClient.AddUploadOperation(t, "", "", int64(1024*2))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op}, client.WithRepair(alloc.Blobbers))
+
+		// assert upload and download size should be 1KB and 2KB respectively
+		rs, err := alloc.RepairSize("/")
+		require.Nil(t, err)
+		t.Logf("repair size: %v", rs)
+		require.Equal(t, uint64(1024), rs.UploadSize, "upload size doesn't match")
+		require.Equal(t, uint64(1024*2), rs.DownloadSize, "download size doesn't match")
+	})
+
+	t.RunSequentiallyWithTimeout("repair size with nested directories and two blobber failure should match", 5*time.Minute, func(t *test.SystemTest) {
+		// create allocation with default blobber requirements
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		blobberRequirements.DataShards = 2
+		blobberRequirements.ParityShards = 4
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+		t.Logf("allocationID: %v", allocationID)
+
+		// create and upload two files of 1KB each to / and /dir1.
+		// two blobber url is set invalid to mimic failure.
+		alloc, err := sdk.GetAllocation(allocationID)
+		require.NoErrorf(t, err, "allocation ID %v is not found", allocationID)
+		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
+		alloc.Blobbers[1].Baseurl = "http://0zus.com/"
+		ops := []sdk.OperationRequest{
+			sdkClient.AddUploadOperationWithPath(t, allocationID, "/dir1/"),
+			sdkClient.AddUploadOperationWithPath(t, allocationID, "/dir1/"),
+			sdkClient.AddUploadOperationWithPath(t, allocationID, "/"),
+			sdkClient.AddUploadOperationWithPath(t, allocationID, "/"),
+		}
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+
+		// assert both upload and download size should be 2KB in /dir1
+		rs, err := alloc.RepairSize("/dir1")
+		require.Nilf(t, err, "error getting repair size in /dir1: %v", err)
+		t.Logf("repair size: %v", rs)
+		require.Equal(t, uint64(1024*2), rs.UploadSize, "upload size in directory /dir1 doesn't match")
+		require.Equal(t, uint64(1024*2), rs.DownloadSize, "download size in directory dir1 doesn't match")
+
+		// with trailing slash
+		// assert both upload and download size should be 2KB in /dir1/
+		rs, err = alloc.RepairSize("/dir1/")
+		require.Nilf(t, err, "error getting repair size in /dir1/: %v", err)
+		t.Logf("repair size: %v", rs)
+		require.Equal(t, uint64(1024*2), rs.UploadSize, "upload size in directory /dir1/ doesn't match")
+		require.Equal(t, uint64(1024*2), rs.DownloadSize, "download size in directory /dir1/ doesn't match")
+
+		// assert both upload and download size should be 4KB in root directory
+		rs, err = alloc.RepairSize("/")
+		require.Nilf(t, err, "error getting repair size in /: %v", err)
+		t.Logf("repair size: %v", rs)
+		require.Equal(t, uint64(1024*4), rs.UploadSize, "upload size in root directory doesn't match")
+		require.Equal(t, uint64(1024*4), rs.DownloadSize, "download size in root directory doesn't match")
+	})
 }
