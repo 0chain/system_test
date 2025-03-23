@@ -14,6 +14,7 @@ import (
 
 func TestHashnodeRoot(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	// t.Skip()
 	t.Parallel()
 	t.SetSmokeTests("Get hashnode root from blobber for an empty allocation should work")
 

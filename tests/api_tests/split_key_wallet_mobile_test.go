@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/0chain/gosdk/core/zcncrypto"
 	"github.com/0chain/gosdk/mobilesdk/sdk"
+	"github.com/0chain/gosdk_common/core/zcncrypto"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 )

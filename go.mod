@@ -1,10 +1,13 @@
 module github.com/0chain/system_test
 
-go 1.22.0
+go 1.22.5
+
+toolchain go1.23.1
 
 require (
 	github.com/0chain/errors v1.0.3
-	github.com/0chain/gosdk v1.18.14
+	github.com/0chain/gosdk v1.19.11-0.20250318142516-45e2eb64f374
+	github.com/0chain/gosdk_common v0.0.0-20250318142402-b7bd1ebd4f66
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/herumi/bls-go-binary v1.31.0
 	github.com/shopspring/decimal v1.3.1
@@ -112,4 +115,6 @@ require (
 )
 
 // replace github.com/herumi/bls-go-binary => github.com/herumi/bls-go-binary v1.28.2
+// replace github.com/0chain/gosdk => github.com/0chain/egosdk v1.19.1-0.20250318134101-026d9c8701a0
+
 // replace github.com/0chain/gosdk => ../gosdk

@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	coreClient "github.com/0chain/gosdk/core/client"
-	"github.com/0chain/gosdk/core/conf"
+	coreClient "github.com/0chain/gosdk_common/core/client"
+	"github.com/0chain/gosdk_common/core/conf"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"

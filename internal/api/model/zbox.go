@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/0chain/gosdk/core/common"
+	"github.com/0chain/gosdk_common/core/common"
 	"github.com/0chain/system_test/internal/api/util/test"
 	resty "github.com/go-resty/resty/v2"
 )
