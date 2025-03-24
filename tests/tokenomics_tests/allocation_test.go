@@ -136,7 +136,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err, "Error updating allocation", strings.Join(output, "\n"))
 
 		// sleep for 10 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(11 * time.Minute)
 
 		alloc = utils.GetAllocation(t, allocationId)
 		require.Equal(t, true, alloc.Finalized, "Allocation should be finalized : ", alloc.ExpirationDate)
@@ -327,7 +327,7 @@ func TestAllocationRewards(testSetup *testing.T) {
 		require.Nil(t, err)
 
 		// sleep for 5 minutes
-		time.Sleep(10 * time.Minute)
+		time.Sleep(11 * time.Minute)
 
 		alloc = utils.GetAllocation(t, allocationId)
 		require.Greater(t, alloc.MovedToChallenge, movedToChallengePool, "MovedToChallenge should increase")
