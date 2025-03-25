@@ -23,6 +23,8 @@ func Test0TenderlyAuthorizerRewards(testSetup *testing.T) {
 		t.Skip("Tenderly has not been initialized properly!")
 	}
 
+	t.Skip("Skip due to Tenderly rate throttling")
+
 	t.RunSequentiallyWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {
 		createWallet(t)
 
