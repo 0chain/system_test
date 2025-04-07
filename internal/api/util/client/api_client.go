@@ -964,7 +964,6 @@ func (c *APIClient) RegisterBlobber(t *test.SystemTest,
 				t.Log("Error unmarshalling JSON:", err)
 				return false
 			}
-
 			return registerBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus && storageNode.ID == expectedResponse
 		}
 
