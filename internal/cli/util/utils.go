@@ -3,6 +3,8 @@ package cliutils
 import (
 	"bufio"
 	"crypto/rand"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -10,13 +12,16 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 
 	"github.com/0chain/system_test/internal/cli/util/specific"
@@ -25,6 +30,22 @@ import (
 )
 
 var Logger = getLogger()
+
+var (
+	WalletMutex sync.Mutex
+	Wallets     []json.RawMessage
+	WalletIdx   int64
+)
+
+func GetWallets() []json.RawMessage {
+	return Wallets
+}
+
+func SetWallets(wallets []json.RawMessage) {
+	WalletMutex.Lock()
+	defer WalletMutex.Unlock()
+	Wallets = wallets
+}
 
 type Configuration struct {
 	Server      string
@@ -394,7 +415,7 @@ func LogOutput(stdout io.Reader, t *test.SystemTest) {
 	}
 }
 
-func GetAllocationID(path string) string {
+func GetAllocationID(path string) (string, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		log.Printf("Error opening allocation.txt file: %v", err)
@@ -404,7 +425,7 @@ func GetAllocationID(path string) string {
 	scanner := bufio.NewScanner(file)
 	scanner.Scan()
 	allocationID := scanner.Text()
-	return allocationID
+	return allocationID, nil
 }
 
 func ReadFileMC(testSetup *testing.T) McConfiguration {
@@ -440,4 +461,174 @@ func ReadFileMC(testSetup *testing.T) McConfiguration {
 	config.SecondaryPort = strconv.FormatInt(int64(s_port), 10)
 	config.Concurrent = strconv.FormatInt(int64(concurrent), 10)
 	return config
+}
+
+func MigrateFromCloud(t *test.SystemTest, params string) ([]string, error) {
+	commandGenerated := fmt.Sprintf("../s3mgrt migrate  %s", params)
+	return RunCommand(t, commandGenerated, 1, time.Hour*2)
+}
+
+func EscapedTestName(t *test.SystemTest) string {
+	replacer := strings.NewReplacer("/", "-", "\"", "-", ":", "-", "(", "-",
+		")", "-", "<", "LESS_THAN", ">", "GREATER_THAN", "|", "-", "*", "-",
+		"?", "-")
+	return replacer.Replace(t.Name())
+}
+
+func CreateParams(params map[string]interface{}) string {
+	var builder strings.Builder
+
+	for k, v := range params {
+		if v == nil {
+			_, _ = builder.WriteString(fmt.Sprintf("--%s ", k))
+		} else if reflect.TypeOf(v).String() == "bool" {
+			_, _ = builder.WriteString(fmt.Sprintf("--%s=%v ", k, v))
+		} else {
+			_, _ = builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
+		}
+	}
+	return strings.TrimSpace(builder.String())
+}
+
+func ExecuteFaucetWithTokens(t *test.SystemTest, cliConfigFilename string, tokens float64) ([]string, error) {
+	return ExecuteFaucetWithTokensForWallet(t, EscapedTestName(t), cliConfigFilename, tokens)
+}
+
+// ExecuteFaucetWithTokensForWallet executes faucet command with given tokens and wallet.
+// Tokens greater than or equal to 10 are considered to be 1 token by the system.
+func ExecuteFaucetWithTokensForWallet(t *test.SystemTest, wallet, cliConfigFilename string, tokens float64) ([]string, error) {
+	t.Logf("Executing faucet...")
+	return RunCommand(t, fmt.Sprintf("./zwallet faucet --methodName "+
+		"pour --tokens %f --input {} --silent --wallet %s_wallet.json --configDir ./config --config %s",
+		tokens,
+		wallet,
+		cliConfigFilename,
+	), 3, time.Second*5)
+}
+
+func CreateWalletForName(rootPath, name string) {
+	if name == "" {
+		name = "default"
+	}
+	walletPath := fmt.Sprintf("%s/config/%s_wallet.json", rootPath, name)
+
+	// check if wallet already exists
+	if _, err := os.Stat(walletPath); err == nil {
+		return
+	}
+	WalletMutex.Lock()
+
+	wallet := Wallets[WalletIdx]
+
+	WalletIdx++
+	WalletMutex.Unlock()
+
+	err := os.WriteFile(walletPath, wallet, 0600)
+	if err != nil {
+		fmt.Printf("Error writing file %s: %v\n", walletPath, err)
+	} else {
+		fmt.Printf("File %s written successfully.\n", walletPath)
+	}
+}
+
+func SetupAllocation(t *test.SystemTest, cliConfigFilename, rootPath string, extraParams ...map[string]interface{}) string {
+	return setupAllocationWithWallet(t, EscapedTestName(t), cliConfigFilename, rootPath, extraParams...)
+}
+
+func CreateNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, rootPath, params string) ([]string, error) {
+	t.Log(cliConfigFilename, "configdir path")
+	if wallet == "" {
+		wallet = "default"
+	}
+	command := fmt.Sprintf(
+		"%s/zbox newallocation %s --silent --wallet %s --configDir %s --config %s --allocationFileName %s",
+		rootPath,
+		params,
+		wallet+"_wallet.json",
+		cliConfigFilename,
+		"config.yaml",
+		wallet+"_allocation.txt",
+	)
+	return RunCommand(t, command, 3, time.Second*5)
+}
+
+func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename, rootPath string, extraParams ...map[string]interface{}) string {
+	// Then create new allocation
+	options := map[string]interface{}{"size": "10000000", "lock": "5"}
+
+	// Add additional parameters if available
+	// Overwrite with new parameters when available
+	for _, params := range extraParams {
+		for k, v := range params {
+			options[k] = v
+		}
+	}
+	// First create a wallet and run faucet command
+	CreateWalletForName(rootPath, walletName)
+
+	output, err := CreateNewAllocationForWallet(t, walletName, cliConfigFilename, rootPath, CreateParams(options))
+	defer func() {
+		fmt.Printf("err: %v\n", err)
+	}()
+	require.NoError(t, err, "create new allocation failed", strings.Join(output, "\n"))
+	require.Len(t, output, 1)
+
+	// Get the allocation ID and return it
+	allocationID, err := getAllocationID(output[0])
+	require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
+
+	return allocationID
+}
+
+var (
+	createAllocationRegex = regexp.MustCompile(`^Allocation created: (.+)$`)
+)
+
+func getAllocationID(str string) (string, error) {
+	match := createAllocationRegex.FindStringSubmatch(str)
+	if len(match) < 2 {
+		return "", errors.New("allocation match not found")
+	}
+	return match[1], nil
+}
+
+func GetmigratedDataID(output []string) (totalMigrated, totalCount int, err error) {
+	pattern := `Total files ::(\d+)`
+	re := regexp.MustCompile(pattern)
+	match := re.FindStringSubmatch(strings.Join(output, "\n"))
+
+	pattern2 := `Total migrated objects :: (\d+)`
+	re2 := regexp.MustCompile(pattern2)
+	match_2 := re2.FindStringSubmatch(strings.Join(output, "\n"))
+
+	if len(match) > 1 && len(match_2) > 1 {
+		totalCount, err = strconv.Atoi(match[1])
+		if err != nil {
+			return
+		}
+
+		totalMigrated, err = strconv.Atoi(match_2[1])
+		if err != nil {
+			return
+		}
+
+		return totalMigrated, totalCount, nil
+	}
+
+	return 0, 0, errors.New("no match found")
+}
+
+func GetFileStats(t *test.SystemTest, cliConfigFilename, param string, retry bool) ([]string, error) {
+	t.Logf("Getting file stats...")
+	cmd := fmt.Sprintf(
+		"./zbox stats %s --silent --wallet %s --configDir ./config --config %s",
+		param,
+		EscapedTestName(t)+"_wallet.json",
+		cliConfigFilename,
+	)
+	if retry {
+		return RunCommand(t, cmd, 3, time.Second*2)
+	} else {
+		return RunCommandWithoutRetry(cmd)
+	}
 }

@@ -183,7 +183,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 		output, err = finalizeAllocation(t, configPath, allocationID, true)
 		if err != nil {
-			require.Contains(t, err.Error(), "already finalized", "unexpected error: %s", err.Error())
+			require.Contains(t, output[0], "already finalized", "unexpected error: %s", err.Error())
 		} else {
 			require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
 			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
