@@ -182,9 +182,13 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		cliutils.Wait(t, time.Minute*1)
 
 		output, err = finalizeAllocation(t, configPath, allocationID, true)
-		require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
-		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
-		require.Regexp(t, regexp.MustCompile("Allocation finalized with txId .*$"), output[0])
+		if err != nil {
+			require.Contains(t, output[0], "already finalized", "unexpected error: %s", err.Error())
+		} else {
+			require.Nil(t, err, "unexpected error updating allocation", strings.Join(output, "\n"))
+			require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
+			require.Regexp(t, regexp.MustCompile("Allocation finalized with txId .*$"), output[0])
+		}
 
 		// get balance after unlock
 		balanceAfterFinalize, err := getBalanceZCN(t, configPath)

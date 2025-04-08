@@ -17,6 +17,57 @@ func TestUpdateBlobber(testSetup *testing.T) {
 
 	t.Parallel()
 
+	t.Run("update blobber version should work", func(t *test.SystemTest) {
+		wallet := createWallet(t)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+
+		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+		require.NotZero(t, blobberID)
+
+		blobber := apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
+		require.NotEqual(t, wallet.Id, blobber.StakePoolSettings.DelegateWallet)
+
+		blobber.StorageVersion = 1
+
+		apiClient.UpdateBlobber(t, wallet, blobber, client.TxUnsuccessfulStatus)
+
+		blobber = apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
+		require.NotEqual(t, wallet.Id, blobber.StakePoolSettings.DelegateWallet)
+
+		require.Equal(t, int64(1), blobber.StorageVersion)
+	})
+
+	t.Run("update blobber: degrade version should not work", func(t *test.SystemTest) {
+		wallet := createWallet(t)
+
+		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
+		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
+
+		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		allocation := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+
+		blobberID := getFirstUsedStorageNodeID(allocationBlobbers.Blobbers, allocation.Blobbers)
+		require.NotZero(t, blobberID)
+
+		blobber := apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
+		require.NotEqual(t, wallet.Id, blobber.StakePoolSettings.DelegateWallet)
+
+		blobber.StorageVersion = 0
+
+		apiClient.UpdateBlobber(t, wallet, blobber, client.TxUnsuccessfulStatus)
+
+		blobber = apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
+		require.NotEqual(t, wallet.Id, blobber.StakePoolSettings.DelegateWallet)
+
+		require.Equal(t, int64(1), blobber.StorageVersion)
+	})
+
 	t.Run("Update blobber in allocation without correct delegated client, shouldn't work", func(t *test.SystemTest) {
 		wallet := createWallet(t)
 

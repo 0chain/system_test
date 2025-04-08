@@ -1,36 +1,35 @@
-package cli_tests
+package s3migration_tests
 
 import (
-	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	cli_utils "github.com/0chain/system_test/internal/cli/util"
 	cliutils "github.com/0chain/system_test/internal/cli/util"
+	"github.com/0chain/system_test/tests/cli_tests/s3migration_tests/shared"
 	"github.com/stretchr/testify/require"
 )
 
 func Test0S3Migration(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	if s3SecretKey == "" || s3AccessKey == "" {
-		t.Skip("s3SecretKey or s3AccessKey was missing")
+	if shared.ConfigData.S3SecretKey == "" || shared.ConfigData.S3AccessKey == "" {
+		t.Skip("shared.ConfigData.S3SecretKey or shared.ConfigData.S3AccessKey was missing")
 	}
 
 	t.SetSmokeTests("Should migrate existing bucket successfully")
 
 	t.RunSequentially("Should migrate existing bucket successfully", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
+		allocationID := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath, map[string]interface{}{
+			"size": shared.AllocSize,
 		})
 
-		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"access-key": s3AccessKey,
-			"secret-key": s3SecretKey,
-			"bucket":     s3bucketName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
+			"access-key": shared.ConfigData.S3AccessKey,
+			"secret-key": shared.ConfigData.S3SecretKey,
+			"bucket":     shared.ConfigData.S3BucketName,
+			"wallet":     cliutils.EscapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 		}))
 
@@ -40,16 +39,15 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should migrate empty bucket successfully", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
+		allocationID := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath, map[string]interface{}{
+			"size": shared.AllocSize,
 		})
 
-		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"access-key": s3AccessKey,
-			"secret-key": s3SecretKey,
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
+			"access-key": shared.ConfigData.S3AccessKey,
+			"secret-key": shared.ConfigData.S3SecretKey,
 			"bucket":     "system-tests-empty",
-			"wallet":     escapedTestName(t) + "_wallet.json",
+			"wallet":     cliutils.EscapedTestName(t) + "_wallet.json",
 			"allocation": allocationID,
 		}))
 
@@ -59,16 +57,16 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when bucket too large for allocation", func(t *test.SystemTest) {
-		allocSize := int64(64 * KB)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
+		allocSize := int64(64 * shared.KB)
+		allocationID := cli_utils.SetupAllocation(t, shared.ConfigDir, shared.RootPath, map[string]interface{}{
 			"size": allocSize,
 		})
 
-		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"access-key": s3AccessKey,
-			"secret-key": s3SecretKey,
-			"bucket":     s3bucketName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
+			"access-key": shared.ConfigData.S3AccessKey,
+			"secret-key": shared.ConfigData.S3SecretKey,
+			"bucket":     shared.ConfigData.S3BucketName,
+			"wallet":     shared.DefaultWallet,
 			"allocation": allocationID,
 		}))
 
@@ -78,17 +76,12 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when bucket does not exist", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"access-key": s3AccessKey,
-			"secret-key": s3SecretKey,
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
+			"access-key": shared.ConfigData.S3AccessKey,
+			"secret-key": shared.ConfigData.S3SecretKey,
 			"bucket":     "invalid",
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationID,
+			"wallet":     shared.DefaultWallet,
+			"allocation": shared.DefaultAllocationId,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -97,16 +90,11 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when bucket flag missing", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"access-key": s3AccessKey,
-			"secret-key": s3SecretKey,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationID,
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
+			"access-key": shared.ConfigData.S3AccessKey,
+			"secret-key": shared.ConfigData.S3SecretKey,
+			"wallet":     shared.DefaultWallet,
+			"allocation": shared.DefaultAllocationId,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -115,16 +103,11 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when allocation flag missing", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		_ = setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"access-key": s3AccessKey,
-			"secret-key": s3SecretKey,
-			"bucket":     s3bucketName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
+			"access-key": shared.ConfigData.S3AccessKey,
+			"secret-key": shared.ConfigData.S3SecretKey,
+			"bucket":     shared.ConfigData.S3BucketName,
+			"wallet":     shared.DefaultWallet,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -133,17 +116,12 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when access key invalid", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": "invalid",
-			"secret-key": s3SecretKey,
-			"bucket":     s3bucketName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationID,
+			"secret-key": shared.ConfigData.S3SecretKey,
+			"bucket":     shared.ConfigData.S3BucketName,
+			"wallet":     cliutils.EscapedTestName(t) + "_wallet.json",
+			"allocation": shared.DefaultAllocationId,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -152,16 +130,11 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when access key missing", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"secret-key": s3SecretKey,
-			"bucket":     s3bucketName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationID,
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
+			"secret-key": shared.ConfigData.S3SecretKey,
+			"bucket":     shared.ConfigData.S3BucketName,
+			"wallet":     cliutils.EscapedTestName(t) + "_wallet.json",
+			"allocation": shared.DefaultAllocationId,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -170,17 +143,12 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when secret key invalid", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"access-key": s3AccessKey,
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
+			"access-key": shared.ConfigData.S3AccessKey,
 			"secret-key": "invalid",
-			"bucket":     s3bucketName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationID,
+			"bucket":     shared.ConfigData.S3BucketName,
+			"wallet":     cliutils.EscapedTestName(t) + "_wallet.json",
+			"allocation": shared.DefaultAllocationId,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -189,16 +157,11 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when secret key missing", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"access-key": s3AccessKey,
-			"bucket":     s3bucketName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationID,
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
+			"access-key": shared.ConfigData.S3AccessKey,
+			"bucket":     shared.ConfigData.S3BucketName,
+			"wallet":     cliutils.EscapedTestName(t) + "_wallet.json",
+			"allocation": shared.DefaultAllocationId,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -207,17 +170,12 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when access and secret key invalid", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
 			"access-key": "invalid",
 			"secret-key": "invalid",
-			"bucket":     s3bucketName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationID,
+			"bucket":     shared.ConfigData.S3BucketName,
+			"wallet":     cliutils.EscapedTestName(t) + "_wallet.json",
+			"allocation": shared.DefaultAllocationId,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
@@ -226,24 +184,14 @@ func Test0S3Migration(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Should fail when access and secret key missing", func(t *test.SystemTest) {
-		allocSize := int64(50 * MB)
-		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-		})
-
-		output, err := migrateFromS3(t, configPath, createParams(map[string]interface{}{
-			"bucket":     s3bucketName,
-			"wallet":     escapedTestName(t) + "_wallet.json",
-			"allocation": allocationID,
+		output, err := cli_utils.MigrateFromCloud(t, cli_utils.CreateParams(map[string]interface{}{
+			"bucket":     shared.ConfigData.S3BucketName,
+			"wallet":     cliutils.EscapedTestName(t) + "_wallet.json",
+			"allocation": shared.DefaultAllocationId,
 		}))
 
 		require.NotNil(t, err, "Expected a migration failure but got no error", strings.Join(output, "\n"))
 		require.Greater(t, len(output), 0, "More/Less output was returned than expected", strings.Join(output, "\n"))
 		require.Equal(t, output[0], "Error: aws credentials missing", "Output was not as expected", strings.Join(output, "\n"))
 	})
-}
-
-func migrateFromS3(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
-	t.Logf("Migrating S3 bucket to Zus...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./s3mgrt migrate --silent --configDir ./config --config %s --network %s %s", cliConfigFilename, cliConfigFilename, params), 1, time.Second*2)
 }

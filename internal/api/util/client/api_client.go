@@ -914,7 +914,8 @@ func (c *APIClient) RegisterBlobber(t *test.SystemTest,
 	wallet *model.Wallet,
 	storageNode *model.StorageNode,
 	requiredTransactionStatus int,
-	expectedResponse string) string {
+	expectedResponse string,
+	requireIdVerification bool) string {
 	t.Log("Registering blobber...")
 
 	registerBlobberTransactionPutResponse, resp, err := c.V1TransactionPut(
@@ -954,12 +955,76 @@ func (c *APIClient) RegisterBlobber(t *test.SystemTest,
 			return false
 		}
 
+		if requireIdVerification {
+			var storageNode model.StorageNode
+
+			// Unmarshal the JSON string into the StorageNode struct
+			err := json.Unmarshal([]byte(registerBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput), &storageNode)
+			if err != nil {
+				t.Log("Error unmarshalling JSON:", err)
+				return false
+			}
+			return registerBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus && storageNode.ID == expectedResponse
+		}
+
 		return registerBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus && registerBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput == expectedResponse
 	})
 
 	wallet.IncNonce()
 
 	return registerBlobberTransactionPutResponse.Entity.Hash
+}
+
+func (c *APIClient) KillBlobber(t *test.SystemTest,
+	wallet *model.Wallet,
+	killBlobberRequest *model.KillBlobberRequest,
+	requiredTransactionStatus int) string {
+	t.Log("Killing blobber...")
+
+	killBlobberTransactionPutResponse, resp, err := c.V1TransactionPut(
+		t,
+		model.InternalTransactionPutRequest{
+			Wallet:          wallet,
+			ToClientID:      StorageSmartContractAddress,
+			TransactionData: model.NewKillBlobberTransactionData(killBlobberRequest),
+			Value:           tokenomics.IntToZCN(0),
+			TxnType:         SCTxType,
+		},
+		HttpOkStatus)
+	require.Nil(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, killBlobberTransactionPutResponse)
+
+	var killBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
+
+	wait.PoolImmediately(t, time.Minute*2, func() bool {
+		killBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
+			t,
+			model.TransactionGetConfirmationRequest{
+				Hash: killBlobberTransactionPutResponse.Entity.Hash,
+			},
+			HttpOkStatus)
+
+		if err != nil {
+			t.Log("Error killing blobber : ", err)
+			return false
+		}
+
+		if resp == nil {
+			fmt.Println("got nil response : ", resp)
+			return false
+		}
+
+		if killBlobberTransactionGetConfirmationResponse == nil {
+			fmt.Println("got nil txn confirmation response : ", killBlobberTransactionGetConfirmationResponse)
+			return false
+		}
+
+		return killBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+	})
+
+	wallet.IncNonce()
+	return killBlobberTransactionPutResponse.Entity.Hash
 }
 
 func (c *APIClient) CreateFreeAllocation(t *test.SystemTest,
