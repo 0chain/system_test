@@ -1,0 +1,197 @@
+name: "0Chain System Tests"
+run-name: "System tests [${{ github.ref_name }}] - [${{ github.event.head_commit.message }}]"
+concurrency:
+  group: "system-tests-${{ github.ref }}-${{ github.event_name }}"
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [master, staging, sprint*]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      repo_snapshots_branch:
+        description: "branch of repo-snapshots to derive images and branches from."
+        default: "current-sprint"
+        required: true
+      existing_network:
+        description: "(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]"
+        default: ""
+        required: false
+      test_file_filter:
+        description: "Comma separated list of test files to run (eg. zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result"
+        default: ""
+        required: false
+      run_smoke_tests:
+        description: "Only run smoke tests (subset of system tests for fast feedback)"
+        default: "false"
+        required: false
+
+jobs:
+  # Start EC2 instance
+  start-ec2:
+    runs-on: ubuntu-latest
+    outputs:
+      instance_id: ${{ steps.get_id.outputs.instance_id }}
+    steps:
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2 # change region if you require
+
+      - name: Get EC2 instance ID
+        id: get_id
+        run: |
+          INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=my-ec2-runner" \
+            --query "Reservations[].Instances[].InstanceId" \
+            --output text)
+          echo "instance_id=$INSTANCE_ID" >> $GITHUB_OUTPUT
+
+      - name: Start EC2
+        run: |
+          aws ec2 start-instances --instance-ids ${{ steps.get_id.outputs.instance_id }}
+          aws ec2 wait instance-running --instance-ids ${{ steps.get_id.outputs.instance_id }}
+ 
+  # Lint (Runs on EC2)
+  golangci:
+    # if: github.event_name == 'push'
+    name: "lint"
+    runs-on: self-hosted
+    needs: start-ec2
+    steps:
+      - name: Install Packages
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install build-essential nghttp2 libnghttp2-dev libssl-dev
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "1.22"
+      - uses: actions/checkout@v3
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.57.1
+          skip-build-cache: true
+          skip-pkg-cache: true
+          only-new-issues: true
+
+  # System tests (Runs on EC2)
+  system-tests:
+    name: "System Tests"
+    runs-on: self-hosted
+    needs: start-ec2
+    timeout-minutes: 360
+    steps:
+      - name: "Get current PR"
+        uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+        with:
+          github-token: ${{ github.token }}
+
+      - name: "Set PR status as pending"
+        uses: 0chain/actions/set-pr-status@master
+        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
+        with:
+          pr_number: ${{ steps.findPr.outputs.pr }}
+          description: "System tests running with default config..."
+          state: "pending"
+          repository: ${{ github.repository }}
+          status_name: "0Chain System Tests"
+          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          github_token: ${{ github.token }}
+
+      - name: "Config: Run tests against existing 0Chain network"
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
+        run: |
+          echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
+          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
+
+      - name: "Config: Deploy new 0Chain network then run tests against it"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        run: |
+          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
+          echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
+          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
+          if [[ "${{github.event.inputs.run_smoke_tests}}" == 'true' ]];
+            then
+              echo RUN_SMOKE_TESTS=true >> $GITHUB_ENV
+            else
+              echo RUN_SMOKE_TESTS=false >> $GITHUB_ENV
+          fi
+
+      - name: "Setup jq"
+        uses: dcarbone/install-jq-action@v2.1.0
+        with:
+          version: "1.7"
+          force: "false"
+
+      - name: "Deploy Minio Server"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-minio@master
+
+      - name: "Deploy 0Chain"
+        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        uses: 0chain/actions/deploy-0chain-system-test@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          kube_config: ${{ secrets[format('DEV{0}KC', env.RUNNER_NUMBER)] }}
+          teardown_condition: "TESTS_PASSED"
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+
+      - name: "Run System tests"
+        uses: 0chain/actions/run-system-tests@master
+        with:
+          repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: true
+          run_api_system_tests: true
+          run_cli_system_tests: true
+          run_tenderly_tests: false
+          run_tokenomics_system_tests: false
+          test_file_filter: ${{ env.TEST_FILE_FILTER }}
+          run_smoke_tests: ${{ env.RUN_SMOKE_TESTS }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          DROPBOX_ACCESS_TOKEN: ${{ secrets.DROPBOX_ACCESS_TOKEN }}
+          GDRIVE_ACCESS_TOKEN: ${{ secrets.GDRIVE_ACCESS_TOKEN }}
+
+      - name: "Set PR status as ${{ job.status }}"
+        if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
+        uses: 0chain/actions/set-pr-status@master
+        with:
+          pr_number: ${{ steps.findPr.outputs.pr }}
+          description: "System tests with default config ${{ job.status }}"
+          state: ${{ job.status }}
+          repository: ${{ github.repository }}
+          status_name: "0Chain System Tests"
+          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          github_token: ${{ github.token }}
+
+  # Stop EC2 instance after all jobs are done   
+  stop-ec2:
+    runs-on: ubuntu-latest
+    needs: [golangci, system-tests, start-ec2]
+    if: always()
+    steps:
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Stop EC2
+        run: |
+          aws ec2 stop-instances --instance-ids ${{ needs.start-ec2.outputs.instance_id }}
+          aws ec2 wait instance-stopped --instance-ids ${{ needs.start-ec2.outputs.instance_id }}
