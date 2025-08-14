@@ -73,12 +73,13 @@ jobs:
           go-version: "1.22"
       - uses: actions/checkout@v3
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v4
         with:
           version: v1.57.1
           skip-build-cache: true
           skip-pkg-cache: true
           only-new-issues: true
+
 
   # System tests (Runs on EC2)
   system-tests:
