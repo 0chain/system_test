@@ -36,15 +36,11 @@ jobs:
       instance_id: ${{ steps.get_id.outputs.instance_id }}
     steps:
       - name: Configure AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v4       
         with:
-          aws-access-key-id: ${{ secrets.BACKUP_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.BACKUP_SECRET_KEY_ID }}
-          aws-region: us-east-2        
-        # with:
-        #   aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        #   aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        #   aws-region: us-east-2 # change region if you require
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1b # change region if you require
 
       - name: Get EC2 instance ID
         id: get_id
@@ -192,9 +188,9 @@ jobs:
       - name: Configure AWS CLI
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.BACKUP_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.BACKUP_SECRET_KEY_ID }}
-          aws-region: us-east-2    
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1b # change region if you require   
 
       - name: Stop EC2
         run: |
