@@ -28,6 +28,7 @@ on:
   #       default: "false"
   #       required: false
 
+
 jobs:
   # Start EC2 instance
   start-ec2:
