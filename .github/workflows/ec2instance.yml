@@ -40,7 +40,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1b # change region if you require
+          aws-region: eu-north-1 # change region if you require
 
       - name: Get EC2 instance ID
         id: get_id
@@ -190,7 +190,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1b # change region if you require   
+          aws-region: eu-north-1 # change region if you require   
 
       - name: Stop EC2
         run: |
