@@ -90,18 +90,19 @@ jobs:
   system-tests:
     name: "System Tests"
     runs-on: self-hosted
-    needs: start-ec2
+    needs: [start-ec2, golangci]   # Wait for EC2 start + lint to finish
     timeout-minutes: 360
+
     steps:
       - name: "Get current PR"
-        uses: jwalton/gh-find-current-pr@v1
         id: findPr
+        uses: jwalton/gh-find-current-pr@v1
         with:
           github-token: ${{ github.token }}
 
       - name: "Set PR status as pending"
+        if: ${{ steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
         uses: 0chain/actions/set-pr-status@master
-        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
           description: "System tests running with default config..."
@@ -112,26 +113,25 @@ jobs:
           github_token: ${{ github.token }}
 
       - name: "Config: Run tests against existing 0Chain network"
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != ''
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != '' }}
         run: |
-          echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
-          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
-          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
+          echo "NETWORK_URL=${{ github.event.inputs.existing_network }}" >> $GITHUB_ENV
+          echo "TEST_FILE_FILTER=${{ github.event.inputs.test_file_filter }}" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=${{ github.event.inputs.repo_snapshots_branch || '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>' }}" >> $GITHUB_ENV
 
       - name: "Config: Deploy new 0Chain network then run tests against it"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        if: ${{ github.event_name == 'push' || github.event.inputs.existing_network == '' }}
         run: |
-          echo "NETWORK_URL=$(echo dev-${RUNNER_NAME:(-1)}.devnet-0chain.net)" >> $GITHUB_ENV
+          echo "NETWORK_URL=dev-${RUNNER_NAME:(-1)}.devnet-0chain.net" >> $GITHUB_ENV
           echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
-          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
-          if [[ "${{github.event.inputs.run_smoke_tests}}" == 'true' ]];
-            then
-              echo RUN_SMOKE_TESTS=true >> $GITHUB_ENV
-            else
-              echo RUN_SMOKE_TESTS=false >> $GITHUB_ENV
+          echo "TEST_FILE_FILTER=${{ github.event.inputs.test_file_filter }}" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=${{ github.event.inputs.repo_snapshots_branch || '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>' }}" >> $GITHUB_ENV
+          if [[ "${{ github.event.inputs.run_smoke_tests }}" == 'true' ]]; then
+            echo RUN_SMOKE_TESTS=true >> $GITHUB_ENV
+          else
+            echo RUN_SMOKE_TESTS=false >> $GITHUB_ENV
           fi
 
       - name: "Setup jq"
@@ -141,11 +141,11 @@ jobs:
           force: "false"
 
       # - name: "Deploy Minio Server"
-      #   if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+      #   if: ${{ github.event_name == 'push' || github.event.inputs.existing_network == '' }}
       #   uses: 0chain/actions/deploy-minio@master
 
       - name: "Deploy 0Chain"
-        if: github.event_name == 'push' || github.event.inputs.existing_network == ''
+        if: ${{ github.event_name == 'push' || github.event.inputs.existing_network == '' }}
         uses: 0chain/actions/deploy-0chain-system-test@master
         with:
           repo_snapshots_branch: "${{ env.REPO_SNAPSHOTS_BRANCH }}"
@@ -185,6 +185,7 @@ jobs:
           status_name: "0Chain System Tests"
           target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           github_token: ${{ github.token }}
+
 
   # Stop EC2 instance after all jobs are done   
   stop-ec2:
