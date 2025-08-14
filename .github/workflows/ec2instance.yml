@@ -59,27 +59,32 @@ jobs:
  
   # Lint (Runs on EC2)
   golangci:
-    # if: github.event_name == 'push'
     name: "lint"
     runs-on: self-hosted
     needs: start-ec2
+    env:
+      HOME: /tmp
+      GOCACHE: /tmp/go-cache
     steps:
+      - name: Prepare cache directories
+        run: mkdir -p /tmp/go-cache
+
       - name: Install Packages
         run: |
           sudo apt-get update
           sudo apt-get -y install build-essential nghttp2 libnghttp2-dev libssl-dev
-      - uses: actions/setup-go@v3
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
-      - uses: actions/checkout@v3
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v4
-        with:
-          version: v1.57.1
-          skip-build-cache: true
-          skip-pkg-cache: true
-          only-new-issues: true
 
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.1
+          only-new-issues: true
 
   # System tests (Runs on EC2)
   system-tests:
