@@ -91,11 +91,11 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v5
         with:
           version: v1.95.2
-          only-new-issues: true
           args: --timeout=5m
+
 
   # System tests (Runs on EC2)
   system-tests:
