@@ -80,11 +80,22 @@ jobs:
         with:
           go-version: "1.22"
 
-      - name: golangci-lint
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ${{ env.GOCACHE }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
           version: v2.1
           only-new-issues: true
+          args: --timeout=5m
 
   # System tests (Runs on EC2)
   system-tests:
