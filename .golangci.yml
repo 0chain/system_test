@@ -1,9 +1,9 @@
-version: 1
-
 linters-settings:
   depguard:
-    list-type: denylist
+    list-type: blacklist
     packages:
+      # logging is allowed only by logutils.Log, logrus
+      # is allowed to use only in logutils package
       - github.com/sirupsen/logrus
     packages-with-error-message:
       - github.com/sirupsen/logrus: "logging is allowed only by logutils.Log"
@@ -27,7 +27,7 @@ linters-settings:
       - performance
       - style
     disabled-checks:
-      - dupImport
+      - dupImport # https://github.com/go-critic/go-critic/issues/845
       - ifElseChain
       - octalLiteral
       - whyNoLint
@@ -35,11 +35,16 @@ linters-settings:
     min-complexity: 25
   goimports:
     local-prefixes: github.com/golangci/golangci-lint
+  golint:
+    min-confidence: 0
   gomnd:
-    checks: argument,case,condition,return
+    settings:
+      mnd:
+        # don't include the "operation" and "assign"
+        checks: argument,case,condition,return
   gosec:
-    excludes:
-      - G204
+    settings:
+      exclude: -G204
   govet:
     check-shadowing: false
     settings:
@@ -51,13 +56,15 @@ linters-settings:
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
   lll:
     line-length: 950
+  maligned:
+    suggest-new: true
   misspell:
     locale: US
   nolintlint:
-    allow-leading-space: true
-    allow-unused: false
-    require-explanation: false
-    require-specific: false
+    allow-leading-space: true # don't require machine-readable nolint directives (i.e. with no leading space)
+    allow-unused: false # report any unused nolint directives
+    require-explanation: false # don't require an explanation for nolint directives
+    require-specific: false # don't require nolint directives to be specific about which linter is being skipped
   revive:
     ignore-generated-header: true
     severity: warning
@@ -70,29 +77,67 @@ linters-settings:
         arguments: ["fmt.Printf", "myFunction"]
 
 linters:
+  # please, do not use `enable-all`: it's deprecated and will be removed soon.
+  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
   disable-all: true
   enable:
+    # todo[kushthedude]: commenting most of the checks as our code can't persist all of the changes, however we can plan further on code-quality after v1.0 release.
+    # - bodyclose
+    # - deadcode
     - dogsled
     - errcheck
+    # - exhaustive
+    # - funlen
+    # - goconst
     - gocritic
     - gocyclo
     - gofmt
     - goimports
     - revive
     - gosec
+    # - gomnd
+    # - goprintffuncname
+    # - gosimple
     - govet
+    # - ineffassign
+    # - interfacer
     - lll
     - misspell
+    # - nakedret
+    # - nolintlint
+    # - rowserrcheck
+    # - scopelint
     - staticcheck
+    # - structcheck
+#    - stylecheck
     - typecheck
+    # - unconvert
+#    - unparam
     - unused
+    # - varcheck
     - whitespace
 
+  # don't enable:
+  # - asciicheck
+  # - gochecknoglobals
+  # - gocognit
+  # - godot
+  # - godox
+  # - goerr113
+  # - maligned
+  # - nestif
+  # - prealloc
+  # - testpackage
+  # - wsl
+
 issues:
+  # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
     - path: _test\.go
       linters:
         - gomnd
+
+    # https://github.com/go-critic/go-critic/issues/926
     - linters:
         - gocritic
       text: "unnecessaryDefer:"
@@ -104,3 +149,10 @@ run:
     - internal/renameio
     - internal/robustio
   timeout: 5m
+
+# golangci.com configuration
+# https://github.com/golangci/golangci/wiki/Configuration
+service:
+  golangci-lint-version: 1.50.x # use the fixed version to not introduce new linters unexpectedly
+  prepare:
+    - echo "here I can run custom commands, but no preparation needed for this repo"
