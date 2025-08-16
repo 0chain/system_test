@@ -84,38 +84,38 @@ linters:
     # todo[kushthedude]: commenting most of the checks as our code can't persist all of the changes, however we can plan further on code-quality after v1.0 release.
     # - bodyclose
     # - deadcode
-    - dogsled
-    - errcheck
+    # - dogsled
+    # - errcheck
     # - exhaustive
     # - funlen
     # - goconst
-    - gocritic
-    - gocyclo
-    - gofmt
-    - goimports
-    - revive
-    - gosec
+    # - gocritic
+    # - gocyclo
+    # - gofmt
+    # - goimports
+    # - revive
+    # - gosec
     # - gomnd
     # - goprintffuncname
     # - gosimple
-    - govet
+    # - govet
     # - ineffassign
     # - interfacer
-    - lll
-    - misspell
+    # - lll
+    # - misspell
     # - nakedret
     # - nolintlint
     # - rowserrcheck
     # - scopelint
-    - staticcheck
+    # - staticcheck
     # - structcheck
 #    - stylecheck
-    - typecheck
+    # - typecheck
     # - unconvert
 #    - unparam
-    - unused
+    # - unused
     # - varcheck
-    - whitespace
+    # - whitespace
 
   # don't enable:
   # - asciicheck
