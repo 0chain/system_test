@@ -103,6 +103,9 @@ jobs:
     runs-on: self-hosted
     needs: [start-ec2, golangci]   # Wait for EC2 start + lint to finish
     timeout-minutes: 360
+    env:
+      HOME: /tmp
+      GOCACHE: /tmp/go-cache
 
     steps:
       - name: Install kubectl
