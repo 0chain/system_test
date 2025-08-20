@@ -122,9 +122,14 @@ jobs:
         with:
           go-version: "1.22"
 
-      - name: Build zbox binary
+      - name: Build zbox from source
         run: |
-          go build -o zbox ./path/to/zbox/main.go
+          # Clone zboxcli repository and build
+          git clone https://github.com/0chain/zboxcli.git
+          cd zboxcli
+          make install
+          sudo cp ./zbox /usr/local/bin/
+          cd ..
 
       - name: "Get current PR"
         id: findPr
