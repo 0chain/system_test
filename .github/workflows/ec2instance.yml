@@ -124,11 +124,29 @@ jobs:
 
       - name: Build zbox from source
         run: |
+          # Install required C++ dependencies
+          sudo apt-get update
+          sudo apt-get install -y libstdc++-12-dev gcc-12 g++-12
+          
           # Clone zboxcli repository and build
           git clone https://github.com/0chain/zboxcli.git
           cd zboxcli
-          make install
-          sudo cp ./zbox /usr/local/bin/
+          
+          # Set C++ compiler to ensure compatibility
+          export CC=gcc-12
+          export CXX=g++-12
+          export CGO_ENABLED=1
+          
+          # Try to build with make
+          if make install; then
+            sudo cp ./zbox /usr/local/bin/
+          else
+            echo "Make install failed, trying direct go build..."
+            # Fallback to direct go build if make fails
+            go build -o zbox -ldflags="-extldflags=-static" .
+            sudo cp ./zbox /usr/local/bin/
+          fi
+          
           cd ..
 
       - name: "Get current PR"
