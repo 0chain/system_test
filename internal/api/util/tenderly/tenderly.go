@@ -1,4 +1,4 @@
-// nolint:typecheck
+//nolint:typecheck
 package tenderly
 
 import (

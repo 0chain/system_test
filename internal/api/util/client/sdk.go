@@ -235,7 +235,7 @@ func (c *SDKClient) AddUploadOperation(t *test.SystemTest, path, format string, 
 	_, err = rand.Read(rawBuf)
 	if err != nil {
 		require.NoError(t, err)
-	} //nolint:gosec,revive
+	}
 
 	_, err = tmpFile.Write(rawBuf)
 	require.NoError(t, err)
@@ -339,7 +339,7 @@ func (c *SDKClient) AddUpdateOperation(t *test.SystemTest, remotePath, remoteNam
 	_, err = rand.Read(rawBuf)
 	if err != nil {
 		require.NoError(t, err)
-	} //nolint:gosec,revive
+	}
 	fileMeta := sdk.FileMeta{
 		Path:       tmpFile.Name(),
 		ActualSize: fileSize,
@@ -391,7 +391,7 @@ func (c *SDKClient) AddUploadOperationWithPath(t *test.SystemTest, allocationID,
 	_, err = rand.Read(rawBuf)
 	if err != nil {
 		require.NoError(t, err)
-	} //nolint:gosec,revive
+	}
 
 	fileMeta := sdk.FileMeta{
 		Path:       tmpFile.Name(),

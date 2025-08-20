@@ -12,15 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/0chain/system_test/internal/api/util/test"
-
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/crypto"
+	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/internal/api/util/tokenomics"
 	"github.com/0chain/system_test/internal/api/util/wait"
 	"github.com/stretchr/testify/require"
-
-	"github.com/0chain/system_test/internal/api/util/tokenomics"
-
 	resty "github.com/go-resty/resty/v2"
 )
 
@@ -275,7 +272,7 @@ func (c *APIClient) executeForGivenServiceProviders(
 			resp = newResp
 		} else {
 			t.Logf("Miner %s. Response: %s", serviceProvider, string(newResp.Body()))
-			respErrors = append(respErrors, errors.New(fmt.Sprintf("Miner %s. Response: %s", serviceProvider, string(newResp.Body()))))
+			respErrors = append(respErrors, fmt.Errorf("Miner %s. Response: %s", serviceProvider, string(newResp.Body())))
 			notExpectedExecutionResponseCounter++
 		}
 	}

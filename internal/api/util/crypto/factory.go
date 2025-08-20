@@ -16,7 +16,7 @@ func NewSignatureScheme(sigScheme string) (SignatureScheme, error) {
 	switch sigScheme {
 	case "ed25519":
 		return NewED255190chainScheme(), nil
-	case "bls0chain":
+	case BLS0Chain:
 		return NewHerumiScheme(), nil
 	default:
 		return nil, errors.New("invalid_scheme", fmt.Sprintf("unknown signature scheme: %v", sigScheme))
@@ -26,7 +26,7 @@ func NewSignatureScheme(sigScheme string) (SignatureScheme, error) {
 // UnmarshalThresholdSignatureSchemes unmarshal SignatureScheme from json string
 func UnmarshalSignatureSchemes(sigScheme string, obj interface{}) ([]SignatureScheme, error) {
 	switch sigScheme {
-	case "bls0chain":
+	case BLS0Chain:
 
 		if obj == nil {
 			return nil, nil

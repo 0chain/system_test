@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"gopkg.in/yaml.v3" //nolint
+	"gopkg.in/yaml.v3"
 )
 
 // ConfigPathEnv contains name of env variable
@@ -29,7 +29,7 @@ func Parse(configPath string) *Config {
 	if err != nil {
 		log.Fatalln("Failed to read config file! due to error: " + err.Error())
 	}
-	err = yaml.Unmarshal(file, &result) //nolint
+	err = yaml.Unmarshal(file, &result)
 	if err != nil {
 		log.Fatalln("failed to deserialise config file due to error: " + err.Error())
 	}

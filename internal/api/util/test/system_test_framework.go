@@ -87,7 +87,7 @@ func (s *SystemTest) testSetup(label string, timeout time.Duration, setupFunctio
 		select {
 		case <-time.After(timeout):
 			s.Fatalf("Test setup [%s] timed out after [%s]", label, timeout)
-		case _ = <-testSetupChannel:
+		case <-testSetupChannel:
 		}
 
 		s.Logf("Test setup [%s] exit at [%s]", label, time.Now().Format("01-02-2006 15:04:05"))
@@ -129,7 +129,7 @@ func (s *SystemTest) run(name string, timeout time.Duration, testFunction func(w
 		select {
 		case <-time.After(timeout):
 			t.Errorf("Test case [%s] timed out after [%s]", name, timeout)
-		case _ = <-testCaseChannel:
+		case <-testCaseChannel:
 		}
 
 		t.Logf("Test case [%s] exit at [%s]", name, time.Now().Format("01-02-2006 15:04:05"))

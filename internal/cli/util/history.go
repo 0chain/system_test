@@ -13,8 +13,8 @@ import (
 
 const (
 	MaxQueryLimit    = 20
-	StorageScAddress = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
-	MinerScAddress   = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
+	StorageScAddress = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7" //nolint:gosec
+	MinerScAddress   = "6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9" //nolint:gosec
 )
 
 type ChainHistory struct {
@@ -121,7 +121,7 @@ func (ch *ChainHistory) readTransaction(t *test.SystemTest, sharderBaseUrl strin
 	ch.transactions = ApiGetList[model.EventDBTransaction](t, url, params, ch.from, ch.to+1)
 }
 
-func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
+func (ch *ChainHistory) setup(t *test.SystemTest) {
 	ch.roundHistories = make(map[int64]RoundHistory, ch.to-ch.from+1)
 
 	for i := range ch.blocks {
