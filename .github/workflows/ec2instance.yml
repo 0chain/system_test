@@ -7,27 +7,29 @@ concurrency:
 on:
   push:
     branches: [ec2testworkflow]
-    # branches: [master, staging, sprint*]
-  # pull_request:
-  # workflow_dispatch:
-  #   inputs:
-  #     repo_snapshots_branch:
-  #       description: "branch of repo-snapshots to derive images and branches from."
-  #       default: "current-sprint"
-  #       required: true
-  #     existing_network:
-  #       description: "(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]"
-  #       default: ""
-  #       required: false
-  #     test_file_filter:
-  #       description: "Comma separated list of test files to run (eg. zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result"
-  #       default: ""
-  #       required: false
-  #     run_smoke_tests:
-  #       description: "Only run smoke tests (subset of system tests for fast feedback)"
-  #       default: "false"
-  #       required: false
+  workflow_dispatch:
+    inputs:
+      repo_snapshots_branch:
+        description: "branch of repo-snapshots to derive images and branches from."
+        default: "current-sprint"
+        required: true
+      existing_network:
+        description: "(OPTIONAL): *EXISTING NETWORK* to run system tests against *INSTEAD OF* deploying a new network. [example: dev.0chain.net]"
+        default: ""
+        required: false
+      test_file_filter:
+        description: "Comma separated list of test files to run (eg. zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result"
+        default: ""
+        required: false
+      run_smoke_tests:
+        description: "Only run smoke tests (subset of system tests for fast feedback)"
+        default: "false"
+        required: false
 
+env:
+  GO_VERSION: "1.22"
+  GOLANGCI_LINT_VERSION: "v1.54.2"
+  TIMEOUT_MINUTES: 360
 
 jobs:
   # Start EC2 instance
@@ -41,7 +43,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1 # change region if you require
+          aws-region: eu-north-1
 
       - name: Get EC2 instance ID
         id: get_id
@@ -50,74 +52,165 @@ jobs:
             --filters "Name=tag:Name,Values=my-ec2-runner" \
             --query "Reservations[].Instances[].InstanceId" \
             --output text)
+          
+          if [ -z "$INSTANCE_ID" ]; then
+            echo "Error: No EC2 instance found with tag Name=my-ec2-runner"
+            exit 1
+          fi
+          
           echo "instance_id=$INSTANCE_ID" >> $GITHUB_OUTPUT
+          echo "Found EC2 instance: $INSTANCE_ID"
 
       - name: Start EC2
         run: |
+          echo "Starting EC2 instance: ${{ steps.get_id.outputs.instance_id }}"
           aws ec2 start-instances --instance-ids ${{ steps.get_id.outputs.instance_id }}
+          
+          echo "Waiting for instance to be running..."
           aws ec2 wait instance-running --instance-ids ${{ steps.get_id.outputs.instance_id }}
- 
-  # Lint (Runs on EC2)
+          
+          # Additional wait to ensure instance is fully ready
+          sleep 30
+          echo "EC2 instance is now running and ready"
+
+  # Enhanced Lint (Runs on EC2)
   golangci:
-    name: "lint"
+    name: "Enhanced Go Lint"
     runs-on: self-hosted
     needs: start-ec2
+    timeout-minutes: 30
     env:
       HOME: /tmp
       GOCACHE: /tmp/go-cache
+      GOMODCACHE: /tmp/go-mod-cache
+      GOPATH: /tmp/go
     steps:
       - name: Prepare cache directories
-        run: mkdir -p /tmp/go-cache
-
-      - name: Install Packages
         run: |
+          mkdir -p /tmp/go-cache
+          mkdir -p /tmp/go-mod-cache
+          mkdir -p /tmp/go/src
+          mkdir -p /tmp/go/bin
+          mkdir -p /tmp/go/pkg
+
+      - name: Install System Dependencies
+        run: |
+          echo "Installing system dependencies..."
           sudo apt-get update
-          sudo apt-get -y install build-essential nghttp2 libnghttp2-dev libssl-dev
+          sudo apt-get -y install build-essential nghttp2 libnghttp2-dev libssl-dev curl wget git
+          
+          # Verify installations
+          gcc --version
+          g++ --version
+          curl --version
+          git --version
 
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
 
-      - name: Clear Go module cache
+      - name: Verify Go Installation
         run: |
+          echo "Go version: $(go version)"
+          echo "Go env:"
+          go env
+          
+          # Test Go installation
+          go version
+          go mod download
+          go mod verify
+
+      - name: Clear Go Module Cache
+        run: |
+          echo "Clearing Go module cache..."
           go clean -modcache
           rm -rf ~/go/pkg/mod/*
 
-      - name: Cache Go modules
+      - name: Cache Go Modules
         uses: actions/cache@v4
         with:
           path: |
-            ~/go/pkg/mod
+            ${{ env.GOMODCACHE }}
             ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ env.GO_VERSION }}
           restore-keys: |
+            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-
             ${{ runner.os }}-go-
 
+      - name: Install golangci-lint
+        run: |
+          echo "Installing golangci-lint version ${{ env.GOLANGCI_LINT_VERSION }}"
+          
+          # Download and install golangci-lint
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /tmp/go/bin ${{ env.GOLANGCI_LINT_VERSION }}
+          
+          # Add to PATH
+          export PATH="/tmp/go/bin:$PATH"
+          
+          # Verify installation
+          golangci-lint --version
+          
+          # Test with a simple command
+          golangci-lint --help
+
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v5
-        with:
-          version: v1.54.2
-          args: --timeout=5m
+        run: |
+          echo "Running golangci-lint..."
+          export PATH="/tmp/go/bin:$PATH"
+          
+          # Run with increased timeout and verbose output
+          golangci-lint run --timeout=10m --verbose --allow-parallel-runners --allow-serial-runners
+          
+          echo "Linting completed successfully"
 
+      - name: Run Additional Go Checks
+        run: |
+          echo "Running additional Go checks..."
+          
+          # Check for unused dependencies
+          go mod tidy
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Warning: go.mod or go.sum has changes after 'go mod tidy'"
+            git diff
+          fi
+          
+          # Check for common Go issues
+          go vet ./...
+          
+          # Check formatting
+          if [ "$(gofmt -l . | wc -l)" -gt 0 ]; then
+            echo "Warning: Some files are not properly formatted"
+            gofmt -l .
+          fi
+          
+          echo "Additional Go checks completed"
 
-  # System tests (Runs on EC2)
+  # Enhanced System tests (Runs on EC2)
   system-tests:
-    name: "System Tests"
+    name: "Enhanced System Tests"
     runs-on: self-hosted
-    needs: [start-ec2, golangci]   # Wait for EC2 start + lint to finish
+    needs: [start-ec2, golangci]
     timeout-minutes: 360
     env:
       HOME: /tmp
       GOCACHE: /tmp/go-cache
-
+      GOMODCACHE: /tmp/go-mod-cache
+      GOPATH: /tmp/go
     steps:
       - name: Install kubectl
         run: |
+          echo "Installing kubectl..."
           curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
+          
+          # Verify installation
+          kubectl version --client
 
       - name: Create logs directory
         run: mkdir -p ./logs
@@ -125,35 +218,53 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
 
       - name: Build zbox from source
         run: |
-          # Install required C++ dependencies for Ubuntu 20.04
-          sudo apt-get update
-          sudo apt-get install -y build-essential gcc g++ libstdc++6-dev
+          echo "Building zbox from source..."
           
-          # Clear Go module cache to avoid tar conflicts
+          # Install required C++ dependencies
+          sudo apt-get update
+          sudo apt-get install -y build-essential gcc g++ libstdc++6-dev pkg-config
+          
+          # Clear Go module cache to avoid conflicts
           go clean -modcache
           
-          # Clone zboxcli repository and build
+          # Clone zboxcli repository
           git clone https://github.com/0chain/zboxcli.git
           cd zboxcli
           
-          # Set C++ compiler to ensure compatibility
+          # Set environment variables for C++ compilation
           export CC=gcc
           export CXX=g++
           export CGO_ENABLED=1
+          export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
           
-          # Try to build with make
+          echo "Building zbox with C++ compiler: $CC"
+          
+          # Try to build with make first
           if make install; then
+            echo "Make install successful"
             sudo cp ./zbox /usr/local/bin/
           else
             echo "Make install failed, trying direct go build..."
-            # Fallback to direct go build if make fails
+            
+            # Fallback to direct go build
             go build -o zbox -ldflags="-extldflags=-static" .
-            sudo cp ./zbox /usr/local/bin/
+            if [ $? -eq 0 ]; then
+              echo "Go build successful"
+              sudo cp ./zbox /usr/local/bin/
+            else
+              echo "Error: Both make install and go build failed"
+              exit 1
+            fi
           fi
+          
+          # Verify installation
+          zbox --version
+          echo "zbox build completed successfully"
           
           cd ..
 
@@ -168,44 +279,49 @@ jobs:
         uses: 0chain/actions/set-pr-status@master
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
-          description: "System tests running with default config..."
+          description: "System tests running with enhanced configuration..."
           state: "pending"
           repository: ${{ github.repository }}
           status_name: "0Chain System Tests"
           target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           github_token: ${{ github.token }}
 
-      - name: "Config: Run tests against existing 0Chain network"
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.existing_network != '' }}
+      - name: "Configure Test Environment"
         run: |
-          echo "NETWORK_URL=${{ github.event.inputs.existing_network }}" >> $GITHUB_ENV
-          echo "TEST_FILE_FILTER=${{ github.event.inputs.test_file_filter }}" >> $GITHUB_ENV
-          echo "CURRENT_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=${{ github.event.inputs.repo_snapshots_branch || '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>' }}" >> $GITHUB_ENV
-
-      - name: "Config: Deploy new 0Chain network then run tests against it"
-        if: ${{ github.event_name == 'push' || github.event.inputs.existing_network == '' }}
-        run: |
-          echo "NETWORK_URL=dev-${RUNNER_NAME:(-1)}.devnet-0chain.net" >> $GITHUB_ENV
-          echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
-          echo "TEST_FILE_FILTER=${{ github.event.inputs.test_file_filter }}" >> $GITHUB_ENV
-          echo "CURRENT_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
-          echo "REPO_SNAPSHOTS_BRANCH=${{ github.event.inputs.repo_snapshots_branch || '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>' }}" >> $GITHUB_ENV
-          if [[ "${{ github.event.inputs.run_smoke_tests }}" == 'true' ]]; then
-            echo RUN_SMOKE_TESTS=true >> $GITHUB_ENV
+          echo "Configuring test environment..."
+          
+          if [ "${{ github.event_name }}" == 'workflow_dispatch' ] && [ -n "${{ github.event.inputs.existing_network }}" ]; then
+            echo "Using existing network: ${{ github.event.inputs.existing_network }}"
+            echo "NETWORK_URL=${{ github.event.inputs.existing_network }}" >> $GITHUB_ENV
+            echo "TEST_FILE_FILTER=${{ github.event.inputs.test_file_filter }}" >> $GITHUB_ENV
+            echo "CURRENT_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+            echo "REPO_SNAPSHOTS_BRANCH=${{ github.event.inputs.repo_snapshots_branch || 'current-sprint' }}" >> $GITHUB_ENV
           else
-            echo RUN_SMOKE_TESTS=false >> $GITHUB_ENV
+            echo "Deploying new network"
+            echo "NETWORK_URL=dev-${RUNNER_NAME:(-1)}.devnet-0chain.net" >> $GITHUB_ENV
+            echo "RUNNER_NUMBER=${RUNNER_NAME:(-1)}" >> $GITHUB_ENV
+            echo "TEST_FILE_FILTER=${{ github.event.inputs.test_file_filter }}" >> $GITHUB_ENV
+            echo "CURRENT_BRANCH=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+            echo "REPO_SNAPSHOTS_BRANCH=${{ github.event.inputs.repo_snapshots_branch || 'current-sprint' }}" >> $GITHUB_ENV
+            
+            if [[ "${{ github.event.inputs.run_smoke_tests }}" == 'true' ]]; then
+              echo "RUN_SMOKE_TESTS=true" >> $GITHUB_ENV
+            else
+              echo "RUN_SMOKE_TESTS=false" >> $GITHUB_ENV
+            fi
           fi
+          
+          echo "Environment configuration completed:"
+          echo "NETWORK_URL: $NETWORK_URL"
+          echo "TEST_FILE_FILTER: $TEST_FILE_FILTER"
+          echo "CURRENT_BRANCH: $CURRENT_BRANCH"
+          echo "REPO_SNAPSHOTS_BRANCH: $REPO_SNAPSHOTS_BRANCH"
 
       - name: "Setup jq"
         uses: dcarbone/install-jq-action@v2.1.0
         with:
           version: "1.7"
           force: "false"
-
-      # - name: "Deploy Minio Server"
-      #   if: ${{ github.event_name == 'push' || github.event.inputs.existing_network == '' }}
-      #   uses: 0chain/actions/deploy-minio@master
 
       - name: "Deploy 0Chain"
         if: ${{ github.event_name == 'push' || github.event.inputs.existing_network == '' }}
@@ -234,21 +350,18 @@ jobs:
           run_smoke_tests: ${{ env.RUN_SMOKE_TESTS }}
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-          # DROPBOX_ACCESS_TOKEN: ${{ secrets.DROPBOX_ACCESS_TOKEN }}
-          # GDRIVE_ACCESS_TOKEN: ${{ secrets.GDRIVE_ACCESS_TOKEN }}
 
       - name: "Set PR status as ${{ job.status }}"
         if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
         uses: 0chain/actions/set-pr-status@master
         with:
           pr_number: ${{ steps.findPr.outputs.pr }}
-          description: "System tests with default config ${{ job.status }}"
+          description: "Enhanced system tests ${{ job.status }}"
           state: ${{ job.status }}
           repository: ${{ github.repository }}
           status_name: "0Chain System Tests"
           target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           github_token: ${{ github.token }}
-
 
   # Stop EC2 instance after all jobs are done   
   stop-ec2:
@@ -261,9 +374,11 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1 # change region if you require   
+          aws-region: eu-north-1
 
       - name: Stop EC2
         run: |
+          echo "Stopping EC2 instance: ${{ needs.start-ec2.outputs.instance_id }}"
           aws ec2 stop-instances --instance-ids ${{ needs.start-ec2.outputs.instance_id }}
           aws ec2 wait instance-stopped --instance-ids ${{ needs.start-ec2.outputs.instance_id }}
+          echo "EC2 instance stopped successfully"
