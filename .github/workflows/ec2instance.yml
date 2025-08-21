@@ -223,11 +223,9 @@ jobs:
 
       - name: Build zbox from source
         run: |
-          echo "Building zbox from source..."
-          
-          # Install required C++ dependencies
+          # Install required C++ dependencies for Ubuntu 20.04
           sudo apt-get update
-          sudo apt-get install -y build-essential gcc g++ libstdc++6-dev pkg-config
+          sudo apt-get install -y build-essential gcc g++ libstdc++6-dev
           
           # Clear Go module cache to avoid conflicts
           go clean -modcache
@@ -236,7 +234,7 @@ jobs:
           git clone https://github.com/0chain/zboxcli.git
           cd zboxcli
           
-          # Set environment variables for C++ compilation
+          # Set C++ compiler to ensure compatibility
           export CC=gcc
           export CXX=g++
           export CGO_ENABLED=1
