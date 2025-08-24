@@ -36,7 +36,7 @@ func ApiGetError[T any](url string, params map[string]string) (*T, error) {
 		return nil, fmt.Errorf("with request %s, %v", url, err)
 	}
 
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck
 	if res.StatusCode < 200 && res.StatusCode >= 300 {
 		return nil, fmt.Errorf("failed API request %s, status code: %d: %v", url, res.StatusCode, err)
 	}
@@ -62,7 +62,7 @@ func ApiGet[T any](t *test.SystemTest, url string, params map[string]string) *T 
 	res, err := http.Get(url) //nolint:gosec
 
 	require.NoError(t, err, "with request", url)
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300,
 		"failed API request %s, status code: %d", url, res.StatusCode)
 	require.NotNil(t, res.Body, "API response must not be nil")
@@ -107,7 +107,7 @@ func getNext(t *test.SystemTest, url string, from, to, limit, offset int64, para
 	res, err := http.Get(url) //nolint:gosec
 
 	require.NoError(t, err, "retrieving blocks %d to %d", from, to)
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck
 	require.True(t, res.StatusCode >= 200 && res.StatusCode < 300,
 		"failed API request to get blocks %d to %d, status code: %d", from, to, res.StatusCode)
 	require.NotNil(t, res.Body, "balance API response must not be nil")

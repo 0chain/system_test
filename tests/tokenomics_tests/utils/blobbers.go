@@ -152,7 +152,7 @@ func getBlobberAuthTicket(t *test.SystemTest, cliConfigFileName, blobberID, blob
 	if err != nil {
 		return authTicket, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 	var responseMap map[string]string
 	err = json.NewDecoder(resp.Body).Decode(&responseMap)
 	if err != nil {

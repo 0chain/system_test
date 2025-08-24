@@ -41,7 +41,7 @@ func (c *ZS3Client) BucketOperation(t *test.SystemTest, queryParams, formData ma
 func createForm(form map[string]string) (string, io.Reader, error) {
 	body := new(bytes.Buffer)
 	mp := multipart.NewWriter(body)
-	defer mp.Close()
+	defer mp.Close() //nolint:errcheck
 	for key, val := range form {
 		if strings.HasPrefix(val, "@") {
 			val = val[1:]
@@ -49,7 +49,7 @@ func createForm(form map[string]string) (string, io.Reader, error) {
 			if err != nil {
 				return "", nil, err
 			}
-			defer file.Close() //nolint:gocritic
+			defer file.Close() //nolint:gocritic,errcheck
 			part, err := mp.CreateFormFile(key, val)
 			if err != nil {
 				return "", nil, err
