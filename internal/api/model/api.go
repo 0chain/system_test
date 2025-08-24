@@ -1,16 +1,16 @@
 package model
 
-import (
+import ( //nolint:gci
 	"encoding/json"
 	"io"
 	"time"
 
 	"github.com/0chain/gosdk/core/common"
-
 	"github.com/0chain/gosdk/core/zcncrypto"
-	climodel "github.com/0chain/system_test/internal/cli/model"
 	"github.com/herumi/bls-go-binary/bls"
 	"gorm.io/gorm"
+
+	climodel "github.com/0chain/system_test/internal/cli/model"
 )
 
 const ZCNInt64 = int64(100000000)

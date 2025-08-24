@@ -46,7 +46,8 @@ jobs:
           version: v1.57.1
           skip-build-cache: true
           skip-pkg-cache: true
-          only-new-issues: true
+          only-new-issues: false
+          args: --timeout=10m --verbose --allow-parallel-runners --allow-serial-runners --no-config --enable=gosec,nolintlint
 
   system-tests:
     name: "System Tests"

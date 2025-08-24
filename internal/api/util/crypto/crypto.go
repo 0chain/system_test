@@ -33,9 +33,9 @@ func init() {
 }
 
 func GenerateMnemonics(t *test.SystemTest) string {
-	entropy, err := bip39.NewEntropy(256) //nolint
+	entropy, err := bip39.NewEntropy(256)
 	require.NoError(t, err)
-	mnemonic, err := bip39.NewMnemonic(entropy) //nolint
+	mnemonic, err := bip39.NewMnemonic(entropy)
 	require.NoError(t, err)
 	t.Logf("Generated mnemonic [%s]", mnemonic)
 
@@ -50,7 +50,7 @@ func GenerateKeys(t *test.SystemTest, mnemonics string) *model.KeyPair {
 		bls.SetRandFunc(nil)
 	}()
 
-	seed := bip39.NewSeed(mnemonics, "0chain-client-split-key") //nolint
+	seed := bip39.NewSeed(mnemonics, "0chain-client-split-key")
 	random := bytes.NewReader(seed)
 	bls.SetRandFunc(random)
 

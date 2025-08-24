@@ -1,9 +1,10 @@
 package model
 
-import (
+import ( //nolint:gci
 	"github.com/0chain/gosdk/core/common"
-	"github.com/0chain/system_test/internal/api/util/test"
 	resty "github.com/go-resty/resty/v2"
+
+	"github.com/0chain/system_test/internal/api/util/test"
 )
 
 const GB = float64(1024 * 1024 * 1024)
