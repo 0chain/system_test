@@ -1,3 +1,13 @@
+version: 2.3.1
+
+run:
+  timeout: 5m
+  skip-dirs:
+    - test/testdata_etc
+    - internal/cache
+    - internal/renameio
+    - internal/robustio
+
 linters-settings:
   depguard:
     list-type: blacklist
@@ -77,10 +87,77 @@ linters-settings:
         arguments: ["fmt.Printf", "myFunction"]
 
 linters:
+  # please, do not use `enable-all`: it's deprecated and will be removed soon.
+  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
   disable-all: true
   enable:
+    # todo[kushthedude]: commenting most of the checks as our code can't persist all of the changes, however we can plan further on code-quality after v1.0 release.
+    # - bodyclose
+    - deadcode
+    - dogsled
+    - errcheck
+    # - exhaustive
+    # - funlen
+    # - goconst
     - gci
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - revive
     - gosec
+    # - gomnd
+    # - goprintffuncname
+    # - gosimple
+    - govet
+    # - ineffassign
+    # - interfacer
+    - lll
+    - misspell
+    # - nakedret
     - nolintlint
+    # - rowserrcheck
+    # - scopelint
+    - staticcheck
+    # - structcheck
+#    - stylecheck
+    - typecheck
+    # - unconvert
+#    - unparam
+    - unused
+    # - varcheck
+    - whitespace
+
+  # don't enable:
+  # - asciicheck
+  # - gochecknoglobals
+  # - gocognit
+  # - godot
+  # - godox
+  # - goerr113
+  # - maligned
+  # - nestif
+  # - prealloc
+  # - testpackage
+  # - wsl
+
+issues:
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gomnd
+
+    # https://github.com/go-critic/go-critic/issues/926
+    - linters:
+        - gocritic
+      text: "unnecessaryDefer:"
+
+# golangci.com configuration
+# https://github.com/golangci/golangci/wiki/Configuration
+service:
+  golangci-lint-version: 2.3.1 # use the fixed version to not introduce new linters unexpectedly
+  prepare:
+    - echo "here I can run custom commands, but no preparation needed for this repo"
 
 
