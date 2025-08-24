@@ -61,7 +61,7 @@ func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 func getCurrentHash(t *test.SystemTest) (string, error) {
 	resp, err := http.Get(apiClient.HealthyServiceProviders.Sharders[0] + "/v1/block/get/latest_finalized_magic_block")
 	require.Nil(t, err)
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	var res map[string]interface{}
 	decoder := json.NewDecoder(resp.Body)

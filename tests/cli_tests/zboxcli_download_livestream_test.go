@@ -1,5 +1,7 @@
 package cli_tests
 
+//nolint:errcheck // defer statements for cleanup don't need error handling
+
 import (
 	"crypto/md5" //nolint:gosec
 	"encoding/hex"

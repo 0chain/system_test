@@ -45,7 +45,7 @@ func TestZs3Server(testSetup *testing.T) {
 		if err != nil {
 			t.Fatalf("Error creating file: %v", err)
 		}
-		defer file.Close()
+		defer file.Close() //nolint:errcheck
 
 		_, err = file.WriteString("test")
 		if err != nil {
@@ -56,7 +56,7 @@ func TestZs3Server(testSetup *testing.T) {
 
 		assert.NotContains(t, output, "../mc: <ERROR>")
 
-		os.Remove("a.txt")
+		os.Remove("a.txt") //nolint:errcheck
 	})
 
 	t.RunSequentially("Test for moving file", func(t *test.SystemTest) {
@@ -66,7 +66,7 @@ func TestZs3Server(testSetup *testing.T) {
 		if err != nil {
 			t.Fatalf("Error creating file: %v", err)
 		}
-		defer file.Close()
+		defer file.Close() //nolint:errcheck
 
 		_, err = file.WriteString("test")
 		if err != nil {

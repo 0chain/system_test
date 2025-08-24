@@ -295,7 +295,7 @@ func ReadFile(testSetup *testing.T) Configuration {
 	if err != nil {
 		testSetup.Fatalf("Error opening hosts.yaml file: %v\n", err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	decoder := yaml.NewDecoder(file)
 	var hosts map[string]interface{}
@@ -322,7 +322,7 @@ func ReadFileAllocation() (data, parity, lock, accessKey, secretKey string) {
 	if err != nil {
 		log.Fatalf("Error opening allocation.yaml file: %v", err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	decoder := yaml.NewDecoder(file)
 	var allocationData map[string]interface{}
@@ -348,7 +348,7 @@ func AppendToFile(filename, data string) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	if _, err := file.WriteString(data); err != nil {
 		return err
@@ -399,7 +399,7 @@ func GetAllocationID(path string) string {
 	if err != nil {
 		log.Printf("Error opening allocation.txt file: %v", err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	scanner := bufio.NewScanner(file)
 	scanner.Scan()
@@ -414,7 +414,7 @@ func ReadFileMC(testSetup *testing.T) McConfiguration {
 	if err != nil {
 		testSetup.Fatalf("Error opening hosts.yaml file: %v\n", err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	decoder := yaml.NewDecoder(file)
 	var hosts map[string]interface{}
