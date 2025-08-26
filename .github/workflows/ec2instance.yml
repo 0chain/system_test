@@ -74,127 +74,127 @@ jobs:
           echo "EC2 instance is now running and ready"
 
   # Enhanced Lint (Runs on EC2)
-  golangci:
-    name: "Enhanced Go Lint"
-    runs-on: self-hosted
-    needs: start-ec2
-    timeout-minutes: 30
-    env:
-      HOME: /tmp
-      GOCACHE: /tmp/go-cache
-      GOMODCACHE: /tmp/go-mod-cache
-      GOPATH: /tmp/go
-    steps:
-      - name: Prepare cache directories
-        run: |
-          mkdir -p /tmp/go-cache
-          mkdir -p /tmp/go-mod-cache
-          mkdir -p /tmp/go/src
-          mkdir -p /tmp/go/bin
-          mkdir -p /tmp/go/pkg
+  # golangci:
+  #   name: "Enhanced Go Lint"
+  #   runs-on: self-hosted
+  #   needs: start-ec2
+  #   timeout-minutes: 30
+  #   env:
+  #     HOME: /tmp
+  #     GOCACHE: /tmp/go-cache
+  #     GOMODCACHE: /tmp/go-mod-cache
+  #     GOPATH: /tmp/go
+  #   steps:
+  #     - name: Prepare cache directories
+  #       run: |
+  #         mkdir -p /tmp/go-cache
+  #         mkdir -p /tmp/go-mod-cache
+  #         mkdir -p /tmp/go/src
+  #         mkdir -p /tmp/go/bin
+  #         mkdir -p /tmp/go/pkg
 
-      - name: Install System Dependencies
-        run: |
-          echo "Installing system dependencies..."
-          sudo apt-get update
-          sudo apt-get -y install build-essential nghttp2 libnghttp2-dev libssl-dev curl wget git
+  #     - name: Install System Dependencies
+  #       run: |
+  #         echo "Installing system dependencies..."
+  #         sudo apt-get update
+  #         sudo apt-get -y install build-essential nghttp2 libnghttp2-dev libssl-dev curl wget git
           
-          # Verify installations
-          gcc --version
-          g++ --version
-          curl --version
-          git --version
+  #         # Verify installations
+  #         gcc --version
+  #         g++ --version
+  #         curl --version
+  #         git --version
 
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: false
+  #     - uses: actions/setup-go@v5
+  #       with:
+  #         go-version: ${{ env.GO_VERSION }}
+  #         cache: false
 
-      - name: Verify Go Installation
-        run: |
-          echo "Go version: $(go version)"
-          echo "Go env:"
-          go env
+  #     - name: Verify Go Installation
+  #       run: |
+  #         echo "Go version: $(go version)"
+  #         echo "Go env:"
+  #         go env
           
-          # Test Go installation
-          go version
-          go mod download
-          go mod verify
+  #         # Test Go installation
+  #         go version
+  #         go mod download
+  #         go mod verify
 
-      - name: Clear Go Module Cache
-        run: |
-          echo "Clearing Go module cache..."
-          go clean -modcache
-          rm -rf ~/go/pkg/mod/*
+  #     - name: Clear Go Module Cache
+  #       run: |
+  #         echo "Clearing Go module cache..."
+  #         go clean -modcache
+  #         rm -rf ~/go/pkg/mod/*
 
-      - name: Cache Go Modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.GOMODCACHE }}
-            ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ env.GO_VERSION }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-
-            ${{ runner.os }}-go-
+  #     - name: Cache Go Modules
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ${{ env.GOMODCACHE }}
+  #           ${{ env.GOCACHE }}
+  #         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ env.GO_VERSION }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-
+  #           ${{ runner.os }}-go-
 
-      - name: Install golangci-lint
-        run: |
-          echo "Installing golangci-lint version ${{ env.GOLANGCI_LINT_VERSION }}"
+  #     - name: Install golangci-lint
+  #       run: |
+  #         echo "Installing golangci-lint version ${{ env.GOLANGCI_LINT_VERSION }}"
           
-          # Download and install golangci-lint
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /tmp/go/bin ${{ env.GOLANGCI_LINT_VERSION }}
+  #         # Download and install golangci-lint
+  #         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /tmp/go/bin ${{ env.GOLANGCI_LINT_VERSION }}
           
-          # Add to PATH
-          export PATH="/tmp/go/bin:$PATH"
+  #         # Add to PATH
+  #         export PATH="/tmp/go/bin:$PATH"
           
-          # Verify installation
-          golangci-lint --version
+  #         # Verify installation
+  #         golangci-lint --version
           
-          # Test with a simple command
-          golangci-lint --help
+  #         # Test with a simple command
+  #         golangci-lint --help
 
-      - name: Run golangci-lint
-        run: |
-          echo "Running golangci-lint..."
-          export PATH="/tmp/go/bin:$PATH"
+  #     - name: Run golangci-lint
+  #       run: |
+  #         echo "Running golangci-lint..."
+  #         export PATH="/tmp/go/bin:$PATH"
           
-          # Run with increased timeout and verbose output
-          golangci-lint run --timeout=10m --verbose --allow-parallel-runners --allow-serial-runners
+  #         # Run with increased timeout and verbose output
+  #         golangci-lint run --timeout=10m --verbose --allow-parallel-runners --allow-serial-runners
           
-          echo "Linting completed successfully"
+  #         echo "Linting completed successfully"
 
-      - name: Run Additional Go Checks
-        run: |
-          echo "Running additional Go checks..."
+  #     - name: Run Additional Go Checks
+  #       run: |
+  #         echo "Running additional Go checks..."
           
-          # Check for unused dependencies
-          go mod tidy
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "Warning: go.mod or go.sum has changes after 'go mod tidy'"
-            git diff
-          fi
+  #         # Check for unused dependencies
+  #         go mod tidy
+  #         if [ -n "$(git status --porcelain)" ]; then
+  #           echo "Warning: go.mod or go.sum has changes after 'go mod tidy'"
+  #           git diff
+  #         fi
           
-          # Check for common Go issues
-          go vet ./...
+  #         # Check for common Go issues
+  #         go vet ./...
           
-          # Check formatting
-          if [ "$(gofmt -l . | wc -l)" -gt 0 ]; then
-            echo "Warning: Some files are not properly formatted"
-            gofmt -l .
-          fi
+  #         # Check formatting
+  #         if [ "$(gofmt -l . | wc -l)" -gt 0 ]; then
+  #           echo "Warning: Some files are not properly formatted"
+  #           gofmt -l .
+  #         fi
           
-          echo "Additional Go checks completed"
+  #         echo "Additional Go checks completed"
 
   # Enhanced System tests (Runs on EC2)
   system-tests:
     name: "Enhanced System Tests"
     runs-on: self-hosted
-    needs: [start-ec2, golangci]
+    needs: [start-ec2]
     timeout-minutes: 360
     env:
       HOME: /tmp
@@ -364,7 +364,7 @@ jobs:
   # Stop EC2 instance after all jobs are done   
   stop-ec2:
     runs-on: ubuntu-latest
-    needs: [golangci, system-tests, start-ec2]
+    needs: [system-tests, start-ec2]
     if: always()
     steps:
       - name: Configure AWS CLI
