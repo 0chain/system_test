@@ -3,7 +3,7 @@ package cli_tests
 import (
 	"encoding/hex"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -26,7 +26,7 @@ import (
 func TestRestrictedBlobbers(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	//Auth Ticket Round expiry we can add a big round number to create the allocation.
+	// Auth Ticket Round expiry we can add a big round number to create the allocation.
 	authTokenRoundExpiry := int(1e9)
 
 	t.SetSmokeTests("Create allocation for locking cost equal to the cost calculated should work")
@@ -351,7 +351,7 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberURL, clientID st
 	}
 
 	url := blobberURL + "/v1/auth/generate?client_id=" + clientID + "&round=" + strconv.FormatInt(int64(authTokenRoundExpiry), 10)
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, http.NoBody)
 	if err != nil {
 		return authTicket, err
 	}
@@ -366,8 +366,10 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberURL, clientID st
 	var responseMap map[string]string
 	err = json.NewDecoder(resp.Body).Decode(&responseMap)
 	if err != nil {
-		var body []byte
-		body, err = ioutil.ReadAll(resp.Body)
+		body, readErr := io.ReadAll(resp.Body) // use io.ReadAll instead of ioutil.ReadAll
+		if readErr != nil {
+			return "", errors.Wrap(readErr, "failed to read response body")
+		}
 		return "", errors.Wrap(err, string(body))
 	}
 	authTicket = responseMap["auth_ticket"]
