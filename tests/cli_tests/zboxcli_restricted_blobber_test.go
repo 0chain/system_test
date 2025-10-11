@@ -3,7 +3,6 @@ package cli_tests
 import (
 	"encoding/hex"
 	"encoding/json"
-	"github.com/0chain/errors"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -13,6 +12,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/0chain/errors"
 
 	"github.com/0chain/common/core/common"
 	"github.com/0chain/gosdk/core/zcncrypto"
@@ -371,7 +372,7 @@ func getBlobberAuthTicket(t *test.SystemTest, blobberID, blobberURL, clientID st
 	}
 	authTicket = responseMap["auth_ticket"]
 	if authTicket == "" {
-		common.NewError("500", "Error getting auth ticket from blobber")
+		return "", common.NewError("500", "Error getting auth ticket from blobber")
 	}
 	return authTicket, nil
 }
