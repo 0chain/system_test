@@ -47,6 +47,7 @@ jobs:
           skip-build-cache: true
           skip-pkg-cache: true
           only-new-issues: true
+          args: --out-format=colored-line-number
 
   system-tests:
     name: "System Tests"

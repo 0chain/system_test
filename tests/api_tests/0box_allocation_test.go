@@ -19,7 +19,7 @@ func NewTestAllocation() map[string]string {
 
 	// Create a new hash
 	hasher := sha256.New()
-	hasher.Write([]byte(uniqueString))
+	_, _ = hasher.Write([]byte(uniqueString))
 
 	// Get the hash and convert it to a hexadecimal string
 	id := hex.EncodeToString(hasher.Sum(nil))

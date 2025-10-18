@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
+	"log"
 	"math/big"
 	"os"
 
@@ -58,7 +59,7 @@ func InitSDK(wallet, configFile string) error {
 
 	err = zcncore.SetGeneralWalletInfo(walletJSON, parsed.SignatureScheme)
 	if err != nil {
-		fmt.Println("Error in sdk init", err)
+		log.Printf("Error in sdk init: %v", err)
 		return err
 	}
 

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -346,7 +347,7 @@ func InitSDK(wallet, configFile string) error {
 
 	err = zcncore.SetGeneralWalletInfo(walletJSON, parsed.SignatureScheme)
 	if err != nil {
-		fmt.Println("Error in sdk init", err)
+		log.Println("Error in sdk init", err)
 		return err
 	}
 
