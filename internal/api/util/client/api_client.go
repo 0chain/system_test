@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -60,6 +61,7 @@ const (
 	PartitionSizeFrequency             = "/v1/screst/:sc_address/parition-size-frequency"
 	BlobberPartitionSelectionFrequency = "/v1/screst/:sc_address/blobber-selection-frequency"
 	GetAllChallenges                   = "/v1/screst/:sc_address/all-challenges"
+	GetQueryData                       = "/v1/screst/:sc_address/query-data"
 )
 
 // Contains all used service providers
@@ -2184,4 +2186,74 @@ func (c *APIClient) BurnZcn(t *test.SystemTest, wallet *model.Wallet, address st
 
 	wallet.IncNonce()
 	return burnZcnTransactionGetConfirmationResponse.Hash
+}
+
+func (c *APIClient) QueryDataFromSharder(t *test.SystemTest, tableName string) ([]interface{}, *resty.Response, error) {
+	t.Log("Querying data from Sharder...")
+
+	extractFields := func(model interface{}) string {
+		val := reflect.ValueOf(model)
+		if val.Kind() == reflect.Ptr {
+			val = val.Elem()
+		}
+		if val.Kind() != reflect.Struct {
+			return ""
+		}
+		var fieldNames []string
+		typ := val.Type()
+		for i := 0; i < val.NumField(); i++ {
+			field := typ.Field(i)
+			jsonTag := field.Tag.Get("json")
+			if jsonTag != "" && jsonTag != "-" {
+				tagParts := strings.Split(jsonTag, ",")
+				fieldNames = append(fieldNames, tagParts[0])
+			} else {
+				fieldNames = append(fieldNames, field.Name)
+			}
+		}
+		return strings.Join(fieldNames, ",")
+	}
+	urlBuilder := NewURLBuilder().
+		SetPath(GetQueryData).
+		SetPathVariable("sc_address", StorageSmartContractAddress)
+
+	var data interface{}
+	var tableEntity interface{}
+	switch tableName {
+	case "blobber":
+		tableEntity = model.Blobber{}
+	case "miner":
+		tableEntity = model.Miner{}
+	case "authorizer":
+		tableEntity = model.Authorizer{}
+	case "validator":
+		tableEntity = model.Validator{}
+	case "sharder":
+		tableEntity = model.Sharder{}
+	case "user":
+		tableEntity = model.User{}
+	case "provider_rewards":
+		tableEntity = model.ProviderRewards{}
+
+	}
+	urlBuilder.queries.Set("entity", tableName)
+	urlBuilder.queries.Set("fields", extractFields(tableEntity))
+	resp, err := c.executeForAllServiceProviders(t, urlBuilder, &model.ExecutionRequest{
+		Dst:                &data,
+		RequiredStatusCode: 200,
+		Headers: map[string]string{
+			"Accept-Encoding": "",
+		},
+	}, HttpGETMethod, SharderServiceProvider)
+	var result []interface{}
+	switch v := data.(type) {
+	case []interface{}:
+		for _, value := range v {
+			result = append(result, value)
+		}
+	default:
+		t.Error("Invalid response from Sharder")
+	}
+
+	return result, resp, err
 }
