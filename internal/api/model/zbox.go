@@ -201,6 +201,30 @@ type ZboxJwtToken struct {
 	JwtToken string `json:"jwt_token"`
 }
 
+// ZboxTranscodingData represents the metadata stored for a transcoding upload.
+type ZboxTranscodingData struct {
+	ID           int     `json:"ID"`
+	UserID       string  `json:"UserID"`
+	ClientID     string  `json:"ClientID"`
+	LookupHash   string  `json:"LookupHash"`
+	Remotepath   string  `json:"Remotepath"`
+	AllocationID string  `json:"AllocationID"`
+	FileName     string  `json:"FileName"`
+	Mode         string  `json:"Mode"`
+	FileSize     int64   `json:"FileSize"`
+	Status       int     `json:"Status"`
+	AppType      int     `json:"AppType"`
+	CreatedAt    string  `json:"CreatedAt"`
+	UpdatedAt    string  `json:"UpdatedAt"`
+	Deleted      *string `json:"Deleted"`
+}
+
+// ZboxTranscodingDataResponse wraps API responses for transcoding metadata endpoints.
+type ZboxTranscodingDataResponse struct {
+	Message string              `json:"message"`
+	Data    ZboxTranscodingData `json:"data"`
+}
+
 type ReferralCodeOfUser struct {
 	ReferrerCode string `json:"referral_code"`
 	ReferrerLink string `json:"referral_link"`

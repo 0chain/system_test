@@ -1343,3 +1343,45 @@ func (c *ZboxClient) GetTransactionsList(t *test.SystemTest, pitId string) (*mod
 
 	return &txnData, resp, err
 }
+
+// CreateMetadata posts transcoding metadata to the server and returns parsed response.
+func (c *ZboxClient) CreateMetadata(t *test.SystemTest, headers map[string]string, body map[string]string) (*model.ZboxTranscodingDataResponse, *resty.Response, error) {
+	t.Logf("creating transcoding metadata for user [%v] using 0box...", headers["X-App-User-ID"])
+
+	var res *model.ZboxTranscodingDataResponse
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/metadata")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &res,
+		Headers:            headers,
+		Body:               body,
+		RequiredStatusCode: 201,
+	}, HttpPOSTMethod)
+
+	return res, resp, err
+}
+
+// UpdateUploadStatus updates status for an uploaded file and returns parsed response.
+func (c *ZboxClient) UpdateUploadStatus(t *test.SystemTest, headers map[string]string, body map[string]string) (*model.ZboxTranscodingDataResponse, *resty.Response, error) {
+	t.Logf("updating upload status for user [%v] using 0box...", headers["X-App-User-ID"])
+
+	var res *model.ZboxTranscodingDataResponse
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/updateUploadStatus")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &res,
+		Headers:            headers,
+		Body:               body,
+		RequiredStatusCode: 200,
+	}, HttpPUTMethod)
+
+	return res, resp, err
+}
