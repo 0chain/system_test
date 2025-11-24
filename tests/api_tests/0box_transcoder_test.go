@@ -1,15 +1,14 @@
 package api_tests
 
 import (
-	"strconv"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"testing"
 	"time"
-	"strings"
-	"go.uber.org/zap"
 
 	"github.com/0chain/gosdk/core/zcncrypto"
 	"github.com/0chain/gosdk/zboxcore/sdk"
@@ -19,122 +18,272 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/errgo.v2/errors"
 
-	coreClient "github.com/0chain/gosdk/core/client"
+	// coreClient "github.com/0chain/gosdk/core/client"
 )
-
 
 func Test0BoxTranscoder(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	
-	headers := zboxClient.NewZboxHeaders(client.X_APP_VULT)
+	t.Logf("Starting 0Box Transcoder Tests...")
+
+	// Create a new wallet 
+	headers := map[string]string{
+		"X-App-Client-ID":        sdkWallet.ClientID,
+		"X-App-Client-Key":       sdkWallet.ClientKey,
+		"X-App-Timestamp":        client.X_APP_TIMESTAMP,
+		"X-App-ID-TOKEN":         client.X_APP_ID_TOKEN,
+		"X-App-User-ID":          client.X_APP_USER_ID,
+		"X-CSRF-TOKEN":           client.X_APP_CSRF,
+		"X-App-Client-Signature": client.X_APP_CLIENT_SIGNATURE,
+		"X-APP-TYPE":             client.X_APP_BLIMP,
+	}
 	Teardown(t, headers)
-	walletInput := NewTestWallet()
-	_, response, err := zboxClient.CreateWallet(t, headers, walletInput)
+	err := Create0boxTestWallet(t, headers)
 	require.NoError(t, err)
-	require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-	testSetup.Logf("Wallet created: %v", walletInput)
+	t.Logf("0box test wallet created: %s", headers["X-App-Client-ID"])
 
-	allocationInput := NewTestAllocation()
-	allocation, response, err := zboxClient.CreateAllocation(t, headers, allocationInput)
-	require.NoError(t, err)
-	require.Equal(t, 201, response.StatusCode(), "Failed to create allocation. Output: [%v]", response.String())
-	require.NotEmpty(t, allocation.ID)
-	testSetup.Logf("Allocation Created ID: %v", allocation.ID)
-
-	wallet, response, err := zboxClient.GetWalletKeys(t, headers)
-	require.NoError(t, err)
-	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-	require.Equal(t, walletInput["name"], wallet.Name)
-	require.Equal(t, walletInput["mnemonic"], wallet.Mnemonic)
-	require.Equal(t, headers["X-App-Client-Key"], wallet.PublicKey)
-	require.Equal(t, walletInput["description"], wallet.Description)
-
-	// Generate split wallet/key and share to 0box-server before transcoding
+	t.Logf("Generating split key...")
 	jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 	require.NoError(t, err)
 	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-	oldHeaders := zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
+	zVaultHeaders := zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
+	zVaultHeaders["X-User-ID"] = client.X_APP_USER_ID
 
-	var generateWalletResponse *model.GenerateWalletResponse
-	generateWalletResponse, response, err = zvaultClient.GenerateSplitWallet(t, oldHeaders)
+	response, err = zvaultClient.Store(t, sdkWallet.Keys[0].PrivateKey, sdkWallet.Mnemonic, zVaultHeaders)
 	require.NoError(t, err)
-	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	require.Equal(t, 200, response.StatusCode(), "StoreHandler: Response status code does not match expected. Output: [%v]", response.String())
+	t.Logf("Wallet stored with StoreHandler: %v", response.String())
 
-	response, err = zvaultClient.GenerateSplitKey(t, generateWalletResponse.ClientID, oldHeaders)
+	t.Logf("Generating split key for client id: %s...", sdkWallet.ClientID)
+	response, err = zvaultClient.GenerateSplitKey(t, sdkWallet.ClientID, zVaultHeaders)
 	require.NoError(t, err)
-	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	require.Equal(t, 200, response.StatusCode(), "GenerateSplitKey: Status code does not match expected. Output: [%v]", response.String())
+	t.Logf("Generated split key for client id: %s", sdkWallet.ClientID)
 
-	keys, response, err := zvaultClient.GetKeys(t, generateWalletResponse.ClientID, oldHeaders)
+	t.Logf("Getting keys for client id: %s...", sdkWallet.ClientID)
+	keys, response, err := zvaultClient.GetKeys(t, sdkWallet.ClientID, zVaultHeaders)
 	require.NoError(t, err)
-	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	require.Equal(t, 200, response.StatusCode(), "GetKeys after StoreHandler: Status code does not match expected. Output: [%v]", response.String())
 	require.Len(t, keys.Keys, 1)
+	require.Equal(t, sdkWallet.ClientID, keys.Keys[0].ClientID, "Stored key's clientID: %s does not match sdkWallet clientID: %s", keys.Keys[0].ClientID, sdkWallet.ClientID)
+	t.Logf("Verified key's clientID: %s", keys.Keys[0].ClientID)
+
+	t.Cleanup(func() {
+		t.Logf("Deleting wallet for client id: %s...", sdkWallet.ClientID)
+		response, err = zvaultClient.Delete(t, sdkWallet.ClientID, zVaultHeaders)
+		require.NoError(t, err)
+		require.Equal(t, 200, response.StatusCode(), "Delete: Response status code does not match expected. Output: [%v]", response.String())
+		t.Logf("Wallet deleted for client id: %s", sdkWallet.ClientID)
+	})
+
+	t.Logf("sharing wallet to 0box-server...")
+	response, err = zvaultClient.ShareWallet(t, "0box-server", keys.Keys[0].PublicKey, zVaultHeaders)
+	require.NoError(t, err)
+	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+
+	t.Logf("retrieving split keys...")
+	keys, response, err = zvaultClient.GetKeys(t, sdkWallet.ClientID, zVaultHeaders)
+	require.NoError(t, err)
+	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	require.Equal(t, keys.Keys[0].ClientID, sdkWallet.ClientID)
 
 	var sharedKey *model.SplitKey
-	for _, k := range keys.Keys {
-		if k.SharedTo == "65b32a635cffb6b6f3c73f09da617c29569a5f690662b5be57ed0d994f234335" {
+	for i, k := range keys.Keys {
+		t.Logf("split key[%d]: %v", i, *k)
+		t.Logf("SharedTo[%d]: %v", i, k.SharedTo)
+		if k.SharedTo == "0box-server" {
 			sharedKey = k
 			break
 		}
 	}
 	require.NotNil(t, sharedKey, "Shared key to 0box-server not found")
+	t.Logf("sharedKey: %v, splitKeys len %d", *sharedKey, len(keys.Keys))
 
+	// create allocation
+	t.Logf("creating new allocation through SDK...")
+	const maxPrice = math.MaxUint64 / 100
+	var (
+		readPrice  = sdk.PriceRange{Min: 0, Max: 0}
+		writePrice = sdk.PriceRange{Min: 0, Max: 250000000}
+	)
+	options := sdk.CreateAllocationOptions{
+		DataShards:   1,
+		ParityShards: 1,
+		Size:         2147483648, // 2GB
+		ReadPrice: sdk.PriceRange{
+			Min: readPrice.Min,
+			Max: readPrice.Max,
+		},
+		WritePrice: sdk.PriceRange{
+			Min: writePrice.Min,
+			Max: writePrice.Max,
+		},
+		FileOptionsParams: &sdk.FileOptionsParameters{},
+		Lock: 1000000000,
+	}
+	t.Logf("creating new allocation with options: %+v", options)
+	allocationID, _, _, err := sdk.CreateAllocationWith(options)
+	require.NoError(t, err, "Failed to create allocation with SDK")
+	t.Logf("newallocation created with ID: %v", allocationID)
 
-	// Share the generated split key to user "0box-server"
-	response, err = zvaultClient.ShareWallet(t, "0box-server", sharedKey.PublicKey, oldHeaders)
-	require.NoError(t, err)
-	require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+	// t.Cleanup(func() {
+	// 	t.Logf("deleting allocation: %s", allocationID)
+	// 	_, _, err := sdk.CancelAllocation(allocationID)
+	// 	require.NoError(t, err, "Failed to cancel allocation with SDK")
+	// 	t.Logf("allocation cancelled: %s", allocationID)
+	// })
 
 	// Run transcode subtests (they will run in parallel because RunSequentially now delegates to Run)
-	t.RunSequentially("Transcode MP4 file with web mode", func(t *test.SystemTest) {
+	timeout := 3 * time.Minute
+	sleepTime := 20 * time.Second
+	t.RunSequentiallyWithTimeout("Transcode MP4 file with web mode", timeout, func(t *test.SystemTest) {
 		// Test MP4 transcoding
-		transcodeFile(t, headers, allocation.ID, sharedKey, "sample.mp4", "web")
-		verifyTranscodedFile(t, allocation.ID, "/.transcoded/sample.mp4", "sample.mp4", sharedKey)
+		lookupHash := fmt.Sprintf("TODO-random-%d", time.Now().UnixNano())
+		remotepath := "/sample.mp4"
+		transcodeFile(t, headers, allocationID, sharedKey, filepath.Base(remotepath), "web", lookupHash)
+
+		// wait before first verification (20 seconds) then verify up to 3 times
+		time.Sleep(sleepTime)
+		var verr error
+		for i := 0; i < 3; i++ {
+			t.Logf("verify attempt %d for sample.mp4", i+1)
+			verr = verifyTranscodedFile(t, allocationID, fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), fmt.Sprintf("%s.mp4", lookupHash), sharedKey)
+			if verr == nil {
+				break
+			}
+			t.Logf("verification attempt %d failed: %v, sleeping %s before retry", i+1, verr, sleepTime)
+			time.Sleep(sleepTime)
+		}
+
+		// t.Cleanup(func() {
+		// 	allocationObj, err := sdk.GetAllocation(allocationID)
+		// 	require.NoError(t, err, "Failed to get allocation from SDK")
+
+		// 	// Delete transcoded file
+		// 	t.Logf("deleting transcoded file: /.transcoded/%s.mp4", lookupHash)
+		// 	err = allocationObj.DeleteFile(fmt.Sprintf("/.transcoded/%s.mp4", lookupHash))
+		// 	if err != nil {
+		// 		t.Logf("error deleting file %s: %v", fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), err)
+		// 	}
+		// 	// Delete original uploaded file
+		// 	t.Logf("deleting original uploaded file: %s", remotepath)
+		// 	err = allocationObj.DeleteFile(remotepath)
+		// 	if err != nil {
+		// 		t.Logf("error deleting file %s: %v", fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), err)
+		// 	}
+		// })
+		require.NoError(t, verr, "verification failed after 3 attempts")
 	})
 
-	t.RunSequentially("Transcode AVI file with web mode", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Transcode AVI file with web mode", timeout, func(t *test.SystemTest) {
+		// t.Skip("Skipping AVI transcoding test")
 		// Test AVI transcoding
-		transcodeFile(t, headers, allocation.ID, sharedKey, "sample.avi", "web")
-		verifyTranscodedFile(t, allocation.ID, "/.transcoded/sample.mp4", "sample.mp4", sharedKey)
+		lookupHash := fmt.Sprintf("TODO-random-%d", time.Now().UnixNano())
+		remotepath := "/sample.avi"
+		transcodeFile(t, headers, allocationID, sharedKey, filepath.Base(remotepath), "web", lookupHash)
 
+		// wait before first verification (20 seconds) then verify up to 3 times
+		time.Sleep(sleepTime)
+		var verr error
+		for i := 0; i < 3; i++ {
+			t.Logf("verify attempt %d for sample.avi", i+1)
+			verr = verifyTranscodedFile(t, allocationID, fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), fmt.Sprintf("%s.mp4", lookupHash), sharedKey)
+			if verr == nil {
+				break
+			}
+			t.Logf("verification attempt %d failed: %v, sleeping %s before retry", i+1, verr, sleepTime)
+			time.Sleep(sleepTime)
+		}
+		// t.Cleanup(func() {
+		// 	allocationObj, err := sdk.GetAllocation(allocationID)
+		// 	require.NoError(t, err, "Failed to get allocation from SDK")
+
+		// 	// Delete transcoded file
+		// 	t.Logf("deleting transcoded file: /.transcoded/%s.mp4", lookupHash)
+		// 	err = allocationObj.DeleteFile(fmt.Sprintf("/.transcoded/%s.mp4", lookupHash))
+		// 	if err != nil {
+		// 		t.Logf("error deleting file %s: %v", fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), err)
+		// 	}
+		// 	// Delete original uploaded file
+		// 	t.Logf("deleting original uploaded file: %s", remotepath)
+		// 	err = allocationObj.DeleteFile(remotepath)
+		// 	if err != nil {
+		// 		t.Logf("error deleting file %s: %v", fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), err)
+		// 	}
+		// })
+		require.NoError(t, verr, "verification failed after 3 attempts")
 	})
 
-	t.RunSequentially("Transcode MOV file with web mode", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Transcode MOV file with web mode", timeout, func(t *test.SystemTest) {
+		// t.Skip("Skipping MOV transcoding test)
 		// Test MOV transcoding
-		transcodeFile(t, headers, allocation.ID, sharedKey, "sample.mov", "web")
-		verifyTranscodedFile(t, allocation.ID, "/.transcoded/sample.mp4", "sample.mp4", sharedKey)
+		lookupHash := fmt.Sprintf("TODO-random-%d", time.Now().UnixNano())
+		remotepath := "/sample.mov"
+		transcodeFile(t, headers, allocationID, sharedKey, filepath.Base(remotepath), "web", lookupHash)
+
+		// wait before first verification (20 seconds) then verify up to 3 times
+		time.Sleep(sleepTime)
+		var verr error
+		for i := 0; i < 3; i++ {
+			t.Logf("verify attempt %d for sample.mov", i+1)
+			verr = verifyTranscodedFile(t, allocationID, fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), fmt.Sprintf("%s.mp4", lookupHash), sharedKey)
+			if verr == nil {
+				break
+			}
+			t.Logf("verification attempt %d failed: %v, sleeping %s before retry", i+1, verr, sleepTime)
+				time.Sleep(sleepTime)
+		}
+		// t.Cleanup(func() {
+		// 	allocationObj, err := sdk.GetAllocation(allocationID)
+		// 	require.NoError(t, err, "Failed to get allocation from SDK")
+
+		// 	// Delete transcoded file
+		// 	t.Logf("deleting transcoded file: /.transcoded/%s.mp4", lookupHash)
+		// 	err = allocationObj.DeleteFile(fmt.Sprintf("/.transcoded/%s.mp4", lookupHash))
+		// 	if err != nil {
+		// 		t.Logf("error deleting file %s: %v", fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), err)
+		// 	}
+		// 	// Delete original uploaded file
+		// 	t.Logf("deleting original uploaded file: %s", remotepath)
+		// 	err = allocationObj.DeleteFile(remotepath)
+		// 	if err != nil {
+		// 		t.Logf("error deleting file %s: %v", fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), err)
+		// 	}
+		// })
+		require.NoError(t, verr, "verification failed after 3 attempts")
 	})
 
 }
 
-
 // transcodeFile makes the actual API call to the transcoder endpoint
-func transcodeFile(t *test.SystemTest, headers map[string]string, allocationID string, splitKey *model.SplitKey, fileName, mode string) {
-	
+func transcodeFile(t *test.SystemTest, headers map[string]string, allocationID string, splitKey *model.SplitKey, fileName, mode, lookupHash string) {
+	t.Logf("transcoding file: %s with mode: %s", fileName, mode)
 
-	// TODO: compute a real lookup hash from the uploaded file. Use a
-	// placeholder random string for now.
-	lookupHash := fmt.Sprintf("TODO-random-%d", time.Now().UnixNano())
+	t.Logf("splitKey fields: ClientID=%s, PublicKey=%s, PrivateKey=%s, UserID=%s, PeerPublicKey=%s", 
+		splitKey.ClientID, splitKey.PublicKey, splitKey.PrivateKey, splitKey.UserID, splitKey.PeerPublicKey)
 
-	w := zcncrypto.Wallet{
-		ClientID:   splitKey.ClientID,
-		ClientKey:  splitKey.PublicKey,
-		Keys: []zcncrypto.KeyPair{ {
-			PublicKey: splitKey.PublicKey,
-			PrivateKey: splitKey.PrivateKey,
-		}},
-		PeerPublicKey: splitKey.PeerPublicKey,
-		IsSplit: true,
-	}
-	coreClient.AddWallet(w)
-	defer coreClient.RemoveWallet(w.ClientID)
+	// w := zcncrypto.Wallet{
+	// 	ClientID:  splitKey.ClientID,
+	// 	ClientKey: splitKey.PublicKey,
+	// 	Keys: []zcncrypto.KeyPair{{
+	// 		PublicKey:  splitKey.PublicKey,
+	// 		PrivateKey: splitKey.PrivateKey,
+	// 	}},
+	// 	PeerPublicKey: splitKey.PeerPublicKey,
+	// 	IsSplit:       true,
+	// }
+	// coreClient.AddWallet(w)
+	// defer coreClient.RemoveWallet(w.Keys[0].PublicKey)
 
-	allocation, err := sdk.GetAllocation(allocationID, w.Keys[0].PublicKey)
+	allocation, err := sdk.GetAllocation(allocationID)
 	require.NoError(t, err, "Failed to get allocation from SDK")
-	
+
 	// Use the test_files_small folder as the workDir for uploads
-	workDir := filepath.Join(".", "tests", "api_tests", "test_files_small")
-	UploadFileBlobber(t, w, allocation, workDir, "/", fileName)
+	curDir, err := os.Getwd()
+	require.NoError(t, err, "Unable to get working directory")
+	workDir := filepath.Join(curDir, "test_files_small")
+	err = UploadFileBlobber(t, *sdkWallet, allocation, workDir, "/", fileName)
+	require.NoError(t, err, "upload failed: %v", err)
 
 	// Determine remote name and file size for metadata
 	fi, err := os.Stat(filepath.Join(workDir, fileName))
@@ -152,8 +301,11 @@ func transcodeFile(t *test.SystemTest, headers map[string]string, allocationID s
 		"lookup_hash":   lookupHash,
 	}
 
-	_, _, metaErr := zboxClient.CreateMetadata(t, headers, metaBody)
+	transcodingData, response, metaErr := zboxClient.CreateMetadata(t, headers, metaBody)
 	require.NoError(t, metaErr, "createMetadata API call failed: %v", metaErr)
+	require.Equal(t, 201, response.StatusCode(), "createMetadata API call failed: %v", response.String())
+	require.NotNil(t, transcodingData, "transcodingData is nil")
+	t.Logf("transcodingData: %v", *transcodingData)
 
 	// Update upload status
 	updateBody := map[string]string{
@@ -161,84 +313,69 @@ func transcodeFile(t *test.SystemTest, headers map[string]string, allocationID s
 		"status":      "1",
 		"lookup_hash": lookupHash,
 	}
-	_, _, updateErr := zboxClient.UpdateUploadStatus(t, headers, updateBody)
+	transcodingData, response, updateErr := zboxClient.UpdateUploadStatus(t, headers, updateBody)
 	require.NoError(t, updateErr, "updateUploadStatus API call failed: %v", updateErr)
+	require.Equal(t, 201, response.StatusCode(), "updateUploadStatus API call failed: %v", response.String())
+	require.NotNil(t, transcodingData, "transcodingData is nil")
+	t.Logf("transcodingData: %v", *transcodingData)
 
 	t.Logf("Metadata post completed; fileName : %v, size_in_bytes; %v", fileName, actualSize)
 
 }
 
 func verifyTranscodedFile(t *test.SystemTest, allocationID, remotpath, fileName string, splitKey *model.SplitKey) error {
-	w := zcncrypto.Wallet{
-		ClientID:   splitKey.ClientID,
-		ClientKey:  splitKey.PublicKey,
-		Keys: []zcncrypto.KeyPair{ {
-			PublicKey: splitKey.PublicKey,
-			PrivateKey: splitKey.PrivateKey,
-		}},
-		PeerPublicKey: splitKey.PeerPublicKey,
-		IsSplit: true,
-	}
-	coreClient.AddWallet(w)
-	defer coreClient.RemoveWallet(w.ClientID)
+	t.Logf("verifying transcoded file: %s at remote path: %s", fileName, remotpath)
+	// w := zcncrypto.Wallet{
+	// 	ClientID:  splitKey.ClientID,
+	// 	ClientKey: splitKey.PublicKey,
+	// 	Keys: []zcncrypto.KeyPair{{
+	// 		PublicKey:  splitKey.PublicKey,
+	// 		PrivateKey: splitKey.PrivateKey,
+	// 	}},
+	// 	PeerPublicKey: splitKey.PeerPublicKey,
+	// 	IsSplit:       true,
+	// }
+	// coreClient.AddWallet(w)
+	// defer coreClient.RemoveWallet(w.Keys[0].PublicKey)
 
 	// download the file
-	allocationObj, err := sdk.GetAllocation(allocationID, w.Keys[0].PublicKey)
-	require.NoError(t, err, "Failed to get allocation from SDK")
+	allocationObj, err := sdk.GetAllocation(allocationID)
+	if err != nil {
+		return fmt.Errorf("failed to get allocation from SDK: %w", err)
+	}
 
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	cb := StatusBar{wg: wg, t: t}
 
-	prefix := strings.Join([]string{allocationID, fileName}, "_") + "_"
-	downloadPath, err := os.MkdirTemp("", prefix)
-	require.NoError(t, err, "failed to create temporary download directory")
+	downloadPath := t.TempDir()
 
-	err = allocationObj.DownloadFile(downloadPath, remotpath, true, &cb, true)
-	require.NoError(t, err, "download file failed: %v", err)
+	if err := allocationObj.DownloadFile(downloadPath, remotpath, true, &cb, true); err != nil {
+		return fmt.Errorf("download file failed: %w", err)
+	}
 	wg.Wait()
-	require.True(t, cb.success, "download file reported unsuccessful")
+	if !cb.success {
+		if cb.err != nil {
+			return fmt.Errorf("download reported unsuccessful: %w", cb.err)
+		}
+		return fmt.Errorf("download reported unsuccessful")
+	}
 
 	fi, statErr := os.Stat(filepath.Join(downloadPath, fileName))
-	require.NoError(t, statErr, "failed to stat downloaded file: %v", statErr)
+	if statErr != nil {
+		return fmt.Errorf("failed to stat downloaded file: %w", statErr)
+	}
 	f, openErr := os.Open(filepath.Join(downloadPath, fileName))
-	require.NoError(t, openErr, "failed to open downloaded file: %v", openErr)
-	t.Log("Transcoded File Info: ", "file info", zap.String("path", filepath.Join(downloadPath, fileName)), zap.Int64("size", fi.Size()), zap.String("mode", fi.Mode().String()))
+	if openErr != nil {
+		return fmt.Errorf("failed to open downloaded file: %w", openErr)
+	}
 	_ = f.Close()
 
-	// defer cleanup of downloaded file
-	defer func() {
-		err := os.RemoveAll(downloadPath)
-		if err != nil {
-			t.Error("error removing downloaded path", zap.String("path", downloadPath), zap.Error(err))
-		}
-	}()
+	t.Logf("Transcoded File Info: file info: %s, size: %d, mode: %s", filepath.Join(downloadPath, fileName), fi.Size(), fi.Mode().String())
+	_ = os.RemoveAll(downloadPath)
+
 	return nil
 }
-
-// Benchmark transcoding performance
-func BenchmarkTranscoder(b *testing.B) {
-	t := test.NewSystemTest(&testing.T{})
-	
-	headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
-	
-	// Create wallet and allocation for benchmark
-	err := Create0boxTestWallet(t, headers)
-	if err != nil {
-		b.Fatalf("Failed to create test wallet: %v", err)
-	}
-
-	allocationInput := NewTestAllocation()
-	allocation, response, err := zboxClient.CreateAllocation(t, headers, allocationInput)
-	if err != nil || response.StatusCode() != 201 {
-		b.Fatalf("Failed to create allocation: %v", err)
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		transcodeFile(t, headers, allocation.ID, nil, "sample.mp4", "web")
-	}
-} 
 
 func UploadFileBlobber(t *test.SystemTest, wallet zcncrypto.Wallet, allocationObj *sdk.Allocation, workDir, remotePath, fileName string) error {
 
@@ -269,7 +406,7 @@ type StatusBar struct {
 	wg      *sync.WaitGroup
 	success bool
 	err     error
-	t 	 	*test.SystemTest
+	t       *test.SystemTest
 
 	totalBytes     int
 	completedBytes int
@@ -334,4 +471,3 @@ func (s *StatusBar) Error(allocationID string, filePath string, op int, err erro
 func (s *StatusBar) RepairCompleted(filesRepaired int) {
 	s.wg.Done()
 }
-

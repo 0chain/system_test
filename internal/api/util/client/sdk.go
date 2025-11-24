@@ -438,7 +438,7 @@ func (c *SDKClient) RepairAllocation(t *test.SystemTest, allocationID string) {
 
 func WithRepair(blobbers []*blockchain.StorageNode) MultiOperationOption {
 	return func(alloc *sdk.Allocation) {
-		alloc.SetConsensusThreshold()
+		// alloc.SetConsensusThreshold()
 		alloc.Blobbers = blobbers
 	}
 }

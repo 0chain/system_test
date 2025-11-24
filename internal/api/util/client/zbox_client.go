@@ -173,6 +173,11 @@ func (c *ZboxClient) CreateWallet(t *test.SystemTest, headers, wallet map[string
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/wallet")
 
+	// t.Logf("wallet input: %v", wallet)
+	// t.Logf("CreateWallet URL: %v", urlBuilder.String())
+	// t.Logf("CreateWallet Headers: %v", headers)
+	// t.Logf("CreateWallet Wallet: %v", wallet)
+
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:                &zboxWallet,
 		FormData:           wallet,
@@ -1358,7 +1363,7 @@ func (c *ZboxClient) CreateMetadata(t *test.SystemTest, headers map[string]strin
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:                &res,
 		Headers:            headers,
-		Body:               body,
+		FormData:            body,
 		RequiredStatusCode: 201,
 	}, HttpPOSTMethod)
 
@@ -1379,8 +1384,8 @@ func (c *ZboxClient) UpdateUploadStatus(t *test.SystemTest, headers map[string]s
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:                &res,
 		Headers:            headers,
-		Body:               body,
-		RequiredStatusCode: 200,
+		FormData:               body,
+		RequiredStatusCode: 201,
 	}, HttpPUTMethod)
 
 	return res, resp, err
