@@ -136,7 +136,7 @@ func Test0BoxTranscoder(testSetup *testing.T) {
 	// Run transcode subtests (they will run in parallel because RunSequentially now delegates to Run)
 	timeout := 3 * time.Minute
 	sleepTime := 20 * time.Second
-	t.RunSequentiallyWithTimeout("Transcode MP4 file with web mode", timeout, func(t *test.SystemTest) {
+	t.RunWithTimeout("Transcode MP4 file with web mode", timeout, func(t *test.SystemTest) {
 		// Test MP4 transcoding
 		lookupHash := fmt.Sprintf("TODO-random-%d", time.Now().UnixNano())
 		remotepath := "/sample.mp4"
@@ -154,29 +154,10 @@ func Test0BoxTranscoder(testSetup *testing.T) {
 			t.Logf("verification attempt %d failed: %v, sleeping %s before retry", i+1, verr, sleepTime)
 			time.Sleep(sleepTime)
 		}
-
-		// t.Cleanup(func() {
-		// 	allocationObj, err := sdk.GetAllocation(allocationID)
-		// 	require.NoError(t, err, "Failed to get allocation from SDK")
-
-		// 	// Delete transcoded file
-		// 	t.Logf("deleting transcoded file: /.transcoded/%s.mp4", lookupHash)
-		// 	err = allocationObj.DeleteFile(fmt.Sprintf("/.transcoded/%s.mp4", lookupHash))
-		// 	if err != nil {
-		// 		t.Logf("error deleting file %s: %v", fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), err)
-		// 	}
-		// 	// Delete original uploaded file
-		// 	t.Logf("deleting original uploaded file: %s", remotepath)
-		// 	err = allocationObj.DeleteFile(remotepath)
-		// 	if err != nil {
-		// 		t.Logf("error deleting file %s: %v", fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), err)
-		// 	}
-		// })
 		require.NoError(t, verr, "verification failed after 3 attempts")
 	})
 
-	t.RunSequentiallyWithTimeout("Transcode AVI file with web mode", timeout, func(t *test.SystemTest) {
-		// t.Skip("Skipping AVI transcoding test")
+	t.RunWithTimeout("Transcode AVI file with web mode", timeout, func(t *test.SystemTest) {
 		// Test AVI transcoding
 		lookupHash := fmt.Sprintf("TODO-random-%d", time.Now().UnixNano())
 		remotepath := "/sample.avi"
@@ -194,28 +175,10 @@ func Test0BoxTranscoder(testSetup *testing.T) {
 			t.Logf("verification attempt %d failed: %v, sleeping %s before retry", i+1, verr, sleepTime)
 			time.Sleep(sleepTime)
 		}
-		// t.Cleanup(func() {
-		// 	allocationObj, err := sdk.GetAllocation(allocationID)
-		// 	require.NoError(t, err, "Failed to get allocation from SDK")
-
-		// 	// Delete transcoded file
-		// 	t.Logf("deleting transcoded file: /.transcoded/%s.mp4", lookupHash)
-		// 	err = allocationObj.DeleteFile(fmt.Sprintf("/.transcoded/%s.mp4", lookupHash))
-		// 	if err != nil {
-		// 		t.Logf("error deleting file %s: %v", fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), err)
-		// 	}
-		// 	// Delete original uploaded file
-		// 	t.Logf("deleting original uploaded file: %s", remotepath)
-		// 	err = allocationObj.DeleteFile(remotepath)
-		// 	if err != nil {
-		// 		t.Logf("error deleting file %s: %v", fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), err)
-		// 	}
-		// })
 		require.NoError(t, verr, "verification failed after 3 attempts")
 	})
 
-	t.RunSequentiallyWithTimeout("Transcode MOV file with web mode", timeout, func(t *test.SystemTest) {
-		// t.Skip("Skipping MOV transcoding test)
+	t.RunWithTimeout("Transcode MOV file with web mode", timeout, func(t *test.SystemTest) {
 		// Test MOV transcoding
 		lookupHash := fmt.Sprintf("TODO-random-%d", time.Now().UnixNano())
 		remotepath := "/sample.mov"
@@ -233,23 +196,6 @@ func Test0BoxTranscoder(testSetup *testing.T) {
 			t.Logf("verification attempt %d failed: %v, sleeping %s before retry", i+1, verr, sleepTime)
 				time.Sleep(sleepTime)
 		}
-		// t.Cleanup(func() {
-		// 	allocationObj, err := sdk.GetAllocation(allocationID)
-		// 	require.NoError(t, err, "Failed to get allocation from SDK")
-
-		// 	// Delete transcoded file
-		// 	t.Logf("deleting transcoded file: /.transcoded/%s.mp4", lookupHash)
-		// 	err = allocationObj.DeleteFile(fmt.Sprintf("/.transcoded/%s.mp4", lookupHash))
-		// 	if err != nil {
-		// 		t.Logf("error deleting file %s: %v", fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), err)
-		// 	}
-		// 	// Delete original uploaded file
-		// 	t.Logf("deleting original uploaded file: %s", remotepath)
-		// 	err = allocationObj.DeleteFile(remotepath)
-		// 	if err != nil {
-		// 		t.Logf("error deleting file %s: %v", fmt.Sprintf("/.transcoded/%s.mp4", lookupHash), err)
-		// 	}
-		// })
 		require.NoError(t, verr, "verification failed after 3 attempts")
 	})
 
