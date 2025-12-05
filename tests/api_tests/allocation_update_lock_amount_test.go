@@ -230,6 +230,8 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 	t.RunWithTimeout("Extend Allocation Size", 1*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
+		sdkClient.SetWallet(t, wallet)
+
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 1 * GB
 		blobberRequirements.DataShards = 1

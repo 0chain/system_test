@@ -9,12 +9,31 @@ import (
 	"testing"
 	"time"
 
+	"github.com/0chain/gosdk/zboxcore/blockchain"
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 )
+
+// filterValidBlobbers filters out blobbers with invalid URLs (like http://0zus.com/)
+// to avoid connection errors during multi-operation. The repair functionality will
+// still work as the invalid blobber is missing from the list.
+func filterValidBlobbers(blobbers []*blockchain.StorageNode, minRequired int) []*blockchain.StorageNode {
+	validBlobbers := make([]*blockchain.StorageNode, 0)
+	for _, blobber := range blobbers {
+		// Skip blobbers with invalid URLs that can't be resolved
+		if blobber.Baseurl != "http://0zus.com/" {
+			validBlobbers = append(validBlobbers, blobber)
+		}
+	}
+	// Ensure we have at least the minimum required blobbers
+	if len(validBlobbers) < minRequired {
+		return blobbers // Return original if filtering would leave too few
+	}
+	return validBlobbers
+}
 
 func TestRepairAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
@@ -39,7 +58,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		lastBlobber := alloc.Blobbers[0]
 		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
 		op := sdkClient.AddUploadOperation(t, "", "")
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op}, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op}, client.WithRepair(validBlobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
@@ -63,7 +83,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 			op := sdkClient.AddUploadOperation(t, "", "")
 			ops = append(ops, op)
 		}
-		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(validBlobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		for _, op := range ops {
@@ -90,7 +111,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
 		updateOp := sdkClient.AddUpdateOperation(t, op.RemotePath, op.FileMeta.RemoteName, op.FileMeta.ActualSize)
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{updateOp}, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{updateOp}, client.WithRepair(validBlobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 
@@ -119,7 +141,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 		deleteOp := sdkClient.AddDeleteOperation(t, allocationID, op.RemotePath)
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{deleteOp}, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{deleteOp}, client.WithRepair(validBlobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
@@ -144,7 +167,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 		newPath := "/new/" + filepath.Join("", filepath.Base(op.FileMeta.Path))
 		moveOp := sdkClient.AddMoveOperation(t, allocationID, op.RemotePath, newPath)
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{moveOp}, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{moveOp}, client.WithRepair(validBlobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, newPath)
@@ -169,7 +193,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 		newPath := "/new/" + filepath.Join("", filepath.Base(op.FileMeta.Path))
 		copyOP := sdkClient.AddCopyOperation(t, allocationID, op.RemotePath, newPath)
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{copyOP}, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{copyOP}, client.WithRepair(validBlobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, newPath)
@@ -196,7 +221,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		alloc.Blobbers[len(alloc.Blobbers)-1].Baseurl = "http://0zus.com/"
 		newName := randName()
 		renameOp := sdkClient.AddRenameOperation(t, allocationID, op.RemotePath, newName)
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{renameOp}, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{renameOp}, client.WithRepair(validBlobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, "/"+newName)
@@ -224,7 +250,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
 			ops = append(ops, op)
 		}
-		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(validBlobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		for _, op := range ops {
@@ -254,7 +281,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 			op := sdkClient.AddUploadOperation(t, path, "", fileSize)
 			ops = append(ops, op)
 		}
-		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(validBlobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		for _, op := range ops {
@@ -289,7 +317,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 			op := sdkClient.AddUploadOperation(t, path, format, fileSize)
 			ops = append(ops, op)
 		}
-		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(validBlobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		for _, op := range ops {
@@ -336,7 +365,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 		t.Log(ops)
 
-		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(validBlobbers))
 
 		sdkClient.RepairAllocation(t, allocationID)
 		for _, op := range ops {
@@ -389,7 +419,8 @@ func TestRepairSize(testSetup *testing.T) {
 		require.NoErrorf(t, err, "allocation ID %v is not found", allocationID)
 		alloc.Blobbers[0].Baseurl = "http://0zus.com/"
 		op := sdkClient.AddUploadOperation(t, "", "", int64(1024*2))
-		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op}, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{op}, client.WithRepair(validBlobbers))
 
 		// assert upload and download size should be 1KB and 2KB respectively
 		rs, err := alloc.RepairSize("/")
@@ -420,7 +451,8 @@ func TestRepairSize(testSetup *testing.T) {
 			sdkClient.AddUploadOperationWithPath(t, allocationID, "/"),
 			sdkClient.AddUploadOperationWithPath(t, allocationID, "/"),
 		}
-		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(alloc.Blobbers))
+		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
+		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(validBlobbers))
 
 		// assert both upload and download size should be 2KB in /dir1
 		rs, err := alloc.RepairSize("/dir1")

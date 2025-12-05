@@ -64,6 +64,36 @@ func (c *ZboxClient) NewZboxCSRFHeaders(appType string) map[string]string {
 	return zboxHeaders
 }
 
+func (c *ZboxClient) NewZboxCSRFHeadersWithToken(t *test.SystemTest, appType string) (map[string]string, error) {
+	csrfToken, _, err := c.GetCSRFToken(t)
+	if err != nil {
+		return nil, err
+	}
+	zboxHeaders := map[string]string{
+		"X-App-User-ID": X_APP_USER_ID,
+		"X-CSRF-TOKEN":  csrfToken.CSRFToken,
+		"X-APP-TYPE":    appType,
+	}
+	return zboxHeaders, nil
+}
+
+// NewZboxCSRFHeadersWithCSRF fetches a CSRF token and creates headers with it
+// This should be used instead of NewZboxCSRFHeaders when making requests to dev.zus.network or production
+func (c *ZboxClient) NewZboxCSRFHeadersWithCSRF(t *test.SystemTest, appType string) map[string]string {
+	csrfToken, _, err := c.GetCSRFToken(t)
+	if err != nil {
+		// Fall back to hardcoded token if fetching fails (for backward compatibility)
+		t.Logf("Warning: Failed to fetch CSRF token, using hardcoded token: %v", err)
+		return c.NewZboxCSRFHeaders(appType)
+	}
+	zboxHeaders := map[string]string{
+		"X-App-User-ID": X_APP_USER_ID,
+		"X-CSRF-TOKEN":  csrfToken.CSRFToken,
+		"X-APP-TYPE":    appType,
+	}
+	return zboxHeaders
+}
+
 func (c *ZboxClient) NewZboxHeaders(appType string) map[string]string {
 	zboxHeaders := map[string]string{
 		"X-App-Client-ID":        X_APP_CLIENT_ID,
@@ -78,6 +108,46 @@ func (c *ZboxClient) NewZboxHeaders(appType string) map[string]string {
 	return zboxHeaders
 }
 
+func (c *ZboxClient) NewZboxHeadersWithToken(t *test.SystemTest, appType string) (map[string]string, error) {
+	csrfToken, _, err := c.GetCSRFToken(t)
+	if err != nil {
+		return nil, err
+	}
+	zboxHeaders := map[string]string{
+		"X-App-Client-ID":        X_APP_CLIENT_ID,
+		"X-App-Client-Key":       X_APP_CLIENT_KEY,
+		"X-App-Timestamp":        X_APP_TIMESTAMP,
+		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
+		"X-App-User-ID":          X_APP_USER_ID,
+		"X-CSRF-TOKEN":           csrfToken.CSRFToken,
+		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+		"X-APP-TYPE":             appType,
+	}
+	return zboxHeaders, nil
+}
+
+// NewZboxHeadersWithCSRF fetches a CSRF token and creates headers with it
+// This should be used instead of NewZboxHeaders when making requests to dev.zus.network or production
+func (c *ZboxClient) NewZboxHeadersWithCSRF(t *test.SystemTest, appType string) map[string]string {
+	csrfToken, _, err := c.GetCSRFToken(t)
+	if err != nil {
+		// Fall back to hardcoded token if fetching fails (for backward compatibility)
+		t.Logf("Warning: Failed to fetch CSRF token, using hardcoded token: %v", err)
+		return c.NewZboxHeaders(appType)
+	}
+	zboxHeaders := map[string]string{
+		"X-App-Client-ID":        X_APP_CLIENT_ID,
+		"X-App-Client-Key":       X_APP_CLIENT_KEY,
+		"X-App-Timestamp":        X_APP_TIMESTAMP,
+		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
+		"X-App-User-ID":          X_APP_USER_ID,
+		"X-CSRF-TOKEN":           csrfToken.CSRFToken,
+		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE,
+		"X-APP-TYPE":             appType,
+	}
+	return zboxHeaders
+}
+
 func (c *ZboxClient) NewZboxHeaders_R(appType string) map[string]string {
 	zboxHeaders := map[string]string{
 		"X-App-Client-ID":        X_APP_CLIENT_ID_R,
@@ -86,6 +156,46 @@ func (c *ZboxClient) NewZboxHeaders_R(appType string) map[string]string {
 		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
 		"X-App-User-ID":          X_APP_USER_ID_R,
 		"X-CSRF-TOKEN":           X_APP_CSRF,
+		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
+		"X-APP-TYPE":             appType,
+	}
+	return zboxHeaders
+}
+
+func (c *ZboxClient) NewZboxHeaders_RWithToken(t *test.SystemTest, appType string) (map[string]string, error) {
+	csrfToken, _, err := c.GetCSRFToken(t)
+	if err != nil {
+		return nil, err
+	}
+	zboxHeaders := map[string]string{
+		"X-App-Client-ID":        X_APP_CLIENT_ID_R,
+		"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
+		"X-App-Timestamp":        X_APP_TIMESTAMP,
+		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
+		"X-App-User-ID":          X_APP_USER_ID_R,
+		"X-CSRF-TOKEN":           csrfToken.CSRFToken,
+		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
+		"X-APP-TYPE":             appType,
+	}
+	return zboxHeaders, nil
+}
+
+// NewZboxHeaders_RWithCSRF fetches a CSRF token and creates headers with it for referred users
+// This should be used instead of NewZboxHeaders_R when making requests to dev.zus.network or production
+func (c *ZboxClient) NewZboxHeaders_RWithCSRF(t *test.SystemTest, appType string) map[string]string {
+	csrfToken, _, err := c.GetCSRFToken(t)
+	if err != nil {
+		// Fall back to hardcoded token if fetching fails (for backward compatibility)
+		t.Logf("Warning: Failed to fetch CSRF token, using hardcoded token: %v", err)
+		return c.NewZboxHeaders_R(appType)
+	}
+	zboxHeaders := map[string]string{
+		"X-App-Client-ID":        X_APP_CLIENT_ID_R,
+		"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
+		"X-App-Timestamp":        X_APP_TIMESTAMP,
+		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
+		"X-App-User-ID":          X_APP_USER_ID_R,
+		"X-CSRF-TOKEN":           csrfToken.CSRFToken,
 		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
 		"X-APP-TYPE":             appType,
 	}
@@ -1342,4 +1452,21 @@ func (c *ZboxClient) GetTransactionsList(t *test.SystemTest, pitId string) (*mod
 	}, HttpGETMethod)
 
 	return &txnData, resp, err
+}
+
+func (c *ZboxClient) GetCSRFToken(t *test.SystemTest) (*model.CSRFToken, *resty.Response, error) {
+	t.Logf("Getting CSRF token from 0box...")
+	var csrfToken *model.CSRFToken
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/csrftoken")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &csrfToken,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	return csrfToken, resp, err
 }
