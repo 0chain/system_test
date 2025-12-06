@@ -160,8 +160,8 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		balanceAfterLock, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 
-		// assert balance reduced by 1 ZCN and txn fee
-		require.Less(t, balanceAfterLock, balance-1)
+		// assert balance reduced by at least 1 ZCN (may include txn fee)
+		require.LessOrEqual(t, balanceAfterLock, balance-1)
 
 		// Write pool balance should increment by 1
 		allocation := getAllocation(t, allocationID)

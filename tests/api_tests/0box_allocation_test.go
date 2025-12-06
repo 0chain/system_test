@@ -55,7 +55,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("List allocation with zero allocation should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
@@ -68,7 +68,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("List allocation with existing allocation should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
@@ -86,7 +86,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("multiple allocations with blimp argument should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
@@ -110,7 +110,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("multiple allocations with vult argument should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_VULT)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_VULT)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
@@ -128,7 +128,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Post allocation for chimney should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_CHIMNEY)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_CHIMNEY)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
@@ -141,7 +141,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Post allocation with already existing allocation Id should not  work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
@@ -158,7 +158,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get an allocation with allocation present should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
@@ -179,7 +179,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Get an allocation with allocation not present should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
@@ -193,7 +193,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update an allocation with allocation present should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
@@ -220,7 +220,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update an allocation with allocation not present should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
