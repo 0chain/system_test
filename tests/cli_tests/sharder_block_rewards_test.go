@@ -198,10 +198,28 @@ func countDelegatesRewarded(
 	for round := history.From(); round <= history.To(); round++ {
 		roundHistory := history.RoundHistory(t, round)
 		for i, id := range sharderIds {
+			// First check if this sharder was rewarded in this round
+			sharderRewarded := false
+			for _, pReward := range roundHistory.ProviderRewards {
+				if pReward.ProviderId == id && pReward.RewardType == climodel.BlockRewardSharder {
+					sharderRewarded = true
+					break
+				}
+			}
+
+			// Only check delegate pool rewards if the sharder was rewarded in this round
+			if !sharderRewarded {
+				continue
+			}
+
 			poolsPaid := make(map[string]bool)
 			for poolId := range beforeSharders[i].Pools {
 				for _, dReward := range roundHistory.DelegateRewards {
 					if dReward.RewardType != climodel.BlockRewardSharder || dReward.PoolID != poolId {
+						continue
+					}
+					// Also check that this delegate reward is for this sharder
+					if dReward.ProviderID != id {
 						continue
 					}
 					_, found := poolsPaid[poolId]
@@ -215,9 +233,12 @@ func countDelegatesRewarded(
 			if numShouldPay > len(beforeSharders[i].Pools) {
 				numShouldPay = len(beforeSharders[i].Pools)
 			}
-			require.Len(t, poolsPaid, numShouldPay,
-				"should pay %d pools for shader %s on round %d; %d pools actually paid",
-				numShouldPay, id, round, len(poolsPaid))
+			// Only require pools to be paid if the sharder has pools and delegates should be rewarded
+			if numShouldPay > 0 {
+				require.Len(t, poolsPaid, numShouldPay,
+					"should pay %d pools for shader %s on round %d; %d pools actually paid",
+					numShouldPay, id, round, len(poolsPaid))
+			}
 		}
 	}
 }

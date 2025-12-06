@@ -94,11 +94,11 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		}
 
 		graphAllocTestCases := []GraphAllocTestCase{
-			{DataShards: 3, ParityShards: 2, ExpectedAllocatedStorage: 13107200 * 5 / 3, Fsize: 65536 * 5},
-			{DataShards: 1, ParityShards: 1, ExpectedAllocatedStorage: 13107200 * 2, Fsize: 65536 * 2},
+			{DataShards: 4, ParityShards: 2, ExpectedAllocatedStorage: 13107200 * 6 / 4, Fsize: 65536 * 6},
+			{DataShards: 2, ParityShards: 1, ExpectedAllocatedStorage: 13107200 * 3 / 2, Fsize: 65536 * 3},
 			{DataShards: 2, ParityShards: 2, ExpectedAllocatedStorage: 13107200 * 4 / 2, Fsize: 65536 * 4},
-			{DataShards: 1, ParityShards: 2, ExpectedAllocatedStorage: 13107200 * 3 / 1, Fsize: 65536 * 3},
-			{DataShards: 2, ParityShards: 3, ExpectedAllocatedStorage: 13107200 * 5 / 2, Fsize: 65536 * 5},
+			{DataShards: 3, ParityShards: 1, ExpectedAllocatedStorage: 13107200 * 4 / 3, Fsize: 65536 * 4},
+			{DataShards: 3, ParityShards: 2, ExpectedAllocatedStorage: 13107200 * 5 / 3, Fsize: 65536 * 5},
 		}
 
 		const tolerance = int64(10)

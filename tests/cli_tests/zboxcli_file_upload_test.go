@@ -784,9 +784,27 @@ func TestUpload(testSetup *testing.T) {
 		unit := strings.Fields(output[0])[1]
 		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
 
+		// Wait for write pool balance to be updated - poll until it changes
 		cliutils.Wait(t, 30*time.Second)
-
-		finalAllocation := getAllocation(t, allocationID)
+		var finalAllocation climodel.Allocation
+		maxWait := time.Minute * 2
+		startTime := time.Now()
+		pollInterval := time.Second * 10
+		writePoolUpdated := false
+		for !writePoolUpdated {
+			if time.Since(startTime) > maxWait {
+				t.Logf("Timeout waiting for write pool balance to update after %v", maxWait)
+				break
+			}
+			finalAllocation = getAllocation(t, allocationID)
+			totalChangeInWritePool := intToZCN(initialAllocation.WritePool - finalAllocation.WritePool)
+			// Check if write pool has decreased or challenge pool has moved tokens
+			if totalChangeInWritePool > 0 || intToZCN(finalAllocation.MovedToChallenge) > 0 {
+				writePoolUpdated = true
+			} else {
+				cliutils.Wait(t, pollInterval)
+			}
+		}
 
 		// Get Challenge-Pool info after upload
 		output, err = challengePoolInfo(t, configPath, allocationID)
