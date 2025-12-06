@@ -179,7 +179,27 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 	t.RunSequentially("update no params should work", func(t *test.SystemTest) {
 		createWallet(t)
 
-		output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}))
+		// Get current blobber info to check if delegate wallet matches blobberOwnerWallet
+		output, err := getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+
+		var currentBlobberInfo climodel.BlobberDetails
+		err = json.Unmarshal([]byte(output[0]), &currentBlobberInfo)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		// If delegate wallet was changed by a previous test, revert it to the original
+		if currentBlobberInfo.StakePoolSettings.DelegateWallet != intialBlobberInfo.StakePoolSettings.DelegateWallet {
+			// Revert to original delegate wallet using the managing wallet (blobberOwnerWallet should be the managing wallet)
+			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{
+				"blobber_id":      intialBlobberInfo.ID,
+				"delegate_wallet": intialBlobberInfo.StakePoolSettings.DelegateWallet,
+			}))
+			require.Nil(t, err, "error reverting delegate wallet: %v", strings.Join(output, "\n"))
+		}
+
+		// Now update with no params - this should work with blobberOwnerWallet
+		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID}))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 

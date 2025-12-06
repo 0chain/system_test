@@ -24,7 +24,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		"GetObjects should return 200 all the parameter are correct",
 		"RemoveObject should return 200 all the parameter are correct")
 
-	t.Run("Zs3 server should return 500 when the action doesn't exist", func(t *test.SystemTest) {
+	t.RunSequentially("Zs3 server should return 500 when the action doesn't exist", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
@@ -35,7 +35,7 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		require.Equal(t, 500, resp.StatusCode())
 	})
 
-	t.Run("zs3 server should return 500 when the credentials aren't correct", func(t *test.SystemTest) {
+	t.RunSequentially("zs3 server should return 500 when the credentials aren't correct", func(t *test.SystemTest) {
 		queryParams := map[string]string{
 			"accessKey":       "wrong-access-key",
 			"secretAccessKey": SecretAccessKey,
@@ -175,14 +175,26 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("RemoveObject should not return error if object doen't exist", func(t *test.SystemTest) {
+		// Ensure the bucket exists first
 		queryParams := map[string]string{
+			"accessKey":       AccessKey,
+			"secretAccessKey": SecretAccessKey,
+			"action":          "createBucket",
+			"bucketName":      "system-test",
+		}
+		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
+		require.Nil(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+
+		// Now try to remove a non-existent object
+		queryParams = map[string]string{
 			"accessKey":       AccessKey,
 			"secretAccessKey": SecretAccessKey,
 			"action":          "removeObject",
 			"bucketName":      "system-test",
 			"objectName":      "file name created as a part of " + t.Name(),
 		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
+		resp, err = zs3Client.BucketOperation(t, queryParams, map[string]string{})
 		require.Nil(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 	})

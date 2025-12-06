@@ -32,6 +32,9 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 
 		time.Sleep(10 * time.Second)
 
+		// Re-set wallet to ensure SDK context is correct after chimneySdkClient operation
+		sdkClient.SetWallet(t, wallet)
+
 		uar := &model.UpdateAllocationRequest{
 			ID:   allocationID,
 			Size: 1 * GB,
@@ -155,6 +158,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 
 	t.RunWithTimeout("Add blobber to allocation", 1*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 1 * GB

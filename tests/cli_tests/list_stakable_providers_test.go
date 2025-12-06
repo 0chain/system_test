@@ -2,11 +2,13 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/0chain/system_test/internal/cli/model"
@@ -24,7 +26,7 @@ func TestGetStakableProviders(testSetup *testing.T) {
 		// Get a stakable miner from the list
 		stakableMinersBefore := getStakableMinersList(t)
 		require.NotEmpty(t, stakableMinersBefore.Nodes, "No stakable miners found")
-		
+
 		// Try to use miner01ID if it exists in the list, otherwise use the first available miner
 		selectedMinerID := stakableMinersBefore.Nodes[0].ID
 		hasMiner01 := false
@@ -37,11 +39,11 @@ func TestGetStakableProviders(testSetup *testing.T) {
 		}
 		log.Printf("Selected miner ID: %s (miner01ID found: %v)", selectedMinerID, hasMiner01)
 
-		// count number of delegates
-		output, err := minerInfo(t, configPath, createParams(map[string]interface{}{
+		// count number of delegates - use test wallet for miner info
+		output, err := minerInfoForWallet(t, configPath, createParams(map[string]interface{}{
 			"id": selectedMinerID,
-		}), true)
-		require.Nilf(t, err, "error fetching miner info: %v", err)
+		}), escapedTestName(t), true)
+		require.Nilf(t, err, "error fetching miner info for miner %s: %v", selectedMinerID, err)
 		require.Len(t, output, 1)
 		var minerInfo1 model.Node
 		err = json.Unmarshal([]byte(output[0]), &minerInfo1)
@@ -402,4 +404,9 @@ func getStakableValidatorList(t *test.SystemTest) []model.Validator {
 	require.Nilf(t, err, "error unmarshalling validators list: %v", err)
 	require.NotEmpty(t, validators, "No validators found in validators list")
 	return validators
+}
+
+func minerInfoForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
+	t.Log("Fetching miner node info...")
+	return cliutil.RunCommand(t, fmt.Sprintf("./zwallet mn-info %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second*2)
 }
