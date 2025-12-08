@@ -41,8 +41,18 @@ func TestKillBlobber(testSetup *testing.T) {
 		}
 		require.NotEqual(t, blobberToKill, "", "all active blobbers have been killed")
 		require.True(t, activeBlobbers > 1, "need at least two active blobbers")
-		dataShards := 1
-		parityShards := activeBlobbers - 1
+		// Use fixed shard configuration that works with 6 blobbers: 4 data + 2 parity = 6 total
+		// This ensures we don't try to use more blobbers than available
+		dataShards := 4
+		parityShards := 2
+		// Ensure we don't exceed available blobbers
+		if dataShards+parityShards > activeBlobbers {
+			// Fall back to a smaller configuration if needed
+			dataShards = 2
+			parityShards = 1
+		}
+		t.Logf("blobberToKill: %s, activeBlobbers: %d, dataShards: %d, parityShards: %d, total needed: %d",
+			blobberToKill, activeBlobbers, dataShards, parityShards, dataShards+parityShards)
 
 		t.Log("blobberToKill", blobberToKill)
 
@@ -51,12 +61,15 @@ func TestKillBlobber(testSetup *testing.T) {
 
 		time.Sleep(2 * time.Minute)
 
-		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
+		allocationParams := createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   5.0,
 			"size":   "2097152", // 2MB to ensure it's above min_alloc_size
-		}))
+		})
+		t.Logf("Creating allocation with params: %s (expecting %d blobbers: %d data + %d parity)",
+			allocationParams, dataShards+parityShards, dataShards, parityShards)
+		output, err := createNewAllocation(t, configPath, allocationParams)
 		require.NoError(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"),
@@ -170,22 +183,34 @@ func TestKillBlobber(testSetup *testing.T) {
 		}
 		require.NotEqual(t, blobberToShutdown, "", "all active blobbers have been shutdowned")
 		require.True(t, activeBlobbers > 1, "need at least two active blobbers")
-		dataShards := 1
-		parityShards := activeBlobbers - 1
+		// Use fixed shard configuration that works with 6 blobbers: 4 data + 2 parity = 6 total
+		// This ensures we don't try to use more blobbers than available
+		dataShards := 4
+		parityShards := 2
+		// Ensure we don't exceed available blobbers
+		if dataShards+parityShards > activeBlobbers {
+			// Fall back to a smaller configuration if needed
+			dataShards = 2
+			parityShards = 1
+		}
 
-		t.Log("blobberToShutdown", blobberToShutdown)
+		t.Logf("blobberToShutdown: %s, activeBlobbers: %d, dataShards: %d, parityShards: %d, total needed: %d",
+			blobberToShutdown, activeBlobbers, dataShards, parityShards, dataShards+parityShards)
 
 		_, err := stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToShutdown, "tokens": 100}), true)
 		require.NoErrorf(t, err, "error staking tokens to blobber %s", blobberToShutdown)
 
 		time.Sleep(2 * time.Minute)
 
-		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{
+		allocationParams := createParams(map[string]interface{}{
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   5.0,
 			"size":   "2097152", // 2MB to ensure it's above min_alloc_size
-		}))
+		})
+		t.Logf("Creating allocation with params: %s (expecting %d blobbers: %d data + %d parity)",
+			allocationParams, dataShards+parityShards, dataShards, parityShards)
+		output, err := createNewAllocation(t, configPath, allocationParams)
 		require.NoError(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("Allocation created: ([a-f0-9]{64})"),

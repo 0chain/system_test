@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -52,7 +53,19 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 			value, ok := settings.Numeric[name]
 			require.True(t, ok, "unrecognized setting", name)
 			resetChanges[name] = strconv.FormatFloat(value, 'f', 10, 64)
-			newChanges[name] = strconv.FormatFloat(value+0.1, 'f', 10, 64)
+			// Some float settings have max value of 1.0 (validator_reward, blobber_slash, cancellation_charge, max_charge, read_pool_fraction, kill_slash)
+			// If adding 0.1 would exceed 1.0, decrease by 0.1 instead
+			var newValue float64
+			if value >= 0.9 {
+				// Value is close to max, decrease instead
+				newValue = value - 0.1
+				if newValue < 0 {
+					newValue = 0 // Ensure non-negative
+				}
+			} else {
+				newValue = value + 0.1
+			}
+			newChanges[name] = strconv.FormatFloat(newValue, 'f', 10, 64)
 			expectedChange.Numeric[name], err = strconv.ParseFloat(newChanges[name], 64)
 			require.NoError(t, err)
 		}
@@ -60,7 +73,21 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 			value, ok := settings.Numeric[name]
 			require.True(t, ok, "unrecognized setting", name)
 			resetChanges[name] = strconv.FormatFloat(value, 'f', 10, 64)
-			newChanges[name] = strconv.FormatFloat(value+0.1, 'f', 10, 64)
+			// Currency values are converted to Coin (uint64) with max math.MaxInt64 / 1e10
+			// If value is already very large, adding 0.1 might exceed the limit
+			// Use a smaller increment or decrease if near max
+			var newValue float64
+			maxCurrencyValue := float64(math.MaxInt64) / 1e10 // Max ZCN value that can be represented
+			if value >= maxCurrencyValue-1.0 {
+				// Value is close to max, decrease instead
+				newValue = value - 0.1
+				if newValue < 0 {
+					newValue = 0 // Ensure non-negative
+				}
+			} else {
+				newValue = value + 0.1
+			}
+			newChanges[name] = strconv.FormatFloat(newValue, 'f', 10, 64)
 			expectedChange.Numeric[name], err = strconv.ParseFloat(newChanges[name], 64)
 			require.NoError(t, err)
 		}

@@ -91,7 +91,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"size": "1024",
+			"size": "2048", // Use 2048 to meet min_alloc_size requirement
 			"lock": "0.5",
 		})
 		output, err := createNewAllocation(t, configPath, allocParams)
@@ -131,7 +131,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"size": "1024",
+			"size": "2048", // Use 2048 to meet min_alloc_size requirement
 			"lock": "0.5",
 		})
 		output, err := createNewAllocation(t, configPath, allocParams)
@@ -170,7 +170,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"size": "1024",
+			"size": "2048", // Use 2048 to meet min_alloc_size requirement
 			"lock": "0.5",
 		})
 		output, err := createNewAllocation(t, configPath, allocParams)
@@ -207,7 +207,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"size": "1024",
+			"size": "2048", // Use 2048 to meet min_alloc_size requirement
 			"lock": "0.5",
 		})
 		output, err := createNewAllocation(t, configPath, allocParams)

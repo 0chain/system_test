@@ -115,8 +115,32 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 		createWalletForName(targetWalletName)
 		require.Nil(t, err, "error creating wallet")
 
+		// Get stakable miners list to find a valid miner (not genesis)
+		stakableMiners := getStakableMinersList(t)
+		require.NotEmpty(t, stakableMiners.Nodes, "No stakable miners found")
+		selectedMinerID := stakableMiners.Nodes[0].ID
+		// Try to use miner01ID if it exists in the list, otherwise use the first available miner
+		for _, minerNode := range stakableMiners.Nodes {
+			if minerNode.ID == miner01ID {
+				selectedMinerID = miner01ID
+				break
+			}
+		}
+
+		// Get stakable sharders list to find a valid sharder
+		stakableSharders := getStakableSharderList(t)
+		require.NotEmpty(t, stakableSharders, "No stakable sharders found")
+		selectedSharderID := stakableSharders[0].ID
+		// Try to use sharder01ID if it exists in the list, otherwise use the first available sharder
+		for _, sharderNode := range stakableSharders {
+			if sharderNode.ID == sharder01ID {
+				selectedSharderID = sharder01ID
+				break
+			}
+		}
+
 		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"miner_id": miner01ID,
+			"miner_id": selectedMinerID,
 			"tokens":   4,
 		}), true)
 		require.Nil(t, err, "error locking tokens against node")
@@ -125,7 +149,7 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 
 		waitForStakePoolActive(t)
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"sharder_id": sharder01ID,
+			"sharder_id": selectedSharderID,
 			"tokens":     4,
 		}), true)
 		require.Nil(t, err, "error locking tokens against node")
@@ -145,24 +169,24 @@ func TestMinerSCUserPoolInfo(testSetup *testing.T) {
 		w, err := getWallet(t, configPath)
 		require.NoError(t, err)
 
-		require.Len(t, poolsInfo.Pools[miner01ID], 1)
-		require.Equal(t, w.ClientID, poolsInfo.Pools[miner01ID][0].ID)
-		require.Equal(t, float64(4), intToZCN(poolsInfo.Pools[miner01ID][0].Balance))
+		require.Len(t, poolsInfo.Pools[selectedMinerID], 1)
+		require.Equal(t, w.ClientID, poolsInfo.Pools[selectedMinerID][0].ID)
+		require.Equal(t, float64(4), intToZCN(poolsInfo.Pools[selectedMinerID][0].Balance))
 
-		require.Len(t, poolsInfo.Pools[sharder01ID], 1)
-		require.Equal(t, w.ClientID, poolsInfo.Pools[sharder01ID][0].ID)
-		require.Equal(t, float64(4), intToZCN(poolsInfo.Pools[sharder01ID][0].Balance))
+		require.Len(t, poolsInfo.Pools[selectedSharderID], 1)
+		require.Equal(t, w.ClientID, poolsInfo.Pools[selectedSharderID][0].ID)
+		require.Equal(t, float64(4), intToZCN(poolsInfo.Pools[selectedSharderID][0].Balance))
 
 		// teardown
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"miner_id": miner01ID,
+			"miner_id": selectedMinerID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())
 		}
 
 		_, err = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
-			"sharder_id": sharder01ID,
+			"sharder_id": selectedSharderID,
 		}), true)
 		if err != nil {
 			t.Log("error unlocking tokens after test: ", t.Name())

@@ -24,8 +24,9 @@ func TestZvaultJWT(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Perform wallets retrieval call with JWT token, containing user id, for which there are no keys", func(w *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -43,8 +44,9 @@ func TestZvaultJWT(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		headers = zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		headers["X-App-Client-ID"] = client.X_APP_CLIENT_ID_A
 		headers["X-App-User-ID"] = client.X_APP_USER_ID_A
@@ -70,8 +72,9 @@ func TestZvaultJWT(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Perform wallets retrieval call with JWT token, containing user id with present split key", func(w *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
