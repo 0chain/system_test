@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	minShardersForKillSharderTest = 2
+	minShardersForKillSharderTest = 1
 )
 
 func TestKillSharder(testSetup *testing.T) { // nolint:gocyclo // team preference is to have codes all within test.

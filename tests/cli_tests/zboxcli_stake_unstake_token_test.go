@@ -155,9 +155,7 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 	})
 
 	t.Run("Staking more tokens than in wallet should fail", func(t *test.SystemTest) {
-		_, err := executeFaucetWithTokens(t, configPath, 1.0)
-		require.Nil(t, err, "Error executing faucet")
-
+		// Wallet is pre-funded with 1000 ZCN, no need for faucet
 		// Wallet balance before staking tokens
 		balance, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err, "Error fetching balance")
@@ -174,10 +172,10 @@ func TestStakeUnstakeTokens(testSetup *testing.T) {
 		// Pick a random blobber
 		blobber := blobbers[time.Now().Unix()%int64(len(blobbers))]
 
-		// Stake tokens against this blobber
+		// Stake more tokens than available in wallet (wallet has ~1000 ZCN, stake 2000)
 		output, err = stakeTokens(t, configPath, createParams(map[string]interface{}{
 			"blobber_id": blobber.Id,
-			"tokens":     10,
+			"tokens":     2000.0, // Stake more than the pre-funded amount (1000 ZCN)
 		}), false)
 		require.NotNil(t, err, "Expected error when staking more tokens than in wallet", strings.Join(output, "\n"))
 		require.GreaterOrEqual(t, len(output), 1)
