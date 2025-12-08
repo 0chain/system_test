@@ -47,7 +47,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		t.Log("blobberToKill", blobberToKill)
 
 		_, err := stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToKill, "tokens": 100}), true)
-		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", blobberToKill)
+		require.NoErrorf(t, err, "error staking tokens to blobber %s", blobberToKill)
 
 		time.Sleep(2 * time.Minute)
 
@@ -55,7 +55,7 @@ func TestKillBlobber(testSetup *testing.T) {
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   5.0,
-			"size":   "10000",
+			"size":   "2097152", // 2MB to ensure it's above min_alloc_size
 		}))
 		require.NoError(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -128,7 +128,7 @@ func TestKillBlobber(testSetup *testing.T) {
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   4.0,
-			"size":   "10000",
+			"size":   "2097152", // 2MB to ensure it's above min_alloc_size
 		}))
 		require.Error(t, err, "should fail to create allocation")
 		require.Len(t, output, 1)
@@ -176,7 +176,7 @@ func TestKillBlobber(testSetup *testing.T) {
 		t.Log("blobberToShutdown", blobberToShutdown)
 
 		_, err := stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToShutdown, "tokens": 100}), true)
-		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", blobberToShutdown)
+		require.NoErrorf(t, err, "error staking tokens to blobber %s", blobberToShutdown)
 
 		time.Sleep(2 * time.Minute)
 
@@ -184,7 +184,7 @@ func TestKillBlobber(testSetup *testing.T) {
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   5.0,
-			"size":   "10000",
+			"size":   "2097152", // 2MB to ensure it's above min_alloc_size
 		}))
 		require.NoError(t, err, "Failed to create new allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
@@ -194,11 +194,8 @@ func TestKillBlobber(testSetup *testing.T) {
 		require.NoError(t, err)
 		createAllocationTestTeardown(t, allocationID)
 
-		_, err = executeFaucetWithTokens(t, configPath, 100.0)
-		require.NoError(t, err, "faucet execution failed", strings.Join(output, "\n"))
-
 		_, err = stakeTokens(t, configPath, createParams(map[string]interface{}{"blobber_id": blobberToShutdown, "tokens": 100}), true)
-		require.NoErrorf(t, err, "error unstaking tokens from blobber %s", blobberToShutdown)
+		require.NoErrorf(t, err, "error staking tokens to blobber %s", blobberToShutdown)
 
 		spBefore := getStakePoolInfo(t, blobberToShutdown)
 		output, err = shutdownBlobber(t, scOwnerWallet, configPath, createParams(map[string]interface{}{
@@ -263,7 +260,7 @@ func TestKillBlobber(testSetup *testing.T) {
 			"data":   strconv.Itoa(dataShards),
 			"parity": strconv.Itoa(parityShards),
 			"lock":   4.0,
-			"size":   "10000",
+			"size":   "2097152", // 2MB to ensure it's above min_alloc_size
 		}))
 		require.Error(t, err, "should fail to create allocation")
 		require.Len(t, output, 1)

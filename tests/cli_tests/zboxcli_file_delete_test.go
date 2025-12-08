@@ -324,7 +324,9 @@ func TestFileDelete(testSetup *testing.T) {
 
 		balanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.Equal(t, balanceBefore-5.01, balanceAfter)
+		// Allow for small differences due to transaction fees (0.02 ZCN absolute tolerance)
+		expectedBalance := balanceBefore - 5.01
+		require.InDelta(t, expectedBalance, balanceAfter, 0.02, "Balance after allocation creation and file upload should be approximately %v, got %v", expectedBalance, balanceAfter)
 		balanceBefore = balanceAfter
 
 		output, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{

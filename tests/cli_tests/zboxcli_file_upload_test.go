@@ -95,11 +95,11 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Root Directory Should Work", func(t *test.SystemTest) { // todo: slow
-		const allocSize int64 = 64 * KB * 2
+		const allocSize int64 = 1 * MB // Use 1 MB to ensure it's well above min_alloc_size (2 KB)
 		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
+			"size": strconv.FormatInt(allocSize, 10),
 		})
 
 		filename := generateRandomTestFileName(t)
@@ -960,13 +960,18 @@ func TestUpload(testSetup *testing.T) {
 					"lock": 9,
 				})
 				downloadVideo := "wget " + videoLink + " -O " + videoName + "." + videoFormat
-				output, err := cliutils.RunCommand(t, downloadVideo, 3, 2*time.Second)
+				output, err := cliutils.RunCommand(t, downloadVideo, 3, 5*time.Minute)
 				require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
+
+				// Verify the file was downloaded successfully
+				videoFilePath := "./" + videoName + "." + videoFormat
+				_, err = os.Stat(videoFilePath)
+				require.Nil(t, err, "Downloaded video file does not exist: "+videoFilePath)
 
 				output, err = uploadFile(t, configPath, map[string]interface{}{
 					"allocation":    allocationID,
 					"remotepath":    "/",
-					"localpath":     "./" + videoName + "." + videoFormat,
+					"localpath":     videoFilePath,
 					"web-streaming": true,
 				}, true)
 				require.Nil(t, err, strings.Join(output, "\n"))

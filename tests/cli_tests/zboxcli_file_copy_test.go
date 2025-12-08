@@ -942,9 +942,27 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
 		t.Logf("Upload cost in ZCN: %v", expectedUploadCostInZCN)
 
-		time.Sleep(30 * time.Second)
+		// Wait for write pool balance and MovedToChallenge to be updated - poll until it changes
+		var allocAfterUpload climodel.Allocation
+		maxWait := time.Minute * 2
+		timeout := time.After(maxWait)
+		pollInterval := time.Second * 10
+		for {
+			select {
+			case <-timeout:
+				t.Logf("Timeout waiting for write pool balance to update after %v", maxWait)
+				goto EndPoll // Exit the polling loop
+			default:
+			}
+			allocAfterUpload = getAllocation(t, allocationID)
+			// Check if MovedToChallenge has been updated (allowing for small rounding differences)
+			if allocAfterUpload.MovedToChallenge > 0 || (initialAllocation.WritePool-allocAfterUpload.WritePool) > 0 {
+				break // Exit the polling loop
+			}
+			cliutils.Wait(t, pollInterval)
+		}
+	EndPoll: // Label to jump to after timeout
 
-		allocAfterUpload := getAllocation(t, allocationID)
 		require.Equal(t, initialAllocation.WritePool-allocAfterUpload.WritePool, allocAfterUpload.MovedToChallenge)
 		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge), 0.05, "Upload cost is not as expected %v != %v", expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge))
 
