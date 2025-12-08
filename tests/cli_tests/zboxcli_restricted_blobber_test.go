@@ -91,7 +91,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		// Setup wallet and create allocation
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "force": "true"}
+		options := map[string]interface{}{"size": "2048", "data": "3", "parity": "3", "lock": "0.5", "force": "true"} // Use 2048 to meet min_alloc_size requirement
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
@@ -123,7 +123,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		}
 
 		options = map[string]interface{}{
-			"size":                 "1024",
+			"size":                 "2048", // Use 2048 to meet min_alloc_size requirement
 			"data":                 "3",
 			"parity":               "3",
 			"lock":                 "0.5",
@@ -163,7 +163,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		// Setup wallet and create allocation
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5"}
+		options := map[string]interface{}{"size": "2048", "data": "3", "parity": "3", "lock": "0.5"} // Use 2048 to meet min_alloc_size requirement
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))
@@ -184,7 +184,7 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 			}
 		}
 
-		options = map[string]interface{}{"size": "1024", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": preferredBlobbers, "blobber_auth_tickets": blobberAuthTickets}
+		options = map[string]interface{}{"size": "2048", "data": "3", "parity": "3", "lock": "0.5", "preferred_blobbers": preferredBlobbers, "blobber_auth_tickets": blobberAuthTickets} // Use 2048 to meet min_alloc_size requirement
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err)
 		require.True(t, len(output) > 0, "expected output length be at least 1", strings.Join(output, "\n"))

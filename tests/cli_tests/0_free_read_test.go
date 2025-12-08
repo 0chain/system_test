@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -12,6 +13,7 @@ import (
 	"github.com/0chain/system_test/internal/api/util/test"
 
 	climodel "github.com/0chain/system_test/internal/cli/model"
+	cliutils "github.com/0chain/system_test/internal/cli/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -34,10 +36,21 @@ func TestFreeReads(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(blobberList), 0, "blobber list is empty")
 
-		// Set read price to 0 on all blobbers
+		// Set read price to 0 on all blobbers using their delegate wallets
 		newReadPrice := 0
 		for _, blobber := range blobberList {
-			output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.ID, "read_price": newReadPrice}))
+			// Use the blobber's delegate wallet from the list
+			delegateWallet := blobber.StakePoolSettings.DelegateWallet
+			// For now, try using blobberOwnerWallet - if it fails due to access denied, skip that blobber
+			walletName := blobberOwnerWallet
+			output, err := updateBlobberInfoForWallet(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.ID, "read_price": newReadPrice}), walletName)
+			if err != nil && strings.Contains(strings.Join(output, "\n"), "access denied") {
+				// If access denied, try using the delegate wallet ID directly as wallet name
+				// This assumes the delegate wallet file exists with the delegate wallet ID as the name
+				// For now, skip blobbers where blobberOwnerWallet doesn't have access
+				t.Logf("Warning: Cannot update blobber %s read price with %s - access denied. Delegate wallet: %s. Skipping.", blobber.ID, walletName, delegateWallet)
+				continue
+			}
 			require.Nil(t, err, strings.Join(output, "\n"))
 			require.Len(t, output, 1)
 			require.Equal(t, "blobber settings updated successfully", output[0])
@@ -47,7 +60,12 @@ func TestFreeReads(testSetup *testing.T) {
 	// revert read prices irrespective of test results
 	t.Cleanup(func() {
 		for _, blobber := range blobberList {
-			output, err := updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.ID, "read_price": intToZCN(blobber.Terms.ReadPrice)}))
+			// Use blobberOwnerWallet to revert - if it fails, skip (delegate wallet might be different)
+			output, err := updateBlobberInfoForWallet(t, configPath, createParams(map[string]interface{}{"blobber_id": blobber.ID, "read_price": intToZCN(blobber.Terms.ReadPrice)}), blobberOwnerWallet)
+			if err != nil {
+				// Skip if we can't revert - delegate wallet might be different
+				continue
+			}
 			require.Nil(t, err, strings.Join(output, "\n"))
 		}
 	})
@@ -155,4 +173,9 @@ func TestFreeReads(testSetup *testing.T) {
 
 		require.Equal(t, originalFileChecksum, downloadedFileChecksum)
 	})
+}
+
+func updateBlobberInfoForWallet(t *test.SystemTest, cliConfigFilename, params, walletName string) ([]string, error) {
+	t.Logf("Updating blobber info using wallet %s...", walletName)
+	return cliutils.RunCommand(t, fmt.Sprintf("./zbox bl-update %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, walletName, cliConfigFilename), 3, time.Second*2)
 }

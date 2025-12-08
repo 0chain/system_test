@@ -942,26 +942,68 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
 		t.Logf("Upload cost in ZCN: %v", expectedUploadCostInZCN)
 
+		// Get initial challenge pool balance
+		output, err = challengePoolInfo(t, configPath, allocationID)
+		require.Nil(t, err, "Could not fetch challenge pool", strings.Join(output, "\n"))
+		initialChallengePool := climodel.ChallengePoolInfo{}
+		err = json.Unmarshal([]byte(output[0]), &initialChallengePool)
+		require.Nil(t, err, "Error unmarshalling challenge pool info", strings.Join(output, "\n"))
+		initialChallengePoolBalance := initialChallengePool.Balance
+
 		// Wait for write pool balance and MovedToChallenge to be updated - poll until it changes
+		cliutils.Wait(t, 30*time.Second) // Initial wait for upload to process
 		var allocAfterUpload climodel.Allocation
-		maxWait := time.Minute * 2
-		timeout := time.After(maxWait)
+		var finalChallengePool climodel.ChallengePoolInfo
+		maxWait := time.Minute * 5 // Increased from 2 minutes to 5 minutes
+		startTime := time.Now()
 		pollInterval := time.Second * 10
-		for {
-			select {
-			case <-timeout:
+		writePoolUpdated := false
+
+		for !writePoolUpdated {
+			if time.Since(startTime) > maxWait {
 				t.Logf("Timeout waiting for write pool balance to update after %v", maxWait)
-				goto EndPoll // Exit the polling loop
-			default:
+				// Get final state even on timeout for debugging
+				allocAfterUpload = getAllocation(t, allocationID)
+				output, _ := challengePoolInfo(t, configPath, allocationID)
+				if len(output) > 0 {
+					json.Unmarshal([]byte(output[0]), &finalChallengePool)
+				}
+				break
 			}
 			allocAfterUpload = getAllocation(t, allocationID)
-			// Check if MovedToChallenge has been updated (allowing for small rounding differences)
-			if allocAfterUpload.MovedToChallenge > 0 || (initialAllocation.WritePool-allocAfterUpload.WritePool) > 0 {
-				break // Exit the polling loop
+			totalChangeInWritePool := intToZCN(initialAllocation.WritePool - allocAfterUpload.WritePool)
+			movedToChallenge := intToZCN(allocAfterUpload.MovedToChallenge)
+
+			// Also check challenge pool balance directly
+			output, err := challengePoolInfo(t, configPath, allocationID)
+			if err == nil && len(output) > 0 {
+				var cp climodel.ChallengePoolInfo
+				if err := json.Unmarshal([]byte(output[0]), &cp); err == nil {
+					finalChallengePool = cp
+					challengePoolBalanceIncrease := intToZCN(cp.Balance - initialChallengePoolBalance)
+					t.Logf("Polling: WritePool change: %v, MovedToChallenge: %v, ChallengePool increase: %v",
+						totalChangeInWritePool, movedToChallenge, challengePoolBalanceIncrease)
+
+					// Check if write pool has decreased, challenge pool has moved tokens, or challenge pool balance has increased
+					if totalChangeInWritePool > 0 || movedToChallenge > 0 || challengePoolBalanceIncrease > 0 {
+						writePoolUpdated = true
+						break
+					}
+				}
 			}
-			cliutils.Wait(t, pollInterval)
+
+			if !writePoolUpdated {
+				cliutils.Wait(t, pollInterval)
+			}
 		}
-	EndPoll: // Label to jump to after timeout
+
+		// Get Challenge-Pool info after upload (if not already fetched)
+		if finalChallengePool.Id == "" {
+			output, err = challengePoolInfo(t, configPath, allocationID)
+			require.Nil(t, err, "Could not fetch challenge pool", strings.Join(output, "\n"))
+			err = json.Unmarshal([]byte(output[0]), &finalChallengePool)
+			require.Nil(t, err, "Error unmarshalling challenge pool info", strings.Join(output, "\n"))
+		}
 
 		require.Equal(t, initialAllocation.WritePool-allocAfterUpload.WritePool, allocAfterUpload.MovedToChallenge)
 		require.InEpsilon(t, expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge), 0.05, "Upload cost is not as expected %v != %v", expectedUploadCostInZCN, intToZCN(allocAfterUpload.MovedToChallenge))

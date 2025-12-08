@@ -116,6 +116,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
 
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_VULT)
+
 		allocInput := NewTestAllocation()
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
 		require.NoError(t, err)
