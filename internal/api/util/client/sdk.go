@@ -438,7 +438,10 @@ func (c *SDKClient) RepairAllocation(t *test.SystemTest, allocationID string) {
 
 func WithRepair(blobbers []*blockchain.StorageNode) MultiOperationOption {
 	return func(alloc *sdk.Allocation) {
-		alloc.SetConsensusThreshold()
+		// Set consensus threshold to DataShards + 1 (standard formula for repair operations)
+		// This ensures we have enough consensus even if some blobbers fail
+		consensusThreshold := alloc.DataShards + 1
+		alloc.SetConsensusThreshold(consensusThreshold)
 		alloc.Blobbers = blobbers
 	}
 }
