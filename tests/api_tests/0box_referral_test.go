@@ -14,11 +14,15 @@ func Test0BoxReferral(testSetup *testing.T) {
 	t.SetSmokeTests("Post referrals with correct CSRF should work properly")
 
 	t.RunSequentially("Get referral code with owner should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		zboxReferral, response, err := zboxClient.GetReferralCode(t, headers)
 		require.NoError(t, err)
@@ -28,11 +32,15 @@ func Test0BoxReferral(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Rank referrals with no referrer should work properly", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		zboxRferral, response, err := zboxClient.GetReferralRank(t, headers)
 		require.NoError(t, err)
@@ -44,13 +52,18 @@ func Test0BoxReferral(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create wallet for first time with the referral code should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
-		referralHeaders := zboxClient.NewZboxHeaders_R(client.X_APP_BLIMP)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
+		referralHeaders := zboxClient.NewZboxHeaders_RWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, referralHeaders)
+		referralHeaders = zboxClient.NewZboxHeaders_RWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		zboxRferral, response, err := zboxClient.GetReferralCode(t, headers)
 		require.NoError(t, err)
@@ -81,13 +94,18 @@ func Test0BoxReferralLeaderBoard(testSetup *testing.T) {
 	t.SetSmokeTests("Testing LeaderBoard")
 
 	t.RunSequentially("Testing LeaderBoard", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
-		referralHeaders := zboxClient.NewZboxHeaders_R(client.X_APP_BLIMP)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
+		referralHeaders := zboxClient.NewZboxHeaders_RWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, referralHeaders)
+		referralHeaders = zboxClient.NewZboxHeaders_RWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		zboxRferral, response, err := zboxClient.GetReferralCode(t, headers)
 		require.NoError(t, err)

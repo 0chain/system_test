@@ -34,8 +34,9 @@ func Test0BoxWallet(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("create wallet without owner should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		walletInput := NewTestWallet()
 		_, response, err := zboxClient.CreateWallet(t, headers, walletInput)
@@ -44,8 +45,9 @@ func Test0BoxWallet(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("create wallet without existing wallet should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		verifyOtpInput := NewVerifyOtpDetails()
 		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
@@ -66,8 +68,9 @@ func Test0BoxWallet(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("create wallet with existing wallet should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		verifyOtpInput := NewVerifyOtpDetails()
 		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
@@ -84,8 +87,9 @@ func Test0BoxWallet(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("create wallet with existing wallet another apptype should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		verifyOtpInput := NewVerifyOtpDetails()
 		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
@@ -96,7 +100,7 @@ func Test0BoxWallet(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		newHeaders := zboxClient.NewZboxHeaders(client.X_APP_CHIMNEY)
+		newHeaders := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_CHIMNEY)
 		_, response, err = zboxClient.CreateWallet(t, newHeaders, walletInput)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -108,8 +112,9 @@ func Test0BoxWallet(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("create wallet with existing wallet same apptype should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		verifyOtpInput := NewVerifyOtpDetails()
 		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
@@ -127,8 +132,9 @@ func Test0BoxWallet(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update wallet with existing wallet should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		verifyOtpInput := NewVerifyOtpDetails()
 		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
@@ -156,8 +162,9 @@ func Test0BoxWallet(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update wallet without existing wallet should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		verifyOtpInput := NewVerifyOtpDetails()
 		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)

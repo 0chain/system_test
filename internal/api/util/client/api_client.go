@@ -956,16 +956,54 @@ func (c *APIClient) RegisterBlobber(t *test.SystemTest,
 		}
 
 		if requireIdVerification {
-			var storageNode model.StorageNode
-
-			// Unmarshal the JSON string into the StorageNode struct
-			err := json.Unmarshal([]byte(registerBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput), &storageNode)
-			if err != nil {
-				t.Log("Error unmarshalling JSON:", err)
+			// First check if transaction status matches
+			if registerBlobberTransactionGetConfirmationResponse.Status != requiredTransactionStatus {
+				t.Logf("Transaction status doesn't match. Expected: %d, Actual: %d, Output: %s",
+					requiredTransactionStatus, registerBlobberTransactionGetConfirmationResponse.Status,
+					registerBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput)
 				return false
 			}
 
-			return registerBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus && storageNode.ID == expectedResponse
+			// Only try to unmarshal if transaction is successful
+			transactionOutput := registerBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput
+
+			// Check if output is empty or not valid JSON
+			if transactionOutput == "" {
+				t.Log("Transaction output is empty, waiting for confirmation...")
+				return false
+			}
+
+			// Check if output looks like JSON (starts with '{')
+			trimmedOutput := strings.TrimSpace(transactionOutput)
+			if !strings.HasPrefix(trimmedOutput, "{") {
+				preview := trimmedOutput
+				if len(preview) > 50 {
+					preview = preview[:50] + "..."
+				}
+				t.Logf("Transaction output is not JSON (starts with: %s), waiting for confirmation...", preview)
+				return false
+			}
+
+			var storageNode model.StorageNode
+			// Unmarshal the JSON string into the StorageNode struct
+			err := json.Unmarshal([]byte(transactionOutput), &storageNode)
+			if err != nil {
+				t.Logf("Error unmarshalling JSON: %v. Output: %s", err, transactionOutput)
+				return false
+			}
+
+			// Verify the ManagingWallet matches (for storage version 2+ blobbers)
+			// or the ID matches (for legacy blobbers)
+			if storageNode.ManagingWallet != "" && storageNode.ManagingWallet == expectedResponse {
+				return true
+			}
+			if storageNode.ID == expectedResponse {
+				return true
+			}
+
+			t.Logf("StorageNode verification failed. Expected: %s, Actual ID: %s, Actual ManagingWallet: %s",
+				expectedResponse, storageNode.ID, storageNode.ManagingWallet)
+			return false
 		}
 
 		// Log the actual status and output for debugging

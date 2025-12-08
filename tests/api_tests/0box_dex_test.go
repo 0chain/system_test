@@ -21,11 +21,15 @@ func Test0BoxDex(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("Create dex should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		dexData := NewTestDex()
 
@@ -40,11 +44,15 @@ func Test0BoxDex(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update dex should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		dexData := NewTestDex()
 

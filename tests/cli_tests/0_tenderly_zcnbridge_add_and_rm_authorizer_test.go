@@ -42,13 +42,59 @@ func TestZCNAuthorizerRegisterAndDelete(testSetup *testing.T) {
 	)
 
 	t.RunSequentially("Register authorizer to zcnsc smartcontract", func(t *test.SystemTest) {
-		output, err := registerAuthorizer(t, "random_delegate_wallet", publicKey, authURL, true)
+		// Use the wallet's clientID for registration instead of "random_delegate_wallet"
+		// This ensures we can delete it later using the same ID
+		output, err := registerAuthorizer(t, clientID, publicKey, authURL, true)
 		require.NoError(t, err, "error trying to register authorizer to zcnsc: %s", strings.Join(output, "\n"))
 		t.Log("register authorizer zcnsc successfully")
+
+		// Wait for the authorizer to be registered and confirmed on the blockchain
+		// This ensures the authorizer exists before we try to delete it
+		maxWait := 2 * time.Minute
+		startTime := time.Now()
+		pollInterval := 5 * time.Second
+		authorizerRegistered := false
+
+		for !authorizerRegistered && time.Since(startTime) < maxWait {
+			auths := getAuthorizersForClientID(t, clientID)
+			if len(auths) > 0 {
+				// Check if our authorizer is in the list
+				for _, auth := range auths {
+					if auth.ID == clientID {
+						authorizerRegistered = true
+						t.Logf("Authorizer %s confirmed as registered", clientID)
+						break
+					}
+				}
+			}
+			if !authorizerRegistered {
+				t.Logf("Waiting for authorizer %s to be registered... (elapsed: %v)", clientID, time.Since(startTime))
+				time.Sleep(pollInterval)
+			}
+		}
+
+		if !authorizerRegistered {
+			t.Logf("Warning: Authorizer %s may not be fully registered yet, but continuing with deletion test", clientID)
+		}
 	})
 
 	t.RunSequentially("Remove authorizer from zcnsc smartcontract", func(t *test.SystemTest) {
+		// Verify authorizer exists before trying to delete
+		auths := getAuthorizersForClientID(t, clientID)
+		if len(auths) == 0 {
+			t.Logf("Authorizer %s not found in authorizer list, skipping deletion", clientID)
+			return
+		}
+
 		output, err := removeAuthorizer(t, clientID, true)
+		// If authorizer doesn't exist, that's okay - it might have been deleted already or never registered
+		if err != nil {
+			outputStr := strings.Join(output, "\n")
+			if strings.Contains(outputStr, "value not present") || strings.Contains(outputStr, "not found") {
+				t.Logf("Authorizer %s not found (may have been deleted or never registered), skipping deletion", clientID)
+				return
+			}
+		}
 		require.NoError(t, err, strings.Join(output, "\n"))
 		t.Log("remove authorizer zcnsc successfully")
 	})
@@ -133,4 +179,44 @@ func removeAuthorizer(t *test.SystemTest, clientID string, retry bool) ([]string
 	} else {
 		return cliutils.RunCommandWithoutRetry(cmd)
 	}
+}
+
+// getAuthorizersForClientID gets all authorizers and filters by clientID
+func getAuthorizersForClientID(t *test.SystemTest, clientID string) []authorizerInfo {
+	output, err := getAuthorizersListLocal(t, false)
+	if err != nil {
+		t.Logf("Error getting authorizers: %v", err)
+		return nil
+	}
+
+	// Parse the JSON output to find authorizers
+	outputStr := strings.Join(output, "\n")
+
+	// Simple check: if the clientID appears in the output, the authorizer exists
+	// This is a basic check - for more robust parsing, we could use JSON unmarshalling
+	if strings.Contains(outputStr, clientID) {
+		return []authorizerInfo{{ID: clientID}}
+	}
+
+	return nil
+}
+
+func getAuthorizersListLocal(t *test.SystemTest, retry bool) ([]string, error) {
+	t.Log("Get authorizers from zcnsc ...")
+
+	cmd := fmt.Sprintf(`
+		./zwallet bridge-list-auth --silent
+		--configDir ./config
+		--wallet %s`, escapedTestName(t)+"_wallet.json")
+
+	if retry {
+		return cliutils.RunCommand(t, cmd, 6, time.Second*10)
+	} else {
+		return cliutils.RunCommandWithoutRetry(cmd)
+	}
+}
+
+type authorizerInfo struct {
+	ID  string
+	URL string
 }

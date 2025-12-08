@@ -30,6 +30,7 @@ func TestZauthOperations(testSetup *testing.T) {
 	t.RunSequentially("Sign transaction with not allowed restrictions", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)

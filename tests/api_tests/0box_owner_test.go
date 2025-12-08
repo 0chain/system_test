@@ -37,8 +37,9 @@ func Test0BoxOwner(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("create owner without existing userID should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		verifyOtpInput := NewVerifyOtpDetails()
 		_, response, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
@@ -54,8 +55,9 @@ func Test0BoxOwner(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("create owner with existing userID should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		verifyOtpInput := NewVerifyOtpDetails()
 		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
@@ -67,8 +69,9 @@ func Test0BoxOwner(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update owner with existing owner should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		verifyOtpInput := NewVerifyOtpDetails()
 		_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
@@ -91,8 +94,9 @@ func Test0BoxOwner(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update owner without existing owner should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		ownerInput := NewTestOwner()
 		message, _, err := zboxClient.UpdateOwner(t, headers, ownerInput)

@@ -21,11 +21,15 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 	t.SetSmokeTests("List allocation with zero allocation should work")
 
 	t.RunSequentiallyWithTimeout("Create FreeStorage should work", 3*time.Minute, func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		storageMarker, response, err := zboxClient.CreateFreeStorage(t, headers)
 		require.NoError(t, err)
@@ -40,8 +44,9 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create FreeStorage without existing wallet should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		_, response, err := zboxClient.CreateFreeStorage(t, headers)
 		require.NoError(t, err)

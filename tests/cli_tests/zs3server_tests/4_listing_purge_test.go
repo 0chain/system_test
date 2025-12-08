@@ -39,6 +39,24 @@ func TestZs3serverListTests(testSetup *testing.T) {
 		testSetup.Fatalf("Alias 'warp-test' was not found in alias list. Output: %s", aliasListStr)
 	}
 
+	// Test alias connectivity by trying to list buckets (this verifies the alias works)
+	testAliasOutput, testAliasErr := cliutils.RunCommand(t, "../mc ls warp-test", 1, time.Minute*2)
+	if testAliasErr != nil {
+		testAliasStr := strings.Join(testAliasOutput, "\n")
+		// If listing fails, the alias might not be working - try to recreate it
+		t.Logf("Alias connectivity test failed (error: %s), retrying alias setup...", testAliasStr)
+		_, aliasErr := cliutils.RunCommand(t, aliasCommand, 1, time.Minute*2)
+		if aliasErr != nil {
+			testSetup.Fatalf("Failed to recreate mc alias: %v", aliasErr)
+		}
+		// Test alias again after recreation
+		testAliasOutput, testAliasErr = cliutils.RunCommand(t, "../mc ls warp-test", 1, time.Minute*2)
+		if testAliasErr != nil {
+			testAliasStr = strings.Join(testAliasOutput, "\n")
+			testSetup.Fatalf("Alias connectivity test failed after retry: %v\nOutput: %s", testAliasErr, testAliasStr)
+		}
+	}
+
 	// Create the bucket that warp expects (warp-benchmark-bucket)
 	bucketCommand := "../mc mb warp-test/warp-benchmark-bucket"
 	output, err = cliutils.RunCommand(t, bucketCommand, 1, time.Minute*2)
@@ -48,22 +66,10 @@ func TestZs3serverListTests(testSetup *testing.T) {
 		if strings.Contains(outputStr, "already exists") || strings.Contains(outputStr, "BucketAlreadyExists") {
 			// Bucket already exists, which is fine - continue
 			t.Logf("Bucket already exists, continuing...")
-		} else if strings.Contains(outputStr, "does not exist") || strings.Contains(outputStr, "Unable to make bucket") {
-			// Alias might not be properly configured, try to recreate it
-			t.Logf("Alias issue detected (error: %s), retrying alias setup...", outputStr)
-			_, aliasErr := cliutils.RunCommand(t, aliasCommand, 1, time.Minute*2)
-			if aliasErr != nil {
-				testSetup.Fatalf("Failed to recreate mc alias: %v", aliasErr)
-			}
-			// Verify alias again after recreation
-			aliasListOutput, aliasListErr = cliutils.RunCommand(t, "../mc alias list", 1, time.Minute*2)
-			if aliasListErr == nil {
-				aliasListStr = strings.Join(aliasListOutput, "\n")
-				if !strings.Contains(aliasListStr, "warp-test") {
-					testSetup.Fatalf("Alias 'warp-test' still not found after retry. Output: %s", aliasListStr)
-				}
-			}
-			// Retry bucket creation
+		} else {
+			// For any other error, try one more time after a brief wait
+			t.Logf("Bucket creation failed (error: %s), retrying after brief wait...", outputStr)
+			time.Sleep(2 * time.Second)
 			output, err = cliutils.RunCommand(t, bucketCommand, 1, time.Minute*2)
 			if err != nil {
 				outputStr = strings.Join(output, "\n")
@@ -73,8 +79,6 @@ func TestZs3serverListTests(testSetup *testing.T) {
 			} else {
 				t.Logf("Bucket created successfully after retry")
 			}
-		} else {
-			testSetup.Fatalf("Failed to create bucket: %v\nOutput: %s", err, outputStr)
 		}
 	} else {
 		t.Logf("Bucket created successfully")

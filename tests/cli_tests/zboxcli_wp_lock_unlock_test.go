@@ -28,7 +28,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"size": "2048",
+			"size": "1048576", // 1MB to ensure it's well above min_alloc_size (2KB) and works with 4 data + 2 parity shards
 			"lock": "1",
 		})
 		output, err := createNewAllocation(t, configPath, allocParams)
@@ -91,7 +91,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"size": "2048", // Use 2048 to meet min_alloc_size requirement
+			"size": "1048576", // 1MB to ensure it's well above min_alloc_size (2KB) and works with 4 data + 2 parity shards
 			"lock": "0.5",
 		})
 		output, err := createNewAllocation(t, configPath, allocParams)
@@ -131,7 +131,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"size": "2048", // Use 2048 to meet min_alloc_size requirement
+			"size": "1048576", // 1MB to ensure it's well above min_alloc_size (2KB) and works with 4 data + 2 parity shards
 			"lock": "0.5",
 		})
 		output, err := createNewAllocation(t, configPath, allocParams)
@@ -170,7 +170,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"size": "2048", // Use 2048 to meet min_alloc_size requirement
+			"size": "1048576", // 1MB to ensure it's well above min_alloc_size (2KB) and works with 4 data + 2 parity shards
 			"lock": "0.5",
 		})
 		output, err := createNewAllocation(t, configPath, allocParams)
@@ -207,7 +207,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 
 		// Lock 0.5 token for allocation
 		allocParams := createParams(map[string]interface{}{
-			"size": "2048", // Use 2048 to meet min_alloc_size requirement
+			"size": "1048576", // 1MB to ensure it's well above min_alloc_size (2KB) and works with 4 data + 2 parity shards
 			"lock": "0.5",
 		})
 		output, err := createNewAllocation(t, configPath, allocParams)

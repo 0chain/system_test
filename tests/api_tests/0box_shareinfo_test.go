@@ -20,11 +20,15 @@ func Test0BoxShareinfo(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("Create shareinfo valid auth ticket should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		shareinfoData := NewTestShareinfo()
 
@@ -38,11 +42,15 @@ func Test0BoxShareinfo(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create shareinfo invalid auth ticket should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		shareinfoData := NewTestShareinfo()
 		shareinfoData["auth_ticket"] = "invalid_ticket"
@@ -53,11 +61,15 @@ func Test0BoxShareinfo(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("get shareinfo valid auth ticket should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		shareinfoData := NewTestShareinfo()
 

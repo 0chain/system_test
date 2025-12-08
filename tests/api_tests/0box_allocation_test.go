@@ -61,6 +61,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
 
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
+
 		allocationList, response, err := zboxClient.ListAllocation(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -73,6 +76,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		allocInput := NewTestAllocation()
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
@@ -91,6 +97,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		allocInput := NewTestAllocation()
 		allocInput["id"] = "c0360331837a7376d27007614e124db83811e4416dd2f1577345dd96c8621bf6"
@@ -137,6 +146,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
 
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_CHIMNEY)
+
 		allocInput := NewTestAllocation()
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
 		require.NoError(t, err)
@@ -149,6 +161,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		allocInput := NewTestAllocation()
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
@@ -166,6 +181,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		allocInput := NewTestAllocation()
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
@@ -188,6 +206,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
 
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
+
 		allocInput := NewTestAllocation()
 
 		_, response, err := zboxClient.GetAllocation(t, headers, allocInput["id"])
@@ -201,6 +222,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		allocInput := NewTestAllocation()
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
@@ -228,6 +252,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		allocInput := NewTestAllocation()
 		allocInput["name"] = "new_alloc_name"

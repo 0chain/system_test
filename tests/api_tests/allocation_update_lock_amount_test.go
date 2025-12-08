@@ -33,16 +33,20 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		time.Sleep(10 * time.Second)
 
 		// Re-set wallet to ensure SDK context is correct after chimneySdkClient operation
+		// chimneySdkClient uses a different block worker and may have changed the global SDK state
 		sdkClient.SetWallet(t, wallet)
+		// Small delay to ensure SDK state is fully updated
+		time.Sleep(1 * time.Second)
 
 		uar := &model.UpdateAllocationRequest{
 			ID:   allocationID,
 			Size: 1 * GB,
 		}
 
-		// Ensure wallet is set before calling GetUpdateAllocationMinLock
-		// This is critical as GetUpdateAllocationMinLock needs wallet context
+		// Ensure wallet is set immediately before calling GetUpdateAllocationMinLock
+		// This is critical as GetUpdateAllocationMinLock uses client.Id() which requires wallet context
 		sdkClient.SetWallet(t, wallet)
+		time.Sleep(500 * time.Millisecond) // Brief delay to ensure SDK state is ready
 		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 1*GB, false, "", "")
 		require.NoError(t, err)
 
@@ -106,7 +110,10 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		time.Sleep(10 * time.Second)
 
 		// Re-set wallet to ensure SDK context is correct after chimneySdkClient operation
+		// chimneySdkClient uses a different block worker and may have changed the global SDK state
 		sdkClient.SetWallet(t, wallet)
+		// Small delay to ensure SDK state is fully updated
+		time.Sleep(1 * time.Second)
 
 		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
@@ -118,8 +125,10 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 			AddBlobberId: newBlobberID,
 		}
 
-		// Ensure wallet is set before calling GetUpdateAllocationMinLock
+		// Ensure wallet is set immediately before calling GetUpdateAllocationMinLock
+		// This is critical as GetUpdateAllocationMinLock uses client.Id() which requires wallet context
 		sdkClient.SetWallet(t, wallet)
+		time.Sleep(500 * time.Millisecond) // Brief delay to ensure SDK state is ready
 		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 0, false, newBlobberID, "")
 		require.NoError(t, err)
 
@@ -186,6 +195,10 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 			AddBlobberId: newBlobberID,
 		}
 
+		// Ensure wallet is set immediately before calling GetUpdateAllocationMinLock
+		// This is critical as GetUpdateAllocationMinLock uses client.Id() which requires wallet context
+		sdkClient.SetWallet(t, wallet)
+		time.Sleep(500 * time.Millisecond) // Brief delay to ensure SDK state is ready
 		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 0, false, newBlobberID, "")
 		require.NoError(t, err)
 
@@ -257,6 +270,10 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 			Size: 1 * GB,
 		}
 
+		// Ensure wallet is set immediately before calling GetUpdateAllocationMinLock
+		// This is critical as GetUpdateAllocationMinLock uses client.Id() which requires wallet context
+		sdkClient.SetWallet(t, wallet)
+		time.Sleep(500 * time.Millisecond) // Brief delay to ensure SDK state is ready
 		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 1*GB, false, "", "")
 		require.NoError(t, err)
 
