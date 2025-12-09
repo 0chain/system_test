@@ -121,6 +121,10 @@ func TestRepairAllocation(testSetup *testing.T) {
 		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{updateOp}, client.WithRepair(validBlobbers))
 
+		// Wait for the update to complete and be committed to all blobbers
+		// This ensures the file is properly updated before repair attempts to fix it
+		time.Sleep(15 * time.Second)
+
 		sdkClient.RepairAllocation(t, allocationID)
 
 		updatedRef, err := sdk.GetFileRefFromBlobber(allocationID, firstBlobber.ID, op.RemotePath)
