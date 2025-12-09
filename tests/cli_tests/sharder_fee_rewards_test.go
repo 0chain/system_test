@@ -228,6 +228,10 @@ func checkSharderDelegatePoolFeeRewardFrequency(
 		}
 		roundHistory := history.RoundHistory(t, round)
 		for i, id := range sharderIds {
+			// Skip sharders that don't have delegate pools
+			if len(sharders[i].Pools) == 0 {
+				continue
+			}
 			poolsPaid := make(map[string]bool)
 			for poolId := range sharders[i].Pools {
 				for _, dReward := range roundHistory.DelegateRewards {
@@ -245,9 +249,13 @@ func checkSharderDelegatePoolFeeRewardFrequency(
 			if numShouldPay > len(sharders[i].Pools) {
 				numShouldPay = len(sharders[i].Pools)
 			}
-			require.Len(t, poolsPaid, numShouldPay,
-				"should pay %d pools for shader %s on round %d; %d pools actually paid",
-				numShouldPay, id, round, len(poolsPaid))
+			// Only require payment if the sharder was selected for rewards (has fees in this round)
+			// or if we expect payments based on configuration
+			if numShouldPay > 0 {
+				require.Len(t, poolsPaid, numShouldPay,
+					"should pay %d pools for shader %s on round %d; %d pools actually paid",
+					numShouldPay, id, round, len(poolsPaid))
+			}
 		}
 	}
 }

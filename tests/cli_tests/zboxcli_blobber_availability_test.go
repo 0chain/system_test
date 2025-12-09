@@ -34,15 +34,22 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		}
 		require.NotEqual(t, blobberToDeactivate, "", "no active blobbers")
 		require.True(t, activeBlobbers > 2, "need at least three active blobbers")
-		// Use fixed shard configuration that works with 6 blobbers: 4 data + 2 parity = 6 total
+		// Use conservative shard configuration: 2 data + 1 parity = 3 total
 		// This ensures we don't try to use more blobbers than available
-		dataShards := 4
-		parityShards := 2
-		// Ensure we don't exceed available blobbers
-		if dataShards+parityShards > activeBlobbers {
-			// Fall back to a smaller configuration if needed
+		// After deactivating one blobber, we'll have activeBlobbers-1 available
+		dataShards := 2
+		parityShards := 1
+		// Ensure we don't exceed available blobbers (accounting for one that will be deactivated)
+		availableAfterDeactivation := activeBlobbers - 1
+		if dataShards+parityShards > availableAfterDeactivation {
+			// Fall back to minimum configuration if needed
 			dataShards = 2
 			parityShards = 1
+			// If still not enough, use even smaller
+			if dataShards+parityShards > availableAfterDeactivation {
+				dataShards = 1
+				parityShards = 1
+			}
 		}
 
 		output, err := createNewAllocation(t, configPath, createParams(map[string]interface{}{

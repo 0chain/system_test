@@ -219,6 +219,7 @@ func checkMinerDelegatePoolFeeAmounts(
 		}
 		for round := beforeMiners[i].RoundServiceChargeLastUpdated + 1; round <= afterMiners[i].RoundServiceChargeLastUpdated; round++ {
 			poolsBlockRewarded := make(map[string]int64)
+			poolsFeeRewarded := make(map[string]int64)
 			roundHistory := history.RoundHistory(t, round)
 			for _, dReward := range roundHistory.DelegateRewards {
 				if dReward.ProviderID != id {
@@ -228,12 +229,13 @@ func checkMinerDelegatePoolFeeAmounts(
 				require.Truef(t, isMinerPool, "round %d, invalid pool id, reward %v", round, dReward)
 				switch dReward.RewardType {
 				case climodel.FeeRewardMiner:
-					_, found := poolsBlockRewarded[dReward.PoolID]
+					_, found := poolsFeeRewarded[dReward.PoolID]
 					require.False(t, found, "delegate pool %s paid a fee reward more than once on round %d",
 						dReward.PoolID, round)
-					poolsBlockRewarded[dReward.PoolID] = dReward.Amount
+					poolsFeeRewarded[dReward.PoolID] = dReward.Amount
 					rewards[dReward.PoolID] += dReward.Amount
 				case climodel.BlockRewardMiner:
+					poolsBlockRewarded[dReward.PoolID] = dReward.Amount
 					rewards[dReward.PoolID] += dReward.Amount
 				default:
 					require.Failf(t, "", "reward type %s not paid to miner delegate pools", dReward.RewardType.String())

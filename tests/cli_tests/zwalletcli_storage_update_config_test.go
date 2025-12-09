@@ -95,8 +95,22 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 			value, ok := settings.Numeric[name]
 			require.True(t, ok, "unrecognized setting", name)
 			resetChanges[name] = strconv.FormatInt(int64(value), 10)
-			newChanges[name] = strconv.FormatInt(int64(value+1), 10)
-			expectedChange.Numeric[name] = value + 1
+			// Some int settings might have maximum values (e.g., max_file_size, max_blobbers_per_allocation)
+			// If value is already very large, decrease instead of increase to avoid "value is too large" error
+			var newValue float64
+			// Use a conservative threshold: if value is > 1e12 (1 trillion), it's likely near a max limit
+			// For most settings, this is safe. For very large settings like max_file_size, decrease instead
+			if value > 1e12 {
+				// Decrease by 1 to avoid exceeding max
+				newValue = value - 1
+				if newValue < 0 {
+					newValue = 0 // Ensure non-negative
+				}
+			} else {
+				newValue = value + 1
+			}
+			newChanges[name] = strconv.FormatInt(int64(newValue), 10)
+			expectedChange.Numeric[name] = newValue
 		}
 		for _, name := range climodel.StorageBoolSettings {
 			value, ok := settings.Boolean[name]

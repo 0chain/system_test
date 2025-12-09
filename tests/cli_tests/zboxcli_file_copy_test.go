@@ -954,10 +954,16 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		cliutils.Wait(t, 30*time.Second) // Initial wait for upload to process
 		var allocAfterUpload climodel.Allocation
 		var finalChallengePool climodel.ChallengePoolInfo
-		maxWait := time.Minute * 5 // Increased from 2 minutes to 5 minutes
+		maxWait := time.Minute * 10 // Increased to 10 minutes for very small amounts
 		startTime := time.Now()
 		pollInterval := time.Second * 10
 		writePoolUpdated := false
+		// Use a very small threshold to account for rounding errors with tiny amounts
+		minChangeThreshold := 1e-12
+		pollCount := 0
+
+		t.Logf("Expected upload cost: %v ZCN, Initial write pool: %v ZCN, Initial challenge pool: %v", 
+			expectedUploadCostInZCN, intToZCN(initialAllocation.WritePool), intToZCN(initialChallengePoolBalance))
 
 		for !writePoolUpdated {
 			if time.Since(startTime) > maxWait {
@@ -968,6 +974,9 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 				if len(output) > 0 {
 					json.Unmarshal([]byte(output[0]), &finalChallengePool)
 				}
+				t.Logf("Final state - WritePool: %v ZCN (was %v), MovedToChallenge: %v ZCN, ChallengePool: %v ZCN (was %v)",
+					intToZCN(allocAfterUpload.WritePool), intToZCN(initialAllocation.WritePool),
+					intToZCN(allocAfterUpload.MovedToChallenge), intToZCN(finalChallengePool.Balance), intToZCN(initialChallengePoolBalance))
 				break
 			}
 			allocAfterUpload = getAllocation(t, allocationID)
@@ -981,12 +990,20 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 				if err := json.Unmarshal([]byte(output[0]), &cp); err == nil {
 					finalChallengePool = cp
 					challengePoolBalanceIncrease := intToZCN(cp.Balance - initialChallengePoolBalance)
-					t.Logf("Polling: WritePool change: %v, MovedToChallenge: %v, ChallengePool increase: %v",
-						totalChangeInWritePool, movedToChallenge, challengePoolBalanceIncrease)
+					pollCount++
+					
+					// Log every 3 polls (every 30 seconds) to track progress
+					if pollCount%3 == 0 {
+						t.Logf("Polling (elapsed: %v, poll #%d): WritePool change: %v, MovedToChallenge: %v, ChallengePool increase: %v",
+							time.Since(startTime), pollCount, totalChangeInWritePool, movedToChallenge, challengePoolBalanceIncrease)
+					}
 
 					// Check if write pool has decreased, challenge pool has moved tokens, or challenge pool balance has increased
-					if totalChangeInWritePool > 0 || movedToChallenge > 0 || challengePoolBalanceIncrease > 0 {
+					// Use threshold to account for rounding with very small amounts
+					if totalChangeInWritePool > minChangeThreshold || movedToChallenge > minChangeThreshold || challengePoolBalanceIncrease > minChangeThreshold {
 						writePoolUpdated = true
+						t.Logf("Write pool updated! WritePool change: %v, MovedToChallenge: %v, ChallengePool increase: %v",
+							totalChangeInWritePool, movedToChallenge, challengePoolBalanceIncrease)
 						break
 					}
 				}

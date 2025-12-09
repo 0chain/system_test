@@ -27,7 +27,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 		options := map[string]interface{}{
 			"lock":            "0.5",
-			"size":            "2048", // Use 2048 to meet min_alloc_size requirement
+			"size":            "1048576", // Use 1MB to ensure it's well above min_alloc_size and works with shard configuration
 			"read_price":      "0-1",
 			"write_price":     "0-1",
 			"storage_version": 1,
@@ -116,10 +116,10 @@ func TestCreateAllocation(testSetup *testing.T) {
 		require.NotNil(t, err, strings.Join(output, "\n"))
 	})
 
-	t.Run("Create allocation with smallest possible size (2048) Should Work", func(t *test.SystemTest) {
+	t.Run("Create allocation with smallest possible size (1048576) Should Work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"size": "2048", "lock": "0.5"} // Use 2048 to meet min_alloc_size requirement
+		options := map[string]interface{}{"size": "1048576", "lock": "0.5"} // Use 1MB to ensure it's well above min_alloc_size and works with shard configuration
 		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -178,7 +178,10 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Run("Create allocation with parity specified Should Work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"size": "2048", "parity": "1", "lock": "0.5"} // Use 2048 to meet min_alloc_size requirement
+		// Use 10MB to ensure it's well above min_alloc_size even after division by data shards
+		// When parity is specified without data shards, system may default to 4 data shards
+		// So 10MB / 4 = 2.5MB per shard, which should be sufficient
+		options := map[string]interface{}{"size": "10485760", "parity": "1", "lock": "0.5"}
 		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -193,7 +196,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Run("Create allocation with data specified Should Work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"size": "2048", "data": "1", "lock": "0.5"} // Use 2048 to meet min_alloc_size requirement
+		options := map[string]interface{}{"size": "1048576", "data": "1", "lock": "0.5"} // Use 1MB to ensure it's well above min_alloc_size and works with shard configuration
 		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -209,7 +212,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		t.Skip()
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"size": "2048", "read_price": "0-9999", "lock": "0.5"} // Use 2048 to meet min_alloc_size requirement
+		options := map[string]interface{}{"size": "1048576", "read_price": "0-9999", "lock": "0.5"} // Use 1MB to ensure it's well above min_alloc_size and works with shard configuration
 		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -224,7 +227,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Run("Create allocation with write price range Should Work", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"size": "2048", "write_price": "0-9999", "lock": "0.5"} // Use 2048 to meet min_alloc_size requirement
+		options := map[string]interface{}{"size": "1048576", "write_price": "0-9999", "lock": "0.5"} // Use 1MB to ensure it's well above min_alloc_size and works with shard configuration
 		output, err := createNewAllocation(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -238,7 +241,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Run("Create allocation with too large parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"parity": "99", "lock": "0.5", "size": 2048} // Use 2048 to meet min_alloc_size requirement
+		options := map[string]interface{}{"parity": "99", "lock": "0.5", "size": 1048576} // Use 1MB to ensure it's well above min_alloc_size and works with shard configuration
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -248,7 +251,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Run("Create allocation with too large data (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"data": "99", "lock": "0.5", "size": 2048} // Use 2048 to meet min_alloc_size requirement
+		options := map[string]interface{}{"data": "99", "lock": "0.5", "size": 1048576} // Use 1MB to ensure it's well above min_alloc_size and works with shard configuration
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -258,7 +261,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Run("Create allocation with too large data and parity (Greater than the number of blobbers) Should Fail", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"data": "30", "parity": "20", "lock": "0.5", "size": 2048} // Use 2048 to meet min_alloc_size requirement
+		options := map[string]interface{}{"data": "30", "parity": "20", "lock": "0.5", "size": 1048576} // Use 1MB to ensure it's well above min_alloc_size and works with shard configuration
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -269,7 +272,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		t.Skip()
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 2048} // Use 2048 to meet min_alloc_size requirement
+		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 1048576} // Use 1MB to ensure it's well above min_alloc_size and works with shard configuration
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -299,7 +302,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 	t.Run("Create allocation should have all file options permitted by default", func(t *test.SystemTest) {
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"lock": "0.5", "size": 2048} // Use 2048 bytes to meet min_alloc_size requirement
+		options := map[string]interface{}{"lock": "0.5", "size": 1048576} // Use 1MB to ensure it's well above min_alloc_size and works with shard configuration
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -324,7 +327,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		_ = setupWallet(t, configPath)
 
 		// Forbid upload
-		options := map[string]interface{}{"lock": "0.5", "size": 2048, "forbid_upload": nil}
+		options := map[string]interface{}{"lock": "0.5", "size": 1048576, "forbid_upload": nil}
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -338,7 +341,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid delete
-		options = map[string]interface{}{"lock": "0.5", "size": 2048, "forbid_delete": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1048576, "forbid_delete": nil}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -352,7 +355,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid update
-		options = map[string]interface{}{"lock": "0.5", "size": 2048, "forbid_update": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1048576, "forbid_update": nil}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -366,7 +369,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid move
-		options = map[string]interface{}{"lock": "0.5", "size": 2048, "forbid_move": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1048576, "forbid_move": nil}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -380,7 +383,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid copy
-		options = map[string]interface{}{"lock": "0.5", "size": 2048, "forbid_copy": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1048576, "forbid_copy": nil}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -394,7 +397,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid rename
-		options = map[string]interface{}{"lock": "0.5", "size": 2048, "forbid_rename": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1048576, "forbid_rename": nil}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -412,7 +415,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		_ = setupWallet(t, configPath)
 
 		// Forbid update, rename and delete
-		options := map[string]interface{}{"lock": "0.5", "size": 2048}
+		options := map[string]interface{}{"lock": "0.5", "size": 1048576}
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -433,7 +436,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 		createAllocationTestTeardown(t, allocationID)
 
 		// Forbid upload, move and copy
-		options = map[string]interface{}{"lock": "0.5", "size": 2048, "third_party_extendable": nil}
+		options = map[string]interface{}{"lock": "0.5", "size": 1048576, "third_party_extendable": nil}
 		output, err = createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")

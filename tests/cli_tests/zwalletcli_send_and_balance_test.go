@@ -117,11 +117,10 @@ func TestSendAndBalance(testSetup *testing.T) {
 	})
 
 	t.Run("Send attempt on zero ZCN wallet should fail", func(t *test.SystemTest) {
+		createWallet(t)
+		// Wallet is pre-funded with 1000 ZCN, no need for faucet
+
 		targetWallet := escapedTestName(t) + "_TARGET"
-
-		_, err := executeFaucetWithTokens(t, configPath, 0.1)
-		require.Nil(t, err, "Error occurred when executing faucet")
-
 		createWalletForName(targetWallet)
 
 		target, err := getWalletForName(t, configPath, targetWallet)
@@ -129,7 +128,8 @@ func TestSendAndBalance(testSetup *testing.T) {
 
 		wantFailureMsg := `Send tokens failed. submit transaction failed: {"error":"insufficient balance to send"}`
 
-		output, err := sendZCN(t, configPath, target.ClientID, "1", "", createParams(map[string]interface{}{}), false)
+		// Try to send more than the pre-funded amount (1000 ZCN)
+		output, err := sendZCN(t, configPath, target.ClientID, "2000", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)

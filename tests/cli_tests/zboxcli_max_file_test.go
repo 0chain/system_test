@@ -34,8 +34,7 @@ func TestMaxFileSize(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
-		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+		// Wallet is pre-funded, no need for faucet
 
 		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
 			"size":   10 * MB,
@@ -67,8 +66,7 @@ func TestMaxFileSize(testSetup *testing.T) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
-		_, err = utils.ExecuteFaucetWithTokens(t, configPath, 9)
-		require.Nil(t, err, "Error executing faucet", strings.Join(output, "\n"))
+		// Wallet is pre-funded, no need for faucet
 
 		output, err = utils.CreateNewAllocation(t, configPath, utils.CreateParams(map[string]interface{}{
 			"size":   10 * MB,

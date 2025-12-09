@@ -90,6 +90,9 @@ func TestSharderStake(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		require.Regexp(t, regexp.MustCompile("locked with: [0-9a-z]{64}"), output[0])
 
+		// wait for pool to be active from pending status, usually need to wait for 50 rounds
+		waitForStakePoolActive(t)
+
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
 			"tokens":     2,
@@ -113,25 +116,10 @@ func TestSharderStake(testSetup *testing.T) {
 
 	t.RunSequentially("Staking tokens with insufficient balance should fail", func(t *test.SystemTest) {
 		createWallet(t)
-
-		// Try to get 1 ZCN from faucet, but handle gracefully if faucet is empty
-		faucetOutput, err := executeFaucetWithTokens(t, configPath, 1)
-		if err != nil {
-			// Check if the error is due to empty faucet
-			outputStr := strings.Join(faucetOutput, "\n")
-			if strings.Contains(outputStr, "faucet has no tokens") {
-				// Since wallets are pre-funded with 1000 ZCN, we can't test insufficient balance
-				// without first draining the wallet, which is complex. Skip this test.
-				t.Skipf("Faucet is empty and wallet is pre-funded with 1000 ZCN, cannot test insufficient balance scenario")
-				return
-			}
-			// If it's a different error, fail the test
-			require.NoError(t, err, "Unexpected error from faucet: %v, Output: %s", err, outputStr)
-		}
-
+		// Wallet is pre-funded with 1000 ZCN, so stake more than that to test insufficient balance
 		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
-			"tokens":     6,
+			"tokens":     2000.0, // Stake more than the pre-funded amount (1000 ZCN)
 		}), false)
 		require.NotNil(t, err, "expected error when staking tokens with insufficient balance but got output", strings.Join(output, "\n"))
 		require.Len(t, output, 1)

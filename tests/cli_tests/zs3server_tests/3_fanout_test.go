@@ -73,6 +73,25 @@ func TestZs3serverFanoutTests(testSetup *testing.T) {
 		if strings.Contains(outputStr, "already exists") || strings.Contains(outputStr, "BucketAlreadyExists") {
 			// Bucket already exists, which is fine - continue
 			t.Logf("Bucket already exists, continuing...")
+		} else if strings.Contains(outputStr, "does not exist") || strings.Contains(outputStr, "Unable to make bucket") {
+			// Alias might not be properly configured or server not accessible
+			t.Logf("Alias/server issue detected: %s. Retrying alias setup...", outputStr)
+			output, err = cliutils.RunCommand(t, aliasCommand, 1, time.Minute*2)
+			if err != nil {
+				testSetup.Fatalf("Failed to recreate mc alias: %v\nOutput: %s", err, output)
+			}
+			// Wait a bit for alias to be ready
+			time.Sleep(2 * time.Second)
+			// Retry bucket creation
+			output, err = cliutils.RunCommand(t, bucketCommand, 1, time.Minute*2)
+			if err != nil {
+				outputStr = strings.Join(output, "\n")
+				if !strings.Contains(outputStr, "already exists") && !strings.Contains(outputStr, "BucketAlreadyExists") {
+					testSetup.Fatalf("Failed to create bucket after retry: %v\nOutput: %s. This may indicate the S3 server at %s:%s is not accessible.", err, outputStr, config.Server, config.HostPort)
+				}
+			} else {
+				t.Logf("Bucket created successfully after retry")
+			}
 		} else {
 			// For any other error, try one more time after a brief wait
 			t.Logf("Bucket creation failed (error: %s), retrying after brief wait...", outputStr)

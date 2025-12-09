@@ -81,7 +81,9 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.BaseURL = generateRandomURL()
 		sn.Capacity = 10240 * GB
 
-		sn.Terms.ReadPrice = 1000000000
+		// Set read_price to 0 to ensure it's within valid range (max_read_price validation happens first)
+		// This allows the write_price validation to be tested without triggering read_price validation
+		sn.Terms.ReadPrice = 0
 		sn.Terms.WritePrice = 100000000000000000
 
 		sn.StakePoolSettings.DelegateWallet = "config.Configuration.DelegateWallet"
@@ -149,7 +151,9 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.BaseURL = generateRandomURL()
 		sn.Capacity = 1 * MB
 
-		sn.Terms.ReadPrice = 1000000000
+		// Set read_price to 0 to ensure it's within valid range (max_read_price validation happens first)
+		// This allows the capacity validation to be tested without triggering read_price validation
+		sn.Terms.ReadPrice = 0
 		sn.Terms.WritePrice = 1000000000
 
 		sn.StakePoolSettings.DelegateWallet = "config.Configuration.DelegateWallet"

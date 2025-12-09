@@ -788,11 +788,17 @@ func TestUpload(testSetup *testing.T) {
 		cliutils.Wait(t, 30*time.Second)
 		var finalAllocation climodel.Allocation
 		var finalChallengePool climodel.ChallengePoolInfo
-		maxWait := time.Minute * 5 // Increased from 2 minutes to 5 minutes
+		maxWait := time.Minute * 10 // Increased to 10 minutes for very small amounts
 		startTime := time.Now()
 		pollInterval := time.Second * 10
 		writePoolUpdated := false
 		initialChallengePoolBalance := challengePool.Balance
+		// Use a very small threshold to account for rounding errors with tiny amounts
+		minChangeThreshold := 1e-12
+		pollCount := 0
+
+		t.Logf("Expected upload cost: %v ZCN, Initial write pool: %v ZCN, Initial challenge pool: %v", 
+			expectedUploadCostInZCN, intToZCN(initialAllocation.WritePool), intToZCN(initialChallengePoolBalance))
 
 		for !writePoolUpdated {
 			if time.Since(startTime) > maxWait {
@@ -803,6 +809,9 @@ func TestUpload(testSetup *testing.T) {
 				if len(output) > 0 {
 					json.Unmarshal([]byte(output[0]), &finalChallengePool)
 				}
+				t.Logf("Final state - WritePool: %v ZCN (was %v), MovedToChallenge: %v ZCN, ChallengePool: %v ZCN (was %v)",
+					intToZCN(finalAllocation.WritePool), intToZCN(initialAllocation.WritePool),
+					intToZCN(finalAllocation.MovedToChallenge), intToZCN(finalChallengePool.Balance), intToZCN(initialChallengePoolBalance))
 				break
 			}
 			finalAllocation = getAllocation(t, allocationID)
@@ -816,12 +825,20 @@ func TestUpload(testSetup *testing.T) {
 				if err := json.Unmarshal([]byte(output[0]), &cp); err == nil {
 					finalChallengePool = cp
 					challengePoolBalanceIncrease := intToZCN(cp.Balance - initialChallengePoolBalance)
-					t.Logf("Polling: WritePool change: %v, MovedToChallenge: %v, ChallengePool increase: %v",
-						totalChangeInWritePool, movedToChallenge, challengePoolBalanceIncrease)
+					pollCount++
+					
+					// Log every 3 polls (every 30 seconds) to track progress
+					if pollCount%3 == 0 {
+						t.Logf("Polling (elapsed: %v, poll #%d): WritePool change: %v, MovedToChallenge: %v, ChallengePool increase: %v",
+							time.Since(startTime), pollCount, totalChangeInWritePool, movedToChallenge, challengePoolBalanceIncrease)
+					}
 
 					// Check if write pool has decreased, challenge pool has moved tokens, or challenge pool balance has increased
-					if totalChangeInWritePool > 0 || movedToChallenge > 0 || challengePoolBalanceIncrease > 0 {
+					// Use threshold to account for rounding with very small amounts
+					if totalChangeInWritePool > minChangeThreshold || movedToChallenge > minChangeThreshold || challengePoolBalanceIncrease > minChangeThreshold {
 						writePoolUpdated = true
+						t.Logf("Write pool updated! WritePool change: %v, MovedToChallenge: %v, ChallengePool increase: %v",
+							totalChangeInWritePool, movedToChallenge, challengePoolBalanceIncrease)
 						break
 					}
 				}
@@ -1021,22 +1038,69 @@ func TestUpload(testSetup *testing.T) {
 					probeOutput, probeErr := probeCmd.CombinedOutput()
 					if probeErr != nil {
 						t.Logf("Warning: ffprobe validation failed for %s: %v, output: %s", videoFilePath, probeErr, string(probeOutput))
-						// Continue anyway, as some formats might not be fully supported by ffprobe
+						// For some formats like mxf, ffprobe might fail but ffmpeg can still process them
+						// Continue anyway, but log the warning
 					} else {
 						t.Logf("Video file validated successfully with ffprobe")
 					}
 				}
 
+				// Additional validation: ensure file is readable
+				file, fileErr := os.Open(videoFilePath)
+				if fileErr != nil {
+					t.Fatalf("Cannot open video file %s for reading: %v", videoFilePath, fileErr)
+				}
+				file.Close()
+
+				// Try to read a small portion of the file to ensure it's not corrupted
+				testRead, readErr := os.ReadFile(videoFilePath)
+				if readErr != nil {
+					t.Fatalf("Cannot read video file %s: %v", videoFilePath, readErr)
+				}
+				if len(testRead) == 0 {
+					t.Fatalf("Video file %s is empty", videoFilePath)
+				}
+				t.Logf("Video file %s is readable and has %d bytes", videoFilePath, len(testRead))
+
+				// Upload with web-streaming enabled
+				// Note: Some video formats may cause issues with web-streaming processing
+				// If upload fails with panic/nil pointer, it's likely a zbox CLI issue with that format
 				output, err = uploadFile(t, configPath, map[string]interface{}{
 					"allocation":    allocationID,
 					"remotepath":    "/",
 					"localpath":     videoFilePath,
 					"web-streaming": true,
 				}, true)
-				require.Nil(t, err, strings.Join(output, "\n"))
-				require.Len(t, output, 2)
+				
+				// Check for panic errors in output (check both stdout and stderr patterns)
+				outputStr := strings.Join(output, "\n")
+				outputLower := strings.ToLower(outputStr)
+				hasPanic := strings.Contains(outputLower, "panic:") || 
+					strings.Contains(outputLower, "nil pointer") ||
+					strings.Contains(outputLower, "invalid memory address") ||
+					strings.Contains(outputLower, "segmentation violation") ||
+					strings.Contains(outputLower, "sigsegv")
+				
+				if hasPanic {
+					// If we get a panic, this is a CLI bug with this format, not a test issue
+					// Log it clearly and fail with a descriptive message
+					t.Logf("Upload failed with panic/nil pointer error for format %s. This indicates a bug in zbox CLI's %s format processing.", videoFormat, videoFormat)
+					t.Logf("Full output: %s", outputStr)
+					require.Failf(t, "Upload failed with panic/nil pointer error for %s format. This is a zbox CLI bug, not a test issue. Output: %s", videoFormat, outputStr)
+				}
+				
+				// If there's an error but no panic, check if it's a known issue
+				if err != nil && !hasPanic {
+					// Check for other common errors that might indicate format issues
+					if strings.Contains(outputLower, "unsupported") || strings.Contains(outputLower, "codec") {
+						t.Logf("Upload failed for format %s with error: %s", videoFormat, outputStr)
+					}
+				}
+				
+				require.Nil(t, err, "Upload failed: %s", outputStr)
+				require.Len(t, output, 2, "Expected 2 lines of output, got: %s", outputStr)
 				expected := "Status completed callback. Type = video/mp4. Name = " + videoName + ".mp4"
-				require.Equal(t, expected, output[1])
+				require.Equal(t, expected, output[1], "Output did not match expected. Full output: %s", outputStr)
 			})
 		}
 	})

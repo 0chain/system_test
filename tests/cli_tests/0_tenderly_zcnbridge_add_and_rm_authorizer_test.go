@@ -94,9 +94,12 @@ func TestZCNAuthorizerRegisterAndDelete(testSetup *testing.T) {
 				t.Logf("Authorizer %s not found (may have been deleted or never registered), skipping deletion", clientID)
 				return
 			}
+			// If it's a different error, fail the test
+			require.NoError(t, err, "error removing authorizer: %s", outputStr)
 		}
-		require.NoError(t, err, strings.Join(output, "\n"))
-		t.Log("remove authorizer zcnsc successfully")
+		if err == nil {
+			t.Log("remove authorizer zcnsc successfully")
+		}
 	})
 }
 

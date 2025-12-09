@@ -41,13 +41,18 @@ func TestKillBlobber(testSetup *testing.T) {
 		}
 		require.NotEqual(t, blobberToKill, "", "all active blobbers have been killed")
 		require.True(t, activeBlobbers > 1, "need at least two active blobbers")
-		// Use fixed shard configuration that works with 6 blobbers: 4 data + 2 parity = 6 total
-		// This ensures we don't try to use more blobbers than available
-		dataShards := 4
-		parityShards := 2
-		// Ensure we don't exceed available blobbers
+		// Use a conservative shard configuration that works with available blobbers
+		// Use 2 data + 1 parity = 3 total to ensure we have enough blobbers even after kill
+		// This is more conservative than 4+2=6 to avoid "not enough blobbers" errors
+		dataShards := 2
+		parityShards := 1
+		// Only use larger configuration if we have plenty of blobbers
+		if activeBlobbers >= 7 {
+			dataShards = 4
+			parityShards = 2
+		}
+		// Final safety check - ensure we don't exceed available blobbers
 		if dataShards+parityShards > activeBlobbers {
-			// Fall back to a smaller configuration if needed
 			dataShards = 2
 			parityShards = 1
 		}
@@ -183,13 +188,18 @@ func TestKillBlobber(testSetup *testing.T) {
 		}
 		require.NotEqual(t, blobberToShutdown, "", "all active blobbers have been shutdowned")
 		require.True(t, activeBlobbers > 1, "need at least two active blobbers")
-		// Use fixed shard configuration that works with 6 blobbers: 4 data + 2 parity = 6 total
-		// This ensures we don't try to use more blobbers than available
-		dataShards := 4
-		parityShards := 2
-		// Ensure we don't exceed available blobbers
+		// Use a conservative shard configuration that works with available blobbers
+		// Use 2 data + 1 parity = 3 total to ensure we have enough blobbers even after shutdown
+		// This is more conservative than 4+2=6 to avoid "not enough blobbers" errors
+		dataShards := 2
+		parityShards := 1
+		// Only use larger configuration if we have plenty of blobbers
+		if activeBlobbers >= 7 {
+			dataShards = 4
+			parityShards = 2
+		}
+		// Final safety check - ensure we don't exceed available blobbers
 		if dataShards+parityShards > activeBlobbers {
-			// Fall back to a smaller configuration if needed
 			dataShards = 2
 			parityShards = 1
 		}

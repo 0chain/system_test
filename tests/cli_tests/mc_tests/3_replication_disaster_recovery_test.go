@@ -51,6 +51,18 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 			t.Fatalf("Alias 'secondary' was not found in alias list. Output: %s", aliasListStr)
 		}
 
+		// Verify alias is working by testing a simple command
+		lsOutput, lsErr := cli_utils.RunCommand(t, "../mc ls primary", 1, time.Minute*2)
+		if lsErr != nil {
+			lsOutputStr := strings.Join(lsOutput, "\n")
+			t.Logf("Warning: Primary alias test failed: %v, Output: %s", lsErr, lsOutputStr)
+			// Try to recreate the alias
+			output, err = cli_utils.RunCommand(t, command_primary, 1, time.Hour*2)
+			if err != nil {
+				t.Fatalf("Failed to recreate primary mc alias: %v\nOutput: %s", err, output)
+			}
+		}
+
 		// Create bucket, with retry logic if alias issue detected
 		bucketCommand := "../mc mb primary/mybucket"
 		bucketOutput, bucketErr := cli_utils.RunCommand(t, bucketCommand, 1, time.Hour*2)
@@ -59,13 +71,15 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 			if strings.Contains(outputStr, "already exists") || strings.Contains(outputStr, "BucketAlreadyExists") {
 				// Bucket already exists, which is fine - continue
 				t.Logf("Primary bucket already exists, continuing...")
-			} else if strings.Contains(outputStr, "does not exist") {
-				// Alias might not be properly configured, try to recreate it
-				t.Logf("Primary alias issue detected, retrying alias setup...")
+			} else if strings.Contains(outputStr, "does not exist") || strings.Contains(outputStr, "Unable to make bucket") {
+				// Alias might not be properly configured or server not accessible
+				t.Logf("Primary alias/server issue detected: %s. Retrying alias setup...", outputStr)
 				output, err = cli_utils.RunCommand(t, command_primary, 1, time.Hour*2)
 				if err != nil {
 					t.Fatalf("Failed to recreate primary mc alias: %v\nOutput: %s", err, output)
 				}
+				// Wait a bit for alias to be ready
+				time.Sleep(2 * time.Second)
 				// Verify alias again after recreation
 				aliasListOutput, aliasListErr = cli_utils.RunCommand(t, "../mc alias list", 1, time.Minute*2)
 				if aliasListErr == nil {
@@ -79,7 +93,7 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 				if bucketErr != nil {
 					outputStr = strings.Join(bucketOutput, "\n")
 					if !strings.Contains(outputStr, "already exists") && !strings.Contains(outputStr, "BucketAlreadyExists") {
-						t.Fatalf("Failed to create primary bucket after retry: %v\nOutput: %s", bucketErr, outputStr)
+						t.Fatalf("Failed to create primary bucket after retry: %v\nOutput: %s. This may indicate the S3 server at %s:%s is not accessible.", bucketErr, outputStr, config.Server, config.HostPort)
 					}
 				} else {
 					t.Logf("Primary bucket created successfully after retry")
@@ -102,6 +116,18 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 			t.Fatalf("Error writing to file: %v", err)
 		}
 
+		// Verify secondary alias is working
+		lsOutput2, lsErr2 := cli_utils.RunCommand(t, "../mc ls secondary", 1, time.Minute*2)
+		if lsErr2 != nil {
+			lsOutputStr2 := strings.Join(lsOutput2, "\n")
+			t.Logf("Warning: Secondary alias test failed: %v, Output: %s", lsErr2, lsOutputStr2)
+			// Try to recreate the alias
+			output, err = cli_utils.RunCommand(t, command_secondary, 1, time.Hour*2)
+			if err != nil {
+				t.Fatalf("Failed to recreate secondary mc alias: %v\nOutput: %s", err, output)
+			}
+		}
+
 		// Create bucket, with retry logic if alias issue detected
 		bucketCommand2 := "../mc mb secondary/mirrorbucket"
 		bucketOutput2, bucketErr2 := cli_utils.RunCommand(t, bucketCommand2, 1, time.Hour*2)
@@ -110,13 +136,15 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 			if strings.Contains(outputStr, "already exists") || strings.Contains(outputStr, "BucketAlreadyExists") {
 				// Bucket already exists, which is fine - continue
 				t.Logf("Secondary bucket already exists, continuing...")
-			} else if strings.Contains(outputStr, "does not exist") {
-				// Alias might not be properly configured, try to recreate it
-				t.Logf("Secondary alias issue detected, retrying alias setup...")
+			} else if strings.Contains(outputStr, "does not exist") || strings.Contains(outputStr, "Unable to make bucket") {
+				// Alias might not be properly configured or server not accessible
+				t.Logf("Secondary alias/server issue detected: %s. Retrying alias setup...", outputStr)
 				output, err = cli_utils.RunCommand(t, command_secondary, 1, time.Hour*2)
 				if err != nil {
 					t.Fatalf("Failed to recreate secondary mc alias: %v\nOutput: %s", err, output)
 				}
+				// Wait a bit for alias to be ready
+				time.Sleep(2 * time.Second)
 				// Verify alias again after recreation
 				aliasListOutput, aliasListErr = cli_utils.RunCommand(t, "../mc alias list", 1, time.Minute*2)
 				if aliasListErr == nil {
@@ -130,7 +158,7 @@ func TestZs3ServerReplication(testSetup *testing.T) {
 				if bucketErr2 != nil {
 					outputStr = strings.Join(bucketOutput2, "\n")
 					if !strings.Contains(outputStr, "already exists") && !strings.Contains(outputStr, "BucketAlreadyExists") {
-						t.Fatalf("Failed to create secondary bucket after retry: %v\nOutput: %s", bucketErr2, outputStr)
+						t.Fatalf("Failed to create secondary bucket after retry: %v\nOutput: %s. This may indicate the S3 server at %s:%s is not accessible.", bucketErr2, outputStr, config.SecondaryServer, config.SecondaryPort)
 					}
 				} else {
 					t.Logf("Secondary bucket created successfully after retry")
