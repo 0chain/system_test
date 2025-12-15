@@ -28,7 +28,7 @@ func TestZauthOperations(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("Sign transaction with not allowed restrictions", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
@@ -75,8 +75,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Sign transaction with allowed restrictions", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -123,8 +124,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Sign transaction with the missing signature", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -171,8 +173,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Sign transaction with the missing peer public key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -219,8 +222,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Sign transaction with the missing split key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -250,8 +254,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Sign transaction with correct payload", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -302,8 +307,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Sign message with the missing peer public key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -340,8 +346,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Sign message with the missing split key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -361,8 +368,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Sign message with invalid client id in the payload", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -399,8 +407,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Sign message with correct payload", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -441,8 +450,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Revoke not existing split key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -456,8 +466,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Revoke existing split key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -488,8 +499,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Delete not existing split key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -503,8 +515,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Delete existing split key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -531,8 +544,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Retrieve details for not existing split key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -546,8 +560,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Retrieve split key details for existing split key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -583,8 +598,9 @@ func TestZauthOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Retrieve split key details last used field to be updated after message signing operation", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)

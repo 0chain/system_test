@@ -43,8 +43,11 @@ func Test0BoxNFTCollection(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("List nft collections with zero nft collections should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+
+		// Refresh CSRF token after teardown to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		nftCollectionList, response, err := zboxClient.GetNftCollections(t, headers)
 		require.NoError(t, err)
@@ -53,11 +56,17 @@ func Test0BoxNFTCollection(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("List nft collections with nft collections should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+
+		// Refresh CSRF token after teardown to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestAllocation(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		nftCollectionData := NewTestNFTCollection()
 		_, response, err := zboxClient.CreateNftCollection(t, headers, nftCollectionData)
@@ -71,11 +80,17 @@ func Test0BoxNFTCollection(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update nft collection with collection present should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+
+		// Refresh CSRF token after teardown to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestAllocation(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		nftCollectionData := NewTestNFTCollection()
 		_, response, err := zboxClient.CreateNftCollection(t, headers, nftCollectionData)
@@ -93,11 +108,17 @@ func Test0BoxNFTCollection(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update nft collection with no collection present should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+
+		// Refresh CSRF token after teardown to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestAllocation(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		nftCollectionData := NewTestNFTCollection()
 		nftCollectionData["collection_name"] = "new_collection_name"
@@ -112,8 +133,11 @@ func Test0BoxNFT(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("List nfts with zero nfts should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+
+		// Refresh CSRF token after teardown to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		nftList, response, err := zboxClient.GetAllNfts(t, headers)
 		require.NoError(t, err)
@@ -122,11 +146,17 @@ func Test0BoxNFT(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("List nfts with nfts should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+
+		// Refresh CSRF token after teardown to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestAllocation(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		nftCollectionData := NewTestNFTCollection()
 		_, response, err := zboxClient.CreateNftCollection(t, headers, nftCollectionData)
@@ -145,11 +175,17 @@ func Test0BoxNFT(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update nft with nft present should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+
+		// Refresh CSRF token after teardown to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestAllocation(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		nftCollectionData := NewTestNFTCollection()
 		_, response, err := zboxClient.CreateNftCollection(t, headers, nftCollectionData)
@@ -174,11 +210,17 @@ func Test0BoxNFT(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update nft with no nft present should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+
+		// Refresh CSRF token after teardown to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		err := Create0boxTestAllocation(t, headers)
 		require.NoError(t, err)
+
+		// Refresh CSRF token after wallet creation to ensure it's valid
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		nftData := NewTestNFT()
 		nftData["stage"] = "mint_nft"
 		_, response, err := zboxClient.UpdateNft(t, headers, nftData, 1)

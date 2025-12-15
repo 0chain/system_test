@@ -121,6 +121,7 @@ jobs:
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
           network: ${{ env.NETWORK_URL }}
           svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          custom_go_sdk_version: "v1.20.9"
           deploy_report_page: true
           archive_results: true
           run_flaky_tests: true

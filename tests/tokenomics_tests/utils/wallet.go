@@ -64,6 +64,12 @@ func CreateWalletForName(t *test.SystemTest, cliConfigFilename, name string, opt
 
 	output, err = ExecuteFaucetWithTokensForWallet(t, name, cliConfigFilename, 5)
 	t.Logf("faucet output: %v", output)
+	// Don't fail wallet creation if faucet is empty - the wallet was created successfully
+	// The caller can handle faucet errors separately if needed
+	if err != nil && strings.Contains(strings.Join(output, "\n"), "faucet has no tokens") {
+		t.Logf("Warning: Faucet is empty, but wallet was created successfully")
+		return output, nil
+	}
 	return output, err
 }
 

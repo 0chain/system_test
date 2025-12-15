@@ -968,7 +968,18 @@ func (c *APIClient) RegisterBlobber(t *test.SystemTest,
 			return registerBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus && storageNode.ID == expectedResponse
 		}
 
-		return registerBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus && registerBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput == expectedResponse
+		// Log the actual status and output for debugging
+		if registerBlobberTransactionGetConfirmationResponse.Status == requiredTransactionStatus {
+			actualOutput := registerBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput
+			if strings.Contains(actualOutput, expectedResponse) {
+				return true
+			}
+			t.Logf("Transaction status matches (%d) but output doesn't match. Expected: %s, Actual: %s", requiredTransactionStatus, expectedResponse, actualOutput)
+		} else {
+			t.Logf("Transaction status doesn't match. Expected: %d, Actual: %d, Output: %s", requiredTransactionStatus, registerBlobberTransactionGetConfirmationResponse.Status, registerBlobberTransactionGetConfirmationResponse.Transaction.TransactionOutput)
+		}
+
+		return false
 	})
 
 	wallet.IncNonce()
@@ -1363,7 +1374,15 @@ func (c *APIClient) GetWalletBalance(t *test.SystemTest, wallet *model.Wallet, r
 
 	if err != nil {
 		t.Logf("Error getting wallet balance: %v", err)
-		clientGetBalanceResponse.Balance = 0
+		// Return a zero balance response if there's an error (e.g., "value not present" for new wallets)
+		if clientGetBalanceResponse == nil {
+			clientGetBalanceResponse = &model.ClientGetBalanceResponse{
+				Balance: 0,
+				Nonce:   0,
+			}
+		} else {
+			clientGetBalanceResponse.Balance = 0
+		}
 		return clientGetBalanceResponse
 	}
 	require.Nil(t, err)

@@ -95,11 +95,11 @@ func TestUpload(testSetup *testing.T) {
 	})
 
 	t.Run("Upload File to Root Directory Should Work", func(t *test.SystemTest) { // todo: slow
-		const allocSize int64 = 64 * KB * 2
+		const allocSize int64 = 1 * MB // Use 1 MB to ensure it's well above min_alloc_size (2 KB)
 		const fileSize int64 = 64 * KB
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
+			"size": strconv.FormatInt(allocSize, 10),
 		})
 
 		filename := generateRandomTestFileName(t)
@@ -784,17 +784,62 @@ func TestUpload(testSetup *testing.T) {
 		unit := strings.Fields(output[0])[1]
 		expectedUploadCostInZCN = unitToZCN(expectedUploadCostInZCN, unit)
 
+		// Wait for write pool balance to be updated - poll until it changes
 		cliutils.Wait(t, 30*time.Second)
+		var finalAllocation climodel.Allocation
+		var finalChallengePool climodel.ChallengePoolInfo
+		maxWait := time.Minute * 5 // Increased from 2 minutes to 5 minutes
+		startTime := time.Now()
+		pollInterval := time.Second * 10
+		writePoolUpdated := false
+		initialChallengePoolBalance := challengePool.Balance
 
-		finalAllocation := getAllocation(t, allocationID)
+		for !writePoolUpdated {
+			if time.Since(startTime) > maxWait {
+				t.Logf("Timeout waiting for write pool balance to update after %v", maxWait)
+				// Get final state even on timeout for debugging
+				finalAllocation = getAllocation(t, allocationID)
+				output, _ := challengePoolInfo(t, configPath, allocationID)
+				if len(output) > 0 {
+					json.Unmarshal([]byte(output[0]), &finalChallengePool)
+				}
+				break
+			}
+			finalAllocation = getAllocation(t, allocationID)
+			totalChangeInWritePool := intToZCN(initialAllocation.WritePool - finalAllocation.WritePool)
+			movedToChallenge := intToZCN(finalAllocation.MovedToChallenge)
 
-		// Get Challenge-Pool info after upload
-		output, err = challengePoolInfo(t, configPath, allocationID)
-		require.Nil(t, err, "Could not fetch challenge pool", strings.Join(output, "\n"))
+			// Also check challenge pool balance directly
+			output, err := challengePoolInfo(t, configPath, allocationID)
+			if err == nil && len(output) > 0 {
+				var cp climodel.ChallengePoolInfo
+				if err := json.Unmarshal([]byte(output[0]), &cp); err == nil {
+					finalChallengePool = cp
+					challengePoolBalanceIncrease := intToZCN(cp.Balance - initialChallengePoolBalance)
+					t.Logf("Polling: WritePool change: %v, MovedToChallenge: %v, ChallengePool increase: %v",
+						totalChangeInWritePool, movedToChallenge, challengePoolBalanceIncrease)
 
-		challengePool = climodel.ChallengePoolInfo{}
-		err = json.Unmarshal([]byte(output[0]), &challengePool)
-		require.Nil(t, err, "Error unmarshalling challenge pool info", strings.Join(output, "\n"))
+					// Check if write pool has decreased, challenge pool has moved tokens, or challenge pool balance has increased
+					if totalChangeInWritePool > 0 || movedToChallenge > 0 || challengePoolBalanceIncrease > 0 {
+						writePoolUpdated = true
+						break
+					}
+				}
+			}
+
+			if !writePoolUpdated {
+				cliutils.Wait(t, pollInterval)
+			}
+		}
+
+		// Get Challenge-Pool info after upload (if not already fetched)
+		if finalChallengePool.Id == "" {
+			output, err = challengePoolInfo(t, configPath, allocationID)
+			require.Nil(t, err, "Could not fetch challenge pool", strings.Join(output, "\n"))
+			err = json.Unmarshal([]byte(output[0]), &finalChallengePool)
+			require.Nil(t, err, "Error unmarshalling challenge pool info", strings.Join(output, "\n"))
+		}
+		challengePool = finalChallengePool
 
 		require.Regexp(t, regexp.MustCompile(fmt.Sprintf("([a-f0-9]{64}):challengepool:%s", allocationID)), challengePool.Id)
 		require.IsType(t, int64(1), challengePool.StartTime)
@@ -935,20 +980,57 @@ func TestUpload(testSetup *testing.T) {
 			videoLink := sampleVideo[0]
 			videoName := sampleVideo[1]
 			videoFormat := sampleVideo[2]
-			t.RunSequentiallyWithTimeout("Upload Video File "+videoFormat+" With Web Streaming Should Work", 2*time.Minute, func(t *test.SystemTest) {
+			t.RunSequentiallyWithTimeout("Upload Video File "+videoFormat+" With Web Streaming Should Work", 5*time.Minute, func(t *test.SystemTest) {
 				allocSize := int64(400 * 1024 * 1024)
 				allocationID := setupAllocation(t, configPath, map[string]interface{}{
 					"size": allocSize,
 					"lock": 9,
 				})
-				downloadVideo := "wget " + videoLink + " -O " + videoName + "." + videoFormat
-				output, err := cliutils.RunCommand(t, downloadVideo, 3, 2*time.Second)
-				require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
+
+				// Check if ffmpeg is available (required for web streaming)
+				ffmpegPath, err := exec.LookPath("ffmpeg")
+				if err != nil {
+					t.Skipf("ffmpeg is not available, skipping web streaming test for %s", videoFormat)
+					return
+				}
+				t.Logf("Using ffmpeg at: %s", ffmpegPath)
+
+				videoFilePath := "./" + videoName + "." + videoFormat
+				// Clean up any existing file from previous runs
+				os.Remove(videoFilePath)
+
+				downloadVideo := "wget " + videoLink + " -O " + videoFilePath
+				output, err := cliutils.RunCommand(t, downloadVideo, 3, 5*time.Minute)
+				if err != nil {
+					// If download fails, check if file exists (might have been downloaded in previous run)
+					if _, statErr := os.Stat(videoFilePath); statErr != nil {
+						require.Nil(t, err, "Failed to download test video file: ", strings.Join(output, "\n"))
+					}
+				}
+
+				// Verify the file was downloaded successfully and has content
+				fileInfo, err := os.Stat(videoFilePath)
+				require.Nil(t, err, "Downloaded video file does not exist: "+videoFilePath)
+				require.Greater(t, fileInfo.Size(), int64(0), "Downloaded video file is empty: "+videoFilePath)
+
+				// Verify the video file is valid by checking with ffprobe (if available)
+				// This helps catch corrupted downloads before attempting transcoding
+				ffprobePath, probeErr := exec.LookPath("ffprobe")
+				if probeErr == nil {
+					probeCmd := exec.Command(ffprobePath, "-v", "error", "-show_format", "-show_streams", videoFilePath)
+					probeOutput, probeErr := probeCmd.CombinedOutput()
+					if probeErr != nil {
+						t.Logf("Warning: ffprobe validation failed for %s: %v, output: %s", videoFilePath, probeErr, string(probeOutput))
+						// Continue anyway, as some formats might not be fully supported by ffprobe
+					} else {
+						t.Logf("Video file validated successfully with ffprobe")
+					}
+				}
 
 				output, err = uploadFile(t, configPath, map[string]interface{}{
 					"allocation":    allocationID,
 					"remotepath":    "/",
-					"localpath":     "./" + videoName + "." + videoFormat,
+					"localpath":     videoFilePath,
 					"web-streaming": true,
 				}, true)
 				require.Nil(t, err, strings.Join(output, "\n"))
@@ -1081,20 +1163,42 @@ func waitPartialUploadAndInterrupt(t *test.SystemTest, cmd *exec.Cmd) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
+	// Use a very short wait time to interrupt before upload completes
+	interruptAfter := 500 * time.Millisecond // Reduced to 500ms to interrupt very early
+	startTime := time.Now()
+
 	for {
 		select {
 		case <-ctx.Done():
 			t.Log("Timeout waiting for partial upload")
 			return false
-		case <-time.After(5 * time.Second):
-			// Send interrupt signal to command
-			err := cmd.Process.Signal(os.Interrupt)
-			if err != nil {
+		case <-time.After(100 * time.Millisecond): // Check every 100ms
+			// Check if process is still running
+			if cmd.Process == nil {
+				t.Log("Process is nil, upload may have completed")
 				return false
 			}
-			require.Nil(t, err)
-			t.Log("Partial upload successful, upload has been interrupted")
-			return true
+
+			// Check if process has exited (upload completed)
+			// Check process state without sending a signal
+			if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
+				// Process has exited, upload likely completed
+				t.Log("Process has exited, upload may have completed before interruption")
+				return false
+			}
+
+			// Check if enough time has passed to interrupt
+			if time.Since(startTime) >= interruptAfter {
+				// Try to send interrupt signal to command
+				err := cmd.Process.Signal(os.Interrupt)
+				if err != nil {
+					// Process may have already exited (upload completed)
+					t.Logf("Error sending interrupt signal (process may have exited): %v", err)
+					return false
+				}
+				t.Log("Partial upload successful, upload has been interrupted")
+				return true
+			}
 		}
 	}
 }

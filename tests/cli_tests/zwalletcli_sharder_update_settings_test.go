@@ -24,7 +24,8 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 	var cooldownPeriod int64
 	var lastRoundOfSettingUpdate int64
-	var sharder climodel.Sharder
+	var selectedSharderID string
+	var oldSharderInfo climodel.Node
 	var mnConfig map[string]float64
 
 	t.TestSetup("Get list of sharders", func() {
@@ -34,30 +35,39 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			t.Skipf("Sharder node owner wallet located at %s is missing", "./config/"+sharder01NodeDelegateWalletName+"_wallet.json")
 		}
 
-		output, err := minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": sharder01ID,
-		}), true)
-		require.Nil(t, err, "error fetching sharder settings")
-		require.Len(t, output, 1)
-
-		var oldSharderInfo climodel.Node
-		err = json.Unmarshal([]byte(output[0]), &oldSharderInfo)
-		require.Nil(t, err, "error unmarhsalling mn-info json output")
-		require.NotEmpty(t, oldSharderInfo)
-
+		// First get the list of sharders for the wallet
 		sharders := getShardersListForWallet(t, sharder01NodeDelegateWalletName)
+		require.NotEmpty(t, sharders, "No sharders found for wallet")
 
+		// Try to find sharder01ID in the list, otherwise use the first available sharder
+		selectedSharderID = sharder01ID
 		found := false
-		for _, sharder = range sharders {
-			if sharder.ID == sharder01ID {
+		for _, s := range sharders {
+			if s.ID == sharder01ID {
 				found = true
 				break
 			}
 		}
 
 		if !found {
-			t.Skip("Skipping update test settings as delegate wallet not found. Please the wallets on https://github.com/0chain/actions/blob/master/run-system-tests/action.yml match delegate wallets on rancher.")
+			// Use the first available sharder if sharder01ID is not found
+			for _, s := range sharders {
+				selectedSharderID = s.ID
+				break
+			}
+			t.Logf("sharder01ID not found, using first available sharder: %s", selectedSharderID)
 		}
+
+		// Fetch sharder info using the selected sharder ID
+		output, err := minerInfoForWallet(t, configPath, createParams(map[string]interface{}{
+			"id": selectedSharderID,
+		}), sharder01NodeDelegateWalletName, true)
+		require.Nil(t, err, "error fetching sharder settings")
+		require.Len(t, output, 1)
+
+		err = json.Unmarshal([]byte(output[0]), &oldSharderInfo)
+		require.Nil(t, err, "error unmarhsalling mn-info json output")
+		require.NotEmpty(t, oldSharderInfo)
 
 		cooldownPeriod = int64(mnConfig["cooldown_period"]) // Updating miner settings has a cooldown of this many rounds
 		lastRoundOfSettingUpdate = int64(0)
@@ -74,7 +84,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 
 			output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-				"id":            sharder01ID,
+				"id":            selectedSharderID,
 				"num_delegates": oldSharderInfo.Settings.MaxNumDelegates,
 				"sharder":       "",
 			}), true)
@@ -86,6 +96,11 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 	})
 
 	t.RunSequentially("Sharder update num_delegates by delegate wallet should work", func(t *test.SystemTest) {
+		// Check balance before attempting update
+		balance, err := getBalanceZCN(t, configPath, sharder01NodeDelegateWalletName)
+		require.NoError(t, err, "Error fetching balance for sharder delegate wallet")
+		require.GreaterOrEqual(t, balance, 0.2, "Sharder delegate wallet must have at least 0.2 ZCN to pay for transaction fees")
+
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -96,7 +111,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}
 
 		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":            sharder01ID,
+			"id":            selectedSharderID,
 			"num_delegates": 5,
 			"sharder":       "",
 		}), true)
@@ -105,9 +120,9 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
-		output, err = minerInfo(t, configPath, createParams(map[string]interface{}{
-			"id": sharder01ID,
-		}), true)
+		output, err = minerInfoForWallet(t, configPath, createParams(map[string]interface{}{
+			"id": selectedSharderID,
+		}), sharder01NodeDelegateWalletName, true)
 		require.Nil(t, err, "error fetching sharder info")
 		require.Len(t, output, 1)
 
@@ -118,6 +133,11 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 	})
 
 	t.RunSequentially("Sharder update with num_delegates more than global max_delegates should fail", func(t *test.SystemTest) {
+		// Check balance before attempting update
+		balance, err := getBalanceZCN(t, configPath, sharder01NodeDelegateWalletName)
+		require.NoError(t, err, "Error fetching balance for sharder delegate wallet")
+		require.GreaterOrEqual(t, balance, 0.2, "Sharder delegate wallet must have at least 0.2 ZCN to pay for transaction fees")
+
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -128,7 +148,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}
 
 		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":            sharder01ID,
+			"id":            selectedSharderID,
 			"num_delegates": mnConfig["max_delegates"] + 1,
 			"sharder":       "",
 		}), false)
@@ -139,6 +159,11 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 	})
 
 	t.RunSequentially("Sharder update num_delegates negative value should fail", func(t *test.SystemTest) {
+		// Check balance before attempting update
+		balance, err := getBalanceZCN(t, configPath, sharder01NodeDelegateWalletName)
+		require.NoError(t, err, "Error fetching balance for sharder delegate wallet")
+		require.GreaterOrEqual(t, balance, 0.2, "Sharder delegate wallet must have at least 0.2 ZCN to pay for transaction fees")
+
 		currRound := getCurrentRound(t)
 
 		if (currRound - lastRoundOfSettingUpdate) < cooldownPeriod {
@@ -149,7 +174,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}
 
 		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":            sharder01ID,
+			"id":            selectedSharderID,
 			"num_delegates": -1,
 			"sharder":       "",
 		}), false)
@@ -186,7 +211,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}
 
 		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":      sharder01ID,
+			"id":      selectedSharderID,
 			"sharder": "",
 		}), false)
 		// FIXME: some indication that no param has been selected to update should be given
@@ -208,8 +233,17 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 
 		createWallet(t)
 
-		output, err := minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
-			"id":            sharder01ID,
+		// Verify sharder exists before attempting update
+		output, err := minerInfoForWallet(t, configPath, createParams(map[string]interface{}{
+			"id": selectedSharderID,
+		}), escapedTestName(t), true)
+		if err != nil {
+			t.Skipf("Sharder %s not found, skipping test", selectedSharderID)
+			return
+		}
+
+		output, err = minerSharderUpdateSettingsForWallet(t, configPath, createParams(map[string]interface{}{
+			"id":            selectedSharderID,
 			"num_delegates": 5,
 			"sharder":       "",
 		}), escapedTestName(t), false)

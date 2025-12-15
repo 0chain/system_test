@@ -32,11 +32,17 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 
 		time.Sleep(10 * time.Second)
 
+		// Re-set wallet to ensure SDK context is correct after chimneySdkClient operation
+		sdkClient.SetWallet(t, wallet)
+
 		uar := &model.UpdateAllocationRequest{
 			ID:   allocationID,
 			Size: 1 * GB,
 		}
 
+		// Ensure wallet is set before calling GetUpdateAllocationMinLock
+		// This is critical as GetUpdateAllocationMinLock needs wallet context
+		sdkClient.SetWallet(t, wallet)
 		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 1*GB, false, "", "")
 		require.NoError(t, err)
 
@@ -99,6 +105,9 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 
 		time.Sleep(10 * time.Second)
 
+		// Re-set wallet to ensure SDK context is correct after chimneySdkClient operation
+		sdkClient.SetWallet(t, wallet)
+
 		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		newBlobberID := getNotUsedStorageNodeID(allocationBlobbers.Blobbers, alloc.Blobbers)
@@ -109,6 +118,8 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 			AddBlobberId: newBlobberID,
 		}
 
+		// Ensure wallet is set before calling GetUpdateAllocationMinLock
+		sdkClient.SetWallet(t, wallet)
 		minLockRequired, err := sdk.GetUpdateAllocationMinLock(allocationID, 0, false, newBlobberID, "")
 		require.NoError(t, err)
 
@@ -155,6 +166,7 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 
 	t.RunWithTimeout("Add blobber to allocation", 1*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 1 * GB
@@ -229,6 +241,8 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 
 	t.RunWithTimeout("Extend Allocation Size", 1*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
+
+		sdkClient.SetWallet(t, wallet)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		blobberRequirements.Size = 1 * GB

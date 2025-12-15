@@ -22,8 +22,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("Retrieve split keys for default client id, should be empty", func(w *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -38,8 +39,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Retrieve master wallets for default client id, should be empty", func(w *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -54,8 +56,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Retrieve shared wallets for default client id, should be empty", func(w *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -70,8 +73,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Generate split wallet", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -101,8 +105,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Generate split key with previously created split wallet", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -139,8 +144,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Store previously created private key without mnemonic", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -175,8 +181,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	t.RunSequentially("Store invalid private key with correct mnemonic", func(t *test.SystemTest) {
 		t.Skip("Implement when store validation is refactored")
 
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -190,8 +197,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Store previously created private key with correct mnemonic", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -224,8 +232,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Store previously created private key with invalid mnemonic", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -258,8 +267,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update restrictions for existing split key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -301,8 +311,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update restrictions for not existing split key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -322,8 +333,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Generate split key with previously stored private key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -360,8 +372,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Revoke not existing split wallet", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -375,8 +388,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Revoke generated split wallet, when only one split wallet is available", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -417,8 +431,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Delete not existing master wallet", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -432,8 +447,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Share split key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -461,8 +477,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		headers = zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		headers["X-App-Client-ID"] = client.X_APP_CLIENT_ID_A
 		headers["X-App-User-ID"] = client.X_APP_USER_ID_A
@@ -489,8 +506,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Share not existing split key", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)
@@ -524,8 +542,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Share split key to the initial split key owner", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
 		require.NoError(t, err)

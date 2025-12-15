@@ -53,11 +53,26 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 		lockOutputRegex = regexp.MustCompile("locked with: [a-f0-9]{64}")
 	)
 
-	t.Run("Miner pool info after locking against miner should work", func(t *test.SystemTest) {
+	t.RunSequentially("Miner pool info after locking against miner should work", func(t *test.SystemTest) {
+		// Get a fresh list of miners to find one with available pool slots
+		miners := getMinersListForWallet(t, miner02NodeDelegateWalletName)
+
+		// Select a miner that is NOT miner02ID to avoid conflicts with other tests
+		var testMiner climodel.Node
+		found := false
+		for _, m := range miners.Nodes {
+			if m.ID != miner02ID {
+				testMiner = m
+				found = true
+				break
+			}
+		}
+		require.True(t, found, "No suitable miner found (need a miner that is not miner02ID)")
+
 		createWallet(t)
 
 		output, err := minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
-			"miner_id": miner.ID,
+			"miner_id": testMiner.ID,
 			"tokens":   1,
 		}), true)
 		require.Nil(t, err, "error staking tokens against a node")
@@ -66,7 +81,7 @@ func TestMinerSharderPoolInfo(testSetup *testing.T) {
 
 		var poolsInfo climodel.DelegatePool
 		output, err = minerSharderPoolInfo(t, configPath, createParams(map[string]interface{}{
-			"id": miner.ID,
+			"id": testMiner.ID,
 		}), true)
 		require.Nil(t, err, "error fetching Miner Sharder pools")
 		require.Len(t, output, 1)
