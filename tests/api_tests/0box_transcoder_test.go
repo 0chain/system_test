@@ -290,6 +290,128 @@ func Test0BoxTranscoder(testSetup *testing.T) {
 		require.NoError(t, verr, "verification failed after 3 attempts")
 	})
 
+	t.RunWithTimeout("Transcode MP3 file with web mode", timeout, func(t *test.SystemTest) {
+		// Test MP3 transcoding
+		fileName := "audio.mp3"
+		transcodeFile(t, headers, allocationID, sharedKey, fileName, "web")
+
+		// wait before first verification (20 seconds) then verify up to 3 times
+		time.Sleep(sleepTime)
+		queryParams := map[string]string{
+			"app_type":  headers["X-APP-TYPE"],
+			"file_path": fmt.Sprintf("/%s/%s", fileName, fileName),
+			"mode":      "web",
+		}
+
+		var verr error
+		for i := 0; i < 3; i++ {
+			t.Logf("verify attempt %d for audio.mp3", i+1)
+
+			// First verify metadata status
+			entity, response, err := zboxClient.GetMetadata(t, headers, queryParams)
+			if err != nil {
+				t.Logf("metadata verification attempt %d failed: %v, sleeping %s before retry", i+1, err, sleepTime)
+				time.Sleep(sleepTime)
+				continue
+			}
+			if response.StatusCode() != 200 {
+				t.Logf("metadata verification attempt %d failed: status code %d, sleeping %s before retry", i+1, response.StatusCode(), sleepTime)
+				time.Sleep(sleepTime)
+				continue
+			}
+			if entity == nil {
+				t.Logf("metadata verification attempt %d failed: entity is nil, sleeping %s before retry", i+1, sleepTime)
+				time.Sleep(sleepTime)
+				continue
+			}
+			if entity.Status != 6 {
+				t.Logf("metadata verification attempt %d: status is %d (expected 6), sleeping %s before retry", i+1, entity.Status, sleepTime)
+				time.Sleep(sleepTime)
+				continue
+			}
+			t.Logf("Transcoding entity status verified: %d", entity.Status)
+
+			// Metadata status is 6, proceed to verify transcoded file
+			verr = verifyTranscodedFile(t, allocationID, fmt.Sprintf("/%s/preview", fileName), sharedKey)
+			if verr == nil {
+				break
+			}
+			t.Logf("file verification attempt %d failed: %v, sleeping %s before retry", i+1, verr, sleepTime)
+			time.Sleep(sleepTime)
+		}
+		require.NoError(t, verr, "verification failed after 3 attempts")
+	})
+
+	t.RunWithTimeout("Transcode unsupported file should fail", timeout, func(t *test.SystemTest) {
+		// Create a random file for testing failure case
+		curDir, err := os.Getwd()
+		require.NoError(t, err, "Unable to get working directory")
+		testFilesDir := filepath.Join(curDir, "test_files_small")
+
+		randomFileName := fmt.Sprintf("random_unsupported_%d.bin", time.Now().UnixNano())
+		randomFilePath := filepath.Join(testFilesDir, randomFileName)
+
+		// Create a random binary file
+		randomFile, err := os.Create(randomFilePath)
+		require.NoError(t, err, "Failed to create random file")
+
+		// Write some random data
+		randomData := make([]byte, 1024)
+		for i := range randomData {
+			randomData[i] = byte(i % 256)
+		}
+		_, err = randomFile.Write(randomData)
+		require.NoError(t, err, "Failed to write random data")
+		randomFile.Close()
+
+		// Clean up the file after test
+		defer func() {
+			_ = os.Remove(randomFilePath)
+		}()
+
+		// Test transcoding of unsupported file
+		transcodeFile(t, headers, allocationID, sharedKey, randomFileName, "web")
+
+		// wait before first verification (20 seconds) then verify up to 3 times
+		time.Sleep(sleepTime)
+		queryParams := map[string]string{
+			"app_type":  headers["X-APP-TYPE"],
+			"file_path": fmt.Sprintf("/%s/%s", randomFileName, randomFileName),
+			"mode":      "web",
+		}
+
+		var finalStatus int
+		for i := 0; i < 3; i++ {
+			t.Logf("verify attempt %d for %s (expecting failure status 5)", i+1, randomFileName)
+
+			// Verify metadata status - expecting failure status (5)
+			entity, response, err := zboxClient.GetMetadata(t, headers, queryParams)
+			if err != nil {
+				t.Logf("metadata verification attempt %d failed: %v, sleeping %s before retry", i+1, err, sleepTime)
+				time.Sleep(sleepTime)
+				continue
+			}
+			if response.StatusCode() != 200 {
+				t.Logf("metadata verification attempt %d failed: status code %d, sleeping %s before retry", i+1, response.StatusCode(), sleepTime)
+				time.Sleep(sleepTime)
+				continue
+			}
+			if entity == nil {
+				t.Logf("metadata verification attempt %d failed: entity is nil, sleeping %s before retry", i+1, sleepTime)
+				time.Sleep(sleepTime)
+				continue
+			}
+			finalStatus = entity.Status
+			if entity.Status == 5 {
+				t.Logf("Transcoding entity status verified as failure: %d", entity.Status)
+				break
+			}
+			t.Logf("metadata verification attempt %d: status is %d (expected 5), sleeping %s before retry", i+1, entity.Status, sleepTime)
+			time.Sleep(sleepTime)
+		}
+		require.Equal(t, 5, finalStatus, "transcoding status should be failure (5), got: %d", finalStatus)
+	})
+
 }
 
 // transcodeFile makes the actual API call to the transcoder endpoint
@@ -377,8 +499,8 @@ func verifyTranscodedFile(t *test.SystemTest, allocationID, remotpath string, sp
 
 	// Log directory information
 	t.Logf("Transcoded Directory Info: path: %s", remotpath)
-	t.Logf("Directory Type: %s, Name: %s, Path: %s, Size: %d bytes, Hash: %s, FileMetaHash: %v, ActualSize: %d, NumFiles: %d, Directory Children: %d", 
-	listResult.Type, listResult.Name, listResult.Path, listResult.Size, listResult.Hash, listResult.FileMetaHash, listResult.ActualSize, listResult.NumFiles, len(listResult.Children))
+	t.Logf("Directory Type: %s, Name: %s, Path: %s, Size: %d bytes, Hash: %s, FileMetaHash: %v, ActualSize: %d, NumFiles: %d, Directory Children: %d",
+		listResult.Type, listResult.Name, listResult.Path, listResult.Size, listResult.Hash, listResult.FileMetaHash, listResult.ActualSize, listResult.NumFiles, len(listResult.Children))
 
 	// Calculate total size and print all fields for each file
 	var totalSize int64
