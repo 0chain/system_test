@@ -201,6 +201,31 @@ type ZboxJwtToken struct {
 	JwtToken string `json:"jwt_token"`
 }
 
+// TranscodingEntity represents the transcoding entity metadata
+type TranscodingEntity struct {
+	ID           int64   `json:"ID"`
+	UserID       string  `json:"UserID"`
+	ClientID     string  `json:"ClientID"`
+	Remotepath   string  `json:"Remotepath"`
+	FilePath     string  `json:"FilePath"`
+	AllocationID string  `json:"AllocationID"`
+	FileName     string  `json:"FileName"`
+	Mode         string  `json:"Mode"`
+	FileSize     int64   `json:"FileSize"`
+	DoThumbnail  bool    `json:"DoThumbnail"`
+	Status       int     `json:"Status"`
+	AppType      int     `json:"AppType"`
+	CreatedAt    string  `json:"CreatedAt"`
+	UpdatedAt    string  `json:"UpdatedAt"`
+	Deleted      *string `json:"Deleted"`
+}
+
+// GetTranscodingEntityResponse wraps API responses for GET metadata endpoint
+type GetTranscodingEntityResponse struct {
+	Message string            `json:"message"`
+	Data    TranscodingEntity `json:"data"`
+}
+
 type ReferralCodeOfUser struct {
 	ReferrerCode string `json:"referral_code"`
 	ReferrerLink string `json:"referral_link"`
