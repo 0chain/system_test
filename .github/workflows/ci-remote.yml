@@ -1,0 +1,106 @@
+name: '0Chain System Tests (Remote)'
+run-name: 'Remote system tests [${{ github.ref_name }}]'
+
+concurrency:
+  group: 'system-tests-remote-${{ github.ref }}-${{ github.event_name }}'
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo_snapshots_branch:
+        description: 'Branch of repo-snapshots to derive images and branches from.'
+        default: 'current-sprint'
+        required: true
+      existing_network:
+        description: 'Existing network to run system tests against (required). Example: dev.0chain.net'
+        required: true
+      test_file_filter:
+        description: 'Comma separated list of test files to run (eg. zwalletcli_send_and_balance_test.go). If supplied, the PR will NOT be notified of the test result'
+        default: ''
+        required: false
+      run_smoke_tests:
+        description: 'Only run smoke tests (subset of system tests for fast feedback)'
+        default: 'false'
+        required: false
+
+jobs:
+  system-tests:
+    name: 'System Tests (Remote)'
+    runs-on: [tests-suite]
+    timeout-minutes: 360
+    steps:
+      - name: 'Get current PR'
+        uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+        with:
+          github-token: ${{ github.token }}
+
+      - name: 'Set PR status as pending'
+        uses: 0chain/actions/set-pr-status@master
+        if: steps.findPr.outputs.number && github.event.inputs.test_file_filter == ''
+        with:
+          pr_number: ${{ steps.findPr.outputs.pr }}
+          description: 'System tests running with provided network...'
+          state: 'pending'
+          repository: ${{ github.repository }}
+          status_name: '0Chain System Tests (Remote)'
+          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          github_token: ${{ github.token }}
+
+      - name: 'Config: Run tests against provided 0Chain network'
+        run: |
+          echo "NETWORK_URL=$(echo ${{ github.event.inputs.existing_network }})" >> $GITHUB_ENV
+          echo "TEST_FILE_FILTER=$(echo $(([ -z '${{github.event.inputs.test_file_filter}}' ] && echo '') || echo '${{github.event.inputs.test_file_filter}}'))" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=$(echo $(([ -z '${{ github.head_ref }}' ] && echo  ${GITHUB_REF#refs/*/}) || echo '${{ github.head_ref }}'))" >> $GITHUB_ENV
+          echo "REPO_SNAPSHOTS_BRANCH=$(echo $(([ -z '${{github.event.inputs.repo_snapshots_branch}}' ] && echo '<CURRENT BRANCH WITH FALLBACK TO CURRENT_SPRINT>') || echo '${{github.event.inputs.repo_snapshots_branch}}'))" >> $GITHUB_ENV
+          if [[ "${{github.event.inputs.run_smoke_tests}}" == 'true' ]]; then
+            echo RUN_SMOKE_TESTS=true >> $GITHUB_ENV
+          else
+            echo RUN_SMOKE_TESTS=false >> $GITHUB_ENV
+          fi
+
+      - name: 'Setup jq'
+        uses: dcarbone/install-jq-action@v2.1.0
+        with:
+          version: '1.7'
+          force: 'false'
+
+      - name: 'Run System tests (remote)'
+        uses: 0chain/actions/run-system-tests/action-remote.yml@run-st-remote
+        with:
+          repo_snapshots_branch: ${{ env.REPO_SNAPSHOTS_BRANCH }}
+          system_tests_branch: ${{ env.CURRENT_BRANCH }}
+          network: ${{ env.NETWORK_URL }}
+          svc_account_secret: ${{ secrets.SVC_ACCOUNT_SECRET }}
+          custom_go_sdk_version: 'v1.20.9'
+          deploy_report_page: true
+          archive_results: true
+          run_flaky_tests: true
+          run_api_system_tests: true
+          run_cli_system_tests: true
+          run_tenderly_tests: false
+          run_tokenomics_system_tests: false
+          test_file_filter: ${{ env.TEST_FILE_FILTER }}
+          run_smoke_tests: ${{ env.RUN_SMOKE_TESTS }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          DROPBOX_ACCESS_TOKEN: ${{ secrets.DROPBOX_ACCESS_TOKEN }}
+          GDRIVE_ACCESS_TOKEN: ${{ secrets.GDRIVE_ACCESS_TOKEN }}
+          linux_server_ipv4: ${{ secrets.LINUX_SERVER_IPV4 }}
+          linux_server_username: ${{ secrets.LINUX_SERVER_USERNAME }}
+          linux_server_password: ${{ secrets.LINUX_SERVER_PASSWORD }}
+          linux_server_hostkey: ${{ secrets.LINUX_SERVER_HOSTKEY }}
+          linux_server_remote_path: '~/actions/run-system-tests'
+
+      - name: 'Set PR status as ${{ job.status }}'
+        if: ${{ (success() || failure()) && steps.findPr.outputs.number && github.event.inputs.test_file_filter == '' }}
+        uses: 0chain/actions/set-pr-status@master
+        with:
+          pr_number: ${{ steps.findPr.outputs.pr }}
+          description: 'System tests with provided network ${{ job.status }}'
+          state: ${{ job.status }}
+          repository: ${{ github.repository }}
+          status_name: '0Chain System Tests (Remote)'
+          target_url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          github_token: ${{ github.token }}
