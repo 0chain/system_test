@@ -67,7 +67,7 @@ jobs:
           force: 'false'
 
       - name: 'Run System tests (remote)'
-        uses: 0chain/actions/run-system-tests/action-remote.yml@run-st-remote
+        uses: 0chain/actions/run-system-tests-remote/action.yml@run-st-remote
         with:
           repo_snapshots_branch: ${{ env.REPO_SNAPSHOTS_BRANCH }}
           system_tests_branch: ${{ env.CURRENT_BRANCH }}
