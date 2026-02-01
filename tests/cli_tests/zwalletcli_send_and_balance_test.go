@@ -23,10 +23,23 @@ func TestSendAndBalance(testSetup *testing.T) {
 
 	t.Parallel()
 
+	ensureWalletReadyForTransfers := func(t *test.SystemTest, faucetTokens float64) {
+		createWallet(t)
+
+		// Ensure the wallet is created/registered on-chain before we try to send or query balances.
+		_, err := getWallet(t, configPath)
+		require.NoError(t, err, "Error occurred when getting wallet")
+
+		if faucetTokens > 0 {
+			_, err := executeFaucetWithTokens(t, configPath, faucetTokens)
+			require.NoError(t, err, "Error occurred when executing faucet")
+		}
+	}
+
 	t.Run("Send with description", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		createWallet(t)
+		ensureWalletReadyForTransfers(t, 2)
 
 		createWalletForName(targetWallet)
 
@@ -44,7 +57,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send with json flag", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		createWallet(t)
+		ensureWalletReadyForTransfers(t, 2)
 
 		createWalletForName(targetWallet)
 
@@ -68,7 +81,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Balance checks before and after ZCN sent", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		createWallet(t)
+		ensureWalletReadyForTransfers(t, 2)
 
 		createWalletForName(targetWallet)
 
@@ -78,9 +91,6 @@ func TestSendAndBalance(testSetup *testing.T) {
 		// Before send balance checks
 		srcBalanceBefore, err := getBalanceZCN(t, configPath)
 		require.Nil(t, err, "Unexpected balance check failure for wallet", escapedTestName(t))
-
-		_, err = getBalanceForWallet(t, configPath, targetWallet)
-		require.NoError(t, err)
 
 		targetBalanceBefore, err := getBalanceZCN(t, configPath, targetWallet)
 		require.Nil(t, err, "Unexpected balance check failure for target wallet", escapedTestName(t))
@@ -119,21 +129,23 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt on zero ZCN wallet should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		_, err := executeFaucetWithTokens(t, configPath, 0.1)
-		require.Nil(t, err, "Error occurred when executing faucet")
+		// Create the wallet on-chain but do NOT fund it.
+		// This should fail because the source wallet has insufficient balance (either for tokens or fee).
+		ensureWalletReadyForTransfers(t, 0)
 
 		createWalletForName(targetWallet)
 
 		target, err := getWalletForName(t, configPath, targetWallet)
 		require.Nil(t, err, "Error occurred when retrieving target wallet")
 
-		wantFailureMsg := `Send tokens failed. submit transaction failed: {"error":"insufficient balance to send"}`
-
 		output, err := sendZCN(t, configPath, target.ClientID, "1", "", createParams(map[string]interface{}{}), false)
 		require.NotNil(t, err, "Expected send to fail", strings.Join(output, "\n"))
 
 		require.Len(t, output, 1)
-		require.Equal(t, wantFailureMsg, output[0])
+		require.Regexp(t,
+			regexp.MustCompile(`^Send tokens failed\. submit transaction failed: \{"error":"insufficient balance to (send|pay fee)"\}$`),
+			output[0],
+		)
 	})
 
 	t.Run("Send attempt to invalid address should fail", func(t *test.SystemTest) {
@@ -152,7 +164,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send with zero token should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		createWallet(t)
+		ensureWalletReadyForTransfers(t, 2)
 
 		createWalletForName(targetWallet)
 
@@ -170,7 +182,7 @@ func TestSendAndBalance(testSetup *testing.T) {
 	t.Run("Send attempt to exceeding balance should fail", func(t *test.SystemTest) {
 		targetWallet := escapedTestName(t) + "_TARGET"
 
-		createWallet(t)
+		ensureWalletReadyForTransfers(t, 2)
 
 		balance, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)

@@ -134,7 +134,11 @@ func TestMain(m *testing.M) { //nolint:gocyclo
 	}
 
 	if configPath == "" {
-		configPath = "./zbox_config.yaml"
+		// NOTE: `zwallet` resolves `--config` relative to `--configDir`.
+		// Our CLI tests pass `--configDir ./config`, so the default config must be a filename
+		// (NOT a path like "./zbox_config.yaml"), otherwise it may be looked up as
+		// "./config/./zbox_config.yaml" or "./config/config/..." depending on the caller.
+		configPath = "zbox_config.yaml"
 		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
