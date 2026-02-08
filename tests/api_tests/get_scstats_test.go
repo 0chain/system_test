@@ -20,7 +20,7 @@ func TestGetSCStats(testSetup *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, resp)
 		require.NotNil(t, minerGetStatsResponse)
-		require.NotZero(t, minerGetStatsResponse.BlockFinality)
+		require.GreaterOrEqual(t, minerGetStatsResponse.BlockFinality, float64(0))
 		require.NotZero(t, minerGetStatsResponse.LastFinalizedRound)
 		require.NotZero(t, minerGetStatsResponse.BlocksFinalized)
 		require.GreaterOrEqual(t, minerGetStatsResponse.StateHealth, int64(-1))

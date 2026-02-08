@@ -57,7 +57,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn := &model.StorageNode{}
 		sn.ID = uuid.New().String()
 		sn.BaseURL = generateRandomURL()
-		sn.Capacity = 10 * GB
+		sn.Capacity = 10240 * GB
 
 		sn.Terms.ReadPrice = 1000000000
 		sn.Terms.WritePrice = 1
