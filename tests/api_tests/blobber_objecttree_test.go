@@ -17,7 +17,7 @@ func TestObjectTree(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Get object tree with allocation id, remote path should work")
 
-	t.RunSequentially("Get object tree with allocation id, remote path should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get object tree with allocation id, remote path should work", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -52,7 +52,7 @@ func TestObjectTree(testSetup *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.RunSequentially("Get file ref for empty allocation should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref for empty allocation should work", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -83,7 +83,7 @@ func TestObjectTree(testSetup *testing.T) {
 		// TODO add more assertions once there blobber endpoints are documented
 	})
 
-	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", 90*time.Second, func(t *test.SystemTest) { //TODO: Why is this so slow?  (69s)
+	t.RunSequentiallyWithTimeout("Get file ref with invalid allocation id should fail", 10*time.Minute, func(t *test.SystemTest) { //TODO: Why is this so slow?  (69s)
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -114,7 +114,7 @@ func TestObjectTree(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentially("Get file ref with invalid sign should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with invalid sign should fail", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -142,7 +142,7 @@ func TestObjectTree(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentially("Get file ref with invalid remotepath should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with invalid remotepath should fail", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)

@@ -33,33 +33,33 @@ func NewTestAllocation() map[string]string {
 }
 
 func Create0boxTestAllocation(t *test.SystemTest, headers map[string]string) error {
-	verifyOtpInput := NewVerifyOtpDetails()
-	_, _, err := zboxClient.VerifyOtpDetails(t, headers, verifyOtpInput)
-	if err != nil {
-		return err
-	}
-	walletInput := NewTestWallet()
-	_, _, err = zboxClient.CreateWallet(t, headers, walletInput)
+	// Create0boxTestWallet already calls Teardown() internally
+	err := Create0boxTestWallet(t, headers)
 	if err != nil {
 		return err
 	}
 	allocationInput := NewTestAllocation()
-	_, _, err = zboxClient.CreateAllocation(t, headers, allocationInput)
+	_, resp, err := zboxClient.CreateAllocation(t, headers, allocationInput)
 	if err != nil {
-		return err
+		return fmt.Errorf("CreateAllocation failed: %w", err)
+	}
+	if resp.StatusCode() != 201 {
+		return fmt.Errorf("CreateAllocation returned %d: %s", resp.StatusCode(), resp.String())
 	}
 	return nil
 }
 
 func Test0BoxAllocation(testSetup *testing.T) {
+	require.True(testSetup, isZboxResponding(), "0box service must be available")
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 
-	t.RunSequentially("List allocation with zero allocation should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("List allocation with zero allocation should work", 10*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		allocationList, response, err := zboxClient.ListAllocation(t, headers)
 		require.NoError(t, err)
@@ -67,12 +67,12 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Len(t, allocationList, 0)
 	})
 
-	t.RunSequentially("List allocation with existing allocation should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("List allocation with existing allocation should work", 10*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		allocInput := NewTestAllocation()
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
@@ -85,12 +85,12 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Len(t, allocationList, 1)
 	})
 
-	t.RunSequentially("multiple allocations with blimp argument should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("multiple allocations with blimp argument should work", 10*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		allocInput := NewTestAllocation()
 		allocInput["id"] = "c0360331837a7376d27007614e124db83811e4416dd2f1577345dd96c8621bf6"
@@ -109,12 +109,12 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Len(t, allocationList, 2)
 	})
 
-	t.RunSequentially("multiple allocations with vult argument should not work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("multiple allocations with vult argument should not work", 10*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_VULT)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		// Refresh CSRF token after wallet creation to ensure it's valid
 		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_VULT)
@@ -130,12 +130,12 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
-	t.RunSequentially("Post allocation for chimney should not work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Post allocation for chimney should not work", 10*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_CHIMNEY)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		allocInput := NewTestAllocation()
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
@@ -143,12 +143,12 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
-	t.RunSequentially("Post allocation with already existing allocation Id should not  work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Post allocation with already existing allocation Id should not  work", 10*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		allocInput := NewTestAllocation()
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
@@ -160,12 +160,12 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
-	t.RunSequentially("Get an allocation with allocation present should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get an allocation with allocation present should work", 10*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		allocInput := NewTestAllocation()
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
@@ -181,12 +181,12 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, allocInput["allocation_type"], allocation.AllocationType)
 	})
 
-	t.RunSequentially("Get an allocation with allocation not present should not work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get an allocation with allocation not present should not work", 10*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		allocInput := NewTestAllocation()
 
@@ -195,12 +195,12 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
-	t.RunSequentially("Update an allocation with allocation present should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Update an allocation with allocation present should work", 10*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		allocInput := NewTestAllocation()
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
@@ -222,12 +222,12 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.Equal(t, allocInput["allocation_type"], allocation.AllocationType)
 	})
 
-	t.RunSequentially("Update an allocation with allocation not present should not work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Update an allocation with allocation not present should not work", 10*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		allocInput := NewTestAllocation()
 		allocInput["name"] = "new_alloc_name"

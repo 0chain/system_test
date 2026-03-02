@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -17,7 +18,7 @@ func TestUpdateBlobber(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("update blobber version should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("update blobber version should work", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -34,6 +35,7 @@ func TestUpdateBlobber(testSetup *testing.T) {
 
 		blobber.StorageVersion = 1
 
+		apiClient.FundWallet(t, wallet, 1.0, client.TxSuccessfulStatus)
 		apiClient.UpdateBlobber(t, wallet, blobber, client.TxUnsuccessfulStatus)
 
 		blobber = apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
@@ -42,7 +44,7 @@ func TestUpdateBlobber(testSetup *testing.T) {
 		require.Equal(t, int64(1), blobber.StorageVersion)
 	})
 
-	t.Run("update blobber: degrade version should not work", func(t *test.SystemTest) {
+	t.RunWithTimeout("update blobber: degrade version should not work", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -60,6 +62,7 @@ func TestUpdateBlobber(testSetup *testing.T) {
 
 		blobber.StorageVersion = 0
 
+		apiClient.FundWallet(t, wallet, 1.0, client.TxSuccessfulStatus)
 		apiClient.UpdateBlobber(t, wallet, blobber, client.TxUnsuccessfulStatus)
 
 		blobber = apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
@@ -68,7 +71,7 @@ func TestUpdateBlobber(testSetup *testing.T) {
 		require.Equal(t, int64(1), blobber.StorageVersion)
 	})
 
-	t.Run("Update blobber in allocation without correct delegated client, shouldn't work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Update blobber in allocation without correct delegated client, shouldn't work", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -83,6 +86,7 @@ func TestUpdateBlobber(testSetup *testing.T) {
 		blobber := apiClient.GetBlobber(t, blobberID, client.HttpOkStatus)
 		require.NotEqual(t, wallet.Id, blobber.StakePoolSettings.DelegateWallet)
 
+		apiClient.FundWallet(t, wallet, 1.0, client.TxSuccessfulStatus)
 		apiClient.UpdateBlobber(t, wallet, blobber, client.TxUnsuccessfulStatus)
 	})
 }

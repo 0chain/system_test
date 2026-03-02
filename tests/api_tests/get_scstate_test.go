@@ -2,8 +2,10 @@ package api_tests
 
 import (
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
+	"github.com/0chain/system_test/internal/api/util/wait"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -12,7 +14,6 @@ import (
 
 func TestGetSCState(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Skip()
 	t.SetSmokeTests("Get SCState of faucet SC, should work")
 
 	t.Parallel()
@@ -20,32 +21,38 @@ func TestGetSCState(testSetup *testing.T) {
 	t.Run("Get SCState of faucet SC, should work", func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
-		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
-			t,
-			model.SCStateGetRequest{
-				SCAddress: client.FaucetSmartContractAddress,
-				Key:       wallet.Id,
-			},
-			client.HttpOkStatus)
-		require.Nil(t, err)
-		require.NotNil(t, resp)
+		// Pour from faucet so the SC has state for this wallet to query.
+		apiClient.FundWallet(t, wallet, 2.0, client.TxSuccessfulStatus)
+
+		// SC state may have a 1-2 block delay after transaction confirmation; retry for up to 30s.
+		var scStateGetResponse *model.SCStateGetResponse
+		wait.PoolImmediately(t, 30*time.Second, func() bool {
+			var err error
+			scStateGetResponse, _, err = apiClient.V1SharderGetSCState(
+				t,
+				model.SCStateGetRequest{
+					SCAddress: client.FaucetSmartContractAddress,
+					Key:       wallet.Id,
+				},
+				client.HttpOkStatus)
+			return err == nil && scStateGetResponse != nil
+		})
 		require.NotNil(t, scStateGetResponse)
 	})
 
-	t.Run("Get SCState of faucet SC, shouldn't work", func(t *test.SystemTest) {
+	t.Run("Get SCState with invalid SC address should fail", func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
-		scStateGetResponse, resp, err := apiClient.V1SharderGetSCState(
+		_, resp, err := apiClient.V1SharderGetSCState(
 			t,
 			model.SCStateGetRequest{
-				SCAddress: client.FaucetSmartContractAddress,
+				SCAddress: "invalid_sc_address",
 				Key:       wallet.Id,
 			},
 			client.HttpBadRequestStatus)
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
-		require.NotNil(t, scStateGetResponse)
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 }

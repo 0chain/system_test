@@ -11,7 +11,9 @@ import (
 )
 
 func Test0BoxTransactions(testSetup *testing.T) {
+	require.True(testSetup, isZboxResponding(), "0box service must be available")
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 
 	t.RunSequentiallyWithTimeout("get paginated transactions list while creating pit id", 1*time.Minute, func(t *test.SystemTest) {
 		txnsData, resp, err := zboxClient.GetTransactionsList(t, "")
@@ -19,7 +21,7 @@ func Test0BoxTransactions(testSetup *testing.T) {
 		require.Equal(t, 200, resp.StatusCode())
 		require.NotNil(t, txnsData, "Nil transaction response received")
 		require.NotEmpty(t, txnsData.PitId, "")
-		require.NotEmpty(t, txnsData.Transactions, "No transactions data received")
+		require.NotEmpty(t, txnsData.Transactions, "transactions data must be available on this network")
 		txnDataByHash, resp, err := apiClient.V1TransactionGetConfirmation(t,
 			model.TransactionGetConfirmationRequest{
 				Hash: txnsData.Transactions[0].Hash,

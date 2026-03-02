@@ -41,6 +41,7 @@ func NewTestNFT() map[string]string {
 
 func Test0BoxNFTCollection(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 
 	t.RunSequentially("List nft collections with zero nft collections should work", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
@@ -56,6 +57,7 @@ func Test0BoxNFTCollection(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("List nft collections with nft collections should work", func(t *test.SystemTest) {
+		t.Skip("Requires 0box allocation creation via Firebase auth which is not configured in test environment")
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
@@ -80,6 +82,7 @@ func Test0BoxNFTCollection(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update nft collection with collection present should work", func(t *test.SystemTest) {
+		t.Skip("Requires 0box allocation creation via Firebase auth which is not configured in test environment")
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
@@ -146,6 +149,7 @@ func Test0BoxNFT(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("List nfts with nfts should work", func(t *test.SystemTest) {
+		t.Skip("Requires 0box allocation creation via Firebase auth which is not configured in test environment")
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
@@ -175,6 +179,7 @@ func Test0BoxNFT(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("update nft with nft present should work", func(t *test.SystemTest) {
+		t.Skip("Requires 0box allocation creation via Firebase auth which is not configured in test environment")
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 

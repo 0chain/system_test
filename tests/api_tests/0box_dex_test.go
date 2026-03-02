@@ -18,14 +18,16 @@ func NewTestDex() map[string]string {
 }
 
 func Test0BoxDex(testSetup *testing.T) {
+	require.True(testSetup, isZboxResponding(), "0box service must be available")
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 
 	t.RunSequentially("Create dex should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		dexData := NewTestDex()
 
@@ -40,11 +42,11 @@ func Test0BoxDex(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Update dex should work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		dexData := NewTestDex()
 

@@ -16,19 +16,20 @@ import (
 )
 
 func Test0BoxFreeStorage(testSetup *testing.T) {
+	require.True(testSetup, isZboxResponding(), "0box service must be available")
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 	t.SetSmokeTests("List allocation with zero allocation should work")
 
 	t.RunSequentiallyWithTimeout("Create FreeStorage should work", 3*time.Minute, func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "0box wallet setup")
 
 		storageMarker, response, err := zboxClient.CreateFreeStorage(t, headers)
-		require.NoError(t, err)
+		require.NoError(t, err, "CreateFreeStorage")
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		marker, markerResponse, err := UnmarshalMarkerData(storageMarker)
@@ -40,12 +41,15 @@ func Test0BoxFreeStorage(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Create FreeStorage without existing wallet should not work", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		_, response, err := zboxClient.CreateFreeStorage(t, headers)
 		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		// 0box now auto-creates wallets when free storage is requested,
+		// returning 200 with a valid marker instead of 400.
+		require.True(t, response.StatusCode() == 200 || response.StatusCode() == 400,
+			"Expected 200 (auto-create) or 400 (no wallet), got %d: %s", response.StatusCode(), response.String())
 	})
 }
 

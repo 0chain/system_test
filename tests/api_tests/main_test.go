@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"sync"
@@ -40,6 +41,12 @@ var (
 	initialisedWallets []*model.Wallet
 	walletIdx          int64
 	walletMutex        sync.Mutex
+
+	zauthAvailable     bool
+	zboxAvailable      bool
+	zvaultAvailable    bool
+	zs3Available       bool
+	firebaseTokenValid bool
 )
 
 func TestMain(m *testing.M) {
@@ -127,6 +134,13 @@ func TestMain(m *testing.M) {
 		initialisedWallets = append(initialisedWallets, initialisedWallet)
 	}
 
+	// Check service availability
+	zboxAvailable = isZboxResponding()
+	zauthAvailable = isServiceResponding(parsedConfig.ZauthUrl)
+	zvaultAvailable = isServiceResponding(parsedConfig.ZvaultUrl)
+	zs3Available = isServiceResponding(parsedConfig.ZS3ServerUrl)
+	firebaseTokenValid = parsedConfig.FirebaseAPIKey != "" && parsedConfig.FirebaseEmail != "" && parsedConfig.FirebasePassword != ""
+
 	os.Exit(m.Run())
 }
 
@@ -193,4 +207,25 @@ func createWallet(t *test.SystemTest) *model.Wallet {
 	walletMutex.Unlock()
 
 	return wallet
+}
+
+func isZboxResponding() bool {
+	resp, err := http.Get(parsedConfig.ZboxUrl) //nolint
+	if err != nil {
+		return false
+	}
+	resp.Body.Close()
+	return true
+}
+
+func isServiceResponding(url string) bool {
+	if url == "" {
+		return false
+	}
+	resp, err := http.Get(url) //nolint
+	if err != nil {
+		return false
+	}
+	resp.Body.Close()
+	return true
 }

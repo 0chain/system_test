@@ -2,6 +2,7 @@ package api_tests
 
 import (
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 
@@ -16,7 +17,7 @@ func TestCreateAllocation(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Create allocation API call should be successful given a valid request", func(t *test.SystemTest) {
+	t.RunWithTimeout("Create allocation API call should be successful given a valid request", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)

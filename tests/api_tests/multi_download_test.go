@@ -2,8 +2,9 @@ package api_tests
 
 import (
 	"os"
-	"sync"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/0chain/gosdk/zboxcore/sdk"
 	"github.com/0chain/system_test/internal/api/model"
@@ -14,10 +15,9 @@ import (
 
 func TestMultiDownload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 	t.SetSmokeTests("Multi download should work")
 
-	t.Run("Multi download should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Multi download should work", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -34,20 +34,18 @@ func TestMultiDownload(testSetup *testing.T) {
 		}
 		sdkClient.MultiOperation(t, allocationID, ops)
 
-		alloc, err := sdk.GetAllocation(allocationID)
-		require.NoError(t, err, "error getting allocation")
-		err = os.MkdirAll("temp_download", os.ModePerm)
+		err := os.MkdirAll("temp_download", os.ModePerm)
 		require.NoError(t, err, "error creating temp dir")
 		defer func() {
-			err = os.RemoveAll("temp_download")
-			require.NoError(t, err, "error removing temp dir")
+			_ = os.RemoveAll("temp_download")
 		}()
-		wg := &sync.WaitGroup{}
-		for i := 0; i < 9; i++ {
-			sdkClient.DownloadFileWithParam(t, alloc, ops[i].FileMeta.RemotePath, "temp_download/", wg, false)
+
+		for _, op := range ops {
+			// RemotePath starts with "/"; DownloadFile prepends "/" internally, so strip it
+			remotePath := strings.TrimPrefix(op.FileMeta.RemotePath, "/")
+			sdkClient.DownloadFile(t, allocationID, remotePath, "temp_download/")
 		}
-		sdkClient.DownloadFileWithParam(t, alloc, ops[9].FileMeta.RemotePath, "temp_download/", wg, true)
-		wg.Wait()
+
 		files, err := os.ReadDir("temp_download")
 		require.NoError(t, err, "error reading temp dir")
 		require.Equal(t, 10, len(files), "files count mismatch expected %v actual %v", 10, len(files))

@@ -1,239 +1,169 @@
 package api_tests
 
 import (
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/stretchr/testify/require"
 )
 
 const (
-	AccessKey       = "rootroot"
-	SecretAccessKey = "rootroot"
+	mcAlias = "zs3test"
 )
 
+// mcCmd runs an mc CLI command and returns stdout, stderr, and error.
+func mcCmd(args ...string) (string, string, error) {
+	cmd := exec.Command("mc", args...)
+	var stdout, stderr strings.Builder
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	return strings.TrimSpace(stdout.String()), strings.TrimSpace(stderr.String()), err
+}
+
+// setupMcAlias configures the mc alias for the zs3 server.
+func setupMcAlias(t *test.SystemTest, serverUrl string) {
+	_, _, err := mcCmd("alias", "set", mcAlias, serverUrl, parsedConfig.S3AccessKey, parsedConfig.S3SecretKey)
+	require.Nil(t, err, "failed to set mc alias for zs3 server")
+}
+
 func TestZs3ServerOperations(testSetup *testing.T) {
+	if !zs3Available {
+		testSetup.Skip("zs3 server is not available, skipping zs3 tests")
+	}
+
+	// Check mc binary is available
+	if _, err := exec.LookPath("mc"); err != nil {
+		testSetup.Skip("mc (MinIO client) binary not found in PATH, skipping zs3 tests")
+	}
+
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
-	// FIXME: we should never return a 500 to the end user
 
-	t.SetSmokeTests("CreateBucket should return 200 when all the parameters are correct",
-		"ListBucket should return 200 all the parameter are correct",
-		"ListObjects should return 200 all the parameter are correct",
-		"PutObjects should return 200 all the parameter are correct",
-		"GetObjects should return 200 all the parameter are correct",
-		"RemoveObject should return 200 all the parameter are correct")
+	t.SetSmokeTests("CreateBucket should work",
+		"ListBuckets should work",
+		"ListObjects should work",
+		"PutObject should work",
+		"GetObject should work",
+		"RemoveObject should work")
 
-	t.RunSequentially("Zs3 server should return 500 when the action doesn't exist", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "random-action",
-		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		require.Equal(t, 500, resp.StatusCode())
+	// Setup mc alias using the configured zs3 server URL
+	setupMcAlias(t, parsedConfig.ZS3ServerUrl)
+
+	bucketName := "zs3-system-test"
+	bucketPath := fmt.Sprintf("%s/%s", mcAlias, bucketName)
+
+	// Ensure cleanup after all tests
+	testSetup.Cleanup(func() {
+		// Best-effort cleanup: remove test bucket and contents
+		_, _, _ = mcCmd("rb", "--force", bucketPath)
 	})
 
-	t.RunSequentially("zs3 server should return 500 when the credentials aren't correct", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"accessKey":       "wrong-access-key",
-			"secretAccessKey": SecretAccessKey,
-			"action":          "createBucket",
-			"bucketName":      "test",
-		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		// Nginx returns 401 for invalid credentials before the request reaches zs3server
-		// Accept both 401 (nginx rejection) and 500 (zs3server error) as valid responses
-		require.Contains(t, []int{401, 500}, resp.StatusCode(), "Expected 401 (nginx) or 500 (zs3server) for invalid credentials, got %d", resp.StatusCode())
+	t.RunSequentially("CreateBucket should work", func(t *test.SystemTest) {
+		_, stderr, err := mcCmd("mb", bucketPath)
+		require.Nil(t, err, "mc mb failed: %s", stderr)
 	})
 
-	t.RunSequentially("CreateBucket should return 200 when all the parameters are correct", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "createBucket",
-			"bucketName":      "system-test",
+	t.RunSequentially("CreateBucket should not error when bucket already exists", func(t *test.SystemTest) {
+		// First create
+		_, _, _ = mcCmd("mb", bucketPath)
+		// Second create — should succeed or return "already exists" (not a hard error for mc)
+		_, stderr, err := mcCmd("mb", bucketPath)
+		// mc returns exit 1 for "already own it" but that's acceptable
+		if err != nil {
+			require.Contains(t, stderr, "already", "expected 'already exists' error, got: %s", stderr)
 		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
 	})
 
-	t.RunSequentially("CreateBucket should not return error when bucket name already exist", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "createBucket",
-			"bucketName":      "system-test",
-		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
+	t.RunSequentially("ListBuckets should work", func(t *test.SystemTest) {
+		stdout, stderr, err := mcCmd("ls", mcAlias+"/")
+		require.Nil(t, err, "mc ls failed: %s", stderr)
+		require.Contains(t, stdout, bucketName, "bucket %s not found in listing: %s", bucketName, stdout)
 	})
 
-	t.RunSequentially("ListBucket should return 200 all the parameter are correct", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "listBuckets",
-		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
+	t.RunSequentially("PutObject should work", func(t *test.SystemTest) {
+		// Create a temp test file
+		tmpDir := t.TempDir()
+		testFile := filepath.Join(tmpDir, "test-file.txt")
+		err := os.WriteFile(testFile, []byte("hello world from zs3 system test"), 0644)
+		require.Nil(t, err, "failed to create test file")
+
+		_, stderr, err := mcCmd("cp", testFile, bucketPath+"/test-file.txt")
+		require.Nil(t, err, "mc cp (upload) failed: %s", stderr)
 	})
 
-	t.RunSequentially("ListObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "listObjects",
-			"bucketName":      "system-test",
+	t.RunSequentially("ListObjects should work", func(t *test.SystemTest) {
+		// Retry listing to handle ZS3 index propagation delay on fresh allocations
+		var stdout, stderr string
+		var err error
+		for attempt := 0; attempt < 15; attempt++ {
+			stdout, stderr, err = mcCmd("ls", bucketPath+"/")
+			if err == nil && strings.Contains(stdout, "test-file.txt") {
+				break
+			}
+			time.Sleep(2 * time.Second)
 		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
+		require.Nil(t, err, "mc ls (objects) failed: %s", stderr)
+		require.Contains(t, stdout, "test-file.txt", "uploaded file not found in listing: %s", stdout)
 	})
 
-	t.RunSequentially("PutObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "createBucket",
-			"bucketName":      "system-test",
-		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
+	t.RunSequentially("GetObject should work", func(t *test.SystemTest) {
+		tmpDir := t.TempDir()
+		downloadFile := filepath.Join(tmpDir, "downloaded.txt")
 
-		queryParams = map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "putObject",
-			"bucketName":      "system-test",
-		}
-		formData := map[string]string{
-			"file": "@test-file.txt",
-		}
-		resp, err = zs3Client.Zs3ServerRequest(t, queryParams, formData)
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
+		_, stderr, err := mcCmd("cp", bucketPath+"/test-file.txt", downloadFile)
+		require.Nil(t, err, "mc cp (download) failed: %s", stderr)
+
+		content, err := os.ReadFile(downloadFile)
+		require.Nil(t, err, "failed to read downloaded file")
+		require.Equal(t, "hello world from zs3 system test", string(content))
 	})
 
-	t.RunSequentially("GetObjects should return 200 all the parameter are correct", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "getObject",
-			"bucketName":      "system-test",
-			"objectName":      "test-file.txt",
-		}
-		formData := map[string]string{
-			"file": "@test-file.txt",
-		}
-		resp, err := zs3Client.Zs3ServerRequest(t, queryParams, formData)
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
+	t.RunSequentially("RemoveObject should work", func(t *test.SystemTest) {
+		_, stderr, err := mcCmd("rm", bucketPath+"/test-file.txt")
+		require.Nil(t, err, "mc rm failed: %s", stderr)
+
+		// Verify object is gone
+		stdout, _, _ := mcCmd("ls", bucketPath+"/")
+		require.NotContains(t, stdout, "test-file.txt", "file should be removed but still appears in listing")
 	})
 
-	t.RunSequentially("PutObjects should return error when buckcet name does not exist", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "putObject",
-			"bucketName":      "This bucket doesnot exist",
-		}
-		formData := map[string]string{
-			"file": "@test-file.txt",
-		}
-		resp, err := zs3Client.Zs3ServerRequest(t, queryParams, formData)
+	t.RunSequentially("PutObject to non-existent bucket should fail", func(t *test.SystemTest) {
+		tmpDir := t.TempDir()
+		testFile := filepath.Join(tmpDir, "test-file.txt")
+		err := os.WriteFile(testFile, []byte("test"), 0644)
 		require.Nil(t, err)
-		require.Equal(t, 500, resp.StatusCode())
-		require.Equal(t, `{"error":"Bucket name contains invalid characters"}`, resp.String())
+
+		_, _, err = mcCmd("cp", testFile, mcAlias+"/nonexistent-bucket-12345/test.txt")
+		require.NotNil(t, err, "expected error when uploading to non-existent bucket")
 	})
 
-	t.RunSequentially("RemoveObject should return 200 all the parameter are correct", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "createBucket",
-			"bucketName":      "system-test",
-			"objectName":      "bucket created as a part of " + t.Name(),
-		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		queryParams = map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "removeObject",
-			"bucketName":      "system-test",
-			"objectName":      "bucket created as a part of " + t.Name(),
-		}
-		resp, err = zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
+	t.RunSequentially("Invalid credentials should fail", func(t *test.SystemTest) {
+		badAlias := "zs3badcreds"
+		_, _, _ = mcCmd("alias", "set", badAlias, parsedConfig.ZS3ServerUrl, "wrong-key", "wrong-secret")
+
+		_, _, err := mcCmd("ls", badAlias+"/")
+		require.NotNil(t, err, "expected error with invalid credentials")
+
+		// Cleanup bad alias
+		_, _, _ = mcCmd("alias", "rm", badAlias)
 	})
 
-	t.RunSequentially("RemoveObject should not return error if object doen't exist", func(t *test.SystemTest) {
-		// Ensure the bucket exists first
-		queryParams := map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "createBucket",
-			"bucketName":      "system-test",
-		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
+	t.RunSequentially("RemoveBucket should work", func(t *test.SystemTest) {
+		// Create a temporary bucket to remove
+		tmpBucket := mcAlias + "/zs3-remove-test"
+		_, _, _ = mcCmd("mb", tmpBucket)
 
-		// Now try to remove a non-existent object
-		queryParams = map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "removeObject",
-			"bucketName":      "system-test",
-			"objectName":      "file name created as a part of " + t.Name(),
-		}
-		resp, err = zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-	})
+		_, stderr, err := mcCmd("rb", tmpBucket)
+		require.Nil(t, err, "mc rb failed: %s", stderr)
 
-	// FIXME - this should be 400 not 500
-	t.Run("CreateBucket should return 500 when one of more required parameters are missing", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "createBucket",
-		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		require.Equal(t, 500, resp.StatusCode())
-	})
-
-	t.Run("ListBuckets should return 500 when one of more required parameters are missing", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"secretAccessKey": SecretAccessKey,
-			"action":          "listBucket",
-		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		require.Equal(t, 500, resp.StatusCode())
-	})
-
-	t.Run("listObjects should return 500 when trying to list objects from un existing bucket", func(t *test.SystemTest) {
-		queryParams := map[string]string{
-			"accessKey":       AccessKey,
-			"secretAccessKey": SecretAccessKey,
-			"action":          "listObjects",
-			"bucketName":      "random-bucket",
-		}
-		resp, err := zs3Client.BucketOperation(t, queryParams, map[string]string{})
-		require.Nil(t, err)
-		// Nginx may return 401 for non-existent buckets before the request reaches zs3server
-		// Accept both 401 (nginx rejection) and 500 (zs3server error) as valid responses
-		require.Contains(t, []int{401, 500}, resp.StatusCode(), "Expected 401 (nginx) or 500 (zs3server) for non-existent bucket, got %d", resp.StatusCode())
+		// Verify bucket is gone
+		stdout, _, _ := mcCmd("ls", mcAlias+"/")
+		require.NotContains(t, stdout, "zs3-remove-test", "bucket should be removed but still appears")
 	})
 }

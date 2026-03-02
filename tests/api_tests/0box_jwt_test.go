@@ -9,10 +9,12 @@ import (
 )
 
 func Test0BoxJWT(testSetup *testing.T) {
+	require.True(testSetup, isZboxResponding(), "0box service must be available")
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 
 	t.RunSequentially("Create JWT token", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		_, response, err := zboxClient.CreateJwtToken(t, headers)
@@ -21,7 +23,7 @@ func Test0BoxJWT(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Refresh JWT token with user id, which differs from the one used by the given old JWT token", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
@@ -40,7 +42,7 @@ func Test0BoxJWT(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Refresh JWT token with incorrect old JWT token", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
@@ -54,7 +56,7 @@ func Test0BoxJWT(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Refresh JWT token with user id, which equals to the one used by the given old JWT token", func(t *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
 		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)

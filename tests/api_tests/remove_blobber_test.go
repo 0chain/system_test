@@ -19,7 +19,7 @@ func TestRemoveBlobber(testSetup *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Remove blobber in allocation, shouldn't work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Remove blobber in allocation, shouldn't work", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)

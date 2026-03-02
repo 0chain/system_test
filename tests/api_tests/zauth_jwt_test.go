@@ -1,6 +1,8 @@
 package api_tests
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -20,85 +22,108 @@ const (
 )
 
 func TestZauthJWT(testSetup *testing.T) {
+	require.True(testSetup, zauthAvailable && zboxAvailable, "zauth and 0box services must be available")
+	if !firebaseTokenValid {
+		testSetup.Skip("Firebase authentication not configured")
+	}
 	t := test.NewSystemTest(testSetup)
 
 	t.RunSequentially("Perform keys retrieval call with expired JWT token", func(w *test.SystemTest) {
 		headers := zauthClient.NewZauthHeaders(JWT_TOKEN, "")
 
-		response, err := zauthClient.Setup(t, &model.SetupWallet{}, headers)
-		require.NoError(t, err)
-		require.Equal(t, 401, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		response, err := zauthClient.Setup(w, &model.SetupWallet{}, headers)
+		require.NoError(w, err)
+		require.Equal(w, 401, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	t.RunSequentially("Perform wallet setup call with JWT token and remove with invalid JWT token", func(w *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
-		Teardown(t, headers)
+		headers := zboxClient.NewZboxHeadersWithCSRF(w, client.X_APP_BLIMP)
+		Teardown(w, headers)
 
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		jwtToken, response, err := zboxClient.CreateJwtToken(w, headers)
+		require.NoError(w, err)
+		require.Equal(w, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		oldHeaders := zauthClient.NewZauthHeaders(jwtToken.JwtToken, "")
 
-		response, err = zauthClient.Setup(t, &model.SetupWallet{
+		// Clean up stale data from previous test runs to avoid duplicate key constraint
+		_, _ = zauthClient.Delete(w, CLIENT_ID, oldHeaders)
+
+		// Generate a unique private key per test run to avoid stale duplicate key conflicts
+		privKeyBytes := make([]byte, 32)
+		_, err = rand.Read(privKeyBytes)
+		require.NoError(w, err)
+		uniquePrivateKey := hex.EncodeToString(privKeyBytes)
+
+		response, err = zauthClient.Setup(w, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID,
 			ClientKey:     CLIENT_KEY,
 			PublicKey:     PUBLIC_KEY_A,
-			PrivateKey:    PRIVATE_KEY_A,
+			PrivateKey:    uniquePrivateKey,
 			PeerPublicKey: PEER_PUBLIC_KEY,
 			ExpiredAt:     EXPIRES_AT,
 		}, oldHeaders)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NoError(w, err)
+		require.Equal(w, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		headers = zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
-		Teardown(t, headers)
+		headers = zboxClient.NewZboxHeadersWithCSRF(w, client.X_APP_BLIMP)
+		Teardown(w, headers)
 
 		headers["X-App-Client-ID"] = client.X_APP_CLIENT_ID_A
 		headers["X-App-User-ID"] = client.X_APP_USER_ID_A
 		headers["X-App-Client-Key"] = client.X_APP_CLIENT_KEY_A
 		headers["X-App-Client-Signature"] = client.X_APP_CLIENT_SIGNATURE_A
 
-		jwtToken, response, err = zboxClient.CreateJwtToken(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		jwtToken, response, err = zboxClient.CreateJwtToken(w, headers)
+		require.NoError(w, err)
+		require.NotEqual(w, 401, response.StatusCode(), "Alternative user JWT creation failed (user may not exist in Firebase)")
+		require.Equal(w, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, "")
 
-		response, err = zauthClient.Delete(t, CLIENT_ID, headers)
-		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		response, err = zauthClient.Delete(w, CLIENT_ID, headers)
+		require.NoError(w, err)
+		require.Equal(w, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		response, err = zauthClient.Delete(t, CLIENT_ID, oldHeaders)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		response, err = zauthClient.Delete(w, CLIENT_ID, oldHeaders)
+		require.NoError(w, err)
+		require.Equal(w, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	t.RunSequentially("Perform wallet setup call with JWT token and remove with correct JWT token", func(w *test.SystemTest) {
-		headers := zboxClient.NewZboxHeaders(client.X_APP_BLIMP)
-		Teardown(t, headers)
+		headers := zboxClient.NewZboxHeadersWithCSRF(w, client.X_APP_BLIMP)
+		Teardown(w, headers)
 
-		jwtToken, response, err := zboxClient.CreateJwtToken(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		jwtToken, response, err := zboxClient.CreateJwtToken(w, headers)
+		require.NoError(w, err)
+		require.Equal(w, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		headers = zauthClient.NewZauthHeaders(jwtToken.JwtToken, "")
 
-		response, err = zauthClient.Setup(t, &model.SetupWallet{
+		// Clean up stale data from previous test runs to avoid duplicate key constraint
+		_, _ = zauthClient.Delete(w, CLIENT_ID, headers)
+
+		// Generate a unique private key per test run to avoid stale duplicate key conflicts
+		privKeyBytes := make([]byte, 32)
+		_, err = rand.Read(privKeyBytes)
+		require.NoError(w, err)
+		uniquePrivateKey := hex.EncodeToString(privKeyBytes)
+
+		response, err = zauthClient.Setup(w, &model.SetupWallet{
 			UserID:        client.X_APP_USER_ID,
 			ClientID:      CLIENT_ID,
 			ClientKey:     CLIENT_KEY,
 			PublicKey:     PUBLIC_KEY_A,
-			PrivateKey:    PRIVATE_KEY_A,
+			PrivateKey:    uniquePrivateKey,
 			PeerPublicKey: PEER_PUBLIC_KEY,
 			ExpiredAt:     EXPIRES_AT,
 		}, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.NoError(w, err)
+		require.Equal(w, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		response, err = zauthClient.Delete(t, CLIENT_ID, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		response, err = zauthClient.Delete(w, CLIENT_ID, headers)
+		require.NoError(w, err)
+		require.Equal(w, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 }

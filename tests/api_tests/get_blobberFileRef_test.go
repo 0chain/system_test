@@ -17,7 +17,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 	t.SetSmokeTests("Get file ref with allocation id, remote path with reftype as regular or updated should work")
 
-	t.RunSequentially("Get file ref with allocation id, remote path with reftype as regular or updated should work", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with allocation id, remote path with reftype as regular or updated should work", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -104,7 +104,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentially("Get file ref with invalid remote file path should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with invalid remote file path should fail", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -135,7 +135,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentially("Get file ref with invalid refType should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with invalid refType should fail", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -166,7 +166,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentially("Get file ref with no path should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with no path should fail", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -197,7 +197,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentially("Get file ref with no refType should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with no refType should fail", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -228,7 +228,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentially("Get file ref with no path and no refType should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with no path and no refType should fail", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -259,7 +259,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentially("Get file ref with invalid client signature should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with invalid client signature should fail", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -286,7 +286,7 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentially("Get file ref with invalid client id should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with invalid client id should fail", 10*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)
@@ -319,9 +319,11 @@ func TestBlobberFileRefs(testSetup *testing.T) {
 		require.Equal(t, resp.StatusCode(), client.HttpBadRequestStatus)
 	})
 
-	t.RunSequentially("Get file ref with invalid client key should fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Get file ref with invalid client key should fail", 10*time.Minute, func(t *test.SystemTest) {
+		walletMutex.Lock()
 		initialisedWallet := initialisedWallets[walletIdx]
 		walletIdx++
+		walletMutex.Unlock()
 		balance := apiClient.GetWalletBalance(t, initialisedWallet, client.HttpOkStatus)
 		initialisedWallet.Nonce = int(balance.Nonce)
 

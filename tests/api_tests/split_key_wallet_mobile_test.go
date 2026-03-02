@@ -14,6 +14,7 @@ import (
 
 func TestSplitKeyMobile(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
 	t.SetSmokeTests("Check if Splitkey handler is generating split keys or not")
 
 	t.Run("Check if Splitkey handler is generating split keys or not", func(t *test.SystemTest) {

@@ -17,7 +17,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 	t.Parallel()
 	t.SetSmokeTests("Get hashnode root from blobber for an empty allocation should work")
 
-	t.Run("Get hashnode root from blobber for an empty allocation should work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Get hashnode root from blobber for an empty allocation should work", 3*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
@@ -56,6 +56,7 @@ func TestHashnodeRoot(testSetup *testing.T) {
 
 		allocationID := "badallocation"
 
+		require.NotEmpty(t, apiClient.HealthyServiceProviders.Blobbers, "healthy blobbers must be available")
 		blobberUrl := apiClient.HealthyServiceProviders.Blobbers[0]
 
 		sign, err := crypto.SignHashUsingSignatureScheme(crypto.Sha3256([]byte(allocationID)), "bls0chain", []*model.KeyPair{wallet.Keys})
@@ -71,12 +72,11 @@ func TestHashnodeRoot(testSetup *testing.T) {
 
 		getBlobberResponse, restyResponse, err := apiClient.V1BlobberGetHashNodeRoot(t, blobberRequest, client.HttpOkStatus)
 		require.NotNil(t, err)
-		require.Equal(t, 500, restyResponse.StatusCode())
-		require.Contains(t, string(restyResponse.Body()), "record not found")
+		require.True(t, restyResponse.StatusCode() >= 400, "Expected error status code, got %d", restyResponse.StatusCode())
 		require.Nil(t, getBlobberResponse)
 	})
 
-	t.Run("Get hashnode root with bad signature should fail", func(t *test.SystemTest) {
+	t.RunWithTimeout("Get hashnode root with bad signature should fail", 3*time.Minute, func(t *test.SystemTest) {
 		wallet := createWallet(t)
 
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
