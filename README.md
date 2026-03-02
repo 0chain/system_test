@@ -1,144 +1,252 @@
-# System Tests
+# 0Chain System Tests
 
-A black/grey box suite that tests the functionality of the 0Chain network as an end user via the CLI tools.
+Integration test suite for the [0Chain](https://github.com/0chain) decentralized storage network. Tests validate storage, wallets, allocations, tokenomics, and service integrations as an end user.
 
-## Running tests
+## Test Suites
 
-The tests require a full 0Chain network to be deployed and running in a healthy state.
+| Suite | Path | Description |
+|-------|------|-------------|
+| **API** | `tests/api_tests/` | REST API endpoint tests (allocations, blobbers, 0box, zauth, zvault, zs3) |
+| **CLI** | `tests/cli_tests/` | CLI tool tests for `zbox` and `zwallet` (file ops, allocations, staking) |
+| **SDK** | `tests/sdk_tests/` | Go SDK integration tests (multi-operation, wallet creation) |
+| **Tokenomics** | `tests/tokenomics_tests/` | Financial tests (rewards, penalties, enterprise blobbers) |
 
-### Deploy a new 0Chain network and run tests with the system tests pipeline (RECOMMENDED)
+## Prerequisites
 
-![system-tests drawio(1) drawio](https://user-images.githubusercontent.com/42718091/168160360-624d83ec-deb2-4e32-95c8-575341a71fc4.png)
+- Go 1.22.0+
+- A running 0Chain network (local or remote)
+- For CLI tests: `zbox` and `zwallet` binaries in `tests/cli_tests/`
+- For zs3/mc tests: `mc`, `warp`, `minio` binaries in `tests/cli_tests/`
 
-The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workflows/ci.yml) can deploy a new 0Chain network with a custom set of docker images then run tests:
-<details>
-  <summary><b>[Click to show screenshot]</b></summary>
-<img width="322" alt="ci-deploy" src="https://user-images.githubusercontent.com/18306778/136713487-db7ef096-cb11-4a33-9b29-302ffb5470df.png">
-</details>
+## Quick Start
 
-**In this mode, do not supply the network URL. Supply the docker images you wish to deploy**
+### Option 1: Local Deployment with Deploy Script (Recommended)
 
-You can view a list available 0chain docker images at [Docker Hub](https://hub.docker.com/search?q=0chain&type=image), or build your own by running the docker build pipeline in the repo of your feature branch.
-
-0Chain will automatically be deployed to a free test slot at ```dev-[1-5].devnet-0chain.net```.
-You can view the network URL of deployment by checking the "VIEW TEST CONFIGURATION" step of the pipeline.
-<details>
-  <summary><b>[Click to show screenshot]</b></summary>
-<img width="1200" alt="ci-config" src="https://user-images.githubusercontent.com/18306778/137035204-4feffd1e-1692-4021-bc06-e97b7925f5a9.png">
-</details>
-
-If tests fail, the network will stay available for debugging purposes, however uptime is not guaranteed as the network may be overridden by another test run.
-
-### Run system tests to unblock merging code changes spanning multiple repos protected by automatic system tests
-
-There may arise a scenario when PRs will fail against default system tests. Consider this, you raise a PR on zboxcli, blobber and 0chain repos simultaneously that only work with new code on all three of them. In this case the PRs raised on all 3 of them will fail system tests because the PR raised on zboxcli will have the new code in that zboxcli branch, but not the required blobber or 0chain code, and so on for the other 2 repos.
-
-In such a case, go to `actions` tab on any of the repos, find the 0Chain System Tests workflow (like [here](https://github.com/0chain/0chain/actions/workflows/system_tests.yml)), input all the custom branches and run it manually. After the completion, all the PRs used in this manual run will be updated to the status of the run (green on success, red otherwise).
-
-Note: While trying to run this workflow manually, if you do not see an input field to one of the repos you want to use, just look in a different repo's actions. This is because GitHub only allows 10 input params, but all params should be covered in different repos.
-
-### Updating system tests along with change in another repo
-
-If you need to update system tests according to a PR in some other repos, the protocol is:
-
-- Make a feature branch on system tests repo with the updated tests
-- Run system tests from any one of those repos manually against this feature branch, passing should make those PRs green.
-- Merge all the other PRs in different repos.
-- This feature branch will now pass against default config, and should be ready to merge.
-
-### Run tests against an existing 0Chain network with the system tests pipeline
-
-The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workflows/ci.yml) can also run tests against an existing 0Chain network
-<details>
-  <summary><b>[Click to show screenshot]</b></summary>
-<img width="347" alt="ci-predeployed" src="https://user-images.githubusercontent.com/18306778/136713492-fbeadfb0-51d7-4f59-90a0-34e72e9eafcb.png">
-</details>
-
-**In this mode, supply the network URL. Docker image input fields will be ignored**
-
-Set the network URL field to the 0Chain network you wish to test, without the URL scheme or subdomain.
-eg. beta.0chain.net
-
-### Report
-
-The CI pipeline will generate an HTML report after test execution.
-In this report you can view logs from any test and see failures at a glance.
-
-<img width="900" alt="report-link" src="https://user-images.githubusercontent.com/18306778/136713954-911ddb21-64b0-4180-88f7-3724a4d24de8.png">
-
-
-### Run tests against an existing 0Chain network locally
-Requires BASH shell (UNIX, macOS, WSL) and [go](https://golang.org/dl/)
-
-Build or download the [zbox](https://github.com/0chain/zboxcli/tags) and [zwallet](https://github.com/0chain/zwalletcli/tags) CLIs, ensuring they are compatible with the network you wish to test.
-Modify the ```block_worker``` field in ```./tests/cli_tests/config/zbox_config.yaml``` to point to the network.
-
-To run the entire test suite (minus tests for known broken features) run:
+The deploy script automates the entire setup: chain, blobbers, services, wallets, and test configuration.
 
 ```bash
-cp $ZBOX_LOCATION ./tests/cli_tests/ # Copy zbox CLI to test folder
-cp $ZWALLET_LOCATION ./tests/cli_tests/ # Copy zwallet CLI to test folder
-cp $MC_LOCATION ./tests/cli_tests/ #Copy MC CLI to test folder
-cp $WARP_LOCATION ./tests/cli_tests/ #Copy WARP CLI to test folder
-cp $MINIO_LOCATION ./tests/cli_tests/ #Copy MINIO CLI to test folder
-cd ./tests/cli_tests/
+# Full deployment from scratch
+cd scripts/
+./deploy_local.sh all
+
+# Or step by step:
+./deploy_local.sh start-chain     # Start miners, sharders, 0dns
+./deploy_local.sh chain           # Initialize chain config (hardforks, SC settings)
+./deploy_local.sh blobbers        # Build, start, fund, stake blobbers
+./deploy_local.sh services        # Start 0box, zauth, zvault, Kafka, Elasticsearch
+./deploy_local.sh test-setup      # Setup test wallets and configs
+./deploy_local.sh verify          # Verify everything is healthy
+```
+
+See [`scripts/README.md`](scripts/README.md) for full deployment documentation including:
+- Configuration via `scripts/deploy_config.yaml`
+- Branch management for multi-repo development
+- Enterprise blobber setup
+- Nginx reverse proxy with SSL
+- Monitoring and chaos testing
+- Web-apps and rclone-zus deployment
+
+### Option 2: CI/CD Pipeline
+
+The [System Tests Pipeline](https://github.com/0chain/system_test/actions/workflows/ci.yml) can:
+- Deploy a fresh 0Chain network with custom docker images
+- Run tests against an existing network
+- Generate HTML test reports
+
+## Running Tests
+
+```bash
+# Run all tests in a suite
+cd tests/api_tests && go test ./... -v -timeout 30m
+cd tests/cli_tests && go test ./... -v -timeout 60m
+cd tests/sdk_tests && go test ./... -v -timeout 30m
+cd tests/tokenomics_tests && go test ./... -v -timeout 30m
+
+# Run a specific test by name
+go test -run "^TestCreateAllocation$" ./... -v
+
+# Run smoke tests only (fast subset)
+SMOKE_TEST_MODE=true go test ./... -v
+
+# Run with debug logging
+DEBUG=true go test ./... -v
+
+# Exclude known-broken tests (CLI)
 go test -run "^Test[^___]*$" ./... -v
+
+# Run all suites with auto-retry via deploy script
+cd scripts/ && ./deploy_local.sh test
 ```
-Debug logging can be achieved by running
+
+### CLI Test Setup
+
+CLI tests require `zbox` and `zwallet` binaries:
+
 ```bash
-DEBUG=true go test -run "^Test[^___]*$" ./... -v
+# Build from source
+cd ~/Code/zboxcli && make install && cp ./zbox ../system_test/tests/cli_tests/
+cd ~/Code/zwalletcli && make zwallet && cp ./zwallet ../system_test/tests/cli_tests/
+
+# Or use the deploy script (builds and copies automatically)
+./scripts/deploy_local.sh test-setup
 ```
-Include tests for broken features as part of your test run by running
+
+### Configuration
+
+Each test suite has its own config directory:
+
+| Suite | Config | Key Settings |
+|-------|--------|--------------|
+| API | `tests/api_tests/config/api_tests_config.yaml` | `block_worker`, sharder URLs |
+| CLI | `tests/cli_tests/config/zbox_config.yaml` | `block_worker`, wallet paths |
+| SDK | `tests/sdk_tests/config/sdk_tests_config.yaml` | `block_worker` |
+| Tokenomics | `tests/tokenomics_tests/config/tokenomics_tests_config.yaml` | `block_worker` |
+
+The `block_worker` URL should point to the 0dns service (e.g., `http://198.18.0.100:9091` for Docker, `http://localhost:9091` for host access).
+
+## Architecture
+
+```
+system_test/
+├── internal/                    # Shared test libraries
+│   ├── api/model/               # Data models (Wallet, Allocation, Blobber, etc.)
+│   ├── api/util/client/         # HTTP clients (APIClient, SDKClient, ZboxClient)
+│   ├── api/util/test/           # SystemTest framework (timeouts, logging)
+│   ├── api/util/crypto/         # BLS signatures
+│   └── cli/                     # CLI-specific utilities
+├── tests/
+│   ├── api_tests/               # REST API tests
+│   ├── cli_tests/               # CLI tool tests
+│   │   ├── mc_tests/            # MinIO client (mc) tests
+│   │   └── zs3server_tests/     # S3 gateway tests
+│   ├── sdk_tests/               # Go SDK tests
+│   └── tokenomics_tests/        # Financial/tokenomics tests
+├── scripts/
+│   ├── deploy_local.sh          # Full local deployment automation
+│   ├── deploy_config.yaml       # Deployment configuration
+│   ├── run_tests.sh             # Test runner with retry logic
+│   └── README.md                # Deployment documentation
+└── .github/workflows/ci.yml     # CI/CD pipeline
+```
+
+## Services
+
+The full test environment includes:
+
+| Service | Port | Description |
+|---------|------|-------------|
+| 0dns | 9091 | DNS/discovery service |
+| Miners (4) | 7071-7074 | Block producers |
+| Sharders (2) | 7171-7172 | Block storage |
+| Blobbers (6-12) | 5051-5065 | Storage providers |
+| Validators (6-12) | 5061-5069 | Challenge validators |
+| Enterprise Blobbers (3) | 5071-5073 | Enterprise storage |
+| 0box | 9081 | Aggregation/metadata API |
+| zauth | 8080 | Authentication service |
+| zvault | 8090 | Key vault service |
+| zs3server | 9000 | S3 gateway (MinIO-compatible) |
+| Elasticsearch | 9200 | Search backend for 0box |
+| Kafka | 9092 | Event streaming (sharder to 0box) |
+
+## Multi-Repo Development
+
+When PRs span multiple repos (e.g., `0chain` + `blobber` + `gosdk`):
+
+1. Create feature branches in each repo
+2. Use the deploy script with branch overrides:
+   ```bash
+   ./deploy_local.sh --branch 0chain=fix/my-feature --branch blobber=fix/my-feature all
+   ```
+3. Or run the CI pipeline manually from any repo's Actions tab with custom branches
+
+## Updating Services, Clients, and Web Apps
+
+The deploy script provides a `swap-image` command to update any service, CLI client, or web app without a full redeployment.
+
 ```bash
-go test ./... -v
+# Usage
+./scripts/deploy_local.sh swap-image <repo> [branch] [--gosdk-branch <branch>]
 ```
-PS: Test suite execution will be slower when running locally vs the system tests pipeline.
-Output will also be less clear vs the system tests pipeline.
-Therefore, we recommend using an IDE such as [GoLand](https://www.jetbrains.com/go/) to run/debug individual tests locally
 
-## Run individual tests against local 0chain network
+### Update a Service (e.g., 0box, blobber, 0chain)
 
-For developing new system tests for code still in developer branches, tests can be run against a locally running chain.
-Typically, for a 0chain change you will have a PR for several modules that need to work
-together. For example, `0chain`, `blobber`, `GoSDK`, `zboxcli` and `zwalletcli`.
-
-The first step requires setting up a running chain using the GitHub branches from the PRs.
-Use the instructions for building a [local chain 0chain](https://github.com/0chain/0chain#setup-network),
-[add a few blobbers](https://github.com/0chain/blobber#building-and-starting-the-nodes).
-Make sure you [stake the blobbers](https://github.com/0chain/0chain/blob/staging/code/go/0chain.net/smartcontract/storagesc/README.md#order).
-
-For `zboxcli` and `zwalletcli` changes you need to first build the executable and copy into local
-system test directory. For example:
 ```bash
-cd zboxcli
-make install
-cp ./zbox ../system_test/tests/cli_tests/zbox
+# Update 0box to a specific branch
+./scripts/deploy_local.sh swap-image 0box staging
 
-cd ../zwalletcli
-make zwallet
-cp ./zwallet ../system_test/tests/cli_tests/zwallet
+# Update blobber (uses branch from deploy_config.yaml)
+./scripts/deploy_local.sh swap-image blobber
+
+# Update 0chain (rebuilds both miner + sharder images, restarts all)
+./scripts/deploy_local.sh swap-image 0chain fix/my-feature
+
+# Update a service with a specific gosdk dependency
+./scripts/deploy_local.sh swap-image 0box staging --gosdk-branch enterprise-blobber
 ```
 
-Make sure you have the correct system test branch. Now you need to edit `system_test/tests/cli_tests/config/zbox_config.yaml`
-Edit the line `block_worker: https://dev.0chain.net/dns` to the appropriate setting for you, something like
-```yaml
-block_worker: http://192.168.1.100:9091
+This will: `git checkout branch` → `build Docker image` → `restart containers`.
+
+### Update CLI Clients (zboxcli / zwalletcli)
+
+```bash
+# Update zboxcli to a branch (rebuilds binary, copies to test dirs)
+./scripts/deploy_local.sh swap-image zboxcli fix/my-branch
+
+# To use a specific gosdk branch with a CLI client:
+cd /path/to/zboxcli
+go get github.com/0chain/gosdk@<branch-or-commit>
+go mod tidy
+./scripts/deploy_local.sh swap-image zboxcli
 ```
 
-Now open the system_test project in [GoLand](https://www.jetbrains.com/go/),
-you should now be able to run any of the `cli_tests` in debug.
+Binaries are built and copied to both `tests/cli_tests/` and `tests/tokenomics_tests/`.
 
-You can run tests against a remote chain if you have already deployed elsewhere eg. dev.0chain.net
+### Update Web Apps with a Specific gosdk (WASM)
 
-## Handling test failures
-The test suite/pipeline should pass when ran against a healthy network.
-If some tests fail, it is likely that a code issue has been introduced.
-Try running the same tests against another network to rule out environmental issues.
-If the failure persists, and you believe this to be a false positive, [contact the system tests team](https://0chain.slack.com/archives/C02AV6MKT36).
+```bash
+# Rebuild web-apps with a specific gosdk branch for zcn.wasm
+./scripts/deploy_local.sh swap-image web-apps master --gosdk-branch enterprise-blobber
+```
+
+This will: `checkout gosdk branch` → `build zcn.wasm` → `copy to all packages/*/public/` → `rebuild web-apps`.
+
+### Available Repos
+
+| Repo | What It Builds | Containers Affected |
+|------|---------------|-------------------|
+| `0chain` | Miner + Sharder images | miner-1..4, sharder-1..2 |
+| `blobber` | Blobber + Validator images | blobber-1..12, validator-1..12 |
+| `eblobber` | Enterprise blobber image | blobber-13..15 |
+| `0box` | 0box image | 0box container |
+| `zauth-server` | zauth image | zauth container |
+| `zvault` | zvault image | zvault container |
+| `zs3server` | MinIO S3 gateway | zs3server container |
+| `crawler` | Crawler image | crawler container |
+| `web-apps` | Web frontends (Vult, Bolt, Blimp, etc.) | PM2 processes |
+| `zboxcli` | `zbox` binary | Copies to test dirs (no container) |
+| `zwalletcli` | `zwallet` binary | Copies to test dirs (no container) |
+
+### Run Tests After Update
+
+```bash
+./scripts/deploy_local.sh test          # Run all test suites
+./scripts/deploy_local.sh test api      # Run only API tests
+./scripts/deploy_local.sh test cli      # Run only CLI tests
+./scripts/deploy_local.sh test token    # Run only tokenomics tests
+```
+
+## Handling Test Failures
+
+- Tests should pass against a healthy network
+- If tests fail, check chain health first: `./scripts/deploy_local.sh verify`
+- Check blobber balances (blobbers need ZCN to redeem write markers)
+- Try running the specific failing test in isolation
+- For transient failures, re-run the test (some tests are timing-sensitive)
 
 ## Contributing
+
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-
 ## License
+
 [MIT](https://choosealicense.com/licenses/mit/)
