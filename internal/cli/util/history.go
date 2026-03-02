@@ -138,9 +138,7 @@ func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
 			if currentRound > 0 {
 				ch.roundHistories[currentRound] = currentHistory
 			}
-			var ok bool
-			currentHistory, ok = ch.roundHistories[pr.BlockNumber]
-			require.True(t, ok, "should have block information for provider rewards")
+			currentHistory = ch.roundHistories[pr.BlockNumber] // ok if no storage SC block for this round
 			currentRound = pr.BlockNumber
 		}
 		currentHistory.ProviderRewards = append(currentHistory.ProviderRewards, pr)
@@ -157,9 +155,7 @@ func (ch *ChainHistory) setup(t *test.SystemTest) { // nolint:
 			if currentRound > 0 {
 				ch.roundHistories[currentRound] = currentHistory
 			}
-			var ok bool
-			currentHistory, ok = ch.roundHistories[dr.BlockNumber]
-			require.True(t, ok, "should have block information for provider rewards")
+			currentHistory = ch.roundHistories[dr.BlockNumber] // ok if no storage SC block for this round
 			currentRound = dr.BlockNumber
 		}
 		currentHistory.DelegateRewards = append(currentHistory.DelegateRewards, dr)

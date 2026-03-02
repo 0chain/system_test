@@ -1,29 +1,30 @@
 package client
 
 import (
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"net/http/cookiejar"
 	"strconv"
+	"strings"
+	"sync"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/test"
 	"github.com/go-resty/resty/v2"
+	"github.com/herumi/bls-go-binary/bls"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/sha3"
 )
 
 const (
-	X_APP_USER_ID            = "test_user_id"
-	X_APP_CLIENT_ID          = "caae5a9d48b1a0cd01a5da982807d7ad6fcc8a8367b79c6adbe48e7c632544f2"
-	X_APP_CLIENT_KEY         = "91a3a29f4c05b82f2a83f9d4b405976637a4a29f11b1918de30fc319ab87db191b195d9f3e6eecf588e1b83d195931d12760f303c3d1845144f07617022faa8f"
-	X_APP_CLIENT_SIGNATURE   = "6de25e5a202614216610558ec68346a9aca97165e29a12cc047fbeb8c696d420"
 	X_APP_USER_ID_A          = "test_user_id_alternative"
 	X_APP_CLIENT_ID_A        = "2e16f28602959e23e0f5b153e298fc5dbfb02dcb089cfa74bd46f158c2f02ab7"
 	X_APP_CLIENT_KEY_A       = "f615cfbb9154c99bf6e1d87e26397e987ee345c2e98c7a652326a3744f15ea100e22506fccf75515d9379f3275386f4401e2dbd1aafc4ef8f18af58a8c68fc02"
 	X_APP_CLIENT_SIGNATURE_A = "db4bf04ab302a4dde154804334d0eeb512d875585a4092c7776cf3505ba9e793"
-	X_APP_USER_ID_R          = "test_user_id_referred_user"
-	X_APP_CLIENT_ID_R        = "bcf5f517be521e0ffdb22d1fc26a35abdec8556bcb9ed075244a358df7337cd0"
-	X_APP_CLIENT_KEY_R       = "de9351bbf460c761ea979764831759369ced3c6de38b856e7921eee9cc034323cce23c562c74a0629867fbea33d5009b9f473bc3b766871b65e7cf864ba4301d"
-	X_APP_CLIENT_SIGNATURE_R = "43fa947257ae0b5da8b073f0efeaa2570c4faf66fcabd93407e3597bc34e440b"
-	X_APP_ID_TOKEN           = "test_firebase_token"
 	X_APP_TIMESTAMP          = "123456789"
 	X_APP_CSRF               = "test_csrf_token"
 	X_APP_BLIMP              = "blimp"
@@ -32,6 +33,259 @@ const (
 	X_APP_BOLT               = "bolt"
 	X_APP_CHALK              = "chalk"
 )
+
+// Referred user (_R) identity - vars so they can be refreshed with real Firebase credentials.
+var (
+	X_APP_USER_ID_R          = "test_user_id_referred_user"
+	X_APP_CLIENT_ID_R        = "bcf5f517be521e0ffdb22d1fc26a35abdec8556bcb9ed075244a358df7337cd0"
+	X_APP_CLIENT_KEY_R       = "de9351bbf460c761ea979764831759369ced3c6de38b856e7921eee9cc034323cce23c562c74a0629867fbea33d5009b9f473bc3b766871b65e7cf864ba4301d"
+	X_APP_CLIENT_SIGNATURE_R = "43fa947257ae0b5da8b073f0efeaa2570c4faf66fcabd93407e3597bc34e440b"
+	X_APP_ID_TOKEN_R         = "test_firebase_token"
+)
+
+// Primary client identity - these are vars so they can be set from a wallet with
+// a known private key (needed to dynamically compute BLS signatures when the
+// Firebase UID changes).
+var (
+	X_APP_CLIENT_ID        = "caae5a9d48b1a0cd01a5da982807d7ad6fcc8a8367b79c6adbe48e7c632544f2"
+	X_APP_CLIENT_KEY       = "91a3a29f4c05b82f2a83f9d4b405976637a4a29f11b1918de30fc319ab87db191b195d9f3e6eecf588e1b83d195931d12760f303c3d1845144f07617022faa8f"
+	X_APP_CLIENT_SIGNATURE = "6de25e5a202614216610558ec68346a9aca97165e29a12cc047fbeb8c696d420"
+)
+
+// These variables are refreshed with real Firebase credentials at test startup
+// via RefreshFirebaseToken(). Defaults are used when Firebase config is not provided.
+var (
+	X_APP_USER_ID        = "test_user_id"
+	X_APP_ID_TOKEN       = "test_firebase_token"
+	X_APP_FIREBASE_EMAIL = "test_email_1"
+)
+
+// clientSecretKey holds the BLS private key used to compute X_APP_CLIENT_SIGNATURE.
+// Set via SetClientWallet(). When nil, the pre-computed default signature is used.
+var (
+	clientSecretKey   *bls.SecretKey
+	clientSecretKey_R *bls.SecretKey
+	blsSignMutex      sync.Mutex
+)
+
+// SetClientWallet sets the primary 0box client identity from a wallet with a known private key.
+// This enables dynamic computation of BLS signatures when X_APP_USER_ID changes (e.g. Firebase UID).
+func SetClientWallet(clientID, publicKey string, secretKey bls.SecretKey) {
+	X_APP_CLIENT_ID = clientID
+	X_APP_CLIENT_KEY = publicKey
+	sk := secretKey // copy
+	clientSecretKey = &sk
+	recomputeSignature()
+	log.Printf("0box client wallet set: clientID=%s, signature=%s", clientID, X_APP_CLIENT_SIGNATURE)
+}
+
+// recomputeSignature recalculates X_APP_CLIENT_SIGNATURE using the stored private key.
+// The signature is BLS_Sign(SHA3_256("{ClientID}:{UserID}:{PublicKey}"), privateKey).
+func recomputeSignature() {
+	if clientSecretKey == nil {
+		return
+	}
+	blsSignMutex.Lock()
+	defer blsSignMutex.Unlock()
+
+	hashData := fmt.Sprintf("%v:%v:%v", X_APP_CLIENT_ID, X_APP_USER_ID, X_APP_CLIENT_KEY)
+	sha := sha3.New256()
+	sha.Write([]byte(hashData))
+	hash := hex.EncodeToString(sha.Sum(nil))
+
+	hashBytes, err := hex.DecodeString(hash)
+	if err != nil {
+		log.Printf("Warning: failed to decode hash for signature: %v", err)
+		return
+	}
+	sig := clientSecretKey.Sign(string(hashBytes))
+	X_APP_CLIENT_SIGNATURE = sig.SerializeToHexStr()
+}
+
+// SetClientWallet_R sets the referred user's 0box client identity from a wallet with a known private key.
+func SetClientWallet_R(clientID, publicKey string, secretKey bls.SecretKey) {
+	X_APP_CLIENT_ID_R = clientID
+	X_APP_CLIENT_KEY_R = publicKey
+	sk := secretKey // copy
+	clientSecretKey_R = &sk
+	recomputeSignature_R()
+	log.Printf("0box _R client wallet set: clientID=%s, signature=%s", clientID, X_APP_CLIENT_SIGNATURE_R)
+}
+
+// recomputeSignature_R recalculates X_APP_CLIENT_SIGNATURE_R for the referred user.
+func recomputeSignature_R() {
+	if clientSecretKey_R == nil {
+		return
+	}
+	blsSignMutex.Lock()
+	defer blsSignMutex.Unlock()
+
+	hashData := fmt.Sprintf("%v:%v:%v", X_APP_CLIENT_ID_R, X_APP_USER_ID_R, X_APP_CLIENT_KEY_R)
+	sha := sha3.New256()
+	sha.Write([]byte(hashData))
+	hash := hex.EncodeToString(sha.Sum(nil))
+
+	hashBytes, err := hex.DecodeString(hash)
+	if err != nil {
+		log.Printf("Warning: failed to decode hash for _R signature: %v", err)
+		return
+	}
+	sig := clientSecretKey_R.Sign(string(hashBytes))
+	X_APP_CLIENT_SIGNATURE_R = sig.SerializeToHexStr()
+}
+
+// firebaseAPIKey is stored so that RefreshFirebaseToken can be called again
+// after 0box's DELETE /v2/owner deletes the Firebase user.
+var (
+	firebaseAPIKey  string
+	firebaseEmail   string
+	firebasePasswd  string
+)
+
+// Firebase credentials for the referred user (_R identity).
+var (
+	firebaseEmail_R  string
+	firebasePasswd_R string
+)
+
+// RefreshFirebaseToken obtains a fresh Firebase ID token using the Firebase Auth REST API.
+// It tries sign-in first; if the user was deleted (e.g. by 0box Teardown), it re-creates
+// the user via sign-up. Updates X_APP_ID_TOKEN, X_APP_USER_ID, and X_APP_FIREBASE_EMAIL.
+// If any parameter is empty, it silently returns (falls back to the default test token).
+func RefreshFirebaseToken(apiKey, email, password string) error {
+	if apiKey == "" || email == "" || password == "" {
+		return nil
+	}
+
+	// Store credentials for subsequent calls
+	firebaseAPIKey = apiKey
+	firebaseEmail = email
+	firebasePasswd = password
+
+	// Try sign-in first
+	result, err := firebaseSignIn(apiKey, email, password)
+	if err != nil {
+		// If user doesn't exist (deleted by 0box Teardown), re-create via sign-up
+		log.Printf("Firebase sign-in failed (%v), attempting sign-up to re-create user", err)
+		result, err = firebaseSignUp(apiKey, email, password)
+		if err != nil {
+			return fmt.Errorf("firebase sign-up also failed: %w", err)
+		}
+		log.Printf("Firebase user re-created via sign-up (uid: %s)", result.LocalID)
+	}
+
+	X_APP_ID_TOKEN = result.IDToken
+	X_APP_FIREBASE_EMAIL = email
+	if result.LocalID != "" {
+		X_APP_USER_ID = result.LocalID
+		recomputeSignature() // UID changed, recompute BLS signature
+	}
+	log.Printf("Firebase ID token refreshed successfully (expires in %ss, email: %s, uid: %s)", result.ExpiresIn, email, X_APP_USER_ID)
+	return nil
+}
+
+// RefreshFirebaseToken_R obtains a fresh Firebase ID token for the referred user (_R identity).
+// Uses the same API key as the primary user but a different email/password.
+func RefreshFirebaseToken_R(apiKey, email, password string) error {
+	if apiKey == "" || email == "" || password == "" {
+		return nil
+	}
+
+	firebaseEmail_R = email
+	firebasePasswd_R = password
+
+	result, err := firebaseSignIn(apiKey, email, password)
+	if err != nil {
+		log.Printf("Firebase _R sign-in failed (%v), attempting sign-up", err)
+		result, err = firebaseSignUp(apiKey, email, password)
+		if err != nil {
+			return fmt.Errorf("firebase _R sign-up also failed: %w", err)
+		}
+		log.Printf("Firebase _R user created via sign-up (uid: %s)", result.LocalID)
+	}
+
+	X_APP_ID_TOKEN_R = result.IDToken
+	if result.LocalID != "" {
+		X_APP_USER_ID_R = result.LocalID
+		recomputeSignature_R()
+	}
+	log.Printf("Firebase _R token refreshed (email: %s, uid: %s)", email, X_APP_USER_ID_R)
+	return nil
+}
+
+// GetFirebaseEmail_R returns the stored Firebase email for the referred user.
+func GetFirebaseEmail_R() string   { return firebaseEmail_R }
+func GetFirebasePassword_R() string { return firebasePasswd_R }
+
+type firebaseAuthResult struct {
+	IDToken      string `json:"idToken"`
+	RefreshToken string `json:"refreshToken"`
+	ExpiresIn    string `json:"expiresIn"`
+	LocalID      string `json:"localId"`
+}
+
+func firebaseSignIn(apiKey, email, password string) (*firebaseAuthResult, error) {
+	url := "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + apiKey
+	payload := fmt.Sprintf(`{"email":%q,"password":%q,"returnSecureToken":true}`, email, password)
+
+	resp, err := http.Post(url, "application/json", strings.NewReader(payload)) //nolint:gosec
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
+	}
+
+	var result firebaseAuthResult
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+	if result.IDToken == "" {
+		return nil, fmt.Errorf("response did not contain idToken")
+	}
+	return &result, nil
+}
+
+func firebaseSignUp(apiKey, email, password string) (*firebaseAuthResult, error) {
+	url := "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=" + apiKey
+	payload := fmt.Sprintf(`{"email":%q,"password":%q,"returnSecureToken":true}`, email, password)
+
+	resp, err := http.Post(url, "application/json", strings.NewReader(payload)) //nolint:gosec
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
+	}
+
+	var result firebaseAuthResult
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+	if result.IDToken == "" {
+		return nil, fmt.Errorf("response did not contain idToken")
+	}
+	return &result, nil
+}
+
+// GetFirebaseAPIKey returns the stored Firebase API key for re-authentication.
+func GetFirebaseAPIKey() string  { return firebaseAPIKey }
+func GetFirebaseEmail() string   { return firebaseEmail }
+func GetFirebasePassword() string { return firebasePasswd }
 
 type ZboxClient struct {
 	BaseHttpClient
@@ -45,6 +299,15 @@ func NewZboxClient(zboxEntrypoint string) *ZboxClient {
 	zboxClient.HttpClient = resty.New()
 
 	return zboxClient
+}
+
+// ClearCookies replaces the HTTP cookie jar with a fresh one, isolating
+// subsequent requests from any session cookies set by earlier calls.
+// Use this when switching between different user identities (e.g. primary
+// user vs referred user) to avoid session/CSRF conflicts.
+func (c *ZboxClient) ClearCookies() {
+	jar, _ := cookiejar.New(nil)
+	c.HttpClient.SetCookieJar(jar)
 }
 
 func (c *ZboxClient) NewZboxPublicHeaders(appType string) map[string]string {
@@ -153,7 +416,7 @@ func (c *ZboxClient) NewZboxHeaders_R(appType string) map[string]string {
 		"X-App-Client-ID":        X_APP_CLIENT_ID_R,
 		"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
 		"X-App-Timestamp":        X_APP_TIMESTAMP,
-		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
+		"X-App-ID-TOKEN":         X_APP_ID_TOKEN_R,
 		"X-App-User-ID":          X_APP_USER_ID_R,
 		"X-CSRF-TOKEN":           X_APP_CSRF,
 		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
@@ -171,7 +434,7 @@ func (c *ZboxClient) NewZboxHeaders_RWithToken(t *test.SystemTest, appType strin
 		"X-App-Client-ID":        X_APP_CLIENT_ID_R,
 		"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
 		"X-App-Timestamp":        X_APP_TIMESTAMP,
-		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
+		"X-App-ID-TOKEN":         X_APP_ID_TOKEN_R,
 		"X-App-User-ID":          X_APP_USER_ID_R,
 		"X-CSRF-TOKEN":           csrfToken.CSRFToken,
 		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
@@ -193,7 +456,7 @@ func (c *ZboxClient) NewZboxHeaders_RWithCSRF(t *test.SystemTest, appType string
 		"X-App-Client-ID":        X_APP_CLIENT_ID_R,
 		"X-App-Client-Key":       X_APP_CLIENT_KEY_R,
 		"X-App-Timestamp":        X_APP_TIMESTAMP,
-		"X-App-ID-TOKEN":         X_APP_ID_TOKEN,
+		"X-App-ID-TOKEN":         X_APP_ID_TOKEN_R,
 		"X-App-User-ID":          X_APP_USER_ID_R,
 		"X-CSRF-TOKEN":           csrfToken.CSRFToken,
 		"X-App-Client-Signature": X_APP_CLIENT_SIGNATURE_R,
@@ -602,8 +865,12 @@ func (c *ZboxClient) GetGraphWritePrice(t *test.SystemTest, req *model.ZboxGraph
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/graph-write-price")
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -818,8 +1085,12 @@ func (c *ZboxClient) GetGraphTotalChallengePools(t *test.SystemTest, req *model.
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/graph-total-challenge-pools")
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -867,8 +1138,12 @@ func (c *ZboxClient) GetGraphAllocatedStorage(t *test.SystemTest, req *model.Zbo
 	require.NoError(t, err, "URL parse error")
 
 	urlBuilder.SetPath("/v2/graph-allocated-storage")
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -888,8 +1163,12 @@ func (c *ZboxClient) GetGraphUsedStorage(t *test.SystemTest, req *model.ZboxGrap
 	require.NoError(t, err, "URL parse error")
 
 	urlBuilder.SetPath("/v2/graph-used-storage")
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -909,8 +1188,12 @@ func (c *ZboxClient) GetGraphTotalStaked(t *test.SystemTest, req *model.ZboxGrap
 	require.NoError(t, err, "URL parse error")
 
 	urlBuilder.SetPath("/v2/graph-total-staked")
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -930,8 +1213,12 @@ func (c *ZboxClient) GetGraphTotalMinted(t *test.SystemTest, req *model.ZboxGrap
 	require.NoError(t, err, "URL parse error")
 
 	urlBuilder.SetPath("/v2/graph-total-minted")
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -951,8 +1238,12 @@ func (c *ZboxClient) GetGraphTotalLocked(t *test.SystemTest, req *model.ZboxGrap
 	require.NoError(t, err, "URL parse error")
 
 	urlBuilder.SetPath("/v2/graph-total-locked")
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -972,8 +1263,12 @@ func (c *ZboxClient) GetGraphChallenges(t *test.SystemTest, req *model.ZboxGraph
 	require.NoError(t, err, "URL parse error")
 
 	urlBuilder.SetPath("/v2/graph-challenges")
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -993,8 +1288,12 @@ func (c *ZboxClient) GetGraphTokenSupply(t *test.SystemTest, req *model.ZboxGrap
 	require.NoError(t, err, "URL parse error")
 
 	urlBuilder.SetPath("/v2/graph-token-supply")
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1141,8 +1440,12 @@ func (c *ZboxClient) GetGraphBlobberChallengesPassed(t *test.SystemTest, blobber
 
 	urlBuilder.SetPath("/v2/graph-blobber-challenges-passed")
 	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1163,8 +1466,12 @@ func (c *ZboxClient) GetGraphBlobberChallengesCompleted(t *test.SystemTest, blob
 
 	urlBuilder.SetPath("/v2/graph-blobber-challenges-completed")
 	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1185,8 +1492,12 @@ func (c *ZboxClient) GetGraphBlobberChallengesOpen(t *test.SystemTest, blobberId
 
 	urlBuilder.SetPath("/v2/graph-blobber-challenges-open")
 	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1207,8 +1518,12 @@ func (c *ZboxClient) GetGraphBlobberInactiveRounds(t *test.SystemTest, blobberId
 
 	urlBuilder.SetPath("/v2/graph-blobber-inactive-rounds")
 	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1229,8 +1544,12 @@ func (c *ZboxClient) GetGraphBlobberWritePrice(t *test.SystemTest, blobberId str
 
 	urlBuilder.SetPath("/v2/graph-blobber-write-price")
 	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1251,8 +1570,12 @@ func (c *ZboxClient) GetGraphBlobberCapacity(t *test.SystemTest, blobberId strin
 
 	urlBuilder.SetPath("/v2/graph-blobber-capacity")
 	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1273,8 +1596,12 @@ func (c *ZboxClient) GetGraphBlobberAllocated(t *test.SystemTest, blobberId stri
 
 	urlBuilder.SetPath("/v2/graph-blobber-allocated")
 	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1295,8 +1622,12 @@ func (c *ZboxClient) GetGraphBlobberSavedData(t *test.SystemTest, blobberId stri
 
 	urlBuilder.SetPath("/v2/graph-blobber-saved-data")
 	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1318,8 +1649,12 @@ func (c *ZboxClient) GetGraphBlobberReadData(t *test.SystemTest, blobberId strin
 
 	urlBuilder.SetPath("/v2/graph-blobber-read-data")
 	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1341,8 +1676,12 @@ func (c *ZboxClient) GetGraphBlobberOffersTotal(t *test.SystemTest, blobberId st
 
 	urlBuilder.SetPath("/v2/graph-blobber-offers-total")
 	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1364,8 +1703,12 @@ func (c *ZboxClient) GetGraphBlobberTotalStake(t *test.SystemTest, blobberId str
 
 	urlBuilder.SetPath("/v2/graph-blobber-total-stake")
 	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -1387,8 +1730,12 @@ func (c *ZboxClient) GetGraphBlobberTotalRewards(t *test.SystemTest, blobberId s
 
 	urlBuilder.SetPath("/v2/graph-blobber-total-rewards")
 	urlBuilder.queries.Set("id", blobberId)
-	urlBuilder.queries.Set("from", req.From)
-	urlBuilder.queries.Set("to", req.To)
+	if req.From != "" {
+		urlBuilder.queries.Set("from", req.From)
+	}
+	if req.To != "" {
+		urlBuilder.queries.Set("to", req.To)
+	}
 	urlBuilder.queries.Set("data-points", req.DataPoints)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{

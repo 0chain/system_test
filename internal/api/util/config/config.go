@@ -38,6 +38,11 @@ type Config struct {
 	OwnerWalletMnemonics        string `yaml:"owner_wallet_mnemonics"`
 	DropboxAccessToken          string `yaml:"dropboxAccessToken"`
 	GdriveAccessToken           string `yaml:"gdriveAccessToken"`
+	FirebaseAPIKey              string `yaml:"firebase_api_key"`
+	FirebaseEmail               string `yaml:"firebase_email"`
+	FirebasePassword            string `yaml:"firebase_password"`
+	FirebaseEmailR              string `yaml:"firebase_email_r"`
+	FirebasePasswordR           string `yaml:"firebase_password_r"`
 }
 
 func Parse(configPath string) *Config {

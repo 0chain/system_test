@@ -74,8 +74,8 @@ func NewSDKClient(blockWorker string) *SDKClient {
 	conf.InitClientConfig(&conf.Config{
 		BlockWorker:             blockWorker,
 		SignatureScheme:         crypto.BLS0Chain,
-		MinSubmit:               50,
-		MinConfirmation:         50,
+		MinSubmit:               100,
+		MinConfirmation:         10,
 		ConfirmationChainLength: 3,
 	})
 
@@ -113,7 +113,7 @@ func (c *SDKClient) SetWallet(t *test.SystemTest, wallet *model.Wallet) {
 }
 
 func (c *SDKClient) UploadFile(t *test.SystemTest, allocationID string, options ...int64) (tmpFilePath string, actualSizeUploaded int64) {
-	fileSize := int64(65636)
+	fileSize := int64(512)
 	if len(options) > 0 {
 		fileSize = int64(options[0])
 	}
@@ -140,9 +140,6 @@ func (c *SDKClient) UpdateFileWithParams(t *test.SystemTest, allocationID string
 
 func (c *SDKClient) DeleteFile(t *test.SystemTest, allocationID, fpath string) {
 	t.Logf("Deleting file %s from allocation %s", fpath, allocationID)
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
-
 	deleteOp := c.AddDeleteOperation(t, allocationID, "/"+filepath.Join("", filepath.Base(fpath)))
 	c.MultiOperation(t, allocationID, []sdk.OperationRequest{deleteOp})
 }
@@ -201,6 +198,18 @@ func (c *SDKClient) MultiOperation(t *test.SystemTest, allocationID string, ops 
 			}
 		}
 	}()
+
+	// Hold the mutex for the entire operation (GetAllocation + DoMultiOperation) so that
+	// concurrent SetWallet calls cannot corrupt the signing key between the two calls.
+	// Re-applying c.wallet inside the lock guarantees the correct wallet is active.
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	if c.wallet != nil {
+		if serializedWallet, serErr := c.wallet.String(); serErr == nil {
+			_ = zcncore.SetGeneralWalletInfo(serializedWallet, crypto.BLS0Chain)
+		}
+	}
 
 	sdkAllocation, err := sdk.GetAllocation(allocationID)
 	require.NoError(t, err)

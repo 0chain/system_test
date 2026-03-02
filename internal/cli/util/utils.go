@@ -86,7 +86,15 @@ func RunCommandWithRawOutput(commandString string) ([]string, error) {
 
 	output := strings.Split(string(rawOutput), "\n")
 
-	return output, err
+	// Filter out "ZCN wallet created" lines from raw output too
+	var filtered []string
+	for _, line := range output {
+		if strings.TrimSpace(line) != "ZCN wallet created" {
+			filtered = append(filtered, line)
+		}
+	}
+
+	return filtered, err
 }
 
 func RunCommand(t *test.SystemTest, commandString string, maxAttempts int, backoff time.Duration) ([]string, error) {
@@ -201,7 +209,7 @@ func sanitizeOutput(rawOutput []byte) []string {
 	for _, lineOfOutput := range output {
 		uniqueOutput := strings.Join(unique(strings.Split(lineOfOutput, "\r")), " ")
 		trimmedOutput := strings.TrimSpace(uniqueOutput)
-		if trimmedOutput != "" {
+		if trimmedOutput != "" && trimmedOutput != "ZCN wallet created" {
 			sanitizedOutput = append(sanitizedOutput, trimmedOutput)
 		}
 	}

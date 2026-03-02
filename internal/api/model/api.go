@@ -190,6 +190,13 @@ func NewCreateFreeAllocationTransactionData(scRestGetFreeAllocationBlobbersRespo
 	}
 }
 
+func NewCreateReadPoolTransactionData() TransactionData {
+	return TransactionData{
+		Name:  "new_read_pool",
+		Input: "{}",
+	}
+}
+
 func NewCreateWritePoolTransactionData(createWritePoolRequest CreateWritePoolRequest) TransactionData {
 	return TransactionData{
 		Name:  "write_pool_lock",
@@ -642,6 +649,8 @@ type SCRestGetBlobberResponse struct {
 	//todo:
 	StorageVersion int64  `json:"storage_version"`
 	ManagingWallet string `json:"managing_wallet"`
+	IsEnterprise   bool   `json:"is_enterprise"`
+	IsRestricted   bool   `json:"is_restricted"`
 }
 
 type SCRestGetBlobbersResponse struct {

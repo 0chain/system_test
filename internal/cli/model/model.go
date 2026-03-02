@@ -106,6 +106,7 @@ type Blobber struct {
 	LastHealthCheck   int64             `json:"last_health_check"`
 	PublicKey         string            `json:"-"`
 	StakePoolSettings StakePoolSettings `json:"stake_pool_settings"`
+	IsEnterprise      bool              `json:"is_enterprise"`
 }
 
 type RecentlyAddedRefResult struct {
@@ -173,6 +174,7 @@ type BlobberInfo struct {
 	UncollectedServiceCharge int64             `json:"uncollected_service_charge"`
 	IsKilled                 bool              `json:"is_killed"`
 	IsShutdown               bool              `json:"is_shutdown"`
+	IsEnterprise             bool              `json:"is_enterprise"`
 }
 
 type ChallengePoolInfo struct {
@@ -374,6 +376,7 @@ type BlobberDetails struct {
 	IsShutdown        bool              `json:"is_shutdown"`
 	IsRestricted      bool              `json:"is_restricted"`
 	NotAvailable      bool              `json:"not_available"`
+	IsEnterprise      bool              `json:"is_enterprise"`
 	StorageVersion    int64             `json:"storage_version"`
 }
 
