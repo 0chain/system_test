@@ -37,9 +37,20 @@ tests/cli_tests/*.png
 **/*.log
 
 .pre-commit-config.yaml
+
+# Secrets and credentials (NEVER commit)
+scripts/.secrets.env
+scripts/.secrets.env.*
+scripts/deploy_local.sh.bak*
+scripts/0box_firebase_key.json
+!scripts/.secrets.env.template
+
 warp-*.csv.zst
 warp-*_output.txt
 warp
 minio
 mc
 store
+
+# Local documentation and notes (may contain server IPs/credentials)
+TEST_FIXES_DOCUMENTATION.md
