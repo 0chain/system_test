@@ -1,0 +1,261 @@
+# 0Chain Local Deployment Configuration
+# This file specifies branches/versions for each service.
+#
+# Branch resolution order:
+#   1. CLI flag: --branch 0chain=fix/my-branch (highest priority)
+#   2. This config file (per-repo branch field)
+#   3. Default fallback: master
+#
+# To deploy a feature branch for testing:
+#   Option A: Edit the branch field below
+#   Option B: Use CLI override: ./deploy_local.sh --branch 0chain=fix/my-branch all
+
+# Base directory for all repositories
+base_dir: ~/Code
+
+# Repository configurations
+repositories:
+  # Core blockchain
+  0chain:
+    branch: fix/dkg-broadcast-fee
+    path: 0chain
+    build_required: true
+    docker_image: sharder  # Image name for swap-image command
+    containers:            # Containers using this image
+      - miner-1
+      - miner-2
+      - miner-3
+      - miner-4
+      - sharder-1
+      - sharder-2
+
+  # DNS service
+  0dns:
+    branch: staging
+    path: 0dns
+    build_required: false
+    containers:
+      - 0dns
+
+  # Go SDK (dependency for eblobber, zs3server)
+  gosdk:
+    branch: fix/lfb-aware-sharder-selection
+    path: gosdk
+    build_required: false
+
+  # Enterprise blobber (separate repo from regular blobber)
+  eblobber:
+    branch: fix/configurable-health-check-transaction
+    path: eblobber
+    build_required: true
+    docker_image: eblobber  # Separate image from regular blobber
+    gosdk_branch: feat/enterprise-blobber  # gosdk branch to use when building (overrides gosdk.branch)
+    containers:
+      - eblobber1-blobber-1
+      - eblobber2-blobber-1
+      - eblobber3-blobber-1
+      - eblobber4-blobber-1
+      - eblobber5-blobber-1
+
+  # Crawler
+  crawler:
+    branch: main
+    path: crawler
+    build_required: true
+    containers:
+      - crawler
+
+  # Storage providers
+  blobber:
+    branch: staging
+    path: blobber
+    build_required: true
+    containers:
+      - blobber-7
+      - blobber-8
+      - blobber-9
+      - blobber-10
+      - blobber-11
+      - blobber-12
+      - validator-7
+      - validator-8
+      - validator-9
+      - validator-10
+      - validator-11
+      - validator-12
+
+  # API services
+  0box:
+    branch: fix/kafka-multi-sharder-chaos
+    path: 0box
+    build_required: true
+    containers:
+      - 0box
+
+  zauth-server:
+    branch: staging
+    path: zauth-server
+    build_required: true
+    containers:
+      - zauth
+
+  zvault:
+    branch: staging
+    path: zvault
+    build_required: true
+    containers:
+      - zvault
+
+  # S3 gateway (enterprise-timings branch for enterprise blobber support)
+  zs3server:
+    branch: feat/enterprise-timings
+    path: zs3server
+    build_required: true
+    gosdk_branch: enterprise-blobber  # gosdk branch to use when building
+    containers:
+      - minioserver
+
+  # Datalake (Blimp backend)
+  zusCloudNative:
+    branch: main
+    path: zusCloudNative
+    build_required: true
+
+  # CLI tools (no containers -- built as binaries)
+  zboxcli:
+    branch: staging
+    path: zboxcli
+    build_required: true
+
+  zwalletcli:
+    branch: staging
+    path: zwalletcli
+    build_required: true
+
+  # Web applications (needs zcn.wasm built from gosdk)
+  web-apps:
+    branch: fix/atlus-explorer-improvements
+    path: web-apps
+    build_required: true
+    gosdk_branch: fix/lfb-aware-sharder-selection   # gosdk branch to build zcn.wasm from
+
+  # rclone plugin
+  rclone_zus:
+    branch: master
+    path: rclone_zus
+    build_required: false
+
+# Service deployment order
+deploy_order:
+  - 0chain
+  - 0dns
+  - blobber
+  - eblobber
+  - 0box
+  - zauth-server
+  - zvault
+  - zs3server
+  - crawler
+  - zusCloudNative
+
+# Number of blobbers to deploy
+blobber_count: 6
+blobber_start_index: 7  # Blobbers 7-12
+
+# Chain configuration
+chain_config:
+  hardforks:
+    - apollo
+    - ares
+    - artemis
+    - athena
+    - demeter
+    - electra
+    - hercules
+    - hermes
+    - Medea
+    - jason
+    - odysseus
+    - Nyx
+  hardfork_rounds: 0,0,0,0,0,0,0,0,0,0,0,0
+
+  miner_config:
+    vc_rounds_start: 10
+    vc_rounds_contribute: 20
+    vc_rounds_share: 10
+    vc_rounds_publish: 10
+    vc_rounds_wait: 20
+    k_percent: 0.6
+    x_percent: 0.6
+    min_n: 3
+    min_s: 1
+
+  global_config:
+    view_change: true
+    block_proposal_max_wait: 500ms
+    max_block_cost: 100000
+
+# Wallet configuration
+wallet:
+  config_dir: ~/.zcn
+  config_file: local.yaml
+  wallet_file: local.json
+  faucet_tokens: 100
+
+# Blobber configuration
+blobber_config:
+  read_price: 0.00
+  write_price: 0.001
+  funding_tokens: 10
+  validator_tokens: 5
+  stake_tokens: 1
+
+# Enterprise blobber configuration (uses separate eblobber repo)
+enterprise_blobbers:
+  enabled: true
+  count: 5                    # Number of enterprise blobbers to deploy
+  repo: eblobber              # Separate repo from regular blobber
+  # Port offsets to avoid conflicts with regular blobbers (5051-5059, 5061-5069)
+  blobber_port_base: 507      # 5071, 5072, 5073
+  # No validators needed - enterprise blobbers have no challenges on-chain
+  blobber_ip_prefix: "198.18.0.20"   # 198.18.0.201, .202, .203
+  postgres_port_base: 544     # 5441, 5442, 5443
+
+# Storage SC free allocation settings
+free_allocation:
+  read_price_range_max: 0.01
+
+# Nginx reverse proxy configuration
+# Set domain to enable nginx setup (e.g., test.zus.network)
+# Leave empty to skip nginx setup
+# domain_prefix: prefix for web-app subdomains (e.g. "test" → test.bolt.holdings, "test1" → test1.bolt.holdings)
+# Defaults to the first segment of the domain if not set.
+nginx:
+  domain: "test.zus.network"
+  domain_prefix: "test"
+  email: "admin@zus.network"
+  enable_ssl: true
+
+# Kafka configuration
+# Both sharder and 0box HARDCODE SASL.Enable=true, so Kafka MUST use SASL_PLAINTEXT.
+# The host is the Kafka container IP on the testnet0 Docker network.
+kafka:
+  host: "198.19.0.99:9092"
+  username: "admin"
+  # password: loaded from .secrets.env (KAFKA_PASSWORD)
+  topic: "events"
+  trigger_round: 1
+
+# Firebase authentication (for 0box API tests)
+# Credentials are loaded from scripts/.secrets.env (not stored here).
+# Set FIREBASE_TEST_API_KEY, FIREBASE_TEST_EMAIL, FIREBASE_TEST_PASSWORD in .secrets.env
+firebase:
+  email: "test_system_test@0chain.net"
+  # api_key and password: see .secrets.env
+
+# Allocation settings for zs3server
+allocation:
+  data_shards: 2
+  parity_shards: 2
+  size_bytes: 1073741824  # 1GB
+  lock_tokens: 1
