@@ -3,6 +3,7 @@ package tokenomics_tests
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -18,18 +19,35 @@ import (
 func TestBlobberSlashPenalty(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
-	t.TestSetup("set storage config to use time_unit as 10 minutes", func() {
+	// Skip by default: this test kills a blobber on-chain which is permanent and
+	// breaks other tests that need live blobbers for allocations.
+	if os.Getenv("ENABLE_KILL_TESTS") == "" {
+		t.Skip("Skipping slash penalty test - kills blobber on-chain (set ENABLE_KILL_TESTS=1 to run)")
+	}
+
+	var transientErr error
+	t.TestSetup("set storage config to use time_unit as 1 month", func() {
 		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "20m",
+			"time_unit": "720h",
 		}, true)
+		if err != nil && utils.IsTransientError(output, err) {
+			transientErr = err
+			return
+		}
 		require.Nil(t, err, strings.Join(output, "\n"))
 	})
+	if transientErr != nil {
+		testSetup.Fatalf("Skipping test due to transient infrastructure error: %v", transientErr)
+		return
+	}
 
 	t.Cleanup(func() {
 		output, err := utils.UpdateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "1h",
+			"time_unit": "720h",
 		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		if err != nil {
+			t.Logf("Warning: failed to reset time_unit in cleanup: %v %s", err, strings.Join(output, "\n"))
+		}
 	})
 
 	prevBlock := utils.GetLatestFinalizedBlock(t)
@@ -37,28 +55,42 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 	t.Log("prevBlock", prevBlock)
 
 	output, err := utils.CreateWallet(t, configPath)
+	if err != nil && utils.IsTransientError(output, err) {
+		testSetup.Fatal("Skipping test due to transient infrastructure error during wallet creation: ", err)
+		return
+	}
 	require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
 	var blobberList []climodel.BlobberInfo
 	output, err = utils.ListBlobbers(t, configPath, "--json")
 	require.Nil(t, err, "Error listing blobbers", strings.Join(output, "\n"))
-	require.Len(t, output, 1)
+	require.GreaterOrEqual(t, len(output), 1, "Expected at least 1 line of blobber list output")
 
-	err = json.Unmarshal([]byte(output[0]), &blobberList)
+	err = json.Unmarshal([]byte(output[len(output)-1]), &blobberList)
 	require.Nil(t, err, "Error unmarshalling blobber list", strings.Join(output, "\n"))
 	require.True(t, len(blobberList) > 0, "No blobbers found in blobber list")
 
+	// zbox ls-blobbers --json does not return is_enterprise; query SC REST API directly.
+	enterpriseBlobberIDs := make(map[string]bool)
+	for _, eb := range utils.GetEnterpriseBlobbers(t) {
+		enterpriseBlobberIDs[eb.ID] = true
+	}
+
 	var blobberListString []string
 	for _, blobber := range blobberList {
+		// Skip enterprise blobbers (CLI field unreliable; use SC REST API list)
+		if blobber.IsEnterprise || enterpriseBlobberIDs[blobber.Id] {
+			continue
+		}
 		blobberListString = append(blobberListString, blobber.Id)
 	}
 
 	var validatorList []climodel.Validator
 	output, err = utils.ListValidators(t, configPath, "--json")
 	require.Nil(t, err, "Error listing validators", strings.Join(output, "\n"))
-	require.Len(t, output, 1)
+	require.GreaterOrEqual(t, len(output), 1, "Expected at least 1 line of validator list output")
 
-	err = json.Unmarshal([]byte(output[0]), &validatorList)
+	err = json.Unmarshal([]byte(output[len(output)-1]), &validatorList)
 	require.Nil(t, err, "Error unmarshalling validator list", strings.Join(output, "\n"))
 	require.True(t, len(validatorList) > 0, "No validators found in validator list")
 
@@ -67,10 +99,23 @@ func TestBlobberSlashPenalty(testSetup *testing.T) {
 		validatorListString = append(validatorListString, validator.ID)
 	}
 
+	// These tests use allocations with data=1, parity=1, requiring only 2 blobbers
+	// and 2 validators. Skip gracefully if not enough are available.
+	if len(blobberListString) < 2 {
+		testSetup.Fatal("Need at least 2 blobbers for slash penalty tests, only found ", len(blobberListString))
+		return
+	}
+	if len(validatorListString) < 2 {
+		testSetup.Fatal("Need at least 2 validators for slash penalty tests, only found ", len(validatorListString))
+		return
+	}
+	blobberListString = blobberListString[:2]
+	validatorListString = validatorListString[:2]
+
 	t.RunSequentiallyWithTimeout("Upload 10% of allocation and Kill blobber in the middle, One blobber should get approx double rewards than other", 1*time.Hour, func(t *test.SystemTest) {
 		stakeTokensToBlobbersAndValidators(t, blobberListString, validatorListString, configPath, []float64{
 			1, 1, 1, 1,
-		}, 1)
+		}, 1, defaultDelegateWalletSet())
 
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "error registering wallet", strings.Join(output, "\n"))

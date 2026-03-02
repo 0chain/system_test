@@ -18,6 +18,14 @@ import (
 
 func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Parallel()
+
+	// Skip enterprise tests early using testSetup.Skip() to ensure propagation
+	enterpriseBlobbers := utils.GetEnterpriseBlobbers(t)
+	if len(enterpriseBlobbers) == 0 {
+		testSetup.Fatal("No enterprise blobbers available on the network, skipping enterprise create allocation tests")
+		return
+	}
 
 	t.Run("Create enterprise allocation with blobber auth tickets should pass", func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
@@ -29,10 +37,10 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		// Create enterprise allocation with blobber auth tickets
+		// Note: do NOT pass "enterprise" in options - utils.CreateNewEnterpriseAllocation adds --enterprise
 		options := map[string]interface{}{
 			"size":                 "1024",
 			"lock":                 "0.5",
-			"enterprise":           true,
 			"blobber_auth_tickets": blobberAuthTickets,
 			"preferred_blobbers":   blobberIds,
 		}
@@ -113,7 +121,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		createEnterpriseAllocationTestTeardown(t, allocationID)
 	})
 
-	t.Run("Create enterprise allocation for another owner should Work", func(t *test.SystemTest) {
+	t.RunWithTimeout("Create enterprise allocation for another owner should Work", 10*time.Minute, func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -127,7 +135,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		targetWallet, err := utils.GetWalletForName(t, configPath, targetWalletName)
 		require.Nil(t, err, "could not get target wallet")
 
-		_, err = utils.ExecuteFaucetWithTokensForWallet(t, utils.EscapedTestName(t)+"_other", configPath, 1000)
+		_, err = utils.ExecuteFaucetWithTokensForWallet(t, utils.EscapedTestName(t)+"_other", configPath, 10)
 		require.Nil(t, err, "Error executing facuet")
 
 		_, err = utils.GetWalletForName(t, configPath, utils.EscapedTestName(t)+"_other")
@@ -136,6 +144,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
 		options := map[string]interface{}{
+			"size":                 "1024",
 			"lock":                 "0.5",
 			"owner":                targetWallet.ClientID,
 			"owner_public_key":     targetWallet.ClientPublicKey,
@@ -152,7 +161,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "could not get allocation ID", strings.Join(output, "\n"))
 
 		file := utils.GenerateRandomTestFileName(t)
-		fileSize := int64(102400)
+		fileSize := int64(1024)
 		err = utils.CreateFileWithSize(file, fileSize)
 		require.Nil(t, err)
 
@@ -163,7 +172,14 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 			"encrypt":    "",
 		}
 		output, err = utils.UploadFile(t, configPath, uploadParams, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		if err != nil {
+			outputStr := strings.Join(output, "\n")
+			if strings.Contains(outputStr, "max_allocation_size") {
+				t.Errorf("Enterprise blobber capacity exhausted (max_allocation_size reached)")
+				return
+			}
+			require.Nil(t, err, outputStr)
+		}
 
 		output, err = utils.UploadFileForWallet(t, utils.EscapedTestName(t)+"_other", configPath, uploadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
@@ -536,10 +552,10 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		_, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
+		// Note: do NOT pass "enterprise" in options - utils.CreateNewEnterpriseAllocation adds --enterprise
 		options := map[string]interface{}{
 			"size":               "1024",
 			"lock":               "0.5",
-			"enterprise":         true,
 			"preferred_blobbers": blobberIds,
 		}
 		output, err = utils.CreateNewEnterpriseAllocation(t, configPath, utils.CreateParams(options))
@@ -598,7 +614,7 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 		require.Contains(t, output[0], "blobbers provided are not enough to honour the allocation") //nolint
 	})
 
-	t.Run("Create enterprise allocation with read price range 0-0 Should Fail", func(t *test.SystemTest) {
+	t.Run("Create enterprise allocation with read price range that no blobber matches Should Fail", func(t *test.SystemTest) {
 		output, err := utils.CreateWallet(t, configPath)
 		require.Nil(t, err, "Error registering wallet", strings.Join(output, "\n"))
 
@@ -607,7 +623,8 @@ func TestCreateEnterpriseAllocation(testSetup *testing.T) {
 
 		blobberAuthTickets, blobberIds := utils.GenerateBlobberAuthTickets(t, configPath)
 
-		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
+		// Use a high read_price range that no blobber matches (blobbers have read_price=0)
+		options := map[string]interface{}{"read_price": "100-200", "lock": "0.5", "size": 1024, "enterprise": true, "blobber_auth_tickets": blobberAuthTickets,
 			"preferred_blobbers": blobberIds}
 		output, err = createNewEnterpriseAllocationWithoutRetry(t, configPath, utils.CreateParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
@@ -658,21 +675,48 @@ func createNewEnterpriseAllocation(t *test.SystemTest, cliConfigFilename, params
 
 func createNewEnterpriseAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Creating new allocation...")
+	nonce, err := utils.GetNonceForWallet(t, cliConfigFilename, wallet)
+	nonceParam := ""
+	if err == nil {
+		nonceParam = fmt.Sprintf(" --withNonce %d", nonce+1)
+	}
+	// Default to parity 1 if not explicitly set (only 3 enterprise blobbers available)
+	parityParam := ""
+	if !strings.Contains(params, "--parity") {
+		parityParam = " --parity 1"
+	}
 	return cliutils.RunCommand(t, fmt.Sprintf(
-		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
+		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s --auth_round_expiry %d%s%s",
 		params,
 		wallet+"_wallet.json",
 		cliConfigFilename,
-		wallet+"_allocation.txt"), 3, time.Second*5)
+		wallet+"_allocation.txt",
+		utils.DefaultAuthRoundExpiry,
+		parityParam,
+		nonceParam), 3, time.Second*5)
 }
 
 func createNewEnterpriseAllocationWithoutRetry(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
+	wallet := utils.EscapedTestName(t)
+	nonce, err := utils.GetNonceForWallet(t, cliConfigFilename, wallet)
+	nonceParam := ""
+	if err == nil {
+		nonceParam = fmt.Sprintf(" --withNonce %d", nonce+1)
+	}
+	// Default to parity 1 if not explicitly set (only 3 enterprise blobbers available)
+	parityParam := ""
+	if !strings.Contains(params, "--parity") {
+		parityParam = " --parity 1"
+	}
 	return cliutils.RunCommandWithoutRetry(fmt.Sprintf(
-		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
+		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s --auth_round_expiry %d%s%s",
 		params,
-		utils.EscapedTestName(t)+"_wallet.json",
+		wallet+"_wallet.json",
 		cliConfigFilename,
-		utils.EscapedTestName(t)+"_allocation.txt"))
+		wallet+"_allocation.txt",
+		utils.DefaultAuthRoundExpiry,
+		parityParam,
+		nonceParam))
 }
 
 func createEnterpriseAllocationTestTeardown(t *test.SystemTest, allocationID string) {

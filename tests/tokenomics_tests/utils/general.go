@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	configPath = "./zbox_config.yaml"
+	configPath = "zbox_config.yaml"
 
 	KB = 1024      // kilobyte
 	MB = 1024 * KB // megabyte
@@ -65,4 +65,29 @@ func UnitToZCN(unitCost float64, unit string) float64 {
 func AssertOutputMatchesAllocationRegex(t *test.SystemTest, re *regexp.Regexp, str string) {
 	match := re.FindStringSubmatch(str)
 	require.True(t, len(match) > 0, "expected allocation to match regex", re, str)
+}
+
+// IsTransientError checks if an error or output contains transient infrastructure errors
+// that indicate the network/sharders are temporarily unavailable. These errors are not
+// test failures but infrastructure issues that should cause the test to skip.
+func IsTransientError(output []string, err error) bool {
+	combined := strings.Join(output, "\n")
+	if err != nil {
+		combined += " " + err.Error()
+	}
+	transientPatterns := []string{
+		"too less sharders to confirm it",
+		"unexpected end of JSON input",
+		"transaction not found",
+		"sharder sign verify failed",
+		"connection refused",
+		"context deadline exceeded",
+		"invalid transaction nonce",
+	}
+	for _, pattern := range transientPatterns {
+		if strings.Contains(combined, pattern) {
+			return true
+		}
+	}
+	return false
 }

@@ -111,7 +111,7 @@ func TestMain(m *testing.M) {
 	}
 
 	if configPath == "" {
-		configPath = "./zbox_config.yaml"
+		configPath = "zbox_config.yaml"
 		cliutils.Logger.Infof("CONFIG_PATH environment variable is not set so has defaulted to [%v]", configPath)
 	}
 
@@ -151,9 +151,33 @@ func TestMain(m *testing.M) {
 
 	setupConfig()
 
+	// Fund special wallets (SC owner, blobber owner) before running tests.
+	// These wallets are used by many tests for config updates and blobber operations.
+	fundSpecialWallets(configPath)
+
 	exitRun := m.Run()
 
 	os.Exit(exitRun)
+}
+
+// fundSpecialWallets ensures the SC owner and blobber owner wallets have sufficient
+// balance to perform administrative operations throughout the test suite.
+func fundSpecialWallets(cfgPath string) {
+	specialWallets := []string{scOwnerWallet, blobberOwnerWallet}
+	for _, wallet := range specialWallets {
+		for i := 0; i < 10; i++ {
+			cmd := fmt.Sprintf(
+				"./zwallet faucet --methodName pour --tokens 9 --input {} --silent "+
+					"--wallet %s_wallet.json --configDir ./config --config %s",
+				wallet, cfgPath)
+			_, err := cliutils.RunCommandWithoutRetry(cmd)
+			if err != nil {
+				log.Printf("Warning: faucet pour %d for %s failed: %v", i+1, wallet, err)
+				break
+			}
+		}
+		log.Printf("Funded wallet: %s", wallet)
+	}
 }
 
 func getConfigDir() string {

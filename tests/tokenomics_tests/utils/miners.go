@@ -84,9 +84,14 @@ func MinerOrSharderLock(t *test.SystemTest, cliConfigFilename, params string, re
 
 func minerOrSharderLockForWallet(t *test.SystemTest, cliConfigFilename, params, wallet string, retry bool) ([]string, error) {
 	t.Log("locking tokens against miner/sharder...")
+	nonce, err := GetNonceForWallet(t, cliConfigFilename, wallet)
+	nonceParam := ""
+	if err == nil {
+		nonceParam = fmt.Sprintf(" --withNonce %d", nonce+1)
+	}
 	if retry {
-		return cliutil.RunCommand(t, fmt.Sprintf("./zwallet mn-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename), 3, time.Second)
+		return cliutil.RunCommand(t, fmt.Sprintf("./zwallet mn-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s%s", params, wallet, cliConfigFilename, nonceParam), 3, time.Second)
 	} else {
-		return cliutil.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, wallet, cliConfigFilename))
+		return cliutil.RunCommandWithoutRetry(fmt.Sprintf("./zwallet mn-lock %s --silent --wallet %s_wallet.json --configDir ./config --config %s%s", params, wallet, cliConfigFilename, nonceParam))
 	}
 }

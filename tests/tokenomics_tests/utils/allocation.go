@@ -41,8 +41,8 @@ func SetupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 func SetupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	faucetTokens := 2.0
 	lockAmountPassed := false
-	// Then create new allocation
-	options := map[string]interface{}{"size": "10000", "lock": "0.5"}
+	// Then create new allocation (10MB to meet min_alloc_size requirement)
+	options := map[string]interface{}{"size": "10485760", "lock": "5"}
 
 	// Add additional parameters if available
 	// Overwrite with new parameters when available
@@ -100,6 +100,11 @@ func SetupEnterpriseAllocationWithWallet(t *test.SystemTest, walletName, cliConf
 
 	extraParams[0]["blobber_auth_tickets"], extraParams[0]["preferred_blobbers"] = GenerateBlobberAuthTicketsWithWallet(t, walletName, cliConfigFilename)
 	extraParams[0]["enterprise"] = true
+	extraParams[0]["auth_round_expiry"] = DefaultAuthRoundExpiry
+	// Default to parity=1 if not explicitly set, to work with 3 enterprise blobbers
+	if _, ok := extraParams[0]["parity"]; !ok {
+		extraParams[0]["parity"] = 1
+	}
 
 	allocID := SetupAllocationWithWallet(t, walletName, cliConfigFilename, extraParams...)
 
@@ -134,12 +139,25 @@ func CreateNewEnterpriseAllocation(t *test.SystemTest, cliConfigFilename, params
 
 func CreateNewEnterpriseAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Creating new enterprise allocation...")
+	nonce, err := GetNonceForWallet(t, cliConfigFilename, wallet)
+	nonceParam := ""
+	if err == nil {
+		nonceParam = fmt.Sprintf(" --withNonce %d", nonce+1)
+	}
+	// Default to parity 1 if not explicitly set (only 3 enterprise blobbers available)
+	parityParam := ""
+	if !strings.Contains(params, "--parity") {
+		parityParam = " --parity 1"
+	}
 	return cliutils.RunCommand(t, fmt.Sprintf(
-		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s --enterprise",
+		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s --enterprise --auth_round_expiry %d%s%s",
 		params,
 		wallet+"_wallet.json",
 		cliConfigFilename,
-		wallet+"_allocation.txt"), 3, time.Second*5)
+		wallet+"_allocation.txt",
+		DefaultAuthRoundExpiry,
+		parityParam,
+		nonceParam), 3, time.Second*5)
 }
 func CreateNewAllocation(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	return CreateNewAllocationForWallet(t, EscapedTestName(t), cliConfigFilename, params)
@@ -147,22 +165,35 @@ func CreateNewAllocation(t *test.SystemTest, cliConfigFilename, params string) (
 
 func CreateNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Creating new allocation...")
+	nonce, err := GetNonceForWallet(t, cliConfigFilename, wallet)
+	nonceParam := ""
+	if err == nil {
+		nonceParam = fmt.Sprintf(" --withNonce %d", nonce+1)
+	}
 	return cliutils.RunCommand(t, fmt.Sprintf(
-		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
+		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s%s",
 		params,
 		wallet+"_wallet.json",
 		cliConfigFilename,
-		wallet+"_allocation.txt"), 3, time.Second*5)
+		wallet+"_allocation.txt",
+		nonceParam), 3, time.Second*5)
 }
 
 func CancelAllocation(t *test.SystemTest, cliConfigFilename, allocationID string, retry bool) ([]string, error) {
 	t.Logf("Canceling allocation...")
+	wallet := EscapedTestName(t)
+	nonce, err := GetNonceForWallet(t, cliConfigFilename, wallet)
+	nonceParam := ""
+	if err == nil {
+		nonceParam = fmt.Sprintf(" --withNonce %d", nonce+1)
+	}
 	cmd := fmt.Sprintf(
 		"./zbox alloc-cancel --allocation %s "+
-			"--wallet %s --configDir ./config --config %s",
+			"--wallet %s --configDir ./config --config %s%s",
 		allocationID,
-		EscapedTestName(t)+"_wallet.json",
+		wallet+"_wallet.json",
 		cliConfigFilename,
+		nonceParam,
 	)
 
 	if retry {
@@ -204,12 +235,18 @@ func UploadFile(t *test.SystemTest, cliConfigFilename string, param map[string]i
 func UploadFileForWallet(t *test.SystemTest, wallet, cliConfigFilename string, param map[string]interface{}, retry bool) ([]string, error) {
 	t.Logf("Uploading file...")
 
+	nonce, err := GetNonceForWallet(t, cliConfigFilename, wallet)
+	nonceParam := ""
+	if err == nil {
+		nonceParam = fmt.Sprintf(" --withNonce %d", nonce+1)
+	}
 	p := CreateParams(param)
 	cmd := fmt.Sprintf(
-		"./zbox upload %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
+		"./zbox upload %s --silent --wallet %s_wallet.json --configDir ./config --config %s%s",
 		p,
 		wallet,
 		cliConfigFilename,
+		nonceParam,
 	)
 
 	if retry {
@@ -244,12 +281,18 @@ func UpdateAllocation(t *test.SystemTest, cliConfigFilename, params string, retr
 
 func UpdateAllocationWithWallet(t *test.SystemTest, wallet, cliConfigFilename, params string, retry bool) ([]string, error) {
 	t.Logf("Updating allocation...")
+	nonce, err := GetNonceForWallet(t, cliConfigFilename, wallet)
+	nonceParam := ""
+	if err == nil {
+		nonceParam = fmt.Sprintf(" --withNonce %d", nonce+1)
+	}
 	cmd := fmt.Sprintf(
 		"./zbox updateallocation %s --silent --wallet %s "+
-			"--configDir ./config --config %s --lock 0.2",
+			"--configDir ./config --config %s --lock 0.2%s",
 		params,
 		wallet+"_wallet.json",
 		cliConfigFilename,
+		nonceParam,
 	)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*2)
@@ -260,12 +303,18 @@ func UpdateAllocationWithWallet(t *test.SystemTest, wallet, cliConfigFilename, p
 
 func DeleteFile(t *test.SystemTest, walletName, params string, retry bool) ([]string, error) {
 	t.Logf("Deleting file...")
+	nonce, err := GetNonceForWallet(t, configPath, walletName)
+	nonceParam := ""
+	if err == nil {
+		nonceParam = fmt.Sprintf(" --withNonce %d", nonce+1)
+	}
 	cmd := fmt.Sprintf(
 		"./zbox delete %s --silent --wallet %s "+
-			"--configDir ./config --config %s",
+			"--configDir ./config --config %s%s",
 		params,
 		walletName+"_wallet.json",
 		configPath,
+		nonceParam,
 	)
 	if retry {
 		return cliutils.RunCommand(t, cmd, 3, time.Second*20)
