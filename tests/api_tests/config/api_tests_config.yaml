@@ -1,11 +1,18 @@
-block_worker:  https://dev.zus.network/dns
-0box_url: https://0box.dev.zus.network
+block_worker:  http://127.0.0.1:9091
+0box_url: http://localhost:9081
 0box_phone_number: +917696229925
-zvault_url: https://zvault.dev.zus.network
-zauth_url: https://zauth.dev.zus.network
-default_test_case_timeout: 45s
-zs3_server_url: https://dev.zus.network/zs3server/
-chimney_test_network: https://dev.zus.network/dns
-blobber_owner_wallet_mnemonics: "economy day fan flower between rebuild valid bid catch bargain vivid hybrid room permit check manage mean twelve damage summer close churn boat either"
-owner_wallet_mnemonics: "cactus panther essence ability copper fox wise actual need cousin boat uncover ride diamond group jacket anchor current float rely tragic omit child payment"
+zvault_url: http://localhost:8090
+zauth_url: http://localhost:8080
+default_test_case_timeout: 300s
+zs3_server_url: http://localhost:9100
+s3_access_key: rootroot
+s3_secret_key: rootroot
+chimney_test_network: http://127.0.0.1:9091
+blobber_owner_wallet_mnemonics: "remain version junior doll broccoli situate behind end offer category position truck citizen siege gadget prefer magnet hire symptom fever wear neglect blood glass"
+owner_wallet_mnemonics: "remain version junior doll broccoli situate behind end offer category position truck citizen siege gadget prefer magnet hire symptom fever wear neglect blood glass"
 ethereum_address: 0xD8c9156e782C68EE671C09b6b92de76C97948432
+firebase_api_key: "AIzaSyBvR4zq1ZtYbQ-5Sha1P9PGLZr3QPn2jaY"
+firebase_email: "test_system_test@0chain.net"
+firebase_password: "TestPass123!"
+firebase_email_r: "test_referred_user@0chain.net"
+firebase_password_r: "TestPass123!"

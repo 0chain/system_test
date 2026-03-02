@@ -1,14 +1,16 @@
 {
-    "client_id": "9636ab821fd93a37740ab4c6a27d9e2cf3a4072b4bc8fd1c6048f9c3ef9cf2a8",
-    "client_key": "02237d7edafc8c648b1e2ff64ad5d4e6a7cea949a40448e15a55f0a90c71bc1928d8f1409d8985757cc1f59f13d82d83fe6757e4a510d9b47c6385d91ea5d59b",
+    "client_id": "e984e37602ecd8ac5201638b45bc63d73bd2416bf8b91d9deb514bd6819b16fc",
+    "client_key": "112e0c312ba021a1ea201bad4a4135b042384f9d918b5b1670954cc2c514c5212aa547da3f9d15bfc08110b5c03a62ab34eea7bd0bc8988992c733bd405a930c",
     "keys": [
-        {
-            "public_key": "02237d7edafc8c648b1e2ff64ad5d4e6a7cea949a40448e15a55f0a90c71bc1928d8f1409d8985757cc1f59f13d82d83fe6757e4a510d9b47c6385d91ea5d59b",
-            "private_key": "17627154df3d2a77a273c6b5caf71ca552d26addce0198c1126331eb71ef5c0a"
-        }
+      {
+        "public_key": "112e0c312ba021a1ea201bad4a4135b042384f9d918b5b1670954cc2c514c5212aa547da3f9d15bfc08110b5c03a62ab34eea7bd0bc8988992c733bd405a930c",
+        "private_key": "ca876c34c4cd584416ec7f4066ab7e3c323cd835ccbeca5326201ffc8624de1a"
+      }
     ],
-    "mnemonics": "family admit sound girl recall another rule hawk equip soccer action dance tumble style prepare face cluster endorse wonder raven unit vital hybrid mass",
+    "mnemonics": "remain version junior doll broccoli situate behind end offer category position truck citizen siege gadget prefer magnet hire symptom fever wear neglect blood glass",
     "version": "1.0",
-    "date_created": "1661370959",
-    "nonce": 0
-}
+    "date_created": "2023-11-26T01:23:58Z",
+    "nonce": 1,
+    "ChainID": "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe",
+    "SignatureScheme": null
+  }

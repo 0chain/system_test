@@ -1,10 +1,16 @@
-block_worker: https://dev.zus.network/dns
+block_worker: http://198.18.0.100:9091
 confirmation_chain_length: 3
 ethereum_node_url: "https://rpc.tenderly.co/fork/5b7ffac9-50cc-4169-b0ca-6fd203d26ef6"
-min_confirmation: 50
-min_submit: 50
+min_confirmation: 10
+min_submit: 100
+max_txn_query: 10
+query_sleep_time: 5
 signature_scheme: bls0chain
 store_unlock_duration_sec: 2
+
+sharders:
+  - http://198.18.0.81:7171
+  - http://198.18.0.82:7172
 
 bridge:
   bridge_address: 0x7700D773022b19622095118Fadf46f7B9448Be9b

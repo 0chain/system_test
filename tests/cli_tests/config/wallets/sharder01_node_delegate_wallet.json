@@ -1,14 +1,16 @@
 {
-    "client_id": "b888ae3400b67a47362aad7d6263fcfeb6585fe696e8d182d3bb4f4a9d737bae",
-    "client_key": "e2075a6d93dd3544e14a185b03e7bf5fbf402fe498452b3e786ddb6b500be2095eaa42ef748ccd0e139e6cc041c19da4dffa06ecb9b37bed783e4bffd89b8295",
+    "client_id": "e984e37602ecd8ac5201638b45bc63d73bd2416bf8b91d9deb514bd6819b16fc",
+    "client_key": "112e0c312ba021a1ea201bad4a4135b042384f9d918b5b1670954cc2c514c5212aa547da3f9d15bfc08110b5c03a62ab34eea7bd0bc8988992c733bd405a930c",
     "keys": [
-        {
-            "public_key": "e2075a6d93dd3544e14a185b03e7bf5fbf402fe498452b3e786ddb6b500be2095eaa42ef748ccd0e139e6cc041c19da4dffa06ecb9b37bed783e4bffd89b8295",
-            "private_key": "0d3c9bf1844fb66cc98fd82c6a93d6ed0199aef8af3387cfdd7bc53f3e2aa602"
-        }
+      {
+        "public_key": "112e0c312ba021a1ea201bad4a4135b042384f9d918b5b1670954cc2c514c5212aa547da3f9d15bfc08110b5c03a62ab34eea7bd0bc8988992c733bd405a930c",
+        "private_key": "ca876c34c4cd584416ec7f4066ab7e3c323cd835ccbeca5326201ffc8624de1a"
+      }
     ],
-    "mnemonics": "manage envelope elephant bamboo inmate blast legend quality vocal cushion black party mad mixture coyote prepare visit surge pair elite treat place match blouse",
+    "mnemonics": "remain version junior doll broccoli situate behind end offer category position truck citizen siege gadget prefer magnet hire symptom fever wear neglect blood glass",
     "version": "1.0",
-    "date_created": "1661370992",
-    "nonce": 0
-}
+    "date_created": "2023-11-26T01:23:58Z",
+    "nonce": 1,
+    "ChainID": "0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe",
+    "SignatureScheme": null
+  }
