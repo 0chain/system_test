@@ -18,7 +18,22 @@ import (
 )
 
 func createWallet(t *test.SystemTest) {
-	createWalletForName(escapedTestName(t))
+	walletName := escapedTestName(t)
+	walletPath := fmt.Sprintf("./config/%s_wallet.json", walletName)
+
+	// If wallet already exists, it was already created and funded
+	if _, err := os.Stat(walletPath); err == nil {
+		return
+	}
+
+	createWalletForName(walletName)
+
+	// Register on chain and fund from faucet so the wallet has balance
+	// for operations like creating allocations, uploading files, etc.
+	_, err := executeFaucetWithTokens(t, configPath, 9)
+	if err != nil {
+		t.Logf("Warning: faucet funding failed for %s: %v", walletName, err)
+	}
 }
 
 func createWalletForName(name string) {

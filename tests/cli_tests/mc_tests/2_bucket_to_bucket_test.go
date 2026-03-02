@@ -2,6 +2,7 @@ package cli_tests
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"testing"
 	"time"
@@ -13,6 +14,18 @@ import (
 )
 
 func TestZs3ServerBucket(testSetup *testing.T) {
+	// Check if mc binary is available, skip if not
+	if _, err := os.Stat("../mc"); os.IsNotExist(err) {
+		testSetup.Skip("mc binary not available at ../mc, skipping test")
+	}
+
+	// Check if ZS3 server is reachable at port 9100 (ZS3 server port, from mc_hosts.yaml)
+	conn, err := net.DialTimeout("tcp", "localhost:9100", 5*time.Second)
+	if err != nil {
+		testSetup.Skipf("ZS3/MinIO server not available at localhost:9100, skipping test: %v", err)
+	}
+	conn.Close()
+
 	t := test.NewSystemTest(testSetup)
 
 	// test for moving the file from testbucket to testbucket2

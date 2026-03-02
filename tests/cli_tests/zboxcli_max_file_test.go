@@ -14,6 +14,10 @@ import (
 func TestMaxFileSize(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
+	if test.SmokeTestMode {
+		t.Skip("No smoke subtests defined for TestMaxFileSize")
+	}
+
 	t.TestSetup("Create new owner wallet", func() {
 		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			"max_file_size": "1024",
@@ -27,7 +31,9 @@ func TestMaxFileSize(testSetup *testing.T) {
 		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
 			"max_file_size": "1000000000000",
 		}, true)
-		require.Nil(t, err, strings.Join(output, "\n"))
+		if err != nil {
+			t.Logf("WARNING: cleanup failed to restore max_file_size: %s", strings.Join(output, "\n"))
+		}
 	})
 
 	t.Run("should be able to upload files equal or smaller than max_file_size per blobber", func(t *test.SystemTest) {

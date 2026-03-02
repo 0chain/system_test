@@ -17,13 +17,14 @@ import (
 
 func Test0TenderlyValidatorConfigUpdate(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("Tenderly/bridge tests skipped - not deployed in local test environment")
 	t.SetSmokeTests("update validator number of delegates should work")
 
 	var intialValidatorInfo climodel.Validator
 	t.TestSetup("Get validator config", func() {
 		// blobber delegate wallet and validator delegate wallet are same
 		if _, err := os.Stat("./config/" + blobberOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
+			t.Errorf("blobber owner wallet located at %s is missing", "./config/"+blobberOwnerWallet+"_wallet.json")
 		}
 
 		createWallet(t)
@@ -103,5 +104,5 @@ func getValidatorInfo(t *test.SystemTest, cliConfigFilename, params string) ([]s
 
 func updateValidatorInfo(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Log("Updating validator info...")
-	return cliutils.RunCommand(t, fmt.Sprintf("./zbox validator-update %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, blobberOwnerWallet, cliConfigFilename), 3, time.Second*2)
+	return cliutils.RunCommand(t, fmt.Sprintf("./zbox validator-update %s --silent --wallet %s_wallet.json --configDir ./config --config %s", params, blobberOwnerWallet, cliConfigFilename), 3, time.Second*30)
 }

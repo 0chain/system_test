@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -154,47 +152,22 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			"size": allocSize,
 		})
 
-		var fileNames [2]string
 		var destFileNames []string
 
 		const remotePathPrefix = "/"
 
-		var outputList [2][]string
-		var errorList [2]error
-		var wg sync.WaitGroup
-
+		// Upload files sequentially to avoid nonce collisions during setup.
+		renameOps := make([][2]string, 0, 2)
 		for i := 0; i < 2; i++ {
-			wg.Add(1)
-			go func(currentIndex int) {
-				defer wg.Done()
-
-				fileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
-				fileNames[currentIndex] = fileName
-
-				destFileName := filepath.Base(generateRandomTestFileName(t))
-				destFileNames = append(destFileNames, destFileName)
-
-				op, err := renameFile(t, configPath, map[string]interface{}{
-					"allocation": allocationID,
-					"remotepath": filepath.Join(remotePathPrefix, fileName),
-					"destname":   destFileName,
-				}, true)
-
-				errorList[currentIndex] = err
-				outputList[currentIndex] = op
-			}(i)
+			fileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+			destFileName := filepath.Base(generateRandomTestFileName(t))
+			destFileNames = append(destFileNames, destFileName)
+			renameOps = append(renameOps, [2]string{filepath.Join(remotePathPrefix, fileName), destFileName})
 		}
 
-		wg.Wait()
-
-		const renameExpectedPattern = "%s renamed"
-
-		for i := 0; i < 2; i++ {
-			require.Nil(t, errorList[i], strings.Join(outputList[i], "\n"))
-			require.Len(t, outputList[i], 1, strings.Join(outputList[i], "\n"))
-
-			require.Equal(t, fmt.Sprintf(renameExpectedPattern, fileNames[i]), filepath.Base(outputList[i][0]), "Rename output is not appropriate")
-		}
+		// Rename both files concurrently using multi-operation (single transaction, no nonce collision).
+		err := MultiRename(escapedTestName(t), configPath, allocationID, renameOps)
+		require.Nil(t, err, "multi-operation rename failed")
 
 		output, err := listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
@@ -791,88 +764,30 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 			"size": allocSize,
 		})
 
-		var renameFileNames [2]string
-		var destFileNames [2]string
-
-		var deleteFileNames [2]string
-
 		const remotePathPrefix = "/"
 
-		var renameOutputList, deleteOutputList [2][]string
-		var renameErrorList, deleteErrorList [2]error
-		var wg sync.WaitGroup
-
-		renameFileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
-		renameFileNames[0] = renameFileName
-
-		destFileName := filepath.Base(generateRandomTestFileName(t))
-		destFileNames[0] = destFileName
-
-		renameFileName = filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
-		renameFileNames[1] = renameFileName
-
-		destFileName = filepath.Base(generateRandomTestFileName(t))
-		destFileNames[1] = destFileName
-
-		deleteFileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
-		deleteFileNames[0] = deleteFileName
-
-		deleteFileName = filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
-		deleteFileNames[1] = deleteFileName
-
+		// Uploads are sequential (already was the case in original code).
+		renameOps := make([][2]string, 0, 2)
 		for i := 0; i < 2; i++ {
-			wg.Add(2)
-
-			go func(currentIndex int) {
-				defer wg.Done()
-
-				op, err := renameFile(t, configPath, map[string]interface{}{
-					"allocation": allocationID,
-					"remotepath": filepath.Join(remotePathPrefix, renameFileNames[currentIndex]),
-					"destname":   destFileNames[currentIndex],
-				}, true)
-
-				renameErrorList[currentIndex] = err
-				renameOutputList[currentIndex] = op
-			}(i)
-
-			go func(currentIndex int) {
-				defer wg.Done()
-
-				op, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
-					"allocation": allocationID,
-					"remotepath": filepath.Join(remotePathPrefix, deleteFileNames[currentIndex]),
-				}), true)
-
-				deleteErrorList[currentIndex] = err
-				deleteOutputList[currentIndex] = op
-			}(i)
+			renameFileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+			destFileName := filepath.Base(generateRandomTestFileName(t))
+			renameOps = append(renameOps, [2]string{filepath.Join(remotePathPrefix, renameFileName), destFileName})
 		}
 
-		wg.Wait()
-
-		const renameExpectedPattern = "%s renamed"
-
+		deletePaths := make([]string, 0, 2)
 		for i := 0; i < 2; i++ {
-			require.Nil(t, renameErrorList[i], strings.Join(renameOutputList[i], "\n"))
-			require.Len(t, renameOutputList[i], 1, strings.Join(renameOutputList[i], "\n"))
-
-			require.Equal(t, fmt.Sprintf(renameExpectedPattern, renameFileNames[i]), filepath.Base(renameOutputList[i][0]), "Rename output is not appropriate")
+			deleteFileName := filepath.Base(generateFileAndUpload(t, allocationID, remotePathPrefix, fileSize))
+			deletePaths = append(deletePaths, filepath.Join(remotePathPrefix, deleteFileName))
 		}
 
-		const deleteExpectedPattern = "%s deleted"
+		// Rename + delete concurrently using multi-operation (single transaction, no nonce collision).
+		err := MultiRenameAndDelete(escapedTestName(t), configPath, allocationID, renameOps, deletePaths)
+		require.Nil(t, err, "multi-operation rename+delete failed")
 
-		for i := 0; i < 2; i++ {
-			require.Nil(t, deleteErrorList[i], strings.Join(deleteOutputList[i], "\n"))
-			require.Len(t, deleteOutputList[i], 1, strings.Join(deleteOutputList[i], "\n"))
-
-			require.Equal(t, fmt.Sprintf(deleteExpectedPattern, deleteFileNames[i]), filepath.Base(deleteOutputList[i][0]), "Delete output is not appropriate")
-		}
-
-		for i := 0; i < 2; i++ {
+		for _, deletePath := range deletePaths {
 			output, err := listFilesInAllocation(t, configPath, createParams(map[string]interface{}{
 				"allocation": allocationID,
-				"remotepath": path.Join(remotePathPrefix, deleteFileNames[i]),
+				"remotepath": deletePath,
 				"json":       "",
 			}), true)
 

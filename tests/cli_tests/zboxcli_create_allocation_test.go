@@ -206,7 +206,6 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with read price range Should Work", func(t *test.SystemTest) {
-		t.Skip()
 		_ = setupWallet(t, configPath)
 
 		options := map[string]interface{}{"size": "2048", "read_price": "0-9999", "lock": "0.5"} // Use 2048 to meet min_alloc_size requirement
@@ -266,10 +265,11 @@ func TestCreateAllocation(testSetup *testing.T) {
 	})
 
 	t.Run("Create allocation with read price range 0-0 Should Fail", func(t *test.SystemTest) {
-		t.Skip()
 		_ = setupWallet(t, configPath)
 
-		options := map[string]interface{}{"read_price": "0-0", "lock": "0.5", "size": 2048} // Use 2048 to meet min_alloc_size requirement
+		// Use an impossibly high read_price range (100-200 ZCN/GB) that no blobber will ever have,
+		// so the allocation fails with "not enough blobbers". Works regardless of blobber read_price config.
+		options := map[string]interface{}{"read_price": "100-200", "lock": "0.5", "size": 2048}
 		output, err := createNewAllocationWithoutRetry(t, configPath, createParams(options))
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.True(t, len(output) > 0, "expected output length be at least 1")
@@ -473,7 +473,7 @@ func createNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename,
 		params,
 		wallet+"_wallet.json",
 		cliConfigFilename,
-		wallet+"_allocation.txt"), 3, time.Second*5)
+		wallet+"_allocation.txt"), 5, time.Second*15)
 }
 
 func createNewAllocationWithoutRetry(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {

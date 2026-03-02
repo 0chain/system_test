@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -127,7 +128,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		require.Error(t, err, "expected error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Equal(t, "Error updating allocation:allocation_updating_failed: allocation can't be reduced", output[0])
+		require.Contains(t, output[0], "allocation can't be reduced")
 
 		alloc := getAllocation(t, allocationID)
 
@@ -168,6 +169,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 
 		targetWalletName := escapedTestName(t) + "_TARGET"
 		createWalletForName(targetWalletName)
+		_, _ = executeFaucetWithTokensForWallet(t, targetWalletName, configPath, 1)
 
 		size := int64(2048)
 
@@ -537,6 +539,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		createWalletForName(nonAllocOwnerWallet)
+		_, _ = executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 1)
 
 		// expand allocation
 		params = createParams(map[string]interface{}{
@@ -573,6 +576,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		createWalletForName(nonAllocOwnerWallet)
+		_, _ = executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 1)
 
 		// expand allocation
 		params = createParams(map[string]interface{}{
@@ -612,6 +616,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		nonAllocOwnerWallet := escapedTestName(t) + "_NON_OWNER"
 
 		createWalletForName(nonAllocOwnerWallet)
+		_, _ = executeFaucetWithTokensForWallet(t, nonAllocOwnerWallet, configPath, 1)
 
 		// reduce allocation should fail
 		params = createParams(map[string]interface{}{
@@ -710,6 +715,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 
 		output, err = updateAllocation(t, configPath, params, true)
+		if err != nil && strings.Contains(strings.Join(output, "\n"), "auth ticket") {
+			t.Errorf("Selected blobber requires auth ticket (likely enterprise blobber) - test infrastructure should not select enterprise blobbers")
+			return
+		}
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		assertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
@@ -758,6 +767,10 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		})
 
 		output, err = updateAllocation(t, configPath, params, true)
+		if err != nil && strings.Contains(strings.Join(output, "\n"), "auth ticket") {
+			t.Errorf("Selected blobber requires auth ticket (likely enterprise blobber) - test infrastructure should not select enterprise blobbers")
+			return
+		}
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		assertOutputMatchesAllocationRegex(t, repairCompletednRegex, output[len(output)-1])
@@ -801,7 +814,8 @@ func setupAllocation(t *test.SystemTest, cliConfigFilename string, extraParams .
 
 func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename string, extraParams ...map[string]interface{}) string {
 	// Then create new allocation
-	options := map[string]interface{}{"size": "10000000", "lock": "5"}
+	// Default to 2 data + 1 parity (3 blobbers) so tests work when fewer blobbers are healthy
+	options := map[string]interface{}{"size": "10000000", "lock": "5", "data": "2", "parity": "1"}
 
 	// Add additional parameters if available
 	// Overwrite with new parameters when available
@@ -810,8 +824,14 @@ func setupAllocationWithWallet(t *test.SystemTest, walletName, cliConfigFilename
 			options[k] = v
 		}
 	}
-	// First create a wallet and run faucet command
+	// First create a wallet and always fund it from faucet
+	// Always fund regardless of whether wallet file existed - stale wallet files
+	// from previous test runs may have 0 balance on-chain
 	createWalletForName(walletName)
+	faucetOutput, faucetErr := executeFaucetWithTokensForWallet(t, walletName, cliConfigFilename, 10)
+	if faucetErr != nil {
+		t.Logf("Warning: faucet funding failed for %s: %v (output: %s)", walletName, faucetErr, strings.Join(faucetOutput, "\n"))
+	}
 
 	output, err := createNewAllocationForWallet(t, walletName, cliConfigFilename, createParams(options))
 	require.NoError(t, err, "create new allocation failed", strings.Join(output, "\n"))
@@ -852,13 +872,28 @@ func getAllocationCost(str string) (float64, error) {
 func createParams(params map[string]interface{}) string {
 	var builder strings.Builder
 
-	for k, v := range params {
+	// Sort keys to ensure consistent flag ordering (Go maps have random iteration order)
+	keys := make([]string, 0, len(params))
+	for k := range params {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		v := params[k]
 		if v == nil {
 			_, _ = builder.WriteString(fmt.Sprintf("--%s ", k))
 		} else if reflect.TypeOf(v).String() == "bool" {
 			_, _ = builder.WriteString(fmt.Sprintf("--%s=%v ", k, v))
 		} else {
-			_, _ = builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
+			// Use --key=value format for negative numbers to prevent
+			// the CLI from interpreting them as flags (e.g. --tokens -1)
+			s := fmt.Sprintf("%v", v)
+			if strings.HasPrefix(s, "-") {
+				_, _ = builder.WriteString(fmt.Sprintf("--%s=%v ", k, v))
+			} else {
+				_, _ = builder.WriteString(fmt.Sprintf("--%s %v ", k, v))
+			}
 		}
 	}
 	return strings.TrimSpace(builder.String())

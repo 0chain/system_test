@@ -18,12 +18,7 @@ import (
 
 func Test0TenderlyAuthorizerRewards(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-
-	if !tenderlyInitialized {
-		t.Skip("Tenderly has not been initialized properly!")
-	}
-
-	t.Skip("Skip due to Tenderly rate throttling")
+	t.Skip("Tenderly/authorizer tests skipped - not deployed in local test environment")
 
 	t.RunSequentiallyWithTimeout("Verify Authorizer Rewards", time.Minute*10, func(t *test.SystemTest) {
 		createWallet(t)

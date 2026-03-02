@@ -29,6 +29,7 @@ const (
 
 func Test0TenderlyEthRegisterAccount(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+	t.Skip("Tenderly/bridge tests skipped - not deployed in local test environment")
 	t.SetSmokeTests("Register ethereum account in local key storage")
 
 	t.RunSequentially("Register ethereum account in local key storage", func(t *test.SystemTest) {
@@ -91,7 +92,7 @@ func listAccounts(t *test.SystemTest, retry bool) ([]string, error) {
 func deleteDefaultAccountInStorage(t *test.SystemTest, address string) {
 	keyDir := path.Join(configDir, "wallets")
 	if _, err := os.Stat(keyDir); err != nil {
-		t.Skipf("wallets folder at location is missing: %s", keyDir)
+		t.Errorf("wallets folder at location is missing: %s", keyDir)
 	}
 
 	err := filepath.Walk(keyDir, func(path string, info fs.FileInfo, err error) error {

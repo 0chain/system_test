@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"net"
 	"os"
 	"strings"
 	"testing"
@@ -12,8 +13,33 @@ import (
 )
 
 func TestZs3ServerReplication(testSetup *testing.T) {
-	t := test.NewSystemTest(testSetup)
+	// Check if mc binary is available, skip if not
+	if _, err := os.Stat("../mc"); os.IsNotExist(err) {
+		testSetup.Skip("mc binary not available at ../mc, skipping test")
+	}
+
+	// Check if mc_hosts.yaml config exists, skip if not available
+	if _, err := os.Stat("mc_hosts.yaml"); os.IsNotExist(err) {
+		testSetup.Skip("mc_hosts.yaml config not found, MC replication tests not configured, skipping test")
+	}
+
 	config := cli_utils.ReadFileMC(testSetup)
+
+	// Check if primary ZS3 server is reachable, skip if not available
+	conn, err := net.DialTimeout("tcp", config.Server+":"+config.HostPort, 5*time.Second)
+	if err != nil {
+		testSetup.Skipf("Primary ZS3 server not available at %s:%s, skipping test: %v", config.Server, config.HostPort, err)
+	}
+	conn.Close()
+
+	// Check if secondary ZS3 server is reachable, skip if not available
+	conn2, err2 := net.DialTimeout("tcp", config.SecondaryServer+":"+config.SecondaryPort, 5*time.Second)
+	if err2 != nil {
+		testSetup.Skipf("Secondary ZS3 server not available at %s:%s, skipping test: %v", config.SecondaryServer, config.SecondaryPort, err2)
+	}
+	conn2.Close()
+
+	t := test.NewSystemTest(testSetup)
 
 	t.RunWithTimeout("Test for replication", 4000*time.Second, func(t *test.SystemTest) {
 		t.Log(config.Server, "server")

@@ -26,7 +26,7 @@ import (
 )
 
 func TestStreamUploadDownload(testSetup *testing.T) {
-	testSetup.Skip("Flaky")
+	testSetup.Skip("Test marked as flaky - needs to be investigated and fixed")
 	t := test.NewSystemTest(testSetup)
 
 	t.TestSetup("Kill FFMPEG", KillFFMPEG)

@@ -84,12 +84,15 @@ func setupConfig() {
 const (
 	zcnscOwner                      = "wallets/zcnsc_owner"
 	scOwnerWallet                   = "wallets/sc_owner"
-	blobberOwnerWallet              = "wallets/blobber_owner"
-	miner01NodeDelegateWalletName   = "wallets/miner01_node_delegate"
-	miner02NodeDelegateWalletName   = "wallets/miner02_node_delegate"
-	miner03NodeDelegateWalletName   = "wallets/miner03_node_delegate"
-	sharder01NodeDelegateWalletName = "wallets/sharder01_node_delegate"
-	sharder02NodeDelegateWalletName = "wallets/sharder02_node_delegate"
+	// All infrastructure nodes (miners, sharders, blobbers, validators) use the same
+	// on-chain delegate wallet (sc_owner). Use a single wallet file for all of them.
+	minerScOwnerWallet              = "wallets/sc_owner"
+	blobberOwnerWallet              = "wallets/sc_owner"
+	miner01NodeDelegateWalletName   = "wallets/sc_owner"
+	miner02NodeDelegateWalletName   = "wallets/sc_owner"
+	miner03NodeDelegateWalletName   = "wallets/sc_owner"
+	sharder01NodeDelegateWalletName = "wallets/sc_owner"
+	sharder02NodeDelegateWalletName = "wallets/sc_owner"
 	stakingWallet                   = "wallets/staking"
 	zboxTeamWallet                  = "wallets/zbox_team"
 )
@@ -219,7 +222,7 @@ func TestMain(m *testing.M) { //nolint:gocyclo
 	})
 
 	if err_gd != nil {
-		log.Fatalln("Failed to create Gdrive session:", err_dp)
+		log.Fatalln("Failed to create Gdrive session:", err_gd)
 	}
 	// Create an S3 client
 	cloudService := os.Getenv("CLOUD_SERVICE")
@@ -248,10 +251,41 @@ func TestMain(m *testing.M) { //nolint:gocyclo
 	}
 
 	walletIdx = 500
+	if offsetStr := os.Getenv("WALLET_OFFSET"); offsetStr != "" {
+		if offset, err := strconv.ParseInt(offsetStr, 10, 64); err == nil {
+			walletIdx += offset
+			log.Printf("WALLET_OFFSET=%d, starting walletIdx at %d", offset, walletIdx)
+		}
+	}
 
 	walletMutex.Unlock()
+
+	// Fund special wallets (SC owner, blobber owner) before running tests.
+	// These wallets are used by many tests for config updates and blobber operations,
+	// and must have sufficient balance. Each faucet pour gives up to 9 ZCN.
+	fundSpecialWallets(configPath)
 
 	exitRun := m.Run()
 
 	os.Exit(exitRun)
+}
+
+// fundSpecialWallets ensures the SC owner and blobber owner wallets have sufficient
+// balance to perform administrative operations throughout the test suite.
+func fundSpecialWallets(cfgPath string) {
+	specialWallets := []string{scOwnerWallet, blobberOwnerWallet}
+	for _, wallet := range specialWallets {
+		for i := 0; i < 10; i++ {
+			cmd := fmt.Sprintf(
+				"./zwallet faucet --methodName pour --tokens 9 --input {} --silent "+
+					"--wallet %s_wallet.json --configDir ./config --config %s",
+				wallet, cfgPath)
+			_, err := cliutils.RunCommandWithoutRetry(cmd)
+			if err != nil {
+				log.Printf("Warning: faucet pour %d for %s failed: %v", i+1, wallet, err)
+				break
+			}
+		}
+		log.Printf("Funded wallet: %s", wallet)
+	}
 }

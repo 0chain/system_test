@@ -1,6 +1,7 @@
 package zs3servertests
 
 import (
+	"net"
 	"os"
 	"strings"
 	"testing"
@@ -11,12 +12,30 @@ import (
 )
 
 func TestZs3serverPutWarpTests(testSetup *testing.T) {
+	// Check if hosts.yaml config exists, skip if not available
+	if _, err := os.Stat("hosts.yaml"); os.IsNotExist(err) {
+		testSetup.Skip("hosts.yaml config not found, ZS3 server tests not configured, skipping test")
+	}
+
 	config := cliutils.ReadFile(testSetup)
+
+	// Check if ZS3 server is reachable, skip if not available
+	conn, err := net.DialTimeout("tcp", config.Server+":"+config.HostPort, 5*time.Second)
+	if err != nil {
+		testSetup.Skipf("ZS3 server not available at %s:%s, skipping test: %v", config.Server, config.HostPort, err)
+	}
+	conn.Close()
+
+	// Check if warp binary is available
+	if _, err := os.Stat("../warp"); os.IsNotExist(err) {
+		testSetup.Skip("warp binary not available at ../warp, skipping test")
+	}
+
 	t := test.NewSystemTest(testSetup)
 
 	// Check if mc is available - it's required for this test
 	if _, err := os.Stat("../mc"); os.IsNotExist(err) {
-		testSetup.Fatalf("mc is not installed at ../mc, which is required for this test")
+		testSetup.Skip("mc is not installed at ../mc, skipping test")
 	}
 
 	// Remove alias if it exists (ignore errors)
@@ -87,7 +106,18 @@ func TestZs3serverPutWarpTests(testSetup *testing.T) {
 		testSetup.Fatalf("Error running warp put: %v\nOutput: %s", err, output)
 	}
 	output_string := strings.Join(output, "\n")
-	output_string = strings.Split(output_string, "----------------------------------------")[1]
+
+	// warp output uses Unicode box-drawing separator (U+2500), not ASCII hyphens.
+	// warp put may produce a single report section with no separator at all.
+	unicodeSeparator := strings.Repeat("\u2500", 34)
+	parts := strings.Split(output_string, unicodeSeparator)
+	if len(parts) > 1 {
+		output_string = strings.TrimSpace(parts[1])
+	}
+	// Strip cleanup section if present
+	if idx := strings.Index(output_string, "warp: Starting cleanup"); idx >= 0 {
+		output_string = strings.TrimSpace(output_string[:idx])
+	}
 
 	output_string = "Condition 2 : Put  \n--------\n" + output_string
 	err = cliutils.AppendToFile("warp-put_output.txt", output_string)

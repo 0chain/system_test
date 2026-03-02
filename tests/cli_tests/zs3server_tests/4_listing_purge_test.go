@@ -1,6 +1,7 @@
 package zs3servertests
 
 import (
+	"net"
 	"os"
 	"strings"
 	"testing"
@@ -11,12 +12,30 @@ import (
 )
 
 func TestZs3serverListTests(testSetup *testing.T) {
+	// Check if hosts.yaml config exists, skip if not available
+	if _, err := os.Stat("hosts.yaml"); os.IsNotExist(err) {
+		testSetup.Skip("hosts.yaml config not found, ZS3 server tests not configured, skipping test")
+	}
+
 	config := cliutils.ReadFile(testSetup)
+
+	// Check if ZS3 server is reachable, skip if not available
+	conn, err := net.DialTimeout("tcp", config.Server+":"+config.HostPort, 5*time.Second)
+	if err != nil {
+		testSetup.Skipf("ZS3 server not available at %s:%s, skipping test: %v", config.Server, config.HostPort, err)
+	}
+	conn.Close()
+
+	// Check if warp binary is available
+	if _, err := os.Stat("../warp"); os.IsNotExist(err) {
+		testSetup.Skip("warp binary not available at ../warp, skipping test")
+	}
+
 	t := test.NewSystemTest(testSetup)
 
 	// Check if mc is available - it's required for this test
 	if _, err := os.Stat("../mc"); os.IsNotExist(err) {
-		testSetup.Fatalf("mc is not installed at ../mc, which is required for this test")
+		testSetup.Skip("mc is not installed at ../mc, skipping test")
 	}
 
 	// Remove alias if it exists (ignore errors)
@@ -38,6 +57,9 @@ func TestZs3serverListTests(testSetup *testing.T) {
 	if !strings.Contains(aliasListStr, "warp-test") {
 		testSetup.Fatalf("Alias 'warp-test' was not found in alias list. Output: %s", aliasListStr)
 	}
+
+	// Remove bucket from previous run to avoid repair_required from stale blobber data
+	_, _ = cliutils.RunCommand(t, "../mc rb --force warp-test/warp-benchmark-bucket", 1, time.Minute*2)
 
 	// Create the bucket that warp expects (warp-benchmark-bucket)
 	bucketCommand := "../mc mb warp-test/warp-benchmark-bucket"
@@ -81,40 +103,59 @@ func TestZs3serverListTests(testSetup *testing.T) {
 	}
 
 	t.RunSequentiallyWithTimeout("Warp List Benchmark", 40*time.Minute, func(t *test.SystemTest) {
-		commandGenerated := "../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --duration 30s" + " --obj.size " + config.ObjectSize + " --objects " + config.ObjectCount
+		commandGenerated := "../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --duration 30s" + " --obj.size " + config.ObjectSize + " --objects " + config.ObjectCount + " --noclear"
 		output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*2)
 		if err != nil {
-			testSetup.Fatalf("Error running warp list: %v\nOutput: %s", err, output)
+			t.Fatalf("Error running warp list: %v\nOutput: %s", err, output)
 		}
 		output_string := strings.Join(output, "\n")
-		output_string = strings.Split(output_string, "----------------------------------------")[1]
 
-		output_string = strings.Split(output_string, "warp: Starting cleanup")[0]
+		// warp output uses Unicode box-drawing separator (U+2500), not ASCII hyphens.
+		// Some warp commands may produce a single report section with no separator.
+		unicodeSeparator := strings.Repeat("\u2500", 34)
+		parts := strings.Split(output_string, unicodeSeparator)
+		if len(parts) > 1 {
+			output_string = strings.TrimSpace(parts[1])
+		}
+		// Strip cleanup section if present
+		if idx := strings.Index(output_string, "warp: Starting cleanup"); idx >= 0 {
+			output_string = strings.TrimSpace(output_string[:idx])
+		}
 
 		output_string = "Condition 1: Get objects: 1 \n--------\n" + output_string
 		err = cliutils.AppendToFile("warp-list_output.txt", output_string)
 
 		if err != nil {
-			testSetup.Fatalf("Error appending to file: %v\n", err)
+			t.Fatalf("Error appending to file: %v\n", err)
 		}
 	})
 
-	t.RunSequentiallyWithTimeout("Warp List Benchmark", 40*time.Minute, func(t *test.SystemTest) {
-		commandGenerated := "../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --objects " + config.ObjectCount + " --concurrent " + config.Concurrent + " --duration 30s" + " --obj.size " + config.ObjectSize
+	t.RunSequentiallyWithTimeout("Warp List Benchmark Concurrent", 40*time.Minute, func(t *test.SystemTest) {
+		commandGenerated := "../warp get --host=" + config.Server + ":" + config.HostPort + " --access-key=" + config.AccessKey + " --secret-key=" + config.SecretKey + " --objects " + config.ObjectCount + " --concurrent " + config.Concurrent + " --duration 30s" + " --obj.size " + config.ObjectSize + " --noclear --list-existing"
 		output, err := cliutils.RunCommand(t, commandGenerated, 1, time.Hour*2)
 
 		if err != nil {
-			testSetup.Fatalf("Error running warp list: %v\nOutput: %s", err, output)
+			t.Fatalf("Error running warp list: %v\nOutput: %s", err, output)
 		}
 		output_string := strings.Join(output, "\n")
-		output_string = strings.Split(output_string, "----------------------------------------")[1]
+
+		// warp output uses Unicode box-drawing separator (U+2500), not ASCII hyphens.
+		unicodeSeparator2 := strings.Repeat("\u2500", 34)
+		parts2 := strings.Split(output_string, unicodeSeparator2)
+		if len(parts2) > 1 {
+			output_string = strings.TrimSpace(parts2[1])
+		}
+		// Strip cleanup section if present
+		if idx := strings.Index(output_string, "warp: Starting cleanup"); idx >= 0 {
+			output_string = strings.TrimSpace(output_string[:idx])
+		}
 
 		output_string = "Condition 1: Get objects: 100 concurrent 50::  \n--------\n" + output_string
 
 		err = cliutils.AppendToFile("warp-list_output.txt", output_string)
 
 		if err != nil {
-			testSetup.Fatalf("Error appending to file: %v\n", err)
+			t.Fatalf("Error appending to file: %v\n", err)
 		}
 	})
 }

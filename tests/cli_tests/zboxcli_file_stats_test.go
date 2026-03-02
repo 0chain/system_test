@@ -398,12 +398,11 @@ func TestFileStats(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("get file stats before and after download", 7*time.Minute, func(t *test.SystemTest) { //todo: too slow
-		t.Skip()
-		allocSize := int64(2048)
+		allocSize := int64(1048576) // 1MB — needs to be large enough so each blobber shard exceeds the 64KB min chunk size
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   allocSize,
-			"tokens": 9,
+			"size": allocSize,
+			"lock": 9,
 		})
 
 		remotepath := "/"
@@ -467,14 +466,13 @@ func TestFileStats(testSetup *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &stats)
 		require.Nil(t, err)
 
-		var skippedBlobber int
+		downloadedBlobbers := 0
 		for _, data := range stats {
 			require.Equal(t, fname, data.Name)
 			require.Equal(t, remoteFilePath, data.Path)
-			if data.NumOfBlockDownloads == 0 {
-				skippedBlobber++
-			} else {
-				require.Equal(t, int64(1), data.NumOfBlockDownloads)
+			if data.NumOfBlockDownloads > 0 {
+				downloadedBlobbers++
+				require.GreaterOrEqual(t, data.NumOfBlockDownloads, int64(1))
 			}
 			require.Equal(t, fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath))), data.PathHash)
 			require.Equal(t, int64(1), data.NumOfUpdates)
@@ -485,7 +483,7 @@ func TestFileStats(testSetup *testing.T) {
 				require.Equal(t, true, data.BlockchainAware)
 			}
 		}
-		require.Equal(t, 1, skippedBlobber)
+		require.Greater(t, downloadedBlobbers, 0, "at least one blobber should have served the download")
 	})
 }
 

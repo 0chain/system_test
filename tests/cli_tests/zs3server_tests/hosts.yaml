@@ -1,5 +1,5 @@
 server: localhost
-port: 9000
+port: 9100
 # access_key: someminiouser
 # secret_key: someminiopassword
 concurrent: 1

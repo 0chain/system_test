@@ -965,9 +965,10 @@ func TestShareFile(testSetup *testing.T) {
 		walletOwner := escapedTestName(t)
 
 		createWalletForName(walletOwner)
+		_, _ = executeFaucetWithTokensForWallet(t, walletOwner, configPath, 10)
 
 		allocParam := createParams(map[string]interface{}{
-			"lock":   24,
+			"lock":   5,
 			"size":   1024000,
 			"parity": 1,
 			"data":   1,
@@ -1574,6 +1575,7 @@ func shareFileWithWallet(t *test.SystemTest, wallet, cliConfigFilename string, p
 
 func createWalletAndAllocation(t *test.SystemTest, configPath, wallet string) (string, *climodel.Wallet) {
 	createWalletForName(wallet)
+	executeFaucetWithTokensForWallet(t, wallet, configPath, 9)
 
 	allocParam := createParams(map[string]interface{}{
 		"lock":   2,

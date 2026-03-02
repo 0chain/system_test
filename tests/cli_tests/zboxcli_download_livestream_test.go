@@ -25,7 +25,7 @@ import (
 )
 
 func TestLivestreamDownload(testSetup *testing.T) { // nolint cyclomatic complexity 48
-	testSetup.Skip("Flaky")
+	testSetup.Skip("Test marked as flaky - needs to be investigated and fixed")
 	t := test.NewSystemTest(testSetup)
 	t.Parallel()
 	t.TestSetup("Kill FFMPEG", KillFFMPEG)

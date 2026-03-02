@@ -47,7 +47,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	blobbersList = getBlobbersList(t)
 	var listBlobbersString []string
 	for _, blobber := range blobbersList {
-		listBlobbersString = append(listBlobbersString, blobber.Id)
+		if !blobber.IsKilled && !blobber.IsShutdown {
+			listBlobbersString = append(listBlobbersString, blobber.Id)
+		}
 	}
 
 	t.TestSetup("Create free storage allocation wallet", func() {
@@ -55,7 +57,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		require.NoError(t, err, "Error initializing BLS")
 
 		if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
-			t.Skipf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+			t.Errorf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
 		}
 
 		assigner := escapedTestName(t) + "_ASSIGNER"
@@ -98,8 +100,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t.RunWithTimeout("Create free storage from marker with accounting", 60*time.Second, func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
-		// create recipient wallet
+		// create recipient wallet and fund from faucet (needs balance to pay transaction fees)
 		createWalletForName(recipient)
+		_, _ = executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -179,8 +182,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t.Run("Create free storage with invalid marker signature should fail", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
-		// create recipient wallet
+		// create recipient wallet and fund from faucet (needs balance to pay transaction fees)
 		createWalletForName(recipient)
+		_, _ = executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
@@ -260,8 +264,9 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 	t.Run("Create free storage with tokens exceeding assigner's individual limit should fail", func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
-		// create recipient wallet
+		// create recipient wallet and fund from faucet (needs balance to pay transaction fees)
 		createWalletForName(recipient)
+		_, _ = executeFaucetWithTokensForWallet(t, recipient, configPath, 1)
 
 		recipientWallet, err := getWalletForName(t, configPath, recipient)
 		require.Nil(t, err, "Error occurred when retrieving new owner wallet")
