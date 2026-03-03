@@ -564,8 +564,8 @@ assert d.get('assigner') and d.get('signature'), 'no marker fields'
             log_fail "Could not create allocation: $(echo "$alloc_out" | tail -3)"
     fi
 
-    # Wait for allocation to be committed and indexed on chain before using it
-    [ -n "$alloc_id" ] && sleep 10
+    # Wait for allocation to be committed on chain and for blobbers to process the allocation event
+    [ -n "$alloc_id" ] && sleep 30
 
     if [ -n "$alloc_id" ]; then
         # Prepare test files

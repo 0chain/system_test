@@ -3783,6 +3783,16 @@ seed_0box_providers() {
     done < <(run_sharder_sql "SELECT id, n2n_host, port, delegate_wallet, service_charge, num_delegates FROM sharders WHERE is_killed=false AND is_shutdown=false ORDER BY id;")
     print_status "Seeded $sharder_count sharders"
 
+    # Update sharder n2n_host to public nginx domain URL.
+    # Atlus Explorer fetches last_finalized_round via: n2n_host + '/sharder01/v1/sharder/get/stats'
+    # Internal IPs (198.18.0.81/82) are unreachable from browsers; public nginx domain routes correctly.
+    local public_domain="${NGINX_DOMAIN:-}"
+    if [ -n "$public_domain" ]; then
+        local public_url="https://${public_domain}"
+        run_0box_sql "UPDATE sharders SET n2n_host='$public_url', updated_at=to_timestamp($now_epoch) WHERE is_killed=false AND is_shutdown=false;" 2>/dev/null
+        print_status "Updated sharder n2n_host to public URL: $public_url (enables Atlus last_finalized_round)"
+    fi
+
     # Seed validators from events_db
     local validator_count=0
     while IFS='|' read -r vid url delegate_wallet service_charge num_delegates; do
