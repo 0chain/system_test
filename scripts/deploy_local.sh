@@ -555,7 +555,7 @@ remote_deploy() {
 
     if [ -z "$server_ip" ]; then
         print_error "Server IP required. Use: --server <IP>"
-        print_error "Example: bash scripts/deploy_local.sh remote-deploy --server 144.76.58.147 --pass 'mypass' --domain test2.zus.network redeploy"
+        print_error "Example: bash scripts/deploy_local.sh remote-deploy --server <server-ip> --pass 'mypass' --domain test2.zus.network redeploy"
         exit 1
     fi
 

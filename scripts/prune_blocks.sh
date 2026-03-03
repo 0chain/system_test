@@ -1,7 +1,7 @@
 #!/bin/bash
 # Prune block files older than KEEP_HOURS hours (default 168 = 1 week)
 # Usage: ./prune_blocks.sh [hours]
-# Deployed on test.zus.network (37.27.65.188) via cron: 0 3 * * *
+# Deployed on test.zus.network (<server-ip>) via cron: 0 3 * * *
 KEEP_HOURS="${1:-168}"
 KEEP_MINS=$(( KEEP_HOURS * 60 ))
 
