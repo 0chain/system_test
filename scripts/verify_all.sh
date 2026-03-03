@@ -38,6 +38,10 @@ ZCN_WALLET_FILE="owner.json"
 ZWALLET="${BASE_DIR}/zwalletcli/zwallet"
 ZBOX="${BASE_DIR}/zboxcli/zbox"
 SHARDER_URL="http://127.0.0.1:7171"
+# Auto-select the sharder with the highest round (in case one is stale)
+_s1r=$(curl -s --max-time 3 "http://127.0.0.1:7171/v1/chain/get/stats" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("current_round",0))' 2>/dev/null || echo 0)
+_s2r=$(curl -s --max-time 3 "http://127.0.0.1:7172/v1/chain/get/stats" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("current_round",0))' 2>/dev/null || echo 0)
+if [ "${_s2r:-0}" -gt "${_s1r:-0}" ]; then SHARDER_URL="http://127.0.0.1:7172"; fi
 STORAGE_SC="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
 MINER_SC="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
 FAUCET_SC="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d3"
@@ -339,7 +343,7 @@ check_services() {
         "SELECT count(*) FROM blobbers WHERE not_available=false;" 2>/dev/null | tr -d ' \n' || echo 0)
 
     [ "${am:-0}" -gt 0 ] && log_pass "0box DB: $am active miners" || \
-        { log_fail "0box DB: 0 active miners — Atlus blank"; $AUTO_FIX && bash "${SCRIPT_DIR}/deploy_local.sh" seed-explorer; }
+        { log_fail "0box DB: 0 active miners — Atlus blank"; $AUTO_FIX && bash "${SCRIPT_DIR}/deploy_local.sh" fix-kafka; }
     [ "${as:-0}" -gt 0 ] && log_pass "0box DB: $as active sharders" || log_fail "0box DB: 0 active sharders"
     [ "${ab:-0}" -gt 0 ] && log_pass "0box DB: $ab available blobbers" || \
         log_warn "0box DB: 0 available blobbers — Blimp allocation may fail"
@@ -866,8 +870,8 @@ check_blimp() {
         log_pass "0box: $avail_blobbers regular blobbers available for Blimp allocation"
     else
         log_fail "0box: only $avail_blobbers regular blobbers — Blimp 'no provider match'"
-        log_info "Fix: bash scripts/deploy_local.sh seed-explorer"
-        $AUTO_FIX && bash "${SCRIPT_DIR}/deploy_local.sh" seed-explorer
+        log_info "Fix: bash scripts/deploy_local.sh fix-kafka"
+        $AUTO_FIX && bash "${SCRIPT_DIR}/deploy_local.sh" fix-kafka
     fi
 
     # d. Gotenberg carousel render service
