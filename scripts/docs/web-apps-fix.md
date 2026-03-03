@@ -44,11 +44,11 @@ If any step fails, the user cannot log in.
 2. Project Settings → Service Accounts → **Generate New Private Key**
 3. Copy the downloaded JSON to the server:
 ```bash
-scp /path/to/key.json root@37.27.65.188:/root/Code/0box/docker.local/config/0box_firebase_key.json
+scp /path/to/key.json root@<server-ip>:/root/Code/0box/docker.local/config/0box_firebase_key.json
 ```
 4. Restart 0box:
 ```bash
-ssh root@37.27.65.188 "cd /root/Code/0box/docker.local && docker compose -p 0box restart 0box"
+ssh root@<server-ip> "cd /root/Code/0box/docker.local && docker compose -p 0box restart 0box"
 ```
 
 The key is volume-mounted from host, so it persists across container restarts.
@@ -93,7 +93,7 @@ server_chain:
 
 **Manual check**:
 ```bash
-ssh root@37.27.65.188 "grep 'owner:' /root/Code/0box/docker.local/config/0box.yaml"
+ssh root@<server-ip> "grep 'owner:' /root/Code/0box/docker.local/config/0box.yaml"
 ```
 
 ---
@@ -117,14 +117,14 @@ Email → Firebase ID Token → phone number screen → OTP sent via Twilio
 **Fix**: Set `deployment_mode: 0` in `0box.yaml`. This bypasses OTP verification entirely — any code is accepted.
 
 ```bash
-ssh root@37.27.65.188 "grep deployment_mode /root/Code/0box/docker.local/config/0box.yaml"
+ssh root@<server-ip> "grep deployment_mode /root/Code/0box/docker.local/config/0box.yaml"
 # Should show: deployment_mode: 0
 ```
 
 If it shows `1`, change it:
 ```bash
-ssh root@37.27.65.188 "sed -i 's/deployment_mode: 1/deployment_mode: 0/' /root/Code/0box/docker.local/config/0box.yaml"
-ssh root@37.27.65.188 "cd /root/Code/0box/docker.local && docker compose -p 0box restart 0box"
+ssh root@<server-ip> "sed -i 's/deployment_mode: 1/deployment_mode: 0/' /root/Code/0box/docker.local/config/0box.yaml"
+ssh root@<server-ip> "cd /root/Code/0box/docker.local && docker compose -p 0box restart 0box"
 ```
 
 > **Note**: Even with `deployment_mode: 0`, the Firebase auth flow still runs on the frontend — the web app still needs to successfully get a Firebase ID token before calling 0box. Only 0box's server-side validation of the token is bypassed.
@@ -261,7 +261,7 @@ This copies blobber data from the sharder's `events_db` directly into 0box's `bl
 
 **Verify blobbers are populated**:
 ```bash
-ssh root@37.27.65.188 \
+ssh root@<server-ip> \
   "docker exec -e PGPASSWORD=zbox_server postgres-0box \
    psql -U zbox_user -d zbox -c \
    \"SELECT id, base_url, not_available, brand_id, last_health_check, blobber_type, is_enterprise
@@ -270,14 +270,14 @@ ssh root@37.27.65.188 \
 
 **Verify `provider_brand` table has the 'Zus' entry** (required for the JOIN):
 ```bash
-ssh root@37.27.65.188 \
+ssh root@<server-ip> \
   "docker exec -e PGPASSWORD=zbox_server postgres-0box \
    psql -U zbox_user -d zbox -c \"SELECT * FROM provider_brand;\""
 ```
 
 If empty, insert it:
 ```bash
-ssh root@37.27.65.188 \
+ssh root@<server-ip> \
   "docker exec -e PGPASSWORD=zbox_server postgres-0box \
    psql -U zbox_user -d zbox -c \
    \"INSERT INTO provider_brand (name) VALUES ('Zus') ON CONFLICT DO NOTHING;\""
@@ -341,7 +341,7 @@ User clicks "Free Allocation" in Blimp
 0box needs a funded on-chain wallet to pay for the allocation transaction.
 
 ```bash
-ssh root@37.27.65.188 "docker logs 0box-0box-1 2>&1 | grep 'wallet client id' | head -1"
+ssh root@<server-ip> "docker logs 0box-0box-1 2>&1 | grep 'wallet client id' | head -1"
 # Get the wallet ID, then check balance:
 # zwallet getbalance --clientid <id> --configDir /root/.zcn
 ```
@@ -383,7 +383,7 @@ curl -s "http://198.18.0.81:7171/v1/screst/6dba10422e368813802877a85039d3985d967
   | jq '.fields.free_allocation_settings'
 
 # 0box config value:
-ssh root@37.27.65.188 "grep free_storage_assginer /root/Code/0box/docker.local/config/0box.yaml"
+ssh root@<server-ip> "grep free_storage_assginer /root/Code/0box/docker.local/config/0box.yaml"
 ```
 
 ---
@@ -406,7 +406,7 @@ zwallet sc-update-config \
 Free allocations only use regular (non-enterprise) blobbers. If `seed-explorer` seeded them with `is_enterprise=true`, free allocation queries return empty.
 
 ```bash
-ssh root@37.27.65.188 \
+ssh root@<server-ip> \
   "docker exec -e PGPASSWORD=zbox_server postgres-0box \
    psql -U zbox_user -d zbox -c \
    \"SELECT COUNT(*) FROM blobbers WHERE is_enterprise = false AND not_available = false;\""
@@ -421,12 +421,12 @@ ssh root@37.27.65.188 \
 
 **Step 1 — Check if the container is running**:
 ```bash
-ssh root@37.27.65.188 "docker ps | grep 0box"
+ssh root@<server-ip> "docker ps | grep 0box"
 ```
 
 **Step 2 — Check Redis** (0box crashes silently if Redis is down):
 ```bash
-ssh root@37.27.65.188 "docker ps | grep redis; docker logs 0box-redis --tail 20"
+ssh root@<server-ip> "docker ps | grep redis; docker logs 0box-redis --tail 20"
 ```
 
 If Redis is crash-looping with `signal: 11` (SIGSEGV):
@@ -435,9 +435,9 @@ If Redis is crash-looping with `signal: 11` (SIGSEGV):
 
 **Fix**: Pin to `redis:7.4.3-alpine` in `/root/Code/0box/docker.local/docker-compose.yml`:
 ```bash
-ssh root@37.27.65.188 "sed -i 's|image: \"redis:alpine\"|image: \"redis:7.4.3-alpine\"|' \
+ssh root@<server-ip> "sed -i 's|image: \"redis:alpine\"|image: \"redis:7.4.3-alpine\"|' \
   /root/Code/0box/docker.local/docker-compose.yml"
-ssh root@37.27.65.188 "cd /root/Code/0box/docker.local && \
+ssh root@<server-ip> "cd /root/Code/0box/docker.local && \
   docker compose -p 0box up -d --force-recreate redis && sleep 5 && \
   docker compose -p 0box up -d 0box"
 ```
@@ -464,9 +464,9 @@ healthcheck:
 
 **Fix**:
 ```bash
-ssh root@37.27.65.188 "sed -i 's|host: localhost|host: postgreszv|' \
+ssh root@<server-ip> "sed -i 's|host: localhost|host: postgreszv|' \
   /root/Code/zvault/config/zvault.yaml"
-ssh root@37.27.65.188 "cd /root/Code/zvault/docker.local && \
+ssh root@<server-ip> "cd /root/Code/zvault/docker.local && \
   docker compose -p zvault up -d --force-recreate zvault"
 ```
 
@@ -481,11 +481,11 @@ zauth_server: http://172.17.0.1:8080   # Docker bridge gateway (NOT localhost:80
 
 ```bash
 # Check PM2 processes
-ssh root@37.27.65.188 "pm2 list"
+ssh root@<server-ip> "pm2 list"
 # Restart a specific app
-ssh root@37.27.65.188 "pm2 restart vult"
+ssh root@<server-ip> "pm2 restart vult"
 # Or restart all
-ssh root@37.27.65.188 "pm2 restart all"
+ssh root@<server-ip> "pm2 restart all"
 # Rebuild if process keeps crashing
 bash scripts/deploy_local.sh web-apps
 ```
@@ -533,15 +533,15 @@ nginx -t && nginx -s reload
 
 **Fix**:
 ```bash
-ssh root@37.27.65.188 "grep block_worker /root/Code/0box/docker.local/config/0box.yaml"
+ssh root@<server-ip> "grep block_worker /root/Code/0box/docker.local/config/0box.yaml"
 # Must be: block_worker: http://198.18.0.100:9091
 ```
 
 If wrong:
 ```bash
-ssh root@37.27.65.188 "sed -i 's|block_worker:.*|block_worker: http://198.18.0.100:9091|' \
+ssh root@<server-ip> "sed -i 's|block_worker:.*|block_worker: http://198.18.0.100:9091|' \
   /root/Code/0box/docker.local/config/0box.yaml"
-ssh root@37.27.65.188 "cd /root/Code/0box/docker.local && docker compose -p 0box restart 0box"
+ssh root@<server-ip> "cd /root/Code/0box/docker.local && docker compose -p 0box restart 0box"
 ```
 
 ---
@@ -563,7 +563,7 @@ bash scripts/deploy_local.sh swap-image web-apps master --gosdk-branch fix/my-sd
 
 ### Check all services at once
 ```bash
-ssh root@37.27.65.188 "
+ssh root@<server-ip> "
   echo '=== 0box ===' && curl -s http://localhost:9081/v2/health | jq -r '.status' 2>/dev/null || echo DOWN
   echo '=== zauth ===' && curl -s http://localhost:8080/v1/health | jq -r '.status' 2>/dev/null || echo DOWN
   echo '=== zvault ===' && curl -s http://localhost:8090/v1/health | jq -r '.status' 2>/dev/null || echo DOWN
@@ -577,19 +577,19 @@ ssh root@37.27.65.188 "
 
 ### Check 0box logs for auth errors
 ```bash
-ssh root@37.27.65.188 "docker logs 0box-0box-1 --tail 50 2>&1 | grep -iE 'error|firebase|cors|invalid|unauthorized'"
+ssh root@<server-ip> "docker logs 0box-0box-1 --tail 50 2>&1 | grep -iE 'error|firebase|cors|invalid|unauthorized'"
 ```
 
 ### Test CSRF endpoint (verifies Firebase key + 0box are working)
 ```bash
 # With deployment_mode: 0, any token is accepted
-ssh root@37.27.65.188 "curl -s -X GET http://localhost:9081/v2/csrftoken \
+ssh root@<server-ip> "curl -s -X GET http://localhost:9081/v2/csrftoken \
   -H 'X-App-ID-TOKEN: test_token' | jq ."
 ```
 
 ### Test blobber query (what Blimp calls when creating allocation)
 ```bash
-ssh root@37.27.65.188 "curl -s 'http://localhost:9081/v2/blobbers?allocation_type=0' | jq 'length'"
+ssh root@<server-ip> "curl -s 'http://localhost:9081/v2/blobbers?allocation_type=0' | jq 'length'"
 # Should return 12 (number of regular blobbers seeded)
 ```
 
@@ -622,13 +622,13 @@ curl -I -X OPTIONS https://test.zus.network/0box/v2/csrftoken \
 
 **Check**:
 ```bash
-ssh root@37.27.65.188 "curl -s http://localhost:9081/ | grep BlockWorker"
+ssh root@<server-ip> "curl -s http://localhost:9081/ | grep BlockWorker"
 # Must show: BlockWorker: http://198.18.0.100:9091
 ```
 
 **Fix**:
 ```bash
-ssh root@37.27.65.188 "
+ssh root@<server-ip> "
   sed -i 's|block_worker:.*|block_worker: http://198.18.0.100:9091|' /root/Code/0box/docker.local/config/0box.yaml
   sed -i 's|^host:.*|host: https://0box.test.zus.network|' /root/Code/0box/docker.local/config/0box.yaml
   cd /root/Code/0box/docker.local && docker compose -p 0box restart 0box
@@ -645,7 +645,7 @@ ssh root@37.27.65.188 "
 
 **Check**:
 ```bash
-ssh root@37.27.65.188 "curl -s http://localhost:9081/v2/miners | python3 -c \"
+ssh root@<server-ip> "curl -s http://localhost:9081/v2/miners | python3 -c \"
 import json,sys
 for m in json.load(sys.stdin):
     print(m['id'][:16], 'stake:', m.get('total_stake',0))
@@ -656,7 +656,7 @@ for m in json.load(sys.stdin):
 **Fix**: Stake 10 ZCN on each miner/sharder (the deploy script's `check_and_fund_providers` now handles this automatically):
 ```bash
 # Manual staking if needed:
-ssh root@37.27.65.188 "
+ssh root@<server-ip> "
 export PATH=\$PATH:/root/Code/zwalletcli
 for MID in \$(curl -s 'http://198.18.0.81:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getMinerList' | python3 -c \"import json,sys; [print(n.get('simple_miner',n)['id']) for n in json.load(sys.stdin).get('Nodes',[])]\"); do
   zwallet mn-lock --miner_id \"\$MID\" --tokens 10 --configDir /root/.zcn --wallet local.json --silent 2>/dev/null
@@ -696,7 +696,7 @@ bash scripts/deploy_local.sh nginx
 
 **Check**:
 ```bash
-ssh root@37.27.65.188 "docker exec postgres-0box psql -U zbox_user -d zbox -c \
+ssh root@<server-ip> "docker exec postgres-0box psql -U zbox_user -d zbox -c \
   'SELECT round, allocated_storage FROM snapshots ORDER BY round DESC LIMIT 3;'"
 ```
 
@@ -712,7 +712,7 @@ ssh root@37.27.65.188 "docker exec postgres-0box psql -U zbox_user -d zbox -c \
 
 **Check**:
 ```bash
-ssh root@37.27.65.188 "
+ssh root@<server-ip> "
 # Is crawler running?
 docker ps | grep crawler
 
@@ -736,7 +736,7 @@ ALLOC=\$(grep -A1 '^allocations:' /root/Code/crawler/docker.local/config/crawler
 
 **Verify wallet consistency**:
 ```bash
-ssh root@37.27.65.188 "
+ssh root@<server-ip> "
 echo 'Crawler wallet:' && grep 'wallet_client_id' /root/Code/crawler/docker.local/config/crawler.yaml
 echo 'local.json wallet:' && jq -r '.client_id' /root/.zcn/local.json
 # These MUST match
@@ -746,7 +746,7 @@ echo 'local.json wallet:' && jq -r '.client_id' /root/.zcn/local.json
 **Fix: Regenerate crawler config and allocation**:
 ```bash
 # Delete stale config and regenerate from local.json
-ssh root@37.27.65.188 "
+ssh root@<server-ip> "
 mv /root/Code/crawler/docker.local/config/crawler.yaml /root/Code/crawler/docker.local/config/crawler.yaml.bak
 export PATH=\$PATH:/root/Code/zboxcli:/root/Code/zwalletcli
 cd /root/Code/system_test
@@ -756,7 +756,7 @@ bash scripts/deploy_local.sh crawler
 
 **Perpetual monitor**: The deploy script runs `start_crawler_monitor` which starts a background loop (30-min interval) that detects expired/invalid allocations, creates new ones, and restarts the crawler. Check its status:
 ```bash
-ssh root@37.27.65.188 "cat /tmp/crawler_monitor.pid; cat /tmp/crawler_monitor.log | tail -10"
+ssh root@<server-ip> "cat /tmp/crawler_monitor.pid; cat /tmp/crawler_monitor.log | tail -10"
 # Restart monitor if needed:
 # bash scripts/deploy_local.sh crawler-monitor
 ```
@@ -771,7 +771,7 @@ ssh root@37.27.65.188 "cat /tmp/crawler_monitor.pid; cat /tmp/crawler_monitor.lo
 
 **Check**:
 ```bash
-ssh root@37.27.65.188 "docker exec postgres-0box psql -U zbox_user -d zbox -c \
+ssh root@<server-ip> "docker exec postgres-0box psql -U zbox_user -d zbox -c \
   'SELECT COUNT(*) FROM snapshots; SELECT COUNT(*) FROM miner_aggregates; SELECT COUNT(*) FROM blobber_aggregates;'"
 # snapshots should have 1000+ rows after a few minutes
 # miner_aggregates should have rows per miner per round
@@ -779,7 +779,7 @@ ssh root@37.27.65.188 "docker exec postgres-0box psql -U zbox_user -d zbox -c \
 
 **Check Kafka pipeline is flowing**:
 ```bash
-ssh root@37.27.65.188 "docker logs 0box --tail 5 2>&1 | grep kafka_debug"
+ssh root@<server-ip> "docker logs 0box --tail 5 2>&1 | grep kafka_debug"
 # Should show: {"Round": <recent_round>, "LastRound": <previous_round>}
 ```
 
@@ -799,25 +799,25 @@ bash scripts/deploy_local.sh fix-kafka
 **Check sequence**:
 ```bash
 # 1. Is 0box connected to local chain (not devNet)?
-ssh root@37.27.65.188 "curl -s http://localhost:9081/ | grep BlockWorker"
+ssh root@<server-ip> "curl -s http://localhost:9081/ | grep BlockWorker"
 # Must be local: http://198.18.0.100:9091
 
 # 2. Is 0box running in deployment_mode 0 (bypass Firebase token verification)?
-ssh root@37.27.65.188 "grep deployment_mode /root/Code/0box/docker.local/config/0box.yaml"
+ssh root@<server-ip> "grep deployment_mode /root/Code/0box/docker.local/config/0box.yaml"
 # Should show: --deployment_mode 0 (in the docker-compose command)
 
 # 3. Is vult's PM2 process running?
-ssh root@37.27.65.188 "pm2 list | grep vult"
+ssh root@<server-ip> "pm2 list | grep vult"
 # Should show: online
 
 # 4. Test 0box CSRF endpoint (simulates what vult calls on login):
-ssh root@37.27.65.188 "curl -s -X GET http://localhost:9081/v2/csrftoken \
+ssh root@<server-ip> "curl -s -X GET http://localhost:9081/v2/csrftoken \
   -H 'X-App-ID-TOKEN: any_test_token' -w '\nHTTP: %{http_code}\n'"
 ```
 
 **Fix**: If 0box is on devNet (block_worker wrong), fix as in 9.1. If PM2 vult is crashing with `NO_SECRET` from next-auth, restart PM2:
 ```bash
-ssh root@37.27.65.188 "pm2 restart vult"
+ssh root@<server-ip> "pm2 restart vult"
 ```
 
 ---
@@ -830,11 +830,11 @@ ssh root@37.27.65.188 "pm2 restart vult"
 
 ```bash
 # Check 0box miners API (what blockchain page uses):
-ssh root@37.27.65.188 "curl -s 'http://localhost:9081/v2/miners' | python3 -c 'import json,sys; print(len(json.load(sys.stdin)), \"miners\")'"
+ssh root@<server-ip> "curl -s 'http://localhost:9081/v2/miners' | python3 -c 'import json,sys; print(len(json.load(sys.stdin)), \"miners\")'"
 # Should show: 4 miners
 
 # Check 0box is connected to local blocks (not devNet blocks):
-ssh root@37.27.65.188 "curl -s http://localhost:9081/ | grep 'Working on the chain'"
+ssh root@<server-ip> "curl -s http://localhost:9081/ | grep 'Working on the chain'"
 ```
 
 **Fix**: Ensure 0box is on local chain (fix 9.1). After restart, wait ~30 seconds for 0box to discover local chain and start processing blocks.
@@ -846,7 +846,7 @@ ssh root@37.27.65.188 "curl -s http://localhost:9081/ | grep 'Working on the cha
 Run this after every deploy to verify all dashboard components:
 
 ```bash
-ssh root@37.27.65.188 bash << 'EOF'
+ssh root@<server-ip> bash << 'EOF'
 echo "=== 1. 0box chain connection ==="
 curl -s http://localhost:9081/ | grep -o 'BlockWorker: [^<]*'
 

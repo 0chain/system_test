@@ -1,6 +1,6 @@
 # 0Chain Test Environment — Operations Guide
 
-This document covers the five core operational areas for managing the 0Chain test environment at `test.zus.network` (server `37.27.65.188`).
+This document covers the five core operational areas for managing the 0Chain test environment at `test.zus.network` (server `<server-ip>`).
 
 ---
 
@@ -21,7 +21,7 @@ A full clean deployment wipes all chain data and rebuilds everything from scratc
 
 ### Prerequisites
 
-- SSH access: `sshpass -p '<server-password>' ssh root@37.27.65.188`
+- SSH access: `sshpass -p '<server-password>' ssh root@<server-ip>`
 - Go 1.22+ on the remote server
 - All service source repos cloned under `/root/Code/`
 - `scripts/deploy_config.yaml` configured with the correct branches
@@ -34,13 +34,13 @@ Always make changes locally first, then rsync:
 # From your local machine
 sshpass -p '<server-password>' rsync -avz \
   --exclude 'zbox' --exclude 'zwallet' --exclude 'mc' --exclude '.git' \
-  /Users/saswatabasu/Code/system_test/ root@37.27.65.188:/root/Code/system_test/
+  /Users/saswatabasu/Code/system_test/ root@<server-ip>:/root/Code/system_test/
 ```
 
 ### Step 2 — Run full clean redeploy
 
 ```bash
-ssh root@37.27.65.188
+ssh root@<server-ip>
 export PATH=$PATH:/usr/local/go/bin:/root/go/bin
 cd /root/Code/system_test
 
@@ -174,7 +174,7 @@ Docker images, networks, and container definitions are **preserved**. Only data 
 ### Step 1 — Stop all containers
 
 ```bash
-ssh root@37.27.65.188
+ssh root@<server-ip>
 # Stop chain
 for c in miner-1 miner-2 miner-3 miner-4 sharder-1 sharder-2; do
     docker stop "$c" 2>/dev/null || true
@@ -355,7 +355,7 @@ Sharder (events_db) → Kafka (198.19.0.99:9092, SASL) → 0box (zbox DB) → Vu
 ### Quick Fix — One Command
 
 ```bash
-ssh root@37.27.65.188
+ssh root@<server-ip>
 cd /root/Code/system_test
 bash scripts/deploy_local.sh fix-kafka
 ```
@@ -377,7 +377,7 @@ This runs all recovery steps automatically:
 
 **Fix**:
 ```bash
-ssh root@37.27.65.188
+ssh root@<server-ip>
 sed -i 's/"last_block_events"/"block_events"/g' \
   /root/Code/0chain/code/go/0chain.net/chaincore/chain/entity.go
 
@@ -739,10 +739,10 @@ go vet ./tests/tokenomics_tests/
 ```bash
 sshpass -p '<server-password>' rsync -avz \
   --exclude 'zbox' --exclude 'zwallet' --exclude 'mc' --exclude '.git' \
-  /Users/saswatabasu/Code/system_test/ root@37.27.65.188:/root/Code/system_test/
+  /Users/saswatabasu/Code/system_test/ root@<server-ip>:/root/Code/system_test/
 
 # Restore Linux CLI binaries (rsync overwrites them with Mac versions)
-sshpass -p '<server-password>' ssh root@37.27.65.188 \
+sshpass -p '<server-password>' ssh root@<server-ip> \
   "cp /root/Code/zboxcli/zbox /root/Code/system_test/tests/cli_tests/zbox && \
    cp /root/Code/zwalletcli/zwallet /root/Code/system_test/tests/cli_tests/zwallet"
 ```
@@ -752,7 +752,7 @@ sshpass -p '<server-password>' ssh root@37.27.65.188 \
 Before every test run, kill any leftover processes:
 
 ```bash
-sshpass -p '<server-password>' ssh root@37.27.65.188 \
+sshpass -p '<server-password>' ssh root@<server-ip> \
   "pkill -f '\.test' || true; pkill -f 'go test' || true; sleep 2; \
    ps aux | grep '\.test' | grep -v grep"
 # Verify output shows NOTHING — no test processes running
@@ -787,7 +787,7 @@ bash scripts/deploy_local.sh smoke
 ### Running Tests Directly (for targeted debugging)
 
 ```bash
-ssh root@37.27.65.188
+ssh root@<server-ip>
 export PATH=$PATH:/usr/local/go/bin:/root/go/bin
 cd /root/Code/system_test
 
@@ -827,18 +827,18 @@ The dashboard is refreshed by a cron job running `refresh-0chain-logs.sh` every 
 
 ```bash
 # Watch API test progress
-ssh root@37.27.65.188 "tail -f /tmp/test_api.log"
+ssh root@<server-ip> "tail -f /tmp/test_api.log"
 
 # Count results so far
-ssh root@37.27.65.188 "grep -c '^--- PASS:' /tmp/test_api.log; \
+ssh root@<server-ip> "grep -c '^--- PASS:' /tmp/test_api.log; \
   grep -c '^--- FAIL:' /tmp/test_api.log; \
   grep -c '^--- SKIP:' /tmp/test_api.log"
 
 # See failing tests
-ssh root@37.27.65.188 "grep '^--- FAIL:' /tmp/test_api.log"
+ssh root@<server-ip> "grep '^--- FAIL:' /tmp/test_api.log"
 
 # Check if done
-ssh root@37.27.65.188 "grep -E '^(PASS|FAIL|ok|DONE)' /tmp/test_api.log | tail -5"
+ssh root@<server-ip> "grep -E '^(PASS|FAIL|ok|DONE)' /tmp/test_api.log | tail -5"
 ```
 
 ### Pre-Test Reset (Before Full Suite Runs)
@@ -915,7 +915,7 @@ zwallet sc-update-config \
 
 ```bash
 # SSH to server
-sshpass -p '<server-password>' ssh root@37.27.65.188
+sshpass -p '<server-password>' ssh root@<server-ip>
 
 # Set PATH (always)
 export PATH=$PATH:/usr/local/go/bin:/root/go/bin

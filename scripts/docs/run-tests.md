@@ -49,10 +49,10 @@ If `go vet` fails, fix the issue before proceeding. Common issues:
 # Sync code (EXCLUDE Mac binaries and .git)
 sshpass -p '<server-password>' rsync -avz \
   --exclude 'zbox' --exclude 'zwallet' --exclude 'mc' --exclude '.git' \
-  /Users/saswatabasu/Code/system_test/ root@37.27.65.188:/root/Code/system_test/
+  /Users/saswatabasu/Code/system_test/ root@<server-ip>:/root/Code/system_test/
 
 # CRITICAL: Restore Linux CLI binaries (rsync overwrites them with Mac versions)
-sshpass -p '<server-password>' ssh root@37.27.65.188 \
+sshpass -p '<server-password>' ssh root@<server-ip> \
   "cp /root/Code/zboxcli/zbox /root/Code/system_test/tests/cli_tests/zbox && \
    cp /root/Code/zwalletcli/zwallet /root/Code/system_test/tests/cli_tests/zwallet"
 ```
@@ -62,7 +62,7 @@ sshpass -p '<server-password>' ssh root@37.27.65.188 \
 Always kill old test processes before starting new ones:
 
 ```bash
-sshpass -p '<server-password>' ssh root@37.27.65.188 \
+sshpass -p '<server-password>' ssh root@<server-ip> \
   "pkill -f 'go test' || true; pkill -f 'api_tests.test' || true; pkill -f 'cli_tests.test' || true"
 ```
 
@@ -72,12 +72,12 @@ sshpass -p '<server-password>' ssh root@37.27.65.188 \
 
 ```bash
 # API: Run specific test functions
-ssh root@37.27.65.188 "export PATH=\$PATH:/usr/local/go/bin:/root/go/bin && \
+ssh root@<server-ip> "export PATH=\$PATH:/usr/local/go/bin:/root/go/bin && \
   cd /root/Code/system_test && \
   go test -run 'TestSpecificName' -v -timeout 30m ./tests/api_tests/ 2>&1 | tee /tmp/api_test.log"
 
 # CLI: Run specific test functions
-ssh root@37.27.65.188 "export PATH=\$PATH:/usr/local/go/bin:/root/go/bin && \
+ssh root@<server-ip> "export PATH=\$PATH:/usr/local/go/bin:/root/go/bin && \
   cd /root/Code/system_test && \
   go test -run 'TestSpecificName' -v -timeout 60m ./tests/cli_tests/ 2>&1 | tee /tmp/cli_test.log"
 
@@ -312,7 +312,7 @@ When a test fails, follow this order:
 
 ```bash
 # SSH
-sshpass -p '<server-password>' ssh root@37.27.65.188
+sshpass -p '<server-password>' ssh root@<server-ip>
 
 # PATH (always set this)
 export PATH=$PATH:/usr/local/go/bin:/root/go/bin

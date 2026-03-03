@@ -57,7 +57,7 @@ If WASM build fails, apps fall back to CDN download via `USE_CACHED_WASM=true`.
 ### Firebase (box-dev-ce8bf)
 
 ```
-FBASE_API_KEY=AIzaSyBvR4zq1ZtYbQ-5Sha1P9PGLZr3QPn2jaY
+FBASE_API_KEY=<firebase-api-key>
 FBASE_AUTH_DOMAIN=box-dev-ce8bf.firebaseapp.com
 FBASE_PROJECT_ID=box-dev-ce8bf
 FBASE_STORAGE_BUCKET=box-dev-ce8bf.firebasestorage.app

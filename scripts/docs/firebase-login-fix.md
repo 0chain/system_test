@@ -27,10 +27,10 @@ Once you have the JSON key file:
 
 ```bash
 # Upload the key file to the server (from your local machine)
-scp /path/to/downloaded-key.json root@37.27.65.188:/root/Code/0box/docker.local/config/0box_firebase_key.json
+scp /path/to/downloaded-key.json root@<server-ip>:/root/Code/0box/docker.local/config/0box_firebase_key.json
 
 # Then restart 0box
-ssh root@37.27.65.188 'docker restart 0box'
+ssh root@<server-ip> 'docker restart 0box'
 ```
 
 This will fix Vult login, Blimp OTP, all zauth API tests, and the Vult/Blimp signup flows.
@@ -39,7 +39,7 @@ This will fix Vult login, Blimp OTP, all zauth API tests, and the Vult/Blimp sig
 
 ```
 Project: box-dev-ce8bf
-apiKey: AIzaSyBvR4zq1ZtYbQ-5Sha1P9PGLZr3QPn2jaY
+apiKey: <firebase-api-key>
 authDomain: box-dev-ce8bf.firebaseapp.com
 projectId: box-dev-ce8bf
 storageBucket: box-dev-ce8bf.firebasestorage.app
