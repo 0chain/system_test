@@ -54,3 +54,5 @@ store
 
 # Local documentation and notes (may contain server IPs/credentials)
 TEST_FIXES_DOCUMENTATION.md
+# Project-local Claude Code guidance (not for public repo)
+CLAUDE.md
