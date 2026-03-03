@@ -11694,6 +11694,11 @@ main() {
     # Phase 9: Update nginx with full service routes, logs, and configs
     setup_nginx || print_warning "Nginx setup had issues (non-critical)"
 
+    # Phase 9b: Seed 0box provider tables so Blimp/Explorer see blobbers immediately.
+    # Kafka health-check events take ~90 min to populate these tables organically.
+    # This bootstraps them from the sharder events_db so apps work right after deploy.
+    seed_0box_providers || print_warning "0box provider seeding had issues (non-critical)"
+
     # Phase 10: Test setup — wallets, configs, funding, tools
     clean_service_databases
     cleanup_stale_test_artifacts
@@ -12041,12 +12046,6 @@ EOF
         seed_0box_providers
 
         print_status "Kafka pipeline fix complete. Verify at /test/results or Explorer."
-        ;;
-    seed-explorer)
-        # Seed 0box provider tables from sharder events_db for Explorer
-        seed_0box_providers
-        # Patch snapshot aggregates (unique_addresses, challenges, rewards stuck at 0)
-        fix_snapshot_aggregates
         ;;
     fix-snapshots)
         # Patch 0box snapshot aggregates with real data from events_db.
