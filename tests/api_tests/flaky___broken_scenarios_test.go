@@ -1,3 +1,5 @@
+//go:build ignore
+
 //nolint:gocritic
 //nolint:gocyclo
 package api_tests

@@ -48,7 +48,6 @@ func NewVerifyOtpDetails() map[string]string {
 func Test0BoxOwner(testSetup *testing.T) {
 	require.True(testSetup, isZboxResponding(), "0box service must be available")
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	t.RunSequentially("create owner without existing userID should work", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)

@@ -56,7 +56,6 @@ func Create0boxTestWallet(t *test.SystemTest, headers map[string]string) error {
 func Test0BoxWallet(testSetup *testing.T) {
 	require.True(testSetup, isZboxResponding(), "0box service must be available")
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	t.RunSequentially("create wallet without owner should not work", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)

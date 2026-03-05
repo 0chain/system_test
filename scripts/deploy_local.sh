@@ -1063,11 +1063,22 @@ init_chain_config() {
     local W="--wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE"
     # SC owner wallet for sc-update-config (must match the SC owner_id in genesis)
     local WO="--wallet $ZCN_SC_OWNER_WALLET --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE"
-    # MinerSC may have a different owner on chains with historical state (miner_sc_owner.json)
+    # MinerSC may have a different owner on chains with historical state (miner_sc_owner.json).
+    # Verify client_id matches on-chain MinerSC owner_id — stale files cause auth failures on fresh chains.
     local WOM="$WO"
+    local _miner_sc="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
+    local _sharder_wom="${SHARDER_BASE_URL:-http://198.18.0.81:7171}"
+    local _onchain_miner_owner
+    _onchain_miner_owner=$(curl -sf "${_sharder_wom}/v1/screst/${_miner_sc}/configs" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); f=d.get('fields',d); print(f.get('owner_id',''))" 2>/dev/null || echo "")
     if [ -f "${ZCN_CONFIG_DIR}/miner_sc_owner.json" ]; then
-        WOM="--wallet miner_sc_owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE"
-        print_status "Using miner_sc_owner.json for mn-update-config (MinerSC owner differs from StorageSC owner)"
+        local _wom_id
+        _wom_id=$(python3 -c "import json; print(json.load(open('${ZCN_CONFIG_DIR}/miner_sc_owner.json')).get('client_id',''))" 2>/dev/null || echo "")
+        if [ -n "$_onchain_miner_owner" ] && [ "$_wom_id" = "$_onchain_miner_owner" ]; then
+            WOM="--wallet miner_sc_owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE"
+            print_status "Using miner_sc_owner.json for mn-update-config (verified MinerSC owner match)"
+        else
+            print_status "miner_sc_owner.json (${_wom_id:0:16}...) != on-chain MinerSC owner (${_onchain_miner_owner:0:16}...) — using owner.json"
+        fi
     fi
 
     # ========== Restore StorageSC owner if a test changed it ==========
@@ -1167,6 +1178,11 @@ init_chain_config() {
     # "error splitting rewards by ratio: uint64 minus overflow"
     run_cmd "Setting share_ratio=0.16 (must be < 1, prevents payfees overflow)..." \
         "$ZWALLET mn-update-config --keys 'share_ratio' --values '0.16' $WOM"
+
+    # health_check_period=60m gives a 30-min buffer vs the Atlus isGoodHealth threshold of 90m.
+    # Default 90m == threshold → any missed cycle makes miner appear unhealthy in Atlus.
+    run_cmd "Setting health_check_period=60m (gives buffer vs 90m Atlus threshold)..." \
+        "$ZWALLET mn-update-config --keys 'health_check_period' --values '60m' $WOM"
 
     # Configure global settings (global-update-config requires SC owner wallet)
     run_cmd "Enabling view change..." \
@@ -2697,6 +2713,99 @@ ensure_blobber_hdd_tablespace() {
     fi
 }
 
+# Patch zauth server.go to allow faucet "pour" method for split wallets.
+# By default, AvailableRestrictions in gosdk doesn't include "pour",
+# so zauth returns "permission denied" when a split wallet tries faucet.
+patch_zauth_faucet() {
+    local zauth_server_go="${BASE_DIR}/zauth-server/pkg/app/server.go"
+    if [ ! -f "$zauth_server_go" ]; then
+        print_warning "zauth server.go not found at $zauth_server_go"
+        return 0
+    fi
+    if grep -q 'Allow faucet pour for split wallets' "$zauth_server_go" 2>/dev/null; then
+        print_status "zauth server.go: faucet pour patch already applied"
+        return 0
+    fi
+    # Add init() that appends "pour" to the token_transfers restriction category
+    python3 - "$zauth_server_go" << 'PYEOF'
+import sys
+with open(sys.argv[1], 'r') as f:
+    content = f.read()
+init_func = '''func init() {
+\t// Allow faucet pour for split wallets
+\tif transfers, ok := zcncore.AvailableRestrictions["token_transfers"]; ok {
+\t\tzcncore.AvailableRestrictions["token_transfers"] = append(transfers, "pour")
+\t}
+}
+
+'''
+content = content.replace('func NewServer(', init_func + 'func NewServer(')
+with open(sys.argv[1], 'w') as f:
+    f.write(content)
+PYEOF
+    print_status "zauth server.go: patched to allow faucet pour for split wallets"
+}
+
+# Patch zcn_blimp.js to force local WASM loading instead of CDN.
+# The default behavior fetches from cdn.blimp.software which may have an older WASM
+# without custom functions (e.g., faucet). Our deploy builds a fresh WASM from gosdk
+# and copies it to each app's public/ dir, so we force loading from local /zcn.wasm.
+patch_wasm_loader_local() {
+    local WEB_APPS_DIR="$1"
+    local WASM_LOADER="${WEB_APPS_DIR}/packages/shared/src/lib/wasm/zcn_blimp.js"
+    if [ ! -f "$WASM_LOADER" ]; then
+        print_warning "zcn_blimp.js not found, skipping WASM loader patch"
+        return 0
+    fi
+    if grep -q 'FORCE LOCAL WASM' "$WASM_LOADER" 2>/dev/null; then
+        print_status "zcn_blimp.js: local WASM patch already applied"
+        return 0
+    fi
+    python3 - "$WASM_LOADER" << 'PYEOF'
+import sys
+wasm_loader = sys.argv[1]
+with open(wasm_loader, 'r') as f:
+    content = f.read()
+
+# Replace getWasmUrl function to always return local path
+old_start = 'const getWasmUrl = () => {'
+new_func_marker = 'const getCachedWasmResponse'
+start_idx = content.find(old_start)
+end_idx = content.find(new_func_marker)
+if start_idx == -1 or end_idx == -1:
+    print('WARNING: Could not find getWasmUrl function boundaries')
+    sys.exit(0)
+
+new_func = """const getWasmUrl = () => {
+  const isEnterpriseMode = getIsEnterpriseMode()
+  let suffix = 'mainnet'
+  const currentLocation = window?.location?.hostname
+  const isHost = host => currentLocation?.includes(host)
+  if (isHost('localhost') || isHost('mob')) suffix = 'mob'
+  else if (isHost('dev') || isHost('mob.desktop')) suffix = 'dev'
+  else if (isHost('demo')) suffix = 'demo'
+  else if (isHost('staging')) suffix = 'staging'
+  else if (isHost('test')) suffix = 'test'
+  const wasmPath = isEnterpriseMode ? '/enterprise-zcn.wasm' : '/zcn.wasm'
+  // FORCE LOCAL WASM - bypass CDN and caching (deploy_local.sh builds fresh WASM from gosdk)
+  return { suffix, wasmUrl: wasmPath, wasmPath, defaultUrl: wasmPath }
+}
+
+"""
+content = content[:start_idx] + new_func + content[end_idx:]
+
+# Also make getCachedWasmResponse always return null to skip stale browser cache
+old_cache = 'const getCachedWasmResponse = async ({ wasmCache, wasmPath }) => {'
+if old_cache in content and 'return null // FORCE LOCAL WASM' not in content:
+    content = content.replace(old_cache, old_cache + '\n  return null // FORCE LOCAL WASM - skip cache')
+
+with open(wasm_loader, 'w') as f:
+    f.write(content)
+print('OK: zcn_blimp.js patched for local WASM')
+PYEOF
+    print_status "zcn_blimp.js: patched to load WASM from local /zcn.wasm (not CDN)"
+}
+
 # Start supporting services
 start_zauth() {
     print_header "Starting zauth-server"
@@ -2722,13 +2831,14 @@ start_zauth() {
         fi
     fi
 
+    # Patch: allow faucet pour for split wallets
+    patch_zauth_faucet
+
     cd "${BASE_DIR}/zauth-server/docker.local"
 
-    # Build zauthserver image if it doesn't exist (e.g. after docker system prune)
-    if ! docker image inspect zauthserver > /dev/null 2>&1; then
-        print_status "Building zauthserver Docker image..."
-        docker build -f Dockerfile -t zauthserver ../ 2>&1 || print_error "zauthserver image build failed"
-    fi
+    # Build zauthserver image (always rebuild to pick up patches)
+    print_status "Building zauthserver Docker image..."
+    docker build -f Dockerfile -t zauthserver ../ 2>&1 || print_error "zauthserver image build failed"
 
     # Start only zauth and postgres (skip pgadmin — we manage pgadmin separately with auto-login)
     docker compose -p zauth up -d --force-recreate zauthserver postgres
@@ -2801,12 +2911,19 @@ start_elasticsearch() {
 
     # Limit Elasticsearch heap to 2GB. Without this, ES 7.17 auto-sizes to 50% of RAM
     # (e.g. 31GB on a 64GB server), causing severe memory pressure and swap thrashing.
-    # 2GB is more than enough for a test environment's 0box indexing needs.
+    # 512MB heap: enough for test environment indexing, prevents OOM kills on shared servers.
+    # Default ES heap (50% of RAM) can be >30GB on 62GB servers, causing OOM during startup.
     local ES_COMPOSE="${BASE_DIR}/0box/docker.local/docker-compose.yml"
-    if [ -f "$ES_COMPOSE" ] && ! grep -q "ES_JAVA_OPTS" "$ES_COMPOSE"; then
-        print_status "Adding ES_JAVA_OPTS=-Xms2g -Xmx2g to elasticsearch compose..."
-        sed -i.bak '/discovery.type=single-node/a\      - ES_JAVA_OPTS=-Xms2g -Xmx2g' "$ES_COMPOSE"
-        rm -f "${ES_COMPOSE}.bak"
+    if [ -f "$ES_COMPOSE" ]; then
+        if ! grep -q "ES_JAVA_OPTS" "$ES_COMPOSE"; then
+            print_status "Adding ES_JAVA_OPTS=-Xms512m -Xmx512m to elasticsearch compose..."
+            sed -i.bak '/discovery.type=single-node/a\      - ES_JAVA_OPTS=-Xms512m -Xmx512m' "$ES_COMPOSE"
+            rm -f "${ES_COMPOSE}.bak"
+        else
+            # Update any existing ES_JAVA_OPTS value to 512m
+            sed -i.bak 's|ES_JAVA_OPTS=.*|ES_JAVA_OPTS=-Xms512m -Xmx512m|' "$ES_COMPOSE"
+            rm -f "${ES_COMPOSE}.bak"
+        fi
     fi
 
     # Start from 0box docker.local which includes elasticsearch
@@ -3093,13 +3210,17 @@ PYEOF
 # The 0box repo's default config ships with dev.zus.network — calling this ensures the
 # local chain URLs are always applied before starting/restarting the container.
 patch_web_apps_for_dev() {
-    # Applies two patches to web-apps source for dev/test environments:
+    # Applies three patches to web-apps source for dev/test environments:
     #
     # Fix 1: NEXTAUTH_SECRET in shared/.env
     #   NextAuth requires NEXTAUTH_SECRET or it returns 500 "There is a problem with the
     #   server configuration" on every /api/auth/* request including /api/auth/_log.
     #
-    # Fix 2: user_id in OTP verify body (shared/src/store/user/actions/user.js)
+    # Fix 2: WASM wallet init — !privateKey guard (shared/src/lib/wasm/index.js)
+    #   Without this, wallets with a privateKey but no mnemonic skip setWallet() → all
+    #   blobber ops fail with "invalid client" and login shows "mnemonic required".
+    #
+    # Fix 3: user_id in OTP verify body (shared/src/store/user/actions/user.js)
     #   0box's VerifyPhoneOTPSignup and VerifyPhoneOTPLogin handlers require user_id when
     #   IsDevelopmentNoAuth()=true (no Firebase token to derive UID from). The web app
     #   doesn't send it, causing 400 "user_id is required" → "Error verifying OTP".
@@ -3122,7 +3243,20 @@ patch_web_apps_for_dev() {
         print_status "Added NEXTAUTH_SECRET + NEXTAUTH_URL to shared/.env"
     fi
 
-    # Fix 2: user_id in OTP body
+    # Fix 2: WASM wallet initialization — add !privateKey guard (wasm/index.js)
+    #   Without this, wallets with a privateKey but no cached mnemonic return early from
+    #   getWasm() without calling setWallet() → WASM has no key material → all blobber
+    #   operations fail with "invalid client" and login shows "mnemonic required".
+    #   The upstream source is missing this guard; we patch it here before every build.
+    local WASM_JS="${WEB_APPS_DIR}/packages/shared/src/lib/wasm/index.js"
+    if [ -f "$WASM_JS" ] && grep -q "!mnemonic && !wallet?.is_split) {" "$WASM_JS"; then
+        sed -i "s/if (!mnemonic && !wallet?.is_split) {/if (!mnemonic \&\& !wallet?.is_split \&\& !privateKey) {/" "$WASM_JS"
+        print_status "web-apps wasm/index.js patched (!privateKey guard added)"
+    else
+        print_status "web-apps wasm/index.js: already patched or not found"
+    fi
+
+    # Fix 3: user_id in OTP body
     local USER_JS="${WEB_APPS_DIR}/packages/shared/src/store/user/actions/user.js"
     if [ -f "$USER_JS" ] && ! grep -q "devUserId" "$USER_JS"; then
         python3 - "$USER_JS" << 'PYEOF'
@@ -3150,6 +3284,46 @@ PYEOF
         print_status "web-apps user.js patched (user_id for dev OTP flow)"
     else
         print_status "web-apps user.js already patched (user_id present)"
+    fi
+
+    # Fix 4: mock token dispatch on dev login (verifyOtpTwilio, user.js)
+    # When 0box IsDevelopmentNoAuth() returns no customToken, dispatch synthetic firebaseTokens
+    # so subsequent requests have valid X-App-User-ID and X-App-ID-TOKEN headers.
+    if [ -f "$USER_JS" ] && ! grep -q "mock-token-" "$USER_JS"; then
+        python3 - "$USER_JS" << 'PYEOF'
+import sys
+path = sys.argv[1]
+with open(path) as f:
+    content = f.read()
+
+old = (
+    "    dispatch({ type: types.VERIFY_OTP_SUCCESS, payload: firebaseTokens })\n"
+    "    return defaultResponse\n"
+    "  } catch (e) {"
+)
+new = (
+    "    // Dev mode: 0box returns no customToken when IsDevelopmentNoAuth() is true.\n"
+    "    // Synthesize mock tokens so subsequent API calls have valid X-App-User-ID + X-App-ID-TOKEN.\n"
+    "    const syntheticFirebaseData = {\n"
+    "      uid: devUserId,\n"
+    "      accessToken: 'mock-token-' + devUserId,\n"
+    "      refreshToken: 'mock-token-' + devUserId,\n"
+    "      expirationTime: Date.now() + 3600000,\n"
+    "    }\n"
+    "    dispatch({ type: types.VERIFY_OTP_SUCCESS, payload: syntheticFirebaseData })\n"
+    "    return { data: syntheticFirebaseData }\n"
+    "  } catch (e) {"
+)
+if old in content:
+    with open(path, 'w') as f:
+        f.write(content.replace(old, new, 1))
+    print("Patched user.js: mock token dispatch for dev OTP flow")
+else:
+    print("user.js: mock-token target not found — may already be patched or source changed")
+PYEOF
+        print_status "web-apps user.js patched (mock token dispatch for dev)"
+    else
+        print_status "web-apps user.js mock token already patched"
     fi
 }
 
@@ -3193,7 +3367,11 @@ NEW = (
     '\t\t}\n'
     '\t\townerFromPhone, _ := a.ownersRepo.GetByPhoneNumber(ctx, phoneNumber)\n'
     '\t\tif ownerFromPhone == nil {\n'
-    '\t\t\t_, _ = a.ownersRepo.Update(ctx, &modelV2.OwnerEntity{UserID: userID, PhoneNumber: phoneNumber, Email: email})\n'
+    '\t\t\tdevEmail := email\n'
+    '\t\t\tif devEmail == "" || devEmail == "undefined" || devEmail == "null" {\n'
+    '\t\t\t\tdevEmail = userID + "@dev.zus.network"\n'
+    '\t\t\t}\n'
+    '\t\t\t_, _ = a.ownersRepo.Create(ctx, &modelV2.OwnerEntity{UserName: userID, UserID: userID, PhoneNumber: phoneNumber, Email: devEmail})\n'
     '\t\t}\n'
     '\t\treturn common.JsonMessageDataResponse{Message: "OTP verified successfully"}, nil\n'
     '\t}\n'
@@ -3396,6 +3574,13 @@ start_0box() {
         fi
     fi
 
+    # Fix Elasticsearch heap: default (50% of RAM) can be >30GB on 62GB servers → OOM kill.
+    # 512MB is sufficient for test environment indexing.
+    if [ -f "$BOX_COMPOSE" ] && ! grep -q "ES_JAVA_OPTS" "$BOX_COMPOSE"; then
+        print_status "Adding ES_JAVA_OPTS=-Xms512m -Xmx512m to elasticsearch (prevent OOM)"
+        sed -i 's/- discovery.type=single-node/- discovery.type=single-node\n      - ES_JAVA_OPTS=-Xms512m -Xmx512m/' "$BOX_COMPOSE"
+    fi
+
     # Pin Redis image to 7.4.3-alpine — redis:alpine (v8+) crashes with SIGSEGV (exit 139)
     if grep -q 'redis:alpine' "$BOX_COMPOSE" 2>/dev/null; then
         print_status "Pinning Redis image to redis:7.4.3-alpine (prevents SIGSEGV)..."
@@ -3558,8 +3743,8 @@ fund_0box() {
 
     # Add 0box as free storage assigner using zbox add command
     # --name must match free_storage.name in 0box.yaml (the "assigner" field in markers)
-    # Must use SC owner wallet — only owner can call add_free_storage_assigner
-    sync_wallet_nonce_from_chain "${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}"
+    # Must use SC owner wallet (owner.json) — only owner can call add_free_storage_assigner
+    sync_wallet_nonce_from_chain "${ZCN_CONFIG_DIR}/owner.json"
     print_status "Adding 0box as free storage assigner..."
     local add_output
     add_output=$($ZBOX add \
@@ -3567,7 +3752,7 @@ fund_0box() {
         --key "$box_public_key" \
         --limit 100 \
         --max 10000 \
-        --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>&1 || true)
+        --wallet owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>&1 || true)
     if echo "$add_output" | grep -q "added as free storage assigner"; then
         print_status "Free storage assigner registered: ${box_assigner_name}"
     elif echo "$add_output" | grep -qi "already exist\|already registered"; then
@@ -3710,12 +3895,13 @@ seed_0box_providers() {
 
     # Seed blobbers from events_db
     local blobber_count=0
-    while IFS='|' read -r bid url capacity allocated write_price read_price delegate_wallet is_enterprise; do
+    while IFS='|' read -r bid url capacity allocated offers_total write_price read_price delegate_wallet is_enterprise; do
         bid=$(echo "$bid" | tr -d ' ')
         url=$(echo "$url" | tr -d ' ')
         [ -z "$bid" ] && continue
         capacity=$(echo "$capacity" | tr -d ' ')
         allocated=$(echo "$allocated" | tr -d ' ')
+        offers_total=$(echo "$offers_total" | tr -d ' ')
         write_price=$(echo "$write_price" | tr -d ' ')
         read_price=$(echo "$read_price" | tr -d ' ')
         delegate_wallet=$(echo "$delegate_wallet" | tr -d ' ')
@@ -3725,11 +3911,11 @@ seed_0box_providers() {
         local is_ent_bool='false'
         [ "$is_enterprise" = "t" ] && btype='HotPlus' && is_ent_bool='true'
 
-        run_0box_sql "INSERT INTO blobbers (id, base_url, capacity, allocated, write_price, read_price, delegate_wallet, last_health_check, not_available, is_killed, is_shutdown, brand_id, blobber_type, is_enterprise, created_at, updated_at)
-            VALUES ('$bid', '$url', ${capacity:-0}, ${allocated:-0}, ${write_price:-0}, ${read_price:-0}, '$delegate_wallet', $now_epoch, false, false, false, ${zus_brand_id:-1}, '$btype', $is_ent_bool, to_timestamp($now_epoch), to_timestamp($now_epoch))
-            ON CONFLICT (id) DO UPDATE SET base_url='$url', last_health_check=$now_epoch, not_available=false, brand_id=${zus_brand_id:-1}, updated_at=to_timestamp($now_epoch);" 2>/dev/null
+        run_0box_sql "INSERT INTO blobbers (id, base_url, capacity, allocated, offers_total, write_price, read_price, delegate_wallet, last_health_check, not_available, is_killed, is_shutdown, brand_id, blobber_type, is_enterprise, created_at, updated_at)
+            VALUES ('$bid', '$url', ${capacity:-0}, ${allocated:-0}, ${offers_total:-0}, ${write_price:-0}, ${read_price:-0}, '$delegate_wallet', $now_epoch, false, false, false, ${zus_brand_id:-1}, '$btype', $is_ent_bool, to_timestamp($now_epoch), to_timestamp($now_epoch))
+            ON CONFLICT (id) DO UPDATE SET base_url='$url', offers_total=COALESCE(EXCLUDED.offers_total,0), last_health_check=$now_epoch, not_available=false, brand_id=${zus_brand_id:-1}, updated_at=to_timestamp($now_epoch);" 2>/dev/null
         blobber_count=$((blobber_count + 1))
-    done < <(run_sharder_sql "SELECT id, base_url, capacity, allocated, write_price, read_price, delegate_wallet, is_enterprise FROM blobbers WHERE is_killed=false AND is_shutdown=false ORDER BY id;")
+    done < <(run_sharder_sql "SELECT id, base_url, capacity, allocated, offers_total, write_price, read_price, delegate_wallet, is_enterprise FROM blobbers WHERE is_killed=false AND is_shutdown=false ORDER BY id;")
     print_status "Seeded $blobber_count blobbers"
 
     # Ensure challenge columns have DEFAULT 0 NOT NULL — older 0box schema may have them as nullable,
@@ -3795,19 +3981,20 @@ seed_0box_providers() {
 
     # Seed validators from events_db
     local validator_count=0
-    while IFS='|' read -r vid url delegate_wallet service_charge num_delegates; do
+    while IFS='|' read -r vid url delegate_wallet service_charge num_delegates total_stake; do
         vid=$(echo "$vid" | tr -d ' ')
         url=$(echo "$url" | tr -d ' ')
         [ -z "$vid" ] && continue
         delegate_wallet=$(echo "$delegate_wallet" | tr -d ' ')
         service_charge=$(echo "$service_charge" | tr -d ' ')
         num_delegates=$(echo "$num_delegates" | tr -d ' ')
+        total_stake=$(echo "$total_stake" | tr -d ' ')
 
-        run_0box_sql "INSERT INTO validators (id, base_url, delegate_wallet, service_charge, num_delegates, last_health_check, is_killed, is_shutdown, created_at, updated_at)
-            VALUES ('$vid', '$url', '$delegate_wallet', ${service_charge:-0}, ${num_delegates:-0}, $now_epoch, false, false, to_timestamp($now_epoch), to_timestamp($now_epoch))
-            ON CONFLICT (id) DO UPDATE SET base_url='$url', last_health_check=$now_epoch, updated_at=to_timestamp($now_epoch);" 2>/dev/null
+        run_0box_sql "INSERT INTO validators (id, base_url, delegate_wallet, service_charge, num_delegates, total_stake, last_health_check, is_killed, is_shutdown, created_at, updated_at)
+            VALUES ('$vid', '$url', '$delegate_wallet', ${service_charge:-0}, ${num_delegates:-0}, ${total_stake:-0}, $now_epoch, false, false, to_timestamp($now_epoch), to_timestamp($now_epoch))
+            ON CONFLICT (id) DO UPDATE SET base_url='$url', total_stake=${total_stake:-0}, last_health_check=$now_epoch, updated_at=to_timestamp($now_epoch);" 2>/dev/null
         validator_count=$((validator_count + 1))
-    done < <(run_sharder_sql "SELECT id, base_url, delegate_wallet, service_charge, num_delegates FROM validators WHERE is_killed=false AND is_shutdown=false ORDER BY id;")
+    done < <(run_sharder_sql "SELECT id, base_url, delegate_wallet, service_charge, num_delegates, total_stake FROM validators WHERE is_killed=false AND is_shutdown=false ORDER BY id;")
     print_status "Seeded $validator_count validators"
 
     print_status "Provider seeding complete: $blobber_count blobbers, $miner_count miners, $sharder_count sharders, $validator_count validators"
@@ -4044,6 +4231,12 @@ EOF
     # (without waiting for first Kafka health check event ~60-90 min from now)
     print_status "Re-seeding 0box provider tables from sharder events_db..."
     seed_0box_providers || print_warning "Provider seeding had issues (non-critical)"
+
+    # Step 9: Seed provider_rewards + challenges + blobber stats from sharder events_db
+    # Without this, provider_rewards table starts empty and reward charts show 0 on Atlus.
+    # (On a fresh deploy the UPDATE-only path in RewardProviders() has no rows to update.)
+    print_status "Seeding provider_rewards + historical data from sharder events_db..."
+    seed_0box_historical_data || print_warning "Historical data seeding had issues (non-critical)"
 
     print_status "reset-0box complete!"
     print_status "  0box now starts from chain round $reset_round"
@@ -4546,23 +4739,32 @@ check_and_fund_providers() {
         fi
     done
 
-    # Enterprise blobbers (eblobber-1..5)
-    for i in 1 2 3 4 5; do
-        local eblobber_id=$(docker logs eblobber-$i 2>&1 | grep "ID:" | head -1 | awk '{print $NF}' 2>/dev/null)
-        if [ -n "$eblobber_id" ] && [ ${#eblobber_id} -ge 60 ]; then
-            local bal=$(_get_balance "$eblobber_id")
-            bal_names+=("eblobber-${i}")
-            bal_values+=("$bal")
-            local is_low=$(python3 -c "print(1 if float('${bal}') < ${MIN_BLOBBER_BALANCE} else 0)" 2>/dev/null || echo "0")
-            if [ "$is_low" = "1" ]; then
-                bal_statuses+=("LOW")
-                fund_queue_ids+=("$eblobber_id")
-                fund_queue_amounts+=("$TOP_UP_AMOUNT")
-                fund_queue_names+=("eblobber-${i}")
-            else
-                bal_statuses+=("OK")
-            fi
+    # Enterprise blobbers — get IDs from chain (is_enterprise=true), not docker logs
+    local _eblob_json
+    _eblob_json=$(curl -s --max-time 8 "${sharder_url}/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/getblobbers?limit=20" 2>/dev/null)
+    local _eblob_ids
+    _eblob_ids=$(echo "$_eblob_json" | python3 -c "
+import sys,json
+d=json.load(sys.stdin); nodes=d.get('Nodes',d.get('nodes',[]))
+for b in nodes:
+    if b.get('is_enterprise',False): print(b['id'])
+" 2>/dev/null || true)
+    local _eblob_idx=1
+    for eblobber_id in $_eblob_ids; do
+        [ -z "$eblobber_id" ] && continue
+        local bal=$(_get_balance "$eblobber_id")
+        bal_names+=("eblobber-${_eblob_idx}")
+        bal_values+=("$bal")
+        local is_low=$(python3 -c "print(1 if float('${bal}') < ${MIN_BLOBBER_BALANCE} else 0)" 2>/dev/null || echo "0")
+        if [ "$is_low" = "1" ]; then
+            bal_statuses+=("LOW")
+            fund_queue_ids+=("$eblobber_id")
+            fund_queue_amounts+=("$TOP_UP_AMOUNT")
+            fund_queue_names+=("eblobber-${_eblob_idx}")
+        else
+            bal_statuses+=("OK")
         fi
+        _eblob_idx=$((_eblob_idx + 1))
     done
 
     # Validators (1-12)
@@ -4701,142 +4903,211 @@ check_and_fund_providers() {
 
     # ===== Stake on miners and sharders (if not already staked) =====
     # This ensures miners/sharders have non-zero stake for atlus/explorer dashboard.
-    # NOTE: Genesis miners on fix/dkg-broadcast-fee branch cannot be staked via mn-lock
-    # until after a successful DKG view change initialises their MinerSC stake pools.
-    # mn-lock will return "genesis miner used" until then — this is handled below.
-    # Sharders use a different registration path and CAN always be staked.
+    # Uses magic block to discover miner/sharder IDs (works on all chain versions,
+    # unlike getMinerList/getSharderList which don't exist on the lfb combined-SC branch).
+    # Uses "zbox sp-lock" (not "zwallet mn-lock" which is deprecated on lfb branch).
     print_status "Ensuring wallet has enough ZCN for staking..."
-    local _w_bal
-    _w_bal=$(${ZWALLET} getbalance --wallet ${ZCN_WALLET_FILE} --configDir ${ZCN_CONFIG_DIR} --config ${ZCN_CONFIG_FILE} --silent 2>/dev/null | grep -oP '[\d.]+(?= ZCN)' | head -1 || echo "0")
-    local _w_bal_int=${_w_bal%.*}
-    if [ "${_w_bal_int:-0}" -lt 200 ]; then
-        print_status "  Wallet balance ${_w_bal} ZCN < 200 ZCN — topping up via faucet..."
-        ${ZWALLET} faucet --methodName pour --input '{}' --tokens 200 \
-            --wallet ${ZCN_WALLET_FILE} --configDir ${ZCN_CONFIG_DIR} --config ${ZCN_CONFIG_FILE} --silent 2>/dev/null || true
+    local _w_bal_raw
+    _w_bal_raw=$(curl -s --max-time 5 "${sharder_url}/v1/client/get/balance?client_id=$(python3 -c "import json; print(json.load(open('${ZCN_WALLET_FILE}'))['client_id'])" 2>/dev/null)" 2>/dev/null \
+        | python3 -c 'import json,sys; print(json.load(sys.stdin).get("balance",0))' 2>/dev/null || echo "0")
+    local _w_bal_zcn=$(python3 -c "print(int(${_w_bal_raw:-0}) // 10000000000)" 2>/dev/null || echo "0")
+    if [ "${_w_bal_zcn:-0}" -lt 500 ]; then
+        print_status "  Wallet balance ~${_w_bal_zcn} ZCN < 500 ZCN — topping up via faucet (pour_limit=10 ZCN each, looping 60x)..."
+        for _i in $(seq 1 60); do
+            $ZBOX faucet --methodName pour --input '{}' --tokens 10 \
+                --wallet ${ZCN_WALLET_FILE} --configDir ${ZCN_CONFIG_DIR} --config ${ZCN_CONFIG_FILE} --silent 2>/dev/null || \
+            ${ZWALLET} faucet --methodName pour --input '{}' --tokens 10 \
+                --wallet ${ZCN_WALLET_FILE} --configDir ${ZCN_CONFIG_DIR} --config ${ZCN_CONFIG_FILE} --silent 2>/dev/null || true
+        done
         sleep 5
     fi
 
     print_status "Checking miner/sharder stake pools..."
+    # Get miner/sharder IDs from the magic block (works on all chain versions).
+    local _mb_json
+    _mb_json=$(curl -s --max-time 10 "${sharder_url}/v1/block/get/latest_finalized_magic_block" 2>/dev/null)
+
     local miner_ids
-    # NOTE: total_stake lives in stake_pool, NOT simple_miner. Read from correct field.
-    miner_ids=$(curl -s --max-time 10 "${sharder_url}/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getMinerList" 2>/dev/null | python3 -c "
+    miner_ids=$(echo "$_mb_json" | python3 -c "
 import json,sys
 try:
-    data=json.load(sys.stdin)
-    for n in data.get('Nodes',[]):
-        sm = n.get('simple_miner') or n
-        sp = n.get('stake_pool') or {}
-        mid = sm.get('id','')
-        total_stake = sp.get('total_stake', 0)
-        if mid and total_stake == 0:
-            print(mid)
+    d=json.load(sys.stdin)
+    mb = d.get('magic_block', d)
+    for m in mb.get('miners',{}).get('nodes',[]):
+        mid = m if isinstance(m, str) else m.get('id','')
+        if mid: print(mid)
 except: pass
 " 2>/dev/null || true)
 
     local sharder_ids
-    sharder_ids=$(curl -s --max-time 10 "${sharder_url}/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9/getSharderList" 2>/dev/null | python3 -c "
+    sharder_ids=$(echo "$_mb_json" | python3 -c "
 import json,sys
 try:
-    data=json.load(sys.stdin)
-    for n in data.get('Nodes',[]):
-        sm = n.get('simple_miner') or n
-        sp = n.get('stake_pool') or {}
-        sid = sm.get('id','')
-        total_stake = sp.get('total_stake', 0)
-        if sid and total_stake == 0:
-            print(sid)
+    d=json.load(sys.stdin)
+    mb = d.get('magic_block', d)
+    for s in mb.get('sharders',{}).get('nodes',[]):
+        sid = s if isinstance(s, str) else s.get('id','')
+        if sid: print(sid)
 except: pass
 " 2>/dev/null || true)
 
     local staked_count=0
-    local genesis_skip=0
+    local already_staked=0
+    local _minersc_addr="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
     while IFS= read -r mid; do
         [ -z "$mid" ] && continue
+        # Check current stake via nodeStat on MinerSC
+        local _cur_stake
+        _cur_stake=$(curl -s --max-time 5 "${sharder_url}/v1/screst/${_minersc_addr}/nodeStat?id=${mid}" 2>/dev/null \
+            | python3 -c 'import json,sys; d=json.load(sys.stdin); sp=d.get("stake_pool",{}); print(sp.get("total_stake",0))' 2>/dev/null || echo "0")
+        if [ "${_cur_stake:-0}" -gt 0 ]; then
+            already_staked=$((already_staked + 1))
+            continue
+        fi
         print_status "  Staking 10 ZCN on miner ${mid:0:16}..."
-        local _mn_out
-        _mn_out=$($ZWALLET mn-lock --miner_id "$mid" --tokens 10 \
+        local _sp_out
+        _sp_out=$($ZBOX sp-lock --miner_id "$mid" --tokens 10 \
             --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>&1) || true
-        if echo "$_mn_out" | grep -q "genesis miner used"; then
+        if echo "$_sp_out" | grep -q "genesis miner used"; then
             print_warning "  Miner ${mid:0:16}: genesis miner — stake pool not yet initialised."
-            print_warning "  Miners become stakeable after the first successful DKG view change."
-            genesis_skip=$((genesis_skip + 1))
-        else
+        elif echo "$_sp_out" | grep -q "locked"; then
             staked_count=$((staked_count + 1))
+        else
+            print_warning "  Miner ${mid:0:16}: sp-lock failed: $_sp_out"
         fi
         sleep 2
     done <<< "$miner_ids"
 
-    if [ "$genesis_skip" -gt 0 ]; then
-        print_warning "$genesis_skip miner(s) skipped (genesis restriction). They earn block rewards"
-        print_warning "but cannot be externally staked until DKG view change completes."
-    fi
-
     while IFS= read -r sid; do
         [ -z "$sid" ] && continue
+        local _cur_stake
+        _cur_stake=$(curl -s --max-time 5 "${sharder_url}/v1/screst/${_minersc_addr}/nodeStat?id=${sid}" 2>/dev/null \
+            | python3 -c 'import json,sys; d=json.load(sys.stdin); sp=d.get("stake_pool",{}); print(sp.get("total_stake",0))' 2>/dev/null || echo "0")
+        if [ "${_cur_stake:-0}" -gt 0 ]; then
+            already_staked=$((already_staked + 1))
+            continue
+        fi
         print_status "  Staking 10 ZCN on sharder ${sid:0:16}..."
-        $ZWALLET mn-lock --sharder_id "$sid" --tokens 10 \
+        $ZBOX sp-lock --sharder_id "$sid" --tokens 10 \
             --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
         staked_count=$((staked_count + 1))
         sleep 2
     done <<< "$sharder_ids"
 
     if [ "$staked_count" -gt 0 ]; then
-        print_status "Staked on $staked_count miners/sharders"
+        print_status "Staked on $staked_count miners/sharders ($already_staked already had stake)"
     else
-        print_status "All miners/sharders already have stake (or genesis-restricted)"
+        print_status "All miners/sharders already have stake ($already_staked checked)"
     fi
 
-    # ===== Stake on blobbers (sp-lock) if not already staked =====
-    # Critical: blobbers with total_stake=0 are excluded from GetAllocationBlobbers —
-    # no stake means no allocations can be created (Vult/Blimp get "0 blobbers" error).
-    print_status "Checking blobber stake pools..."
-    local sharder_url_storage="http://198.18.0.82:7172"
+    # ===== Stake all storage providers (blobbers + enterprise blobbers + validators) =====
+    # Idempotent: queries current stake from chain, only tops up if below MIN_PROVIDER_STAKE.
+    # Run once on fresh deploy; subsequent runs are fast no-ops if already staked.
+    # Why 20 ZCN minimum:
+    #   - blobbers with total_stake=0 are excluded from GetAllocationBlobbers entirely
+    #   - block rewards are proportional to stake (zeta formula): more stake = more rewards
+    #   - validators need stake to be selected for challenges (validators_per_challenge filter)
+    local MIN_PROVIDER_STAKE=${3:-20}  # ZCN — third arg overrides, default 20
     local storage_sc_addr="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
-    local blobber_stake_ids
-    blobber_stake_ids=$(curl -s --max-time 15 \
-        "${sharder_url_storage}/v1/screst/${storage_sc_addr}/getblobbers?active=true" 2>/dev/null | python3 -c "
-import json,sys
-try:
-    data=json.load(sys.stdin)
-    for b in data.get('Nodes',[]):
-        bid = b.get('id','')
-        is_enterprise = b.get('is_enterprise', False)
-        total_stake = b.get('total_stake', 0)
-        if bid and not is_enterprise and total_stake == 0:
-            print(bid)
-except: pass
-" 2>/dev/null || true)
 
-    local blobber_staked_count=0
-    while IFS= read -r bid; do
-        [ -z "$bid" ] && continue
-        print_status "  Staking 1 ZCN on blobber ${bid:0:16}..."
-        $ZBOX sp-lock \
-            --blobber_id "$bid" \
-            --tokens 1 \
-            --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>&1 | \
-            grep -v "^0chain-core-sdk" || true
-        blobber_staked_count=$((blobber_staked_count + 1))
-        sleep 3
-    done <<< "$blobber_stake_ids"
+    print_status "Checking storage provider stake pools (blobbers + validators, min ${MIN_PROVIDER_STAKE} ZCN)..."
 
-    if [ "$blobber_staked_count" -gt 0 ]; then
-        print_status "Staked on $blobber_staked_count blobbers"
-        # Verify stake was applied
-        sleep 5
-        local still_unstaked
-        still_unstaked=$(curl -s --max-time 15 \
-            "${sharder_url_storage}/v1/screst/${storage_sc_addr}/getblobbers?active=true" 2>/dev/null | python3 -c "
-import json,sys
-try:
-    data=json.load(sys.stdin)
-    unstaked=[b['id'][:16] for b in data.get('Nodes',[]) if not b.get('is_enterprise') and b.get('total_stake',0)==0]
-    if unstaked: print(f'WARNING: {len(unstaked)} blobbers still have 0 stake: {unstaked}')
-except: pass
-" 2>/dev/null || true)
-        [ -n "$still_unstaked" ] && print_warning "$still_unstaked" || print_status "Blobber stake verification OK"
+    # Ensure funder has enough ZCN to top up all providers
+    # Worst case: (12 blobbers + 5 eblobbers + 12 validators) x 20 ZCN = 580 ZCN
+    local _sp_bal
+    _sp_bal=$($ZWALLET getbalance --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR \
+        --config $ZCN_CONFIG_FILE --silent 2>/dev/null | grep -oP '[\d.]+(?= ZCN)' | head -1 || echo "0")
+    local _sp_bal_int=${_sp_bal%.*}
+    if [ "${_sp_bal_int:-0}" -lt 400 ]; then
+        print_status "  Wallet ${_sp_bal} ZCN — topping up for provider staking (30 x 10 ZCN)..."
+        for _i in $(seq 1 30); do
+            $ZWALLET faucet --methodName pour --input '{}' --tokens 10 \
+                --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE \
+                --silent 2>/dev/null || true
+        done
+    fi
+
+    local sp_staked_count=0
+
+    # ---- Blobbers (regular + enterprise) ----
+    while IFS=$'\t' read -r _bid _gap _type; do
+        [ -z "$_bid" ] || [ "$_gap" -le 0 ] 2>/dev/null && continue
+        print_status "  sp-lock ${_type} ${_bid:0:16}... adding ${_gap} ZCN to reach ${MIN_PROVIDER_STAKE} ZCN"
+        $ZBOX sp-lock --blobber_id "$_bid" --tokens "$_gap" \
+            --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE \
+            --silent 2>/dev/null || true
+        sp_staked_count=$((sp_staked_count + 1))
+        sleep 2
+    done < <(curl -s --max-time 15 \
+        "${sharder_url}/v1/screst/${storage_sc_addr}/getblobbers?limit=30" 2>/dev/null | \
+        python3 -c "
+import json,sys,math
+MIN=int('${MIN_PROVIDER_STAKE}')
+d=json.load(sys.stdin); nodes=d.get('Nodes',d.get('nodes',[]))
+for b in nodes:
+    bid=b.get('id',''); stake_zcn=b.get('total_stake',0)/1e10
+    gap=math.ceil(max(0, MIN-stake_zcn))
+    if bid and gap>0:
+        t='eblobber' if b.get('is_enterprise',False) else 'blobber'
+        print(f'{bid}\t{gap}\t{t}')
+" 2>/dev/null)
+
+    # ---- Validators ----
+    while IFS=$'\t' read -r _vid _gap; do
+        [ -z "$_vid" ] || [ "$_gap" -le 0 ] 2>/dev/null && continue
+        print_status "  sp-lock validator ${_vid:0:16}... adding ${_gap} ZCN to reach ${MIN_PROVIDER_STAKE} ZCN"
+        $ZBOX sp-lock --validator_id "$_vid" --tokens "$_gap" \
+            --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE \
+            --silent 2>/dev/null || true
+        sp_staked_count=$((sp_staked_count + 1))
+        sleep 2
+    done < <(curl -s --max-time 15 \
+        "${sharder_url}/v1/screst/${storage_sc_addr}/validators?limit=20" 2>/dev/null | \
+        python3 -c "
+import json,sys,math
+MIN=int('${MIN_PROVIDER_STAKE}')
+d=json.load(sys.stdin)
+nodes=d if isinstance(d,list) else d.get('nodes',[])
+for v in nodes:
+    vid=v.get('validator_id',''); stake_zcn=v.get('stake_total',0)/1e10
+    gap=math.ceil(max(0, MIN-stake_zcn))
+    if vid and gap>0:
+        print(f'{vid}\t{gap}')
+" 2>/dev/null)
+
+    if [ "$sp_staked_count" -gt 0 ]; then
+        print_status "Topped up stake on $sp_staked_count storage provider(s)"
     else
-        print_status "All blobbers already have stake"
+        print_status "All storage providers at or above ${MIN_PROVIDER_STAKE} ZCN stake — no staking needed"
+    fi
+
+    # Configure enterprise blobbers: ensure correct write_price, service_charge, not_available.
+    # Idempotent — safe to re-run. Also handles blobbers that registered after the initial deploy.
+    local _eb_ids
+    _eb_ids=$($ZBOX ls-blobbers --json --silent \
+        --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>/dev/null | \
+        jq -r '.[] | select(.is_enterprise == true or (.url | test("198\\.18\\.0\\.20[1-5]|:507[1-5]|eblobber"))) | .id' 2>/dev/null | grep -v '^$' || true)
+    if [ -n "$_eb_ids" ]; then
+        local _eb_count=0
+        _eb_count=$(echo "$_eb_ids" | wc -l | tr -d ' ')
+        print_status "Configuring $_eb_count enterprise blobber(s) (write_price=0.001, service_charge=0.3, not_available=true)..."
+        for _ebid in $_eb_ids; do
+            $ZBOX bl-update \
+                --blobber_id "$_ebid" \
+                --read_price 0 \
+                --write_price 0.001 \
+                --service_charge 0.3 \
+                --storage_version 1 \
+                --num_delegates 100 \
+                --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
+            sleep 1
+            $ZBOX bl-update \
+                --blobber_id "$_ebid" \
+                --not_available true \
+                --wallet owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
+            sleep 1
+        done
+        print_status "Enterprise blobber configuration complete."
     fi
 }
 
@@ -5180,7 +5451,61 @@ except Exception as e: print(f'verify error: {e}')
             --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>&1) || true
         if echo "$update_output" | grep -qi "access denied\|delegate_wallet"; then
             print_error "  bl-update FAILED for ${blobber_id:0:16}... (delegate_wallet mismatch!)"
-            update_failures=$((update_failures + 1))
+            # Step 1: Find the current on-chain delegate_wallet for this blobber
+            local _onchain_dw
+            _onchain_dw=$(curl -s "${SHARDER_URL}/v1/screst/${STORAGE_SC}/getblobbers?limit=50" \
+                | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+for b in d.get('Nodes',d.get('nodes',[])):
+    if b.get('id','') == '$blobber_id':
+        print(b.get('stake_pool_settings',{}).get('delegate_wallet',''))
+        break
+" 2>/dev/null || true)
+            # Step 2: Search wallets.json pool for the old delegate wallet
+            local _wallets_pool="${SYSTEM_TEST_DIR}/tests/cli_tests/config/wallets/wallets.json"
+            local _old_dw_fixed=false
+            if [ -n "$_onchain_dw" ] && [ -f "$_wallets_pool" ]; then
+                print_status "  On-chain delegate_wallet: ${_onchain_dw:0:16}... — searching wallets.json pool"
+                local _tmp_dw_wallet="/tmp/zcn_bl_dw_fix/wallet.json"
+                mkdir -p /tmp/zcn_bl_dw_fix
+                cp "${ZCN_CONFIG_DIR}/${ZCN_CONFIG_FILE}" /tmp/zcn_bl_dw_fix/config.yaml 2>/dev/null || true
+                python3 -c "
+import json, sys
+wallets = json.load(open('$_wallets_pool'))
+for w in wallets if isinstance(wallets, list) else [wallets]:
+    if w.get('client_id','') == '$_onchain_dw':
+        json.dump(w, open('$_tmp_dw_wallet', 'w'))
+        print('found')
+        break
+" 2>/dev/null | grep -q "found" && {
+                    print_status "  Found old delegate wallet — attempting bl-update with it"
+                    local _fix_output
+                    _fix_output=$($ZBOX bl-update \
+                        --blobber_id "$blobber_id" \
+                        --delegate_wallet "$sc_owner_id" \
+                        --wallet wallet.json --configDir /tmp/zcn_bl_dw_fix \
+                        --silent 2>&1) && {
+                        print_status "  bl-update with old delegate wallet succeeded — delegate_wallet fixed to owner"
+                        _old_dw_fixed=true
+                    } || print_warning "  bl-update with old delegate wallet failed: $_fix_output"
+                } || print_warning "  Old delegate wallet ${_onchain_dw:0:16}... not found in wallets.json pool"
+            fi
+            if ! $_old_dw_fixed; then
+                print_warning "  Falling back: restarting blobber container to force re-registration"
+                for _cname in $(docker ps --format '{{.Names}}' | grep -E '^blobber-[0-9]+$'); do
+                    local _cid
+                    _cid=$(docker logs "$_cname" 2>&1 | grep -oP '(?<=client_id=)[a-f0-9]{64}' | head -1)
+                    [ -z "$_cid" ] && _cid=$(docker logs "$_cname" 2>&1 | grep -oP '(?i)(?:ID:|blobber_id:)\s*\K[a-f0-9]{64}' | head -1)
+                    if [ "$_cid" = "$blobber_id" ]; then
+                        docker restart "$_cname" 2>/dev/null || true
+                        print_status "  Restarted $_cname"
+                        sleep 15
+                        break
+                    fi
+                done
+                update_failures=$((update_failures + 1))
+            fi
         fi
         sleep 2
     done
@@ -5264,17 +5589,21 @@ stake_enterprise_blobbers() {
     while [ $poll -lt $max_poll ]; do
         local eblobber_json=$($ZBOX ls-blobbers --json --silent \
             --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>/dev/null || echo "[]")
-        enterprise_ids=$(echo "$eblobber_json" | jq -r '.[] | select(.is_enterprise == true or (.url | test("198\\.18\\.0\\.20[1-5]|:507[1-5]"))) | .id' 2>/dev/null | grep -v '^$' || true)
+        enterprise_ids=$(echo "$eblobber_json" | jq -r '.[] | select(.is_enterprise == true or (.url | test("198\\.18\\.0\\.20[1-5]|:507[1-5]|eblobber"))) | .id' 2>/dev/null | grep -v '^$' || true)
         local count=0
         if [ -n "$enterprise_ids" ]; then
             count=$(echo "$enterprise_ids" | wc -l | tr -d ' ')
         fi
-        if [ "$count" -ge 1 ]; then
-            print_status "Found $count enterprise blobbers on chain"
+        local expected_count
+        expected_count=$(yq_get "enterprise_blobbers.count" 2>/dev/null || echo "5")
+        if [ "$count" -ge "${expected_count:-5}" ]; then
+            print_status "Found all $count enterprise blobbers on chain"
             break
+        elif [ "$count" -ge 1 ]; then
+            print_status "  Found $count/$expected_count enterprise blobbers — waiting for all to register..."
         fi
         poll=$((poll + 1))
-        print_status "  No enterprise blobbers found yet, waiting... (attempt $poll/$max_poll)"
+        print_status "  Enterprise blobbers: $count/$expected_count found, waiting... (attempt $poll/$max_poll)"
         sleep 10
     done
 
@@ -5283,7 +5612,7 @@ stake_enterprise_blobbers() {
             print_status "Staking on enterprise blobber: ${eblobber_id:0:16}..."
             $ZBOX sp-lock \
                 --blobber_id "$eblobber_id" \
-                --tokens 1 \
+                --tokens 20 \
                 --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
             sleep 1
         done
@@ -5454,11 +5783,22 @@ ensure_chain_config() {
 
     local W="--wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE"
     local WO="--wallet $ZCN_SC_OWNER_WALLET --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE"
-    # MinerSC may have a different owner on chains with historical state (miner_sc_owner.json)
+    # MinerSC may have a different owner on chains with historical state (miner_sc_owner.json).
+    # Verify client_id matches on-chain MinerSC owner_id — stale files cause auth failures on fresh chains.
     local WOM="$WO"
+    local _miner_sc2="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
+    local _sharder_wom2="${SHARDER_BASE_URL:-http://198.18.0.81:7171}"
+    local _onchain_miner_owner2
+    _onchain_miner_owner2=$(curl -sf "${_sharder_wom2}/v1/screst/${_miner_sc2}/configs" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); f=d.get('fields',d); print(f.get('owner_id',''))" 2>/dev/null || echo "")
     if [ -f "${ZCN_CONFIG_DIR}/miner_sc_owner.json" ]; then
-        WOM="--wallet miner_sc_owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE"
-        print_status "Using miner_sc_owner.json for mn-update-config (MinerSC owner differs from StorageSC owner)"
+        local _wom_id2
+        _wom_id2=$(python3 -c "import json; print(json.load(open('${ZCN_CONFIG_DIR}/miner_sc_owner.json')).get('client_id',''))" 2>/dev/null || echo "")
+        if [ -n "$_onchain_miner_owner2" ] && [ "$_wom_id2" = "$_onchain_miner_owner2" ]; then
+            WOM="--wallet miner_sc_owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE"
+            print_status "Using miner_sc_owner.json for mn-update-config (verified MinerSC owner match)"
+        else
+            print_status "miner_sc_owner.json (${_wom_id2:0:16}...) != on-chain MinerSC owner (${_onchain_miner_owner2:0:16}...) — using owner.json"
+        fi
     fi
 
     # ========== Restore StorageSC owner if a test changed it ==========
@@ -5559,6 +5899,12 @@ ensure_chain_config() {
     print_status "Setting miner SC: share_ratio=0.16"
     run_cmd "mn-update-config share_ratio" \
         "$ZWALLET mn-update-config --keys 'share_ratio' --values '0.16' $WOM"
+
+    # health_check_period=60m gives a 30-min buffer vs the Atlus isGoodHealth threshold of 90m.
+    # Default 90m == threshold → any missed cycle makes miner appear unhealthy in Atlus.
+    print_status "Setting miner SC: health_check_period=60m"
+    run_cmd "mn-update-config health_check_period" \
+        "$ZWALLET mn-update-config --keys 'health_check_period' --values '60m' $WOM"
 
     # ========== Global Config (requires SC owner wallet) ==========
     print_status "Setting global: view_change=true"
@@ -5698,7 +6044,7 @@ ensure_chain_config() {
     # ========== Validator Config ==========
     print_status "Configuring all validators (num_delegates=200)..."
     local validator_json=$($ZBOX ls-validators --json --silent $W 2>/dev/null || echo "[]")
-    local validator_ids=$(echo "$validator_json" | jq -r '.[].id' 2>/dev/null || true)
+    local validator_ids=$(echo "$validator_json" | jq -r '.[] | (.validator_id // .id)' 2>/dev/null || true)
 
     local vcount=0
     for validator_id in $validator_ids; do
@@ -5827,7 +6173,7 @@ FBASE_API_KEY=${FBASE_API_KEY}
 FBASE_AUTH_DOMAIN=${FBASE_AUTH_DOMAIN}
 FBASE_DB_URL=${FBASE_DB_URL:-https://box-dev-ce8bf.firebaseio.com}
 FBASE_PROJECT_ID=${FBASE_PROJECT_ID:-box-dev-ce8bf}
-FBASE_STORAGE_BUCKET=${FBASE_STORAGE_BUCKET:-box-dev-ce8bf.firebasestorage.app}
+FBASE_STORAGE_BUCKET=${FBASE_STORAGE_BUCKET:-box-dev-ce8bf.appspot.com}
 FBASE_MESSAGING_SENDER_ID=${FBASE_MESSAGING_SENDER_ID:-893964718514}
 FBASE_APP_ID=${FBASE_APP_ID:-1:893964718514:web:6d6f2ee9f96211e64954ab}
 FBASE_SHARE_LINK=${FBASE_SHARE_LINK:-https://zuspublicdev.page.link}
@@ -5936,6 +6282,20 @@ build_web_apps() {
         return 0
     fi
 
+    # Pull latest web-apps from the stable test branch.
+    # Force-checkout discards local changes (e.g. zcn.wasm binary, stale .env edits)
+    # before pulling — we regenerate .env and recopy WASM below anyway.
+    print_status "Updating web-apps to fix/atlus-explorer-improvements..."
+    (
+        cd "$WEB_APPS_DIR"
+        git fetch origin fix/atlus-explorer-improvements 2>/dev/null || true
+        git checkout -f fix/atlus-explorer-improvements 2>/dev/null || true
+        git reset --hard origin/fix/atlus-explorer-improvements 2>/dev/null || \
+            git pull origin fix/atlus-explorer-improvements 2>/dev/null || \
+            print_warning "web-apps git pull failed (using existing code)"
+        print_status "web-apps at: $(git log --oneline -1 2>/dev/null)"
+    )
+
     # Check for required secrets before attempting env file setup
     # The setup_web_app_env_files function uses ${:?} which kills the shell if secrets are missing
     local SECRETS_FILE="${SCRIPT_DIR}/.secrets.env"
@@ -5955,20 +6315,29 @@ build_web_apps() {
     patch_web_apps_for_dev
 
     # Build zcn.wasm from gosdk (required by all web apps)
+    # Uses gosdk_branch from web-apps config section, falls back to gosdk.branch, then master
     local GOSDK_DIR="${BASE_DIR}/gosdk"
-    local GOSDK_BRANCH=$(get_repo_branch "web-apps" "staging")
-    local WASM_DIR="${WEB_APPS_DIR}/packages/nft-core-js/src/wasm"
 
     if [ -d "$GOSDK_DIR" ]; then
-        print_status "Building zcn.wasm from gosdk..."
+        # Checkout the correct gosdk branch for web-apps WASM build
+        checkout_gosdk_for_dependent "web-apps"
         cd "$GOSDK_DIR"
 
+        # Patch: allow setWallet with privateKey but no mnemonic (fixes "mnemonic is required" on login/download)
+        if grep -q 'mnemonic == "" && !isSplit {' wasmsdk/wallet.go 2>/dev/null; then
+            sed -i 's/if mnemonic == "" \&\& !isSplit {/if mnemonic == "" \&\& !isSplit \&\& privateKey == "" {/' wasmsdk/wallet.go
+            print_status "gosdk wasmsdk/wallet.go patched (privateKey guard added)"
+        fi
+
         # Build WASM
-        GOOS=js GOARCH=wasm go build -tags bn256 -o zcn.wasm ./wasmsdk 2>/dev/null || {
+        print_status "Building zcn.wasm from gosdk ($(git log --oneline -1 2>/dev/null))..."
+        CGO_ENABLED=0 GOOS=js GOARCH=wasm go build -ldflags="-s -w" -buildvcs=false -o zcn.wasm ./wasmsdk 2>/dev/null || {
             print_warning "zcn.wasm build failed (may need specific gosdk branch)"
         }
 
         if [ -f "$GOSDK_DIR/zcn.wasm" ]; then
+            local wasm_size=$(du -h "$GOSDK_DIR/zcn.wasm" | cut -f1)
+            print_status "Built zcn.wasm (${wasm_size})"
             # Copy to web-apps packages that need it (src dirs for nft-core-js/zus-sdk)
             for pkg_dir in "${WEB_APPS_DIR}/packages/nft-core-js/src/wasm" \
                            "${WEB_APPS_DIR}/packages/zus-sdk/src/wasm"; do
@@ -5978,8 +6347,8 @@ build_web_apps() {
                     print_status "Copied zcn.wasm to $pkg_dir"
                 fi
             done
-            # Copy to public dirs so browsers get local WASM (USE_CACHED_WASM=false skips CDN)
-            for app in blimp vult bolt shared chimney; do
+            # Copy to public dirs so browsers get local WASM
+            for app in blimp vult bolt shared chimney explorer; do
                 local pub_dir="${WEB_APPS_DIR}/packages/${app}/public"
                 if [ -d "$pub_dir" ]; then
                     cp "$GOSDK_DIR/zcn.wasm" "$pub_dir/zcn.wasm"
@@ -5990,6 +6359,9 @@ build_web_apps() {
     else
         print_warning "gosdk not found at $GOSDK_DIR, cannot build zcn.wasm"
     fi
+
+    # Patch WASM loader to use local /zcn.wasm instead of CDN
+    patch_wasm_loader_local "$WEB_APPS_DIR"
 
     # Install dependencies and build web apps
     cd "$WEB_APPS_DIR"
@@ -6115,6 +6487,18 @@ start_web_apps() {
         sleep 1
     fi
 
+    # SimpleLocalize fix: Remove NEXT_PUBLIC_ORIGIN if set to a wrong port (e.g. localhost:3430).
+    # The i18n loadLocaleFrom runs server-side and reads this var at runtime; remove it so
+    # apps fall through to the SimpleLocalize CDN instead of trying a dead local URL.
+    for app in vult bolt blimp explorer chimney; do
+        local app_env="${WEB_APPS_DIR}/packages/${app}/.env"
+        if [ -f "$app_env" ] && grep -q "^NEXT_PUBLIC_ORIGIN=" "$app_env"; then
+            sed -i.tmp '/^NEXT_PUBLIC_ORIGIN=/d' "$app_env"
+            rm -f "${app_env}.tmp"
+            print_status "Removed NEXT_PUBLIC_ORIGIN from ${app}/.env (SimpleLocalize fix)"
+        fi
+    done
+
     for app in vult bolt blimp explorer chimney; do
         local port=${APP_PORTS[$app]}
         local app_dir="${WEB_APPS_DIR}/packages/${app}"
@@ -6177,12 +6561,14 @@ build_rclone_zus() {
 
     # Ensure we're on the branch that includes the Zus backend.
     # master branch does NOT have the zus backend — feat/zus-backend does.
+    # Use full refspec fetch + create local tracking branch if not present.
     local current_branch
     current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
     if [ "$current_branch" != "$RCLONE_ZUS_BRANCH" ]; then
         print_status "Switching rclone_zus to $RCLONE_ZUS_BRANCH (currently on $current_branch)..."
-        git fetch origin "$RCLONE_ZUS_BRANCH" 2>/dev/null \
-            && git checkout "$RCLONE_ZUS_BRANCH" 2>/dev/null || {
+        git fetch origin "refs/heads/${RCLONE_ZUS_BRANCH}:refs/remotes/origin/${RCLONE_ZUS_BRANCH}" 2>/dev/null || true
+        git checkout "$RCLONE_ZUS_BRANCH" 2>/dev/null \
+            || git checkout -b "$RCLONE_ZUS_BRANCH" "origin/${RCLONE_ZUS_BRANCH}" 2>/dev/null || {
             print_warning "Failed to switch rclone_zus to $RCLONE_ZUS_BRANCH — build may fail"
         }
     else
@@ -6319,13 +6705,17 @@ setup_zs3_test_tools() {
     local CLI_TEST_DIR="${BASE_DIR}/system_test/tests/cli_tests"
 
     # Download mc (MinIO client) for Linux if not present or wrong architecture.
-    # Use `file` command for arch detection — execution-based check fails silently on
-    # some systems when a Mac binary is present (exec format error swallowed by &>/dev/null).
+    # Check ELF magic bytes (7f 45 4c 46) via python3 — portable, no `file` command required.
     local mc_needs_download=false
     if [ ! -f "$CLI_TEST_DIR/mc" ]; then
         mc_needs_download=true
-    elif ! file "$CLI_TEST_DIR/mc" 2>/dev/null | grep -qE 'x86-64|ELF 64-bit'; then
-        print_status "mc binary is wrong architecture ($(file "$CLI_TEST_DIR/mc" 2>/dev/null | cut -d: -f2 | xargs)) — re-downloading Linux amd64..."
+    elif ! python3 -c "
+import sys
+with open('$CLI_TEST_DIR/mc', 'rb') as f:
+    magic = f.read(4)
+sys.exit(0 if magic == b'\x7fELF' else 1)
+" 2>/dev/null; then
+        print_status "mc binary is wrong architecture (not ELF) — re-downloading Linux amd64..."
         mc_needs_download=true
     fi
 
@@ -6587,16 +6977,29 @@ start_zs3server() {
         alloc_flags="--configDir ${ZS3_CONFIG_DIR} --allocationId ${saved_alloc_id}"
     fi
 
+    # Free port 9100 if occupied by a non-minio process (e.g. prometheus-node-exporter)
+    if ss -tlnp 2>/dev/null | grep -q ':9100 '; then
+        local _port_pid
+        _port_pid=$(ss -tlnp 2>/dev/null | grep ':9100 ' | grep -oP 'pid=\K[0-9]+' | head -1)
+        local _port_proc
+        _port_proc=$(ss -tlnp 2>/dev/null | grep ':9100 ' | grep -oP '"\K[^"]+(?=",pid)' | head -1)
+        if [ -n "$_port_pid" ] && ! echo "$_port_proc" | grep -qE 'minio|zs3'; then
+            print_warning "Port 9100 occupied by ${_port_proc} (pid=${_port_pid}) — stopping it to free port for zs3server"
+            kill "$_port_pid" 2>/dev/null || true
+            sleep 2
+        fi
+    fi
+
     MINIO_ROOT_USER="${MINIO_ROOT_USER:-rootroot}" MINIO_ROOT_PASSWORD="${MINIO_ROOT_PASSWORD:-rootroot}" MINIO_BROWSER=OFF \
         nohup ./minio gateway zcn --address :9100 --console-address :9101 ${alloc_flags} 200>&- > /var/log/zs3server.log 2>&1 </dev/null &
     disown
     sleep 5
 
-    # Health check
-    if curl -s http://localhost:9100/minio/health/live > /dev/null 2>&1; then
+    # Health check — use -f so curl fails on non-2xx (prevents false-positive from node-exporter HTML)
+    if curl -sf http://localhost:9100/minio/health/live > /dev/null 2>&1; then
         print_status "zs3server started on port 9100 (healthy)"
     else
-        print_warning "zs3server started but health check failed"
+        print_warning "zs3server health check failed — check /var/log/zs3server.log"
     fi
 
     # Start background renewal loop to keep the allocation alive.
@@ -6723,15 +7126,22 @@ proxy_hide_header Access-Control-Allow-Origin;
 proxy_hide_header Access-Control-Allow-Credentials;
 proxy_hide_header Access-Control-Allow-Methods;
 proxy_hide_header Access-Control-Allow-Headers;
+proxy_hide_header Access-Control-Expose-Headers;
 if ($request_method = OPTIONS) {
     add_header 'Access-Control-Allow-Origin' $http_origin;
     add_header 'Access-Control-Allow-Credentials' 'true';
     add_header 'Access-Control-Allow-Methods' 'GET,POST,PUT,DELETE,OPTIONS';
-    add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-Client-Signature-V2,X-App-Timestamp,ALLOCATION-ID,ALLOCATION-TX';
+    add_header 'Access-Control-Allow-Headers' $http_access_control_request_headers;
+    add_header 'Access-Control-Max-Age' 1728000;
+    add_header 'Cross-Origin-Resource-Policy' 'cross-origin';
     return 204;
 }
 add_header 'Access-Control-Allow-Origin' $http_origin always;
 add_header 'Access-Control-Allow-Credentials' 'true' always;
+add_header 'Access-Control-Allow-Methods' 'GET,POST,PUT,DELETE,OPTIONS' always;
+add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-Client-Signature-V2,X-App-Timestamp,ALLOCATION-ID,ALLOCATION-TX,X-Connection-Id,x-connection-id,x-mode,X-App-ID-Token,X-App-Type,X-App-User-ID,Range' always;
+add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range,X-App-Error-Code' always;
+add_header 'Cross-Origin-Resource-Policy' 'cross-origin' always;
 CORSEOF
 
     # Create connection upgrade map for conditional WebSocket upgrade
@@ -6784,12 +7194,12 @@ server {
     #  If add_header is only inside if{}, the 301 redirect response has no CORS
     #  headers and browsers refuse to follow the cross-origin redirect.
     # =====================================================================
-    location = /miner01 { add_header 'Access-Control-Allow-Origin' \$http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if (\$request_method = OPTIONS) { return 204; } return 301 /miner01/; }
-    location = /miner02 { add_header 'Access-Control-Allow-Origin' \$http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if (\$request_method = OPTIONS) { return 204; } return 301 /miner02/; }
-    location = /miner03 { add_header 'Access-Control-Allow-Origin' \$http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if (\$request_method = OPTIONS) { return 204; } return 301 /miner03/; }
-    location = /miner04 { add_header 'Access-Control-Allow-Origin' \$http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if (\$request_method = OPTIONS) { return 204; } return 301 /miner04/; }
-    location = /sharder01 { add_header 'Access-Control-Allow-Origin' \$http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if (\$request_method = OPTIONS) { return 204; } return 301 /sharder01/; }
-    location = /sharder02 { add_header 'Access-Control-Allow-Origin' \$http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if (\$request_method = OPTIONS) { return 204; } return 301 /sharder02/; }
+    location = /miner01 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /miner01/; }
+    location = /miner02 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /miner02/; }
+    location = /miner03 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /miner03/; }
+    location = /miner04 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /miner04/; }
+    location = /sharder01 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /sharder01/; }
+    location = /sharder02 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /sharder02/; }
     location /miner01/ {
         proxy_hide_header Access-Control-Allow-Origin;
         proxy_hide_header Access-Control-Allow-Credentials;
@@ -7361,87 +7771,22 @@ NGINXEOF
         local CERT_KEY="${CERT_DIR}/privkey.pem"
 
         if [ -f "$CERT_FULLCHAIN" ] && [ -f "$CERT_KEY" ]; then
-            # Cert already exists: inject the HTTPS server block directly instead of
-            # relying on certbot --nginx (which skips if cert is still valid and would
-            # leave our config HTTP-only, causing the old .bak file to serve HTTPS with
-            # stale location blocks).
-            print_status "SSL cert already exists — injecting HTTPS server block directly"
+            # Cert already exists: add listen 443 ssl + cert directives to the
+            # existing server block (alongside listen 80). This is simpler and
+            # more reliable than splitting into separate HTTP redirect + HTTPS blocks.
+            print_status "SSL cert already exists — adding SSL to server block"
 
-            # Replace the HTTP server block's listen directive with HTTP→HTTPS redirect,
-            # then append the full HTTPS server block (with all our location blocks)
-            # immediately after the closing } of the HTTP block.
-            #
-            # Strategy: sed the existing port-80 config to insert:
-            #   1. A minimal HTTP→HTTPS redirect server block at the top
-            #   2. A full HTTPS server block with our location content after it
-            #
-            # This is done by rewriting the config:
-            #   - Change "listen 80;" to "listen 80;" + HTTP redirect block + HTTPS block
-            python3 - "$CONF_FILE" "$DOMAIN" "$CERT_FULLCHAIN" "$CERT_KEY" <<'PYEOF'
-import sys, re
-
-conf_file, domain, fullchain, privkey = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-
-with open(conf_file, 'r') as f:
-    content = f.read()
-
-# Check if HTTPS block already present
-if 'listen 443' in content:
-    print("HTTPS block already in config, skipping injection")
-    sys.exit(0)
-
-# Find the closing } of the server block and append the HTTPS block after it
-# The file is a single server { ... } block for port 80.
-# We need to:
-# 1. Modify the server block to be a simple redirect (HTTP -> HTTPS)
-# 2. Copy the original location blocks into a new HTTPS server block
-
-# Extract everything between 'server {' and the final '}' (location blocks etc.)
-# Strategy: split at the first 'server {', get the body, wrap in HTTPS server block
-lines = content.split('\n')
-
-# Find the opening 'server {' line
-server_start = None
-for i, line in enumerate(lines):
-    if line.strip() == 'server {':
-        server_start = i
-        break
-
-if server_start is None:
-    print("ERROR: could not find 'server {' in config")
-    sys.exit(1)
-
-# Build HTTP redirect server block (simple, no location blocks needed)
-http_redirect_block = f"""server {{
-    listen 80;
-    server_name {domain};
-    return 301 https://$host$request_uri;
-}}"""
-
-# Build HTTPS server block with the original content
-# Replace 'listen 80;' with 'listen 443 ssl;' + cert directives
-https_lines = []
-for line in lines:
-    if 'listen 80;' in line:
-        https_lines.append('    listen 443 ssl;')
-        https_lines.append(f'    ssl_certificate {fullchain}; # managed by Certbot')
-        https_lines.append(f'    ssl_certificate_key {privkey}; # managed by Certbot')
-        https_lines.append('    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot')
-        https_lines.append('    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot')
-    elif 'if ($host =' in line and 'return 301' in line:
-        # Skip certbot's redirect block (already in http_redirect_block)
-        continue
-    elif '} # managed by Certbot' in line and 'http' not in line.lower():
-        continue
-    else:
-        https_lines.append(line)
-https_block = '\n'.join(https_lines)
-
-new_content = http_redirect_block + '\n\n' + https_block
-with open(conf_file, 'w') as f:
-    f.write(new_content)
-print(f"HTTPS server block injected into {conf_file}")
-PYEOF
+            if grep -q 'listen 443' "$CONF_FILE" 2>/dev/null; then
+                print_status "HTTPS already in config, skipping injection"
+            else
+                sed -i "/listen 80;/a\\
+    listen 443 ssl;\\
+    ssl_certificate ${CERT_FULLCHAIN};\\
+    ssl_certificate_key ${CERT_KEY};\\
+    include /etc/letsencrypt/options-ssl-nginx.conf;\\
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;" "$CONF_FILE"
+                print_status "SSL directives injected into ${CONF_FILE}"
+            fi
         else
             print_status "Requesting SSL certificate for ${DOMAIN}..."
             certbot --nginx --non-interactive --agree-tos --email "$EMAIL" \
@@ -8656,9 +9001,11 @@ CRAWLEREOF
         print_status "Generated crawler config at $CRAWLER_CONFIG"
     fi
 
-    # Fix docker-compose volume mount: crawler reads config from /usr/src/app/docker.local/config,
-    # not /crawler/config. Patch the compose file to mount to the correct path.
+    # Fix docker-compose: crawler reads config from /usr/src/app/docker.local/config.
+    # Patch both the volume mount AND the --config_path command arg.
     sed -i 's|- ./config:/crawler/config|- ./config:/usr/src/app/docker.local/config|g' \
+        "$CRAWLER_DIR/docker.local/docker-compose.yml" 2>/dev/null || true
+    sed -i 's|--config_path=/crawler/config|--config_path=/usr/src/app/docker.local/config|g' \
         "$CRAWLER_DIR/docker.local/docker-compose.yml" 2>/dev/null || true
 
     # Stop existing crawler if running (to pick up new image)
@@ -9214,7 +9561,7 @@ verify_services() {
     # NOTE: Chain may not return is_enterprise flag; also match by URL pattern
     local enterprise_count=$($ZBOX ls-blobbers --json --silent \
         --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>/dev/null \
-        | jq '[.[] | select(.is_enterprise == true or (.url | test("198\\.18\\.0\\.20[1-5]|:507[1-5]")))] | length' 2>/dev/null || echo "0")
+        | jq '[.[] | select(.is_enterprise == true or (.url | test("198\\.18\\.0\\.20[1-5]|:507[1-5]|eblobber")))] | length' 2>/dev/null || echo "0")
     print_status "  Enterprise blobbers: $enterprise_count"
     if [ "$enterprise_count" -lt 3 ]; then
         print_warning "  Need at least 3 enterprise blobbers for tokenomics tests!"
@@ -10558,6 +10905,11 @@ swap_image() {
             local LOCAL_IMAGE="0chaindev/0box:local-build"
             print_status "Building 0box image as ${LOCAL_IMAGE}..."
             cd "${repo_path}"
+            # Ensure zbox_base exists — 0box Dockerfile uses it as build base
+            if ! docker image inspect zbox_base > /dev/null 2>&1; then
+                print_status "Building zbox_base (required by 0box Dockerfile)..."
+                DOCKER_BUILDKIT=0 docker build -t zbox_base -f docker.local/base.Dockerfile . 2>&1 || { print_error "Failed to build zbox_base"; return 1; }
+            fi
             # Dockerfile is in docker.local/, build context is repo root; BUILDKIT=0 for local base image
             DOCKER_BUILDKIT=0 docker build -f docker.local/Dockerfile -t "${LOCAL_IMAGE}" . 2>&1 || { print_error "0box docker build failed"; return 1; }
             # Update docker-compose.yml to use the locally built image
@@ -10568,8 +10920,10 @@ swap_image() {
             fi
             ;;
         zauth-server)
+            patch_zauth_faucet
             cd "${repo_path}/docker.local"
-            docker compose build 2>/dev/null || true
+            docker build -f Dockerfile -t zauthserver ../ 2>&1 || print_error "zauthserver image build failed"
+            docker compose -p zauth up -d --force-recreate zauthserver
             ;;
         zvault)
             cd "${repo_path}/docker.local"
@@ -10578,17 +10932,83 @@ swap_image() {
         zs3server)
             # zs3server depends on gosdk - checkout the right branch first
             checkout_gosdk_for_dependent "zs3server" "$gosdk_branch_override"
-            cd "${repo_path}/environment"
-            docker compose build --no-cache 2>/dev/null || {
-                # Fallback: try building from repo root if environment/ doesn't work
-                cd "$repo_path"
-                docker build -t minio . 2>/dev/null || true
-            }
+            cd "$repo_path"
+            # Detect required Go version from go.work or go.mod
+            local zs3_required_go
+            zs3_required_go=$(grep '^go ' "${repo_path}/go.work" 2>/dev/null | awk '{print $2}' | head -1)
+            [ -z "$zs3_required_go" ] && zs3_required_go=$(grep '^go ' "${repo_path}/go.mod" 2>/dev/null | awk '{print $2}' | head -1)
+            # zs3server Dockerfile uses zbox_base — build it with the required Go version
+            # (0box base.Dockerfile may use an older Go version, so patch it if needed)
+            local zbox_base_src="${BASE_DIR}/0box/docker.local/base.Dockerfile"
+            if [ ! -f "$zbox_base_src" ]; then
+                print_error "Cannot find 0box/docker.local/base.Dockerfile to build zbox_base"
+                return 1
+            fi
+            if [ -n "$zs3_required_go" ]; then
+                print_status "Building zbox_base with go ${zs3_required_go} for zs3server..."
+                local tmp_zbox_df
+                tmp_zbox_df=$(mktemp /tmp/zbox_base.XXXXXX.Dockerfile)
+                # Map go 1.X minor to canonical Alpine version (go 1.22 → alpine3.19, go 1.23+ → alpine3.20)
+                local zs3_req_minor; zs3_req_minor=$(echo "$zs3_required_go" | cut -d. -f2)
+                local zbox_target_alpine
+                if [ "${zs3_req_minor:-0}" -le 21 ]; then zbox_target_alpine="alpine3.18"
+                elif [ "${zs3_req_minor:-0}" -eq 22 ]; then zbox_target_alpine="alpine3.19"
+                else zbox_target_alpine="alpine3.20"
+                fi
+                sed "s|FROM golang:[0-9][0-9.]*-alpine[0-9.]*|FROM golang:${zs3_required_go}-${zbox_target_alpine}|g" \
+                    "$zbox_base_src" > "$tmp_zbox_df"
+                DOCKER_BUILDKIT=0 docker build -t zbox_base -f "$tmp_zbox_df" "${BASE_DIR}/0box" 2>&1
+                local zbox_build_rc=$?
+                rm -f "$tmp_zbox_df"
+                [ $zbox_build_rc -ne 0 ] && { print_error "Failed to build zbox_base"; return 1; }
+            else
+                if ! docker image inspect zbox_base > /dev/null 2>&1; then
+                    print_status "Building zbox_base (required by zs3server Dockerfile)..."
+                    DOCKER_BUILDKIT=0 docker build -t zbox_base -f "$zbox_base_src" "${BASE_DIR}/0box" 2>&1 || { print_error "Failed to build zbox_base"; return 1; }
+                fi
+            fi
+            # Build zs3server image from repo root Dockerfile
+            local ZS3_IMAGE="0chaindev/blimp-minioserver:local-build"
+            print_status "Building zs3server image as ${ZS3_IMAGE}..."
+            DOCKER_BUILDKIT=0 docker build -t "${ZS3_IMAGE}" . 2>&1 || { print_error "zs3server docker build failed"; return 1; }
+            # Update docker-compose to use locally built image
+            local zs3_compose="${repo_path}/environment/docker-compose.yaml"
+            if [ -f "$zs3_compose" ]; then
+                sed -i "s|image: 0chaindev/blimp-minioserver:.*|image: ${ZS3_IMAGE}|g" "$zs3_compose"
+                print_status "Updated docker-compose.yaml to use ${ZS3_IMAGE}"
+            fi
             ;;
         eblobber)
             # eblobber depends on gosdk - checkout the right branch first
             checkout_gosdk_for_dependent "eblobber" "$gosdk_branch_override"
             cd "$repo_path"
+            # Detect required Go version from go.mod; patch base.Dockerfile if it uses an older version
+            local eblobber_required_go
+            eblobber_required_go=$(grep '^go ' "${repo_path}/go.mod" 2>/dev/null | awk '{print $2}' | head -1)
+            local base_dockerfile="${repo_path}/docker.local/base.Dockerfile"
+            if [ -n "$eblobber_required_go" ] && [ -f "$base_dockerfile" ]; then
+                local base_go
+                base_go=$(grep -oP '(?<=FROM golang:)[0-9]+\.[0-9]+' "$base_dockerfile" | head -1)
+                local req_minor cur_minor
+                req_minor=$(echo "$eblobber_required_go" | cut -d. -f2)
+                cur_minor=$(echo "$base_go" | cut -d. -f2)
+                if [ -n "$req_minor" ] && [ -n "$cur_minor" ] && [ "$req_minor" -gt "$cur_minor" ] 2>/dev/null; then
+                    # Map go 1.X minor to canonical Alpine version (go publishes per-alpine images)
+                    # go 1.21 → alpine3.18, go 1.22 → alpine3.19, go 1.23+ → alpine3.20
+                    local target_alpine
+                    if [ "$req_minor" -le 21 ]; then target_alpine="alpine3.18"
+                    elif [ "$req_minor" -eq 22 ]; then target_alpine="alpine3.19"
+                    else target_alpine="alpine3.20"
+                    fi
+                    print_status "go.mod requires go ${eblobber_required_go} — updating base.Dockerfile to golang:${eblobber_required_go}-${target_alpine}..."
+                    sed -i "s|FROM golang:[0-9][0-9.]*-alpine[0-9.]*|FROM golang:${eblobber_required_go}-${target_alpine}|" "$base_dockerfile"
+                    # Fix sqlite3 pread64/pwrite64 on musl (alpine3.19+):
+                    # _LARGEFILE64_SOURCE makes musl define pread64/pwrite64/off64_t as aliases
+                    if ! grep -q 'CGO_CFLAGS' "$base_dockerfile"; then
+                        sed -i '/^FROM golang:/a ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE=1"' "$base_dockerfile"
+                    fi
+                fi
+            fi
             # Use separate base image tag (eblobber_base) to avoid overwriting regular blobber's blobber_base
             print_status "Building eblobber_base image..."
             DOCKER_IMAGE_BASE=eblobber_base docker.local/bin/build.base.sh 2>&1 || {
@@ -10652,7 +11072,136 @@ swap_image() {
                 print_status "Updated wasm_exec.js from local Go installation"
             fi
 
-            # Step D: Build web-apps using yarn workspaces (same as build_web_apps())
+            # Step D: Fix .env before build — git .env has production values that break test deployments.
+            # (1) Remove NEXT_PUBLIC_ORIGIN: baked into bundle at build time; if set to a dead port
+            #     (e.g. localhost:3430) the i18n loader fails and shows raw translation keys.
+            # (2) Fix DOMAIN: git .env has DOMAIN=mainnet.zus.network (production). This is baked into
+            #     client bundle via next.config.js env: block — isProdOrDemoEnv=true causes sendOTPTwilio
+            #     to call real 0box and use real Twilio. Must be set to test domain BEFORE build.
+            # (3) Fix FBASE_*: git .env has mainnet-0box Firebase project (production). These are baked
+            #     into the client bundle at build time. 0box is configured for box-dev-ce8bf; using
+            #     mainnet-0box tokens causes "invalid 'aud' claim" errors on /v2/twilio/phone/send.
+            local _deploy_domain="${NGINX_DOMAIN:-test.zus.network}"
+            for _app in vult bolt blimp explorer chimney; do
+                local _app_env="${repo_path}/packages/${_app}/.env"
+                if [ -f "$_app_env" ]; then
+                    if grep -q "^NEXT_PUBLIC_ORIGIN=" "$_app_env"; then
+                        sed -i.tmp '/^NEXT_PUBLIC_ORIGIN=/d' "$_app_env"
+                        rm -f "${_app_env}.tmp"
+                        print_status "Removed NEXT_PUBLIC_ORIGIN from ${_app}/.env"
+                    fi
+                    # Fix DOMAIN: handle both bare and "export VAR=..." syntax in .env files.
+                    # (vult uses bare DOMAIN=, blimp uses export DOMAIN=)
+                    sed -i.tmp \
+                        -e "s|^DOMAIN=.*|DOMAIN=${_deploy_domain}|" \
+                        -e "s|^export DOMAIN=.*|export DOMAIN=\"${_deploy_domain}\"|" \
+                        "$_app_env"
+                    rm -f "${_app_env}.tmp"
+                    print_status "Fixed DOMAIN to ${_deploy_domain} in ${_app}/.env"
+                    # Fix Firebase project: replace production Firebase projects with dev values from .secrets.env.
+                    # .env files use either bare VAR= or "export VAR=" syntax — handle both.
+                    # 0box Firebase Admin SDK is configured for box-dev-ce8bf; mismatched tokens
+                    # cause "invalid 'aud' claim" rejection on the /v2/twilio/phone/send endpoint.
+                    # Values come from .secrets.env (loaded at script startup); double-quotes
+                    # allow shell variable expansion inside the sed replacement strings.
+                    local _fbase_api_key="${FBASE_API_KEY}"
+                    local _fbase_auth_domain="${FBASE_AUTH_DOMAIN:-box-dev-ce8bf.firebaseapp.com}"
+                    local _fbase_db_url="${FBASE_DB_URL:-https://box-dev-ce8bf.firebaseio.com}"
+                    local _fbase_project_id="${FBASE_PROJECT_ID:-box-dev-ce8bf}"
+                    local _fbase_storage_bucket="${FBASE_STORAGE_BUCKET:-box-dev-ce8bf.appspot.com}"
+                    local _fbase_sender_id="${FBASE_MESSAGING_SENDER_ID:-893964718514}"
+                    local _fbase_app_id="${FBASE_APP_ID:-1:893964718514:web:6d6f2ee9f96211e64954ab}"
+                    sed -i.tmp \
+                        -e "s|^\(export \)\{0,1\}FBASE_API_KEY=.*|FBASE_API_KEY=\"${_fbase_api_key}\"|" \
+                        -e "s|^\(export \)\{0,1\}FBASE_AUTH_DOMAIN=.*|FBASE_AUTH_DOMAIN=\"${_fbase_auth_domain}\"|" \
+                        -e "s|^\(export \)\{0,1\}FBASE_DB_URL=.*|FBASE_DB_URL=\"${_fbase_db_url}\"|" \
+                        -e "s|^\(export \)\{0,1\}FBASE_PROJECT_ID=.*|FBASE_PROJECT_ID=\"${_fbase_project_id}\"|" \
+                        -e "s|^\(export \)\{0,1\}FBASE_STORAGE_BUCKET=.*|FBASE_STORAGE_BUCKET=\"${_fbase_storage_bucket}\"|" \
+                        -e "s|^\(export \)\{0,1\}FBASE_MESSAGING_SENDER_ID=.*|FBASE_MESSAGING_SENDER_ID=\"${_fbase_sender_id}\"|" \
+                        -e "s|^\(export \)\{0,1\}FBASE_APP_ID=.*|FBASE_APP_ID=\"${_fbase_app_id}\"|" \
+                        "$_app_env"
+                    rm -f "${_app_env}.tmp"
+                    print_status "Fixed FBASE_* to ${_fbase_project_id} in ${_app}/.env"
+                fi
+            done
+
+            # Step D2: Apply WASM wallet fix — git wasm/index.js has a guard that returns early
+            # when mnemonic is empty AND wallet is not split. This skips setWallet() so the
+            # gosdk clientId is never set → "Client id is required" on all SDK calls (faucet, etc.).
+            # Fix: also allow when privateKey is available (keys-only wallets after resetGoWasm).
+            local _wasm_index="${repo_path}/packages/shared/src/lib/wasm/index.js"
+            if [ -f "$_wasm_index" ]; then
+                sed -i.tmp \
+                    's/if (!mnemonic && !wallet?.is_split) {/if (!mnemonic \&\& !wallet?.is_split \&\& !privateKey) {/' \
+                    "$_wasm_index"
+                rm -f "${_wasm_index}.tmp"
+                print_status "Applied WASM wallet fix (privateKey guard) in wasm/index.js"
+            fi
+
+            # Step D3: Apply user.js patches (user_id in OTP body + mock token dispatch for dev)
+            local _user_js="${repo_path}/packages/shared/src/store/user/actions/user.js"
+            if [ -f "$_user_js" ]; then
+                python3 - "$_user_js" << 'PYEOF'
+import sys
+path = sys.argv[1]
+with open(path) as f:
+    content = f.read()
+changed = False
+
+# Fix A: user_id in OTP body (needed for 0box IsDevelopmentNoAuth() bypass)
+if "devUserId" not in content:
+    old_a = "  if (userName) body.append('username', userName)\n"
+    new_a = old_a + (
+        "\n"
+        "  // Dev mode: 0box IsDevelopmentNoAuth() requires user_id for OTP verify endpoints.\n"
+        "  // In production: 0box derives user ID from Firebase token; this field is ignored.\n"
+        "  const devUserId = firebaseTokens?.uid ||\n"
+        "    ('devnet_' + (phoneNumber || email || '').toLowerCase().replace(/[^a-z0-9]/g, ''))\n"
+        "  body.append('user_id', devUserId)\n"
+    )
+    if old_a in content:
+        content = content.replace(old_a, new_a)
+        changed = True
+        print("Patched user.js: added user_id to OTP verify body")
+
+# Fix B: mock token dispatch when 0box returns no customToken
+if "mock-token-" not in content:
+    old_b = (
+        "    dispatch({ type: types.VERIFY_OTP_SUCCESS, payload: firebaseTokens })\n"
+        "    return defaultResponse\n"
+        "  } catch (e) {"
+    )
+    new_b = (
+        "    // Dev mode: 0box returns no customToken when IsDevelopmentNoAuth() is true.\n"
+        "    // Synthesize mock tokens so subsequent API calls have valid X-App-User-ID + X-App-ID-TOKEN.\n"
+        "    const syntheticFirebaseData = {\n"
+        "      uid: devUserId,\n"
+        "      accessToken: 'mock-token-' + devUserId,\n"
+        "      refreshToken: 'mock-token-' + devUserId,\n"
+        "      expirationTime: Date.now() + 3600000,\n"
+        "    }\n"
+        "    dispatch({ type: types.VERIFY_OTP_SUCCESS, payload: syntheticFirebaseData })\n"
+        "    return { data: syntheticFirebaseData }\n"
+        "  } catch (e) {"
+    )
+    if old_b in content:
+        content = content.replace(old_b, new_b, 1)
+        changed = True
+        print("Patched user.js: mock token dispatch for dev OTP flow")
+
+if changed:
+    with open(path, 'w') as f:
+        f.write(content)
+else:
+    print("user.js: already patched or targets not found")
+PYEOF
+                print_status "Applied user.js dev patches"
+            fi
+
+            # Step D4: Patch WASM loader to use local /zcn.wasm (not CDN)
+            patch_wasm_loader_local "$repo_path"
+
+            # Step E: Build web-apps using yarn workspaces (same as build_web_apps())
             cd "$repo_path"
             if ! command -v yarn &>/dev/null; then
                 npm install -g yarn 2>/dev/null || true
@@ -10722,10 +11271,14 @@ swap_image() {
                     BLOBBER=$i docker compose -p blobber$i -f b0docker-compose.yml up -d --force-recreate 2>/dev/null || true
                 fi
             done
-            # Blobbers 7-12 use generic compose file
+            # Blobbers 7-12: use specific compose if available, else generic (10-12 have specific files to avoid invalid ports)
             for i in 7 8 9 10 11 12; do
                 cd "${repo_path}/docker.local"
-                BLOBBER=$i docker compose -p blobber$i -f b0docker-compose.yml up -d --force-recreate 2>/dev/null || true
+                if [ -f "b0docker-compose-${i}.yml" ]; then
+                    docker compose -p blobber$i -f b0docker-compose-${i}.yml up -d --force-recreate 2>/dev/null || true
+                else
+                    BLOBBER=$i docker compose -p blobber$i -f b0docker-compose.yml up -d --force-recreate 2>/dev/null || true
+                fi
             done
             ;;
         0box)
@@ -10750,8 +11303,56 @@ swap_image() {
             docker compose -p zvault up -d --force-recreate 2>/dev/null || true
             ;;
         zs3server)
-            docker rm -f minioserver 2>/dev/null || true
+            docker rm -f minioserver environment-logsearchapi-1 environment-postgres-db-1 postgres-db minioclient 2>/dev/null || true
             cd "${repo_path}/environment"
+            local zs3_compose="${repo_path}/environment/docker-compose.yaml"
+            # Patch docker-compose: remove conflicting port bindings and fix zcn config mount
+            ZS3_COMPOSE="$zs3_compose" python3 << 'ZS3PYEOF'
+import yaml, os
+compose_path = os.environ['ZS3_COMPOSE']
+with open(compose_path) as f:
+    data = yaml.safe_load(f)
+svcs = data.get('services', {})
+# Remove port bindings from internal services (conflicts with postgres-0box:5432, zauth:8080, web-apps:3001)
+for svc in ['postgres-db', 'logsearchapi', 'minioclient']:
+    if svc in svcs and 'ports' in svcs[svc]:
+        del svcs[svc]['ports']
+# Fix minioserver: mount /root/.zcn-zs3 instead of ~/.zcn (needs internal 0dns IP, not localhost)
+if 'minioserver' in svcs:
+    vols = svcs['minioserver'].get('volumes', [])
+    new_vols = [v for v in vols if '/.zcn' not in str(v)]
+    new_vols.append('/root/.zcn-zs3:/root/.zcn')
+    svcs['minioserver']['volumes'] = new_vols
+    # Connect minioserver to testnet0 so it can reach 0dns at 198.18.0.100:9091
+    nets = svcs['minioserver'].get('networks', {})
+    if isinstance(nets, list):
+        if 'testnet0' not in nets:
+            nets.append('testnet0')
+    elif isinstance(nets, dict):
+        if 'testnet0' not in nets:
+            nets['testnet0'] = {}
+    else:
+        nets = ['testnet0']
+    svcs['minioserver']['networks'] = nets
+# Declare testnet0 as external (created by the chain docker-compose)
+if 'networks' not in data:
+    data['networks'] = {}
+if 'testnet0' not in data['networks']:
+    data['networks']['testnet0'] = {'external': True}
+with open(compose_path, 'w') as f:
+    yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
+print('Patched docker-compose.yaml')
+ZS3PYEOF
+            # Create zs3server-specific zcn config with internal 0dns IP (containers can't use localhost:9091)
+            mkdir -p /root/.zcn-zs3
+            # config.yaml is the standard zcn SDK config (not local.yaml which is used by CLI tools)
+            sed 's|block_worker: http://localhost:9091|block_worker: http://198.18.0.100:9091|g' \
+                "${ZCN_CONFIG_DIR}/config.yaml" > /root/.zcn-zs3/config.yaml 2>/dev/null || \
+            sed 's|block_worker: http://localhost:9091|block_worker: http://198.18.0.100:9091|g' \
+                "${ZCN_CONFIG_DIR}/${ZCN_CONFIG_FILE}" > /root/.zcn-zs3/config.yaml 2>/dev/null || true
+            cp -f "${ZCN_CONFIG_DIR}"/*.json /root/.zcn-zs3/ 2>/dev/null || true
+            # Copy allocation.txt (required by zs3server to identify which Zus allocation to use)
+            [ -f "${ZCN_CONFIG_DIR}/allocation.txt" ] && cp -f "${ZCN_CONFIG_DIR}/allocation.txt" /root/.zcn-zs3/ 2>/dev/null || true
             docker compose up -d --force-recreate 2>/dev/null || true
             ;;
         eblobber)
@@ -12086,6 +12687,7 @@ EOF
         sleep 30
         stake_and_configure_blobbers
         build_and_deploy_enterprise_blobbers
+        stake_enterprise_blobbers
         refresh_crawler_allocation || print_warning "Crawler allocation refresh failed (non-critical)"
         ;;
     update-blobber-prices)
@@ -12437,7 +13039,7 @@ EOF
                 $ZBOX bl-update \
                     --blobber_id "$eblobber_id" \
                     --read_price 0 \
-                    --write_price 0.0001 \
+                    --write_price 0.001 \
                     --service_charge 0.3 \
                     --storage_version 1 \
                     --num_delegates 100 \
@@ -12445,6 +13047,12 @@ EOF
                     && print_status "    Done" \
                     || print_warning "    bl-update failed (may retry on next health check)"
                 sleep 2
+                # Also mark not_available=true so they aren't selected for regular allocations
+                $ZBOX bl-update \
+                    --blobber_id "$eblobber_id" \
+                    --not_available true \
+                    --wallet owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
+                sleep 1
             done
         else
             print_warning "No enterprise blobbers found on chain — skipping bl-update"

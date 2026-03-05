@@ -65,6 +65,7 @@ fi
 
 OBOX_URL="https://0box.${NGINX_DOMAIN}"
 ZAUTH_URL="https://zauth.${NGINX_DOMAIN}"
+ZVAULT_URL="https://zvault.${NGINX_DOMAIN}"
 
 # Web app custom domains
 VULT_DOMAIN="${APP_DOMAIN_PREFIX}.vult.network"
@@ -73,7 +74,7 @@ BLIMP_DOMAIN="${APP_DOMAIN_PREFIX}.blimp.software"
 ATLUS_DOMAIN="${APP_DOMAIN_PREFIX}.atlus.cloud"
 
 # Web app local ports (must match deploy_local.sh APP_PORTS)
-declare -A APP_PORTS=( [vult]=3003 [bolt]=3002 [blimp]=3006 [explorer]=3001 [chimney]=3005 )
+declare -A APP_PORTS=( [vult]=3003 [bolt]=3002 [blimp]=3006 [explorer]=3001 )
 
 # ── Globals ───────────────────────────────────────────────────────────────────
 PASS_COUNT=0
@@ -209,13 +210,23 @@ check_chain_health() {
     [ "$s2_round" -gt 0 ] && log_pass "Sharder-2 responding (round $s2_round)" || log_fail "Sharder-2 NOT responding"
 
     sleep 3
-    local s1_r2
-    s1_r2=$(curl_json "http://127.0.0.1:7171/v1/chain/get/stats" | \
+    # Check the best (highest-round) sharder to confirm chain is advancing
+    local _best_url="http://127.0.0.1:7171"
+    local _best_round=$s1_round
+    [ "${s2_round:-0}" -gt "${s1_round:-0}" ] && _best_url="http://127.0.0.1:7172" && _best_round=$s2_round
+    local s_r2
+    s_r2=$(curl_json "${_best_url}/v1/chain/get/stats" | \
         python3 -c "import sys,json; print(json.load(sys.stdin).get('current_round',0))" 2>/dev/null || echo 0)
-    if [ "$s1_r2" -gt "$s1_round" ]; then
-        log_pass "Chain advancing ($s1_round → $s1_r2)"
-    elif [ "$s1_round" -gt 0 ]; then
-        log_fail "Chain STUCK at round $s1_round"
+    if [ "$s_r2" -gt "$_best_round" ]; then
+        log_pass "Chain advancing (round $_best_round → $s_r2)"
+    elif [ "$_best_round" -gt 0 ]; then
+        log_fail "Chain STUCK at round $_best_round (neither sharder advancing)"
+    fi
+    # Warn if one sharder is significantly behind the other (>1000 rounds)
+    if [ "${s1_round:-0}" -gt 0 ] && [ "${s2_round:-0}" -gt 0 ]; then
+        local _diff=$(( s2_round - s1_round ))
+        [ "$_diff" -lt 0 ] && _diff=$(( s1_round - s2_round ))
+        [ "$_diff" -gt 1000 ] && log_warn "Sharder round gap: S1=$s1_round vs S2=$s2_round (diff=$_diff — one sharder may be catching up)"
     fi
 
     local miner_ok=0
@@ -347,6 +358,38 @@ check_services() {
     [ "${as:-0}" -gt 0 ] && log_pass "0box DB: $as active sharders" || log_fail "0box DB: 0 active sharders"
     [ "${ab:-0}" -gt 0 ] && log_pass "0box DB: $ab available blobbers" || \
         log_warn "0box DB: 0 available blobbers — Blimp allocation may fail"
+
+    # Kafka pipeline health — check snapshots advancing in 0box DB
+    local snap_count snap_latest
+    snap_count=$(docker exec -e PGPASSWORD=zbox_server postgres-0box psql -U zbox_user -d zbox -t -c \
+        "SELECT count(*) FROM snapshots;" 2>/dev/null | tr -d ' \n' || echo 0)
+    snap_latest=$(docker exec -e PGPASSWORD=zbox_server postgres-0box psql -U zbox_user -d zbox -t -c \
+        "SELECT COALESCE(MAX(round),0) FROM snapshots;" 2>/dev/null | tr -d ' \n' || echo 0)
+    if [ "${snap_count:-0}" -gt 0 ]; then
+        log_pass "Kafka pipeline: $snap_count snapshots (latest round: $snap_latest)"
+    else
+        log_fail "Kafka pipeline: 0 snapshots in 0box DB — events not flowing"
+        log_info "Fix: bash scripts/deploy_local.sh fix-kafka"
+    fi
+
+    # Crawler allocation — check it includes all regular blobbers (not enterprise)
+    if docker ps --format '{{.Names}}' | grep -q "^crawler$"; then
+        local crawler_yaml="${BASE_DIR}/crawler/docker.local/config/crawler.yaml"
+        local crawl_alloc; crawl_alloc=$(grep -A1 "^allocations:" "$crawler_yaml" 2>/dev/null | \
+            grep "^  - " | head -1 | awk '{print $2}' | tr -d ' ')
+        if [ -n "$crawl_alloc" ]; then
+            local crawl_blobs; crawl_blobs=$(curl_json "${SHARDER_URL}/v1/screst/${STORAGE_SC}/allocation?allocation=${crawl_alloc}" | \
+                python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('blobbers',[])))" 2>/dev/null || echo 0)
+            local chain_regular; chain_regular=$(curl_json "${SHARDER_URL}/v1/screst/${STORAGE_SC}/getblobbers?limit=20" | \
+                python3 -c "import sys,json; d=json.load(sys.stdin); nodes=d.get('Nodes',d.get('nodes',[])); print(sum(1 for b in nodes if not b.get('is_enterprise',False)))" 2>/dev/null || echo 0)
+            if [ "${crawl_blobs:-0}" -ge "${chain_regular:-1}" ] 2>/dev/null; then
+                log_pass "Crawler allocation has $crawl_blobs blobbers (all $chain_regular regular blobbers)"
+            else
+                log_warn "Crawler allocation has $crawl_blobs blobbers but $chain_regular regular blobbers on chain — recreate with all"
+                log_info "Fix: bash scripts/deploy_local.sh crawler"
+            fi
+        fi
+    fi
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -401,7 +444,8 @@ check_web_apps() {
 
     local WEB_APPS_DIR="${BASE_DIR}/web-apps/packages"
 
-    for app in vult bolt blimp explorer chimney; do
+    # Main page check for all apps
+    for app in vult bolt blimp explorer; do
         local port="${APP_PORTS[$app]}"
         local code; code=$(curl_ok "http://127.0.0.1:${port}/" 5)
         if [[ "$code" =~ ^(200|301|302|304)$ ]]; then
@@ -411,6 +455,78 @@ check_web_apps() {
             log_info "Fix: bash scripts/deploy_local.sh web-apps"
         fi
     done
+
+    # Sub-page / UI link checks — verify key pages and navigation links load
+    # Each entry: "app:port:path:description"
+    local ui_checks=(
+        "vult:3003:/storage:Storage page (file browser)"
+        "vult:3003:/settings:Settings page (manage allocations)"
+        "vult:3003:/profile:Profile page (wallet details)"
+        "blimp:3006:/files:Files page (file manager)"
+        "bolt:3002:/wallet:Wallet page (balance + send)"
+        "bolt:3002:/stake:Stake page (provider staking)"
+        "explorer:3001:/miners:Miners page (Atlus miner list)"
+        "explorer:3001:/sharders:Sharders page (Atlus sharder list)"
+        "explorer:3001:/blobbers:Blobbers page (Atlus blobber list)"
+        "explorer:3001:/transactions:Transactions page"
+        "explorer:3001:/blocks:Blocks page"
+    )
+    local page_ok=0 page_warn=0
+    for entry in "${ui_checks[@]}"; do
+        local _app="${entry%%:*}"; local _rest="${entry#*:}"
+        local _port="${_rest%%:*}"; _rest="${_rest#*:}"
+        local _path="${_rest%%:*}"; local _desc="${_rest#*:}"
+        local _code; _code=$(curl -sk -o /dev/null -w '%{http_code}' -m 6 \
+            "http://127.0.0.1:${_port}${_path}" 2>/dev/null || echo 0)
+        if [[ "$_code" =~ ^(200|301|302|304)$ ]]; then
+            page_ok=$((page_ok+1))
+        else
+            log_warn "UI page ${_app}${_path} (${_desc}): HTTP $_code"
+            page_warn=$((page_warn+1))
+        fi
+    done
+    local page_total=$(( page_ok + page_warn ))
+    if [ "$page_warn" -eq 0 ]; then
+        log_pass "UI sub-pages: all $page_ok/$page_total pages return 200/301"
+    else
+        log_warn "UI sub-pages: $page_ok/$page_total OK, $page_warn returned non-200 (may need auth redirect)"
+    fi
+
+    # 0box API button-power checks — verify endpoints that drive key UI buttons
+    # These are the API calls triggered by clicking buttons in the web apps.
+    local _ts; _ts=$(date +%s)
+    local api_ok=0 api_fail=0
+    # Blobber list (powers Vult/Blimp allocation blobber selector)
+    local _r; _r=$(curl -sk -m 8 -o /dev/null -w '%{http_code}' \
+        "${OBOX_URL}/v2/blobbers?limit=10&offset=0" 2>/dev/null || echo 0)
+    [[ "$_r" =~ ^(200|206)$ ]] && api_ok=$((api_ok+1)) || { log_warn "0box /v2/blobbers: HTTP $_r"; api_fail=$((api_fail+1)); }
+
+    # Provider brands (powers allocation brand selector)
+    _r=$(curl -sk -m 8 -o /dev/null -w '%{http_code}' \
+        "${OBOX_URL}/v2/provider-brands" 2>/dev/null || echo 0)
+    [[ "$_r" =~ ^(200|206)$ ]] && api_ok=$((api_ok+1)) || { log_warn "0box /v2/provider-brands: HTTP $_r"; api_fail=$((api_fail+1)); }
+
+    # 0box network graph data (powers Atlus chart buttons)
+    _r=$(curl -sk -m 8 -o /dev/null -w '%{http_code}' \
+        "${OBOX_URL}/v2/graph-txns-count?from=$((_ts-86400))&to=${_ts}&data-points=10" 2>/dev/null || echo 0)
+    [[ "$_r" =~ ^(200|206)$ ]] && api_ok=$((api_ok+1)) || { log_warn "0box /v2/graph-txns-count: HTTP $_r"; api_fail=$((api_fail+1)); }
+
+    # 0box total data (powers Atlus summary cards)
+    _r=$(curl -sk -m 8 -o /dev/null -w '%{http_code}' \
+        "${OBOX_URL}/v2/total-stored-data" 2>/dev/null || echo 0)
+    [[ "$_r" =~ ^(200|206)$ ]] && api_ok=$((api_ok+1)) || { log_warn "0box /v2/total-stored-data: HTTP $_r"; api_fail=$((api_fail+1)); }
+
+    # Sharder chain stats (powers Explorer block counter in Atlus header)
+    _r=$(curl -sk -m 8 -o /dev/null -w '%{http_code}' \
+        "${SHARDER_URL}/v1/chain/get/stats" 2>/dev/null || echo 0)
+    [ "$_r" = "200" ] && api_ok=$((api_ok+1)) || { log_warn "Sharder /v1/chain/get/stats: HTTP $_r"; api_fail=$((api_fail+1)); }
+
+    local api_total=$(( api_ok + api_fail ))
+    if [ "$api_fail" -eq 0 ]; then
+        log_pass "UI button API endpoints: all $api_ok/$api_total responding"
+    else
+        log_warn "UI button API endpoints: $api_ok/$api_total OK, $api_fail failing"
+    fi
 
     # Check custom domain URLs serve app content
     for app_entry in "vult:${VULT_DOMAIN}" "bolt:${BOLT_DOMAIN}" "blimp:${BLIMP_DOMAIN}" "explorer:${ATLUS_DOMAIN}"; do
@@ -436,13 +552,13 @@ check_web_apps() {
     # Next.js process check — only warn if apps are also NOT serving HTTP
     local next_procs; next_procs=$(pgrep -c -f "node.*next" 2>/dev/null | head -1 | tr -d '[:space:]' || echo 0); next_procs=${next_procs:-0}
     local serving_count=0
-    for p in 3003 3002 3006 3001 3005; do
+    for p in 3003 3002 3006 3001; do
         curl -sk "http://127.0.0.1:${p}/" -o /dev/null -w '%{http_code}' -m 3 2>/dev/null | grep -qE '^(200|301|302)' && serving_count=$((serving_count+1)) || true
     done
-    if [ "$next_procs" -gt 0 ] || [ "$serving_count" -ge 4 ]; then
-        log_pass "Web app processes OK ($serving_count/5 ports serving, $next_procs Next.js procs)"
+    if [ "$next_procs" -gt 0 ] || [ "$serving_count" -ge 3 ]; then
+        log_pass "Web app processes OK ($serving_count/4 ports serving, $next_procs Next.js procs)"
     else
-        log_warn "Web app processes unclear ($serving_count/5 ports serving) — check manually"
+        log_warn "Web app processes unclear ($serving_count/4 ports serving) — check manually"
         log_info "Fix: bash scripts/deploy_local.sh web-apps"
     fi
 }
@@ -452,6 +568,33 @@ check_web_apps() {
 # ══════════════════════════════════════════════════════════════════════════════
 check_vult() {
     log_header "Vult — Storage App Checks"
+
+    # Vult custom domain UI/UX navigation page checks (test.vult.network)
+    log_info "Checking Vult custom domain navigation pages (https://${VULT_DOMAIN})..."
+    local vult_pages=(
+        "/:Home (login/signup)"
+        "/storage:Storage (file browser)"
+        "/settings:Settings (allocations)"
+        "/profile:Profile (wallet details)"
+    )
+    local vult_pg_ok=0 vult_pg_warn=0
+    for pg in "${vult_pages[@]}"; do
+        local _path="${pg%%:*}" _desc="${pg#*:}"
+        local _c; _c=$(curl -sk -o /dev/null -w '%{http_code}' -m 8 \
+            "https://${VULT_DOMAIN}${_path}" 2>/dev/null || echo 0)
+        if [[ "$_c" =~ ^(200|301|302|304)$ ]]; then
+            vult_pg_ok=$((vult_pg_ok+1))
+        else
+            log_warn "Vult page ${_path} (${_desc}): HTTP $_c"
+            vult_pg_warn=$((vult_pg_warn+1))
+        fi
+    done
+    local vult_pg_total=$(( vult_pg_ok + vult_pg_warn ))
+    if [ "$vult_pg_warn" -eq 0 ]; then
+        log_pass "Vult domain pages: all $vult_pg_ok/$vult_pg_total reachable at https://${VULT_DOMAIN}"
+    else
+        log_warn "Vult domain pages: $vult_pg_ok/$vult_pg_total OK, $vult_pg_warn failed — check nginx + DNS for ${VULT_DOMAIN}"
+    fi
 
     if [ ! -x "$ZBOX" ]; then
         log_warn "zbox binary not found at $ZBOX — skipping storage operation checks"
@@ -571,25 +714,37 @@ assert d.get('assigner') and d.get('signature'), 'no marker fields'
     # Wait for allocation to be committed on chain and for blobbers to process the allocation event
     [ -n "$alloc_id" ] && sleep 30
 
+    # Verify the allocation actually exists on chain (the parsed ID could be a txn hash if creation failed)
+    if [ -n "$alloc_id" ]; then
+        local alloc_check
+        alloc_check=$(curl -s "${SHARDER_URL}/v1/screst/${STORAGE_SC}/allocation?allocation=${alloc_id}" 2>/dev/null)
+        if ! echo "$alloc_check" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d.get('id'), 'not found'" 2>/dev/null; then
+            log_fail "Allocation ${alloc_id:0:16}... not found on chain (creation likely failed) — skipping upload tests"
+            alloc_id=""
+        fi
+    fi
+
     if [ -n "$alloc_id" ]; then
         # Prepare test files
         echo "Vult verify test $(date)" > /tmp/verify_vult.txt
         printf '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\x0f\x00\x00\x01\x01\x00\x05\x18\xd8N\x00\x00\x00\x00IEND\xaeB`\x82' > /tmp/verify_vult.png
         printf '%%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj 2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj 3 0 obj<</Type/Page/MediaBox[0 0 3 3]>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n190\n%%%%EOF\n' > /tmp/verify_vult.pdf
+        # Use timestamp-suffixed remote paths to avoid duplicate_file errors on repeated runs
+        local ts_suffix="${alloc_ts}"
 
         # d. Upload: text, image, PDF
         local up_txt; up_txt=$($ZBOX upload --allocation "$alloc_id" \
-            --localpath /tmp/verify_vult.txt --remotepath /verify_vult.txt $W 2>&1)
+            --localpath /tmp/verify_vult.txt --remotepath /verify_vult_${ts_suffix}.txt $W 2>&1)
         echo "$up_txt" | grep -qiE "success|uploaded" && log_pass "Upload text file" || \
             log_fail "Upload text file FAILED: $(echo "$up_txt" | tail -2)"
 
         local up_img; up_img=$($ZBOX upload --allocation "$alloc_id" \
-            --localpath /tmp/verify_vult.png --remotepath /verify_vult.png $W 2>&1)
+            --localpath /tmp/verify_vult.png --remotepath /verify_vult_${ts_suffix}.png $W 2>&1)
         echo "$up_img" | grep -qiE "success|uploaded" && log_pass "Upload image (PNG)" || \
             log_warn "Upload PNG: $(echo "$up_img" | tail -1)"
 
         local up_pdf; up_pdf=$($ZBOX upload --allocation "$alloc_id" \
-            --localpath /tmp/verify_vult.pdf --remotepath /verify_vult.pdf $W 2>&1)
+            --localpath /tmp/verify_vult.pdf --remotepath /verify_vult_${ts_suffix}.pdf $W 2>&1)
         echo "$up_pdf" | grep -qiE "success|uploaded" && log_pass "Upload PDF file" || \
             log_warn "Upload PDF: $(echo "$up_pdf" | tail -1)"
 
@@ -600,23 +755,35 @@ assert d.get('assigner') and d.get('signature'), 'no marker fields'
         [ "${file_count:-0}" -gt 0 ] && log_pass "Listed $file_count files in allocation (carousel source)" || \
             log_warn "List returned no files: $(echo "$ls_out" | tail -2)"
 
-        # f. Carousel render: Gotenberg converts files for preview
+        # f. Carousel render: Blimp calls 0box /v2/convert-to-pdf → 0box → Gotenberg (Docker network)
+        # NOTE: The real carousel path is Browser→0box→Gotenberg, NOT Browser→Gotenberg directly.
+        # Direct port 3010 access is only for health checking the container itself.
         local goten_code; goten_code=$(curl_ok "http://127.0.0.1:3010/health" 5)
         if [[ "$goten_code" =~ ^(200|204)$ ]]; then
-            log_pass "Gotenberg render server: healthy (port 3010)"
-            # Actually render the PDF via LibreOffice (carousel simulation)
-            local goten_render_code
-            goten_render_code=$(curl -sk -m 30 -X POST \
-                -F "files=@/tmp/verify_vult.pdf;type=application/pdf" \
-                "http://127.0.0.1:3010/forms/libreoffice/convert" \
-                -o /tmp/verify_goten_$$.pdf \
-                -w '%{http_code}' 2>/dev/null || echo 0)
-            if [[ "$goten_render_code" =~ ^(200|204)$ ]] && [ -s /tmp/verify_goten_$$.pdf ]; then
-                log_pass "Carousel render: Gotenberg PDF conversion works (HTTP $goten_render_code)"
+            log_pass "Gotenberg container: healthy (port 3010)"
+            # Test that Gotenberg is reachable FROM 0box's Docker network (the actual path used)
+            # 0box calls gotenberg:3000 internally — must use wget (curl not in 0box container)
+            local goten_via_0box
+            goten_via_0box=$(docker exec 0box wget -q -S -O /dev/null \
+                http://gotenberg:3000/health 2>&1 | grep -oP 'HTTP/\S+ \K\d+' | head -1 || echo "0")
+            if [[ "$goten_via_0box" =~ ^(200|204)$ ]]; then
+                log_pass "Gotenberg reachable from 0box container (http://gotenberg:3000) — carousel path OK"
             else
-                log_warn "Carousel render: HTTP $goten_render_code — PDF previews may fail"
+                log_warn "Gotenberg NOT reachable from 0box container (HTTP $goten_via_0box) — carousel will fail"
+                log_info "Fix: ensure gotenberg and 0box are on same Docker network (testnet0)"
             fi
-            rm -f /tmp/verify_goten_$$.pdf
+            # Test that 0box /v2/convert-to-pdf endpoint is registered (returns 400 for missing params, NOT 404)
+            local zbox_pdf_code
+            zbox_pdf_code=$(curl -sk -o /dev/null -w '%{http_code}' -m 10 \
+                "http://127.0.0.1:9081/v2/convert-to-pdf" \
+                2>/dev/null || echo "0")
+            if [[ "$zbox_pdf_code" =~ ^(400|401|403|422)$ ]]; then
+                log_pass "0box /v2/convert-to-pdf endpoint registered (HTTP $zbox_pdf_code — missing params as expected)"
+            elif [[ "$zbox_pdf_code" == "404" ]]; then
+                log_warn "0box /v2/convert-to-pdf returned 404 — endpoint may not be registered"
+            else
+                log_warn "0box /v2/convert-to-pdf: HTTP $zbox_pdf_code (expected 400/401)"
+            fi
         else
             log_warn "Gotenberg not reachable (HTTP $goten_code) — PDF carousel thumbnails will fail"
             log_info "Fix: bash scripts/deploy_local.sh services"
@@ -629,7 +796,7 @@ assert d.get('assigner') and d.get('signature'), 'no marker fields'
 
         local dl_pdf_out
         dl_pdf_out=$($ZBOX download --allocation "$alloc_id" \
-            --remotepath /verify_vult.pdf --localpath /tmp/dl_pdf_$$.pdf $W 2>&1)
+            --remotepath /verify_vult_${ts_suffix}.pdf --localpath /tmp/dl_pdf_$$.pdf $W 2>&1)
         if [ -f /tmp/dl_pdf_$$.pdf ] && [ -s /tmp/dl_pdf_$$.pdf ]; then
             local sha_pdf_dl; sha_pdf_dl=$(sha256sum /tmp/dl_pdf_$$.pdf | awk '{print $1}')
             [ "$sha_pdf_up" = "$sha_pdf_dl" ] && \
@@ -642,7 +809,7 @@ assert d.get('assigner') and d.get('signature'), 'no marker fields'
 
         local dl_img_out
         dl_img_out=$($ZBOX download --allocation "$alloc_id" \
-            --remotepath /verify_vult.png --localpath /tmp/dl_img_$$.png $W 2>&1)
+            --remotepath /verify_vult_${ts_suffix}.png --localpath /tmp/dl_img_$$.png $W 2>&1)
         if [ -f /tmp/dl_img_$$.png ] && [ -s /tmp/dl_img_$$.png ]; then
             local sha_img_dl; sha_img_dl=$(sha256sum /tmp/dl_img_$$.png | awk '{print $1}')
             [ "$sha_img_up" = "$sha_img_dl" ] && \
@@ -652,6 +819,170 @@ assert d.get('assigner') and d.get('signature'), 'no marker fields'
             log_warn "Download image: $(echo "$dl_img_out" | tail -1)"
         fi
         rm -f /tmp/dl_img_$$.png
+
+        # g2. Gotenberg render: actually convert uploaded PDF through 0box → Gotenberg pipeline
+        local render_ticket render_hash
+        render_ticket=$($ZBOX share --allocation "$alloc_id" --remotepath /verify_vult_${ts_suffix}.pdf $W 2>&1 \
+            | grep -oP 'Auth token :\K\S+')
+        # Get lookup_hash via JSON list (separate from the non-JSON ls_out above)
+        local ls_json_out
+        ls_json_out=$($ZBOX list --allocation "$alloc_id" --remotepath / --json $W 2>&1)
+        render_hash=$(echo "$ls_json_out" | python3 -c "
+import json,sys
+for line in sys.stdin:
+    line=line.strip()
+    if line.startswith('[') or line.startswith('{'):
+        try:
+            data=json.loads(line)
+            if isinstance(data,list):
+                for f in data:
+                    n=f.get('name',f.get('Name',''))
+                    if 'verify_vult' in n and n.endswith('.pdf'):
+                        print(f.get('lookup_hash',f.get('LookupHash',''))); break
+        except: pass
+" 2>/dev/null)
+        if [ -n "$render_ticket" ] && [ -n "$render_hash" ]; then
+            local encoded_ticket
+            encoded_ticket=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''${render_ticket}'''))" 2>/dev/null)
+            local render_code render_size
+            render_code=$(curl -sk -o /tmp/render_pdf_$$.pdf -w '%{http_code}' -m 60 \
+                "http://127.0.0.1:9081/v2/convert-to-pdf?auth_ticket=${encoded_ticket}&lookup_hash=${render_hash}" \
+                -H "X-App-Client-ID: $client_id" \
+                -H "X-App-Client-Key: $pub_key" \
+                -H "X-App-Timestamp: $(date +%s)" \
+                -H "X-App-ID-Token: test" \
+                -H "X-App-User-ID: $test_uid" \
+                -H "X-App-Type: vult" 2>/dev/null || echo "0")
+            if [ "$render_code" = "200" ] && [ -f /tmp/render_pdf_$$.pdf ] && [ -s /tmp/render_pdf_$$.pdf ]; then
+                local pdf_header
+                pdf_header=$(head -c 5 /tmp/render_pdf_$$.pdf 2>/dev/null)
+                if [ "$pdf_header" = "%PDF-" ]; then
+                    render_size=$(wc -c < /tmp/render_pdf_$$.pdf | tr -d '[:space:]')
+                    log_pass "Gotenberg render: PDF converted successfully (${render_size} bytes, valid %PDF header)"
+                else
+                    log_fail "Gotenberg render: HTTP 200 but output is not a valid PDF"
+                fi
+            elif [ "$render_code" = "0" ]; then
+                log_fail "Gotenberg render: 0box /v2/convert-to-pdf unreachable"
+            else
+                local render_err
+                render_err=$(cat /tmp/render_pdf_$$.pdf 2>/dev/null | head -c 200)
+                log_fail "Gotenberg render: HTTP $render_code — $render_err"
+            fi
+            rm -f /tmp/render_pdf_$$.pdf
+        else
+            log_warn "Gotenberg render: could not get auth_ticket or lookup_hash (skipping)"
+        fi
+
+        # g3. zvault/zauth split-key vault flow
+        # Tests the full key custody pipeline: store key → generate split wallet → setup in zauth → sign message
+        local zvault_jwt_secret
+        zvault_jwt_secret=$(docker exec zvault-zvault-1 cat /zvault/config/zvault.yaml 2>/dev/null \
+            | grep 'jwt_secret:' | awk -F': ' '{print $2}' | tr -d '"' | xargs)
+        if [ -n "$zvault_jwt_secret" ]; then
+            local vault_jwt
+            vault_jwt=$(python3 -c "
+import json, hmac, hashlib, base64, time
+def b64url(data):
+    return base64.urlsafe_b64encode(data).rstrip(b'=').decode()
+secret = '${zvault_jwt_secret}'
+header = b64url(json.dumps({'alg':'HS256','typ':'JWT'}).encode())
+payload = b64url(json.dumps({'sub':'verify-$$','user_id':'verify-$$','iat':int(time.time()),'exp':int(time.time())+3600}).encode())
+msg = header + '.' + payload
+sig = b64url(hmac.new(secret.encode(), msg.encode(), hashlib.sha256).digest())
+print(msg + '.' + sig)
+" 2>/dev/null)
+            if [ -z "$vault_jwt" ]; then
+                log_warn "zvault: could not generate JWT token (python3 hmac issue)"
+            else
+                local priv_key
+                priv_key=$(python3 -c "import json; print(json.load(open('${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}'))['keys'][0]['private_key'])" 2>/dev/null)
+
+                # Step a: Store private key in zvault
+                local store_code
+                store_code=$(curl -sk -o /dev/null -w '%{http_code}' -m 10 -X POST "${ZVAULT_URL}/store" \
+                    -H "X-Jwt-Token: $vault_jwt" \
+                    -H "Content-Type: application/json" \
+                    -d "{\"mnemonic\":\"verify-test-mnemonic-$$\",\"private_key\":\"$priv_key\"}" 2>/dev/null || echo "0")
+                if [[ "$store_code" =~ ^(200|201|409)$ ]]; then
+                    log_pass "zvault /store: key stored (HTTP $store_code)"
+                else
+                    log_fail "zvault /store: HTTP $store_code"
+                fi
+
+                # Step b: Generate split wallet
+                local wallet_resp wallet_code split_cid
+                wallet_resp=$(curl -sk -m 10 -X POST "${ZVAULT_URL}/wallet" \
+                    -H "X-Jwt-Token: $vault_jwt" \
+                    -w '\n__HTTP__%{http_code}' 2>/dev/null || echo "")
+                wallet_code=$(echo "$wallet_resp" | grep -oP '__HTTP__\K\d+' || echo "0")
+                wallet_resp=$(echo "$wallet_resp" | sed 's/__HTTP__[0-9]*//')
+                split_cid=$(echo "$wallet_resp" | python3 -c "import json,sys; print(json.load(sys.stdin).get('client_id',''))" 2>/dev/null || echo "")
+                if [[ "$wallet_code" =~ ^(200|201)$ ]] && [ -n "$split_cid" ]; then
+                    log_pass "zvault /wallet: split wallet created (${split_cid:0:16}...)"
+                else
+                    log_fail "zvault /wallet: HTTP $wallet_code"
+                fi
+
+                # Step c: Generate split key (zvault calls zauth /setup internally)
+                if [ -n "$split_cid" ]; then
+                    local key_code
+                    key_code=$(curl -sk -o /dev/null -w '%{http_code}' -m 10 -X POST "${ZVAULT_URL}/key/$split_cid" \
+                        -H "X-Jwt-Token: $vault_jwt" 2>/dev/null || echo "0")
+                    [[ "$key_code" =~ ^(200|201)$ ]] && \
+                        log_pass "zvault /key: split key generated (HTTP $key_code)" || \
+                        log_fail "zvault /key: HTTP $key_code"
+
+                    # Step d: Verify keys stored
+                    local keys_resp keys_count
+                    keys_resp=$(curl -sk -m 10 "${ZVAULT_URL}/keys/$split_cid" \
+                        -H "X-Jwt-Token: $vault_jwt" 2>/dev/null || echo "{}")
+                    keys_count=$(echo "$keys_resp" | python3 -c "import json,sys; print(len(json.load(sys.stdin).get('keys',[])))" 2>/dev/null || echo "0")
+                    [ "${keys_count:-0}" -gt 0 ] && \
+                        log_pass "zvault /keys: $keys_count split key(s) retrieved" || \
+                        log_fail "zvault /keys: no keys found"
+
+                    # Step e: Sign message via zauth using known-good BLS key pair
+                    # (zvault-generated keys have no pre-computed valid signature, so we use test constants)
+                    local _za_cid="03df8919e4d76f6ffa9e23c388576f0baa02360d6e903a84d69689e0b2b5a28c"
+                    local _za_pk="ff132aaf4eeb517478c7bdd19ba887dbd909c4527b78ac989f723e5b5c349f03dc5a737071040edd5ba7a593e12264d895ad9cace1a50321886653ca8c366e13"
+                    local _za_sk="863f94d6deacc75c658db3e22d27c31944fc562aeef6e5b97a31d9e25294111a"
+                    local _za_peer="f06fe5513831714965ca33080052b3873bb2e785c5d2abd88a2f958e74872617adf6e8c5fe5cb8ed0e0c218cde796707c0a9ef8f7e77756032eada0d5f3c9d00"
+                    local _za_hash="7a8950d472c3a5a7cf0f27019c4507275d24e0bd3a97e1dedc7d77a132d9d6d3"
+                    local _za_sig="5d65c31f8bcf64c259c3e155b78bb4c7c5ea2dae1d0d6da1a8b735f2bda2db84"
+                    # Setup with known key pair
+                    curl -sk -o /dev/null -m 10 -X POST "${ZAUTH_URL}/setup" \
+                        -H "X-Jwt-Token: $vault_jwt" \
+                        -H "X-Peer-Public-Key: $_za_peer" \
+                        -H "Content-Type: application/json" \
+                        -d "{\"user_id\":\"verify-$$\",\"client_id\":\"$_za_cid\",\"client_key\":\"$_za_pk\",\"public_key\":\"$_za_pk\",\"private_key\":\"$_za_sk\",\"peer_public_key\":\"$_za_peer\",\"expired_at\":0}" \
+                        2>/dev/null
+                    local sign_resp sign_code
+                    sign_resp=$(curl -sk -m 10 -X POST "${ZAUTH_URL}/sign/msg" \
+                        -H "X-Jwt-Token: $vault_jwt" \
+                        -H "X-Peer-Public-Key: $_za_peer" \
+                        -H "Content-Type: application/json" \
+                        -d "{\"hash\":\"$_za_hash\",\"signature\":\"$_za_sig\",\"client_id\":\"$_za_cid\"}" \
+                        -w '\n__HTTP__%{http_code}' 2>/dev/null || echo "")
+                    sign_code=$(echo "$sign_resp" | grep -oP '__HTTP__\K\d+' || echo "0")
+                    sign_resp=$(echo "$sign_resp" | sed 's/__HTTP__[0-9]*//')
+                    if [[ "$sign_code" =~ ^(200|201)$ ]] && echo "$sign_resp" | grep -q '"sig"'; then
+                        log_pass "zauth /sign/msg: message signed successfully"
+                    else
+                        log_warn "zauth /sign/msg: HTTP $sign_code — $(echo "$sign_resp" | head -c 100)"
+                    fi
+                    # Cleanup zauth test key
+                    curl -sk -o /dev/null -m 10 -X POST "${ZAUTH_URL}/delete/$_za_cid" \
+                        -H "X-Jwt-Token: $vault_jwt" -H "X-Peer-Public-Key: $_za_peer" 2>/dev/null
+
+                    # Step f: Cleanup
+                    curl -sk -o /dev/null -m 10 -X POST "${ZVAULT_URL}/delete/$split_cid" \
+                        -H "X-Jwt-Token: $vault_jwt" 2>/dev/null
+                fi
+            fi
+        else
+            log_warn "zvault: could not read jwt_secret from config (container not running?)"
+        fi
 
         # h. Upgrade allocation size (using tokens from faucet)
         local upd_out; upd_out=$($ZBOX updateallocation --allocation "$alloc_id" \
@@ -875,9 +1206,35 @@ check_blimp() {
     fi
 
     # d. Gotenberg carousel render service
+    # Real carousel path: Browser → 0box /v2/convert-to-pdf → 0box → gotenberg:3000 (Docker network)
     local goten_code; goten_code=$(curl_ok "http://127.0.0.1:3010/health" 5)
-    [[ "$goten_code" =~ ^(200|204)$ ]] && log_pass "Blimp carousel: Gotenberg running (port 3010)" || \
+    if [[ "$goten_code" =~ ^(200|204)$ ]]; then
+        log_pass "Blimp carousel: Gotenberg container healthy (port 3010)"
+        # Test Gotenberg is reachable FROM 0box's Docker network (the actual carousel path)
+        local goten_via_0box
+        goten_via_0box=$(docker exec 0box wget -q -S -O /dev/null \
+            http://gotenberg:3000/health 2>&1 | grep -oP 'HTTP/\S+ \K\d+' | head -1 || echo "0")
+        if [[ "$goten_via_0box" =~ ^(200|204)$ ]]; then
+            log_pass "Blimp carousel: Gotenberg reachable from 0box container — carousel path OK"
+        else
+            log_warn "Blimp carousel: Gotenberg NOT reachable from 0box container (HTTP $goten_via_0box) — carousel will fail"
+            log_info "Fix: ensure gotenberg and 0box are on same Docker network (testnet0)"
+        fi
+        # Test 0box /v2/convert-to-pdf endpoint is registered (400=exists, 404=missing)
+        local zbox_pdf_code
+        zbox_pdf_code=$(curl -sk -o /dev/null -w '%{http_code}' -m 10 \
+            "http://127.0.0.1:9081/v2/convert-to-pdf" 2>/dev/null || echo "0")
+        if [[ "$zbox_pdf_code" =~ ^(400|401|403|422)$ ]]; then
+            log_pass "Blimp carousel: 0box /v2/convert-to-pdf endpoint registered (HTTP $zbox_pdf_code)"
+        elif [[ "$zbox_pdf_code" == "404" ]]; then
+            log_warn "Blimp carousel: 0box /v2/convert-to-pdf returned 404 — endpoint not registered"
+        else
+            log_warn "Blimp carousel: 0box /v2/convert-to-pdf HTTP $zbox_pdf_code (expected 400/401)"
+        fi
+    else
         log_warn "Blimp carousel: Gotenberg NOT running (HTTP $goten_code)"
+        log_info "Fix: bash scripts/deploy_local.sh services"
+    fi
 
     # e. Faucet — fund wallet for standard allocation
     local faucet_out
@@ -936,17 +1293,7 @@ check_blimp() {
         fi
         rm -f /tmp/bl_dl_$$.pdf
 
-        # Carousel: Gotenberg renders PDF for in-browser preview
-        if [[ "$goten_code" =~ ^(200|204)$ ]]; then
-            local render_code
-            render_code=$(curl -sk -m 30 -X POST \
-                -F "files=@/tmp/bl_verify_$$.pdf;type=application/pdf" \
-                "http://127.0.0.1:3010/forms/libreoffice/convert" \
-                -o /tmp/bl_render_$$.pdf -w '%{http_code}' 2>/dev/null || echo 0)
-            [ "$render_code" = "200" ] && log_pass "Blimp carousel: Gotenberg PDF render OK" || \
-                log_warn "Blimp carousel: Gotenberg render HTTP $render_code"
-            rm -f /tmp/bl_render_$$.pdf
-        fi
+        # Carousel connectivity already verified above (section d) via 0box Docker path
 
         # i. Add blobber (Blimp: Settings → Manage Allocation → Add Blobber)
         # Get current blobber count, then add one that's not yet in allocation
@@ -1202,6 +1549,25 @@ print(sum(1 for n in d.get('Nodes',[]) if n.get('simple_miner',{}).get('total_st
     [ "${staked_sharders:-0}" -gt 0 ] && log_pass "Sharders with stake: $staked_sharders/$total_sharders" || \
         log_fail "Sharders have zero stake — bash scripts/deploy_local.sh fund"
 
+    # Validators
+    local validator_data
+    validator_data=$(curl_json "${SHARDER_URL}/v1/screst/${STORAGE_SC}/validators?limit=20&offset=0")
+    local total_validators staked_validators active_validators
+    total_validators=$(echo "$validator_data" | python3 -c "
+import sys,json; d=json.load(sys.stdin); nodes=d.get('Nodes',d.get('nodes',[])); print(len(nodes))" 2>/dev/null || echo 0)
+    staked_validators=$(echo "$validator_data" | python3 -c "
+import sys,json; d=json.load(sys.stdin); nodes=d.get('Nodes',d.get('nodes',[]))
+print(sum(1 for v in nodes if v.get('total_stake',0)>0))" 2>/dev/null || echo 0)
+    active_validators=$(echo "$validator_data" | python3 -c "
+import sys,json,time; d=json.load(sys.stdin); nodes=d.get('Nodes',d.get('nodes',[])); now=int(time.time())
+print(sum(1 for v in nodes if v.get('last_health_check',0)>now-3600))" 2>/dev/null || echo 0)
+    [ "$total_validators" -gt 0 ] && log_pass "Validators on chain: $total_validators (staked: $staked_validators, active: $active_validators)" || \
+        log_fail "No validators from SC — bash scripts/deploy_local.sh blobbers"
+    if [ "${staked_validators:-0}" -lt 2 ]; then
+        log_fail "Less than 2 validators staked — challenges will not generate"
+        log_info "Fix: bash scripts/deploy_local.sh fund"
+    fi
+
     # Blobbers
     local blobber_data
     blobber_data=$(curl_json "${SHARDER_URL}/v1/screst/${STORAGE_SC}/getblobbers?limit=20&offset=0")
@@ -1242,8 +1608,14 @@ print(sum(1 for b in nodes if b.get('is_enterprise',False)))" 2>/dev/null || ech
             # Auth required — blobber is running, just locked down
             stats_ok=$((stats_ok+1))
         else
-            log_fail "Blobber FAIL: ${burl} (healthcheck=$hc_code, /_stats=$sr_code)"
-            stats_fail=$((stats_fail+1))
+            # Final fallback: enterprise blobbers serve info at root but have no /_stats or /healthcheck
+            local root_code; root_code=$(curl -sk -m 8 -o /dev/null -w '%{http_code}' "${burl}/" 2>/dev/null) || true
+            if [[ "$root_code" =~ ^(200|204)$ ]]; then
+                stats_ok=$((stats_ok+1))
+            else
+                log_fail "Blobber FAIL: ${burl} (healthcheck=$hc_code, /_stats=$sr_code)"
+                stats_fail=$((stats_fail+1))
+            fi
         fi
     done < <(echo "$blobber_data" | python3 -c "
 import sys,json,re
@@ -1261,6 +1633,20 @@ for b in nodes:
     if   [ "$stats_ok" -gt 0 ] && [ "$stats_fail" -eq 0 ]; then log_pass "All $stats_ok blobbers healthy"
     elif [ "$stats_ok" -gt 0 ]; then log_warn "$stats_ok blobbers healthy, $stats_fail unreachable"
     else log_fail "All blobber health checks failed"; fi
+
+    # Provider rewards — check that at least some providers have earned rewards
+    local reward_count; reward_count=$(docker exec -e PGPASSWORD=zbox_server postgres-0box psql -U zbox_user -d zbox -t -c \
+        "SELECT count(*) FROM provider_rewards WHERE total_rewards > 0;" 2>/dev/null | tr -d ' \n' || echo 0)
+    if [ "${reward_count:-0}" -gt 0 ]; then
+        local reward_top; reward_top=$(docker exec -e PGPASSWORD=zbox_server postgres-0box psql -U zbox_user -d zbox -t -c \
+            "SELECT provider_type, count(*), round(sum(total_rewards)/1e10,2) AS total_zcn FROM provider_rewards WHERE total_rewards>0 GROUP BY provider_type ORDER BY total_zcn DESC;" \
+            2>/dev/null | head -5 | tr -s ' ' || echo "")
+        log_pass "Provider rewards: $reward_count providers earning rewards"
+        [ -n "$reward_top" ] && log_info "Rewards breakdown:$reward_top"
+    else
+        log_warn "Provider rewards: no providers have earned rewards yet"
+        log_info "Fix: check Kafka pipeline flowing — bash scripts/deploy_local.sh fix-kafka"
+    fi
 
     # Transactions — latest block
     local tx_resp
@@ -1312,10 +1698,63 @@ else: print(0)
         fi
     done
 
+    # Elasticsearch search — verify search returns results (not just health)
+    local es_health; es_health=$(curl -s -m 5 "http://127.0.0.1:9200/_cluster/health" 2>/dev/null)
+    local es_status; es_status=$(echo "$es_health" | python3 -c "import json,sys; print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo "")
+    if [ -n "$es_status" ]; then
+        log_pass "Elasticsearch cluster: $es_status"
+        # Try a real search — look for any provider by querying 0box search endpoint
+        local es_indices; es_indices=$(curl -s -m 5 "http://127.0.0.1:9200/_cat/indices?format=json" 2>/dev/null | \
+            python3 -c "import json,sys; data=json.load(sys.stdin); print(sum(int(i.get('docs.count','0')) for i in data))" 2>/dev/null || echo 0)
+        if [ "${es_indices:-0}" -gt 0 ]; then
+            log_pass "Elasticsearch has $es_indices indexed documents (search functional)"
+        else
+            log_warn "Elasticsearch has 0 indexed documents — search will return nothing"
+            log_info "Fix: ensure crawler is running — bash scripts/deploy_local.sh crawler"
+        fi
+        # Monitor ES resource usage
+        local es_mem; es_mem=$(docker stats --no-stream --format '{{.MemUsage}}' elasticsearch 2>/dev/null | awk '{print $1}' || echo "unknown")
+        local es_cpu; es_cpu=$(docker stats --no-stream --format '{{.CPUPerc}}' elasticsearch 2>/dev/null || echo "unknown")
+        log_info "Elasticsearch resources: CPU=$es_cpu  MEM=$es_mem"
+    else
+        log_fail "Elasticsearch not reachable — Atlus search broken"
+        log_info "Fix: check elasticsearch container — docker logs elasticsearch --tail 20"
+    fi
+
     # Atlus app serving
     local atlus_code; atlus_code=$(curl_ok "http://127.0.0.1:${APP_PORTS[explorer]}/" 5)
     [[ "$atlus_code" =~ ^(200|301|302|304)$ ]] && log_pass "Atlus/Explorer app serving on port ${APP_PORTS[explorer]}" || \
         log_fail "Atlus/Explorer app NOT serving (HTTP $atlus_code)"
+
+    # Atlus custom domain UI/UX navigation page checks (test.atlus.cloud)
+    log_info "Checking Atlus custom domain navigation pages (https://${ATLUS_DOMAIN})..."
+    local atlus_pages=(
+        "/:Home (dashboard)"
+        "/miners:Miners list"
+        "/sharders:Sharders list"
+        "/blobbers:Blobbers list"
+        "/validators:Validators list"
+        "/transactions:Transactions list"
+        "/blocks:Blocks list"
+    )
+    local atlus_pg_ok=0 atlus_pg_warn=0
+    for pg in "${atlus_pages[@]}"; do
+        local _path="${pg%%:*}" _desc="${pg#*:}"
+        local _c; _c=$(curl -sk -o /dev/null -w '%{http_code}' -m 8 \
+            "https://${ATLUS_DOMAIN}${_path}" 2>/dev/null || echo 0)
+        if [[ "$_c" =~ ^(200|301|302|304)$ ]]; then
+            atlus_pg_ok=$((atlus_pg_ok+1))
+        else
+            log_warn "Atlus page ${_path} (${_desc}): HTTP $_c"
+            atlus_pg_warn=$((atlus_pg_warn+1))
+        fi
+    done
+    local atlus_pg_total=$(( atlus_pg_ok + atlus_pg_warn ))
+    if [ "$atlus_pg_warn" -eq 0 ]; then
+        log_pass "Atlus domain pages: all $atlus_pg_ok/$atlus_pg_total reachable at https://${ATLUS_DOMAIN}"
+    else
+        log_warn "Atlus domain pages: $atlus_pg_ok/$atlus_pg_total OK, $atlus_pg_warn failed — check nginx + DNS for ${ATLUS_DOMAIN}"
+    fi
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1396,11 +1835,11 @@ print_summary() {
     echo -e "${BLUE}══════════════════════════════════════════════════${NC}"
     echo -e "${BLUE}  VERIFICATION SUMMARY${NC}"
     echo -e "${BLUE}══════════════════════════════════════════════════${NC}"
-    echo -e "  Domain:  ${NGINX_DOMAIN}  (prefix: ${APP_DOMAIN_PREFIX})"
-    echo -e "  Vult:    https://${VULT_DOMAIN}/"
-    echo -e "  Blimp:   https://${BLIMP_DOMAIN}/"
-    echo -e "  Bolt:    https://${BOLT_DOMAIN}/"
-    echo -e "  Atlus:   https://${ATLUS_DOMAIN}/"
+    echo -e "  Domain:   ${NGINX_DOMAIN}  (prefix: ${APP_DOMAIN_PREFIX})"
+    echo -e "  Vult:     https://${VULT_DOMAIN}/"
+    echo -e "  Blimp:    https://${BLIMP_DOMAIN}/"
+    echo -e "  Bolt:     https://${BOLT_DOMAIN}/"
+    echo -e "  Atlus:    https://${ATLUS_DOMAIN}/"
     echo ""
     echo -e "  ${GREEN}PASS${NC}: $PASS_COUNT   ${YELLOW}WARN${NC}: $WARN_COUNT   ${RED}FAIL${NC}: $FAIL_COUNT"
     if [ ${#FAILED_CHECKS[@]} -gt 0 ]; then

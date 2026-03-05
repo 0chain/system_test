@@ -117,7 +117,7 @@ func Test1ChimneyBlobberRewards(testSetup *testing.T) {
 
 	beforeWallet := chimneyClient.GetWalletBalance(t, sdkWallet, client.HttpOkStatus)
 
-	allocationBlobbers = chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
+	allocationBlobbers := chimneyClient.GetAllocationBlobbers(t, sdkWallet, &blobberRequirements, client.HttpOkStatus)
 	allocationID := chimneyClient.CreateAllocationWithLockValue(t, sdkWallet, allocationBlobbers, 10, client.TxSuccessfulStatus)
 
 	time.Sleep(1 * time.Minute)

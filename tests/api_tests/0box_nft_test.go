@@ -41,7 +41,6 @@ func NewTestNFT() map[string]string {
 
 func Test0BoxNFTCollection(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	t.RunSequentially("List nft collections with zero nft collections should work", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)

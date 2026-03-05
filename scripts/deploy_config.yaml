@@ -67,7 +67,7 @@ repositories:
 
   # Storage providers
   blobber:
-    branch: staging
+    branch: fix/finalize-worker-and-logs
     path: blobber
     build_required: true
     containers:
@@ -134,7 +134,7 @@ repositories:
 
   # Web applications (needs zcn.wasm built from gosdk)
   web-apps:
-    branch: fix/atlus-explorer-improvements
+    branch: master
     path: web-apps
     build_required: true
     gosdk_branch: fix/lfb-aware-sharder-selection   # gosdk branch to build zcn.wasm from
@@ -205,7 +205,7 @@ wallet:
 # Blobber configuration
 blobber_config:
   read_price: 0.00
-  write_price: 0.001
+  write_price: 0.000083  # ~1 ZCN/TB/year with time_unit=720h
   funding_tokens: 10
   validator_tokens: 5
   stake_tokens: 1
