@@ -119,10 +119,6 @@ parse_args() {
                 SUITE_TIMEOUT="180m"
                 LONG_MODE=true   # long tests must run sequentially
                 shift ;;
-            --mainnet)
-                # Use mainnet configs (config.mainnet/ instead of config/)
-                export USE_MAINNET_CONFIG=true
-                shift ;;
             --help|-h)
                 usage; exit 0 ;;
             api|cli|tokenomics|sdk|zs3|mc|rclone|cypress)
@@ -178,7 +174,6 @@ Options:
   --smoke            Smoke mode: smoke subtests only (SMOKE_TEST_MODE=true, 35m timeout)
   --long             Sequential mode: suites run one after another (most thorough)
   --long-tests       Run ONLY long-running tests (skipped in standard mode, 180m timeout)
-  --mainnet          Use mainnet configs (config.mainnet/ instead of config/)
   --rerun-failed     Re-run only tests that failed in the most recent run
   --full-retest      Clear result files for selected suites, then run fresh
   -h, --help         Show this help
@@ -397,23 +392,6 @@ run_suite() {
     # Smoke mode: set env var so tests can skip non-smoke subtests
     local env_prefix=""
     $SMOKE_TEST && env_prefix="SMOKE_TEST_MODE=true "
-
-    # Mainnet config: point CONFIG_PATH and CONFIG_DIR to config.mainnet/
-    if [ "${USE_MAINNET_CONFIG:-}" = "true" ]; then
-        local mainnet_dir="${dir}/config.mainnet"
-        if [ -d "$mainnet_dir" ]; then
-            env_prefix="${env_prefix}CONFIG_DIR=${mainnet_dir} "
-            # Set CONFIG_PATH to the suite-specific config file in config.mainnet/
-            case "$suite" in
-                sdk) env_prefix="${env_prefix}CONFIG_PATH=${mainnet_dir}/sdk_tests_config.yaml " ;;
-                api) env_prefix="${env_prefix}CONFIG_PATH=${mainnet_dir}/api_tests_config.yaml " ;;
-                cli) env_prefix="${env_prefix}CONFIG_PATH=${mainnet_dir}/zbox_config.yaml " ;;
-                tokenomics) env_prefix="${env_prefix}CONFIG_PATH=${mainnet_dir}/tokenomics_tests_config.yaml " ;;
-            esac
-        else
-            log_warn "[${suite}] No config.mainnet/ directory found — using default config/"
-        fi
-    fi
 
     log_info "[${suite}] Run #${attempt}: ${env_prefix}${cmd}"
 
