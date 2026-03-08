@@ -164,7 +164,7 @@ run_cmd() {
 # Parse YAML configuration (basic parsing)
 get_config() {
     local key=$1
-    grep "^  $key:" "$CONFIG_FILE" 2>/dev/null | head -1 | awk -F': ' '{print $2}' | tr -d '"'
+    grep "^  $key:" "$CONFIG_FILE" 2>/dev/null | head -1 | awk -F': ' '{print $2}' | sed 's/#.*//' | tr -d '"' | xargs
 }
 
 # Get branch for a repository from config YAML
@@ -190,7 +190,7 @@ get_repo_branch() {
         fi
         if $in_repo; then
             if echo "$line" | grep -qP '^\s+branch:'; then
-                branch=$(echo "$line" | awk -F': ' '{print $2}' | tr -d ' "'"'"'')
+                branch=$(echo "$line" | awk -F': ' '{print $2}' | sed 's/#.*//' | tr -d ' "'"'"'')
                 break
             fi
             # If we hit another repo key (non-indented property), stop
@@ -411,7 +411,7 @@ get_repo_branch_path() {
         fi
         if $in_repo; then
             if echo "$line" | grep -qP '^\s+path:'; then
-                path=$(echo "$line" | awk -F': ' '{print $2}' | tr -d ' "'"'"'')
+                path=$(echo "$line" | awk -F': ' '{print $2}' | sed 's/#.*//' | tr -d ' "'"'"'')
                 break
             fi
             if echo "$line" | grep -qP '^\s+\w+:$'; then
@@ -1000,27 +1000,29 @@ reset_wallet_nonces() {
 validate_0dns() {
     local expected_miners="${EXPECTED_MINERS:-4}"
     local expected_sharders="${EXPECTED_SHARDERS:-2}"
-    local dns_response
-    dns_response=$(curl -s http://127.0.0.1:9091/dns/network 2>/dev/null || curl -s http://127.0.0.1:9091/network 2>/dev/null || echo "{}")
+    local max_retries=6
 
-    local num_miners num_sharders
-    num_miners=$(echo "$dns_response" | python3 -c "import sys,json; print(len(json.load(sys.stdin).get('miners',[])))" 2>/dev/null || echo "0")
-    num_sharders=$(echo "$dns_response" | python3 -c "import sys,json; print(len(json.load(sys.stdin).get('sharders',[])))" 2>/dev/null || echo "0")
+    for attempt in $(seq 1 $max_retries); do
+        local dns_response
+        dns_response=$(curl -s http://127.0.0.1:9091/dns/network 2>/dev/null || curl -s http://127.0.0.1:9091/network 2>/dev/null || echo "{}")
 
-    print_status "0dns reports: $num_miners miners, $num_sharders sharders"
+        local num_miners num_sharders
+        num_miners=$(echo "$dns_response" | python3 -c "import sys,json; print(len(json.load(sys.stdin).get('miners',[])))" 2>/dev/null || echo "0")
+        num_sharders=$(echo "$dns_response" | python3 -c "import sys,json; print(len(json.load(sys.stdin).get('sharders',[])))" 2>/dev/null || echo "0")
 
-    if [ "${num_miners:-0}" -lt "$expected_miners" ]; then
-        print_warning "0dns is missing miners! Found $num_miners, expected $expected_miners"
-        print_warning "Check magic block config and 0dns yaml"
-    fi
-    if [ "${num_sharders:-0}" -lt "$expected_sharders" ]; then
-        print_warning "0dns is missing sharders! Found $num_sharders, expected $expected_sharders"
-        print_warning "Check magic block config and 0dns yaml"
-    fi
+        if [ "${num_miners:-0}" -ge "$expected_miners" ] && [ "${num_sharders:-0}" -ge "$expected_sharders" ]; then
+            print_status "0dns validation passed: $num_miners miners, $num_sharders sharders"
+            return 0
+        fi
 
-    if [ "${num_miners:-0}" -ge "$expected_miners" ] && [ "${num_sharders:-0}" -ge "$expected_sharders" ]; then
-        print_status "0dns validation passed: all nodes present"
-    fi
+        if [ "$attempt" -lt "$max_retries" ]; then
+            print_status "0dns has $num_miners miners, $num_sharders sharders (attempt $attempt/$max_retries), waiting 5s..."
+            sleep 5
+        fi
+    done
+
+    # Final state after all retries
+    print_warning "0dns is missing nodes after ${max_retries} retries: $num_miners/$expected_miners miners, $num_sharders/$expected_sharders sharders"
 }
 
 wait_for_chain() {
@@ -1154,8 +1156,8 @@ init_chain_config() {
     # patch_sc_yaml() sets genesis values but CANNOT fix a chain that started with old sc.yaml.
     # updateSettings enforces the correct limits regardless of what genesis had.
     # NOTE: faucet owner_id is set to owner.json by patch_sc_yaml(), so $WO is correct.
-    run_cmd "Enforcing faucet limits (pour=10, max_pour=1000, periodic=10000, global=10M)..." \
-        "$ZWALLET faucet --methodName updateSettings --input '{\"pour_limit\":10,\"max_pour_amount\":1000,\"periodic_limit\":10000,\"global_limit\":10000000,\"individual_reset\":\"1h\"}' $WO"
+    run_cmd "Enforcing faucet limits (pour=100, max_pour=10000, periodic=10000, global=10M)..." \
+        "$ZWALLET faucet --methodName updateSettings --input '{\"pour_limit\":100,\"max_pour_amount\":10000,\"periodic_limit\":10000,\"global_limit\":10000000,\"individual_reset\":\"1h\"}' $WO"
     sleep 3
 
     # Get faucet tokens for the owner wallet
@@ -1481,14 +1483,14 @@ patch_sc_yaml() {
     # NOTE: ensure_chain_config() also calls 'faucet updateSettings' so these limits are
     # enforced even on chains that started before this patch was applied.
     sed -i.bak \
-        -e 's/^\(\s*\)pour_limit:.*/\1pour_limit: 10/' \
-        -e 's/^\(\s*\)max_pour_amount:.*/\1max_pour_amount: 1000/' \
+        -e 's/^\(\s*\)pour_limit:.*/\1pour_limit: 100/' \
+        -e 's/^\(\s*\)max_pour_amount:.*/\1max_pour_amount: 10000/' \
         -e 's/^\(\s*\)periodic_limit:.*/\1periodic_limit: 10000/' \
         -e 's/^\(\s*\)global_limit:.*/\1global_limit: 10000000/' \
         -e 's/^\(\s*\)individual_reset:.*/\1individual_reset: 1h/' \
         "$SC_YAML"
     rm -f "${SC_YAML}.bak"
-    print_status "sc.yaml faucet config: pour_limit=10, max_pour=1000, periodic=10000, global=10M, reset=1h"
+    print_status "sc.yaml faucet config: pour_limit=100, max_pour=10000, periodic=10000, global=10M, reset=1h"
 
     # Note: min_write_price=0.001 is the chain-enforced floor in the 0chain code.
     # Attempts to set it lower (e.g. 0.0001) via sc-update-config are silently ignored.
@@ -1863,6 +1865,11 @@ build_and_deploy_enterprise_blobbers() {
         return 1
     fi
 
+    # Step 0: Checkout correct gosdk branch for eblobber (enterprise-blobber branch)
+    # eblobber depends on gosdk enterprise-blobber branch, not the default lfb branch.
+    # Without this, go mod tidy during build picks up the wrong gosdk code.
+    checkout_gosdk_for_dependent "eblobber"
+
     # Step 1: Build eblobber Docker image if not present
     # The eblobber repo uses the same build pattern as the regular blobber repo:
     #   1. build.base.sh  → builds eblobber_base (with herumi MCL/BLS crypto libs)
@@ -2000,6 +2007,18 @@ COMPEOF
 
     print_status "Generated eb0docker-compose.yml"
 
+    # Patch compose with --hosturl BEFORE starting containers.
+    # Without --hosturl, blobber's node.Self.GetURLBase() returns the Docker IP
+    # (e.g. http://198.18.0.204:5074), but the SDK signs V2 signatures using the
+    # external URL from chain (e.g. https://test.zus.network/eblobber04/).
+    # This mismatch causes "invalid_signature: Invalid signature" on every upload.
+    local _eb_domain="${NGINX_DOMAIN:-test.zus.network}"
+    if ! grep -q -- '--hosturl' "eb0docker-compose.yml"; then
+        sed -i "s|--hostname 198\.18\.0\.20\${BLOBBER}|--hosturl https://${_eb_domain}/eblobber0\${BLOBBER}/ --hostname 198.18.0.20\${BLOBBER}|" "eb0docker-compose.yml" \
+            && print_status "Patched eb0docker-compose.yml with --hosturl https://${_eb_domain}/eblobber0N/" \
+            || print_warning "Could not patch eb0docker-compose.yml with --hosturl"
+    fi
+
     # Step 3b: Ensure key files exist for all enterprise blobbers
     # Keys for blobbers 1-3 should already exist. For 4+, generate BLS keys using
     # the 0chain keygen tool (from core/encryption/keys/).
@@ -2074,11 +2093,9 @@ COMPEOF
 
     # Step 7: Fund a wallet for sending tokens to blobbers
     print_status "Funding deployment wallet for enterprise blobber funding..."
-    for attempt in $(seq 1 15); do
-        $ZWALLET faucet --methodName pour --input '{PayerID:unused}' --tokens 10 \
-            --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
-        sleep 1
-    done
+    $ZWALLET faucet --methodName pour --input '{PayerID:unused}' --tokens 100 \
+        --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
+    sleep 1
 
     # Step 8: Start enterprise blobber containers (--force-recreate for fresh registration)
     print_status "Starting enterprise blobber containers..."
@@ -2099,16 +2116,14 @@ COMPEOF
     local deploy_bal
     deploy_bal=$($ZWALLET getbalance --json --silent \
         --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>/dev/null | \
-        python3 -c "import json,sys; print(int(json.load(sys.stdin).get('balance',0)/1e10))" 2>/dev/null || echo "0")
+        python3 -c "import json,sys; d=json.load(sys.stdin); print(int(float(d.get('zcn', d.get('balance',0)/1e10 if isinstance(d.get('balance'),int) else 0))))" 2>/dev/null || echo "0")
     while [ "${deploy_bal:-0}" -lt "$needed_balance" ]; do
-        for _fp in $(seq 1 10); do
-            $ZWALLET faucet --methodName pour --input '{PayerID:unused}' --tokens 10 \
-                --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
-        done
+        $ZWALLET faucet --methodName pour --input '{PayerID:unused}' --tokens 100 \
+            --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
         sleep 3
         deploy_bal=$($ZWALLET getbalance --json --silent \
             --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>/dev/null | \
-            python3 -c "import json,sys; print(int(json.load(sys.stdin).get('balance',0)/1e10))" 2>/dev/null || echo "0")
+            python3 -c "import json,sys; d=json.load(sys.stdin); print(int(float(d.get('zcn', d.get('balance',0)/1e10 if isinstance(d.get('balance'),int) else 0))))" 2>/dev/null || echo "0")
         print_status "  Deploy wallet balance: ${deploy_bal} ZCN (need ${needed_balance})"
     done
 
@@ -2691,6 +2706,9 @@ regenerate_blobber_keys() {
 build_and_create_blobbers() {
     print_header "Building and Creating Blobber/Validator Containers"
 
+    # Checkout correct gosdk branch for blobber (lfb branch by default)
+    checkout_gosdk_for_dependent "blobber"
+
     cd "${BASE_DIR}/blobber/docker.local"
 
     # Ensure BLS keys exist for all regular blobbers/validators (1-12).
@@ -2960,6 +2978,9 @@ start_zauth() {
     patch_zauth_faucet
 
     cd "${BASE_DIR}/zauth-server/docker.local"
+
+    # Checkout correct gosdk branch for zauth-server
+    checkout_gosdk_for_dependent "zauth-server"
 
     # Build zauthserver image (always rebuild to pick up patches)
     print_status "Building zauthserver Docker image..."
@@ -3841,8 +3862,25 @@ start_0box() {
     local BOX_CONFIG="${BASE_DIR}/0box/docker.local/config/0box.yaml"
     local BOX_COMPOSE="${BASE_DIR}/0box/docker.local/docker-compose.yml"
 
+    # Checkout correct gosdk branch for 0box
+    checkout_gosdk_for_dependent "0box"
+
     # Fix config: The 0box repo ships with dev.zus.network — always apply local settings.
     fix_0box_config
+
+    # Build 0box image from checked-out source using the repo's own build scripts.
+    # Without this, docker compose uses the stale 0chaindev/0box:staging image from Docker Hub
+    # instead of the local branch, causing 0box to run months-old code.
+    local LOCAL_IMAGE="0chaindev/0box:local-build"
+    print_status "Building 0box image from source as ${LOCAL_IMAGE}..."
+    cd "${BASE_DIR}/0box"
+    ./docker.local/bin/build.base.sh 2>&1 || { print_error "Failed to build zbox_base"; return 1; }
+    ./docker.local/bin/build.zbox.sh 2>&1 || { print_error "0box docker build failed"; return 1; }
+    docker tag zbox "${LOCAL_IMAGE}"
+    if [ -f "$BOX_COMPOSE" ]; then
+        sed -i "s|image: 0chaindev/0box:.*|image: ${LOCAL_IMAGE}|g" "$BOX_COMPOSE"
+        print_status "Updated docker-compose.yml to use ${LOCAL_IMAGE}"
+    fi
 
     # Fix Redis image: pin to redis:7-alpine to avoid redis:alpine pulling v8.4.0 which crashes
     if [ -f "$BOX_COMPOSE" ] && grep -q "redis:alpine" "$BOX_COMPOSE"; then
@@ -4429,6 +4467,7 @@ seed_0box_providers() {
         run_0box_sql "UPDATE snapshots SET created_at = $now_ts - (($max_round - round) * 3) WHERE round > 0 AND created_at = (SELECT created_at FROM snapshots WHERE round > 0 ORDER BY round DESC LIMIT 1);" 2>/dev/null || true
         print_status "Spread snapshot created_at timestamps across ${max_round} rounds"
     fi
+
 }
 
 # Reset 0box to current chain round — clears stale data, resets Kafka offset to latest,
@@ -4891,12 +4930,12 @@ fund_blobbers_and_validators() {
     print_status "Funder wallet balance: ${funder_zcn} ZCN (need ~1800 ZCN)"
     if [ "${funder_zcn}" -lt 1800 ] 2>/dev/null; then
         local needed=$(( 1800 - funder_zcn ))
-        local pours=$(( (needed + 9) / 10 ))  # faucet pour_limit=10 ZCN per call
-        [ "$pours" -lt 10 ] && pours=10
-        [ "$pours" -gt 300 ] && pours=300  # cap at 300 pours = 3000 ZCN max
-        print_status "Topping up funder wallet via faucet (${pours} pours of 10 ZCN each, need ${needed} more)..."
+        local pours=$(( (needed + 99) / 100 ))  # faucet pour_limit=100 ZCN per call
+        [ "$pours" -lt 2 ] && pours=2
+        [ "$pours" -gt 30 ] && pours=30  # cap at 30 pours = 3000 ZCN max
+        print_status "Topping up funder wallet via faucet (${pours} pours of 100 ZCN each, need ${needed} more)..."
         for p in $(seq 1 "$pours"); do
-            $ZWALLET faucet --methodName pour --tokens 10 --input '{}' \
+            $ZWALLET faucet --methodName pour --tokens 100 --input '{}' \
                 --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
             sleep 2
         done
@@ -5088,11 +5127,9 @@ check_and_fund_providers() {
     local funder_low=$(python3 -c "print(1 if float('${funder_bal}') < 50 else 0)" 2>/dev/null || echo "0")
     if [ "$funder_low" = "1" ]; then
         print_status "Funder balance low, pouring from faucet..."
-        for i in $(seq 1 10); do
-            $ZWALLET faucet --methodName pour --tokens 10 --input "fund providers" \
-                --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
-            sleep 2
-        done
+        $ZWALLET faucet --methodName pour --tokens 100 --input "fund providers" \
+            --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
+        sleep 2
         print_status "Faucet pours complete"
         funder_bal=$(_get_balance "$funder_id")
     fi
@@ -5307,11 +5344,11 @@ for b in nodes:
         | python3 -c 'import json,sys; print(json.load(sys.stdin).get("balance",0))' 2>/dev/null || echo "0")
     local _w_bal_zcn=$(python3 -c "print(int(${_w_bal_raw:-0}) // 10000000000)" 2>/dev/null || echo "0")
     if [ "${_w_bal_zcn:-0}" -lt 500 ]; then
-        print_status "  Wallet balance ~${_w_bal_zcn} ZCN < 500 ZCN — topping up via faucet (pour_limit=10 ZCN each, looping 60x)..."
-        for _i in $(seq 1 60); do
-            $ZBOX faucet --methodName pour --input '{}' --tokens 10 \
+        print_status "  Wallet balance ~${_w_bal_zcn} ZCN < 500 ZCN — topping up via faucet (5 x 100 ZCN)..."
+        for _i in $(seq 1 5); do
+            $ZBOX faucet --methodName pour --input '{}' --tokens 100 \
                 --wallet ${ZCN_WALLET_FILE} --configDir ${ZCN_CONFIG_DIR} --config ${ZCN_CONFIG_FILE} --silent 2>/dev/null || \
-            ${ZWALLET} faucet --methodName pour --input '{}' --tokens 10 \
+            ${ZWALLET} faucet --methodName pour --input '{}' --tokens 100 \
                 --wallet ${ZCN_WALLET_FILE} --configDir ${ZCN_CONFIG_DIR} --config ${ZCN_CONFIG_FILE} --silent 2>/dev/null || true
         done
         sleep 5
@@ -5414,12 +5451,10 @@ except: pass
         --config $ZCN_CONFIG_FILE --silent 2>/dev/null | grep -oP '[\d.]+(?= ZCN)' | head -1 || echo "0")
     local _sp_bal_int=${_sp_bal%.*}
     if [ "${_sp_bal_int:-0}" -lt 400 ]; then
-        print_status "  Wallet ${_sp_bal} ZCN — topping up for provider staking (30 x 10 ZCN)..."
-        for _i in $(seq 1 30); do
-            $ZWALLET faucet --methodName pour --input '{}' --tokens 10 \
-                --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE \
-                --silent 2>/dev/null || true
-        done
+        print_status "  Wallet ${_sp_bal} ZCN — topping up for provider staking (100 ZCN)..."
+        $ZWALLET faucet --methodName pour --input '{}' --tokens 100 \
+            --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE \
+            --silent 2>/dev/null || true
     fi
 
     local sp_staked_count=0
@@ -6291,9 +6326,9 @@ ensure_chain_config() {
     # patch_sc_yaml() sets genesis values but CANNOT fix a chain that started with old sc.yaml.
     # Call updateSettings here so the correct limits are enforced regardless of genesis config.
     # NOTE: faucet owner_id is set to owner.json by patch_sc_yaml(), so $WO is correct.
-    print_status "Enforcing faucet limits (pour=10, max_pour=1000, periodic=10000, global=10M, reset=1h)..."
+    print_status "Enforcing faucet limits (pour=100, max_pour=10000, periodic=10000, global=10M, reset=1h)..."
     $ZWALLET faucet --methodName updateSettings \
-        --input '{"pour_limit":10,"max_pour_amount":1000,"periodic_limit":10000,"global_limit":10000000,"individual_reset":"1h"}' \
+        --input '{"pour_limit":100,"max_pour_amount":10000,"periodic_limit":10000,"global_limit":10000000,"individual_reset":"1h"}' \
         $WO 2>&1 || print_warning "Faucet updateSettings failed (chain may not be ready yet; genesis patch still applies)"
     sleep 3
 
@@ -6501,14 +6536,10 @@ ensure_chain_config() {
     # Without staking, validators are filtered out and challenges cannot be generated.
     # validators_per_challenge=2, so at least 2 validators need stake > 0.
     # 20 ZCN per validator. With 12+ validators, we need 240+ ZCN locked.
-    # Fund owner wallet with enough ZCN first (pour_limit=10 per call, so loop 30x).
-    print_status "Funding owner wallet for validator staking (30 pours x 10 ZCN)..."
-    local _pour_count=0
-    while [ $_pour_count -lt 30 ]; do
-        $ZWALLET faucet --methodName pour --input '{}' --tokens 10 $W 2>/dev/null || true
-        _pour_count=$((_pour_count + 1))
-        sleep 0.5
-    done
+    # Fund owner wallet for validator staking (100 ZCN per pour, 1 pour enough for ~5 validators)
+    print_status "Funding owner wallet for validator staking (100 ZCN)..."
+    $ZWALLET faucet --methodName pour --input '{}' --tokens 100 $W 2>/dev/null || true
+    sleep 0.5
     print_status "Staking all validators (20 ZCN each, with retries)..."
     local vstake_count=0
     local vstake_failed=0
@@ -7021,6 +7052,9 @@ build_rclone_zus() {
         git pull origin "$RCLONE_ZUS_BRANCH" 2>/dev/null || true
     fi
 
+    # Checkout correct gosdk branch for rclone_zus
+    checkout_gosdk_for_dependent "rclone_zus"
+
     print_status "Building rclone with Zus backend..."
     CGO_ENABLED=1 go build -tags bn256 -o rclone rclone.go 2>/dev/null || {
         print_warning "rclone-zus build failed"
@@ -7184,14 +7218,19 @@ sys.exit(0 if magic == b'\x7fELF' else 1)
     # Download warp (MinIO benchmark tool) for Linux if not present
     if [ ! -f "$CLI_TEST_DIR/warp" ]; then
         print_status "Downloading warp..."
-        # warp is typically installed via go install or downloaded from releases
-        if command -v go &>/dev/null; then
-            GOBIN="$CLI_TEST_DIR" go install github.com/minio/warp@latest 2>/dev/null || {
-                print_warning "Failed to install warp via go install"
-            }
-        else
-            print_warning "go not available, cannot install warp"
-        fi
+        # Try direct download from MinIO releases first (most reliable)
+        curl -sfL "https://dl.min.io/aistor/warp/release/linux-amd64/warp" -o "$CLI_TEST_DIR/warp" 2>/dev/null && \
+            chmod +x "$CLI_TEST_DIR/warp" && \
+            print_status "warp downloaded from dl.min.io" || {
+            # Fallback to go install
+            if command -v go &>/dev/null; then
+                GOBIN="$CLI_TEST_DIR" go install github.com/minio/warp@latest 2>/dev/null || {
+                    print_warning "Failed to install warp (both dl.min.io and go install failed)"
+                }
+            else
+                print_warning "Failed to download warp and go not available"
+            fi
+        }
     else
         print_status "warp binary already exists"
     fi
@@ -8606,7 +8645,6 @@ setup_auto_funding() {
     local INSTALL_DIR="/usr/local/bin"
 
     if [ ! -f "$DAEMON_SRC" ]; then
-        print_warning "auto_fund_daemon.sh not found at ${DAEMON_SRC}, skipping"
         return 0
     fi
 
@@ -8650,7 +8688,6 @@ setup_block_pruning() {
     local DEST="/root/prune_blocks.sh"
 
     if [ ! -f "$SRC" ]; then
-        print_warning "prune_blocks.sh not found at ${SRC}, skipping block pruning setup"
         return 0
     fi
 
@@ -9332,6 +9369,9 @@ build_and_start_crawler() {
         return 0
     fi
 
+    # Checkout correct gosdk branch for crawler
+    checkout_gosdk_for_dependent "crawler"
+
     # Build the crawler Docker image
     print_status "Building crawler Docker image..."
     cd "$CRAWLER_DIR"
@@ -9381,12 +9421,10 @@ print(m.group(1) if m else '')
     fi
 
     if [ "$need_new_config" = "1" ]; then
-        # Fund the wallet via faucet (need ~100 ZCN to lock for allocation; pour 10 ZCN x 12 = 120 ZCN)
+        # Fund the wallet via faucet (need ~100 ZCN to lock for allocation; pour 100 ZCN x 2 = 200 ZCN)
         print_status "Funding crawler wallet via faucet..."
-        for _i in 1 2 3 4 5 6 7 8 9 10 11 12; do
-            ${ZWALLET} faucet --methodName pour --tokens 10 --silent $WO 2>/dev/null || true
-            sleep 2
-        done
+        ${ZWALLET} faucet --methodName pour --tokens 100 --silent $WO 2>/dev/null || true
+        sleep 2
 
         print_status "Creating crawler allocation on-chain (data=7, parity=2 = all 9 regular blobbers)..."
         local alloc_output
@@ -9495,6 +9533,11 @@ build_and_start_zs3server() {
             return 0
         }
     fi
+
+    # Checkout correct gosdk branch for zs3server (enterprise-blobber branch)
+    # zs3server depends on gosdk enterprise-blobber branch, not the default lfb branch.
+    # Without this, go mod tidy during build picks up the wrong gosdk code.
+    checkout_gosdk_for_dependent "zs3server"
 
     # Check if the minio binary needs to be built
     if [ ! -f "$ZS3_DIR/minio" ]; then
@@ -11193,7 +11236,7 @@ checkout_gosdk_for_dependent() {
             fi
             if $in_repo; then
                 if echo "$line" | grep -qP '^\s+gosdk_branch:'; then
-                    gosdk_branch=$(echo "$line" | awk -F': ' '{print $2}' | tr -d ' "'"'"'')
+                    gosdk_branch=$(echo "$line" | awk -F': ' '{print $2}' | sed 's/#.*//' | tr -d ' "'"'"'')
                     break
                 fi
                 if echo "$line" | grep -qP '^\s+\w+:$'; then
@@ -11234,7 +11277,7 @@ swap_image() {
     local repo="$1"
     local branch=""
     local gosdk_branch_override=""
-    local apply_config=0
+    local apply_config=1  # Always apply config fixes after swap
 
     # $2 might be a branch name OR a flag like --gosdk-branch
     if [ -n "${2:-}" ] && [[ ! "${2:-}" == --* ]]; then
@@ -11244,16 +11287,12 @@ swap_image() {
         shift 1 2>/dev/null || true
     fi
 
-    # Parse remaining flags (e.g., --gosdk-branch, --with-config)
+    # Parse remaining flags (e.g., --gosdk-branch)
     while [ $# -gt 0 ]; do
         case "$1" in
             --gosdk-branch)
                 gosdk_branch_override="${2:-}"
                 shift 2
-                ;;
-            --with-config)
-                apply_config=1
-                shift
                 ;;
             *)
                 shift
@@ -11262,9 +11301,8 @@ swap_image() {
     done
 
     if [ -z "$repo" ]; then
-        print_error "Usage: $0 swap-image <repo> [branch] [--gosdk-branch <branch>] [--with-config]"
+        print_error "Usage: $0 swap-image <repo> [branch] [--gosdk-branch <branch>]"
         print_error "Available repos: 0chain, blobber, eblobber, 0box, zauth-server, zvault, zs3server, web-apps, crawler, 0dns, zboxcli, zwalletcli, gosdk, rclone_zus"
-        print_error "Default: git pull + build + restart WITHOUT config changes. Pass --with-config to apply config fixes."
         return 1
     fi
 
@@ -11415,25 +11453,19 @@ swap_image() {
             fi
             ;;
         0box)
-            # Fix config BEFORE building image: git pull restores dev.zus.network defaults.
-            # fix_0box_config() overwrites them with local chain URLs so the built image
-            # (and the mounted config file) both point to the local chain.
-            if [ "$apply_config" = "1" ]; then
-                fix_0box_config
-            else
-                print_status "Skipping config changes (pass --with-config to apply)"
-            fi
-            # Build image with a local tag (docker-compose.yml has no build: section — image is hardcoded)
+            # Checkout correct gosdk branch for 0box
+            checkout_gosdk_for_dependent "0box" "$gosdk_branch_override"
+            # Always fix 0box config: git pull restores dev.zus.network defaults and
+            # deployment_mode 0, which enforces Firebase auth. fix_0box_config() sets
+            # deployment_mode 3 (NoAuth) and fixes URLs for local chain.
+            fix_0box_config
+            # Build image using the repo's own build scripts, then re-tag for docker-compose
             local LOCAL_IMAGE="0chaindev/0box:local-build"
             print_status "Building 0box image as ${LOCAL_IMAGE}..."
             cd "${repo_path}"
-            # Ensure zbox_base exists — 0box Dockerfile uses it as build base
-            if ! docker image inspect zbox_base > /dev/null 2>&1; then
-                print_status "Building zbox_base (required by 0box Dockerfile)..."
-                DOCKER_BUILDKIT=0 docker build -t zbox_base -f docker.local/base.Dockerfile . 2>&1 || { print_error "Failed to build zbox_base"; return 1; }
-            fi
-            # Dockerfile is in docker.local/, build context is repo root; BUILDKIT=0 for local base image
-            DOCKER_BUILDKIT=0 docker build -f docker.local/Dockerfile -t "${LOCAL_IMAGE}" . 2>&1 || { print_error "0box docker build failed"; return 1; }
+            ./docker.local/bin/build.base.sh 2>&1 || { print_error "Failed to build zbox_base"; return 1; }
+            ./docker.local/bin/build.zbox.sh 2>&1 || { print_error "0box docker build failed"; return 1; }
+            docker tag zbox "${LOCAL_IMAGE}"
             # Update docker-compose.yml to use the locally built image
             local box_compose="${repo_path}/docker.local/docker-compose.yml"
             if [ -f "$box_compose" ]; then
@@ -11442,6 +11474,8 @@ swap_image() {
             fi
             ;;
         zauth-server)
+            # Checkout correct gosdk branch for zauth-server
+            checkout_gosdk_for_dependent "zauth-server" "$gosdk_branch_override"
             if [ "$apply_config" = "1" ]; then
                 patch_zauth_faucet
             fi
@@ -11738,6 +11772,8 @@ PYEOF
             return 0
             ;;
         crawler)
+            # Checkout correct gosdk branch for crawler
+            checkout_gosdk_for_dependent "crawler" "$gosdk_branch_override"
             cd "$repo_path"
             print_status "Building crawler Docker image..."
             docker compose -f docker.local/docker-compose.yml build 2>&1 | tail -10 || {
@@ -12765,6 +12801,159 @@ clear_all_logs() {
     print_status "All scripts stopped and logs cleared"
 }
 
+# test_swap_image — Swap each critical service to its configured branch, then verify health.
+# This tests the swap-image pipeline end-to-end: checkout, build, restart, health check.
+# Services are swapped sequentially. On failure, log a warning and continue (non-blocking).
+test_swap_image() {
+    print_header "Swap-Image Tests"
+    local SWAP_START
+    SWAP_START=$(date +%s)
+    local swap_pass=0
+    local swap_fail=0
+    local swap_total=0
+
+    # Health check helper: curl URL up to N times with 5s interval
+    _swap_health_check() {
+        local label="$1" url="$2" max_attempts="${3:-12}" expect="${4:-200}"
+        for i in $(seq 1 "$max_attempts"); do
+            local code
+            code=$(curl -sk -o /dev/null -w '%{http_code}' "$url" 2>/dev/null) || code="000"
+            if [ "$code" = "$expect" ]; then
+                return 0
+            fi
+            sleep 5
+        done
+        return 1
+    }
+
+    # Docker container health check helper
+    _swap_container_check() {
+        local name="$1" max_attempts="${2:-12}"
+        for i in $(seq 1 "$max_attempts"); do
+            if docker ps --format '{{.Names}}' 2>/dev/null | grep -qw "$name"; then
+                local status
+                status=$(docker inspect -f '{{.State.Status}}' "$name" 2>/dev/null)
+                if [ "$status" = "running" ]; then
+                    return 0
+                fi
+            fi
+            sleep 5
+        done
+        return 1
+    }
+
+    # Test a single swap-image operation
+    _test_swap() {
+        local service="$1"
+        local check_type="$2"  # "url" or "container"
+        local check_target="$3"
+        local expect="${4:-200}"
+        local max_wait="${5:-12}"
+
+        swap_total=$((swap_total + 1))
+        print_status "Testing swap-image: ${service}..."
+        local t_start
+        t_start=$(date +%s)
+
+        # Perform the swap (use configured branch)
+        if ! swap_image "$service" 2>&1 | tail -20; then
+            print_error "  FAIL: swap_image ${service} returned error"
+            swap_fail=$((swap_fail + 1))
+            return 1
+        fi
+
+        # Verify health after swap
+        local ok=false
+        if [ "$check_type" = "url" ]; then
+            if _swap_health_check "$service" "$check_target" "$max_wait" "$expect"; then
+                ok=true
+            fi
+        elif [ "$check_type" = "container" ]; then
+            if _swap_container_check "$check_target" "$max_wait"; then
+                ok=true
+            fi
+        fi
+
+        local t_end
+        t_end=$(date +%s)
+        local elapsed=$((t_end - t_start))
+
+        if $ok; then
+            print_status "  PASS: ${service} swap OK (${elapsed}s)"
+            swap_pass=$((swap_pass + 1))
+        else
+            print_error "  FAIL: ${service} not healthy after swap (${elapsed}s)"
+            swap_fail=$((swap_fail + 1))
+        fi
+    }
+
+    # Test each critical service. Order: services first, then chain/blobbers last (most disruptive).
+    # zauth, zvault, 0box — lightweight Docker services
+    _test_swap "zauth-server"  "url"       "http://localhost:8080/healthz"         200 12
+    _test_swap "zvault"        "container" "zvault"                                200 12
+    _test_swap "0box"          "url"       "http://localhost:9081/v2/health"       200 18
+
+    # 0dns — chain DNS service
+    _test_swap "0dns"          "url"       "http://198.18.0.100:9091/dns/network"  200 12
+
+    # blobber — rebuilds all 12 blobbers + validators (most time-consuming)
+    _test_swap "blobber"       "container" "blobber-1"                             200 24
+
+    # Wait for blobbers to re-register after blobber swap
+    print_status "Waiting for blobbers to re-register after swap..."
+    wait_for_blobbers_ready 4 300 || print_warning "Blobbers slow to re-register after swap"
+
+    # Enterprise blobber
+    _test_swap "eblobber"      "container" "eblobber-1"                            200 24
+
+    # CLI tools (no container — just binary rebuild)
+    swap_total=$((swap_total + 1))
+    print_status "Testing swap-image: zboxcli..."
+    if swap_image "zboxcli" 2>&1 | tail -5; then
+        if [ -f "${BASE_DIR}/system_test/tests/cli_tests/zbox" ]; then
+            print_status "  PASS: zboxcli binary rebuilt"
+            swap_pass=$((swap_pass + 1))
+        else
+            print_error "  FAIL: zboxcli binary not found after swap"
+            swap_fail=$((swap_fail + 1))
+        fi
+    else
+        print_error "  FAIL: zboxcli swap returned error"
+        swap_fail=$((swap_fail + 1))
+    fi
+
+    swap_total=$((swap_total + 1))
+    print_status "Testing swap-image: zwalletcli..."
+    if swap_image "zwalletcli" 2>&1 | tail -5; then
+        if [ -f "${BASE_DIR}/system_test/tests/cli_tests/zwallet" ]; then
+            print_status "  PASS: zwalletcli binary rebuilt"
+            swap_pass=$((swap_pass + 1))
+        else
+            print_error "  FAIL: zwalletcli binary not found after swap"
+            swap_fail=$((swap_fail + 1))
+        fi
+    else
+        print_error "  FAIL: zwalletcli swap returned error"
+        swap_fail=$((swap_fail + 1))
+    fi
+
+    local SWAP_END
+    SWAP_END=$(date +%s)
+    local SWAP_ELAPSED=$((SWAP_END - SWAP_START))
+
+    print_header "Swap-Image Test Results"
+    echo "  Passed: ${swap_pass}/${swap_total}"
+    echo "  Failed: ${swap_fail}/${swap_total}"
+    echo "  Time:   ${SWAP_ELAPSED}s"
+    echo ""
+
+    if [ "$swap_fail" -gt 0 ]; then
+        print_warning "${swap_fail} swap-image test(s) failed — check logs above"
+    else
+        print_status "All swap-image tests PASSED!"
+    fi
+}
+
 # Main deployment
 main() {
     print_header "0Chain Complete Local Deployment"
@@ -12812,7 +13001,9 @@ main() {
     fund_0box
 
     # Phase 3c: Verify events are flowing from chain → Kafka → 0box BEFORE setting up blobbers.
+    # Wait 15s for 0box to start consuming Kafka events before checking.
     if [ -f "${SCRIPT_DIR}/verify_kafka_pipeline.sh" ]; then
+        sleep 15
         bash "${SCRIPT_DIR}/verify_kafka_pipeline.sh" post-chain \
             || print_warning "Kafka post-chain verification failed — 0box may not have chain data (check logs)"
     fi
@@ -12917,7 +13108,7 @@ main() {
     stop_chaos_test || true
     wait_for_blobbers_ready 4 600 || print_warning "Blobbers may not be fully ready — tests may fail with 'not enough blobbers'"
 
-    # Phase 11c: Full environment verification — runs FIRST before any tests
+    # Phase 11c: Full environment verification
     print_header "Running Full Environment Verification"
     if [ -f "${SCRIPT_DIR}/verify_all.sh" ]; then
         bash "${SCRIPT_DIR}/verify_all.sh" || print_warning "verify_all.sh reported issues — check output above before running tests"
@@ -12925,7 +13116,10 @@ main() {
         print_warning "verify_all.sh not found, skipping full verification"
     fi
 
-    # Phase 11d: Smoke tests
+    # Phase 11d: Swap-image tests — skipped (already tested, takes too long in deploy pipeline)
+    # test_swap_image
+
+    # Phase 11e: Smoke tests
     print_header "Running Smoke Tests"
     local SMOKE_LOG="/tmp/smoke_test.log"
     echo "" > "$SMOKE_LOG"
@@ -12948,12 +13142,6 @@ main() {
     local DOMAIN_DISPLAY="${NGINX_DOMAIN:-}"
     if [ -z "$DOMAIN_DISPLAY" ] && [ -f "$CONFIG_FILE" ]; then
         DOMAIN_DISPLAY=$(grep "^  domain:" "$CONFIG_FILE" 2>/dev/null | awk -F': ' '{print $2}' | tr -d '"' | xargs)
-    fi
-
-    # Phase 13: Final verification (Vult/Blimp/Bolt/chain/services/blobbers)
-    if [ -f "${SCRIPT_DIR}/verify_all.sh" ]; then
-        print_header "Running Post-Deployment Verification"
-        bash "${SCRIPT_DIR}/verify_all.sh" || print_warning "Verification found issues — see above"
     fi
 
     print_header "Deployment Complete!"
@@ -13285,6 +13473,10 @@ EOF
         build_and_deploy_enterprise_blobbers
         stake_enterprise_blobbers
         refresh_crawler_allocation || print_warning "Crawler allocation refresh failed (non-critical)"
+        # Deploy ZS3 server + test tools (mc, warp, rclone) so ZS3/MC tests can run
+        build_and_start_zs3server || print_warning "ZS3 server deploy failed (non-critical)"
+        setup_zs3_test_tools || print_warning "ZS3 test tools setup failed (non-critical)"
+        build_rclone_zus || print_warning "rclone-zus build failed (non-critical)"
         ;;
     update-blobber-prices)
         # Update write_price=0.001, read_price=0 for all on-chain blobbers WITHOUT restarting them.

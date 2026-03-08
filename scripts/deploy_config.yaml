@@ -105,7 +105,7 @@ repositories:
     branch: feat/enterprise-timings
     path: zs3server
     build_required: true
-    gosdk_branch: enterprise-blobber  # gosdk branch to use when building
+    gosdk_branch: feat/enterprise-blobber  # gosdk branch to use when building
     containers:
       - minioserver
 

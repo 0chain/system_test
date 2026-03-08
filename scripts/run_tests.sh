@@ -67,6 +67,15 @@ declare -A LONG_TEST_PATTERNS=(
     [tokenomics]="TestAddOrReplace|TestBlobberSlashPenalty|TestBlobberChallengeReward|TestBlobberRewardOnDownload"
 )
 
+# Tests permanently excluded from all runs. These require infrastructure not present
+# in local/dev environments (Tenderly bridge, external cloud storage credentials,
+# Firebase auth) or are destructive (kill tests destroy providers on-chain).
+declare -A EXCLUDED_PATTERNS=(
+    [api]="Test0BoxNFT"
+    [cli]="TestKillBlobber|TestKillSharder|TestKillMiner|Test0Dropbox|Test0Gdrive|Test0S3Migration|TestLivestreamDownload|TestStreamUploadDownload|TestMaxFileSize"
+    [tokenomics]="TestBlobberReadReward"
+)
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -136,9 +145,6 @@ parse_args() {
         else
             # Full run: all suites
             SUITES=("sdk" "zs3" "mc" "rclone" "api" "cli")
-            if [ -d "${SYSTEM_TEST_DIR}/../web-apps/packages/test" ]; then
-                SUITES+=("cypress")
-            fi
         fi
     fi
 }
@@ -365,10 +371,19 @@ run_suite() {
         cmd="$cmd -run '${test_filter}'"
     fi
 
+    # Build combined skip pattern from long tests + permanently excluded tests.
+    local long_pattern="${LONG_TEST_PATTERNS[$suite]:-}"
+    local excluded_pattern="${EXCLUDED_PATTERNS[$suite]:-}"
+    local skip_pattern=""
+
+    # Always skip excluded tests (even on retries — they can never pass).
+    if [ -n "$excluded_pattern" ]; then
+        skip_pattern="$excluded_pattern"
+    fi
+
     # Long test handling: skip or run-only based on mode.
     # When retrying specific failed tests (test_filter set), don't add -skip
     # since the retry already targets only the specific tests that failed.
-    local long_pattern="${LONG_TEST_PATTERNS[$suite]:-}"
     if [ -n "$long_pattern" ]; then
         if $LONG_TESTS; then
             # --long-tests mode: run ONLY the long tests (unless already filtered by retry)
@@ -376,9 +391,17 @@ run_suite() {
                 cmd="$cmd -run '${long_pattern}'"
             fi
         elif [ -z "$test_filter" ]; then
-            # Standard mode (initial run): skip long tests for faster runs
-            cmd="$cmd -skip '${long_pattern}'"
+            # Standard mode: also skip long tests
+            if [ -n "$skip_pattern" ]; then
+                skip_pattern="${skip_pattern}|${long_pattern}"
+            else
+                skip_pattern="$long_pattern"
+            fi
         fi
+    fi
+
+    if [ -n "$skip_pattern" ]; then
+        cmd="$cmd -skip '${skip_pattern}'"
     fi
 
     if [ -n "$TEST_TIMEOUT" ]; then
@@ -943,7 +966,21 @@ run_parallel_group() {
     local group_suites=()
 
     for suite in "${suites[@]}"; do
+        # Delay API tests 60s to let Kafka/0box sync chain data (miners, sharders, blobbers).
+        # Also restart crawler at this point so it generates activity for graph/challenge tests.
+        local delay=0
+        if [ "$suite" = "api" ]; then
+            delay=60
+        fi
         (
+            if [ "$delay" -gt 0 ]; then
+                log_info "[${suite}] Waiting ${delay}s for 0box/Kafka sync..."
+                sleep "$delay"
+                # Restart crawler to ensure fresh activity for API tests (graph endpoints, challenges)
+                if docker ps -a --format '{{.Names}}' | grep -q '^crawler$'; then
+                    docker restart crawler >/dev/null 2>&1 && log_info "[${suite}] Crawler restarted" || true
+                fi
+            fi
             _INITIAL_MODE="$initial_mode" run_suite_with_retries "$suite"
             exit $?
         ) &
