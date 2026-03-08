@@ -21,16 +21,9 @@ func TestFileReferencePath(testSetup *testing.T) {
 	t.SetSmokeTests("Get file ref with allocation id, remote path should work")
 
 	t.RunSequentiallyWithTimeout("Get file ref with allocation id, remote path should work", 10*time.Minute, func(t *test.SystemTest) {
-		// KNOWN BLOBBER BUG: blobber staging branch uses wmpt (Merkle Patricia Trie) for commit.
-		// The wmpt-based commit stores the root hash only in write_markers.allocation_root and
-		// allocations.allocation_root, but does NOT update reference_objects.hash for directory refs
-		// (that column remains empty after upload). The V1 /v1/file/referencepath handler reads
-		// rootRef.Hash (from reference_objects.hash = "") and queries write_markers WHERE
-		// allocation_root="" — no match → "latest_write_marker_read_error: record not found".
-		// Fix requires blobber V1 handler to use allocationObj.AllocationRoot instead of rootRef.Hash
-		// (same as V2 handler). Confirmed via DB: reference_objects.hash="" but
-		// write_markers.allocation_root=7f51970906b6db00... after a successful upload.
-		t.Skip("Known blobber bug: V1 referencepath endpoint broken with wmpt commit (staging branch). Blobber-side fix needed.")
+		// V1 storage endpoints are deprecated. gosdk v1.17.0+ uses V2 (pebble/WMPT) by default.
+		// The V1 /v1/file/referencepath handler is broken with wmpt commit and will not be fixed.
+		t.Skip("V1 referencepath endpoint is deprecated — V2 storage is the default since gosdk v1.17.0")
 		wallet := createWallet(t)
 
 		sdkClient.SetWallet(t, wallet)

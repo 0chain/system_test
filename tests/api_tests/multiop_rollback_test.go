@@ -24,6 +24,9 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
+		// Wait for blobbers to sync the new allocation from chain
+		time.Sleep(5 * time.Second)
+
 		ops := make([]sdk.OperationRequest, 0, 5)
 
 		for i := 0; i < 1; i++ {
@@ -63,6 +66,8 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
+		time.Sleep(5 * time.Second)
+
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
@@ -94,6 +99,8 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
+		time.Sleep(5 * time.Second)
+
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
@@ -124,6 +131,8 @@ func TestMultiOperationRollback(testSetup *testing.T) {
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		time.Sleep(5 * time.Second)
 
 		ops := make([]sdk.OperationRequest, 0, 10)
 

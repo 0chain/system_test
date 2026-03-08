@@ -54,10 +54,14 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 			minLockRequiredInZcn = 0.2
 		}
 
-		// Add 10% buffer to SDK-calculated min lock (SDK can underestimate when allocation has used data)
-		minLockRequiredInZcn *= 1.1
+		// Add generous buffer — SDK min_lock covers write pool only, not challenge pool deficit.
+		// When allocation has used data, challenge pool may be nearly empty and needs refilling.
+		minLockRequiredInZcn *= 2.0
+		if minLockRequiredInZcn < 1.0 {
+			minLockRequiredInZcn = 1.0
+		}
 
-		t.Logf("Min lock required: %v (with 10%% buffer: %v ZCN)", minLockRequired, minLockRequiredInZcn)
+		t.Logf("Min lock required: %v (with buffer: %v ZCN)", minLockRequired, minLockRequiredInZcn)
 
 		apiClient.UpdateAllocation(t, wallet, allocationID, uar, minLockRequiredInZcn, client.TxSuccessfulStatus)
 		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)

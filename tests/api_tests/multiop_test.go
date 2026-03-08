@@ -66,6 +66,9 @@ func TestMultiOperation(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
+		// Wait for blobbers to sync the new allocation from chain
+		time.Sleep(5 * time.Second)
+
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
@@ -107,6 +110,8 @@ func TestMultiOperation(testSetup *testing.T) {
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		time.Sleep(5 * time.Second)
 
 		ops := make([]sdk.OperationRequest, 0, 10)
 
@@ -153,6 +158,8 @@ func TestMultiOperation(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
+		time.Sleep(5 * time.Second)
+
 		ops := make([]sdk.OperationRequest, 0, 10)
 
 		for i := 0; i < 10; i++ {
@@ -197,6 +204,8 @@ func TestMultiOperation(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
+		time.Sleep(5 * time.Second)
+
 		ops := make([]sdk.OperationRequest, 0, 10)
 		names := make([]string, 0, 10)
 		for i := 0; i < 10; i++ {
@@ -226,6 +235,8 @@ func TestMultiOperation(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
+		time.Sleep(5 * time.Second)
+
 		nestedDir := sdkClient.AddUploadOperationWithPath(t, allocationID, "/new/nested/")
 
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{nestedDir})
@@ -248,6 +259,8 @@ func TestMultiOperation(testSetup *testing.T) {
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
 
+		time.Sleep(5 * time.Second)
+
 		nestedDir := sdkClient.AddUploadOperationWithPath(t, allocationID, "/new/nested/")
 
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{nestedDir})
@@ -268,6 +281,8 @@ func TestMultiOperation(testSetup *testing.T) {
 		blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 		allocationBlobbers := apiClient.GetAllocationBlobbers(t, wallet, &blobberRequirements, client.HttpOkStatus)
 		allocationID := apiClient.CreateAllocation(t, wallet, allocationBlobbers, client.TxSuccessfulStatus)
+
+		time.Sleep(5 * time.Second)
 
 		nestedDir := sdkClient.AddCreateDirOperation(t, allocationID, "/new/nested/nested1")
 
@@ -320,6 +335,10 @@ func createAllocationAndPerformMultiOperation(t *test.SystemTest, allocSize int6
 	}()
 	require.Empty(t, allocCreateErr, "allocation creation failed: "+allocCreateErr)
 	require.NotEmpty(t, allocationID, "allocation creation must return non-empty allocation ID")
+
+	// Wait for blobbers to sync the new allocation from chain.
+	// Without this, blobbers may reject uploads with "invalid_signature: could not verify the allocation owner"
+	time.Sleep(5 * time.Second)
 
 	ops := make([]sdk.OperationRequest, 0, 10)
 
