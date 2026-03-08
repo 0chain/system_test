@@ -1,0 +1,15 @@
+block_worker: https://mainnet.zus.network/dns
+confirmation_chain_length: 3
+ethereum_node_url: ""
+min_confirmation: 10
+min_submit: 100
+signature_scheme: bls0chain
+store_unlock_duration_sec: 2
+
+bridge:
+  bridge_address: ""
+  token_address: ""
+  authorizers_address: ""
+  uniswap_address: ""
+  ethereum_address: ""
+  password: ""
