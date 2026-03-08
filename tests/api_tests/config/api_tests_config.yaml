@@ -1,4 +1,4 @@
-block_worker:  http://127.0.0.1:9091
+block_worker: http://198.18.0.100:9091
 0box_url: http://localhost:9081
 0box_phone_number: +917696229925
 zvault_url: http://localhost:8090

@@ -465,6 +465,13 @@ parse_branch_overrides() {
                 fi
                 shift 2
                 ;;
+            --chain-image)
+                if [ -n "$2" ]; then
+                    export CHAIN_IMAGE_TAG="$2"
+                    print_status "Chain image tag: ${2} (will pull from Docker Hub instead of building)"
+                fi
+                shift 2
+                ;;
             --secrets)
                 if [ -n "$2" ]; then
                     export REMOTE_SECRETS_PATH="$2"
@@ -495,6 +502,16 @@ check_prerequisites() {
         exit 1
     fi
     print_status "Docker Compose: OK"
+
+    # Ensure docker-compose (v1 syntax) shim exists for 0chain build scripts that use it
+    if ! command -v docker-compose &> /dev/null; then
+        cat > /usr/local/bin/docker-compose << 'DCSHIM'
+#!/bin/sh
+exec docker compose "$@"
+DCSHIM
+        chmod +x /usr/local/bin/docker-compose
+        print_status "Installed docker-compose → docker compose shim"
+    fi
 
     # Check Go
     if ! command -v go &> /dev/null; then
@@ -920,13 +937,17 @@ EOF
 
     print_status "ZCN config created at ${ZCN_CONFIG_DIR}/${ZCN_CONFIG_FILE}"
 
-    # Always copy the SC owner wallet to local.json (overwrite stale wallets from previous deploys)
-    if [ -f "${BASE_DIR}/system_test/tests/cli_tests/config/wallets/sc_owner_wallet.json" ]; then
-        cp "${BASE_DIR}/system_test/tests/cli_tests/config/wallets/sc_owner_wallet.json" "${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}"
+    # Always copy the SC owner wallet to owner.json (overwrite stale wallets from previous deploys).
+    # Validate JSON content (not just file existence) — a 0-byte file from interrupted rsync passes -f.
+    local sc_wallet_src="${BASE_DIR}/system_test/tests/cli_tests/config/wallets/sc_owner_wallet.json"
+    if [ -f "$sc_wallet_src" ] && [ -s "$sc_wallet_src" ] && jq -e '.client_id' "$sc_wallet_src" >/dev/null 2>&1; then
+        cp "$sc_wallet_src" "${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}"
         local wallet_id=$(jq -r '.client_id' "${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}" 2>/dev/null)
         print_status "Copied SC owner wallet to ${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE} (client_id: ${wallet_id:0:16}...)"
-    elif [ ! -f "${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}" ]; then
-        print_warning "SC owner wallet not found, creating new wallet..."
+    elif [ -f "${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}" ] && [ -s "${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}" ] && jq -e '.client_id' "${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}" >/dev/null 2>&1; then
+        print_status "SC owner wallet source empty/invalid, but existing ${ZCN_WALLET_FILE} is valid — keeping it"
+    else
+        print_warning "SC owner wallet not found or invalid, creating new wallet..."
         $ZWALLET create-wallet --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
     fi
 }
@@ -1659,41 +1680,84 @@ start_chain() {
         print_status "Copied magic block file (4 miners + 2 sharders)"
     fi
 
-    # Build Docker images if they don't exist (e.g. after docker system prune)
+    # Get chain images: pull from Docker Hub if CHAIN_IMAGE_TAG is set, otherwise build locally.
+    # Usage: CHAIN_IMAGE_TAG=pr-3469-4d2f1c9a to pull 0chaindev/miner:TAG and 0chaindev/sharder:TAG
     cd "${BASE_DIR}/0chain"
-    if ! docker image inspect zchain_build_base > /dev/null 2>&1; then
-        print_status "Building base images..."
-        docker.local/bin/build.base.sh
-    fi
-    if ! docker image inspect sharder > /dev/null 2>&1; then
-        print_status "Building sharder image..."
-        docker.local/bin/build.sharders.sh
-    fi
-    if ! docker image inspect miner > /dev/null 2>&1; then
-        print_status "Building miner image..."
-        docker.local/bin/build.miners.sh
+    if [ -n "${CHAIN_IMAGE_TAG:-}" ]; then
+        print_status "Pulling chain images from Docker Hub (tag: ${CHAIN_IMAGE_TAG})..."
+        if ! docker image inspect sharder > /dev/null 2>&1; then
+            docker pull "0chaindev/sharder:${CHAIN_IMAGE_TAG}" 2>&1 && \
+                docker tag "0chaindev/sharder:${CHAIN_IMAGE_TAG}" sharder:latest
+            print_status "Pulled and tagged sharder:latest"
+        fi
+        if ! docker image inspect miner > /dev/null 2>&1; then
+            docker pull "0chaindev/miner:${CHAIN_IMAGE_TAG}" 2>&1 && \
+                docker tag "0chaindev/miner:${CHAIN_IMAGE_TAG}" miner:latest
+            print_status "Pulled and tagged miner:latest"
+        fi
+    else
+        if ! docker image inspect zchain_build_base > /dev/null 2>&1; then
+            print_status "Building base images..."
+            docker.local/bin/build.base.sh
+        fi
+        if ! docker image inspect sharder > /dev/null 2>&1; then
+            print_status "Building sharder image..."
+            local _si_ok=false
+            for _si_try in 1 2 3; do
+                if docker.local/bin/build.sharders.sh 2>&1; then _si_ok=true; break; fi
+                print_warning "sharder image build failed (attempt $_si_try/3), retrying in 15s..."
+                sleep 15
+            done
+            $_si_ok || { print_error "Sharder image build failed after 3 attempts"; return 1; }
+        fi
+        if ! docker image inspect miner > /dev/null 2>&1; then
+            print_status "Building miner image..."
+            local _mi_ok=false
+            for _mi_try in 1 2 3; do
+                if docker.local/bin/build.miners.sh 2>&1; then _mi_ok=true; break; fi
+                print_warning "miner image build failed (attempt $_mi_try/3), retrying in 15s..."
+                sleep 15
+            done
+            $_mi_ok || { print_error "Miner image build failed after 3 attempts"; return 1; }
+        fi
     fi
 
-    # Start sharders first (--force-recreate ensures fresh container state)
+    # Start sharders first (--force-recreate ensures fresh container state; retry on transient Docker Hub failures)
     print_status "Starting sharders..."
     for i in 1 2; do
         cd "${BASE_DIR}/0chain/docker.local/build.sharder"
-        if SHARDER=$i docker compose -p sharder$i -f b0docker-compose.yml up -d --force-recreate 2>&1; then
+        local _sharder_ok=false
+        for _st in 1 2 3; do
+            if SHARDER=$i docker compose -p sharder$i -f b0docker-compose.yml up -d --force-recreate 2>&1; then
+                _sharder_ok=true; break
+            fi
+            print_warning "sharder-$i start failed (attempt $_st/3), retrying in 10s..."
+            sleep 10
+        done
+        if $_sharder_ok; then
             print_status "Started sharder-$i"
         else
-            print_error "Failed to start sharder-$i"
+            print_error "Failed to start sharder-$i after 3 attempts"
         fi
     done
     sleep 5
 
-    # Start miners (--force-recreate ensures fresh container state)
+    # Start miners (--force-recreate ensures fresh container state; retry on transient Docker Hub failures)
     print_status "Starting miners..."
     for i in 1 2 3 4; do
         cd "${BASE_DIR}/0chain/docker.local/build.miner"
-        if MINER=$i docker compose -p miner$i -f b0docker-compose.yml up -d --force-recreate 2>&1; then
+        local _miner_ok=false
+        for _mt in 1 2 3; do
+            if MINER=$i docker compose -p miner$i -f b0docker-compose.yml up -d --force-recreate 2>&1; then
+                _miner_ok=true; break
+            fi
+            print_warning "miner-$i start failed (attempt $_mt/3), retrying in 10s..."
+            sleep 10
+        done
+        if $_miner_ok; then
             print_status "Started miner-$i"
         else
-            print_error "Failed to start miner-$i"
+            print_error "Failed to start miner-$i after 3 attempts"
         fi
     done
     sleep 5
@@ -1749,8 +1813,20 @@ start_0dns() {
 
     print_status "Starting 0dns..."
     cd "${BASE_DIR}/0dns/docker.local"
-    docker compose -p 0dns up -d --build --force-recreate 2>&1 || print_error "Failed to start 0dns"
-    print_status "0dns started (198.18.0.100:9091)"
+    local _dns_ok=false
+    for _dns_try in 1 2 3; do
+        if docker compose -p 0dns up -d --build --force-recreate 2>&1; then
+            _dns_ok=true
+            break
+        fi
+        print_warning "0dns build/start failed (attempt ${_dns_try}/3), retrying in 10s..."
+        sleep 10
+    done
+    if $_dns_ok; then
+        print_status "0dns started (198.18.0.100:9091)"
+    else
+        print_error "Failed to start 0dns after 3 attempts"
+    fi
 }
 
 # Deploy enterprise blobbers using the eblobber repo
@@ -2017,13 +2093,36 @@ COMPEOF
     sleep 30
 
     # Step 10: Get actual wallet IDs from blobber logs and fund them
+    # First ensure deploy wallet has enough balance (need 30 ZCN × ENTERPRISE_COUNT)
+    local needed_balance=$((30 * ENTERPRISE_COUNT))
+    print_status "Ensuring deploy wallet has >= ${needed_balance} ZCN for eblobber funding..."
+    local deploy_bal
+    deploy_bal=$($ZWALLET getbalance --json --silent \
+        --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>/dev/null | \
+        python3 -c "import json,sys; print(int(json.load(sys.stdin).get('balance',0)/1e10))" 2>/dev/null || echo "0")
+    while [ "${deploy_bal:-0}" -lt "$needed_balance" ]; do
+        for _fp in $(seq 1 10); do
+            $ZWALLET faucet --methodName pour --input '{PayerID:unused}' --tokens 10 \
+                --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
+        done
+        sleep 3
+        deploy_bal=$($ZWALLET getbalance --json --silent \
+            --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>/dev/null | \
+            python3 -c "import json,sys; print(int(json.load(sys.stdin).get('balance',0)/1e10))" 2>/dev/null || echo "0")
+        print_status "  Deploy wallet balance: ${deploy_bal} ZCN (need ${needed_balance})"
+    done
+
     print_status "Discovering actual enterprise blobber wallet IDs from logs..."
     for i in $(seq 1 $ENTERPRISE_COUNT); do
         local container="eblobber-${i}"
         local actual_id=""
 
-        # Extract the actual wallet ID from blobber logs
-        actual_id=$(docker logs "$container" 2>&1 | grep "^[[:space:]]*ID:" | head -1 | awk '{print $NF}')
+        # Extract the actual wallet ID from blobber logs (retry up to 30s if not yet available)
+        for _lp in $(seq 1 6); do
+            actual_id=$(docker logs "$container" 2>&1 | grep "^[[:space:]]*ID:" | head -1 | awk '{print $NF}')
+            [ -n "$actual_id" ] && [ ${#actual_id} -eq 64 ] && break
+            sleep 5
+        done
 
         if [ -n "$actual_id" ] && [ ${#actual_id} -eq 64 ]; then
             print_status "Enterprise eblobber-$i actual wallet ID: ${actual_id:0:16}..."
@@ -2155,14 +2254,14 @@ fix_blobber_config() {
     sed -i.bak 's/write_price:.*/write_price: 0.001/' "$BLOBBER_CONFIG"
     rm -f "${BLOBBER_CONFIG}.bak"
 
-    # Set service_charge to 0.3 (30%) so blobber operators earn service fees
+    # Set service_charge to 0.1 (10%) so blobber operators earn service fees
     if grep -q 'service_charge:' "$BLOBBER_CONFIG"; then
-        sed -i.bak 's/service_charge:.*/service_charge: 0.3/' "$BLOBBER_CONFIG"
+        sed -i.bak 's/service_charge:.*/service_charge: 0.1/' "$BLOBBER_CONFIG"
     else
-        sed -i.bak '/^write_price:/a\service_charge: 0.3' "$BLOBBER_CONFIG"
+        sed -i.bak '/^write_price:/a\service_charge: 0.1' "$BLOBBER_CONFIG"
     fi
     rm -f "${BLOBBER_CONFIG}.bak"
-    print_status "Set service_charge to 0.3 (30%)"
+    print_status "Set service_charge to 0.1 (10%)"
 
     # Fix healthcheck frequency: 60m is too slow for local testing
     # Blobbers need to send healthchecks frequently to stay "active" on chain
@@ -2632,17 +2731,43 @@ build_and_create_blobbers() {
 
     # Build images (show output so build failures are visible)
     cd "${BASE_DIR}/blobber"
+
+    # Fix incomplete go.sum (common after branch switches via checkout_branches).
+    # Without this, Docker build fails with "missing go.sum entry for module".
+    if [ -f go.mod ]; then
+        print_status "Running go mod tidy for blobber (fix stale go.sum)..."
+        go mod tidy 2>&1 || print_warning "go mod tidy failed (build may still work from cache)"
+    fi
+
     if ! docker image inspect blobber_base > /dev/null 2>&1; then
         print_status "Building blobber base image..."
-        docker.local/bin/build.base.sh 2>&1 || print_error "Blobber base image build failed"
+        local _bb_ok=false
+        for _bb_try in 1 2 3; do
+            if docker.local/bin/build.base.sh 2>&1; then _bb_ok=true; break; fi
+            print_warning "blobber_base build failed (attempt $_bb_try/3), retrying in 15s..."
+            sleep 15
+        done
+        $_bb_ok || print_error "Blobber base image build failed after 3 attempts"
     fi
     if ! docker image inspect blobber > /dev/null 2>&1; then
         print_status "Building blobber image..."
-        docker.local/bin/build.blobber.sh 2>&1 || print_error "Blobber image build failed"
+        local _bi_ok=false
+        for _bi_try in 1 2 3; do
+            if docker.local/bin/build.blobber.sh 2>&1; then _bi_ok=true; break; fi
+            print_warning "blobber image build failed (attempt $_bi_try/3), retrying in 15s..."
+            sleep 15
+        done
+        $_bi_ok || print_error "Blobber image build failed after 3 attempts"
     fi
     if ! docker image inspect validator > /dev/null 2>&1; then
         print_status "Building validator image..."
-        docker.local/bin/build.validator.sh 2>&1 || print_error "Validator image build failed"
+        local _vi_ok=false
+        for _vi_try in 1 2 3; do
+            if docker.local/bin/build.validator.sh 2>&1; then _vi_ok=true; break; fi
+            print_warning "validator image build failed (attempt $_vi_try/3), retrying in 15s..."
+            sleep 15
+        done
+        $_vi_ok || print_error "Validator image build failed after 3 attempts"
     fi
     cd "${BASE_DIR}/blobber/docker.local"
 
@@ -3286,7 +3411,21 @@ PYEOF
         print_status "web-apps user.js already patched (user_id present)"
     fi
 
-    # Fix 4: mock token dispatch on dev login (verifyOtpTwilio, user.js)
+    # Fix 4: getZusBlogs fetch timeout — blog.zus.network may be unreachable from test
+    # servers, causing next build SSG to hang indefinitely (fetch has no default timeout).
+    local ORG_SCHEMES="${WEB_APPS_DIR}/packages/shared/src/lib/constants/orgSchemes.js"
+    if [ -f "$ORG_SCHEMES" ] && ! grep -q "AbortSignal.timeout" "$ORG_SCHEMES"; then
+        sed -i "s/const res = await fetch(GRAPH_ENDPOINT, {/const res = await fetch(GRAPH_ENDPOINT, { signal: AbortSignal.timeout(5000),/" "$ORG_SCHEMES"
+        print_status "web-apps orgSchemes.js patched (5s fetch timeout for getZusBlogs)"
+    fi
+
+    # Fix 4b: Replace deprecated blog.zus.network with zus.network/blog
+    if [ -f "$ORG_SCHEMES" ] && grep -q "blog\.zus\.network" "$ORG_SCHEMES"; then
+        sed -i "s|blog\.zus\.network/graphql|zus.network/blog/graphql|g" "$ORG_SCHEMES"
+        print_status "web-apps orgSchemes.js patched (blog URL: zus.network/blog/graphql)"
+    fi
+
+    # Fix 5: mock token dispatch on dev login (verifyOtpTwilio, user.js)
     # When 0box IsDevelopmentNoAuth() returns no customToken, dispatch synthetic firebaseTokens
     # so subsequent requests have valid X-App-User-ID and X-App-ID-TOKEN headers.
     if [ -f "$USER_JS" ] && ! grep -q "mock-token-" "$USER_JS"; then
@@ -3396,6 +3535,151 @@ PYEOF
         print_warning "0box auth.go: patch failed — login may still require Firebase in dev mode"
 }
 
+patch_0box_jwt_refresh_for_dev() {
+    # Two-part fix for PUT /v2/jwt/token in dev mode:
+    # 1. handler.go: bypass SignatureHandler middleware (BLS signature check)
+    # 2. auth.go: bypass user_id mismatch in RefreshJwtToken handler
+    #    WASM SDK sends wallet client_id as X-App-User-ID, but JWT was created
+    #    with Firebase UID — Check() compares them and fails. In dev mode, skip
+    #    the strict validation and just refresh any valid JWT.
+    # Production (mode 0) is unaffected — both checks remain active.
+
+    # --- Part 1: handler.go — bypass SignatureHandler on PUT route ---
+    local HANDLER_FILE="${BASE_DIR}/0box/code/zboxcore/router/handler.go"
+    if [ -f "$HANDLER_FILE" ]; then
+        if grep -q "jwt-refresh bypass (injected by deploy_local.sh)" "$HANDLER_FILE" 2>/dev/null; then
+            print_status "0box handler.go: SignatureHandler bypass already applied"
+        else
+            print_status "Patching 0box handler.go: bypassing SignatureHandler on PUT /jwt/token..."
+            python3 - "$HANDLER_FILE" << 'PYEOF'
+import sys
+path = sys.argv[1]
+with open(path) as f:
+    code = f.read()
+
+OLD = '\t\tv2jwtPublic.PUT("/jwt/token", middleware.SignatureHandler(), RefreshJwtToken)\n'
+NEW = (
+    '\t\t// jwt-refresh bypass (injected by deploy_local.sh): skip SignatureHandler in dev mode\n'
+    '\t\tif !config.IsDevelopmentNoAuth() {\n'
+    '\t\t\tv2jwtPublic.PUT("/jwt/token", middleware.SignatureHandler(), RefreshJwtToken)\n'
+    '\t\t} else {\n'
+    '\t\t\tv2jwtPublic.PUT("/jwt/token", RefreshJwtToken)\n'
+    '\t\t}\n'
+)
+if OLD not in code:
+    print("ERROR: target line not found in handler.go (already patched or code changed)", file=sys.stderr)
+    sys.exit(1)
+with open(path, 'w') as f:
+    f.write(code.replace(OLD, NEW, 1))
+print("OK: patched PUT /jwt/token route in handler.go")
+PYEOF
+            [ $? -eq 0 ] && print_status "0box handler.go: SignatureHandler bypass applied" || \
+                print_warning "0box handler.go: SignatureHandler patch failed"
+        fi
+    else
+        print_warning "0box handler.go not found — skipping SignatureHandler bypass"
+    fi
+
+    # --- Part 2: auth.go — bypass user_id mismatch in RefreshJwtToken handler ---
+    # WASM SDK sends wallet client_id as X-App-User-ID, but JWT claims have Firebase UID.
+    # In dev mode, use simpler headers (no hash_validate on client_id) and extract user_id
+    # from the JWT itself instead of requiring the header to match.
+    local AUTH_FILE="${BASE_DIR}/0box/code/zboxcore/router/auth.go"
+    if [ -f "$AUTH_FILE" ]; then
+        if grep -q "jwt-refresh-userid bypass (injected by deploy_local.sh)" "$AUTH_FILE" 2>/dev/null; then
+            print_status "0box auth.go: JWT refresh user_id bypass already applied"
+        else
+            print_status "Patching 0box auth.go: bypassing user_id mismatch in RefreshJwtToken..."
+            python3 - "$AUTH_FILE" << 'PYEOF'
+import sys
+path = sys.argv[1]
+with open(path) as f:
+    code = f.read()
+
+# Step 1: Add encoding/base64 and encoding/json imports if not present
+if '"encoding/base64"' not in code:
+    code = code.replace('"fmt"', '"encoding/base64"\n\t"encoding/json"\n\t"fmt"', 1)
+    print("Added encoding/base64 and encoding/json imports")
+elif '"encoding/json"' not in code:
+    code = code.replace('"encoding/base64"', '"encoding/base64"\n\t"encoding/json"', 1)
+    print("Added encoding/json import")
+
+# Step 2: Patch RefreshJwtToken
+OLD = '''func RefreshJwtToken(context *gin.Context) {
+
+	headers := helpers.NewAuthHeader()
+	if err := headers.Bind(context); err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response, err := jwtService.Refresh(headers.UserID, headers.JwtToken)'''
+
+NEW = '''func RefreshJwtToken(context *gin.Context) {
+	// jwt-refresh-userid bypass (injected by deploy_local.sh)
+	if config.IsDevelopmentNoAuth() {
+		// In dev mode, skip strict AuthHeader validation and user_id match.
+		// WASM SDK sends wallet client_id as X-App-User-ID but JWT has Firebase UID.
+		// Extract the real user_id from JWT claims and use that for refresh.
+		jwtToken := context.GetHeader("X-Jwt-Token")
+		if jwtToken == "" {
+			jwtToken = context.GetHeader("X-JWT-TOKEN")
+		}
+		if jwtToken == "" {
+			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "missing X-Jwt-Token header"})
+			return
+		}
+		// Decode JWT payload to get user_id from claims (base64url middle section)
+		parts := strings.SplitN(jwtToken, ".", 3)
+		if len(parts) != 3 {
+			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "malformed jwt token"})
+			return
+		}
+		payload, err := base64.RawURLEncoding.DecodeString(parts[1])
+		if err != nil {
+			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid jwt payload: " + err.Error()})
+			return
+		}
+		var claims struct {
+			UserID string `json:"user_id"`
+		}
+		if err := json.Unmarshal(payload, &claims); err != nil || claims.UserID == "" {
+			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "cannot extract user_id from jwt"})
+			return
+		}
+		response, err := jwtService.Refresh(claims.UserID, jwtToken)
+		if err != nil {
+			logging.Logger0box.Error("jwt: ", zap.String("user_id", claims.UserID), zap.Error(err))
+			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		context.JSON(http.StatusOK, jwt.JwtResponse{JwtToken: response})
+		return
+	}
+
+	headers := helpers.NewAuthHeader()
+	if err := headers.Bind(context); err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response, err := jwtService.Refresh(headers.UserID, headers.JwtToken)'''
+
+if OLD not in code:
+    print("ERROR: RefreshJwtToken target block not found in auth.go", file=sys.stderr)
+    sys.exit(1)
+with open(path, 'w') as f:
+    f.write(code.replace(OLD, NEW, 1))
+print("OK: patched RefreshJwtToken in auth.go")
+PYEOF
+            [ $? -eq 0 ] && print_status "0box auth.go: JWT refresh user_id bypass applied" || \
+                print_warning "0box auth.go: JWT refresh patch failed"
+        fi
+    else
+        print_warning "0box auth.go not found — skipping JWT refresh user_id bypass"
+    fi
+}
+
 fix_0box_config() {
     local BOX_CONFIG="${BASE_DIR}/0box/docker.local/config/0box.yaml"
     if [ ! -f "$BOX_CONFIG" ]; then
@@ -3405,6 +3689,8 @@ fix_0box_config() {
 
     # Patch 0box Go source for dev-mode auth bypass (login endpoint needs same bypass as signup)
     patch_0box_auth_for_dev
+    # Patch 0box handler.go to bypass SignatureHandler on JWT refresh in dev mode (wallet recovery)
+    patch_0box_jwt_refresh_for_dev
 
     # Backup before modifying
     cp "$BOX_CONFIG" "${BOX_CONFIG}.bak_$(date +%s)" 2>/dev/null || true
@@ -3600,56 +3886,63 @@ start_0box() {
     docker rm -f postgres-0box 2>/dev/null || true
 
     cd "${BASE_DIR}/0box/docker.local"
-    # Start only 0box, postgres, redis (skip pgadmin — we manage pgadmin separately with auto-login)
-    docker compose -p 0box up -d --force-recreate 0box postgres redis
-    print_status "0box started on port 9081"
 
-    # Bootstrap snapshot: 0box reads lastProcessedRound from the snapshots table.
-    # On a fresh DB, lastProcessedRound=0. 0box then waits for Kafka messages for round 1.
-    # But on an already-running chain (e.g. round 23000+), round 1 messages are long gone
-    # from Kafka's consumer offset → 0box is stuck forever at lastProcessedRound=0.
-    #
-    # Fix: Insert a snapshot at current_round - 2 AFTER 0box starts (postgres must be up).
-    # 0box reads this snapshot on next startup → lastProcessedRound=current_round-2
-    # → it looks for round current_round-1 in Kafka → receives it within ~500ms → processes!
-    print_status "Waiting for 0box postgres to initialize..."
-    sleep 12
+    # Step 1: Start postgres + redis FIRST (without 0box) to clean stale DB state.
+    # On a clean deploy the chain starts from round 1, but postgres may retain
+    # last_processed_round from a previous deployment. If 0box reads a stale
+    # last_processed_round > 0 it skips all early events including provider
+    # registrations (TagAddMiner, TagAddSharder, TagAddBlobber) → Atlus shows 0 providers.
+    print_status "Starting postgres + redis (without 0box yet)..."
+    docker compose -p 0box up -d --force-recreate postgres redis
+    print_status "Waiting for postgres to accept connections..."
+    local pg_wait=0
+    while [ $pg_wait -lt 30 ]; do
+        if docker exec ${ZBOX_PG_CONTAINER:-postgres-0box} pg_isready -U ${ZBOX_DB_USER:-zbox_user} -d ${ZBOX_DB_NAME:-zbox} 2>/dev/null | grep -q "accepting"; then
+            break
+        fi
+        sleep 2
+        pg_wait=$((pg_wait + 2))
+    done
 
-    # Get current chain round from sharder-2 (more reliable)
-    local snap_round
-    snap_round=$(curl -s http://198.18.0.82:7172/v1/chain/get/stats -m 5 2>/dev/null \
-        | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d.get("latest_finalized_round", d.get("current_round",0)))' 2>/dev/null)
-    snap_round=${snap_round:-0}
-
-    if [ "${snap_round}" -gt 2 ] 2>/dev/null; then
-        local seed_round=$(( snap_round - 2 ))
-        local now_epoch
-        now_epoch=$(date +%s)
-        print_status "Inserting bootstrap snapshot at round $seed_round (chain at $snap_round)..."
-        docker exec -e PGPASSWORD=${ZBOX_DB_PASS:-zbox_server} ${ZBOX_PG_CONTAINER:-postgres-0box} \
-            psql -U ${ZBOX_DB_USER:-zbox_user} -d ${ZBOX_DB_NAME:-zbox} -c "
-            INSERT INTO snapshots (
-              round, total_mint, total_challenge_pools, active_allocated_delta,
-              zcn_supply, total_read_pool_locked, client_locks, total_staked,
-              storage_token_stake, total_rewards, successful_challenges, total_challenges,
-              allocated_storage, max_capacity_storage, staked_storage, used_storage,
-              transactions_count, unique_addresses, block_count, total_txn_fee,
-              created_at, blobber_count, miner_count, sharder_count, validator_count,
-              authorizer_count, miner_total_rewards, sharder_total_rewards,
-              blobber_total_rewards, total_allocations
-            ) VALUES (
-              ${seed_round}, 0,0,0,0,0,0,0,0,0,0,0,0,
-              0, 0,0,0,0,0,0,${now_epoch},9,4,2,9,0,0,0,0,0
-            ) ON CONFLICT DO NOTHING;" 2>/dev/null \
-            && print_status "Bootstrap snapshot inserted at round $seed_round" \
-            || print_warning "Could not insert bootstrap snapshot (0box will catch up slowly)"
-
-        # Restart 0box so it reads lastProcessedRound from the new snapshot
-        docker compose -p 0box up -d --force-recreate 0box
-        print_status "0box restarted to pick up bootstrap snapshot"
-    else
-        print_warning "Could not get chain round — 0box will start from round 0 (may take time to catch up)"
+    # Step 2: Truncate all 0box tables to remove stale last_processed_round and old provider data.
+    # This ensures 0box starts with last_processed_round=0 and processes all events from round 1.
+    print_status "Truncating 0box database (remove stale state from previous deploy)..."
+    local all_tables
+    all_tables=$(docker exec ${ZBOX_PG_CONTAINER:-postgres-0box} psql -U ${ZBOX_DB_USER:-zbox_user} -d ${ZBOX_DB_NAME:-zbox} -t -c \
+        "SELECT string_agg('\"' || tablename || '\"', ', ')
+         FROM pg_tables
+         WHERE schemaname = 'public'
+           AND tablename NOT IN ('goose_db_version');" 2>/dev/null | tr -d ' \n')
+    if [ -n "$all_tables" ]; then
+        docker exec ${ZBOX_PG_CONTAINER:-postgres-0box} psql -U ${ZBOX_DB_USER:-zbox_user} -d ${ZBOX_DB_NAME:-zbox} -c \
+            "TRUNCATE TABLE ${all_tables} CASCADE;" 2>/dev/null \
+            && print_status "0box database truncated (clean slate for fresh deploy)" \
+            || print_warning "Truncate had issues (non-critical)"
     fi
+
+    # Step 3: Delete Kafka consumer group so 0box starts from earliest offset (round 1).
+    # On a clean deploy, Kafka data dirs are wiped but the consumer group may be recreated
+    # by 0box reading __consumer_offsets. Explicitly delete it as a safety net.
+    print_status "Deleting Kafka consumer group 'events-consumer' (fresh start from offset 0)..."
+    docker exec kafka bash -c '
+cat > /tmp/sasl.props << EOF
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+EOF
+/opt/kafka/bin/kafka-consumer-groups.sh \
+    --bootstrap-server 198.19.0.99:9092 \
+    --command-config /tmp/sasl.props \
+    --delete --group events-consumer' 2>/dev/null \
+        && print_status "Kafka consumer group deleted" \
+        || print_warning "Consumer group delete failed (may not exist yet — OK)"
+
+    # Step 4: Start 0box. With truncated DB (last_processed_round=0) and no consumer group,
+    # 0box will start consuming from Kafka's earliest offset and process ALL events from round 1,
+    # including provider registrations (TagAddMiner, TagAddSharder, TagAddBlobber).
+    print_status "Starting 0box..."
+    docker compose -p 0box up -d --force-recreate 0box
+    print_status "0box started on port 9081 (processing events from round 1)"
 }
 
 # Sync a wallet file's nonce to match the on-chain nonce.
@@ -4048,6 +4341,94 @@ seed_0box_providers() {
     active_miners=$(run_0box_sql "SELECT COUNT(*) FROM miners WHERE active = true;" | tr -d '[:space:]')
     active_sharders=$(run_0box_sql "SELECT COUNT(*) FROM sharders WHERE active = true;" | tr -d '[:space:]')
     print_status "Set active=true: ${active_miners:-0} miners, ${active_sharders:-0} sharders"
+
+    # Fix 0box graph endpoints with DataPoints=1 (no from/to params).
+    # 0box graph queries with data-points=1 generate SQL that looks for round=0.
+    # If no snapshot exists at round=0, ALL graph endpoints return [0].
+    # Fix: create a trigger that copies each new snapshot to round=0, keeping it in sync.
+    run_0box_sql "
+        CREATE OR REPLACE FUNCTION sync_snapshot_round_zero() RETURNS TRIGGER AS \$\$
+        BEGIN
+            INSERT INTO snapshots (round, total_mint, total_challenge_pools, active_allocated_delta,
+                zcn_supply, total_read_pool_locked, client_locks, total_staked, storage_token_stake,
+                total_rewards, successful_challenges, total_challenges, allocated_storage,
+                max_capacity_storage, staked_storage, used_storage, transactions_count,
+                unique_addresses, block_count, total_txn_fee, created_at, blobber_count,
+                miner_count, sharder_count, validator_count, authorizer_count,
+                miner_total_rewards, sharder_total_rewards, blobber_total_rewards, total_allocations)
+            VALUES (0, NEW.total_mint, NEW.total_challenge_pools, NEW.active_allocated_delta,
+                NEW.zcn_supply, NEW.total_read_pool_locked, NEW.client_locks, NEW.total_staked,
+                NEW.storage_token_stake, NEW.total_rewards, NEW.successful_challenges,
+                NEW.total_challenges, NEW.allocated_storage, NEW.max_capacity_storage,
+                NEW.staked_storage, NEW.used_storage, NEW.transactions_count, NEW.unique_addresses,
+                NEW.block_count, NEW.total_txn_fee, NEW.created_at, NEW.blobber_count,
+                NEW.miner_count, NEW.sharder_count, NEW.validator_count, NEW.authorizer_count,
+                NEW.miner_total_rewards, NEW.sharder_total_rewards, NEW.blobber_total_rewards,
+                NEW.total_allocations)
+            ON CONFLICT (round) DO UPDATE SET
+                total_mint=EXCLUDED.total_mint, total_challenge_pools=EXCLUDED.total_challenge_pools,
+                active_allocated_delta=EXCLUDED.active_allocated_delta, zcn_supply=EXCLUDED.zcn_supply,
+                total_read_pool_locked=EXCLUDED.total_read_pool_locked, client_locks=EXCLUDED.client_locks,
+                total_staked=EXCLUDED.total_staked, storage_token_stake=EXCLUDED.storage_token_stake,
+                total_rewards=EXCLUDED.total_rewards, successful_challenges=EXCLUDED.successful_challenges,
+                total_challenges=EXCLUDED.total_challenges, allocated_storage=EXCLUDED.allocated_storage,
+                max_capacity_storage=EXCLUDED.max_capacity_storage, staked_storage=EXCLUDED.staked_storage,
+                used_storage=EXCLUDED.used_storage, transactions_count=EXCLUDED.transactions_count,
+                unique_addresses=EXCLUDED.unique_addresses, block_count=EXCLUDED.block_count,
+                total_txn_fee=EXCLUDED.total_txn_fee, created_at=EXCLUDED.created_at,
+                blobber_count=EXCLUDED.blobber_count, miner_count=EXCLUDED.miner_count,
+                sharder_count=EXCLUDED.sharder_count, validator_count=EXCLUDED.validator_count,
+                authorizer_count=EXCLUDED.authorizer_count, miner_total_rewards=EXCLUDED.miner_total_rewards,
+                sharder_total_rewards=EXCLUDED.sharder_total_rewards,
+                blobber_total_rewards=EXCLUDED.blobber_total_rewards,
+                total_allocations=EXCLUDED.total_allocations;
+            RETURN NEW;
+        END;
+        \$\$ LANGUAGE plpgsql;
+        DROP TRIGGER IF EXISTS trg_sync_round_zero ON snapshots;
+        CREATE TRIGGER trg_sync_round_zero AFTER INSERT ON snapshots
+            FOR EACH ROW EXECUTE FUNCTION sync_snapshot_round_zero();
+    " 2>/dev/null || true
+
+    # Seed round=0 from current latest snapshot
+    run_0box_sql "
+        INSERT INTO snapshots (round, total_mint, total_challenge_pools, active_allocated_delta,
+            zcn_supply, total_read_pool_locked, client_locks, total_staked, storage_token_stake,
+            total_rewards, successful_challenges, total_challenges, allocated_storage,
+            max_capacity_storage, staked_storage, used_storage, transactions_count,
+            unique_addresses, block_count, total_txn_fee, created_at, blobber_count,
+            miner_count, sharder_count, validator_count, authorizer_count,
+            miner_total_rewards, sharder_total_rewards, blobber_total_rewards, total_allocations)
+        SELECT 0, total_mint, total_challenge_pools, active_allocated_delta,
+            zcn_supply, total_read_pool_locked, client_locks, total_staked, storage_token_stake,
+            total_rewards, successful_challenges, total_challenges, allocated_storage,
+            max_capacity_storage, staked_storage, used_storage, transactions_count,
+            unique_addresses, block_count, total_txn_fee, created_at, blobber_count,
+            miner_count, sharder_count, validator_count, authorizer_count,
+            miner_total_rewards, sharder_total_rewards, blobber_total_rewards, total_allocations
+        FROM snapshots WHERE round = (SELECT MAX(round) FROM snapshots WHERE round > 0)
+        ON CONFLICT (round) DO UPDATE SET
+            total_mint=EXCLUDED.total_mint, total_challenge_pools=EXCLUDED.total_challenge_pools,
+            allocated_storage=EXCLUDED.allocated_storage, used_storage=EXCLUDED.used_storage,
+            successful_challenges=EXCLUDED.successful_challenges, total_challenges=EXCLUDED.total_challenges,
+            blobber_count=EXCLUDED.blobber_count, miner_count=EXCLUDED.miner_count,
+            sharder_count=EXCLUDED.sharder_count, max_capacity_storage=EXCLUDED.max_capacity_storage;
+    " 2>/dev/null || true
+    print_status "Created snapshot round-0 sync trigger (fixes graph endpoints with DataPoints=1)"
+
+    # Fix snapshot created_at timestamps.
+    # 0box uses gorm:"autoCreateTime" which sets created_at to INSERT time.
+    # After DB truncation + re-processing, all snapshots get the same created_at.
+    # Graph endpoints that use created_at for time-based bucketing return zeros.
+    # Fix: spread created_at based on round number (3 seconds per round approximation).
+    local max_round
+    max_round=$(run_0box_sql "SELECT COALESCE(MAX(round),0) FROM snapshots WHERE round > 0;" | tr -d '[:space:]')
+    if [ "${max_round:-0}" -gt 0 ]; then
+        local now_ts
+        now_ts=$(date +%s)
+        run_0box_sql "UPDATE snapshots SET created_at = $now_ts - (($max_round - round) * 3) WHERE round > 0 AND created_at = (SELECT created_at FROM snapshots WHERE round > 0 ORDER BY round DESC LIMIT 1);" 2>/dev/null || true
+        print_status "Spread snapshot created_at timestamps across ${max_round} rounds"
+    fi
 }
 
 # Reset 0box to current chain round — clears stale data, resets Kafka offset to latest,
@@ -4207,6 +4588,20 @@ EOF
     cd "${BASE_DIR}/0box/docker.local"
     docker compose -p 0box up -d --force-recreate 0box redis
     sleep 8
+
+    # Step 6b: Truncate zvault and zauth split key tables to prevent stale wallet mismatch.
+    # When 0box wallets are truncated but zvault/zauth retain old split keys, the browser
+    # can cache a stale wallet that no longer exists in 0box, causing "public key mismatch"
+    # and "Network redeployed: Invalid wallet id accessed" errors in Vult.
+    print_status "Clearing zvault split_keys and zauth split_wallets..."
+    docker exec zvault-postgreszv-1 psql -U zvault_user -d zvault -c \
+        "TRUNCATE TABLE split_keys, keys CASCADE;" 2>/dev/null \
+        && print_status "zvault split_keys + keys truncated" \
+        || print_warning "Could not truncate zvault tables (non-critical)"
+    docker exec zauth-postgres-1 psql -U zauth_user -d zauth -c \
+        "TRUNCATE TABLE split_wallets CASCADE;" 2>/dev/null \
+        && print_status "zauth split_wallets truncated" \
+        || print_warning "Could not truncate zauth tables (non-critical)"
 
     # Step 7: Restart zauth and zvault to clear stale auth tokens
     print_status "Restarting zauth..."
@@ -5103,7 +5498,7 @@ for v in nodes:
             sleep 1
             $ZBOX bl-update \
                 --blobber_id "$_ebid" \
-                --not_available true \
+                --not_available=true \
                 --wallet owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
             sleep 1
         done
@@ -5388,10 +5783,10 @@ except Exception as e: print(f'verify error: {e}')
     # Note: Enterprise blobbers are staked separately after Phase 8 (build_and_deploy_enterprise_blobbers)
     # via stake_enterprise_blobbers() since they haven't been deployed yet at this point.
 
-    # Update all blobber read_prices to 0, storage_version to 1, and num_delegates to 100
+    # Update all blobber read_prices to 0, storage_version to 1, and num_delegates to 200
     # read_price=0 is required for free allocation tests
     # storage_version=1 is required for SDK v2 allocations (SDK always uses StorageV2=1)
-    # num_delegates=100 is required so tokenomics tests can stake from multiple wallets
+    # num_delegates=200 is required so tokenomics tests can stake from multiple wallets
     # Without storage_version=1, the alloc_blobbers query filters on storage_version=1 and finds no blobbers
     #
     # Also sets external HTTPS URL (https://test.zus.network/blobberNN/) so browsers
@@ -5403,7 +5798,7 @@ except Exception as e: print(f'verify error: {e}')
     # IMPORTANT: bl-update requires the delegate_wallet owner to sign the txn.
     # If the on-chain delegate_wallet doesn't match ZCN_WALLET_FILE, these calls
     # will silently fail with "access denied, allowed for delegate_wallet owner only".
-    print_status "Setting blobber read_price=0, write_price=0.001, storage_version=1, num_delegates=100, external URL for all blobbers..."
+    print_status "Setting blobber read_price=0, write_price=0.001, storage_version=1, num_delegates=200, service_charge=0.1, external URL for all blobbers..."
     local update_failures=0
     for blobber_id in $blobber_ids; do
         # Determine external URL from registered port (extracted from blobber_json URL field)
@@ -5434,9 +5829,9 @@ except Exception as e: print(f'verify error: {e}')
         local url_flag=""
         if [ "${_stake_use_external:-true}" = true ] && [ -n "$external_url" ]; then
             url_flag="--url $external_url"
-            print_status "Updating blobber ${blobber_id:0:16}... read_price=0, write_price=0.001, storage_version=1, num_delegates=100, url=$external_url"
+            print_status "Updating blobber ${blobber_id:0:16}... read_price=0, write_price=0.001, storage_version=1, num_delegates=200, service_charge=0.1, url=$external_url"
         else
-            print_status "Updating blobber ${blobber_id:0:16}... read_price=0, write_price=0.001, storage_version=1, num_delegates=100"
+            print_status "Updating blobber ${blobber_id:0:16}... read_price=0, write_price=0.001, storage_version=1, num_delegates=200, service_charge=0.1"
         fi
 
         local update_output
@@ -5444,9 +5839,10 @@ except Exception as e: print(f'verify error: {e}')
             --blobber_id "$blobber_id" \
             --read_price 0 \
             --write_price 0.001 \
-            --service_charge 0.3 \
+            --service_charge 0.1 \
             --storage_version 1 \
-            --num_delegates 100 \
+            --num_delegates 200 \
+            --not_available=false \
             $url_flag \
             --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>&1) || true
         if echo "$update_output" | grep -qi "access denied\|delegate_wallet"; then
@@ -5618,18 +6014,39 @@ stake_enterprise_blobbers() {
         done
         print_status "Enterprise blobber staking complete!"
 
-        # Configure enterprise blobbers: read_price=0, write_price=0.001, service_charge=0.3, storage_version=1, num_delegates=100
-        print_status "Configuring enterprise blobbers (read_price=0, write_price=0.001, service_charge=0.3, storage_version=1, num_delegates=100)..."
+        # Configure enterprise blobbers: read_price=0, write_price=0.001, service_charge=0.1, storage_version=1, num_delegates=100
+        # Retry each blobber up to 3 times to handle transient nonce/fee errors
+        print_status "Configuring enterprise blobbers (read_price=0, write_price=0.001, service_charge=0.1, storage_version=1, num_delegates=100)..."
         for eblobber_id in $enterprise_ids; do
-            print_status "  Updating enterprise blobber ${eblobber_id:0:16}..."
-            $ZBOX bl-update \
-                --blobber_id "$eblobber_id" \
-                --read_price 0 \
-                --write_price 0.001 \
-                --service_charge 0.3 \
-                --storage_version 1 \
-                --num_delegates 100 \
-                --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
+            local _eb_ok=false
+            for _eb_try in 1 2 3; do
+                if $ZBOX bl-update \
+                    --blobber_id "$eblobber_id" \
+                    --read_price 0 \
+                    --write_price 0.001 \
+                    --service_charge 0.1 \
+                    --storage_version 1 \
+                    --num_delegates 100 \
+                    --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>&1 | grep -qiE 'updated|success'; then
+                    _eb_ok=true
+                    print_status "  Configured enterprise blobber ${eblobber_id:0:16}..."
+                    break
+                fi
+                print_warning "  bl-update for ${eblobber_id:0:16} attempt $_eb_try failed, retrying..."
+                sleep 3
+            done
+            if ! $_eb_ok; then
+                # Try once more without checking output (some versions don't print "updated")
+                $ZBOX bl-update \
+                    --blobber_id "$eblobber_id" \
+                    --read_price 0 \
+                    --write_price 0.001 \
+                    --service_charge 0.1 \
+                    --storage_version 1 \
+                    --num_delegates 100 \
+                    --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
+                print_status "  Configured enterprise blobber ${eblobber_id:0:16} (no confirmation)"
+            fi
             sleep 2
         done
         print_status "Enterprise blobber configuration complete!"
@@ -5642,11 +6059,29 @@ stake_enterprise_blobbers() {
         for eblobber_id in $enterprise_ids; do
             $ZBOX bl-update \
                 --blobber_id "$eblobber_id" \
-                --not_available true \
+                --not_available=true \
                 --wallet owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
             sleep 1
         done
         print_status "Enterprise blobbers marked not_available."
+
+        # Verify enterprise blobber configuration is correct
+        sleep 5
+        print_status "Verifying enterprise blobber configuration..."
+        for eblobber_id in $enterprise_ids; do
+            local eb_wp
+            eb_wp=$(curl -s "http://${SHARDER_IP}:${SHARDER_PORT}/v1/screst/${STORAGE_SC_ADDRESS}/getBlobber?blobber_id=${eblobber_id}" 2>/dev/null | \
+                python3 -c "import json,sys; b=json.load(sys.stdin); wp=b.get('terms',{}).get('write_price',0); print(wp)" 2>/dev/null || echo "0")
+            local expected_wp=10000000  # 0.001 ZCN = 10,000,000 SAS
+            if [ "${eb_wp:-0}" -ne "$expected_wp" ] && [ "${eb_wp:-0}" -gt 0 ]; then
+                print_warning "  eblobber ${eblobber_id:0:16} write_price=${eb_wp} (expected ${expected_wp}) — retrying bl-update..."
+                $ZBOX bl-update --blobber_id "$eblobber_id" --write_price 0.001 \
+                    --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
+                sleep 2
+            else
+                print_status "  eblobber ${eblobber_id:0:16} write_price OK (${eb_wp})"
+            fi
+        done
     else
         print_warning "No enterprise blobbers registered on chain after polling - skipping staking"
     fi
@@ -6020,7 +6455,7 @@ ensure_chain_config() {
     done
 
     # ========== Blobber Config via bl-update ==========
-    print_status "Configuring all blobbers (write_price=0.001, read_price=0, service_charge=0.3, num_delegates=200, storage_version=1)..."
+    print_status "Configuring all blobbers (write_price=0.001, read_price=0, service_charge=0.1, num_delegates=200, storage_version=1)..."
 
     local blobber_json=$($ZBOX ls-blobbers --json --silent $W 2>/dev/null || echo "[]")
     local blobber_ids=$(echo "$blobber_json" | jq -r '.[].id' 2>/dev/null || true)
@@ -6033,7 +6468,7 @@ ensure_chain_config() {
             --blobber_id "$blobber_id" \
             --write_price 0.001 \
             --read_price 0 \
-            --service_charge 0.3 \
+            --service_charge 0.1 \
             --num_delegates 200 \
             --storage_version 1 \
             $W --silent 2>&1 || print_warning "  bl-update failed for ${blobber_id:0:16}"
@@ -6498,6 +6933,17 @@ start_web_apps() {
             print_status "Removed NEXT_PUBLIC_ORIGIN from ${app}/.env (SimpleLocalize fix)"
         fi
     done
+
+    # Kill stale next-router-worker processes from previous deploys.
+    # After clean.sh + redeploy, old Next.js worker processes can survive and hold ports
+    # (3001-3006), causing EADDRINUSE when PM2 tries to start the new apps.
+    print_status "Killing stale next-router-worker processes..."
+    if command -v pm2 &>/dev/null; then
+        pm2 delete all 2>/dev/null || true
+    fi
+    pkill -f 'next-router-worker' 2>/dev/null || true
+    pkill -f 'next start -p 300' 2>/dev/null || true
+    sleep 2
 
     for app in vult bolt blimp explorer chimney; do
         local port=${APP_PORTS[$app]}
@@ -7543,7 +7989,7 @@ server {
     # =====================================================================
     location /vc      { default_type text/plain; alias /tmp/vc.log; }
     location /chaos   { default_type text/plain; alias /tmp/chaos.log; }
-    location /funding { default_type text/plain; alias /tmp/funding_daemon.log; }
+    location /funding { default_type text/plain; alias /tmp/auto_fund_daemon.log; }
     location /deploy  { default_type text/plain; alias /tmp/deploy_local.log; }
     location /dkg     { default_type text/plain; alias /tmp/monitor.log; }
 
@@ -8238,9 +8684,9 @@ mkdir -p "$LOG_DIR"
 # Docker container logs (last 500 lines each)
 for container in miner-1 miner-2 miner-3 miner-4 sharder-1 sharder-2 \
     blobber-1 blobber-2 blobber-3 blobber-4 blobber-5 blobber-6 \
-    blobber-7 blobber-8 blobber-9 blobber-10 blobber-11 blobber-12 \
+    blobber-7 blobber-8 blobber-9 \
     validator-1 validator-2 validator-3 validator-4 validator-5 validator-6 \
-    validator-7 validator-8 validator-9 validator-10 validator-11 validator-12 \
+    validator-7 validator-8 validator-9 \
     eblobber-1 eblobber-2 eblobber-3 \
     kafka elasticsearch 0box zauth-zauthserver-1 zvault-zvault-1; do
     docker logs --tail 500 "$container" > "$LOG_DIR/${container}.log" 2>&1 || true
@@ -8303,7 +8749,7 @@ docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' > "$LOG_DIR/co
 for log_html in \
     "/tmp/chaos.log:$LOG_DIR/chaos.html" \
     "/tmp/vc.log:$LOG_DIR/vc.html" \
-    "/tmp/funding_daemon.log:$LOG_DIR/funding_daemon.html" \
+    "/tmp/auto_fund_daemon.log:$LOG_DIR/funding_daemon.html" \
     "/tmp/monitor.log:$LOG_DIR/monitor.html" \
     "/tmp/deploy_local.log:$LOG_DIR/deploy.html" \
     "/tmp/smoke_test.log:$LOG_DIR/smoke.html"; do
@@ -8630,7 +9076,7 @@ wait_for_blobbers_ready() {
     local timeout_sec="${2:-600}"  # 10 minutes default
     local SC_ADDRESS="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
     local sharder_url="http://127.0.0.1:7171"
-    local ALLOC_DATA='{"data_shards":2,"parity_shards":2,"size":10485760,"expiration_date":1800000000,"read_price":{"min":0,"max":9223372036854775807},"write_price":{"min":0,"max":9223372036854775807},"storage_version":1}'
+    local ALLOC_DATA='{"data_shards":2,"parity_shards":2,"size":10485760,"read_price_range":{"min":0,"max":9223372036854775807},"write_price_range":{"min":0,"max":9223372036854775807}}'
 
     print_header "Waiting for Blobbers to be Ready (need $min_blobbers eligible)"
     local start_time
@@ -8942,9 +9388,9 @@ print(m.group(1) if m else '')
             sleep 2
         done
 
-        print_status "Creating crawler allocation on-chain..."
+        print_status "Creating crawler allocation on-chain (data=7, parity=2 = all 9 regular blobbers)..."
         local alloc_output
-        alloc_output=$(${ZBOX} newallocation --size 1073741824 --lock 100 --data 2 --parity 2 \
+        alloc_output=$(${ZBOX} newallocation --size 10737418240 --lock 100 --data 7 --parity 2 \
             --silent $WO 2>&1) || true
         local crawler_alloc_id=$(echo "$alloc_output" | grep -oE '[0-9a-f]{64}' | head -1)
 
@@ -9293,9 +9739,9 @@ except: print("renew")
                 echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] No valid allocation in config — creating new one" >> "$MONITOR_LOG"
             fi
 
-            # Create new allocation (--lock 10 gives ~30 days with time_unit=720h)
+            # Create new allocation covering all 9 regular blobbers (--lock 25 gives ~30 days with time_unit=720h)
             alloc_output=$("$ZBOX_BIN" newallocation \
-                --data 2 --parity 2 --size 2147483648 --lock 10 \
+                --data 7 --parity 2 --size 10737418240 --lock 25 \
                 $W 2>&1) || true
             # Extract allocation ID — prefer "ID:" marker, fall back to last 64-hex string
             new_alloc=$(echo "$alloc_output" | grep -oP '(?i)(?:ID:|allocation[^:]*:)\s*\K[a-f0-9]{64}' | head -1 || true)
@@ -9948,10 +10394,14 @@ configure_test_configs() {
     # Ensure DNS proxy is running on port 9099 so gosdk can find sharders even when
     # the magic block has 0 sharders (DKG deadlock). The proxy injects sharder IPs
     # into the /network response transparently.
-    start_dns_proxy
+    start_dns_proxy 2>/dev/null || true
 
-    # Service URLs for local deployment (use proxy port 9099 so gosdk gets sharder list)
+    # Use proxy if running, otherwise fall back to direct 0dns
     local BLOCK_WORKER="http://127.0.0.1:9099"
+    if ! curl -sk --max-time 2 http://127.0.0.1:9099/network >/dev/null 2>&1; then
+        BLOCK_WORKER="http://198.18.0.100:9091"
+        print_warning "DNS proxy not available, using direct 0dns: ${BLOCK_WORKER}"
+    fi
     local ZBOX_URL="http://localhost:9081"
     local ZAUTH_URL="http://localhost:8080"
     local ZVAULT_URL="http://localhost:8090"
@@ -10024,7 +10474,24 @@ configure_test_configs() {
 
     # ---- SDK tests config ----
     local SDK_CONFIG="${SYSTEM_TEST_DIR}/tests/sdk_tests/config/sdk_tests_config.yaml"
-    if [ -f "$SDK_CONFIG" ]; then
+    mkdir -p "$(dirname "$SDK_CONFIG")"
+    if [ ! -f "$SDK_CONFIG" ]; then
+        print_status "Creating sdk_tests_config.yaml from scratch..."
+        cat > "$SDK_CONFIG" <<SDKCFG
+block_worker: ${BLOCK_WORKER}
+default_test_case_timeout: 45s
+signature_scheme: bls0chain
+chain_id: 0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe
+max_txn_query: 5
+query_sleep_time: 5
+min_submit: 10
+min_confirmation: 10
+0box_url: ${ZBOX_URL}
+zauth_url: ${ZAUTH_URL}
+zvault_url: ${ZVAULT_URL}
+SDKCFG
+        print_status "sdk_tests_config.yaml created"
+    else
         print_status "Updating sdk_tests_config.yaml..."
         sed -i.bak "s|block_worker:.*|block_worker: ${BLOCK_WORKER}|" "$SDK_CONFIG"
         sed -i.bak "s|0box_url:.*|0box_url: ${ZBOX_URL}|" "$SDK_CONFIG"
@@ -10083,6 +10550,21 @@ configure_test_configs() {
         fi
     done
 
+    # ---- Update config.yaml files (block_worker + bridge) for CLI and tokenomics ----
+    local SUITE_CONFIGS=(
+        "${SYSTEM_TEST_DIR}/tests/cli_tests/config/config.yaml"
+        "${SYSTEM_TEST_DIR}/tests/tokenomics_tests/config/config.yaml"
+    )
+    for SUITE_CFG in "${SUITE_CONFIGS[@]}"; do
+        if [ -f "$SUITE_CFG" ]; then
+            local suite_name=$(echo "$SUITE_CFG" | grep -oP 'tests/\K[^/]+')
+            print_status "Updating config.yaml for ${suite_name}..."
+            sed -i.bak "s|block_worker:.*|block_worker: ${BLOCK_WORKER}|" "$SUITE_CFG"
+            rm -f "${SUITE_CFG}.bak"
+            print_status "config.yaml for ${suite_name} updated"
+        fi
+    done
+
     print_status "Test config files updated!"
 }
 
@@ -10104,6 +10586,11 @@ clean_service_databases() {
     # from the old chain (users, allocations, blobbers, events, etc.).
     # This causes "record not found" errors and stale state in web apps.
     # Truncate all tables except migration tracking (goose_db_version).
+    #
+    # IMPORTANT: After calling this function, you MUST call seed_0box_providers()
+    # to repopulate the blobbers table. Without blobbers, 0box Kafka consumer
+    # fails to insert allocations (FK constraint on allocation_blobber_terms)
+    # and write_markers (FK constraint on blobbers), causing 0box data loss.
 
     # ---- 0box ----
     if docker ps --format '{{.Names}}' | grep -q "postgres-0box"; then
@@ -10747,6 +11234,7 @@ swap_image() {
     local repo="$1"
     local branch=""
     local gosdk_branch_override=""
+    local apply_config=0
 
     # $2 might be a branch name OR a flag like --gosdk-branch
     if [ -n "${2:-}" ] && [[ ! "${2:-}" == --* ]]; then
@@ -10756,12 +11244,16 @@ swap_image() {
         shift 1 2>/dev/null || true
     fi
 
-    # Parse remaining flags (e.g., --gosdk-branch)
+    # Parse remaining flags (e.g., --gosdk-branch, --with-config)
     while [ $# -gt 0 ]; do
         case "$1" in
             --gosdk-branch)
                 gosdk_branch_override="${2:-}"
                 shift 2
+                ;;
+            --with-config)
+                apply_config=1
+                shift
                 ;;
             *)
                 shift
@@ -10770,8 +11262,9 @@ swap_image() {
     done
 
     if [ -z "$repo" ]; then
-        print_error "Usage: $0 swap-image <repo> [branch] [--gosdk-branch <branch>]"
-        print_error "Available repos: 0chain, blobber, eblobber, 0box, zauth-server, zvault, zs3server, web-apps"
+        print_error "Usage: $0 swap-image <repo> [branch] [--gosdk-branch <branch>] [--with-config]"
+        print_error "Available repos: 0chain, blobber, eblobber, 0box, zauth-server, zvault, zs3server, web-apps, crawler, 0dns, zboxcli, zwalletcli, gosdk, rclone_zus"
+        print_error "Default: git pull + build + restart WITHOUT config changes. Pass --with-config to apply config fixes."
         return 1
     fi
 
@@ -10885,7 +11378,25 @@ swap_image() {
             docker.local/bin/build.sharders.sh || { print_error "Failed to build sharder image"; return 1; }
             ;;
         blobber)
+            # blobber depends on gosdk - checkout the right branch first
+            checkout_gosdk_for_dependent "blobber" "$gosdk_branch_override"
             cd "$repo_path"
+            # If gosdk override specified, copy gosdk into build context and enable replace directive
+            if [ -n "$gosdk_branch_override" ] && [ -d "${BASE_DIR}/gosdk" ]; then
+                print_status "Injecting local gosdk (${gosdk_branch_override}) into blobber build context..."
+                rm -rf "${repo_path}/gosdk"
+                cp -r "${BASE_DIR}/gosdk" "${repo_path}/gosdk"
+                # Enable replace directive in go.mod
+                sed -i 's|// replace github.com/0chain/gosdk => ../gosdk|replace github.com/0chain/gosdk => ./gosdk|' "${repo_path}/go.mod"
+                # Enable COPY ./gosdk in Dockerfile
+                sed -i 's|# COPY ./gosdk  /gosdk|COPY ./gosdk  /gosdk|' "${repo_path}/docker.local/blobber.Dockerfile"
+                # Also fix replace path for Docker context (./gosdk not ../gosdk)
+                local validator_df="${repo_path}/docker.local/validatorDockerfile"
+                [ -f "$validator_df" ] && sed -i 's|# COPY ./gosdk  /gosdk|COPY ./gosdk  /gosdk|' "$validator_df"
+            fi
+            # Ensure go.sum is up to date (branch switches may leave it stale)
+            print_status "Running go mod tidy..."
+            go mod tidy 2>&1 | tail -5 || true
             # Ensure blobber_base exists (needed after docker system prune)
             if ! docker image inspect blobber_base > /dev/null 2>&1; then
                 print_status "Building blobber base image..."
@@ -10895,12 +11406,23 @@ swap_image() {
             docker.local/bin/build.blobber.sh 2>&1 || { print_error "Blobber build failed"; return 1; }
             print_status "Building validator image..."
             docker.local/bin/build.validator.sh 2>&1 || { print_error "Validator build failed"; return 1; }
+            # Clean up injected gosdk from build context
+            if [ -n "$gosdk_branch_override" ]; then
+                rm -rf "${repo_path}/gosdk"
+                git -C "$repo_path" checkout go.mod 2>/dev/null || true
+                git -C "$repo_path" checkout docker.local/blobber.Dockerfile 2>/dev/null || true
+                [ -f "$validator_df" ] && git -C "$repo_path" checkout "$validator_df" 2>/dev/null || true
+            fi
             ;;
         0box)
             # Fix config BEFORE building image: git pull restores dev.zus.network defaults.
             # fix_0box_config() overwrites them with local chain URLs so the built image
             # (and the mounted config file) both point to the local chain.
-            fix_0box_config
+            if [ "$apply_config" = "1" ]; then
+                fix_0box_config
+            else
+                print_status "Skipping config changes (pass --with-config to apply)"
+            fi
             # Build image with a local tag (docker-compose.yml has no build: section — image is hardcoded)
             local LOCAL_IMAGE="0chaindev/0box:local-build"
             print_status "Building 0box image as ${LOCAL_IMAGE}..."
@@ -10920,7 +11442,9 @@ swap_image() {
             fi
             ;;
         zauth-server)
-            patch_zauth_faucet
+            if [ "$apply_config" = "1" ]; then
+                patch_zauth_faucet
+            fi
             cd "${repo_path}/docker.local"
             docker build -f Dockerfile -t zauthserver ../ 2>&1 || print_error "zauthserver image build failed"
             docker compose -p zauth up -d --force-recreate zauthserver
@@ -11009,6 +11533,9 @@ swap_image() {
                     fi
                 fi
             fi
+            # Ensure go.sum is up to date (branch switches may leave it stale)
+            print_status "Running go mod tidy..."
+            go mod tidy 2>&1 | tail -5 || true
             # Use separate base image tag (eblobber_base) to avoid overwriting regular blobber's blobber_base
             print_status "Building eblobber_base image..."
             DOCKER_IMAGE_BASE=eblobber_base docker.local/bin/build.base.sh 2>&1 || {
@@ -11072,58 +11599,34 @@ swap_image() {
                 print_status "Updated wasm_exec.js from local Go installation"
             fi
 
-            # Step D: Fix .env before build — git .env has production values that break test deployments.
-            # (1) Remove NEXT_PUBLIC_ORIGIN: baked into bundle at build time; if set to a dead port
-            #     (e.g. localhost:3430) the i18n loader fails and shows raw translation keys.
-            # (2) Fix DOMAIN: git .env has DOMAIN=mainnet.zus.network (production). This is baked into
-            #     client bundle via next.config.js env: block — isProdOrDemoEnv=true causes sendOTPTwilio
-            #     to call real 0box and use real Twilio. Must be set to test domain BEFORE build.
-            # (3) Fix FBASE_*: git .env has mainnet-0box Firebase project (production). These are baked
-            #     into the client bundle at build time. 0box is configured for box-dev-ce8bf; using
-            #     mainnet-0box tokens causes "invalid 'aud' claim" errors on /v2/twilio/phone/send.
-            local _deploy_domain="${NGINX_DOMAIN:-test.zus.network}"
-            for _app in vult bolt blimp explorer chimney; do
-                local _app_env="${repo_path}/packages/${_app}/.env"
-                if [ -f "$_app_env" ]; then
-                    if grep -q "^NEXT_PUBLIC_ORIGIN=" "$_app_env"; then
-                        sed -i.tmp '/^NEXT_PUBLIC_ORIGIN=/d' "$_app_env"
-                        rm -f "${_app_env}.tmp"
-                        print_status "Removed NEXT_PUBLIC_ORIGIN from ${_app}/.env"
-                    fi
-                    # Fix DOMAIN: handle both bare and "export VAR=..." syntax in .env files.
-                    # (vult uses bare DOMAIN=, blimp uses export DOMAIN=)
-                    sed -i.tmp \
-                        -e "s|^DOMAIN=.*|DOMAIN=${_deploy_domain}|" \
-                        -e "s|^export DOMAIN=.*|export DOMAIN=\"${_deploy_domain}\"|" \
-                        "$_app_env"
-                    rm -f "${_app_env}.tmp"
-                    print_status "Fixed DOMAIN to ${_deploy_domain} in ${_app}/.env"
-                    # Fix Firebase project: replace production Firebase projects with dev values from .secrets.env.
-                    # .env files use either bare VAR= or "export VAR=" syntax — handle both.
-                    # 0box Firebase Admin SDK is configured for box-dev-ce8bf; mismatched tokens
-                    # cause "invalid 'aud' claim" rejection on the /v2/twilio/phone/send endpoint.
-                    # Values come from .secrets.env (loaded at script startup); double-quotes
-                    # allow shell variable expansion inside the sed replacement strings.
-                    local _fbase_api_key="${FBASE_API_KEY}"
-                    local _fbase_auth_domain="${FBASE_AUTH_DOMAIN:-box-dev-ce8bf.firebaseapp.com}"
-                    local _fbase_db_url="${FBASE_DB_URL:-https://box-dev-ce8bf.firebaseio.com}"
-                    local _fbase_project_id="${FBASE_PROJECT_ID:-box-dev-ce8bf}"
-                    local _fbase_storage_bucket="${FBASE_STORAGE_BUCKET:-box-dev-ce8bf.appspot.com}"
-                    local _fbase_sender_id="${FBASE_MESSAGING_SENDER_ID:-893964718514}"
-                    local _fbase_app_id="${FBASE_APP_ID:-1:893964718514:web:6d6f2ee9f96211e64954ab}"
-                    sed -i.tmp \
-                        -e "s|^\(export \)\{0,1\}FBASE_API_KEY=.*|FBASE_API_KEY=\"${_fbase_api_key}\"|" \
-                        -e "s|^\(export \)\{0,1\}FBASE_AUTH_DOMAIN=.*|FBASE_AUTH_DOMAIN=\"${_fbase_auth_domain}\"|" \
-                        -e "s|^\(export \)\{0,1\}FBASE_DB_URL=.*|FBASE_DB_URL=\"${_fbase_db_url}\"|" \
-                        -e "s|^\(export \)\{0,1\}FBASE_PROJECT_ID=.*|FBASE_PROJECT_ID=\"${_fbase_project_id}\"|" \
-                        -e "s|^\(export \)\{0,1\}FBASE_STORAGE_BUCKET=.*|FBASE_STORAGE_BUCKET=\"${_fbase_storage_bucket}\"|" \
-                        -e "s|^\(export \)\{0,1\}FBASE_MESSAGING_SENDER_ID=.*|FBASE_MESSAGING_SENDER_ID=\"${_fbase_sender_id}\"|" \
-                        -e "s|^\(export \)\{0,1\}FBASE_APP_ID=.*|FBASE_APP_ID=\"${_fbase_app_id}\"|" \
-                        "$_app_env"
-                    rm -f "${_app_env}.tmp"
-                    print_status "Fixed FBASE_* to ${_fbase_project_id} in ${_app}/.env"
-                fi
-            done
+            # Step D: Fix .env before build — git .env has production values (mainnet Firebase,
+            # production Alchemy API keys, mainnet.zus.network domain) that break test deployments.
+            # Instead of patching individual fields via sed (fragile — misses new production values),
+            # rewrite all .env files from scratch using setup_web_app_env_files() which uses the
+            # complete env template with values from .secrets.env.
+            if [ "$apply_config" = "1" ]; then
+                setup_web_app_env_files "$repo_path"
+            else
+                print_status "Skipping .env rewrite (pass --with-config to apply)"
+            fi
+
+            # Step D1b: Add fetch timeout to getZusBlogs — blog.zus.network may be unreachable
+            # from test servers, causing SSG to hang indefinitely during next build.
+            local _org_schemes="${repo_path}/packages/shared/src/lib/constants/orgSchemes.js"
+            if [ -f "$_org_schemes" ] && ! grep -q "AbortSignal.timeout" "$_org_schemes"; then
+                sed -i.tmp \
+                    's/const res = await fetch(GRAPH_ENDPOINT, {/const res = await fetch(GRAPH_ENDPOINT, { signal: AbortSignal.timeout(5000),/' \
+                    "$_org_schemes"
+                rm -f "${_org_schemes}.tmp"
+                print_status "Added 5s fetch timeout to getZusBlogs (prevents SSG hang)"
+            fi
+
+            # Step D1c: Replace deprecated blog.zus.network with zus.network/blog
+            if [ -f "$_org_schemes" ] && grep -q "blog\.zus\.network" "$_org_schemes"; then
+                sed -i.tmp 's|blog\.zus\.network/graphql|zus.network/blog/graphql|g' "$_org_schemes"
+                rm -f "${_org_schemes}.tmp"
+                print_status "Updated blog URL to zus.network/blog/graphql"
+            fi
 
             # Step D2: Apply WASM wallet fix — git wasm/index.js has a guard that returns early
             # when mnemonic is empty AND wallet is not split. This skips setWallet() so the
@@ -11215,6 +11718,13 @@ PYEOF
                 yarn workspace "$_app" build 2>/dev/null || true
             done
             print_status "Web apps built"
+            # Step F: Restart PM2 processes so they pick up the new build artifacts.
+            if command -v pm2 &>/dev/null; then
+                for _app in vult bolt blimp explorer chimney; do
+                    pm2 restart "$_app" --update-env 2>/dev/null && \
+                        print_status "Restarted PM2 process: $_app" || true
+                done
+            fi
             ;;
         zboxcli|zwalletcli)
             # CLI tools: rebuild binary, no Docker image
@@ -11224,6 +11734,32 @@ PYEOF
             go build -o "${BASE_DIR}/system_test/tests/cli_tests/$(basename $repo_path | sed 's/cli$//')" . 2>/dev/null || true
             go build -o "${BASE_DIR}/system_test/tests/tokenomics_tests/$(basename $repo_path | sed 's/cli$//')" . 2>/dev/null || true
             print_status "Binary built and copied to test directories"
+            cd "$SCRIPT_DIR"
+            return 0
+            ;;
+        crawler)
+            cd "$repo_path"
+            print_status "Building crawler Docker image..."
+            docker compose -f docker.local/docker-compose.yml build 2>&1 | tail -10 || {
+                print_error "Crawler Docker build failed"
+                return 1
+            }
+            ;;
+        0dns)
+            cd "$repo_path/docker.local"
+            print_status "Building 0dns Docker image..."
+            docker compose build 2>&1 | tail -10 || {
+                print_error "0dns Docker build failed"
+                return 1
+            }
+            ;;
+        rclone_zus)
+            # rclone is a Go binary — rebuild from source
+            checkout_gosdk_for_dependent "rclone_zus" "$gosdk_branch_override"
+            cd "$repo_path"
+            print_status "Building rclone binary..."
+            go build -o rclone . 2>&1 | tail -5 || { print_error "rclone build failed"; return 1; }
+            print_status "rclone binary built"
             cd "$SCRIPT_DIR"
             return 0
             ;;
@@ -11244,7 +11780,11 @@ PYEOF
             # CRITICAL: Re-enable Kafka before restarting sharders.
             # git pull resets 0chain.yaml to defaults (kafka.enabled: false).
             # Must patch BEFORE force-recreate so sharders start with Kafka on.
-            configure_kafka_in_configs
+            if [ "$apply_config" = "1" ]; then
+                configure_kafka_in_configs
+            else
+                print_warning "Skipping Kafka config (pass --with-config if Kafka stops working after swap)"
+            fi
             # Recreate with new image
             for i in 1 2; do
                 cd "${repo_path}/docker.local/build.sharder"
@@ -11257,7 +11797,9 @@ PYEOF
             ;;
         blobber)
             # Fix config before restart so block_worker points to local chain (not dev.0chain.net)
-            fix_blobber_config
+            if [ "$apply_config" = "1" ]; then
+                fix_blobber_config
+            fi
             for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
                 docker rm -f "blobber-$i" "validator-$i" 2>/dev/null || true
             done
@@ -11306,6 +11848,7 @@ PYEOF
             docker rm -f minioserver environment-logsearchapi-1 environment-postgres-db-1 postgres-db minioclient 2>/dev/null || true
             cd "${repo_path}/environment"
             local zs3_compose="${repo_path}/environment/docker-compose.yaml"
+            if [ "$apply_config" = "1" ]; then
             # Patch docker-compose: remove conflicting port bindings and fix zcn config mount
             ZS3_COMPOSE="$zs3_compose" python3 << 'ZS3PYEOF'
 import yaml, os
@@ -11353,11 +11896,14 @@ ZS3PYEOF
             cp -f "${ZCN_CONFIG_DIR}"/*.json /root/.zcn-zs3/ 2>/dev/null || true
             # Copy allocation.txt (required by zs3server to identify which Zus allocation to use)
             [ -f "${ZCN_CONFIG_DIR}/allocation.txt" ] && cp -f "${ZCN_CONFIG_DIR}/allocation.txt" /root/.zcn-zs3/ 2>/dev/null || true
+            fi  # end --with-config for zs3server
             docker compose up -d --force-recreate 2>/dev/null || true
             ;;
         eblobber)
             # Fix config before restart so block_worker points to local chain (not dev.0chain.net)
-            fix_blobber_config
+            if [ "$apply_config" = "1" ]; then
+                fix_blobber_config
+            fi
             local EBLOBBER_DOCKER_DIR="${repo_path}/docker.local"
             local eb_count="${ENTERPRISE_BLOBBER_COUNT:-5}"
             for i in $(seq 1 "$eb_count"); do
@@ -11375,9 +11921,54 @@ ZS3PYEOF
             # Restart PM2 web-app processes with the new build output
             start_web_apps "$repo_path"
             ;;
+        crawler)
+            docker stop crawler 2>/dev/null || true
+            docker rm -f crawler 2>/dev/null || true
+            cd "${repo_path}/docker.local"
+            # Fix volume mount if needed (crawler reads from /usr/src/app/docker.local/config)
+            local crawler_compose="${repo_path}/docker.local/docker-compose.yml"
+            if [ -f "$crawler_compose" ] && grep -q './config:/crawler/config' "$crawler_compose"; then
+                sed -i 's|./config:/crawler/config|./config:/usr/src/app/docker.local/config|g' "$crawler_compose"
+            fi
+            docker compose up -d --force-recreate 2>/dev/null || true
+            ;;
+        0dns)
+            docker stop 0dns 2>/dev/null || true
+            docker rm -f 0dns 2>/dev/null || true
+            if [ "$apply_config" = "1" ]; then
+                # Copy magic block and fix config
+                local DNS_MB="${repo_path}/docker.local/config/b0magicBlock.json"
+                local CHAIN_MB_FULL="${BASE_DIR}/0chain/docker.local/config/b0magicBlock_4_miners_2_sharders.json"
+                local CHAIN_MB="${BASE_DIR}/0chain/docker.local/config/b0magicBlock.json"
+                if [ -f "$CHAIN_MB_FULL" ]; then
+                    cp "$CHAIN_MB_FULL" "$DNS_MB"
+                elif [ -f "$CHAIN_MB" ]; then
+                    cp "$CHAIN_MB" "$DNS_MB"
+                fi
+                local DNS_CONFIG="${repo_path}/docker.local/config/0dns.yaml"
+                if [ -f "$DNS_CONFIG" ]; then
+                    sed -i.bak 's/use_localhost: true/use_localhost: false/' "$DNS_CONFIG" 2>/dev/null || true
+                    rm -f "${DNS_CONFIG}.bak"
+                fi
+                local DNS_COMPOSE="${repo_path}/docker.local/docker-compose.yml"
+                if [ -f "$DNS_COMPOSE" ] && ! grep -q "198.18.0.100" "$DNS_COMPOSE"; then
+                    sed -i.bak 's/198\.18\.0\.[0-9]*/198.18.0.100/g' "$DNS_COMPOSE"
+                    rm -f "${DNS_COMPOSE}.bak"
+                fi
+            fi
+            cd "${repo_path}/docker.local"
+            docker compose -p 0dns up -d --force-recreate 2>/dev/null || true
+            ;;
     esac
 
     cd "$SCRIPT_DIR"
+
+    # After swapping, ensure test configs point to local chain (git pull may
+    # have overwritten them with dev.zus.network URLs)
+    if [ -d "${BASE_DIR}/system_test/tests" ]; then
+        configure_test_configs 2>/dev/null || true
+    fi
+
     print_status "Image swap complete for ${repo}!"
     print_status "Branch: ${branch} (${short_hash})"
 }
@@ -12062,7 +12653,8 @@ usage() {
     echo "  test-setup       Setup test wallets, fund them, copy CLI tools, generate challenge files"
   echo "  challenge-files  Generate challenge_allocations.txt + challenge_blobbers.txt for TestProtocolChallenge"
     echo "  swap-image REPO [BRANCH]  Rebuild image and restart containers (no full redeploy)"
-    echo "  test             Run system tests (API, CLI, tokenomics) with auto-retry"
+    echo "  test             Run system tests (API, CLI, tokenomics) with auto-retry (~1h, long tests skipped)"
+    echo "  test --long-tests  Run ONLY long-running tests (graph, challenge rewards, etc.)"
     echo "  reset-nonces     Reset all wallet nonces to 0"
     echo "  nginx            Setup nginx reverse proxy with SSL (requires domain in config)"
     echo "  verify           Verify chain health + cleanup stale blobbers + verify services"
@@ -12139,7 +12731,7 @@ clear_all_logs() {
     print_header "Clearing All Monitoring Logs & Test Data"
 
     # Clear monitoring logs
-    for logfile in /tmp/vc.log /tmp/chaos.log /tmp/funding_daemon.log /tmp/monitor.log \
+    for logfile in /tmp/vc.log /tmp/chaos.log /tmp/auto_fund_daemon.log /tmp/funding_daemon.log /tmp/monitor.log \
                    /tmp/deploy_local.log /tmp/smoke_test.log \
                    /tmp/test_sdk.log /tmp/test_api.log /tmp/test_cli.log \
                    /tmp/test_tokenomics.log /tmp/test_zs3.log /tmp/test_mc.log \
@@ -12233,7 +12825,7 @@ main() {
     # Phase 4: Funding daemon — install cron+watchdog (survives SSH disconnects)
     # setup_fund_daemon installs auto_fund_daemon.sh + ensure_fund_daemon.sh to /usr/local/bin
     # and sets up a cron job that restarts the daemon every 5 min if it dies.
-    setup_fund_daemon || print_warning "Fund daemon setup failed (non-critical, run fund-daemon manually)"
+    setup_auto_funding || print_warning "Fund daemon setup failed (non-critical, run fund-daemon manually)"
     # Also start immediately (cron won't fire for up to 5 min)
     if [ -f /usr/local/bin/auto_fund_daemon.sh ]; then
         nohup bash /usr/local/bin/auto_fund_daemon.sh 120 5 20 >> /tmp/auto_fund_daemon.log 2>&1 &
@@ -12286,22 +12878,26 @@ main() {
     build_web_apps || print_warning "web-apps build failed (non-critical)"
     build_rclone_zus || print_warning "rclone-zus build failed (non-critical)"
 
-    # Phase 8b: VC test and chaos are disabled — running them interferes with test results.
-    # Enable manually if needed: bash scripts/deploy_local.sh vc-test
-    # start_vc_test || print_warning "VC test failed to start (non-critical)"
-    # start_chaos_test || print_warning "Chaos light test failed to start (non-critical)"
-    start_dkg_monitor || print_warning "DKG monitor failed to start (non-critical)"
+    # Phase 8b: VC, chaos, and DKG monitor are disabled — not needed for test runs.
+    # Enable manually if needed: bash scripts/deploy_local.sh start-vc / start-chaos / start-dkg-monitor
+    # Funding daemon keeps provider wallets topped up during long test runs.
+    start_funding_daemon || print_warning "Funding daemon failed to start (non-critical)"
 
     # Phase 9: Update nginx with full service routes, logs, and configs
     setup_nginx || print_warning "Nginx setup had issues (non-critical)"
 
-    # Phase 9b: Seed 0box provider tables so Blimp/Explorer see blobbers immediately.
+    # Phase 9b: Clean stale service data BEFORE seeding providers.
+    # clean_service_databases truncates blobbers/allocations/write_markers.
+    # seed_0box_providers repopulates blobbers from sharder events_db.
+    # Order matters: truncate first, then seed — otherwise the seed is wiped out.
+    clean_service_databases
+
+    # Phase 9c: Seed 0box provider tables so Blimp/Explorer see blobbers immediately.
     # Kafka health-check events take ~90 min to populate these tables organically.
     # This bootstraps them from the sharder events_db so apps work right after deploy.
     seed_0box_providers || print_warning "0box provider seeding had issues (non-critical)"
 
     # Phase 10: Test setup — wallets, configs, funding, tools
-    clean_service_databases
     cleanup_stale_test_artifacts
     setup_test_wallets
     configure_test_configs
@@ -12395,7 +12991,7 @@ COMMAND=""
 EXTRA_ARGS=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --branch|--domain|--server|--pass|--user|--secrets)
+        --branch|--domain|--server|--pass|--user|--secrets|--chain-image)
             shift 2 ;;  # Skip flag and its value (already parsed by parse_branch_overrides)
         *)
             if [ -z "$COMMAND" ]; then
@@ -12732,6 +13328,7 @@ EOF
     test-setup)
         cleanup_stale_blobbers || true
         clean_service_databases
+        seed_0box_providers || print_warning "0box provider seeding had issues (non-critical)"
         cleanup_stale_test_artifacts
         setup_test_wallets
         configure_test_configs
@@ -13050,7 +13647,7 @@ EOF
                 # Also mark not_available=true so they aren't selected for regular allocations
                 $ZBOX bl-update \
                     --blobber_id "$eblobber_id" \
-                    --not_available true \
+                    --not_available=true \
                     --wallet owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
                 sleep 1
             done

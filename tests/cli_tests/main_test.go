@@ -267,7 +267,27 @@ func TestMain(m *testing.M) { //nolint:gocyclo
 
 	exitRun := m.Run()
 
+	// Safety net: always reset time_unit to 720h after all tests complete.
+	// TestExpiredAllocation sets time_unit=1m and relies on cleanup to restore it.
+	// If cleanup fails or the test panics, time_unit stays short, causing 720x
+	// write price inflation for subsequent test suites and the live environment.
+	resetTimeUnit(configPath)
+
 	os.Exit(exitRun)
+}
+
+// resetTimeUnit resets time_unit to 720h as a safety net after all tests.
+func resetTimeUnit(cfgPath string) {
+	cmd := fmt.Sprintf(
+		"./zwallet sc-update-config --keys time_unit --values 720h --silent "+
+			"--wallet %s_wallet.json --configDir ./config --config %s",
+		scOwnerWallet, cfgPath)
+	output, err := cliutils.RunCommandWithoutRetry(cmd)
+	if err != nil {
+		log.Printf("Warning: failed to reset time_unit to 720h after test suite: %v %s", err, strings.Join(output, "\n"))
+	} else {
+		log.Printf("Safety net: time_unit reset to 720h after test suite")
+	}
 }
 
 // fundSpecialWallets ensures the SC owner and blobber owner wallets have sufficient

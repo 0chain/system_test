@@ -74,15 +74,9 @@ repositories:
       - blobber-7
       - blobber-8
       - blobber-9
-      - blobber-10
-      - blobber-11
-      - blobber-12
       - validator-7
       - validator-8
       - validator-9
-      - validator-10
-      - validator-11
-      - validator-12
 
   # API services
   0box:

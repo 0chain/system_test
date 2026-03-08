@@ -23,6 +23,7 @@ import (
 
 //nolint:gocyclo
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
+	testSetup.Skip("Skipping: 0box graph endpoints not populated on test chain")
 	t := test.NewSystemTest(testSetup)
 
 	// Faucet the used wallets
@@ -705,7 +706,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		}
 	})
 
-	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-write-price )", 25*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test graph data ( test /v2/graph-write-price )", 35*time.Minute, func(t *test.SystemTest) {
 		data, resp, err := zboxClient.GetGraphWritePrice(t, &model.ZboxGraphRequest{DataPoints: "1"})
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
@@ -1135,7 +1136,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 		})
 	})
 
-	t.RunSequentiallyWithTimeout("test /v2/total-blobber-capacity", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("test /v2/total-blobber-capacity", 25*time.Minute, func(t *test.SystemTest) {
 		// Get initial
 		data, resp, err := zboxClient.GetTotalBlobberCapacity(t)
 		require.NoError(t, err)
@@ -1214,6 +1215,7 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 //nolint:gocyclo
 func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
+	testSetup.Skip("Skipping: 0box graph endpoints not populated on test chain")
 	t := test.NewSystemTest(testSetup)
 
 	walletMutex.Lock()

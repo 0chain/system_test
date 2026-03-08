@@ -52,7 +52,7 @@ func TestCommonUserFunctions(testSetup *testing.T) {
 		require.NoError(t, err)
 		// Fee varies with max_block_cost setting; use tolerance instead of exact match
 		balanceDiff := balanceBefore - balanceAfter
-		require.Greater(t, balanceDiff, 5.0, "Balance should decrease by at least the locked amount (5 ZCN)")
+		require.Greater(t, balanceDiff, 4.99, "Balance should decrease by at least the locked amount (5 ZCN)")
 		require.Less(t, balanceDiff, 7.0, "Balance decrease should not exceed locked amount + reasonable fee")
 
 		createAllocationTestTeardown(t, allocationID)

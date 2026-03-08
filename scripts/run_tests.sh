@@ -48,7 +48,7 @@ RESULTS_DIR="${SYSTEM_TEST_DIR}/test_results"
 
 # Defaults
 MAX_RETRIES=3
-SUITE_TIMEOUT="120m"
+SUITE_TIMEOUT="65m"
 TEST_TIMEOUT=""
 TEST_FILTER=""
 SUITES=()
@@ -56,6 +56,16 @@ RERUN_FAILED=false
 FULL_RETEST=false
 SMOKE_TEST=false   # --smoke: run only smoke subtests (SMOKE_TEST_MODE=true)
 LONG_MODE=false    # --long: run suites sequentially instead of in parallel
+LONG_TESTS=false   # --long-tests: run ONLY long-running tests (excluded from standard runs)
+
+# Long-running tests excluded from standard runs (regex patterns for go test -skip).
+# These tests take 30+ minutes each and are run separately via --long-tests.
+# Format: associative array keyed by suite name, values are '|'-separated regex patterns.
+declare -A LONG_TEST_PATTERNS=(
+    [api]="Test0boxGraphAndTotalEndpoints|Test0boxGraphBlobberEndpoints|TestProtocolChallengeTimings|Test1ChimneyBlobberRewards|TestMultiOperation/Multi_upload_operations_of_(single|multiple)_format"
+    [cli]="TestBlobberStakedCapacity|TestMinerUpdateConfig"
+    [tokenomics]="TestAddOrReplace|TestBlobberSlashPenalty|TestBlobberChallengeReward|TestBlobberRewardOnDownload"
+)
 
 # Colors
 RED='\033[0;31m'
@@ -99,8 +109,15 @@ parse_args() {
                 SUITE_TIMEOUT="35m"
                 shift ;;
             --long)
-                # Sequential mode: suites run one after another (thorough, ~2-3h).
+                # Sequential mode: suites run one after another.
+                # Still skips long-running tests (use --long-tests for those).
                 LONG_MODE=true
+                shift ;;
+            --long-tests)
+                # Run ONLY the long-running tests (excluded from standard runs).
+                LONG_TESTS=true
+                SUITE_TIMEOUT="180m"
+                LONG_MODE=true   # long tests must run sequentially
                 shift ;;
             --help|-h)
                 usage; exit 0 ;;
@@ -133,9 +150,11 @@ Usage: $(basename "$0") [OPTIONS] [SUITES...]
 Suites: api, cli, tokenomics, sdk, zs3, mc, rclone, cypress
 
 Execution modes:
-  Default   — All suites run IN PARALLEL simultaneously (fast; ~30-120 min)
-  --smoke   — Smoke subtests only, parallel (fast ~30 min); default suites: sdk+api+cli
-  --long    — All suites run SEQUENTIALLY one after another (thorough; ~2-3 h)
+  Default      — All suites run IN PARALLEL simultaneously (fast; ~1 hour)
+                 Long-running tests (800min+) are auto-skipped.
+  --smoke      — Smoke subtests only, parallel (fast ~30 min); default suites: sdk+api+cli
+  --long       — All suites run SEQUENTIALLY one after another (thorough; ~2-3 h)
+  --long-tests — Run ONLY the long-running tests that are skipped in standard mode
 
 Within each suite, Go's test framework handles internal parallelism:
   • Tests WITH t.Parallel() run concurrently (unique wallets, isolated state)
@@ -149,21 +168,24 @@ Only 'deploy_local.sh redeploy' wipes chain data.
 
 Options:
   --retries N        Max retries for failed tests (default: 3)
-  --timeout DURATION Per-suite timeout (default: 120m)
+  --timeout DURATION Per-suite timeout (default: 65m)
   --test-timeout DUR Per-test timeout override
   --filter PATTERN   Only run tests matching pattern
   --smoke            Smoke mode: smoke subtests only (SMOKE_TEST_MODE=true, 35m timeout)
   --long             Sequential mode: suites run one after another (most thorough)
+  --long-tests       Run ONLY long-running tests (skipped in standard mode, 180m timeout)
   --rerun-failed     Re-run only tests that failed in the most recent run
   --full-retest      Clear result files for selected suites, then run fresh
   -h, --help         Show this help
 
 Examples:
-  $(basename "$0")                          # All suites in parallel (default)
+  $(basename "$0")                          # All suites in parallel (~1h, long tests skipped)
   $(basename "$0") --smoke                  # Smoke run: sdk+api+cli parallel, ~30 min
   $(basename "$0") --smoke api              # API smoke subtests only
   $(basename "$0") --long                   # All suites sequential, full ~2-3 h
   $(basename "$0") --long api cli           # API then CLI sequentially
+  $(basename "$0") --long-tests             # Run ONLY long tests (graph, challenge, etc.)
+  $(basename "$0") --long-tests api         # Run only long API tests
   $(basename "$0") api cli                  # API + CLI in parallel (no smoke)
   $(basename "$0") --retries 3 api          # API with up to 3 retries
   $(basename "$0") --filter TestCreate cli  # CLI tests matching "TestCreate"
@@ -277,12 +299,12 @@ update_runs_meta() {
 # Ensures external dependencies (ZS3 allocation, etc.) are valid.
 pre_suite_setup() {
     local suite="$1"
+    local deploy_sh="${SCRIPT_DIR}/deploy_local.sh"
     case "$suite" in
         zs3|mc)
             # Ensure the ZS3 server has a valid (non-expired) allocation and is running.
             # Uses deploy_local.sh renew-zs3 command which checks expiry and restarts if needed.
             # flock prevents concurrent calls (zs3 and mc share the same ZS3 server).
-            local deploy_sh="${SCRIPT_DIR}/deploy_local.sh"
             if [ -f "$deploy_sh" ]; then
                 log_info "[${suite}] Checking ZS3 server allocation..."
                 (
@@ -293,6 +315,16 @@ pre_suite_setup() {
                 ) 200>"/tmp/zs3_setup.lock"
             else
                 log_warn "[${suite}] deploy_local.sh not found — cannot auto-renew ZS3 allocation"
+            fi
+            ;;
+        rclone)
+            # Ensure rclone-zus binary is available.
+            local cli_dir="${SYSTEM_TEST_DIR}/tests/cli_tests"
+            if [ ! -f "${cli_dir}/rclone-zus" ] && [ -f "$deploy_sh" ]; then
+                log_info "[rclone] Building rclone-zus binary..."
+                bash "$deploy_sh" rclone-zus 2>&1 | while IFS= read -r line; do
+                    log_info "[rclone-setup] $line"
+                done || log_warn "[rclone] rclone-zus build failed — tests will skip"
             fi
             ;;
     esac
@@ -331,6 +363,22 @@ run_suite() {
 
     if [ -n "$test_filter" ]; then
         cmd="$cmd -run '${test_filter}'"
+    fi
+
+    # Long test handling: skip or run-only based on mode.
+    # When retrying specific failed tests (test_filter set), don't add -skip
+    # since the retry already targets only the specific tests that failed.
+    local long_pattern="${LONG_TEST_PATTERNS[$suite]:-}"
+    if [ -n "$long_pattern" ]; then
+        if $LONG_TESTS; then
+            # --long-tests mode: run ONLY the long tests (unless already filtered by retry)
+            if [ -z "$test_filter" ]; then
+                cmd="$cmd -run '${long_pattern}'"
+            fi
+        elif [ -z "$test_filter" ]; then
+            # Standard mode (initial run): skip long tests for faster runs
+            cmd="$cmd -skip '${long_pattern}'"
+        fi
     fi
 
     if [ -n "$TEST_TIMEOUT" ]; then
@@ -726,8 +774,9 @@ main() {
     log_info "Suite timeout: ${SUITE_TIMEOUT}"
     [ -n "$TEST_FILTER" ] && log_info "Filter: ${TEST_FILTER}"
     $SMOKE_TEST    && log_info "Mode: --smoke (smoke subtests only, SMOKE_TEST_MODE=true)"
-    $LONG_MODE     && log_info "Mode: --long (sequential — suites run one after another)"
-    ! $LONG_MODE   && ! $RERUN_FAILED && log_info "Mode: parallel — all suites run simultaneously"
+    $LONG_TESTS    && log_info "Mode: --long-tests (ONLY long-running tests, 180m timeout)"
+    $LONG_MODE && ! $LONG_TESTS && log_info "Mode: --long (sequential — suites run one after another)"
+    ! $LONG_MODE   && ! $RERUN_FAILED && log_info "Mode: parallel — all suites run simultaneously (long tests skipped)"
     $RERUN_FAILED  && log_info "Mode: --rerun-failed (re-running only previously failed tests)"
     $FULL_RETEST   && log_info "Mode: --full-retest (clearing result files for: ${SUITES[*]})"
 

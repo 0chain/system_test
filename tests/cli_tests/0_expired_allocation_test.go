@@ -41,7 +41,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 
 	testSetup.Cleanup(func() {
 		output, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{
-			"time_unit": "1h",
+			"time_unit": "720h",
 		}, true)
 		if err != nil {
 			testSetup.Logf("Warning: cleanup time_unit restore failed: %s", strings.Join(output, "\n"))

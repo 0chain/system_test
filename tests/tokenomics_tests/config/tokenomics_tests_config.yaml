@@ -1,4 +1,4 @@
-block_worker: https://dev.0chain.net
+block_worker: http://198.18.0.100:9091
 0box_url: https://0box.dev.0chain.net
 zs3_server_url: https://dev.0chain.net/zs3server/
 zvault_url: http://zvault.dev.0chain.net

@@ -1,0 +1,11 @@
+block_worker: http://198.18.0.100:9091
+default_test_case_timeout: 45s
+signature_scheme: bls0chain
+chain_id: 0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe
+max_txn_query: 5
+query_sleep_time: 5
+min_submit: 10
+min_confirmation: 10
+0box_url: http://localhost:9081
+zauth_url: http://localhost:8080
+zvault_url: http://localhost:8090

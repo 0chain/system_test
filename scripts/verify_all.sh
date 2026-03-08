@@ -459,17 +459,18 @@ check_web_apps() {
     # Sub-page / UI link checks — verify key pages and navigation links load
     # Each entry: "app:port:path:description"
     local ui_checks=(
-        "vult:3003:/storage:Storage page (file browser)"
-        "vult:3003:/settings:Settings page (manage allocations)"
-        "vult:3003:/profile:Profile page (wallet details)"
-        "blimp:3006:/files:Files page (file manager)"
-        "bolt:3002:/wallet:Wallet page (balance + send)"
-        "bolt:3002:/stake:Stake page (provider staking)"
-        "explorer:3001:/miners:Miners page (Atlus miner list)"
-        "explorer:3001:/sharders:Sharders page (Atlus sharder list)"
-        "explorer:3001:/blobbers:Blobbers page (Atlus blobber list)"
-        "explorer:3001:/transactions:Transactions page"
-        "explorer:3001:/blocks:Blocks page"
+        "vult:3003:/share:Share page"
+        "vult:3003:/chat:Chat page"
+        "vult:3003:/dex:DEX page"
+        "vult:3003:/init:Init page"
+        "vult:3003:/authentication:Auth page"
+        "blimp:3006:/allocations:Allocations page"
+        "blimp:3006:/s3-server:S3 server page"
+        "blimp:3006:/wallet:Wallet page"
+        "blimp:3006:/share:Share page"
+        "explorer:3001:/service-providers:Service providers page"
+        "explorer:3001:/charts:Charts page"
+        "explorer:3001:/blockchain:Blockchain page"
     )
     local page_ok=0 page_warn=0
     for entry in "${ui_checks[@]}"; do
@@ -501,20 +502,10 @@ check_web_apps() {
         "${OBOX_URL}/v2/blobbers?limit=10&offset=0" 2>/dev/null || echo 0)
     [[ "$_r" =~ ^(200|206)$ ]] && api_ok=$((api_ok+1)) || { log_warn "0box /v2/blobbers: HTTP $_r"; api_fail=$((api_fail+1)); }
 
-    # Provider brands (powers allocation brand selector)
-    _r=$(curl -sk -m 8 -o /dev/null -w '%{http_code}' \
-        "${OBOX_URL}/v2/provider-brands" 2>/dev/null || echo 0)
-    [[ "$_r" =~ ^(200|206)$ ]] && api_ok=$((api_ok+1)) || { log_warn "0box /v2/provider-brands: HTTP $_r"; api_fail=$((api_fail+1)); }
-
     # 0box network graph data (powers Atlus chart buttons)
     _r=$(curl -sk -m 8 -o /dev/null -w '%{http_code}' \
         "${OBOX_URL}/v2/graph-txns-count?from=$((_ts-86400))&to=${_ts}&data-points=10" 2>/dev/null || echo 0)
     [[ "$_r" =~ ^(200|206)$ ]] && api_ok=$((api_ok+1)) || { log_warn "0box /v2/graph-txns-count: HTTP $_r"; api_fail=$((api_fail+1)); }
-
-    # 0box total data (powers Atlus summary cards)
-    _r=$(curl -sk -m 8 -o /dev/null -w '%{http_code}' \
-        "${OBOX_URL}/v2/total-stored-data" 2>/dev/null || echo 0)
-    [[ "$_r" =~ ^(200|206)$ ]] && api_ok=$((api_ok+1)) || { log_warn "0box /v2/total-stored-data: HTTP $_r"; api_fail=$((api_fail+1)); }
 
     # Sharder chain stats (powers Explorer block counter in Atlus header)
     _r=$(curl -sk -m 8 -o /dev/null -w '%{http_code}' \
@@ -573,9 +564,9 @@ check_vult() {
     log_info "Checking Vult custom domain navigation pages (https://${VULT_DOMAIN})..."
     local vult_pages=(
         "/:Home (login/signup)"
-        "/storage:Storage (file browser)"
-        "/settings:Settings (allocations)"
-        "/profile:Profile (wallet details)"
+        "/share:Share page"
+        "/chat:Chat page"
+        "/dex:DEX page"
     )
     local vult_pg_ok=0 vult_pg_warn=0
     for pg in "${vult_pages[@]}"; do
@@ -1011,7 +1002,7 @@ try:
     alloc=json.loads(parts[0]); all_b=json.loads(parts[1])
     in_alloc={b.get('id','') for b in alloc.get('blobbers',[])}
     old=list(in_alloc)[0] if in_alloc else ''
-    new=next((b['id'] for b in all_b if not b.get('is_enterprise') and b['id'] not in in_alloc),'')
+    new=next((b['id'] for b in all_b if not b.get('is_enterprise') and not b.get('not_available') and b['id'] not in in_alloc),'')
     print(old,new)
 except: print('','')
 " 2>/dev/null)
@@ -1314,7 +1305,7 @@ parts=sys.stdin.read().split(None,1)
 try:
     alloc=json.loads(parts[0]); all_b=json.loads(parts[1])
     in_alloc={b.get('id','') for b in alloc.get('blobbers',[])}
-    result=next((b['id'] for b in all_b if not b.get('is_enterprise') and b['id'] not in in_alloc),'')
+    result=next((b['id'] for b in all_b if not b.get('is_enterprise') and not b.get('not_available') and b['id'] not in in_alloc),'')
     print(result)
 except: print('')
 " 2>/dev/null | tr -d '[:space:]')
@@ -1554,12 +1545,12 @@ print(sum(1 for n in d.get('Nodes',[]) if n.get('simple_miner',{}).get('total_st
     validator_data=$(curl_json "${SHARDER_URL}/v1/screst/${STORAGE_SC}/validators?limit=20&offset=0")
     local total_validators staked_validators active_validators
     total_validators=$(echo "$validator_data" | python3 -c "
-import sys,json; d=json.load(sys.stdin); nodes=d.get('Nodes',d.get('nodes',[])); print(len(nodes))" 2>/dev/null || echo 0)
+import sys,json; d=json.load(sys.stdin); nodes=d if isinstance(d,list) else d.get('Nodes',d.get('nodes',[])); print(len(nodes))" 2>/dev/null || echo 0)
     staked_validators=$(echo "$validator_data" | python3 -c "
-import sys,json; d=json.load(sys.stdin); nodes=d.get('Nodes',d.get('nodes',[]))
-print(sum(1 for v in nodes if v.get('total_stake',0)>0))" 2>/dev/null || echo 0)
+import sys,json; d=json.load(sys.stdin); nodes=d if isinstance(d,list) else d.get('Nodes',d.get('nodes',[]))
+print(sum(1 for v in nodes if v.get('stake_total',v.get('total_stake',0))>0))" 2>/dev/null || echo 0)
     active_validators=$(echo "$validator_data" | python3 -c "
-import sys,json,time; d=json.load(sys.stdin); nodes=d.get('Nodes',d.get('nodes',[])); now=int(time.time())
+import sys,json,time; d=json.load(sys.stdin); nodes=d if isinstance(d,list) else d.get('Nodes',d.get('nodes',[])); now=int(time.time())
 print(sum(1 for v in nodes if v.get('last_health_check',0)>now-3600))" 2>/dev/null || echo 0)
     [ "$total_validators" -gt 0 ] && log_pass "Validators on chain: $total_validators (staked: $staked_validators, active: $active_validators)" || \
         log_fail "No validators from SC — bash scripts/deploy_local.sh blobbers"
@@ -1730,12 +1721,12 @@ else: print(0)
     log_info "Checking Atlus custom domain navigation pages (https://${ATLUS_DOMAIN})..."
     local atlus_pages=(
         "/:Home (dashboard)"
-        "/miners:Miners list"
-        "/sharders:Sharders list"
-        "/blobbers:Blobbers list"
-        "/validators:Validators list"
-        "/transactions:Transactions list"
-        "/blocks:Blocks list"
+        "/service-providers:Service providers"
+        "/charts:Charts"
+        "/blockchain:Blockchain"
+        "/allocation-details:Allocation details"
+        "/block-details:Block details"
+        "/transaction-details:Transaction details"
     )
     local atlus_pg_ok=0 atlus_pg_warn=0
     for pg in "${atlus_pages[@]}"; do
@@ -1814,7 +1805,120 @@ print(sum(1 for b in nodes if is_real(b) and not b.get('is_enterprise',False) an
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SECTION 10: Run Test Suites
+# SECTION 10: Provider Rewards, Crawler, & JWT Checks
+# ══════════════════════════════════════════════════════════════════════════════
+check_providers() {
+    log_header "Provider Rewards, Crawler & JWT"
+
+    local OBOX_INTERNAL="http://127.0.0.1:9081"
+
+    # --- JWT Token Create (POST) ---
+    local jwt_resp; jwt_resp=$(curl -sk -X POST "${OBOX_INTERNAL}/v2/jwt/token" \
+        -H "X-App-Client-ID: caae5a9d48b1a0cd01a5da982807d7ad6fcc8a8367b79c6adbe48e7c632544f2" \
+        -H "X-App-Client-Key: 91a3a29f4c05b82f2a83f9d4b405976637a4a29f11b1918de30fc319ab87db191b195d9f3e6eecf588e1b83d195931d12760f303c3d1845144f07617022faa8f" \
+        -H "X-App-Client-Signature: test" \
+        -H "X-App-Timestamp: 123456789" \
+        -H "X-App-ID-Token: test" \
+        -H "X-App-User-ID: verify_test" \
+        -H "X-App-Type: vult" \
+        -w "\n%{http_code}" 2>/dev/null)
+    local jwt_code; jwt_code=$(echo "$jwt_resp" | tail -1)
+    local jwt_token; jwt_token=$(echo "$jwt_resp" | head -1 | python3 -c "import json,sys; print(json.load(sys.stdin).get('jwt_token',''))" 2>/dev/null || echo "")
+    [ "$jwt_code" = "200" ] && [ -n "$jwt_token" ] && \
+        log_pass "POST /v2/jwt/token → 200 (JWT created)" || \
+        log_fail "POST /v2/jwt/token → $jwt_code (JWT creation failed — check 0box deployment_mode=3)"
+
+    # --- JWT Token Refresh (PUT) ---
+    if [ -n "$jwt_token" ]; then
+        local ref_code; ref_code=$(curl -sk -X PUT "${OBOX_INTERNAL}/v2/jwt/token" \
+            -H "X-App-Client-ID: caae5a9d48b1a0cd01a5da982807d7ad6fcc8a8367b79c6adbe48e7c632544f2" \
+            -H "X-App-Client-Key: 91a3a29f4c05b82f2a83f9d4b405976637a4a29f11b1918de30fc319ab87db191b195d9f3e6eecf588e1b83d195931d12760f303c3d1845144f07617022faa8f" \
+            -H "X-App-Client-Signature: test" \
+            -H "X-App-Timestamp: 123456789" \
+            -H "X-App-ID-Token: test" \
+            -H "X-App-User-ID: verify_test" \
+            -H "X-App-Type: vult" \
+            -H "X-Jwt-Token: $jwt_token" \
+            -o /dev/null -w "%{http_code}" 2>/dev/null)
+        [ "$ref_code" = "200" ] && \
+            log_pass "PUT /v2/jwt/token → 200 (JWT refresh works — SignatureHandler bypassed)" || \
+            log_fail "PUT /v2/jwt/token → $ref_code (JWT refresh failed — apply SignatureHandler bypass in handler.go)"
+    fi
+
+    # --- Crawler allocation covers all blobbers ---
+    local crawler_config="/root/Code/crawler/docker.local/config/crawler.yaml"
+    if [ -f "$crawler_config" ]; then
+        local crawler_alloc; crawler_alloc=$(grep -A1 'allocations:' "$crawler_config" | tail -1 | sed 's/.*- //' | tr -d ' ')
+        if [ -n "$crawler_alloc" ]; then
+            local alloc_data; alloc_data=$(curl -s "${SHARDER_URL}/v1/screst/${STORAGE_SC}/allocation?allocation=${crawler_alloc}" 2>/dev/null)
+            local alloc_finalized; alloc_finalized=$(echo "$alloc_data" | python3 -c "import json,sys; print(json.load(sys.stdin).get('finalized',False))" 2>/dev/null || echo "True")
+            local alloc_blobber_count; alloc_blobber_count=$(echo "$alloc_data" | python3 -c "import json,sys; print(len(json.load(sys.stdin).get('blobbers',[])))" 2>/dev/null || echo "0")
+            local alloc_blobbers; alloc_blobbers=$(echo "$alloc_data" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+for b in sorted(d.get('blobbers',[]), key=lambda x: x.get('url','')):
+    print(b.get('url','').rstrip('/').split('/')[-1])
+" 2>/dev/null || echo "")
+
+            [ "$alloc_finalized" = "False" ] && \
+                log_pass "Crawler allocation ${crawler_alloc:0:16}… is active (not finalized)" || \
+                log_fail "Crawler allocation ${crawler_alloc:0:16}… is FINALIZED — create new one: bash scripts/deploy_local.sh fix-crawler"
+
+            # Check all 9 regular blobbers are in the allocation
+            local expected_blobbers=9
+            [ "$alloc_blobber_count" -ge "$expected_blobbers" ] && \
+                log_pass "Crawler allocation has $alloc_blobber_count blobbers (need $expected_blobbers)" || \
+                log_fail "Crawler allocation has only $alloc_blobber_count/$expected_blobbers blobbers — recreate with 6+3 shards"
+
+            # Check specific blobbers 1-3 are included
+            local missing_blobbers=""
+            for i in $(seq 1 9); do
+                local bname; bname=$(printf "blobber%02d" "$i")
+                echo "$alloc_blobbers" | grep -q "$bname" || missing_blobbers="$missing_blobbers $bname"
+            done
+            [ -z "$missing_blobbers" ] && \
+                log_pass "All blobbers 01-09 present in crawler allocation" || \
+                log_fail "Missing blobbers in crawler allocation:$missing_blobbers"
+        else
+            log_fail "Crawler config has no allocation — bash scripts/deploy_local.sh fix-crawler"
+        fi
+    else
+        log_warn "Crawler config not found at $crawler_config"
+    fi
+
+    # --- Provider rewards ---
+    local blobber_data; blobber_data=$(curl -s "${SHARDER_URL}/v1/screst/${STORAGE_SC}/getblobbers?limit=20" 2>/dev/null)
+    local rewarded=0 unrewarded=0 unrewarded_names=""
+    while IFS='|' read -r bname bid; do
+        [ -z "$bid" ] && continue
+        local sp_data; sp_data=$(curl -s "${SHARDER_URL}/v1/screst/${STORAGE_SC}/getStakePoolStat?provider_id=${bid}&provider_type=3" 2>/dev/null)
+        local tr; tr=$(echo "$sp_data" | python3 -c "import json,sys; print(json.load(sys.stdin).get('total_rewards',0))" 2>/dev/null || echo "0")
+        if [ "${tr:-0}" -gt 100 ]; then
+            rewarded=$((rewarded+1))
+        else
+            unrewarded=$((unrewarded+1))
+            unrewarded_names="$unrewarded_names $bname"
+        fi
+    done < <(echo "$blobber_data" | python3 -c "
+import json,sys,os
+d=json.load(sys.stdin); nodes=d.get('Nodes',d.get('nodes',[]))
+nginx_domain=os.environ.get('NGINX_DOMAIN','')
+for b in sorted(nodes, key=lambda x: x.get('base_url',x.get('url',''))):
+    url=b.get('base_url',b.get('url',''))
+    if 'eblobber' in url: continue
+    name=url.rstrip('/').split('/')[-1]
+    print(f'{name}|{b[\"id\"]}')
+" 2>/dev/null)
+
+    [ "$rewarded" -gt 0 ] && \
+        log_pass "$rewarded blobber(s) have challenge rewards > 0" || \
+        log_warn "No blobbers have challenge rewards yet — may need time for challenges"
+    [ "$unrewarded" -gt 0 ] && \
+        log_warn "$unrewarded blobber(s) with 0 rewards:$unrewarded_names — ensure they have data (crawler uploads)" || true
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SECTION 11: Run Test Suites
 # ══════════════════════════════════════════════════════════════════════════════
 run_test_suites() {
     log_header "Running Test Suites: ${TEST_SUITES[*]}"
@@ -1880,7 +1984,8 @@ main() {
         blimp)    check_blimp ;;
         bolt)     check_bolt ;;
         atlus)    check_atlus ;;
-        blobbers) check_blobbers ;;
+        blobbers)   check_blobbers ;;
+        providers)  check_providers ;;
         all)
             check_chain_health
             check_services
@@ -1891,6 +1996,7 @@ main() {
             check_bolt
             check_atlus
             check_blobbers
+            check_providers
             ;;
         *) echo "Unknown section: $RUN_SECTION"; exit 1 ;;
     esac

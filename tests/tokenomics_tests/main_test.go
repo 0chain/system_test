@@ -157,6 +157,13 @@ func TestMain(m *testing.M) {
 
 	exitRun := m.Run()
 
+	// Safety net: always reset time_unit to 720h after all tests complete.
+	// Some tests (enterprise finalize, cancel) set time_unit=10m and rely on
+	// cleanup/defer to restore it. If a test panics or the cleanup fails,
+	// time_unit stays at a short duration, causing 720x write price inflation
+	// for subsequent test suites and the live environment.
+	resetTimeUnit(configPath)
+
 	os.Exit(exitRun)
 }
 
@@ -177,6 +184,20 @@ func fundSpecialWallets(cfgPath string) {
 			}
 		}
 		log.Printf("Funded wallet: %s", wallet)
+	}
+}
+
+// resetTimeUnit resets time_unit to 720h as a safety net after all tests.
+func resetTimeUnit(cfgPath string) {
+	cmd := fmt.Sprintf(
+		"./zwallet sc-update-config --keys time_unit --values 720h --silent "+
+			"--wallet %s_wallet.json --configDir ./config --config %s",
+		scOwnerWallet, cfgPath)
+	output, err := cliutils.RunCommandWithoutRetry(cmd)
+	if err != nil {
+		log.Printf("Warning: failed to reset time_unit to 720h after test suite: %v %s", err, strings.Join(output, "\n"))
+	} else {
+		log.Printf("Safety net: time_unit reset to 720h after test suite")
 	}
 }
 
