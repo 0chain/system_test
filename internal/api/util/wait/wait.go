@@ -8,6 +8,12 @@ import (
 
 // PoolImmediatelyNonFatal is like PoolImmediately but returns false on timeout instead of calling t.Fatal
 func PoolImmediatelyNonFatal(t *test.SystemTest, duration time.Duration, predicate func() bool) bool {
+	// Check immediately before waiting
+	if predicate() {
+		t.Log("Wait condition has succeed")
+		return true
+	}
+
 	backoffPeriod := time.Second * 2
 	ticker := time.NewTicker(backoffPeriod)
 
@@ -33,6 +39,12 @@ func PoolImmediatelyNonFatal(t *test.SystemTest, duration time.Duration, predica
 
 // PoolImmediately pools passed function for a certain amount of time
 func PoolImmediately(t *test.SystemTest, duration time.Duration, predicate func() bool) {
+	// Check immediately before waiting
+	if predicate() {
+		t.Log("Wait condition has succeed")
+		return
+	}
+
 	backoffPeriod := time.Second * 2
 	ticker := time.NewTicker(backoffPeriod)
 

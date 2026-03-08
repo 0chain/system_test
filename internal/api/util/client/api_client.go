@@ -1009,7 +1009,7 @@ func (c *APIClient) CreateAllocationWithLockValue(t *test.SystemTest,
 
 	var createAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		createAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -1074,7 +1074,7 @@ func (c *APIClient) RegisterBlobber(t *test.SystemTest,
 
 	var registerBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		registerBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -1164,7 +1164,7 @@ func (c *APIClient) TryRegisterBlobber(t *test.SystemTest,
 	var actualStatus int
 
 	loggedOnce := false
-	matched := wait.PoolImmediatelyNonFatal(t, 10*time.Minute, func() bool {
+	matched := wait.PoolImmediatelyNonFatal(t, 1*time.Minute, func() bool {
 		confirmationResp, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -1221,7 +1221,7 @@ func (c *APIClient) KillBlobber(t *test.SystemTest,
 
 	var killBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		killBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -1274,7 +1274,7 @@ func (c *APIClient) KillBlobberNonFatal(t *test.SystemTest,
 	}
 
 	var killBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
-	ok := wait.PoolImmediatelyNonFatal(t, 2*time.Minute, func() bool {
+	ok := wait.PoolImmediatelyNonFatal(t, 1*time.Minute, func() bool {
 		killBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -1314,7 +1314,7 @@ func (c *APIClient) CreateFreeAllocation(t *test.SystemTest,
 
 	var createAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		createAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -1375,7 +1375,7 @@ func (c *APIClient) UpdateAllocation(
 	var updateAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
 	confirmed := false
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		updateAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -1417,7 +1417,8 @@ func (c *APIClient) UpdateAllocation(
 		if updateAllocationTransactionGetConfirmationResponse.Transaction != nil {
 			txnOutput = updateAllocationTransactionGetConfirmationResponse.Transaction.TransactionOutput
 		}
-		t.Logf("WARNING: Update allocation confirmed with unexpected status: %s", txnOutput)
+		require.Equal(t, requiredTransactionStatus, updateAllocationTransactionGetConfirmationResponse.Status,
+			"Update allocation txn confirmed with unexpected status: %s", txnOutput)
 	}
 }
 
@@ -1515,7 +1516,7 @@ func (c *APIClient) UpdateAllocationBlobbers(t *test.SystemTest, wallet *model.W
 
 	var updateAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		updateAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -1523,18 +1524,37 @@ func (c *APIClient) UpdateAllocationBlobbers(t *test.SystemTest, wallet *model.W
 			},
 			HttpOkStatus)
 		if err != nil {
+			t.Logf("UpdateAllocationBlobbers: confirmation error: %v", err)
 			return false
 		}
 
 		if resp == nil {
+			t.Log("UpdateAllocationBlobbers: nil response")
 			return false
 		}
 
 		if updateAllocationTransactionGetConfirmationResponse == nil {
+			t.Log("UpdateAllocationBlobbers: nil confirmation body")
 			return false
 		}
 
-		return updateAllocationTransactionGetConfirmationResponse.Status == requiredTransactionStatus
+		if updateAllocationTransactionGetConfirmationResponse.Status != requiredTransactionStatus {
+			txnOutput := ""
+			if updateAllocationTransactionGetConfirmationResponse.Transaction != nil {
+				txnOutput = updateAllocationTransactionGetConfirmationResponse.Transaction.TransactionOutput
+			}
+			t.Logf("UpdateAllocationBlobbers: status=%d (want %d), output=%s",
+				updateAllocationTransactionGetConfirmationResponse.Status,
+				requiredTransactionStatus, txnOutput)
+			// If transaction was confirmed with a definitive failure status, don't wait 10 min
+			if updateAllocationTransactionGetConfirmationResponse.Status > 0 {
+				t.Fatalf("UpdateAllocationBlobbers: transaction confirmed with failure status=%d, output=%s",
+					updateAllocationTransactionGetConfirmationResponse.Status, txnOutput)
+			}
+			return false
+		}
+
+		return true
 	})
 
 	wallet.IncNonce()
@@ -1568,7 +1588,7 @@ func (c *APIClient) TryUpdateAllocationBlobbers(t *test.SystemTest, wallet *mode
 
 	var confirmationResp *model.TransactionGetConfirmationResponse
 
-	matched := wait.PoolImmediatelyNonFatal(t, 10*time.Minute, func() bool {
+	matched := wait.PoolImmediatelyNonFatal(t, 1*time.Minute, func() bool {
 		confirmationResp, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -1614,7 +1634,7 @@ func (c *APIClient) CancelAllocation(
 
 	var cancelAllocationTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		cancelAllocationTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -1791,7 +1811,7 @@ func (c *APIClient) GetAllocation(t *test.SystemTest, allocationID string, requi
 		err                 error
 	)
 
-	wait.PoolImmediately(t, 2*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		scRestGetAllocation, resp, err = c.V1SCRestGetAllocation(
 			t,
 			model.SCRestGetAllocationRequest{
@@ -1966,7 +1986,7 @@ func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRe
 
 	var updateBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		updateBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -2023,7 +2043,7 @@ func (c *APIClient) CreateStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 
 	var createStakePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		createStakePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -2073,7 +2093,7 @@ func (c *APIClient) UnlockStakePool(t *test.SystemTest, wallet *model.Wallet, pr
 
 	var unlockStakePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		unlockStakePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -2127,7 +2147,7 @@ func (c *APIClient) CreateMinerStakePool(t *test.SystemTest, wallet *model.Walle
 
 	var createStakePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		createStakePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -2177,7 +2197,7 @@ func (c *APIClient) UnlockMinerStakePool(t *test.SystemTest, wallet *model.Walle
 
 	var unlockStakePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		unlockStakePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -2286,7 +2306,7 @@ func (c *APIClient) CreateWritePool(t *test.SystemTest, wallet *model.Wallet, al
 
 	var createWritePoolTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		createWritePoolTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -2389,7 +2409,7 @@ func (c *APIClient) CollectRewards(t *test.SystemTest, wallet *model.Wallet, pro
 
 	var collectRewardTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		collectRewardTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -2694,7 +2714,7 @@ func (c *APIClient) BurnZcn(t *test.SystemTest, wallet *model.Wallet, address st
 
 	var burnZcnTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 10*time.Minute, func() bool {
+	wait.PoolImmediately(t, 1*time.Minute, func() bool {
 		burnZcnTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{
@@ -2756,7 +2776,7 @@ func (c *APIClient) FundWallet(t *test.SystemTest, wallet *model.Wallet, tokens 
 
 		var fundWalletTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-		wait.PoolImmediately(t, 10*time.Minute, func() bool {
+		wait.PoolImmediately(t, 1*time.Minute, func() bool {
 			fundWalletTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 				t,
 				model.TransactionGetConfirmationRequest{
@@ -2789,7 +2809,11 @@ func (c *APIClient) FundWallet(t *test.SystemTest, wallet *model.Wallet, tokens 
 // It also syncs the wallet nonce from the chain.
 func (c *APIClient) EnsureWalletBalance(t *test.SystemTest, wallet *model.Wallet, minBalanceZCN float64) {
 	balance := c.GetWalletBalance(t, wallet, HttpOkStatus)
-	wallet.Nonce = int(balance.Nonce)
+	// Only advance nonce, never go backwards (consistent with RefreshNonce).
+	// Sharder may return stale nonce; going backwards causes nonce conflicts.
+	if int(balance.Nonce) > wallet.Nonce {
+		wallet.Nonce = int(balance.Nonce)
+	}
 
 	balanceZCN := float64(balance.Balance) / 1e10
 	// Account for TxFee (2 ZCN) in addition to the value itself
