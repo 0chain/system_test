@@ -222,8 +222,10 @@ func checkMinerDelegatePoolFeeAmounts(
 ) {
 	t.Log("checking delegate pool fee payment amounts...")
 	for i, id := range minerIds {
-		numPools := len(afterMiners[i].StakePool.Pools)
-		rewards := make(map[string]int64, numPools)
+		rewards := make(map[string]int64, len(afterMiners[i].StakePool.Pools)+len(beforeMiners[i].StakePool.Pools))
+		for poolId := range beforeMiners[i].StakePool.Pools {
+			rewards[poolId] = 0
+		}
 		for poolId := range afterMiners[i].StakePool.Pools {
 			rewards[poolId] = 0
 		}

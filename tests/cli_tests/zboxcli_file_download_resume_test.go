@@ -23,8 +23,8 @@ func TestResumeDownload(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
 
 	t.RunWithTimeout("Resume download should work", 10*time.Minute, func(t *test.SystemTest) {
-		allocSize := int64(2048 * MB)
-		filesize := int64(1500 * MB)
+		allocSize := int64(4096 * MB)
+		filesize := int64(3000 * MB)
 		remotepath := "/"
 
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{

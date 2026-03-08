@@ -172,16 +172,13 @@ func TestMain(m *testing.M) {
 func fundSpecialWallets(cfgPath string) {
 	specialWallets := []string{scOwnerWallet, blobberOwnerWallet}
 	for _, wallet := range specialWallets {
-		for i := 0; i < 10; i++ {
-			cmd := fmt.Sprintf(
-				"./zwallet faucet --methodName pour --tokens 9 --input {} --silent "+
-					"--wallet %s_wallet.json --configDir ./config --config %s",
-				wallet, cfgPath)
-			_, err := cliutils.RunCommandWithoutRetry(cmd)
-			if err != nil {
-				log.Printf("Warning: faucet pour %d for %s failed: %v", i+1, wallet, err)
-				break
-			}
+		cmd := fmt.Sprintf(
+			"./zwallet faucet --methodName pour --tokens 100 --input {} --silent "+
+				"--wallet %s_wallet.json --configDir ./config --config %s",
+			wallet, cfgPath)
+		_, err := cliutils.RunCommandWithoutRetry(cmd)
+		if err != nil {
+			log.Printf("Warning: faucet pour for %s failed: %v", wallet, err)
 		}
 		log.Printf("Funded wallet: %s", wallet)
 	}

@@ -121,7 +121,18 @@ func TestBlobberAvailability(testSetup *testing.T) {
 			break
 		}
 		require.NotEmpty(t, beforeAllocationId, "could not create initial allocation after retries")
-		beforeAllocation := getAllocation(t, beforeAllocationId)
+
+		// Wait for allocation to be visible on sharder REST API before proceeding
+		var beforeAllocation climodel.Allocation
+		for attempt := 0; attempt < 10; attempt++ {
+			beforeAllocation = getAllocation(t, beforeAllocationId)
+			if beforeAllocation.ID != "" {
+				break
+			}
+			t.Logf("Allocation not yet visible on sharder (attempt %d/10), waiting 5s...", attempt+1)
+			cliutil.Wait(t, 5*time.Second)
+		}
+		require.NotEmpty(t, beforeAllocation.ID, "allocation %s never became visible on sharder", beforeAllocationId)
 
 		// Deactivate the selected blobber - total count drops below required shards
 		setNotAvailability(t, blobberToDeactivate, true)
@@ -129,7 +140,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 
 		// Poll until deactivation is visible (sharder may lag)
 		deactivated := false
-		for pollAttempt := 0; pollAttempt < 6; pollAttempt++ {
+		for pollAttempt := 0; pollAttempt < 10; pollAttempt++ {
 			cliutil.Wait(t, 5*time.Second)
 			betweenBlobbers := getBlobbers(t)
 			for i := range betweenBlobbers {
@@ -140,7 +151,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 			if deactivated {
 				break
 			}
-			t.Logf("Deactivation not yet visible (poll %d/6), retrying...", pollAttempt+1)
+			t.Logf("Deactivation not yet visible (poll %d/10), retrying...", pollAttempt+1)
 		}
 		require.True(t, deactivated, "blobber %s should be deactivated after polling", blobberToDeactivate)
 
@@ -156,18 +167,38 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		require.True(t, strings.Contains(output[0], "not enough blobbers") || strings.Contains(output[0], "Not enough blobbers") || strings.Contains(output[0], "blobbers") || strings.Contains(output[0], "Failed"),
 			"expected blobber allocation failure error, got: %s", output[0])
 
-		// Existing allocation should still be extendable even with reduced blobbers
-		output, err = updateAllocation(t, configPath, createParams(map[string]interface{}{
-			"allocation": beforeAllocationId,
-			"extend":     true,
-			"lock":       "1.0",
-		}), true)
-		if err != nil && strings.Contains(strings.Join(output, "\n"), "only owner can update the allocation") {
-			// This can happen when chain nonce instability causes the update to use a stale key.
-			// The blobber deactivation test has already passed; skip the extend verification.
-			t.Logf("WARNING: updateAllocation returned 'only owner' error (chain nonce instability) — skipping extend check")
-		} else {
-			require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
+		// Existing allocation should still be extendable even with reduced blobbers.
+		// Retry with longer backoff for "value not present" (sharder propagation delay).
+		var updateErr error
+		for attempt := 0; attempt < 5; attempt++ {
+			output, updateErr = updateAllocation(t, configPath, createParams(map[string]interface{}{
+				"allocation": beforeAllocationId,
+				"extend":     true,
+				"lock":       "1.0",
+			}), true)
+			if updateErr == nil {
+				break
+			}
+			outputStr := strings.Join(output, "\n")
+			if strings.Contains(outputStr, "value not present") || strings.Contains(outputStr, "can't get existing allocation") {
+				t.Logf("Attempt %d/5: allocation not yet visible to sharder, waiting 10s...", attempt+1)
+				cliutil.Wait(t, 10*time.Second)
+				continue
+			}
+			if strings.Contains(outputStr, "only owner can update the allocation") {
+				t.Logf("WARNING: updateAllocation returned 'only owner' error (chain nonce instability) — skipping extend check")
+				updateErr = nil
+				break
+			}
+			break // non-retryable error
+		}
+		if updateErr != nil {
+			outputStr := strings.Join(output, "\n")
+			if strings.Contains(outputStr, "only owner can update the allocation") {
+				t.Logf("WARNING: updateAllocation returned 'only owner' error — skipping extend check")
+			} else {
+				require.Nil(t, updateErr, "error updating allocation", outputStr)
+			}
 		}
 
 		afterAlloc := getAllocation(t, beforeAllocationId)
@@ -179,7 +210,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 
 		// Poll until reactivation is visible (sharder may lag)
 		activated := false
-		for pollAttempt := 0; pollAttempt < 6; pollAttempt++ {
+		for pollAttempt := 0; pollAttempt < 10; pollAttempt++ {
 			cliutil.Wait(t, 5*time.Second)
 			afterBlobbers := getBlobbers(t)
 			for i := range afterBlobbers {
@@ -190,7 +221,7 @@ func TestBlobberAvailability(testSetup *testing.T) {
 			if activated {
 				break
 			}
-			t.Logf("Reactivation not yet visible (poll %d/6), retrying...", pollAttempt+1)
+			t.Logf("Reactivation not yet visible (poll %d/10), retrying...", pollAttempt+1)
 		}
 		require.True(t, activated, "blobber %s should be activated after polling", blobberToDeactivate)
 

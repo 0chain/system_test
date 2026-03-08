@@ -262,7 +262,7 @@ func TestMain(m *testing.M) { //nolint:gocyclo
 
 	// Fund special wallets (SC owner, blobber owner) before running tests.
 	// These wallets are used by many tests for config updates and blobber operations,
-	// and must have sufficient balance. Each faucet pour gives up to 9 ZCN.
+	// and must have sufficient balance. Each faucet pour gives up to 100 ZCN.
 	fundSpecialWallets(configPath)
 
 	exitRun := m.Run()
@@ -295,16 +295,13 @@ func resetTimeUnit(cfgPath string) {
 func fundSpecialWallets(cfgPath string) {
 	specialWallets := []string{scOwnerWallet, blobberOwnerWallet}
 	for _, wallet := range specialWallets {
-		for i := 0; i < 10; i++ {
-			cmd := fmt.Sprintf(
-				"./zwallet faucet --methodName pour --tokens 9 --input {} --silent "+
-					"--wallet %s_wallet.json --configDir ./config --config %s",
-				wallet, cfgPath)
-			_, err := cliutils.RunCommandWithoutRetry(cmd)
-			if err != nil {
-				log.Printf("Warning: faucet pour %d for %s failed: %v", i+1, wallet, err)
-				break
-			}
+		cmd := fmt.Sprintf(
+			"./zwallet faucet --methodName pour --tokens 100 --input {} --silent "+
+				"--wallet %s_wallet.json --configDir ./config --config %s",
+			wallet, cfgPath)
+		_, err := cliutils.RunCommandWithoutRetry(cmd)
+		if err != nil {
+			log.Printf("Warning: faucet pour for %s failed: %v", wallet, err)
 		}
 		log.Printf("Funded wallet: %s", wallet)
 	}

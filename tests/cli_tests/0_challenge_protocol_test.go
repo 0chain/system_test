@@ -339,6 +339,29 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			t.Skip("No spare blobber available to add — need more than 2 blobbers registered")
 			return
 		}
+
+		// If selected blobber is enterprise, find a non-enterprise one
+		addedBlobber := getBlobber(t, addedBlobberID)
+		if addedBlobber.IsEnterprise {
+			allBlobbers := getBlobbersList(t)
+			alloc := getAllocation(t, allocationId)
+			allocBlobberIDs := make(map[string]bool)
+			for _, b := range alloc.BlobberDetails {
+				allocBlobberIDs[b.BlobberID] = true
+			}
+			addedBlobberID = ""
+			for _, b := range allBlobbers {
+				if !b.IsEnterprise && !b.IsKilled && !b.IsShutdown && !allocBlobberIDs[b.Id] {
+					addedBlobberID = b.Id
+					break
+				}
+			}
+			if addedBlobberID == "" {
+				t.Skip("No non-enterprise spare blobber available")
+				return
+			}
+		}
+
 		replacedBlobberID, err := GetRandomBlobber(walletFile, configFile, allocationId, addedBlobberID)
 		if err != nil || replacedBlobberID == "" {
 			t.Skip("No blobber available to replace")

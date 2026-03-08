@@ -254,9 +254,18 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		allocSize := int64(64 * KB * 2)
 		fileSize := int64(1024)
 
+		// Use preferred_blobbers from blobbersList to avoid enterprise blobbers
+		// Enterprise blobbers reject uploads with "invalid_signature: could not verify the allocation owner"
+		var preferredIDs []string
+		for _, bb := range blobbersList {
+			preferredIDs = append(preferredIDs, bb.Id)
+		}
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-			"lock": 9,
+			"size":               allocSize,
+			"lock":               9,
+			"data":               1,
+			"parity":             1,
+			"preferred_blobbers": strings.Join(preferredIDs, ","),
 		})
 
 		// faucet tokens
@@ -328,9 +337,17 @@ func TestRestrictedBlobbers(testSetup *testing.T) {
 		allocSize := int64(64 * KB * 2)
 		fileSize := int64(1024)
 
+		// Use preferred_blobbers from blobbersList to avoid enterprise blobbers
+		var preferredIDs []string
+		for _, bb := range blobbersList {
+			preferredIDs = append(preferredIDs, bb.Id)
+		}
 		allocationID := setupAllocation(t, configPath, map[string]interface{}{
-			"size": allocSize,
-			"lock": 9,
+			"size":               allocSize,
+			"lock":               9,
+			"data":               1,
+			"parity":             1,
+			"preferred_blobbers": strings.Join(preferredIDs, ","),
 		})
 
 		// faucet tokens

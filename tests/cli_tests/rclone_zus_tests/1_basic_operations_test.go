@@ -69,16 +69,33 @@ func setupRcloneAllocation(t *test.SystemTest, testName string) string {
 		fmt.Sprintf("%s create-wallet --silent --wallet %s --configDir %s --config %s",
 			zwalletBin, walletFile, cliConfigDir, zboxConfigFile),
 		3, 30*time.Second)
-	if err != nil {
-		t.Logf("Wallet create output: %s", strings.Join(output, "\n"))
-	}
+	require.Nil(t, err, "wallet creation failed: %s", strings.Join(output, "\n"))
+
+	// Verify wallet file was created on disk
+	walletPath := filepath.Join(cliConfigDir, walletFile)
+	require.FileExists(t, walletPath, "wallet file not created at %s", walletPath)
 
 	// Fund wallet via faucet (also registers it on-chain)
 	output, err = cliutils.RunCommand(t,
-		fmt.Sprintf("%s faucet --methodName pour --input '{Pay}' --tokens 10 --silent --wallet %s --configDir %s --config %s",
+		fmt.Sprintf("%s faucet --methodName pour --input '{Pay}' --tokens 100 --silent --wallet %s --configDir %s --config %s",
 			zwalletBin, walletFile, cliConfigDir, zboxConfigFile),
 		3, 60*time.Second)
 	require.Nil(t, err, "faucet failed: %s", strings.Join(output, "\n"))
+
+	// Wait for balance to be confirmed before creating allocation
+	for attempt := 0; attempt < 10; attempt++ {
+		balOutput, _ := cliutils.RunCommand(t,
+			fmt.Sprintf("%s getbalance --silent --wallet %s --configDir %s --config %s",
+				zwalletBin, walletFile, cliConfigDir, zboxConfigFile),
+			1, 15*time.Second)
+		balStr := strings.Join(balOutput, "\n")
+		if strings.Contains(balStr, "Balance:") || strings.Contains(balStr, "zcn") {
+			t.Logf("Wallet funded: %s", balStr)
+			break
+		}
+		t.Logf("Balance not yet visible (attempt %d/10), waiting 3s...", attempt+1)
+		time.Sleep(3 * time.Second)
+	}
 
 	// Create allocation
 	output, err = cliutils.RunCommand(t,

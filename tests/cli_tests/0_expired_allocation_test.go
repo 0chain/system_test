@@ -48,7 +48,11 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		}
 	})
 
-	t.RunWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 5*time.Minute, func(t *test.SystemTest) {
+	// All subtests MUST run sequentially. With time_unit=1m, parallel expirations
+	// overwhelm the chain causing "unexpected end of JSON input" on transaction
+	// confirmations. Sequential execution ensures the SC can process each transaction.
+
+	t.RunSequentiallyWithTimeout("Finalize Expired Allocation Should Work after challenge completion time + expiry", 5*time.Minute, func(t *test.SystemTest) {
 		createWallet(t)
 
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
@@ -67,7 +71,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.Regexp(t, matcher, output[0], "Faucet execution output did not match expected")
 	})
 
-	t.RunWithTimeout("Cancel Expired Allocation Should Fail", 4*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Cancel Expired Allocation Should Fail", 4*time.Minute, func(t *test.SystemTest) {
 		createWallet(t)
 
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
@@ -86,7 +90,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error canceling allocation:alloc_cancel_failed: trying to cancel expired allocation", output[0])
 	})
 
-	t.Run("Download File using Expired Allocation Should Fail", func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Download File using Expired Allocation Should Fail", 5*time.Minute, func(t *test.SystemTest) {
 		allocSize := int64(64 * KB * 2)
 		filesize := int64(256)
 		remotepath := "/"
@@ -114,7 +118,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.Contains(t, output[0], "consensus_not_met")
 	})
 
-	t.RunWithTimeout("Update Expired Allocation Should Fail", 7*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Update Expired Allocation Should Fail", 7*time.Minute, func(t *test.SystemTest) {
 		allocationID, _ := setupAndParseAllocation(t, configPath, map[string]interface{}{})
 
 		time.Sleep(2 * time.Minute)
@@ -143,7 +147,7 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.Equal(t, "Error updating allocation:allocation_updating_failed: can't update expired allocation", output[0])
 	})
 
-	t.RunWithTimeout("Unlocking tokens from finalized allocation should work", 11*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Unlocking tokens from finalized allocation should work", 11*time.Minute, func(t *test.SystemTest) {
 		createWallet(t)
 
 		// Lock 0.5 token for allocation
