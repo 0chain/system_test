@@ -1885,21 +1885,27 @@ build_and_deploy_enterprise_blobbers() {
     # enterprise code (the "Invalid version marker passed" bug).
     if ! docker image inspect eblobber >/dev/null 2>&1; then
         print_status "Building eblobber Docker image..."
+        inject_local_gosdk "$EBLOBBER_DIR" \
+            "${EBLOBBER_DIR}/docker.local/blobber.Dockerfile" \
+            "${EBLOBBER_DIR}/docker.local/validator.Dockerfile"
         cd "$EBLOBBER_DIR"
 
         # Build eblobber_base with herumi MCL/BLS crypto libraries
         # Uses separate tag (eblobber_base) to avoid overwriting regular blobber's blobber_base
         print_status "Building eblobber_base image..."
         DOCKER_IMAGE_BASE=eblobber_base docker.local/bin/build.base.sh 2>&1 || {
+            cleanup_injected_gosdk "$EBLOBBER_DIR"
             print_error "Failed to build eblobber_base image"
             return 1
         }
 
         # Build the enterprise blobber image, tagged as 'eblobber', from eblobber_base
         DOCKER_IMAGE_BASE=eblobber_base DOCKER_IMAGE_BLOBBER="-t eblobber" docker.local/bin/build.blobber.sh 2>&1 || {
+            cleanup_injected_gosdk "$EBLOBBER_DIR"
             print_error "Failed to build eblobber Docker image"
             return 1
         }
+        cleanup_injected_gosdk "$EBLOBBER_DIR"
     else
         print_status "eblobber Docker image already exists"
     fi
@@ -2754,6 +2760,9 @@ build_and_create_blobbers() {
 
     # Build images (show output so build failures are visible)
     cd "${BASE_DIR}/blobber"
+    inject_local_gosdk "${BASE_DIR}/blobber" \
+        "${BASE_DIR}/blobber/docker.local/blobber.Dockerfile" \
+        "${BASE_DIR}/blobber/docker.local/validatorDockerfile"
 
     # Fix incomplete go.sum (common after branch switches via checkout_branches).
     # Without this, Docker build fails with "missing go.sum entry for module".
@@ -2792,6 +2801,7 @@ build_and_create_blobbers() {
         done
         $_vi_ok || print_error "Validator image build failed after 3 attempts"
     fi
+    cleanup_injected_gosdk "${BASE_DIR}/blobber"
     cd "${BASE_DIR}/blobber/docker.local"
 
     # Create containers for blobbers 1-6
@@ -2996,15 +3006,17 @@ start_zauth() {
     # Patch: allow faucet pour for split wallets
     patch_zauth_faucet
 
-    # Checkout correct gosdk branch for zauth-server
+    # Checkout correct gosdk branch for zauth-server and inject local gosdk
     checkout_gosdk_for_dependent "zauth-server"
+    inject_local_gosdk "${BASE_DIR}/zauth-server" "${BASE_DIR}/zauth-server/docker.local/Dockerfile"
 
-    # cd AFTER checkout_gosdk_for_dependent (it changes cwd to gosdk dir)
+    # cd AFTER inject_local_gosdk (it changes cwd to gosdk dir)
     cd "${BASE_DIR}/zauth-server/docker.local"
 
     # Build zauthserver image (always rebuild to pick up patches)
     print_status "Building zauthserver Docker image..."
     docker build -f Dockerfile -t zauthserver ../ 2>&1 || print_error "zauthserver image build failed"
+    cleanup_injected_gosdk "${BASE_DIR}/zauth-server"
 
     # Start only zauth and postgres (skip pgadmin — we manage pgadmin separately with auto-login)
     docker compose -p zauth up -d --force-recreate zauthserver postgres
@@ -3889,8 +3901,9 @@ start_0box() {
     local BOX_CONFIG="${BASE_DIR}/0box/docker.local/config/0box.yaml"
     local BOX_COMPOSE="${BASE_DIR}/0box/docker.local/docker-compose.yml"
 
-    # Checkout correct gosdk branch for 0box
+    # Checkout correct gosdk branch for 0box and inject local gosdk
     checkout_gosdk_for_dependent "0box"
+    inject_local_gosdk "${BASE_DIR}/0box" "${BASE_DIR}/0box/docker.local/Dockerfile"
 
     # Fix config: The 0box repo ships with dev.zus.network — always apply local settings.
     fix_0box_config
@@ -3901,9 +3914,10 @@ start_0box() {
     local LOCAL_IMAGE="0chaindev/0box:local-build"
     print_status "Building 0box image from source as ${LOCAL_IMAGE}..."
     cd "${BASE_DIR}/0box"
-    ./docker.local/bin/build.base.sh 2>&1 || { print_error "Failed to build zbox_base"; return 1; }
-    ./docker.local/bin/build.zbox.sh 2>&1 || { print_error "0box docker build failed"; return 1; }
+    ./docker.local/bin/build.base.sh 2>&1 || { cleanup_injected_gosdk "${BASE_DIR}/0box"; print_error "Failed to build zbox_base"; return 1; }
+    ./docker.local/bin/build.zbox.sh 2>&1 || { cleanup_injected_gosdk "${BASE_DIR}/0box"; print_error "0box docker build failed"; return 1; }
     docker tag zbox "${LOCAL_IMAGE}"
+    cleanup_injected_gosdk "${BASE_DIR}/0box"
     if [ -f "$BOX_COMPOSE" ]; then
         sed -i "s|image: 0chaindev/0box:.*|image: ${LOCAL_IMAGE}|g" "$BOX_COMPOSE"
         print_status "Updated docker-compose.yml to use ${LOCAL_IMAGE}"
@@ -9415,16 +9429,19 @@ build_and_start_crawler() {
         return 0
     fi
 
-    # Checkout correct gosdk branch for crawler
+    # Checkout correct gosdk branch for crawler and inject local gosdk
     checkout_gosdk_for_dependent "crawler"
+    inject_local_gosdk "$CRAWLER_DIR" "${CRAWLER_DIR}/docker.local/Dockerfile"
 
     # Build the crawler Docker image
     print_status "Building crawler Docker image..."
     cd "$CRAWLER_DIR"
     docker compose -f docker.local/docker-compose.yml build 2>&1 | tail -5 || {
+        cleanup_injected_gosdk "$CRAWLER_DIR"
         print_warning "Crawler Docker build failed"
         return 0
     }
+    cleanup_injected_gosdk "$CRAWLER_DIR"
     print_status "Crawler image built successfully"
 
     # Ensure config directory and file exist
@@ -11365,9 +11382,12 @@ inject_local_gosdk() {
     # and the COPY must come BEFORE `go mod download` so the module is available at resolve time.
     for df in "${dockerfile_paths[@]}"; do
         if [ -f "$df" ]; then
-            # Extract SRC_DIR from Dockerfile (e.g., ENV SRC_DIR=/0box → /0box)
+            # Extract SRC_DIR from Dockerfile: prefer ENV SRC_DIR=, fall back to WORKDIR
             local src_dir
             src_dir=$(grep -oP '(?<=ENV SRC_DIR=)\S+' "$df" | head -1)
+            if [ -z "$src_dir" ]; then
+                src_dir=$(grep -oP '(?<=WORKDIR )\S+' "$df" | tail -1)
+            fi
             [ -z "$src_dir" ] && src_dir="/app"
 
             # Remove any existing COPY ./gosdk lines (commented or uncommented) — clean slate
@@ -11648,13 +11668,15 @@ swap_image() {
             fi
             ;;
         zauth-server)
-            # Checkout correct gosdk branch for zauth-server
+            # Checkout correct gosdk branch for zauth-server and inject local gosdk
             checkout_gosdk_for_dependent "zauth-server" "$gosdk_branch_override"
+            inject_local_gosdk "$repo_path" "${repo_path}/docker.local/Dockerfile"
             if [ "$apply_config" = "1" ]; then
                 patch_zauth_faucet
             fi
             cd "${repo_path}/docker.local"
             docker build -f Dockerfile -t zauthserver ../ 2>&1 || print_error "zauthserver image build failed"
+            cleanup_injected_gosdk "$repo_path"
             docker compose -p zauth up -d --force-recreate zauthserver
             ;;
         zvault)
