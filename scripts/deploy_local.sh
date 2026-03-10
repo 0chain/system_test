@@ -243,7 +243,8 @@ checkout_branches() {
         # Checkout branch
         if git rev-parse --verify "origin/${branch}" >/dev/null 2>&1; then
             git checkout "$branch" 2>/dev/null || git checkout -b "$branch" "origin/${branch}" 2>/dev/null || true
-            git pull origin "$branch" 2>/dev/null || true
+            git fetch origin "$branch" 2>/dev/null || true
+            git reset --hard "origin/${branch}" 2>/dev/null || git pull origin "$branch" 2>/dev/null || true
         elif git rev-parse --verify "$branch" >/dev/null 2>&1; then
             git checkout "$branch" 2>/dev/null || true
         else
@@ -2834,13 +2835,19 @@ ensure_blobber_hdd_tablespace() {
     for i in $(seq 1 15); do
         local container="postgres-blob-$i"
         if docker ps --format '{{.Names}}' | grep -q "^${container}$"; then
+            # Use 'postgres' db (always exists); blobber_meta may not exist yet on fresh init
             local ts_exists
-            ts_exists=$(docker exec "$container" psql -U blobber_user -d blobber_meta -tAc \
+            ts_exists=$(docker exec "$container" psql -U blobber_user -d postgres -tAc \
                 "SELECT 1 FROM pg_tablespace WHERE spcname='hdd_tablespace';" 2>/dev/null)
             if [ "$ts_exists" != "1" ]; then
+                # Fix host directory permissions for volume-mounted hdd dirs (owned by root by default)
+                local host_hdd_dir="${BASE_DIR}/blobber/docker.local/blobber${i}/data/postgresql2"
+                if [ -d "$host_hdd_dir" ]; then
+                    chown 999:999 "$host_hdd_dir" 2>/dev/null || true
+                fi
                 docker exec "$container" bash -c \
-                    "rm -rf /var/lib/postgresql/hdd/PG_* && mkdir -p /var/lib/postgresql/hdd && chown postgres:postgres /var/lib/postgresql/hdd" 2>/dev/null
-                if docker exec "$container" psql -U blobber_user -d blobber_meta -c \
+                    "mkdir -p /var/lib/postgresql/hdd" 2>/dev/null
+                if docker exec "$container" psql -U blobber_user -d postgres -c \
                     "CREATE TABLESPACE hdd_tablespace LOCATION '/var/lib/postgresql/hdd';" 2>/dev/null; then
                     print_status "Created hdd_tablespace in $container"
                     fixed=$((fixed + 1))
@@ -2862,8 +2869,8 @@ ensure_blobber_hdd_tablespace() {
 patch_zauth_faucet() {
     local zauth_server_go="${BASE_DIR}/zauth-server/pkg/app/server.go"
     if [ ! -f "$zauth_server_go" ]; then
-        print_warning "zauth server.go not found at $zauth_server_go"
-        return 0
+        print_error "FATAL: zauth server.go not found at $zauth_server_go — faucet will NOT work for split-key wallets"
+        exit 1
     fi
     if grep -q 'Allow faucet pour for split wallets' "$zauth_server_go" 2>/dev/null; then
         print_status "zauth server.go: faucet pour patch already applied"
@@ -2886,6 +2893,10 @@ content = content.replace('func NewServer(', init_func + 'func NewServer(')
 with open(sys.argv[1], 'w') as f:
     f.write(content)
 PYEOF
+    if [ $? -ne 0 ]; then
+        print_error "FATAL: Failed to patch zauth server.go — faucet will NOT work for split-key wallets"
+        exit 1
+    fi
     print_status "zauth server.go: patched to allow faucet pour for split wallets"
 }
 
@@ -2897,8 +2908,8 @@ patch_wasm_loader_local() {
     local WEB_APPS_DIR="$1"
     local WASM_LOADER="${WEB_APPS_DIR}/packages/shared/src/lib/wasm/zcn_blimp.js"
     if [ ! -f "$WASM_LOADER" ]; then
-        print_warning "zcn_blimp.js not found, skipping WASM loader patch"
-        return 0
+        print_error "FATAL: zcn_blimp.js not found at $WASM_LOADER — WASM will load from CDN (stale), faucet will NOT work"
+        exit 1
     fi
     if grep -q 'FORCE LOCAL WASM' "$WASM_LOADER" 2>/dev/null; then
         print_status "zcn_blimp.js: local WASM patch already applied"
@@ -2916,8 +2927,8 @@ new_func_marker = 'const getCachedWasmResponse'
 start_idx = content.find(old_start)
 end_idx = content.find(new_func_marker)
 if start_idx == -1 or end_idx == -1:
-    print('WARNING: Could not find getWasmUrl function boundaries')
-    sys.exit(0)
+    print('FATAL: Could not find getWasmUrl function boundaries in zcn_blimp.js — WASM will load from CDN')
+    sys.exit(1)
 
 new_func = """const getWasmUrl = () => {
   const isEnterpriseMode = getIsEnterpriseMode()
@@ -2946,6 +2957,10 @@ with open(wasm_loader, 'w') as f:
     f.write(content)
 print('OK: zcn_blimp.js patched for local WASM')
 PYEOF
+    if [ $? -ne 0 ]; then
+        print_error "FATAL: Failed to patch zcn_blimp.js — WASM will load from CDN (stale), faucet will NOT work"
+        exit 1
+    fi
     print_status "zcn_blimp.js: patched to load WASM from local /zcn.wasm (not CDN)"
 }
 
@@ -2977,10 +2992,11 @@ start_zauth() {
     # Patch: allow faucet pour for split wallets
     patch_zauth_faucet
 
-    cd "${BASE_DIR}/zauth-server/docker.local"
-
     # Checkout correct gosdk branch for zauth-server
     checkout_gosdk_for_dependent "zauth-server"
+
+    # cd AFTER checkout_gosdk_for_dependent (it changes cwd to gosdk dir)
+    cd "${BASE_DIR}/zauth-server/docker.local"
 
     # Build zauthserver image (always rebuild to pick up patches)
     print_status "Building zauthserver Docker image..."
@@ -3728,6 +3744,13 @@ fix_0box_config() {
         sed -i "s|^host:.*|host: https://0box.${DEPLOY_DOMAIN}|" "$BOX_CONFIG"
         sed -i "/^network:/,/^[a-z]/ s|^  name:.*|  name: ${NETWORK_NAME}|" "$BOX_CONFIG"
         sed -i "s|^\(  domain:\).*|  domain: ${DEPLOY_DOMAIN}|" "$BOX_CONFIG"
+        # Fix kms.domain and nft_tracker.domain: code builds URLs as
+        # "zvault.{network.name}.{kms.domain}" so these must use the base domain
+        # (e.g. zus.network), NOT the full domain (e.g. test1.zus.network),
+        # otherwise the URL becomes zvault.test1.test1.zus.network (DNS failure).
+        local BASE_DOMAIN="${DEPLOY_DOMAIN#*.}"
+        sed -i "/^kms:/,/^[a-z]/ s|^  domain:.*|  domain: ${BASE_DOMAIN}|" "$BOX_CONFIG"
+        sed -i "/^nft_tracker:/,/^[a-z]/ s|^  domain:.*|  domain: ${BASE_DOMAIN}|" "$BOX_CONFIG"
     else
         # No domain configured — use localhost for local-only deployment
         print_status "Setting 0box host → http://localhost (no domain configured)"
@@ -4023,8 +4046,9 @@ fund_0box() {
         box_wallet_id=$(docker logs 0box 2>&1 | grep -o "0box wallet client id: [a-f0-9]*" | head -1 | awk '{print $NF}')
     fi
     if [ -z "$box_wallet_id" ]; then
-        print_warning "Could not find 0box wallet ID — skipping 0box funding."
-        return 0
+        print_error "FATAL: Could not find 0box wallet ID (wallets.free_storage_assginer) in 0box.yaml or docker logs."
+        print_error "Free allocations will NOT work. Check 0box.yaml and 0box container."
+        exit 1
     fi
 
     print_status "0box wallet ID: ${box_wallet_id:0:16}..."
@@ -4066,8 +4090,9 @@ fund_0box() {
     fi
 
     if [ -z "$box_public_key" ] || [ "$box_public_key" = "null" ]; then
-        print_warning "Could not find free_storage.public_key in 0box.yaml — skipping assigner setup."
-        return 0
+        print_error "FATAL: Could not find free_storage.public_key in 0box.yaml."
+        print_error "Free allocations will NOT work. Check 0box.yaml free_storage section."
+        exit 1
     fi
     box_assigner_name="${box_assigner_name:-0chain}"
     print_status "Registering assigner name='${box_assigner_name}' key=${box_public_key:0:16}..."
@@ -4075,21 +4100,39 @@ fund_0box() {
     # Add 0box as free storage assigner using zbox add command
     # --name must match free_storage.name in 0box.yaml (the "assigner" field in markers)
     # Must use SC owner wallet (owner.json) — only owner can call add_free_storage_assigner
-    sync_wallet_nonce_from_chain "${ZCN_CONFIG_DIR}/owner.json"
-    print_status "Adding 0box as free storage assigner..."
-    local add_output
-    add_output=$($ZBOX add \
-        --name "$box_assigner_name" \
-        --key "$box_public_key" \
-        --limit 100 \
-        --max 10000 \
-        --wallet owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>&1 || true)
-    if echo "$add_output" | grep -q "added as free storage assigner"; then
-        print_status "Free storage assigner registered: ${box_assigner_name}"
-    elif echo "$add_output" | grep -qi "already exist\|already registered"; then
-        print_status "Free storage assigner already registered (OK)"
-    else
-        print_warning "free storage assigner registration output: $add_output"
+    # CRITICAL: This is a single point of cascading failure — without it, ALL free allocations
+    # fail with "not enough blobbers available". Retry aggressively.
+    local assigner_registered=false
+    local max_retries=5
+    for attempt in $(seq 1 $max_retries); do
+        sync_wallet_nonce_from_chain "${ZCN_CONFIG_DIR}/owner.json"
+        print_status "Adding 0box as free storage assigner (attempt $attempt/$max_retries)..."
+        local add_output
+        add_output=$($ZBOX add \
+            --name "$box_assigner_name" \
+            --key "$box_public_key" \
+            --limit 100 \
+            --max 10000 \
+            --wallet owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>&1 || true)
+        if echo "$add_output" | grep -qi "added as free storage assigner\|already exist\|already registered"; then
+            print_status "Free storage assigner registered: ${box_assigner_name}"
+            assigner_registered=true
+            break
+        fi
+        print_warning "Attempt $attempt failed: $add_output"
+        if [ "$attempt" -lt "$max_retries" ]; then
+            sleep 5
+        fi
+    done
+
+    # zbox add already confirms the transaction on-chain internally before returning success.
+    # No secondary SC state check needed — it uses an unreliable internal key format.
+
+    if ! $assigner_registered; then
+        print_error "FATAL: Free storage assigner could NOT be registered after $max_retries attempts!"
+        print_error "Free allocations will NOT work until this is fixed."
+        print_error "Manual fix: $ZBOX add --name $box_assigner_name --key $box_public_key --limit 100 --max 10000 --wallet owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE"
+        exit 1
     fi
 
     print_status "0box funding complete!"
@@ -4962,12 +5005,8 @@ fund_blobbers_and_validators() {
         if [ -z "$blobber_id" ]; then
             blobber_id=$(docker logs "blobber-${i}" 2>&1 | grep -oP '(?<="blobber":")[a-f0-9]{64}' | head -1)
         fi
-        # Fallback: key config file (pre-generated keys, valid on clean chains)
-        if [ -z "$blobber_id" ]; then
-            local wallet_file="${BLOBBER_KEYS_DIR}/b0bnode${i}_keys.txt.json"
-            [ -f "$wallet_file" ] && blobber_id=$(jq -r '.client_id' "$wallet_file" 2>/dev/null)
-        fi
-        # Last resort: compute client_id = sha3-256(public_key) from line 1 of .txt key file
+        # Fallback: compute client_id = sha3-256(public_key) from line 1 of .txt key file
+        # NOTE: use .txt (authoritative, updated by build scripts) before .txt.json (may be stale)
         if [ -z "$blobber_id" ]; then
             local key_file="${BLOBBER_KEYS_DIR}/b0bnode${i}_keys.txt"
             if [ -f "$key_file" ]; then
@@ -4977,6 +5016,11 @@ fund_blobbers_and_validators() {
                     "import sys,hashlib; print(hashlib.sha3_256(bytes.fromhex(sys.argv[1])).hexdigest())" \
                     "$pub_key" 2>/dev/null)
             fi
+        fi
+        # Last resort: .txt.json wallet file (may have stale keys if .txt was regenerated)
+        if [ -z "$blobber_id" ]; then
+            local wallet_file="${BLOBBER_KEYS_DIR}/b0bnode${i}_keys.txt.json"
+            [ -f "$wallet_file" ] && blobber_id=$(jq -r '.client_id' "$wallet_file" 2>/dev/null)
         fi
         if [ -n "$blobber_id" ] && [ ${#blobber_id} -ge 60 ]; then
             print_status "Funding blobber-$i: ${blobber_id:0:16}... (100 ZCN)"
@@ -6377,19 +6421,17 @@ ensure_chain_config() {
         "$ZWALLET mn-update-config --keys 'health_check_period' --values '60m' $WOM"
 
     # ========== Global Config (requires SC owner wallet) ==========
-    print_status "Setting global: view_change=true"
+    # view_change=false: prevents split-DKG bug where miners restarted at different times
+    # load different DKG key states from disk → VRF share verification fails → chain stuck.
+    # The 0chain.yaml also has view_change: false as local default. Both must be false.
+    # If view_change was ever enabled (e.g., old deploy), disable it now.
+    print_status "Setting global: view_change=false (prevents split-DKG chain-stuck)"
     run_cmd "global-update-config view_change" \
-        "$ZWALLET global-update-config --keys 'server_chain.view_change' --values 'true' $WO"
+        "$ZWALLET global-update-config --keys 'server_chain.view_change' --values 'false' $WO"
 
     print_status "Setting global: max_wait_time=500ms"
     run_cmd "global-update-config max_wait_time" \
         "$ZWALLET global-update-config --keys 'server_chain.block.proposal.max_wait_time' --values '500ms' $WO"
-
-    # ========== Add Sharders to View Change Register ==========
-    # After enabling view_change + cost.vc_add, add any sharders that are registered in the Miner SC
-    # but not yet in the current magic block. Without this, DKG restarts indefinitely and 0dns
-    # returns sharders:[] causing API/SDK tests to fail with "all shaders seem to be unhealthy".
-    vc_add_sharders
 
     # fee_SAS=cost×10^12/coeff so HIGHER=cheaper; default 1000, set 10000000 = 10000x cheaper
     # At 10000000: challenge_response=0.00728 ZCN, new_allocation=0.019 ZCN (enterprise tests pass)
@@ -9426,9 +9468,9 @@ print(m.group(1) if m else '')
         ${ZWALLET} faucet --methodName pour --tokens 100 --silent $WO 2>/dev/null || true
         sleep 2
 
-        print_status "Creating crawler allocation on-chain (data=7, parity=2 = all 9 regular blobbers)..."
+        print_status "Creating crawler allocation on-chain (data=10, parity=2 = all 12 regular blobbers)..."
         local alloc_output
-        alloc_output=$(${ZBOX} newallocation --size 10737418240 --lock 100 --data 7 --parity 2 \
+        alloc_output=$(${ZBOX} newallocation --size 10737418240 --lock 100 --data 10 --parity 2 \
             --silent $WO 2>&1) || true
         local crawler_alloc_id=$(echo "$alloc_output" | grep -oE '[0-9a-f]{64}' | head -1)
 
@@ -9474,7 +9516,7 @@ ${alloc_entry}
 
 kafka:
   enabled: true
-  host: "198.19.0.99:9092"
+  host: "kafka:9092"
   username: "admin"
   password: "admin-secret"
   eventsTopic: "monitor"
@@ -9643,22 +9685,22 @@ refresh_crawler_allocation() {
             local alloc_shards
             alloc_shards=$(echo "$alloc_stdout" | grep -E "data_shards|parity_shards" | \
                 grep -oE "[0-9]+" | paste -sd+ | python3 -c "import sys; print(sum(int(x) for x in sys.stdin.read().split('+') if x.strip()))" 2>/dev/null || echo "0")
-            if [ "${alloc_shards:-0}" -ge 9 ]; then
+            if [ "${alloc_shards:-0}" -ge 12 ]; then
                 print_status "Existing crawler allocation is valid and covers ${alloc_shards} blobbers: ${existing_alloc:0:16}..."
                 return 0
             fi
-            print_status "Existing allocation only has ${alloc_shards} blobbers (need 9), recreating..."
+            print_status "Existing allocation only has ${alloc_shards} blobbers (need 12), recreating..."
         else
             print_status "Existing allocation ${existing_alloc:0:16}... is invalid/expired, creating new one"
         fi
     fi
 
-    # Create a new allocation for the crawler (7 data + 2 parity = 9 blobbers = all regular blobbers)
+    # Create a new allocation for the crawler (10 data + 2 parity = 12 blobbers = all regular blobbers)
     # Enterprise blobbers are excluded from regular allocations by the SC.
-    print_status "Creating new crawler allocation (data=7, parity=2, covers all 9 regular blobbers)..."
+    print_status "Creating new crawler allocation (data=10, parity=2, covers all 12 regular blobbers)..."
     local alloc_output
     alloc_output=$($ZBOX newallocation \
-        --data 7 --parity 2 --size 10737418240 --lock 25 \
+        --data 10 --parity 2 --size 10737418240 --lock 100 \
         $W 2>&1) || true
 
     # Extract allocation ID from output — look for "ID:" or "Allocation:" marker first,
@@ -9687,8 +9729,15 @@ try:
         content = f.read()
     new_block = "allocations:\n  - {}\n".format(new_alloc)
     if re.search(r'^allocations:', content, re.MULTILINE):
-        # Replace entire allocations block (key + all indented list items)
-        content = re.sub(r'^allocations:(\s*\n(?:[ \t]+[^\n]*\n)*)', new_block, content, flags=re.MULTILINE)
+        # Replace entire allocations block (key + all indented list items).
+        # Pattern: 'allocations:' followed by any number of lines that start with whitespace.
+        # Use [\s\S] approach: match from 'allocations:' through all consecutive indented lines.
+        content = re.sub(
+            r'^allocations:[ \t]*\n(?:[ \t]+[^\n]*\n?)*',
+            new_block,
+            content,
+            flags=re.MULTILINE
+        )
     else:
         content = content.rstrip() + "\n\n" + new_block
     with open(config_file, 'w') as f:
@@ -11268,6 +11317,80 @@ checkout_gosdk_for_dependent() {
     cd "$SCRIPT_DIR"
 }
 
+# Inject local gosdk into a repo's build context so Docker/native builds use it.
+# For Docker builds: copies gosdk dir, enables replace directive, adds COPY to Dockerfile.
+# For native builds: enables replace directive in go.mod.
+# Usage: inject_local_gosdk <repo_path> [dockerfile_paths...]
+# Call cleanup_injected_gosdk <repo_path> after the build to restore original state.
+inject_local_gosdk() {
+    local target_repo="$1"
+    shift
+    local dockerfile_paths=("$@")
+    local gosdk_dir="${BASE_DIR}/gosdk"
+
+    if [ ! -d "$gosdk_dir" ]; then
+        print_warning "gosdk not found at $gosdk_dir — skipping injection"
+        return 1
+    fi
+
+    local gosdk_branch_name
+    gosdk_branch_name=$(git -C "$gosdk_dir" branch --show-current 2>/dev/null || echo "unknown")
+    print_status "Injecting local gosdk (${gosdk_branch_name}) into ${target_repo} build context..."
+
+    # Copy gosdk into the repo
+    rm -rf "${target_repo}/gosdk"
+    cp -r "$gosdk_dir" "${target_repo}/gosdk"
+    # Remove .git from copied gosdk to reduce Docker context size
+    rm -rf "${target_repo}/gosdk/.git"
+
+    # Enable replace directive in go.mod (try common patterns)
+    if [ -f "${target_repo}/go.mod" ]; then
+        # Pattern 1: commented-out replace pointing to ../gosdk
+        sed -i 's|^// *replace github.com/0chain/gosdk => \.\./gosdk|replace github.com/0chain/gosdk => ./gosdk|' "${target_repo}/go.mod"
+        sed -i 's|^//replace github.com/0chain/gosdk => \.\./gosdk|replace github.com/0chain/gosdk => ./gosdk|' "${target_repo}/go.mod"
+        # Pattern 2: active replace pointing to ../gosdk (fix path for Docker context)
+        sed -i 's|^replace github.com/0chain/gosdk => \.\./gosdk|replace github.com/0chain/gosdk => ./gosdk|' "${target_repo}/go.mod"
+        # Pattern 3: no replace at all — append one
+        if ! grep -q 'replace github.com/0chain/gosdk =>' "${target_repo}/go.mod"; then
+            echo 'replace github.com/0chain/gosdk => ./gosdk' >> "${target_repo}/go.mod"
+        fi
+    fi
+
+    # Enable COPY ./gosdk in Dockerfiles with correct destination and placement.
+    # The gosdk must be at $SRC_DIR/gosdk (where go.mod's replace directive resolves ./gosdk)
+    # and the COPY must come BEFORE `go mod download` so the module is available at resolve time.
+    for df in "${dockerfile_paths[@]}"; do
+        if [ -f "$df" ]; then
+            # Extract SRC_DIR from Dockerfile (e.g., ENV SRC_DIR=/0box → /0box)
+            local src_dir
+            src_dir=$(grep -oP '(?<=ENV SRC_DIR=)\S+' "$df" | head -1)
+            [ -z "$src_dir" ] && src_dir="/app"
+
+            # Remove any existing COPY ./gosdk lines (commented or uncommented) — clean slate
+            sed -i '/^#\{0,1\} *COPY \.\/gosdk/d' "$df"
+
+            # Add COPY ./gosdk to correct destination BEFORE go mod download
+            if grep -q 'go mod download' "$df"; then
+                sed -i "/RUN.*go mod download/i COPY ./gosdk ${src_dir}/gosdk" "$df"
+            else
+                # No separate go mod download — add after COPY go.mod line
+                sed -i "/COPY.*go\.mod/a COPY ./gosdk ${src_dir}/gosdk" "$df"
+            fi
+        fi
+    done
+
+    print_status "Local gosdk injected (${gosdk_branch_name})"
+}
+
+# Clean up injected gosdk from a repo's build context, restoring original files.
+cleanup_injected_gosdk() {
+    local target_repo="$1"
+    rm -rf "${target_repo}/gosdk"
+    git -C "$target_repo" checkout go.mod 2>/dev/null || true
+    # Restore any modified Dockerfiles
+    git -C "$target_repo" checkout -- '*.Dockerfile' 'Dockerfile' 'docker.local/' 2>/dev/null || true
+}
+
 # Swap image for a service without full redeployment
 # Usage: ./deploy_local.sh swap-image <repo> [branch] [--gosdk-branch <branch>]
 # Example: ./deploy_local.sh swap-image 0chain fix/my-branch
@@ -11365,7 +11488,8 @@ swap_image() {
         git stash 2>/dev/null || true
         if git rev-parse --verify "origin/${branch}" >/dev/null 2>&1; then
             git checkout "$branch" 2>/dev/null || git checkout -b "$branch" "origin/${branch}" 2>/dev/null || true
-            git pull origin "$branch" 2>/dev/null || true
+            git fetch origin "$branch" 2>/dev/null || true
+            git reset --hard "origin/${branch}" 2>/dev/null || git pull origin "$branch" 2>/dev/null || true
         elif git rev-parse --verify "$branch" >/dev/null 2>&1; then
             git checkout "$branch" 2>/dev/null || true
         else
@@ -11377,6 +11501,11 @@ swap_image() {
     print_status "On ${branch} (${short_hash})"
 
     # Step 2: Rebuild the Docker image
+    # Auto-detect gosdk branch if not explicitly provided via --gosdk-branch.
+    # This ensures a prior `swap-image gosdk <branch>` is honored by all dependents.
+    if [ -z "$gosdk_branch_override" ] && [ -d "${BASE_DIR}/gosdk/.git" ]; then
+        gosdk_branch_override=$(git -C "${BASE_DIR}/gosdk" branch --show-current 2>/dev/null)
+    fi
     print_status "Rebuilding Docker image..."
     case "$repo" in
         gosdk)
@@ -11384,27 +11513,91 @@ swap_image() {
             print_status "Checking out gosdk branch and rebuilding CLI dependents..."
             cd "$repo_path"
             git fetch origin 2>/dev/null || true
-            git checkout "$branch" 2>/dev/null && git pull origin "$branch" 2>/dev/null || true
+            git checkout "$branch" 2>/dev/null || git checkout -b "$branch" "origin/${branch}" 2>/dev/null || true
+            git pull origin "$branch" 2>/dev/null || true
             local short_hash_sdk=$(git rev-parse --short HEAD 2>/dev/null)
             print_status "gosdk now at ${branch} (${short_hash_sdk})"
-            # Rebuild zboxcli with this gosdk
-            print_status "Rebuilding zboxcli with updated gosdk..."
-            cd "${BASE_DIR}/zboxcli"
-            go build -o zbox . 2>&1 | tail -5 || print_warning "zboxcli build failed"
-            cp zbox "${BASE_DIR}/system_test/tests/cli_tests/zbox" 2>/dev/null || true
-            cp zbox "${BASE_DIR}/system_test/tests/tokenomics_tests/zbox" 2>/dev/null || true
-            # Rebuild zwalletcli with this gosdk
-            print_status "Rebuilding zwalletcli with updated gosdk..."
-            cd "${BASE_DIR}/zwalletcli"
-            go build -o zwallet . 2>&1 | tail -5 || print_warning "zwalletcli build failed"
-            cp zwallet "${BASE_DIR}/system_test/tests/cli_tests/zwallet" 2>/dev/null || true
-            cp zwallet "${BASE_DIR}/system_test/tests/tokenomics_tests/zwallet" 2>/dev/null || true
+            # Rebuild zboxcli with local gosdk replace
+            for _cli_repo in zboxcli zwalletcli; do
+                local _cli_dir="${BASE_DIR}/${_cli_repo}"
+                local _bin_name="${_cli_repo/cli/}"
+                if [ ! -d "$_cli_dir" ]; then
+                    print_warning "${_cli_repo} not found at ${_cli_dir} — skipping"
+                    continue
+                fi
+                print_status "Rebuilding ${_cli_repo} with local gosdk..."
+                cd "$_cli_dir"
+                # Enable replace directive for local gosdk
+                if [ -f "go.mod" ]; then
+                    sed -i 's|^// *replace github.com/0chain/gosdk => \.\./gosdk|replace github.com/0chain/gosdk => ../gosdk|' go.mod
+                    sed -i 's|^//replace github.com/0chain/gosdk => \.\./gosdk|replace github.com/0chain/gosdk => ../gosdk|' go.mod
+                    if ! grep -q 'replace github.com/0chain/gosdk =>' go.mod; then
+                        echo 'replace github.com/0chain/gosdk => ../gosdk' >> go.mod
+                    fi
+                fi
+                go build -o "$_bin_name" . 2>&1 | tail -5 || print_warning "${_cli_repo} build failed"
+                cp "$_bin_name" "${BASE_DIR}/system_test/tests/cli_tests/${_bin_name}" 2>/dev/null || true
+                cp "$_bin_name" "${BASE_DIR}/system_test/tests/tokenomics_tests/${_bin_name}" 2>/dev/null || true
+                git checkout go.mod 2>/dev/null || true
+            done
             print_status "gosdk swap complete — zboxcli and zwalletcli rebuilt"
+
+            # Rebuild WASM and restart web-apps so browser uses the new gosdk
+            local gosdk_dir="${BASE_DIR}/gosdk"
+            local web_apps_dir="${BASE_DIR}/web-apps"
+            if [ -d "$gosdk_dir/wasmsdk" ] && [ -d "$web_apps_dir" ]; then
+                print_status "Rebuilding zcn.wasm from gosdk ${branch}..."
+                cd "$gosdk_dir"
+                # Patch wasmsdk/wallet.go (privateKey guard) if needed
+                if grep -q 'mnemonic == "" && !isSplit {' wasmsdk/wallet.go 2>/dev/null; then
+                    sed -i 's/if mnemonic == "" \&\& !isSplit {/if mnemonic == "" \&\& !isSplit \&\& privateKey == "" {/' wasmsdk/wallet.go
+                    print_status "Patched wasmsdk/wallet.go (privateKey guard)"
+                fi
+                # Build WASM: Docker first (matches CI), fall back to native
+                local wasm_ok=false
+                docker run --rm -v "$gosdk_dir":/gosdk -w /gosdk golang:1.22.5 sh -c \
+                    "git config --global --add safe.directory /gosdk; make wasm-build" 2>&1 && wasm_ok=true
+                if ! $wasm_ok; then
+                    print_status "Docker WASM build failed, trying native..."
+                    CGO_ENABLED=0 GOOS=js GOARCH=wasm go build -ldflags="-s -w" -buildvcs=false -o zcn.wasm ./wasmsdk 2>&1 && wasm_ok=true
+                fi
+                if $wasm_ok && [ -f "$gosdk_dir/zcn.wasm" ]; then
+                    print_status "zcn.wasm built ($(du -h "$gosdk_dir/zcn.wasm" | cut -f1))"
+                    # Copy to all web-app public dirs
+                    for app in blimp vult bolt shared chimney explorer; do
+                        local pub_dir="${web_apps_dir}/packages/${app}/public"
+                        if [ -d "$pub_dir" ]; then
+                            cp "$gosdk_dir/zcn.wasm" "$pub_dir/zcn.wasm"
+                        fi
+                    done
+                    # Copy to SDK src dirs
+                    for pkg_dir in "${web_apps_dir}/packages/nft-core-js/src/wasm" \
+                                   "${web_apps_dir}/packages/zus-sdk/src/wasm"; do
+                        [ -d "$(dirname "$pkg_dir")" ] && mkdir -p "$pkg_dir" && cp "$gosdk_dir/zcn.wasm" "$pkg_dir/"
+                    done
+                    print_status "zcn.wasm copied to all web-app packages"
+                    # Restart PM2 processes (no full yarn rebuild needed — WASM is a static asset)
+                    if command -v pm2 &>/dev/null; then
+                        for _app in vult bolt blimp explorer chimney; do
+                            pm2 restart "$_app" --update-env 2>/dev/null && \
+                                print_status "Restarted PM2: $_app" || true
+                        done
+                    fi
+                else
+                    print_warning "WASM build failed — web-apps not updated"
+                fi
+            else
+                print_status "gosdk/wasmsdk or web-apps not found — skipping WASM rebuild"
+            fi
+
             cd "$SCRIPT_DIR"
             return 0
             ;;
         0chain)
             cd "$repo_path"
+            # Force-restore Dockerfiles to committed version in case of local modifications
+            git checkout -- docker.local/build.miner/Dockerfile docker.local/build.sharder/Dockerfile 2>/dev/null || true
+            print_status "Miner Dockerfile vendor line: $(grep 'go mod vendor' docker.local/build.miner/Dockerfile)"
             # Ensure base images exist (needed after docker system prune)
             if ! docker image inspect zchain_build_base > /dev/null 2>&1; then
                 print_status "Building base images..."
@@ -11416,26 +11609,13 @@ swap_image() {
             docker.local/bin/build.sharders.sh || { print_error "Failed to build sharder image"; return 1; }
             ;;
         blobber)
-            # blobber depends on gosdk - checkout the right branch first
             checkout_gosdk_for_dependent "blobber" "$gosdk_branch_override"
             cd "$repo_path"
-            # If gosdk override specified, copy gosdk into build context and enable replace directive
-            if [ -n "$gosdk_branch_override" ] && [ -d "${BASE_DIR}/gosdk" ]; then
-                print_status "Injecting local gosdk (${gosdk_branch_override}) into blobber build context..."
-                rm -rf "${repo_path}/gosdk"
-                cp -r "${BASE_DIR}/gosdk" "${repo_path}/gosdk"
-                # Enable replace directive in go.mod
-                sed -i 's|// replace github.com/0chain/gosdk => ../gosdk|replace github.com/0chain/gosdk => ./gosdk|' "${repo_path}/go.mod"
-                # Enable COPY ./gosdk in Dockerfile
-                sed -i 's|# COPY ./gosdk  /gosdk|COPY ./gosdk  /gosdk|' "${repo_path}/docker.local/blobber.Dockerfile"
-                # Also fix replace path for Docker context (./gosdk not ../gosdk)
-                local validator_df="${repo_path}/docker.local/validatorDockerfile"
-                [ -f "$validator_df" ] && sed -i 's|# COPY ./gosdk  /gosdk|COPY ./gosdk  /gosdk|' "$validator_df"
-            fi
-            # Ensure go.sum is up to date (branch switches may leave it stale)
+            inject_local_gosdk "$repo_path" \
+                "${repo_path}/docker.local/blobber.Dockerfile" \
+                "${repo_path}/docker.local/validatorDockerfile"
             print_status "Running go mod tidy..."
             go mod tidy 2>&1 | tail -5 || true
-            # Ensure blobber_base exists (needed after docker system prune)
             if ! docker image inspect blobber_base > /dev/null 2>&1; then
                 print_status "Building blobber base image..."
                 docker.local/bin/build.base.sh 2>&1 || { print_error "Blobber base build failed"; return 1; }
@@ -11444,29 +11624,19 @@ swap_image() {
             docker.local/bin/build.blobber.sh 2>&1 || { print_error "Blobber build failed"; return 1; }
             print_status "Building validator image..."
             docker.local/bin/build.validator.sh 2>&1 || { print_error "Validator build failed"; return 1; }
-            # Clean up injected gosdk from build context
-            if [ -n "$gosdk_branch_override" ]; then
-                rm -rf "${repo_path}/gosdk"
-                git -C "$repo_path" checkout go.mod 2>/dev/null || true
-                git -C "$repo_path" checkout docker.local/blobber.Dockerfile 2>/dev/null || true
-                [ -f "$validator_df" ] && git -C "$repo_path" checkout "$validator_df" 2>/dev/null || true
-            fi
+            cleanup_injected_gosdk "$repo_path"
             ;;
         0box)
-            # Checkout correct gosdk branch for 0box
             checkout_gosdk_for_dependent "0box" "$gosdk_branch_override"
-            # Always fix 0box config: git pull restores dev.zus.network defaults and
-            # deployment_mode 0, which enforces Firebase auth. fix_0box_config() sets
-            # deployment_mode 3 (NoAuth) and fixes URLs for local chain.
             fix_0box_config
-            # Build image using the repo's own build scripts, then re-tag for docker-compose
+            cd "${repo_path}"
+            inject_local_gosdk "$repo_path" "${repo_path}/docker.local/Dockerfile"
             local LOCAL_IMAGE="0chaindev/0box:local-build"
             print_status "Building 0box image as ${LOCAL_IMAGE}..."
-            cd "${repo_path}"
             ./docker.local/bin/build.base.sh 2>&1 || { print_error "Failed to build zbox_base"; return 1; }
             ./docker.local/bin/build.zbox.sh 2>&1 || { print_error "0box docker build failed"; return 1; }
             docker tag zbox "${LOCAL_IMAGE}"
-            # Update docker-compose.yml to use the locally built image
+            cleanup_injected_gosdk "$repo_path"
             local box_compose="${repo_path}/docker.local/docker-compose.yml"
             if [ -f "$box_compose" ]; then
                 sed -i "s|image: 0chaindev/0box:.*|image: ${LOCAL_IMAGE}|g" "$box_compose"
@@ -11488,9 +11658,9 @@ swap_image() {
             docker compose build 2>/dev/null || true
             ;;
         zs3server)
-            # zs3server depends on gosdk - checkout the right branch first
             checkout_gosdk_for_dependent "zs3server" "$gosdk_branch_override"
             cd "$repo_path"
+            inject_local_gosdk "$repo_path" "${repo_path}/Dockerfile"
             # Detect required Go version from go.work or go.mod
             local zs3_required_go
             zs3_required_go=$(grep '^go ' "${repo_path}/go.work" 2>/dev/null | awk '{print $2}' | head -1)
@@ -11529,7 +11699,7 @@ swap_image() {
             local ZS3_IMAGE="0chaindev/blimp-minioserver:local-build"
             print_status "Building zs3server image as ${ZS3_IMAGE}..."
             DOCKER_BUILDKIT=0 docker build -t "${ZS3_IMAGE}" . 2>&1 || { print_error "zs3server docker build failed"; return 1; }
-            # Update docker-compose to use locally built image
+            cleanup_injected_gosdk "$repo_path"
             local zs3_compose="${repo_path}/environment/docker-compose.yaml"
             if [ -f "$zs3_compose" ]; then
                 sed -i "s|image: 0chaindev/blimp-minioserver:.*|image: ${ZS3_IMAGE}|g" "$zs3_compose"
@@ -11537,9 +11707,11 @@ swap_image() {
             fi
             ;;
         eblobber)
-            # eblobber depends on gosdk - checkout the right branch first
             checkout_gosdk_for_dependent "eblobber" "$gosdk_branch_override"
             cd "$repo_path"
+            inject_local_gosdk "$repo_path" \
+                "${repo_path}/docker.local/blobber.Dockerfile" \
+                "${repo_path}/docker.local/validator.Dockerfile"
             # Detect required Go version from go.mod; patch base.Dockerfile if it uses an older version
             local eblobber_required_go
             eblobber_required_go=$(grep '^go ' "${repo_path}/go.mod" 2>/dev/null | awk '{print $2}' | head -1)
@@ -11551,8 +11723,6 @@ swap_image() {
                 req_minor=$(echo "$eblobber_required_go" | cut -d. -f2)
                 cur_minor=$(echo "$base_go" | cut -d. -f2)
                 if [ -n "$req_minor" ] && [ -n "$cur_minor" ] && [ "$req_minor" -gt "$cur_minor" ] 2>/dev/null; then
-                    # Map go 1.X minor to canonical Alpine version (go publishes per-alpine images)
-                    # go 1.21 → alpine3.18, go 1.22 → alpine3.19, go 1.23+ → alpine3.20
                     local target_alpine
                     if [ "$req_minor" -le 21 ]; then target_alpine="alpine3.18"
                     elif [ "$req_minor" -eq 22 ]; then target_alpine="alpine3.19"
@@ -11560,17 +11730,13 @@ swap_image() {
                     fi
                     print_status "go.mod requires go ${eblobber_required_go} — updating base.Dockerfile to golang:${eblobber_required_go}-${target_alpine}..."
                     sed -i "s|FROM golang:[0-9][0-9.]*-alpine[0-9.]*|FROM golang:${eblobber_required_go}-${target_alpine}|" "$base_dockerfile"
-                    # Fix sqlite3 pread64/pwrite64 on musl (alpine3.19+):
-                    # _LARGEFILE64_SOURCE makes musl define pread64/pwrite64/off64_t as aliases
                     if ! grep -q 'CGO_CFLAGS' "$base_dockerfile"; then
                         sed -i '/^FROM golang:/a ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE=1"' "$base_dockerfile"
                     fi
                 fi
             fi
-            # Ensure go.sum is up to date (branch switches may leave it stale)
             print_status "Running go mod tidy..."
             go mod tidy 2>&1 | tail -5 || true
-            # Use separate base image tag (eblobber_base) to avoid overwriting regular blobber's blobber_base
             print_status "Building eblobber_base image..."
             DOCKER_IMAGE_BASE=eblobber_base docker.local/bin/build.base.sh 2>&1 || {
                 print_error "Failed to build eblobber_base image"
@@ -11581,6 +11747,7 @@ swap_image() {
                 print_error "Failed to build eblobber Docker image"
                 return 1
             }
+            cleanup_injected_gosdk "$repo_path"
             ;;
         web-apps)
             # Step A: Build zcn.wasm from gosdk
@@ -11761,25 +11928,38 @@ PYEOF
             fi
             ;;
         zboxcli|zwalletcli)
-            # CLI tools: rebuild binary, no Docker image
+            # CLI tools: native Go build — enable replace directive for local gosdk
             checkout_gosdk_for_dependent "$repo" "$gosdk_branch_override"
-            print_status "Building ${repo} binary..."
             cd "$repo_path"
-            go build -o "${BASE_DIR}/system_test/tests/cli_tests/$(basename $repo_path | sed 's/cli$//')" . 2>/dev/null || true
-            go build -o "${BASE_DIR}/system_test/tests/tokenomics_tests/$(basename $repo_path | sed 's/cli$//')" . 2>/dev/null || true
+            # Enable go.mod replace to use local gosdk (../gosdk for native builds)
+            if [ -f "go.mod" ]; then
+                sed -i 's|^// *replace github.com/0chain/gosdk => \.\./gosdk|replace github.com/0chain/gosdk => ../gosdk|' go.mod
+                sed -i 's|^//replace github.com/0chain/gosdk => \.\./gosdk|replace github.com/0chain/gosdk => ../gosdk|' go.mod
+                if ! grep -q 'replace github.com/0chain/gosdk =>' go.mod; then
+                    echo 'replace github.com/0chain/gosdk => ../gosdk' >> go.mod
+                fi
+            fi
+            local bin_name
+            bin_name=$(basename "$repo_path" | sed 's/cli$//')
+            print_status "Building ${repo} binary..."
+            go build -o "${BASE_DIR}/system_test/tests/cli_tests/${bin_name}" . 2>&1 | tail -5 || true
+            cp "${BASE_DIR}/system_test/tests/cli_tests/${bin_name}" "${BASE_DIR}/system_test/tests/tokenomics_tests/${bin_name}" 2>/dev/null || true
+            # Restore go.mod
+            git checkout go.mod 2>/dev/null || true
             print_status "Binary built and copied to test directories"
             cd "$SCRIPT_DIR"
             return 0
             ;;
         crawler)
-            # Checkout correct gosdk branch for crawler
             checkout_gosdk_for_dependent "crawler" "$gosdk_branch_override"
             cd "$repo_path"
+            inject_local_gosdk "$repo_path" "${repo_path}/docker.local/Dockerfile"
             print_status "Building crawler Docker image..."
             docker compose -f docker.local/docker-compose.yml build 2>&1 | tail -10 || {
                 print_error "Crawler Docker build failed"
                 return 1
             }
+            cleanup_injected_gosdk "$repo_path"
             ;;
         0dns)
             cd "$repo_path/docker.local"
@@ -11865,10 +12045,27 @@ PYEOF
             if grep -q 'redis:alpine' "$box_compose" 2>/dev/null; then
                 sed -i 's|"redis:alpine"|"redis:7.4.3-alpine"|g; s|image: redis:alpine|image: redis:7.4.3-alpine|g' "$box_compose"
             fi
-            docker stop 0box 2>/dev/null || true
-            docker rm -f 0box-redis 2>/dev/null || true
+            # Fix ES: 0box compose includes elasticsearch as a dependency, but ES runs
+            # standalone on testnet0. Remove depends_on/links for ES and point env var to IP.
+            local es_ip
+            es_ip=$(docker inspect elasticsearch --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 2>/dev/null || echo "198.18.14.5")
+            [ -z "$es_ip" ] && es_ip="198.18.14.5"
+            if [ -f "$box_compose" ]; then
+                sed -i "s|ELASTIC_HOST=elasticsearch|ELASTIC_HOST=${es_ip}|" "$box_compose"
+                # Remove elasticsearch from depends_on (multi-line block)
+                python3 -c "
+import re, sys
+with open('$box_compose') as f: t = f.read()
+# Remove elasticsearch dependency lines
+t = re.sub(r'\n\s+elasticsearch:\s*\n\s+condition:\s+service_healthy', '', t)
+# Remove elasticsearch link
+t = re.sub(r'\n\s+- elasticsearch:elasticsearch', '', t)
+with open('$box_compose','w') as f: f.write(t)
+" 2>/dev/null || true
+            fi
+            docker rm -f 0box 0box-redis postgres-0box 2>/dev/null || true
             cd "${repo_path}/docker.local"
-            docker compose -p 0box up -d --force-recreate 0box postgres redis 2>/dev/null || true
+            docker compose up -d --no-deps postgres redis 0box 2>/dev/null || true
             ;;
         zauth-server)
             docker stop zauth 2>/dev/null || true
@@ -12697,6 +12894,7 @@ usage() {
     echo "  verify-all       Comprehensive verification: chain, services, CORS, Vult, Atlus, blobbers"
     echo "                   Options: --tests [suites...] --fix --section <name>"
     echo "  ensure-config    Ensure all SC configs are correct (idempotent, safe to re-run)"
+    echo "  fix-split-dkg    Fix split-DKG: disable view_change + restart all miners simultaneously"
     echo "  kafka-config     Configure Kafka settings in sharder and 0box YAML configs"
     echo "  finalize-alloc   Fund blobbers + restart to trigger FinalizeWorker (cleans expired allocations)"
   echo "  cleanup-blobbers Kill stale/unreachable blobbers from previous deployments"
@@ -13461,6 +13659,7 @@ EOF
         fix_blobber_config
         fix_validator_config
         build_and_create_blobbers
+        ensure_blobber_hdd_tablespace
         # Wait for blobber wallets to appear in logs before funding
         print_status "Waiting 30s for blobber wallets to initialize..."
         sleep 30
@@ -13568,6 +13767,14 @@ EOF
         if [ -f /tmp/results_gen.pid ]; then
             kill "$(cat /tmp/results_gen.pid)" 2>/dev/null || true
             rm -f /tmp/results_gen.pid
+        fi
+
+        # Verify environment health before running tests
+        print_header "Environment Verification (pre-test)"
+        if [ -f "${SCRIPT_DIR}/verify_all.sh" ]; then
+            bash "${SCRIPT_DIR}/verify_all.sh" || print_warning "verify_all.sh reported issues — tests may fail; investigate before proceeding"
+        else
+            print_warning "verify_all.sh not found, skipping pre-test verification"
         fi
 
         # Run system tests using run_tests.sh
@@ -13703,7 +13910,7 @@ EOF
     web-apps)
         build_web_apps
         # Run web app verification after build
-        local _verify_script="${SCRIPT_DIR}/verify_all.sh"
+        _verify_script="${SCRIPT_DIR}/verify_all.sh"
         if [ -f "$_verify_script" ]; then
             print_header "Verifying Web Apps"
             bash "$_verify_script" --section webapps 2>&1 || true
@@ -13847,6 +14054,9 @@ EOF
             print_warning "No enterprise blobbers found on chain — skipping bl-update"
         fi
         ;;
+    fund-blobbers)
+        fund_blobbers_and_validators
+        ;;
     stake-blobbers)
         stake_and_configure_blobbers
         stake_enterprise_blobbers || true
@@ -13855,6 +14065,39 @@ EOF
         ensure_chain_config
         seed_0box_providers
         fix_snapshot_aggregates
+        ;;
+    fix-split-dkg)
+        # Fix split-DKG: miners restarted at different times load different DKG key states
+        # from disk, causing VRF share verification failures and the chain getting stuck.
+        # Root cause: view_change=true + individual miner restarts → diverged DKG secrets.
+        # Fix: disable view_change on-chain + restart ALL miners simultaneously so they
+        # re-sync their DKG state from the same finalized block.
+        print_header "Fixing Split-DKG (Chain Stuck)"
+        local WO="--wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE"
+        print_status "Step 1: Disabling view_change on-chain to prevent future split-DKG..."
+        $ZWALLET global-update-config --keys 'server_chain.view_change' --values 'false' $WO \
+            --silent 2>&1 | tail -3 || print_warning "view_change update failed (may already be false)"
+        print_status "Step 2: Restarting all miners simultaneously to re-sync DKG state..."
+        local miners_to_restart
+        mapfile -t miners_to_restart < <(docker ps --format '{{.Names}}' | grep '^miner-[0-9]' | sort)
+        if [ ${#miners_to_restart[@]} -eq 0 ]; then
+            print_error "No running miner containers found"
+        else
+            print_status "Restarting: ${miners_to_restart[*]}"
+            docker restart "${miners_to_restart[@]}" 2>&1
+            print_status "Waiting 30s for miners to sync..."
+            sleep 30
+            # Verify chain is moving
+            local round_before round_after
+            round_before=$(docker logs "${miners_to_restart[0]}" --tail 5 2>&1 | grep -oP '"current round": \K[0-9]+' | tail -1 || echo "?")
+            sleep 15
+            round_after=$(docker logs "${miners_to_restart[0]}" --tail 5 2>&1 | grep -oP '"current round": \K[0-9]+' | tail -1 || echo "?")
+            if [ "$round_before" != "$round_after" ] && [ "$round_after" != "?" ]; then
+                print_status "Chain is advancing: round $round_before → $round_after"
+            else
+                print_warning "Chain may still be stuck at round $round_after — check miner logs"
+            fi
+        fi
         ;;
     help|--help|-h)
         usage
