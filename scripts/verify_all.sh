@@ -975,6 +975,118 @@ print(msg + '.' + sig)
             log_warn "zvault: could not read jwt_secret from config (container not running?)"
         fi
 
+        # g4. Encrypted file share: upload encrypted, private-share to wallet2, download & verify hash
+        # Tests the initEncryption fix: auth ticket with explicit EncryptionPublicKey set correctly.
+        local enc_w2_name="encw2_$$"
+        # create-wallet saves without .json extension; try both paths
+        local enc_w2_file
+        local W2="--configDir $ZCN_CONFIG_DIR --wallet $enc_w2_name --config $ZCN_CONFIG_FILE"
+
+        # Create wallet2 using create-wallet (same pattern as second-wallet test)
+        $ZWALLET create-wallet $W --wallet "$enc_w2_name" 2>/dev/null || true
+        # Detect actual saved path (with or without .json extension)
+        if [ -f "${ZCN_CONFIG_DIR}/${enc_w2_name}.json" ]; then
+            enc_w2_file="${ZCN_CONFIG_DIR}/${enc_w2_name}.json"
+        else
+            enc_w2_file="${ZCN_CONFIG_DIR}/${enc_w2_name}"
+        fi
+        local w2_id w2_enc_pub
+        w2_id=$(python3 -c "import json; print(json.load(open('${enc_w2_file}'))['client_id'])" 2>/dev/null || echo "")
+
+        if [ -n "$w2_id" ]; then
+            # Get wallet2's encryption public key (needed for private share)
+            w2_enc_pub=$($ZBOX getwallet $W2 --json 2>/dev/null \
+                | python3 -c "import json,sys
+for line in sys.stdin:
+    line=line.strip()
+    if line.startswith('{') or line.startswith('['):
+        try:
+            d=json.loads(line)
+            if isinstance(d,list): d=d[0]
+            print(d.get('encryption_public_key',''))
+            break
+        except: pass
+" 2>/dev/null || echo "")
+            # Fallback: parse table output
+            [ -z "$w2_enc_pub" ] && \
+                w2_enc_pub=$($ZBOX getwallet $W2 2>/dev/null | grep -oP '[A-Za-z0-9+/=]{40,}$' | head -1)
+        fi
+
+        if [ -n "$w2_id" ] && [ -n "$w2_enc_pub" ]; then
+            # Upload encrypted test file (wallet1 owns it)
+            local enc_file="/tmp/verify_enc_$$.txt"
+            echo "Encrypted share verify $(date +%s)" > "$enc_file"
+            local enc_sha_up; enc_sha_up=$(sha256sum "$enc_file" | awk '{print $1}')
+            local enc_remote="/verify_enc_${ts_suffix}.txt"
+
+            local enc_up_out
+            enc_up_out=$($ZBOX upload --allocation "$alloc_id" \
+                --localpath "$enc_file" --remotepath "$enc_remote" --encrypt $W 2>&1)
+
+            if echo "$enc_up_out" | grep -qiE "success|uploaded|callback"; then
+                log_pass "Encrypted file upload (wallet1)"
+
+                # Create private share: wallet1 → wallet2 with wallet2's enc pub key
+                local auth_ticket
+                auth_ticket=$($ZBOX share --allocation "$alloc_id" \
+                    --remotepath "$enc_remote" \
+                    --clientid "$w2_id" \
+                    --encryptionpublickey "$w2_enc_pub" \
+                    $W 2>&1 | grep -oP 'Auth token :\K\S+' | head -1)
+
+                if [ -n "$auth_ticket" ]; then
+                    log_pass "Private share created (wallet1→wallet2, enc pub set)"
+
+                    # Get lookup hash for the file
+                    local enc_lookup_hash
+                    enc_lookup_hash=$($ZBOX list --allocation "$alloc_id" --remotepath / --json $W 2>/dev/null \
+                        | python3 -c "
+import json,sys
+for line in sys.stdin:
+    line=line.strip()
+    if line.startswith('['):
+        try:
+            for f in json.loads(line):
+                n=f.get('name',f.get('Name',''))
+                if 'verify_enc_${ts_suffix}' in n:
+                    print(f.get('lookup_hash',f.get('LookupHash',''))); break
+        except: pass
+" 2>/dev/null || echo "")
+
+                    # Download as wallet2 using the auth ticket
+                    local enc_dl_out enc_dl_file="/tmp/verify_enc_dl_$$.txt"
+                    rm -f "$enc_dl_file"
+                    enc_dl_out=$($ZBOX download \
+                        --localpath "$enc_dl_file" \
+                        --authticket "$auth_ticket" \
+                        ${enc_lookup_hash:+--lookuphash "$enc_lookup_hash"} \
+                        $W2 2>&1)
+
+                    if [ -f "$enc_dl_file" ] && [ -s "$enc_dl_file" ]; then
+                        local enc_sha_dl; enc_sha_dl=$(sha256sum "$enc_dl_file" | awk '{print $1}')
+                        if [ "$enc_sha_up" = "$enc_sha_dl" ]; then
+                            log_pass "Encrypted private share download (wallet2) + SHA256 hash verified"
+                        else
+                            log_fail "Encrypted share download: hash MISMATCH (upload=$enc_sha_up dl=$enc_sha_dl)"
+                        fi
+                    else
+                        local enc_err; enc_err=$(echo "$enc_dl_out" | grep -iE "error|fail|mismatch" | tail -1)
+                        log_fail "Encrypted share download FAILED: ${enc_err:-$(echo "$enc_dl_out" | tail -1)}"
+                    fi
+                    rm -f "$enc_dl_file"
+                else
+                    local share_err; share_err=$(echo "$auth_ticket" | grep -iE "error|empty_key|fail" | head -1)
+                    log_fail "Private share creation FAILED: ${share_err:-no auth ticket returned}"
+                fi
+            else
+                log_warn "Encrypted upload skipped/failed: $(echo "$enc_up_out" | grep -v 'sdk.go\|INFO' | tail -1)"
+            fi
+            rm -f "$enc_file"
+        else
+            log_warn "Encrypted share test: wallet2 creation failed (w2_id=$w2_id enc_pub=${w2_enc_pub:0:10}...)"
+        fi
+        rm -f "$enc_w2_file" 2>/dev/null || true
+
         # h. Upgrade allocation size (using tokens from faucet)
         local upd_out; upd_out=$($ZBOX updateallocation --allocation "$alloc_id" \
             --size 41943040 $W 2>&1)

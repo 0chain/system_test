@@ -459,7 +459,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		output, err := updateMinerSCConfig(t, minerScOwnerWallet, map[string]interface{}{
 			"keys":   keysStr,
 			"values": valuesStr,
-		}, false)
+		}, true)
 
 		require.Nil(t, err, strings.Join(output, "\n"))
 		// Chain accepts out-of-bounds values due to known bug #3168 — assert acceptance

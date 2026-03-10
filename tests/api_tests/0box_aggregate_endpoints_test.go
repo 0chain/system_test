@@ -23,7 +23,6 @@ import (
 
 //nolint:gocyclo
 func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
-	testSetup.Skip("Skipping: 0box graph endpoints not populated on test chain")
 	t := test.NewSystemTest(testSetup)
 
 	// Faucet the used wallets
@@ -1215,7 +1214,6 @@ func Test0boxGraphAndTotalEndpoints(testSetup *testing.T) {
 
 //nolint:gocyclo
 func Test0boxGraphBlobberEndpoints(testSetup *testing.T) {
-	testSetup.Skip("Skipping: 0box graph endpoints not populated on test chain")
 	t := test.NewSystemTest(testSetup)
 
 	walletMutex.Lock()

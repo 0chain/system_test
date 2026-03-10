@@ -831,18 +831,22 @@ clone_repos() {
         fi
     done
 
-    # Build CLI tools (zbox, zwallet) — ensure gosdk is on the configured branch first
+    # Build CLI tools (zbox, zwallet) — inject local gosdk (LFB-aware sharder selection)
     checkout_gosdk_for_dependent "zboxcli"
+    inject_local_gosdk "${BASE_DIR}/zboxcli"
     print_status "Building zboxcli..."
     cd "${BASE_DIR}/zboxcli" && make install 2>/dev/null || \
         (make build 2>/dev/null && cp zbox "${BASE_DIR}/zboxcli/") || \
         print_warning "zboxcli build failed"
+    cleanup_injected_gosdk "${BASE_DIR}/zboxcli"
 
     checkout_gosdk_for_dependent "zwalletcli"
+    inject_local_gosdk "${BASE_DIR}/zwalletcli"
     print_status "Building zwalletcli..."
     cd "${BASE_DIR}/zwalletcli" && make install 2>/dev/null || \
         (make build 2>/dev/null && cp zwallet "${BASE_DIR}/zwalletcli/") || \
         print_warning "zwalletcli build failed"
+    cleanup_injected_gosdk "${BASE_DIR}/zwalletcli"
 
     cd "$SCRIPT_DIR"
     print_status "Repository setup complete"

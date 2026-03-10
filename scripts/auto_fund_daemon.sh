@@ -1,6 +1,8 @@
 #!/bin/bash
-# Auto-funding daemon for 0Chain test network service providers
-# Monitors blobber/validator/miner/sharder/assigner balances and tops up when low
+# Auto-funding and staking daemon for 0Chain test network service providers
+# - Funds blobbers/validators/miners/sharders/assigner wallets when balance is low
+# - Fixes circular dependency: funds blobbers from containers BEFORE they register on chain
+# - Stakes blobbers and validators that are registered but have no stake yet
 # Uses nonce management for reliable transactions (like vc.sh)
 # Detects chain health and pauses when chain is down
 #
@@ -23,10 +25,17 @@ WALLET_FILE="${WALLET_FILE:-wallet.json}"
 LOG_FILE="/tmp/auto_fund_daemon.log"
 PID_FILE="/tmp/auto_fund_daemon.pid"
 
+# Blobber keys directory (contains b0bnode1_keys.txt through b0bnode15_keys.txt)
+BLOBBER_KEYS_DIR="${BLOBBER_KEYS_DIR:-/root/Code/blobber/docker.local/keys_config}"
+
 # 0box free storage assigner wallet (from 0box config)
 ASSIGNER_WALLET="65b32a635cffb6b6f3c73f09da617c29569a5f690662b5be57ed0d994f234335"
 ASSIGNER_MIN_BALANCE=50    # Assigner needs more tokens (funds user allocations)
 ASSIGNER_TOP_UP=100
+
+# Staking config
+BLOBBER_STAKE_TOKENS=10   # ZCN to stake per blobber
+VALIDATOR_STAKE_TOKENS=20 # ZCN to stake per validator
 
 # Sharder URLs for balance/round queries
 SHARDER_URLS=("http://localhost:7171" "http://localhost:7172")
@@ -303,6 +312,128 @@ fund_if_low() {
 }
 
 # ============================================================================
+# Bootstrap: fund blobbers from running containers
+# Solves circular dependency: blobbers need ZCN to register on chain,
+# but daemon only funds chain-registered blobbers.
+# This function funds ALL running blobber containers regardless of chain state.
+# ============================================================================
+fund_container_blobbers() {
+    if [ ! -d "$BLOBBER_KEYS_DIR" ]; then
+        return 0
+    fi
+    local funded_any=0
+    for i in $(seq 1 15); do
+        # Only process running containers
+        docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^blobber-${i}$" || continue
+
+        local key_file="${BLOBBER_KEYS_DIR}/b0bnode${i}_keys.txt"
+        [ -f "$key_file" ] || continue
+
+        local pub_key
+        pub_key=$(awk 'NR==1' "$key_file" 2>/dev/null | tr -d '[:space:]')
+        [ -z "$pub_key" ] && continue
+
+        local blobber_id
+        blobber_id=$(python3 -c "import hashlib; print(hashlib.sha3_256(bytes.fromhex('${pub_key}')).hexdigest())" 2>/dev/null) || continue
+        [ ${#blobber_id} -eq 64 ] || continue
+
+        if fund_if_low "$blobber_id" "blobber-${i}(container)" "$MIN_BALANCE" "$TOP_UP"; then
+            funded_any=$((funded_any + 1))
+        fi
+    done
+    return $funded_any
+}
+
+# ============================================================================
+# Staking: stake blobbers and validators that are registered but have no stake
+# ============================================================================
+stake_unstaked_providers() {
+    local W="--wallet ${WALLET_FILE} --configDir ${CONFIG_DIR} --config ${CONFIG_FILE} --silent"
+    local staked=0
+
+    # --- Stake unstaked blobbers ---
+    local blobber_json
+    blobber_json=$(curl -s --max-time 10 "${SHARDER_URLS[0]}/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/getblobbers?limit=50" 2>/dev/null) || true
+
+    if [ -n "$blobber_json" ]; then
+        local unstaked_blobbers
+        unstaked_blobbers=$(echo "$blobber_json" | python3 -c "
+import sys,json
+try:
+    data = json.load(sys.stdin)
+    nodes = data if isinstance(data, list) else data.get('Nodes', data.get('nodes', []))
+    for n in (nodes or []):
+        url = n.get('base_url', n.get('url', ''))
+        # Only stake local blobbers (skip fake/external)
+        if url and '.com/' not in url:
+            stake = n.get('total_stake', 0)
+            if stake == 0:
+                print(n['id'])
+except: pass
+" 2>/dev/null) || true
+
+        for bid in $unstaked_blobbers; do
+            log "  Staking unstaked blobber ${bid:0:16}... (${BLOBBER_STAKE_TOKENS} ZCN)"
+            ensure_funder_balance
+            advance_nonce
+            local stake_out
+            stake_out=$($ZBOX sp-lock --blobber_id "$bid" --tokens "$BLOBBER_STAKE_TOKENS" \
+                $W --withNonce "$CURRENT_NONCE" 2>&1) || true
+            if echo "$stake_out" | grep -qi "success\|locked\|already"; then
+                log "    Staked blobber ${bid:0:16}..."
+                staked=$((staked + 1))
+            else
+                log "    Stake failed for blobber ${bid:0:16}...: ${stake_out##*$'\n'}"
+            fi
+            sleep 1
+        done
+    fi
+
+    # --- Stake unstaked validators ---
+    local validator_json
+    validator_json=$(curl -s --max-time 10 "${SHARDER_URLS[0]}/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/validators?limit=50" 2>/dev/null) || true
+
+    if [ -n "$validator_json" ]; then
+        local unstaked_validators
+        unstaked_validators=$(echo "$validator_json" | python3 -c "
+import sys,json
+try:
+    data = json.load(sys.stdin)
+    nodes = data if isinstance(data, dict) else []
+    if isinstance(data, list):
+        nodes = data
+    elif isinstance(data, dict):
+        nodes = data.get('Nodes', data.get('nodes', []))
+    for n in (nodes or []):
+        stake = n.get('total_stake', n.get('stake_total', 0))
+        if stake == 0:
+            vid = n.get('validator_id', n.get('id', ''))
+            if vid:
+                print(vid)
+except: pass
+" 2>/dev/null) || true
+
+        for vid in $unstaked_validators; do
+            log "  Staking unstaked validator ${vid:0:16}... (${VALIDATOR_STAKE_TOKENS} ZCN)"
+            ensure_funder_balance
+            advance_nonce
+            local stake_out
+            stake_out=$($ZBOX sp-lock --validator_id "$vid" --tokens "$VALIDATOR_STAKE_TOKENS" \
+                $W --withNonce "$CURRENT_NONCE" 2>&1) || true
+            if echo "$stake_out" | grep -qi "success\|locked\|already"; then
+                log "    Staked validator ${vid:0:16}..."
+                staked=$((staked + 1))
+            else
+                log "    Stake failed for validator ${vid:0:16}...: ${stake_out##*$'\n'}"
+            fi
+            sleep 1
+        done
+    fi
+
+    [ $staked -gt 0 ] && log "  Staking cycle: staked $staked providers"
+}
+
+# ============================================================================
 # Main funding cycle
 # ============================================================================
 check_and_fund_cycle() {
@@ -337,6 +468,12 @@ check_and_fund_cycle() {
 
     local funded=0
     local checked=0
+
+    # --- 0. Bootstrap: fund blobber containers regardless of chain registration ---
+    # This fixes the circular dependency: new blobbers need ZCN before they can register,
+    # but the chain-registered blobber list only shows registered blobbers.
+    fund_container_blobbers
+    # Note: fund_container_blobbers returns the funded count but we track separately
 
     # --- 1. Fund 0box free storage assigner ---
     checked=$((checked + 1))
@@ -423,6 +560,9 @@ for n in data.get('Nodes',[]):
             funded=$((funded + 1))
         fi
     done
+
+    # --- 6. Stake any unstaked blobbers and validators ---
+    stake_unstaked_providers
 
     log "=== Cycle complete: checked ${checked} providers, funded ${funded} ==="
 }
