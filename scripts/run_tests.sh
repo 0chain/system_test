@@ -63,7 +63,7 @@ LONG_TESTS=false   # --long-tests: run ONLY long-running tests (excluded from st
 # Format: associative array keyed by suite name, values are '|'-separated regex patterns.
 declare -A LONG_TEST_PATTERNS=(
     [api]="Test0boxGraphAndTotalEndpoints|Test0boxGraphBlobberEndpoints|TestProtocolChallengeTimings|Test1ChimneyBlobberRewards|TestMultiOperation/Multi_upload_operations_of_(single|multiple)_format"
-    [cli]="TestBlobberStakedCapacity|TestMinerUpdateConfig"
+    [cli]="TestBlobberStakedCapacity"
     [tokenomics]="TestAddOrReplace|TestBlobberSlashPenalty|TestBlobberChallengeReward|TestBlobberRewardOnDownload"
 )
 
@@ -71,9 +71,10 @@ declare -A LONG_TEST_PATTERNS=(
 # in local/dev environments (Tenderly bridge, external cloud storage credentials,
 # Firebase auth) or are destructive (kill tests destroy providers on-chain).
 declare -A EXCLUDED_PATTERNS=(
-    [api]="Test0BoxNFT"
-    [cli]="TestKillBlobber|TestKillSharder|TestKillMiner|Test0Dropbox|Test0Gdrive|Test0S3Migration|TestLivestreamDownload|TestStreamUploadDownload|TestMaxFileSize"
+    [api]="Test0BoxNFT|TestFileReferencePath"
+    [cli]="TestKillBlobber|TestKillSharder|TestKillMiner|Test0Dropbox|Test0Gdrive|Test0S3Migration|TestLivestreamDownload|TestStreamUploadDownload|TestMaxFileSize|TestLFBSharderSync|TestRestrictedBlobbers|TestUpdateGlobalConfig|Move_file_concurrently|Copy_file_concurrently"
     [tokenomics]="TestBlobberReadReward"
+    [zs3]="TestWarpAnalysis"
 )
 
 # Colors
@@ -936,7 +937,7 @@ main() {
         if [ -x "$zwallet_bin" ]; then
             log_info "[cleanup] Resetting time_unit=720h after tokenomics run..."
             "$zwallet_bin" sc-update-config --keys time_unit --values 720h \
-                --configDir "$zcn_cfg" --config zbox_config.yaml --wallet sc_owner_wallet.json \
+                --configDir "$zcn_cfg" --config zbox_config.yaml --wallet wallets/sc_owner_wallet.json \
                 --silent 2>/dev/null || log_warn "[cleanup] time_unit reset failed (non-critical)"
         fi
     fi
