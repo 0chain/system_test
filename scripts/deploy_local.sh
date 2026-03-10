@@ -13735,6 +13735,21 @@ EOF
         swap_image "${EXTRA_ARGS[@]}"
         ;;
     test)
+        # If not already inside tmux, re-launch inside a tmux session so the run
+        # survives SSH disconnects. Pass _IN_TMUX=1 to avoid infinite re-launch.
+        if [ -z "${TMUX}" ] && [ -z "${_IN_TMUX}" ] && command -v tmux >/dev/null 2>&1; then
+            SESSION="tests"
+            LOG="/root/test_run_$(date +%Y%m%d_%H%M%S).log"
+            print_status "Re-launching inside tmux session '${SESSION}' (log: ${LOG})"
+            # Kill any existing 'tests' session so we start clean
+            tmux kill-session -t "$SESSION" 2>/dev/null || true
+            tmux new-session -d -s "$SESSION" \
+                "_IN_TMUX=1 bash $(realpath "$0") ${COMMAND} ${EXTRA_ARGS[*]} 2>&1 | tee ${LOG}"
+            echo "Attach with: tmux attach -t ${SESSION}"
+            echo "Follow log:  tail -f ${LOG}"
+            exit 0
+        fi
+
         # Kill any stale test processes before starting
         stale_pids=$(pgrep -f "go test.*tests/" 2>/dev/null || true)
         if [ -n "$stale_pids" ]; then
