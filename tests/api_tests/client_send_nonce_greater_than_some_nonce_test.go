@@ -107,15 +107,27 @@ func TestClientSendSameNonceForDifferentTransactions(testSetup *testing.T) {
 	}
 
 	require.GreaterOrEqual(t, len(apiClient.Miners), 1)
-	time.Sleep(time.Second * 10) // Wait for transaction to move to transaction pool?
-	// verify transactions are in txn pool
-	txnsMap := GetTransactionsFromTxnPool(t, apiClient.Miners)
-	txnsFromMap := GetTxnsMapFromGivenMapOfSlice(txnsMap)
 
-	for txn := range transactions {
-		_, ok := txnsFromMap[txn]
-		require.True(t, ok, "hash: ", txn, " does not exist in extracted transaction list")
+	// Retry pool check — transactions may take time to propagate to miners
+	var txnsFromMap map[string]struct{}
+	var allFound bool
+	for attempt := 0; attempt < 6; attempt++ {
+		time.Sleep(time.Second * 5)
+		txnsMap := GetTransactionsFromTxnPool(t, apiClient.Miners)
+		txnsFromMap = GetTxnsMapFromGivenMapOfSlice(txnsMap)
+		allFound = true
+		for txn := range transactions {
+			if _, ok := txnsFromMap[txn]; !ok {
+				allFound = false
+				break
+			}
+		}
+		if allFound {
+			break
+		}
+		t.Logf("Not all transactions in pool yet (attempt %d/6), retrying...", attempt+1)
 	}
+	require.True(t, allFound, "not all transactions found in txn pool after retries")
 
 	walletMutex.Lock()
 	wallet2 := initialisedWallets[walletIdx]
@@ -192,8 +204,8 @@ L1:
 	// All being rejected (chain evicted entire nonce bucket) is also valid.
 	require.GreaterOrEqual(t, len(putError), len(transactions)-1)
 
-	txnsMap = GetTransactionsFromTxnPool(t, nil)
-	txnsFromMap = GetTxnsMapFromGivenMapOfSlice(txnsMap)
+	txnsMap2 := GetTransactionsFromTxnPool(t, nil)
+	txnsFromMap = GetTxnsMapFromGivenMapOfSlice(txnsMap2)
 	for txn := range transactions {
 		_, ok := txnsFromMap[txn]
 		require.False(t, ok)

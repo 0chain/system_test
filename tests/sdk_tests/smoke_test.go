@@ -159,7 +159,18 @@ func TestSmokeServices(testSetup *testing.T) {
 		if parsedConfig.ZboxUrl == "" {
 			t.Skip("0box_url not configured")
 		}
-		resp, err := httpClient.Get(parsedConfig.ZboxUrl + "/v2/csrftoken")
+		var resp *http.Response
+		var err error
+		for i := 0; i < 6; i++ {
+			resp, err = httpClient.Get(parsedConfig.ZboxUrl + "/v2/csrftoken")
+			if err == nil && resp.StatusCode == http.StatusOK {
+				break
+			}
+			if i < 5 {
+				t.Logf("0box not ready yet (attempt %d/6), retrying in 5s...", i+1)
+				time.Sleep(5 * time.Second)
+			}
+		}
 		require.NoError(t, err, "0box should be reachable")
 		require.Equal(t, http.StatusOK, resp.StatusCode, "0box /v2/csrftoken should return 200")
 		t.Logf("0box OK - %s responding", parsedConfig.ZboxUrl)
@@ -169,7 +180,18 @@ func TestSmokeServices(testSetup *testing.T) {
 		if parsedConfig.ZauthUrl == "" {
 			t.Skip("zauth_url not configured")
 		}
-		resp, err := httpClient.Get(parsedConfig.ZauthUrl + "/setup")
+		var resp *http.Response
+		var err error
+		for i := 0; i < 6; i++ {
+			resp, err = httpClient.Get(parsedConfig.ZauthUrl + "/setup")
+			if err == nil && (resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusMethodNotAllowed) {
+				break
+			}
+			if i < 5 {
+				t.Logf("zauth not ready yet (attempt %d/6), retrying in 5s...", i+1)
+				time.Sleep(5 * time.Second)
+			}
+		}
 		require.NoError(t, err, "zauth should be reachable")
 		// zauth /setup is POST-only, so 405 means the service is alive
 		require.Contains(t, []int{http.StatusOK, http.StatusMethodNotAllowed}, resp.StatusCode,

@@ -210,22 +210,32 @@ func createWallet(t *test.SystemTest) *model.Wallet {
 }
 
 func isZboxResponding() bool {
-	resp, err := http.Get(parsedConfig.ZboxUrl) //nolint
-	if err != nil {
-		return false
+	for i := 0; i < 6; i++ {
+		resp, err := http.Get(parsedConfig.ZboxUrl) //nolint
+		if err == nil {
+			resp.Body.Close()
+			return true
+		}
+		if i < 5 {
+			time.Sleep(5 * time.Second)
+		}
 	}
-	resp.Body.Close()
-	return true
+	return false
 }
 
 func isServiceResponding(url string) bool {
 	if url == "" {
 		return false
 	}
-	resp, err := http.Get(url) //nolint
-	if err != nil {
-		return false
+	for i := 0; i < 6; i++ {
+		resp, err := http.Get(url) //nolint
+		if err == nil {
+			resp.Body.Close()
+			return true
+		}
+		if i < 5 {
+			time.Sleep(5 * time.Second)
+		}
 	}
-	resp.Body.Close()
-	return true
+	return false
 }

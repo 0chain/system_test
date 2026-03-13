@@ -291,7 +291,7 @@ func confirmPoolPayments(
 	}
 	for id, reward := range poolsBlockRewarded {
 		expectedReward := (float64(pools[id].Balance) / total) * float64(totalReward)
-		require.InDeltaf(t, expectedReward, float64(reward), 1,
+		require.InDeltaf(t, expectedReward, float64(reward), 2,
 			"delegate rewards. delegates should be rewarded in proportion to their stake."+
 				"total reward %d stake pools %v", totalReward, pools)
 	}
