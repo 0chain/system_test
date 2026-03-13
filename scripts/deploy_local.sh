@@ -1647,6 +1647,20 @@ ensure_chain_mocks() {
 start_chain() {
     print_header "Starting Chain Infrastructure"
 
+    # CRITICAL: Replace sync_clock.sh with no-op on VPS.
+    # sync_clock.sh runs `docker run --privileged alpine hwclock -s` which hangs
+    # indefinitely on Hetzner VPS (no real hardware clock). Blocks deploy 20+ min per call.
+    local sync_clock="${BASE_DIR}/0chain/docker.local/bin/sync_clock.sh"
+    if [ -f "$sync_clock" ] && grep -q 'hwclock' "$sync_clock" 2>/dev/null; then
+        printf '#!/bin/bash\necho "sync_clock skipped (VPS — no hardware clock)"\n' > "$sync_clock"
+        print_status "Replaced sync_clock.sh with no-op (VPS fix)"
+    fi
+
+    # Fix git safe.directory for all repos (prevents 'dubious ownership' errors in Docker builds)
+    for repo_dir in "${BASE_DIR}/0chain" "${BASE_DIR}/blobber" "${BASE_DIR}/0box" "${BASE_DIR}/zauth-server" "${BASE_DIR}/zvault" "${BASE_DIR}/gosdk" "${BASE_DIR}/eblobber"; do
+        [ -d "$repo_dir/.git" ] && git config --global --add safe.directory "$repo_dir" 2>/dev/null || true
+    done
+
     # Ensure generated mock stubs exist before building Docker images.
     # These are needed by go mod vendor -v (test imports) but not tracked in git.
     ensure_chain_mocks
@@ -1703,9 +1717,15 @@ start_chain() {
             print_status "Pulled and tagged miner:latest"
         fi
     else
-        if ! docker image inspect zchain_build_base > /dev/null 2>&1; then
-            print_status "Building base images..."
-            docker.local/bin/build.base.sh
+        if ! docker image inspect zchain_build_base > /dev/null 2>&1 || ! docker image inspect zchain_run_base > /dev/null 2>&1; then
+            print_status "Building base images (zchain_build_base + zchain_run_base)..."
+            local _base_ok=false
+            for _base_try in 1 2 3; do
+                if docker.local/bin/build.base.sh 2>&1; then _base_ok=true; break; fi
+                print_warning "Base image build failed (attempt $_base_try/3), retrying in 15s..."
+                sleep 15
+            done
+            $_base_ok || { print_error "Base image build failed after 3 attempts"; return 1; }
         fi
         if ! docker image inspect sharder > /dev/null 2>&1; then
             print_status "Building sharder image..."
@@ -3006,11 +3026,14 @@ start_zauth() {
     # Patch: allow faucet pour for split wallets
     patch_zauth_faucet
 
-    # Checkout correct gosdk branch for zauth-server and inject local gosdk
+    # Checkout correct gosdk branch for zauth-server.
+    # NOTE: Do NOT inject local gosdk into zauth — it's a key management server, not a chain
+    # client. The LFB-aware gosdk branch may be missing symbols (e.g. zcncore.AvailableRestrictions)
+    # that zauth's staging branch expects. Let zauth use its own gosdk dependency.
     checkout_gosdk_for_dependent "zauth-server"
-    inject_local_gosdk "${BASE_DIR}/zauth-server" "${BASE_DIR}/zauth-server/docker.local/Dockerfile"
+    # Tidy go.mod after gosdk version change so go.sum is correct for docker build
+    (cd "${BASE_DIR}/zauth-server" && go mod tidy 2>&1) || print_warning "zauth go mod tidy failed"
 
-    # cd AFTER inject_local_gosdk (it changes cwd to gosdk dir)
     cd "${BASE_DIR}/zauth-server/docker.local"
 
     # Build zauthserver image (always rebuild to pick up patches)
@@ -11457,6 +11480,11 @@ inject_local_gosdk() {
         if ! grep -q 'replace github.com/0chain/gosdk =>' "${target_repo}/go.mod"; then
             echo 'replace github.com/0chain/gosdk => ./gosdk' >> "${target_repo}/go.mod"
         fi
+        # Run go mod tidy on the HOST so go.mod/go.sum are correct BEFORE Docker copies them.
+        # This avoids the Dockerfile ordering problem where tidy needs full source but runs
+        # before COPY . . — by tidying on the host, the files are already reconciled.
+        print_status "Running go mod tidy on ${target_repo} (host-side)..."
+        (cd "${target_repo}" && go mod tidy 2>&1) || print_warning "go mod tidy failed for ${target_repo} (build may still work)"
     fi
 
     # Enable COPY ./gosdk in Dockerfiles with correct destination and placement.
@@ -11475,11 +11503,14 @@ inject_local_gosdk() {
             # Remove any existing COPY ./gosdk lines (commented or uncommented) — clean slate
             sed -i '/^#\{0,1\} *COPY \.\/gosdk/d' "$df"
 
-            # Add COPY ./gosdk to correct destination BEFORE go mod download
+            # Add COPY ./gosdk BEFORE go mod download so the replace directive resolves.
+            # go.mod/go.sum are already correct from host-side go mod tidy above.
+            # Clean up stale tidy lines from previous inject runs.
+            sed -i '/^RUN cd .* && go mod tidy$/d' "$df"
+            sed -i '/^RUN go mod tidy$/d' "$df"
             if grep -q 'go mod download' "$df"; then
                 sed -i "/RUN.*go mod download/i COPY ./gosdk ${src_dir}/gosdk" "$df"
             else
-                # No separate go mod download — add after COPY go.mod line
                 sed -i "/COPY.*go\.mod/a COPY ./gosdk ${src_dir}/gosdk" "$df"
             fi
         fi
@@ -13266,6 +13297,12 @@ main() {
 
     check_prerequisites "${1:-}"
 
+    # Fix git safe.directory for all repos (prevents 'dubious ownership' errors in Docker builds).
+    # Must run early — before any git or Docker build operations.
+    for _sd in 0chain blobber 0box zauth-server zvault gosdk eblobber zs3server crawler web-apps; do
+        [ -d "${BASE_DIR}/${_sd}/.git" ] && git config --global --add safe.directory "${BASE_DIR}/${_sd}" 2>/dev/null || true
+    done
+
     # Phase 0: Clear old logs and monitoring data for fresh start
     clear_all_logs
 
@@ -13321,8 +13358,9 @@ main() {
     setup_nginx || print_warning "Nginx setup had issues (non-critical, services accessible via Docker IPs)"
 
     # Phase 4: Funding daemon — install cron+watchdog (survives SSH disconnects)
-    # setup_fund_daemon installs auto_fund_daemon.sh + ensure_fund_daemon.sh to /usr/local/bin
-    # and sets up a cron job that restarts the daemon every 5 min if it dies.
+    # Kill ALL stale daemon instances first to prevent accumulation across deploys.
+    pkill -f 'auto_fund_daemon' 2>/dev/null && print_status "Killed stale auto_fund_daemon instances" || true
+    sleep 1
     setup_auto_funding || print_warning "Fund daemon setup failed (non-critical, run fund-daemon manually)"
     # Also start immediately (cron won't fire for up to 5 min)
     if [ -f /usr/local/bin/auto_fund_daemon.sh ]; then
@@ -13330,8 +13368,6 @@ main() {
         disown
         print_status "Auto-fund daemon started (PID: $!)"
     fi
-
-    setup_auto_funding
     setup_block_pruning
     # Phase 5: Monitoring — cAdvisor, pgAdmin
     start_cadvisor || print_warning "cAdvisor failed to start (non-critical)"

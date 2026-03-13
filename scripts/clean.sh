@@ -199,9 +199,29 @@ stop_all_containers() {
 
     print_status "All containers stopped and removed"
 
-    # Prune Docker: unused networks, volumes, dangling images, build cache
-    print_status "Pruning Docker (unused networks, volumes, images, build cache)..."
-    docker system prune --all --volumes -f 2>/dev/null || true
+    # Prune Docker: unused networks, dangling images, build cache.
+    # Use timeout to prevent hanging (seen on Hetzner VPS with large layer stores).
+    # PRESERVE base images (zchain_build_base, zchain_run_base, blobber_base, eblobber_base)
+    # — these take 20+ min to rebuild and are needed by chain/blobber builds.
+    # Tag them to prevent `docker system prune --all` from deleting them.
+    for base_img in zchain_build_base zchain_run_base blobber_base eblobber_base; do
+        if docker image inspect "$base_img" > /dev/null 2>&1; then
+            docker tag "$base_img" "${base_img}:preserve" 2>/dev/null || true
+        fi
+    done
+    print_status "Pruning Docker volumes..."
+    timeout 120 docker volume prune -f 2>/dev/null || print_warning "Volume prune timed out (non-critical)"
+    print_status "Pruning Docker images and build cache (preserving base images)..."
+    timeout 300 docker system prune -f 2>/dev/null || print_warning "System prune timed out (non-critical)"
+    # Remove dangling images but NOT all unused (--all would remove preserved base images)
+    timeout 120 docker image prune -f 2>/dev/null || true
+    # Truncate container logs >500MB (prevents disk-full on long-running deployments)
+    for f in /var/lib/docker/containers/*/*-json.log; do
+        local sz=$(stat -c%s "$f" 2>/dev/null || echo 0)
+        if [ "$sz" -gt 524288000 ]; then
+            truncate -s 0 "$f" 2>/dev/null
+        fi
+    done
     print_status "Docker prune complete"
 }
 
