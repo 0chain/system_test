@@ -4156,6 +4156,88 @@ fund_0box() {
     print_status "0box funding complete!"
 }
 
+# Register the "0box" user in the owner/wallet tables so that the Render (convert-to-pdf)
+# service works for encrypted/private files. The frontend shares encrypted files with the
+# "0box" user's pub_encryption_key. Without this user, Render for private files fails with
+# "User not found" because getPublicEncryptionKey({ userName: '0box' }) returns nothing.
+register_0box_render_user() {
+    print_header "Registering 0box Render User"
+
+    # Get 0box server identity from its status page
+    local server_client_id server_public_key
+    server_client_id=$(curl -s http://localhost:9081/ 2>/dev/null | grep -oP '(?<=id:)[^<]*' | head -1)
+    server_public_key=$(curl -s http://localhost:9081/ 2>/dev/null | grep -oP '(?<=public_key:)[^<]*' | head -1)
+
+    if [ -z "$server_client_id" ] || [ -z "$server_public_key" ]; then
+        print_warning "Could not get 0box server wallet info — skipping render user registration"
+        return
+    fi
+    print_status "0box server: ${server_client_id:0:16}..."
+
+    # Compute pub_encryption_key (ed25519 from sha3(publicKey+clientID))
+    mkdir -p /tmp/genkey
+    cat > /tmp/genkey/main.go << 'GENEOF'
+package main
+
+import (
+	"crypto/ed25519"
+	"encoding/base64"
+	"fmt"
+	"os"
+	"golang.org/x/crypto/sha3"
+)
+
+func main() {
+	data := os.Args[1] + os.Args[2]
+	hash := sha3.Sum256([]byte(data))
+	privKey := ed25519.NewKeyFromSeed(hash[:32])
+	pubKey := privKey.Public().(ed25519.PublicKey)
+	fmt.Println(base64.StdEncoding.EncodeToString(pubKey))
+}
+GENEOF
+    cd /tmp/genkey
+    go mod init genkey 2>/dev/null
+    go get golang.org/x/crypto/sha3 2>/dev/null
+    local pub_enc_key
+    pub_enc_key=$(go run main.go "$server_public_key" "$server_client_id" 2>/dev/null)
+    cd - >/dev/null
+
+    if [ -z "$pub_enc_key" ]; then
+        print_warning "Could not compute pub_encryption_key — skipping render user registration"
+        return
+    fi
+    print_status "Encryption key: ${pub_enc_key:0:20}..."
+
+    local PG="docker exec ${ZBOX_PG_CONTAINER:-postgres-0box} psql -U ${ZBOX_DB_USER:-zbox_user} -d ${ZBOX_DB_NAME:-zbox}"
+
+    # Create "0box" owner (idempotent — rename 0box-server if transcoder branch created it)
+    $PG -c "UPDATE owner SET username = '0box' WHERE username = '0box-server' AND user_id = '$server_client_id';" 2>/dev/null
+    $PG -c "INSERT INTO owner (username, user_id, app_types, created_at, updated_at) \
+            VALUES ('0box', '$server_client_id', '{vult,blimp,bolt}', NOW(), NOW()) \
+            ON CONFLICT DO NOTHING;" 2>/dev/null
+
+    local owner_id
+    owner_id=$($PG -t -c "SELECT id FROM owner WHERE username = '0box';" | tr -d ' ')
+    if [ -z "$owner_id" ]; then
+        print_warning "Failed to create 0box owner — render for private files may not work"
+        return
+    fi
+
+    # Create wallet with pub_encryption_key
+    $PG -c "INSERT INTO wallet (owner_id, client_id, public_key, public_encryption_key, updated_at) \
+            VALUES ($owner_id, '$server_client_id', '$server_public_key', '$pub_enc_key', NOW()) \
+            ON CONFLICT (client_id) DO UPDATE SET public_encryption_key = '$pub_enc_key', owner_id = $owner_id, updated_at = NOW();" 2>/dev/null
+
+    # Verify
+    local verify
+    verify=$($PG -t -c "SELECT o.username FROM owner o JOIN wallet w ON w.client_id = o.user_id WHERE o.username = '0box' AND w.public_encryption_key IS NOT NULL;" | tr -d ' ')
+    if [ "$verify" = "0box" ]; then
+        print_status "0box render user registered successfully (owner_id=$owner_id)"
+    else
+        print_warning "0box render user verification failed — check owner/wallet tables"
+    fi
+}
+
 # Configure 0box public key in blobber config.
 # Blobbers use 0box.public_key to verify Zbox-Signature headers on auth ticket requests.
 # Without this, blobber's Authenticate0Box middleware rejects all requests with "Invalid signature".
@@ -6704,7 +6786,7 @@ FBASE_MESSAGING_SENDER_ID=${FBASE_MESSAGING_SENDER_ID:-893964718514}
 FBASE_APP_ID=${FBASE_APP_ID:-1:893964718514:web:6d6f2ee9f96211e64954ab}
 FBASE_SHARE_LINK=${FBASE_SHARE_LINK:-https://zuspublicdev.page.link}
 NODE_ENV=development
-APP_ENV=development
+APP_ENV=local
 WEBHOOK_API_TOKEN=${WEBHOOK_API_TOKEN:?".secrets.env missing WEBHOOK_API_TOKEN"}
 ZENDESK_KEY=${ZENDESK_KEY:?".secrets.env missing ZENDESK_KEY"}
 ETH_TOKEN=0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
@@ -13223,6 +13305,7 @@ main() {
     # Kafka retains all events from block 0 so 0box will consume the full history.
     start_0box
     fund_0box
+    register_0box_render_user
 
     # Phase 3c: Verify events are flowing from chain → Kafka → 0box BEFORE setting up blobbers.
     # Wait 15s for 0box to start consuming Kafka events before checking.
@@ -13679,6 +13762,7 @@ EOF
         start_gotenberg
         start_0box
         fund_0box
+        register_0box_render_user
         ;;
     blobbers)
         reset_wallet_nonces
