@@ -711,8 +711,10 @@ generate_results_html() {
     # Kill any existing fix_results.py loop processes before starting a new one
     pkill -f "fix_results.py --loop" 2>/dev/null || true
     sleep 0.5
-    # Run fix_results.py in loop mode (regenerates every 5s)
-    python3 "${SCRIPT_DIR}/fix_results.py" --loop 2>/dev/null &
+    # Run fix_results.py in loop mode (regenerates every 5s).
+    # Redirect to /dev/null so it doesn't pollute the test log or cause
+    # double-tee buffering issues that make the log appear stale.
+    python3 "${SCRIPT_DIR}/fix_results.py" --loop > /dev/null 2>&1 &
 }
 
 stop_results_generator() {

@@ -76,6 +76,11 @@ server {
     listen 80;
     server_name DOMAIN_PLACEHOLDER;
 
+    # Allow large file uploads (resume download test uses 3GB files)
+    client_max_body_size 5g;
+    proxy_read_timeout 600s;
+    proxy_send_timeout 600s;
+
     # --- Miners ---
     location /miner01/ { proxy_pass http://localhost:7071/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; }
     location /miner02/ { proxy_pass http://localhost:7072/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; }
