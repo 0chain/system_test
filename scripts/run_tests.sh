@@ -145,7 +145,7 @@ parse_args() {
             SUITES=("sdk" "api" "cli")
         else
             # Full run: all suites
-            SUITES=("sdk" "zs3" "mc" "rclone" "api" "cli")
+            SUITES=("sdk" "mc" "rclone" "zs3" "api" "cli")
         fi
     fi
 }
@@ -309,10 +309,10 @@ pre_suite_setup() {
     local suite="$1"
     local deploy_sh="${SCRIPT_DIR}/deploy_local.sh"
     case "$suite" in
-        zs3|mc)
+        zs3|mc|rclone)
             # Ensure the ZS3 server has a valid (non-expired) allocation and is running.
             # Uses deploy_local.sh renew-zs3 command which checks expiry and restarts if needed.
-            # flock prevents concurrent calls (zs3 and mc share the same ZS3 server).
+            # flock prevents concurrent calls (zs3, mc, and rclone share the same ZS3 server).
             if [ -f "$deploy_sh" ]; then
                 log_info "[${suite}] Checking ZS3 server allocation..."
                 (
@@ -324,15 +324,15 @@ pre_suite_setup() {
             else
                 log_warn "[${suite}] deploy_local.sh not found — cannot auto-renew ZS3 allocation"
             fi
-            ;;
-        rclone)
-            # Ensure rclone-zus binary is available.
-            local cli_dir="${SYSTEM_TEST_DIR}/tests/cli_tests"
-            if [ ! -f "${cli_dir}/rclone-zus" ] && [ -f "$deploy_sh" ]; then
-                log_info "[rclone] Building rclone-zus binary..."
-                bash "$deploy_sh" rclone-zus 2>&1 | while IFS= read -r line; do
-                    log_info "[rclone-setup] $line"
-                done || log_warn "[rclone] rclone-zus build failed — tests will skip"
+            # For rclone suite: also ensure rclone-zus binary is available
+            if [ "$suite" = "rclone" ]; then
+                local cli_dir="${SYSTEM_TEST_DIR}/tests/cli_tests"
+                if [ ! -f "${cli_dir}/rclone-zus" ] && [ -f "$deploy_sh" ]; then
+                    log_info "[rclone] Building rclone-zus binary..."
+                    bash "$deploy_sh" rclone-zus 2>&1 | while IFS= read -r line; do
+                        log_info "[rclone-setup] $line"
+                    done || log_warn "[rclone] rclone-zus build failed — tests will skip"
+                fi
             fi
             ;;
     esac
@@ -355,7 +355,7 @@ run_suite() {
 
     # Run pre-suite setup on first attempt; for zs3/mc also on retries (fresh allocation needed
     # so retry tests don't fail due to stale allocation root from previous passing tests).
-    if [ "$attempt" -eq 1 ] || [[ "$suite" =~ ^(zs3|mc)$ ]]; then
+    if [ "$attempt" -eq 1 ] || [[ "$suite" =~ ^(zs3|mc|rclone)$ ]]; then
         pre_suite_setup "$suite"
     fi
 
