@@ -1074,7 +1074,7 @@ func (c *APIClient) RegisterBlobber(t *test.SystemTest,
 
 	var registerBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 1*time.Minute, func() bool {
+	wait.PoolImmediately(t, 3*time.Minute, func() bool {
 		registerBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{

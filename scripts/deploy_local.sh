@@ -1910,6 +1910,51 @@ build_and_deploy_enterprise_blobbers() {
             "${EBLOBBER_DIR}/docker.local/validator.Dockerfile"
         cd "$EBLOBBER_DIR"
 
+        # Detect required Go version from go.mod AND injected gosdk's go.mod; patch base.Dockerfile
+        # if it uses an older version. The eblobber's own go.mod may say go 1.21, but the injected
+        # gosdk (feat/enterprise-blobber) requires go 1.22.5. Go 1.21 inside Docker refuses to
+        # process modules requiring go 1.22+, so we must bump the base image.
+        local eblobber_required_go gosdk_required_go
+        eblobber_required_go=$(grep '^go ' "${EBLOBBER_DIR}/go.mod" 2>/dev/null | awk '{print $2}' | head -1)
+        gosdk_required_go=$(grep '^go ' "${EBLOBBER_DIR}/gosdk/go.mod" 2>/dev/null | awk '{print $2}' | head -1)
+        # Use whichever requires the higher Go version
+        if [ -n "$gosdk_required_go" ]; then
+            local _eb_minor _gs_minor
+            _eb_minor=$(echo "${eblobber_required_go:-0}" | cut -d. -f2)
+            _gs_minor=$(echo "$gosdk_required_go" | cut -d. -f2)
+            if [ "$_gs_minor" -gt "${_eb_minor:-0}" ] 2>/dev/null; then
+                eblobber_required_go="$gosdk_required_go"
+            elif [ "$_gs_minor" -eq "${_eb_minor:-0}" ] 2>/dev/null; then
+                # Same minor — compare patch version
+                local _eb_patch _gs_patch
+                _eb_patch=$(echo "${eblobber_required_go:-0}" | cut -d. -f3)
+                _gs_patch=$(echo "$gosdk_required_go" | cut -d. -f3)
+                if [ "${_gs_patch:-0}" -gt "${_eb_patch:-0}" ] 2>/dev/null; then
+                    eblobber_required_go="$gosdk_required_go"
+                fi
+            fi
+        fi
+        local base_dockerfile="${EBLOBBER_DIR}/docker.local/base.Dockerfile"
+        if [ -n "$eblobber_required_go" ] && [ -f "$base_dockerfile" ]; then
+            local base_go
+            base_go=$(grep -oP '(?<=FROM golang:)[0-9]+\.[0-9]+' "$base_dockerfile" | head -1)
+            local req_minor cur_minor
+            req_minor=$(echo "$eblobber_required_go" | cut -d. -f2)
+            cur_minor=$(echo "$base_go" | cut -d. -f2)
+            if [ -n "$req_minor" ] && [ -n "$cur_minor" ] && [ "$req_minor" -gt "$cur_minor" ] 2>/dev/null; then
+                local target_alpine
+                if [ "$req_minor" -le 21 ]; then target_alpine="alpine3.18"
+                elif [ "$req_minor" -eq 22 ]; then target_alpine="alpine3.19"
+                else target_alpine="alpine3.20"
+                fi
+                print_status "go.mod requires go ${eblobber_required_go} — updating base.Dockerfile to golang:${eblobber_required_go}-${target_alpine}..."
+                sed -i "s|FROM golang:[0-9][0-9.]*-alpine[0-9.]*|FROM golang:${eblobber_required_go}-${target_alpine}|" "$base_dockerfile"
+                if ! grep -q 'CGO_CFLAGS' "$base_dockerfile"; then
+                    sed -i '/^FROM golang:/a ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE=1"' "$base_dockerfile"
+                fi
+            fi
+        fi
+
         # Build eblobber_base with herumi MCL/BLS crypto libraries
         # Uses separate tag (eblobber_base) to avoid overwriting regular blobber's blobber_base
         print_status "Building eblobber_base image..."
@@ -2824,11 +2869,123 @@ build_and_create_blobbers() {
     cleanup_injected_gosdk "${BASE_DIR}/blobber"
     cd "${BASE_DIR}/blobber/docker.local"
 
+    # Generate specific compose files for blobbers 10-12 if they don't exist.
+    # The generic b0docker-compose.yml uses ${BLOBBER} in IPs (198.18.0.9${BLOBBER})
+    # and ports (3150${BLOBBER}), which produces invalid values for double-digit N
+    # (e.g. 198.18.0.910 or port 315010). These need hardcoded IPs and ports.
+    # IP scheme: blobber=198.18.0.{100+N}, validator=198.18.0.{110+N}
+    # Ports: blobber=506{N-10} (host 506{N-10}{N}), validator=507{N-10} (host 507{N-10}{N})
+    local _bd="${NGINX_DOMAIN:-test.zus.network}"
+    for _n in 10 11 12; do
+        local _cf="b0docker-compose-${_n}.yml"
+        [ -f "$_cf" ] && continue
+        local _off=$((_n - 10))
+        local _blobber_ip="198.18.0.$((100 + _n))"
+        local _validator_ip="198.18.0.$((110 + _n))"
+        local _blobber_port=$((5060 + _off))
+        local _validator_port=$((5070 + _off))
+        local _grpc_port=$((31510 + _off))
+        local _blobber_host_port=$((50600 + _n))
+        local _validator_host_port=$((50700 + _n))
+        local _grpc_host_port=$((31500 + _n))
+        # blobber-10 gets host port 50610 (not 5060 which may conflict)
+        print_status "Generating ${_cf} (blobber IP ${_blobber_ip}, validator IP ${_validator_ip})..."
+        cat > "$_cf" <<COMPOSEEOF
+version: "3"
+services:
+  postgres:
+    container_name: postgres-blob-${_n}
+    image: postgres:14
+    environment:
+      POSTGRES_DB: blobber_meta
+      POSTGRES_PORT: 5432
+      POSTGRES_HOST: postgres-blob-${_n}
+      POSTGRES_USER: blobber_user
+      POSTGRES_PASSWORD: blobber
+      POSTGRES_HOST_AUTH_METHOD: trust
+      SLOW_TABLESPACE_PATH: /var/lib/postgresql/hdd
+      SLOW_TABLESPACE: hdd_tablespace
+    volumes:
+      - ../config/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./blobber${_n}/data/postgresql:/var/lib/postgresql/data
+      - ./sql_init:/docker-entrypoint-initdb.d
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    restart: unless-stopped
+    networks:
+      default:
+
+  validator:
+    container_name: validator-${_n}
+    image: validator
+    environment:
+      - DOCKER=true
+      - AWS_ACCESS_KEY_ID=key_id
+      - AWS_SECRET_ACCESS_KEY=secret_key
+      - VALIDATOR_SECRET_NAME=validator_secret_name
+      - AWS_REGION=aws_region
+    depends_on:
+      - postgres
+    volumes:
+      - \${CONFIG_PATH:-../config}:/validator/config
+      - ./blobber${_n}/data:/validator/data
+      - ./blobber${_n}/log:/validator/log
+      - ./keys_config:/validator/keysconfig
+    ports:
+      - "${_validator_host_port}:${_validator_port}"
+    command: ./bin/validator --port ${_validator_port} --hostname ${_validator_ip} --deployment_mode 0 --keys_file keysconfig/b0vnode${_n}_keys.txt --log_dir /validator/log
+    restart: unless-stopped
+    networks:
+      default:
+      testnet0:
+        ipv4_address: ${_validator_ip}
+
+  blobber:
+    container_name: blobber-${_n}
+    image: blobber
+    environment:
+      - DOCKER=true
+      - DB_HOST=postgres-blob-${_n}
+      - DB_NAME=blobber_meta
+      - DB_USER=blobber_user
+      - DB_PASSWORD=blobber
+      - DB_PORT=5432
+      - AWS_ACCESS_KEY_ID=key_id
+      - AWS_SECRET_ACCESS_KEY=secret_key
+      - BLOBBER_SECRET_NAME=blobber_secret_name
+      - AWS_REGION=aws_region
+    depends_on:
+      - validator
+      - postgres
+    links:
+      - validator:validator
+      - postgres:postgres
+    volumes:
+      - \${CONFIG_PATH:-../config}:/blobber/config
+      - ./blobber${_n}/files:/blobber/files
+      - ./blobber${_n}/data:/blobber/data
+      - ./blobber${_n}/log:/blobber/log
+      - ./keys_config:/blobber/keysconfig
+      - ./blobber${_n}/data/tmp:/tmp
+    ports:
+      - "${_blobber_host_port}:${_blobber_port}"
+      - "${_grpc_host_port}:${_grpc_port}"
+    command: ./bin/blobber --port ${_blobber_port} --grpc_port ${_grpc_port} --hosturl https://${_bd}/blobber${_n}/ --hostname ${_blobber_ip} --deployment_mode 0 --keys_file keysconfig/b0bnode${_n}_keys.txt --files_dir /blobber/files --log_dir /blobber/log --db_dir /blobber/data
+    restart: unless-stopped
+    networks:
+      default:
+      testnet0:
+        ipv4_address: ${_blobber_ip}
+
+networks:
+  default:
+    driver: bridge
+  testnet0:
+    external: true
+COMPOSEEOF
+    done
+
     # Create containers for blobbers 1-6
     # --force-recreate ensures fresh containers with no stale state from previous deploys.
-    # NOTE: Blobbers 1-2 MUST use b0docker-compose-N.yml (specific files) because
-    # the generic b0docker-compose.yml assigns validator port = 5060+N, which
-    # conflicts with blobber ports for N=11,12 (blobber-11 port 5061 = validator-1 port 5061).
     for i in 1 2 3 4 5 6; do
         if [ -f "b0docker-compose-${i}.yml" ]; then
             print_status "Creating blobber-$i and validator-$i (specific compose)..."
@@ -2841,7 +2998,7 @@ build_and_create_blobbers() {
 
     # Create containers for blobbers 7-12
     # Blobbers 7-9 can use generic compose (single-digit N gives valid IPs 198.18.0.9N/6N)
-    # Blobbers 10-12 MUST use specific compose files (double-digit N gives invalid IPs)
+    # Blobbers 10-12 use generated specific compose files (double-digit N gives invalid IPs with generic)
     for i in 7 8 9 10 11 12; do
         if [ -f "b0docker-compose-${i}.yml" ]; then
             print_status "Creating blobber-$i and validator-$i (specific compose)..."
@@ -11856,9 +12013,26 @@ swap_image() {
             inject_local_gosdk "$repo_path" \
                 "${repo_path}/docker.local/blobber.Dockerfile" \
                 "${repo_path}/docker.local/validator.Dockerfile"
-            # Detect required Go version from go.mod; patch base.Dockerfile if it uses an older version
-            local eblobber_required_go
+            # Detect required Go version from go.mod AND injected gosdk's go.mod; patch base.Dockerfile
+            local eblobber_required_go gosdk_required_go
             eblobber_required_go=$(grep '^go ' "${repo_path}/go.mod" 2>/dev/null | awk '{print $2}' | head -1)
+            gosdk_required_go=$(grep '^go ' "${repo_path}/gosdk/go.mod" 2>/dev/null | awk '{print $2}' | head -1)
+            # Use whichever requires the higher Go version
+            if [ -n "$gosdk_required_go" ]; then
+                local _eb_minor _gs_minor
+                _eb_minor=$(echo "${eblobber_required_go:-0}" | cut -d. -f2)
+                _gs_minor=$(echo "$gosdk_required_go" | cut -d. -f2)
+                if [ "$_gs_minor" -gt "${_eb_minor:-0}" ] 2>/dev/null; then
+                    eblobber_required_go="$gosdk_required_go"
+                elif [ "$_gs_minor" -eq "${_eb_minor:-0}" ] 2>/dev/null; then
+                    local _eb_patch _gs_patch
+                    _eb_patch=$(echo "${eblobber_required_go:-0}" | cut -d. -f3)
+                    _gs_patch=$(echo "$gosdk_required_go" | cut -d. -f3)
+                    if [ "${_gs_patch:-0}" -gt "${_eb_patch:-0}" ] 2>/dev/null; then
+                        eblobber_required_go="$gosdk_required_go"
+                    fi
+                fi
+            fi
             local base_dockerfile="${repo_path}/docker.local/base.Dockerfile"
             if [ -n "$eblobber_required_go" ] && [ -f "$base_dockerfile" ]; then
                 local base_go

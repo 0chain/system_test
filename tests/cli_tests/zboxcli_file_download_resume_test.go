@@ -98,17 +98,20 @@ func TestResumeDownload(testSetup *testing.T) {
 
 		outputStatus := strings.Fields(output[0])
 		t.Log("Output status:", outputStatus)
-		// Parse the first numeric field as the downloaded bytes count.
-		// Progress format: "DOWNLOADED / TOTAL [bar] PERCENT TIME"
-		// Fields split may include "/" as separate element, so find the first parseable int.
+		// Parse downloaded bytes from progress output.
+		// Progress output is multiple lines concatenated: "0 / TOTAL ... N / TOTAL ... FINAL / TOTAL"
+		// The last "N / TOTAL" pair before completion shows actual bytes downloaded.
+		// Find the last numeric value that appears before a "/" separator and is > 0.
 		var actualDownloadedBytes int64
-		for _, field := range outputStatus {
-			if v, parseErr := strconv.ParseInt(field, 10, 64); parseErr == nil {
-				actualDownloadedBytes = v
-				break
+		for i, field := range outputStatus {
+			if v, parseErr := strconv.ParseInt(field, 10, 64); parseErr == nil && v > 0 {
+				// Check if next field is "/" (this is a "downloaded / total" pair)
+				if i+1 < len(outputStatus) && outputStatus[i+1] == "/" {
+					actualDownloadedBytes = v
+				}
 			}
 		}
-		require.NotZero(t, actualDownloadedBytes, "Could not parse downloaded bytes from output")
+		require.NotZero(t, actualDownloadedBytes, "Could not parse downloaded bytes from output: %v", outputStatus)
 
 		t.Log("Bytes downloaded after resuming:", actualDownloadedBytes)
 		require.InEpsilon(t, filesize-partialDownloadedBytes, actualDownloadedBytes, 0.005,
