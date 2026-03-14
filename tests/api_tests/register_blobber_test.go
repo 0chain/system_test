@@ -17,10 +17,9 @@ import (
 
 func TestRegisterBlobber(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
 
 	// write a test case to register a blobber with storage version
-	t.RunWithTimeout("Register blobber with storage version", 20*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Register blobber with storage version", 20*time.Minute, func(t *test.SystemTest) {
 		// Use a fresh wallet (not from the pre-initialized pool) because the SC uses the
 		// wallet's client ID as the blobber ID. Re-using pool wallets across runs causes
 		// "blobber already exists" since the previous run's blobber persists on-chain.
@@ -60,7 +59,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		killBlobber(t, wallet.Id)
 	})
 
-	t.RunWithTimeout("Write price lower than min_write_price should not allow register", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Write price lower than min_write_price should not allow register", 10*time.Minute, func(t *test.SystemTest) {
 		// When min_write_price=0 on the chain, no write price can be "lower than min",
 		// so this test verifies the registration succeeds with a very low write price.
 		// When min_write_price>0, it verifies the SC rejects prices below the minimum.
@@ -94,7 +93,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		killBlobber(t, wallet.Id)
 	})
 
-	t.RunWithTimeout("Write price higher than max_write_price should not allow register", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Write price higher than max_write_price should not allow register", 10*time.Minute, func(t *test.SystemTest) {
 		// Use fresh random wallets (not pool wallets) to avoid "blobber already exists" on
 		// re-runs: the SC uses the wallet's client_id as the blobber ID, so reusing a pool
 		// wallet that previously registered (even in a timed-out tx) causes cross-run failures.
@@ -121,7 +120,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: invalid blobber params: write_price is greater than max_write_price allowed", false)
 	})
 
-	t.RunWithTimeout("Read price higher than max_read_price should not allow register", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Read price higher than max_read_price should not allow register", 10*time.Minute, func(t *test.SystemTest) {
 		mnemonic := crypto.GenerateMnemonics(t)
 		wallet := apiClient.CreateWalletForMnemonic(t, mnemonic)
 		apiClient.FundWallet(t, wallet, 5.0, client.TxSuccessfulStatus)
@@ -145,7 +144,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: invalid blobber params: read_price is greater than max_read_price allowed", false)
 	})
 
-	t.RunWithTimeout("Service charge higher than max_service_charge should not allow register", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Service charge higher than max_service_charge should not allow register", 10*time.Minute, func(t *test.SystemTest) {
 		mnemonic := crypto.GenerateMnemonics(t)
 		wallet := apiClient.CreateWalletForMnemonic(t, mnemonic)
 		apiClient.FundWallet(t, wallet, 5.0, client.TxSuccessfulStatus)
@@ -171,7 +170,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		apiClient.RegisterBlobber(t, wallet, sn, 2, "add_or_update_blobber_failed: creating stake pool: invalid stake_pool settings: service_charge (0.650000) is greater than max allowed by SC (0.500000)", false)
 	})
 
-	t.RunWithTimeout("Capacity lower than min_blobber_capacity should not allow register", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Capacity lower than min_blobber_capacity should not allow register", 10*time.Minute, func(t *test.SystemTest) {
 		mnemonic := crypto.GenerateMnemonics(t)
 		wallet := apiClient.CreateWalletForMnemonic(t, mnemonic)
 		apiClient.FundWallet(t, wallet, 5.0, client.TxSuccessfulStatus)
