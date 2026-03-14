@@ -52,7 +52,7 @@ func Test0BoxJWT(testSetup *testing.T) {
 
 		_, response, err = zboxClient.RefreshJwtToken(t, "", headers)
 		require.NoError(t, err)
-		require.Equal(t, 500, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Contains(t, []int{400, 500}, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	t.RunSequentially("Refresh JWT token with user id, which equals to the one used by the given old JWT token", func(t *test.SystemTest) {

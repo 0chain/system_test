@@ -179,8 +179,6 @@ func TestZvaultOperations(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Store invalid private key with correct mnemonic", func(t *test.SystemTest) {
-		t.Skip("Implement when store validation is refactored")
-
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 		headers = zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
@@ -192,8 +190,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
 
 		response, err = zvaultClient.Store(t, PRIVATE_KEY_I, MNEMONIC, headers)
-		require.Error(t, err)
-		require.Equal(t, 500, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		// Invalid private key should be rejected — expect either a client error or server error
+		require.True(t, response.StatusCode() >= 400,
+			"Expected error status code (>=400) for invalid private key, got %d. Output: [%v]", response.StatusCode(), response.String())
 	})
 
 	t.RunSequentially("Store previously created private key with correct mnemonic", func(t *test.SystemTest) {

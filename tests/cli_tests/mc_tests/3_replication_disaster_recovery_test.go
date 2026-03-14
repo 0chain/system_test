@@ -13,31 +13,50 @@ import (
 )
 
 func TestZs3ServerReplication(testSetup *testing.T) {
-	// Check if mc binary is available, skip if not
-	if _, err := os.Stat("../mc"); os.IsNotExist(err) {
-		testSetup.Skip("mc binary not available at ../mc, skipping test")
+	// Require mc binary
+	_, err := os.Stat("../mc")
+	if os.IsNotExist(err) {
+		testSetup.Fatalf("mc binary not available at ../mc")
 	}
 
-	// Check if mc_hosts.yaml config exists, skip if not available
-	if _, err := os.Stat("mc_hosts.yaml"); os.IsNotExist(err) {
-		testSetup.Skip("mc_hosts.yaml config not found, MC replication tests not configured, skipping test")
+	// Require mc_hosts.yaml config
+	_, err = os.Stat("mc_hosts.yaml")
+	if os.IsNotExist(err) {
+		testSetup.Fatalf("mc_hosts.yaml config not found")
 	}
 
 	config := cli_utils.ReadFileMC(testSetup)
 
-	// Check if primary ZS3 server is reachable, skip if not available
-	conn, err := net.DialTimeout("tcp", config.Server+":"+config.HostPort, 5*time.Second)
+	// Wait for primary ZS3 server to become reachable (up to 60s)
+	var conn net.Conn
+	for i := 0; i < 12; i++ {
+		conn, err = net.DialTimeout("tcp", config.Server+":"+config.HostPort, 5*time.Second)
+		if err == nil {
+			conn.Close()
+			break
+		}
+		testSetup.Logf("Primary ZS3 server not available at %s:%s (attempt %d/12), retrying in 5s...", config.Server, config.HostPort, i+1)
+		time.Sleep(5 * time.Second)
+	}
 	if err != nil {
-		testSetup.Skipf("Primary ZS3 server not available at %s:%s, skipping test: %v", config.Server, config.HostPort, err)
+		testSetup.Fatalf("Primary ZS3 server not available at %s:%s after 60s: %v", config.Server, config.HostPort, err)
 	}
-	conn.Close()
 
-	// Check if secondary ZS3 server is reachable, skip if not available
-	conn2, err2 := net.DialTimeout("tcp", config.SecondaryServer+":"+config.SecondaryPort, 5*time.Second)
-	if err2 != nil {
-		testSetup.Skipf("Secondary ZS3 server not available at %s:%s, skipping test: %v", config.SecondaryServer, config.SecondaryPort, err2)
+	// Wait for secondary ZS3 server to become reachable (up to 60s)
+	var conn2 net.Conn
+	var err2 error
+	for i := 0; i < 12; i++ {
+		conn2, err2 = net.DialTimeout("tcp", config.SecondaryServer+":"+config.SecondaryPort, 5*time.Second)
+		if err2 == nil {
+			conn2.Close()
+			break
+		}
+		testSetup.Logf("Secondary ZS3 server not available at %s:%s (attempt %d/12), retrying in 5s...", config.SecondaryServer, config.SecondaryPort, i+1)
+		time.Sleep(5 * time.Second)
 	}
-	conn2.Close()
+	if err2 != nil {
+		testSetup.Fatalf("Secondary ZS3 server not available at %s:%s after 60s: %v", config.SecondaryServer, config.SecondaryPort, err2)
+	}
 
 	t := test.NewSystemTest(testSetup)
 

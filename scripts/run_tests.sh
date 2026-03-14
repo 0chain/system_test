@@ -237,14 +237,15 @@ extract_failed_tests() {
 }
 
 # Extract test counts from output
+# Counts TOP-LEVEL tests only (no "/" in name). Subtests are NOT counted separately
+# to avoid double-counting (e.g. TestFoo + TestFoo/Sub1 + TestFoo/Sub2 = 1, not 3).
 count_results() {
     local output_file="$1"
-    # Strip ANSI color codes before counting (go test -v may include colors)
     local clean
     clean=$(sed 's/\x1b\[[0-9;]*m//g' "$output_file" 2>/dev/null)
-    local passed; passed=$(echo "$clean" | grep -c '^--- PASS:' 2>/dev/null) || passed=0
-    local failed; failed=$(echo "$clean" | grep -c '^--- FAIL:' 2>/dev/null) || failed=0
-    local skipped; skipped=$(echo "$clean" | grep -c '^--- SKIP:' 2>/dev/null) || skipped=0
+    local passed; passed=$(echo "$clean" | grep -oP '^--- PASS: \K\S+' | grep -cv '/' 2>/dev/null) || passed=0
+    local failed; failed=$(echo "$clean" | grep -oP '^--- FAIL: \K\S+' | grep -cv '/' 2>/dev/null) || failed=0
+    local skipped; skipped=$(echo "$clean" | grep -oP '^--- SKIP: \K\S+' | grep -cv '/' 2>/dev/null) || skipped=0
     echo "$passed $failed $skipped"
 }
 
@@ -656,6 +657,8 @@ for fpath in files:
                 m = re.match(r'^--- (PASS|FAIL|SKIP): (\S+)', line)
                 if m:
                     st, nm = m.group(1), m.group(2)
+                    if '/' in nm:
+                        continue  # skip subtests — count top-level only
                     if nm not in results or PRIORITY.get(st,0) > PRIORITY.get(results.get(nm,''),0):
                         results[nm] = st
     except: pass
@@ -684,16 +687,14 @@ for fpath in sorted(glob.glob('${RESULTS_DIR}/${suite}_run*.txt')):
                 m = re.match(r'^--- (PASS|FAIL|SKIP): (\S+)', line)
                 if m:
                     st, nm = m.group(1), m.group(2)
+                    if '/' in nm:
+                        continue  # skip subtests — count top-level only
                     if nm not in results or PRIORITY.get(st,0) > PRIORITY.get(results.get(nm,''),0):
                         results[nm] = st
     except: pass
-seen = set()
 for nm, st in sorted(results.items()):
     if st == 'FAIL':
-        top = nm.split('/')[0]
-        if top not in seen:
-            seen.add(top)
-            print(top)
+        print(nm)
 " 2>/dev/null
 }
 

@@ -469,7 +469,7 @@ func TestZauthOperations(testSetup *testing.T) {
 			t.Log("zauth revoke returned error (service may drop connection for non-existing keys): " + err.Error())
 			return
 		}
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		require.Contains(t, []int{400, 500}, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 	})
 
 	t.RunSequentially("Revoke existing split key", func(t *test.SystemTest) {

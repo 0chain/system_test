@@ -188,16 +188,31 @@ L1:
 		time.Sleep(time.Second) // sleep to avoid request rate limit
 	}
 
+	// If all errors are transient sharder errors, retry confirmations with back-off
 	if len(putError) != len(transactions)-1 {
-		chainUnstable := len(putError) > 0
+		allTransient := len(putError) > 0
 		for _, e := range putError {
 			if !strings.Contains(e.Error(), "execution consensus") && !strings.Contains(e.Error(), "unexpected end of JSON") {
-				chainUnstable = false
+				allTransient = false
 				break
 			}
 		}
-		if chainUnstable {
-			t.Skip("Chain unstable — all confirmation failures are sharder errors, cannot verify duplicate nonce count")
+		if allTransient {
+			t.Log("All confirmation failures are transient sharder errors, retrying confirmations...")
+			time.Sleep(10 * time.Second)
+			putError = nil
+			for txn := range transactions {
+				_, _, err := apiClient.V1TransactionGetConfirmation(
+					t,
+					model.TransactionGetConfirmationRequest{
+						Hash: txn,
+					},
+					client.HttpOkStatus)
+				if err != nil {
+					putError = append(putError, err)
+				}
+				time.Sleep(time.Second)
+			}
 		}
 	}
 	// At least len(transactions)-1 same-nonce txns must be rejected.

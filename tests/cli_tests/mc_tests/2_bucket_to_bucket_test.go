@@ -14,17 +14,34 @@ import (
 )
 
 func TestZs3ServerBucket(testSetup *testing.T) {
-	// Check if mc binary is available, skip if not
-	if _, err := os.Stat("../mc"); os.IsNotExist(err) {
-		testSetup.Skip("mc binary not available at ../mc, skipping test")
+	// Require mc binary
+	_, err := os.Stat("../mc")
+	if os.IsNotExist(err) {
+		testSetup.Fatalf("mc binary not available at ../mc")
 	}
 
-	// Check if ZS3 server is reachable at port 9100 (ZS3 server port, from mc_hosts.yaml)
-	conn, err := net.DialTimeout("tcp", "localhost:9100", 5*time.Second)
-	if err != nil {
-		testSetup.Skipf("ZS3/MinIO server not available at localhost:9100, skipping test: %v", err)
+	// Require mc_hosts.yaml config
+	_, err = os.Stat("mc_hosts.yaml")
+	if os.IsNotExist(err) {
+		testSetup.Fatalf("mc_hosts.yaml config not found")
 	}
-	conn.Close()
+
+	config := cli_utils.ReadFileMC(testSetup)
+
+	// Wait for ZS3 server to become reachable (up to 60s)
+	var conn net.Conn
+	for i := 0; i < 12; i++ {
+		conn, err = net.DialTimeout("tcp", config.Server+":"+config.HostPort, 5*time.Second)
+		if err == nil {
+			conn.Close()
+			break
+		}
+		testSetup.Logf("ZS3 server not available at %s:%s (attempt %d/12), retrying in 5s...", config.Server, config.HostPort, i+1)
+		time.Sleep(5 * time.Second)
+	}
+	if err != nil {
+		testSetup.Fatalf("ZS3/MinIO server not available at %s:%s after 60s: %v", config.Server, config.HostPort, err)
+	}
 
 	t := test.NewSystemTest(testSetup)
 

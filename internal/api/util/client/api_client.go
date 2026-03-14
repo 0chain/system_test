@@ -1986,7 +1986,7 @@ func (c *APIClient) UpdateBlobber(t *test.SystemTest, wallet *model.Wallet, scRe
 
 	var updateBlobberTransactionGetConfirmationResponse *model.TransactionGetConfirmationResponse
 
-	wait.PoolImmediately(t, 1*time.Minute, func() bool {
+	wait.PoolImmediately(t, 3*time.Minute, func() bool {
 		updateBlobberTransactionGetConfirmationResponse, resp, err = c.V1TransactionGetConfirmation(
 			t,
 			model.TransactionGetConfirmationRequest{

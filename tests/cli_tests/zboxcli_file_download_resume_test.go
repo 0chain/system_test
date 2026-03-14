@@ -74,9 +74,7 @@ func TestResumeDownload(testSetup *testing.T) {
 
 		// Wait till more than 20% of the file is downloaded and send interrupt signal to command
 		downloaded, dp := waitPartialDownloadAndInterrupt(t, cmd, filename, progressID, filesize)
-		if !downloaded {
-			t.Skip("Could not capture partial download state - download may have completed too fast for interrupt on this infrastructure")
-		}
+		require.True(t, downloaded, "Could not capture partial download state - download may have completed too fast for interrupt on this infrastructure")
 
 		// Allow command to stop
 		time.Sleep(5 * time.Second)
@@ -100,8 +98,17 @@ func TestResumeDownload(testSetup *testing.T) {
 
 		outputStatus := strings.Fields(output[0])
 		t.Log("Output status:", outputStatus)
-		actualDownloadedBytes, err := strconv.ParseInt(outputStatus[len(outputStatus)-5], 10, 64) // This gets the 5th element from the end
-		require.Nil(t, err)
+		// Parse the first numeric field as the downloaded bytes count.
+		// Progress format: "DOWNLOADED / TOTAL [bar] PERCENT TIME"
+		// Fields split may include "/" as separate element, so find the first parseable int.
+		var actualDownloadedBytes int64
+		for _, field := range outputStatus {
+			if v, parseErr := strconv.ParseInt(field, 10, 64); parseErr == nil {
+				actualDownloadedBytes = v
+				break
+			}
+		}
+		require.NotZero(t, actualDownloadedBytes, "Could not parse downloaded bytes from output")
 
 		t.Log("Bytes downloaded after resuming:", actualDownloadedBytes)
 		require.InEpsilon(t, filesize-partialDownloadedBytes, actualDownloadedBytes, 0.005,
