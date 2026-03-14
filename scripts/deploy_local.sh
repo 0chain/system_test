@@ -10824,6 +10824,28 @@ clean_service_databases() {
                 "TRUNCATE TABLE ${tables} CASCADE;" 2>/dev/null
             print_status "0box database truncated"
         fi
+        # CRITICAL: Reset Kafka consumer group to earliest offset after DB truncate.
+        # Without this, 0box starts consuming from where the old instance left off
+        # but its DB has last_processed_round=0, so it needs round 1. If Kafka
+        # starts at round N>>1, 0box skips all events forever (never processes).
+        if docker ps --format '{{.Names}}' | grep -q "kafka"; then
+            # Stop 0box so consumer group has no active members (reset requires this)
+            docker stop 0box 2>/dev/null || true
+            docker cp /dev/stdin kafka:/tmp/sasl.props <<'SASLEOF'
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+SASLEOF
+            docker exec kafka /opt/kafka/bin/kafka-consumer-groups.sh \
+                --bootstrap-server kafka:9092 \
+                --command-config /tmp/sasl.props \
+                --group events-consumer \
+                --topic events \
+                --reset-offsets --to-earliest --execute 2>/dev/null \
+                && print_status "Kafka consumer group reset to earliest (round 1)" \
+                || print_warning "Kafka offset reset failed"
+            docker start 0box 2>/dev/null || true
+        fi
     else
         print_warning "postgres-0box not running, skipping"
     fi
