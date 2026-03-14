@@ -924,11 +924,29 @@ main() {
             _INITIAL_MODE="$initial_mode" run_suite_with_retries "$suite" || overall_rc=1
         done
     else
-        # ---- Short mode (default): all suites run IN PARALLEL simultaneously ----
-        # Fast (~30-60 min). Within each suite, t.Parallel() tests run concurrently;
-        # sequential tests (SC config, kill tests) still run in order within their suite.
-        log_info "Short mode: running all ${#SUITES[@]} suite(s) in parallel: ${SUITES[*]}"
-        run_parallel_group "${SUITES[@]}" || overall_rc=1
+        # ---- Short mode (default): two-phase parallel ----
+        # Phase 1 (warm-up): lightweight suites (sdk, mc, rclone, zs3) run in parallel.
+        #   These complete quickly (~5 min) and their faucet/allocation transactions warm
+        #   up the chain after a fresh deploy, ensuring sharders have processed recent blocks.
+        # Phase 2 (main): heavy suites (api, cli) run in parallel after Phase 1 completes.
+        #   By this point the chain has settled and sharder confirmation works reliably.
+        local warmup_suites=()
+        local main_suites=()
+        for suite in "${SUITES[@]}"; do
+            case "$suite" in
+                api|cli|tokenomics) main_suites+=("$suite") ;;
+                *) warmup_suites+=("$suite") ;;
+            esac
+        done
+
+        if [ ${#warmup_suites[@]} -gt 0 ]; then
+            log_info "Phase 1 (warm-up): ${warmup_suites[*]}"
+            run_parallel_group "${warmup_suites[@]}" || overall_rc=1
+        fi
+        if [ ${#main_suites[@]} -gt 0 ]; then
+            log_info "Phase 2 (main): ${main_suites[*]}"
+            run_parallel_group "${main_suites[@]}" || overall_rc=1
+        fi
     fi
 
     # After all suites finish: reset time_unit to 720h (tokenomics tests may change it)
