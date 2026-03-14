@@ -10824,26 +10824,40 @@ clean_service_databases() {
                 "TRUNCATE TABLE ${tables} CASCADE;" 2>/dev/null
             print_status "0box database truncated"
         fi
-        # CRITICAL: Reset Kafka consumer group to earliest offset after DB truncate.
-        # Without this, 0box starts consuming from where the old instance left off
-        # but its DB has last_processed_round=0, so it needs round 1. If Kafka
-        # starts at round N>>1, 0box skips all events forever (never processes).
+        # CRITICAL: Bootstrap 0box lastProcessedRound after DB truncate.
+        # 0box's GroupByRound needs msgMap[lastProcessedRound+1] to exist in Kafka.
+        # After truncate, lastProcessedRound=0, so it needs round 1 — but Kafka may
+        # not have round 1 (retention policy or topic purge). Fix: insert a snapshot
+        # at the current chain round so 0box starts processing from NOW, not round 1.
+        # Also purge Kafka events topic and reset consumer offset so old events don't
+        # create a mismatch between 0box's expected round and Kafka's served round.
+        local current_round
+        current_round=$(curl -s "http://198.18.0.81:7171/v1/current-round" 2>/dev/null || echo "0")
+        if [ "$current_round" -gt 0 ] 2>/dev/null; then
+            docker exec postgres-0box psql -U zbox_user -d zbox -c \
+                "INSERT INTO snapshots (round) VALUES ($current_round);" 2>/dev/null \
+                && print_status "Bootstrapped 0box snapshot at round $current_round" \
+                || print_warning "Failed to bootstrap 0box snapshot"
+        fi
         if docker ps --format '{{.Names}}' | grep -q "kafka"; then
-            # Stop 0box so consumer group has no active members (reset requires this)
             docker stop 0box 2>/dev/null || true
+            # Purge events topic by setting retention to 1ms, then restore
             docker cp /dev/stdin kafka:/tmp/sasl.props <<'SASLEOF'
 security.protocol=SASL_PLAINTEXT
 sasl.mechanism=PLAIN
 sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
 SASLEOF
-            docker exec kafka /opt/kafka/bin/kafka-consumer-groups.sh \
-                --bootstrap-server kafka:9092 \
-                --command-config /tmp/sasl.props \
-                --group events-consumer \
-                --topic events \
-                --reset-offsets --to-earliest --execute 2>/dev/null \
-                && print_status "Kafka consumer group reset to earliest (round 1)" \
-                || print_warning "Kafka offset reset failed"
+            docker exec kafka /opt/kafka/bin/kafka-configs.sh --bootstrap-server kafka:9092 \
+                --command-config /tmp/sasl.props --entity-type topics --entity-name events \
+                --alter --add-config retention.ms=1 2>/dev/null
+            sleep 10
+            docker exec kafka /opt/kafka/bin/kafka-configs.sh --bootstrap-server kafka:9092 \
+                --command-config /tmp/sasl.props --entity-type topics --entity-name events \
+                --alter --delete-config retention.ms 2>/dev/null
+            # Delete consumer group so 0box starts fresh
+            docker exec kafka /opt/kafka/bin/kafka-consumer-groups.sh --bootstrap-server kafka:9092 \
+                --command-config /tmp/sasl.props --group events-consumer --delete 2>/dev/null
+            print_status "Kafka events purged and consumer group reset"
             docker start 0box 2>/dev/null || true
         fi
     else
