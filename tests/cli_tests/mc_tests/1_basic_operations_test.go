@@ -65,13 +65,13 @@ func TestZs3Server(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Test Bucket Creation", func(t *test.SystemTest) {
-		output, _ := cli_utils.RunCommand(t, "../mc mb custombucket", 1, time.Hour*2)
-		assert.Contains(t, output, "Bucket created successfully `custombucket`.")
+		output, _ := cli_utils.RunCommand(t, "../mc mb zs3/custombucket", 1, time.Hour*2)
+		assert.Contains(t, output, "Bucket created successfully `zs3/custombucket`.")
 	})
 
 	t.RunSequentially("Test Copying File Upload", func(t *test.SystemTest) {
 		// create a file with content
-		_, _ = cli_utils.RunCommand(t, "../mc mb custombucket", 1, time.Hour*2)
+		_, _ = cli_utils.RunCommand(t, "../mc mb zs3/custombucket", 1, time.Hour*2)
 
 		file, err := os.Create("a.txt")
 		if err != nil {
@@ -84,7 +84,7 @@ func TestZs3Server(testSetup *testing.T) {
 			t.Fatalf("Error writing to file: %v", err)
 		}
 
-		output, _ := cli_utils.RunCommand(t, "../mc cp a.txt custombucket", 1, time.Hour*2)
+		output, _ := cli_utils.RunCommand(t, "../mc cp a.txt zs3/custombucket", 1, time.Hour*2)
 
 		assert.NotContains(t, output, "../mc: <ERROR>")
 
@@ -92,7 +92,7 @@ func TestZs3Server(testSetup *testing.T) {
 	})
 
 	t.RunSequentially("Test for moving file", func(t *test.SystemTest) {
-		_, _ = cli_utils.RunCommand(t, "../mc mb custombucket", 1, time.Hour*2)
+		_, _ = cli_utils.RunCommand(t, "../mc mb zs3/custombucket", 1, time.Hour*2)
 
 		file, err := os.Create("a.txt")
 		if err != nil {
@@ -105,20 +105,20 @@ func TestZs3Server(testSetup *testing.T) {
 			t.Fatalf("Error writing to file: %v", err)
 		}
 
-		_, _ = cli_utils.RunCommand(t, "../mc cp a.txt custombucket", 1, time.Hour*2)
+		_, _ = cli_utils.RunCommand(t, "../mc cp a.txt zs3/custombucket", 1, time.Hour*2)
 
-		output, _ := cli_utils.RunCommand(t, "../mc mv custombucket/a.txt custombucket/b", 1, time.Hour*2)
+		output, _ := cli_utils.RunCommand(t, "../mc mv zs3/custombucket/a.txt zs3/custombucket/b", 1, time.Hour*2)
 		assert.NotContains(t, output, "../mc: <ERROR>")
 	})
 
 	t.RunSequentially("Test for copying file ", func(t *test.SystemTest) {
-		output, _ := cli_utils.RunCommand(t, "../mc cp a.txt custombucket", 1, time.Hour*2)
+		output, _ := cli_utils.RunCommand(t, "../mc cp a.txt zs3/custombucket", 1, time.Hour*2)
 
 		assert.NotContains(t, output, "../mc: <ERROR>")
 	})
 
 	t.RunSequentially("Test for removing file", func(t *test.SystemTest) {
-		output, _ := cli_utils.RunCommand(t, "../mc rm custombucket/a.txt", 1, time.Hour*2)
-		assert.Contains(t, output, "Removed `custombucket/a.txt`.")
+		output, _ := cli_utils.RunCommand(t, "../mc rm zs3/custombucket/a.txt", 1, time.Hour*2)
+		assert.Contains(t, output, "Removed `zs3/custombucket/a.txt`.")
 	})
 }

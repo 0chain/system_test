@@ -6152,7 +6152,7 @@ except Exception as e: print(f'verify error: {e}')
     # can reach blobbers via nginx reverse proxy instead of internal Docker IPs.
     # Blobbers register with internal IPs (198.18.0.9X:505X) on first start; this
     # overrides the on-chain URL so gosdk WASM CheckAllocStatus calls succeed.
-    # Port mapping: 5051-5059 → blobber01-09, 5060-5062 → blobber10-12.
+    # Port mapping: 5051-5059 → blobber01-09, 50610-50612 → blobber10-12.
     #
     # IMPORTANT: bl-update requires the delegate_wallet owner to sign the txn.
     # If the on-chain delegate_wallet doesn't match ZCN_WALLET_FILE, these calls
@@ -8179,7 +8179,7 @@ server {
     location /blobber07/ { proxy_pass http://localhost:5057/; include snippets/provider-cors.conf; }
     location /blobber08/ { proxy_pass http://localhost:5058/; include snippets/provider-cors.conf; }
     location /blobber09/ { proxy_pass http://localhost:5059/; include snippets/provider-cors.conf; }
-    location /blobber10/ { proxy_pass http://localhost:5060/; include snippets/provider-cors.conf; }
+    location /blobber10/ { proxy_pass http://localhost:50610/; include snippets/provider-cors.conf; }
     location /blobber11/ { proxy_pass http://localhost:50611/; include snippets/provider-cors.conf; }
     location /blobber12/ { proxy_pass http://localhost:50612/; include snippets/provider-cors.conf; }
 
@@ -8195,7 +8195,7 @@ server {
     location /validator07/ { proxy_pass http://localhost:5067/; include snippets/provider-cors.conf; }
     location /validator08/ { proxy_pass http://localhost:5068/; include snippets/provider-cors.conf; }
     location /validator09/ { proxy_pass http://localhost:5069/; include snippets/provider-cors.conf; }
-    location /validator10/ { proxy_pass http://localhost:5070/; include snippets/provider-cors.conf; }
+    location /validator10/ { proxy_pass http://localhost:50710/; include snippets/provider-cors.conf; }
     location /validator11/ { proxy_pass http://localhost:50711/; include snippets/provider-cors.conf; }
     location /validator12/ { proxy_pass http://localhost:50712/; include snippets/provider-cors.conf; }
 
@@ -10342,10 +10342,10 @@ verify_services() {
     print_status "Blobber connectivity:"
     local blobbers_reachable=0
     local blobbers_total=0
-    # Regular blobbers 1-12: port = 505N for 1-9, 5060 for 10, 50611 for 11, 50612 for 12
+    # Regular blobbers 1-12: port = 505N for 1-9, 50610 for 10, 50611 for 11, 50612 for 12
     for i in $(seq 1 12); do
         local port
-        case $i in 10) port=5060;; 11) port=50611;; 12) port=50612;; *) port="505${i}";; esac
+        case $i in 10) port=50610;; 11) port=50611;; 12) port=50612;; *) port="505${i}";; esac
         blobbers_total=$((blobbers_total + 1))
         if curl -s -o /dev/null -w '' "http://localhost:${port}/" -m 2 2>/dev/null; then
             blobbers_reachable=$((blobbers_reachable + 1))
