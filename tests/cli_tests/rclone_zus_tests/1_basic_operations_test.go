@@ -104,14 +104,28 @@ func setupRcloneAllocation(t *test.SystemTest, testName string) string {
 		3, 2*time.Minute)
 	require.Nil(t, err, "failed to create allocation: %s", strings.Join(output, "\n"))
 
-	// Extract allocation ID from output
+	// Extract allocation ID from "Allocation created: <hash>" line.
+	// Must not match wallet client_id printed in SDK init logs (same 64-hex format).
 	re := regexp.MustCompile(`[a-f0-9]{64}`)
 	for _, line := range output {
-		match := re.FindString(line)
-		if match != "" {
-			t.Logf("Created allocation: %s", match)
-			return match
+		if strings.Contains(strings.ToLower(line), "allocation created") || strings.Contains(line, "Allocation created") {
+			match := re.FindString(line)
+			if match != "" {
+				t.Logf("Created allocation: %s", match)
+				return match
+			}
 		}
+	}
+	// Fallback: last 64-hex match (allocation hash is printed after wallet IDs)
+	var lastMatch string
+	for _, line := range output {
+		if match := re.FindString(line); match != "" {
+			lastMatch = match
+		}
+	}
+	if lastMatch != "" {
+		t.Logf("Created allocation (fallback): %s", lastMatch)
+		return lastMatch
 	}
 	t.Fatalf("could not extract allocation ID from: %s", strings.Join(output, "\n"))
 	return ""
