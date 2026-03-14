@@ -7666,11 +7666,15 @@ start_zs3server() {
                             --size 1073741824 \
                             --lock 10 \
                             --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>&1 || true)
-                        alloc_id=$(echo "$alloc_output" | grep -o '[a-f0-9]\{64\}' | head -1)
-                        if [ -n "$alloc_id" ]; then
+                        alloc_id=$(echo "$alloc_output" | grep -i 'Allocation created' | grep -o '[a-f0-9]\{64\}' | head -1)
+                        if [ -z "$alloc_id" ]; then
+                            alloc_id=$(echo "$alloc_output" | grep -o '[a-f0-9]\{64\}' | grep -v "$client_id" | tail -1)
+                        fi
+                        if [ -n "$alloc_id" ] && [ "$alloc_id" != "$client_id" ]; then
                             use_enterprise=true
                             break
                         fi
+                        alloc_id=""
                         print_status "Enterprise allocation attempt $attempt failed, retrying in 10s..."
                         sleep 10
                     done
@@ -7686,6 +7690,10 @@ start_zs3server() {
         else
             print_warning "Enterprise allocation failed — falling back to regular allocation"
         fi
+        # Get wallet client_id so we can exclude it from allocation ID parsing
+        # (zbox prints wallet ID in SDK init logs — same 64-hex format as allocation IDs)
+        local wallet_client_id
+        wallet_client_id=$(python3 -c "import json; print(json.load(open('${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}'))['client_id'])" 2>/dev/null || echo "")
         for attempt in 1 2 3; do
             local alloc_output
             alloc_output=$($ZBOX newallocation \
@@ -7693,10 +7701,16 @@ start_zs3server() {
                 --size 1073741824 \
                 --lock 10 \
                 --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>&1 || true)
-            alloc_id=$(echo "$alloc_output" | grep -o '[a-f0-9]\{64\}' | head -1)
-            if [ -n "$alloc_id" ]; then
+            # Parse allocation ID from "Allocation created: <hash>" line specifically.
+            # Fallback: last 64-hex string that isn't the wallet client_id.
+            alloc_id=$(echo "$alloc_output" | grep -i 'Allocation created' | grep -o '[a-f0-9]\{64\}' | head -1)
+            if [ -z "$alloc_id" ]; then
+                alloc_id=$(echo "$alloc_output" | grep -o '[a-f0-9]\{64\}' | grep -v "$wallet_client_id" | tail -1)
+            fi
+            if [ -n "$alloc_id" ] && [ "$alloc_id" != "$wallet_client_id" ]; then
                 break
             fi
+            alloc_id=""
             print_status "Allocation attempt $attempt failed, retrying in 10s..."
             sleep 10
         done
@@ -7740,8 +7754,11 @@ start_zs3server() {
                     --size 1073741824 \
                     --lock 10 \
                     --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE 2>&1 || true)
-                alloc_id=$(echo "$alloc_output2" | grep -o '[a-f0-9]\{64\}' | head -1)
-                if [ -n "$alloc_id" ]; then
+                alloc_id=$(echo "$alloc_output2" | grep -i 'Allocation created' | grep -o '[a-f0-9]\{64\}' | head -1)
+                if [ -z "$alloc_id" ]; then
+                    alloc_id=$(echo "$alloc_output2" | grep -o '[a-f0-9]\{64\}' | grep -v "$wallet_client_id" | tail -1)
+                fi
+                if [ -n "$alloc_id" ] && [ "$alloc_id" != "${wallet_client_id:-}" ]; then
                     sleep 30
                     echo "$alloc_id" > "${ZCN_CONFIG_DIR}/allocation.txt"
                     print_status "Created replacement allocation: ${alloc_id:0:16}..."
