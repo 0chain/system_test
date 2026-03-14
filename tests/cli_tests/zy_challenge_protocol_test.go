@@ -86,19 +86,26 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			err := createFileWithSize(filename, int64(filesize))
 			require.Nil(t, err)
 
-			output, err := uploadFile(t, configPath, map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": remotepath + fmt.Sprintf("file%d_", i) + filepath.Base(filename),
-				"localpath":  filename,
-			}, true)
-			if err != nil {
+			var uploadErr error
+			var output []string
+			for attempt := 0; attempt < 3; attempt++ {
+				output, uploadErr = uploadFile(t, configPath, map[string]interface{}{
+					"allocation": allocationId,
+					"remotepath": remotepath + fmt.Sprintf("file%d_", i) + filepath.Base(filename),
+					"localpath":  filename,
+				}, true)
+				if uploadErr == nil {
+					break
+				}
 				errStr := strings.Join(output, "\n")
 				if strings.Contains(errStr, "commit_failed") || strings.Contains(errStr, "duplicate_file") {
-					t.Skipf("Upload failed due to blobber overload (infrastructure issue): %s", errStr)
-					return
+					t.Logf("Upload attempt %d/3 failed due to blobber overload, retrying in 30s: %s", attempt+1, errStr)
+					time.Sleep(30 * time.Second)
+					continue
 				}
-				require.Nil(t, err, "error uploading file %d: %s", i, errStr)
+				require.Nil(t, uploadErr, "error uploading file %d: %s", i, errStr)
 			}
+			require.Nil(t, uploadErr, "error uploading file %d after 3 retries: %s", i, strings.Join(output, "\n"))
 		}
 
 		startBlock := getLatestFinalizedBlock(t)
@@ -110,24 +117,37 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		time.Sleep(1 * time.Minute)
 
 		challengesCountQuery := fmt.Sprintf("round_created_at >= %d AND round_created_at < %d", startBlock.Round, endBlock.Round)
-		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
-		if err != nil {
-			t.Skip("Could not count challenges (sharder endpoint unavailable): " + err.Error())
-			return
+		// Retry sharder endpoint with wait
+		var challenges map[string]int64
+		var err error
+		for attempt := 0; attempt < 6; attempt++ {
+			challenges, err = countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
+			if err == nil {
+				break
+			}
+			t.Logf("Sharder endpoint unavailable (attempt %d/6), retrying in 30s: %s", attempt+1, err.Error())
+			time.Sleep(30 * time.Second)
 		}
+		require.Nil(t, err, "Could not count challenges after 6 retries (sharder endpoint unavailable): %s", err)
 
 		challengeGenerationGap := int64(4)
 
+		// Poll for challenges if none generated yet (up to 5 more minutes)
 		if challenges["total"] == 0 {
-			t.Skip("No challenges generated — challenge_enabled may be false or infrastructure not ready")
-			return
+			for attempt := 0; attempt < 10; attempt++ {
+				t.Logf("No challenges generated yet (attempt %d/10), waiting 30s...", attempt+1)
+				time.Sleep(30 * time.Second)
+				challenges, err = countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
+				require.Nil(t, err, "error counting challenges")
+				if challenges["total"] > 0 {
+					break
+				}
+			}
+			require.Greater(t, challenges["total"], int64(0), "No challenges generated after extended wait — challenge_enabled may be false or infrastructure not ready")
 		}
 
 		expectedChallenges := (endBlock.Round - startBlock.Round) / challengeGenerationGap
-		if expectedChallenges == 0 {
-			t.Skip("No blocks produced during test period — chain may be stalled")
-			return
-		}
+		require.Greater(t, expectedChallenges, int64(0), "No blocks produced during test period — chain may be stalled")
 
 		// Log challenge stats — challenge generation rate varies on test chains.
 		// If any challenges were generated, the protocol is working.
@@ -140,10 +160,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	t.RunWithTimeout("Allocation with writes should get challenges", 12*time.Minute, func(t *test.SystemTest) {
 		// Temporarily set time_unit=10m to speed up challenge generation for this test
 		_, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{"time_unit": "10m"}, true)
-		if err != nil {
-			t.Skip("Could not set time_unit=10m (SC owner wallet issue) — skipping")
-			return
-		}
+		require.Nil(t, err, "Could not set time_unit=10m (SC owner wallet issue)")
 		defer func() {
 			_, _ = updateStorageSCConfig(t, scOwnerWallet, map[string]string{"time_unit": "720h"}, true)
 		}()
@@ -158,29 +175,52 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		err = createFileWithSize(filename, 10*MB)
 		require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": "/file_" + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		if err != nil {
-			t.Skipf("Upload failed (infrastructure issue): %s", strings.Join(output, "\n"))
-			return
+		var uploadErr error
+		var output []string
+		for attempt := 0; attempt < 3; attempt++ {
+			output, uploadErr = uploadFile(t, configPath, map[string]interface{}{
+				"allocation": allocationId,
+				"remotepath": "/file_" + filepath.Base(filename),
+				"localpath":  filename,
+			}, true)
+			if uploadErr == nil {
+				break
+			}
+			t.Logf("Upload attempt %d/3 failed, retrying in 30s: %s", attempt+1, strings.Join(output, "\n"))
+			time.Sleep(30 * time.Second)
 		}
+		require.Nil(t, uploadErr, "Upload failed after 3 retries: %s", strings.Join(output, "\n"))
 
 		// With time_unit=10m, wait 5 minutes for challenges to accumulate
 		t.Logf("Waiting 5 minutes for challenges to accumulate (time_unit=10m)...")
 		time.Sleep(5 * time.Minute)
 
 		challengesCountQuery := fmt.Sprintf("allocation_id='%s'", allocationId)
-		challenges, err := countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
-		if err != nil {
-			t.Skip("Could not count challenges (sharder endpoint unavailable): " + err.Error())
-			return
+
+		// Retry sharder endpoint with wait
+		var challenges map[string]int64
+		for attempt := 0; attempt < 6; attempt++ {
+			challenges, err = countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
+			if err == nil {
+				break
+			}
+			t.Logf("Sharder endpoint unavailable (attempt %d/6), retrying in 30s: %s", attempt+1, err.Error())
+			time.Sleep(30 * time.Second)
 		}
+		require.Nil(t, err, "Could not count challenges after 6 retries (sharder endpoint unavailable)")
+
+		// Poll for challenges if none generated yet (up to 5 more minutes)
 		if challenges["total"] == 0 {
-			t.Skip("No challenges generated after 5 minutes — challenge_enabled may be false or infrastructure not ready")
-			return
+			for attempt := 0; attempt < 10; attempt++ {
+				t.Logf("No challenges generated yet (attempt %d/10), waiting 30s...", attempt+1)
+				time.Sleep(30 * time.Second)
+				challenges, err = countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
+				require.Nil(t, err, "error counting challenges")
+				if challenges["total"] > 0 {
+					break
+				}
+			}
+			require.Greater(t, challenges["total"], int64(0), "No challenges generated after extended wait — challenge_enabled may be false or infrastructure not ready")
 		}
 
 		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
@@ -235,7 +275,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		require.Equal(t, int64(0), challenges["total"], "number of challenges should be 0")
 	})
 
-	t.RunWithTimeout("Added blobber in an allocation should also be challenged for this blobber allocation", 5*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Added blobber in an allocation should also be challenged for this blobber allocation", 15*time.Minute, func(t *test.SystemTest) {
 		// Use 1+1 shards so spare blobbers are available to add
 		allocationId := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
@@ -248,66 +288,59 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		err := createFileWithSize(filename, 1*MB)
 		require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": "/file_" + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		if err != nil {
-			t.Skipf("Upload failed (infrastructure issue): %s", strings.Join(output, "\n"))
-			return
+		var uploadErr error
+		var output []string
+		for attempt := 0; attempt < 3; attempt++ {
+			output, uploadErr = uploadFile(t, configPath, map[string]interface{}{
+				"allocation": allocationId,
+				"remotepath": "/file_" + filepath.Base(filename),
+				"localpath":  filename,
+			}, true)
+			if uploadErr == nil {
+				break
+			}
+			t.Logf("Upload attempt %d/3 failed, retrying in 30s: %s", attempt+1, strings.Join(output, "\n"))
+			time.Sleep(30 * time.Second)
 		}
+		require.Nil(t, uploadErr, "Upload failed after 3 retries: %s", strings.Join(output, "\n"))
 
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
 
 		blobberId, err := GetBlobberIDNotPartOfAllocation(walletFile, configFile, allocationId)
-		if err != nil || blobberId == "" {
-			t.Skip("No spare blobber available to add — need more than 2 blobbers registered")
-			return
-		}
+		require.Nil(t, err, "Error finding spare blobber")
+		require.NotEmpty(t, blobberId, "No spare blobber available to add — need more than 2 blobbers registered")
 
 		params := createParams(map[string]interface{}{
 			"allocation":  allocationId,
 			"add_blobber": blobberId,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
-		if err != nil {
-			errStr := strings.Join(output, "\n")
-			if strings.Contains(errStr, "auth ticket") {
-				t.Skip("Selected blobber requires auth ticket (enterprise blobber)")
-				return
-			}
-			t.Skipf("Add blobber failed (infrastructure issue): %s", errStr)
-			return
-		}
+		require.Nil(t, err, "Add blobber failed: %s", strings.Join(output, "\n"))
 
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, blobberId)
 
-		// Poll for challenges — added blobber needs time to accumulate them
+		// Poll for challenges — added blobber needs time to accumulate them (up to 10 minutes)
 		var challenges map[string]int64
-		for i := 0; i < 6; i++ {
+		for i := 0; i < 20; i++ {
 			challenges, err = countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 			require.Nil(t, err, "error counting challenges")
 			if challenges["total"] > 0 {
 				break
 			}
-			if i < 5 {
-				t.Logf("No challenges yet for added blobber (attempt %d/6), waiting 30s...", i+1)
+			if i < 19 {
+				t.Logf("No challenges yet for added blobber (attempt %d/20), waiting 30s...", i+1)
 				time.Sleep(30 * time.Second)
 			}
 		}
-		if challenges["total"] == 0 {
-			t.Skip("Added blobber has no challenges after 3 minutes — chain needs more time")
-			return
-		}
+		require.Greater(t, challenges["total"], int64(0), "Added blobber has no challenges after 10 minutes")
 
 		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
 		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
 	})
 
-	t.RunWithTimeout("Replaced blobber in an allocation should not be challenged for this blobber allocation", 5*time.Minute, func(t *test.SystemTest) {
+	t.RunWithTimeout("Replaced blobber in an allocation should not be challenged for this blobber allocation", 15*time.Minute, func(t *test.SystemTest) {
 		// Use 1+1 shards so spare blobbers are available to add/replace
 		allocationId := setupAllocation(t, configPath, map[string]interface{}{
 			"size":   10 * MB,
@@ -320,25 +353,29 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		err := createFileWithSize(filename, 1*MB)
 		require.Nil(t, err)
 
-		output, err := uploadFile(t, configPath, map[string]interface{}{
-			"allocation": allocationId,
-			"remotepath": "/file_" + filepath.Base(filename),
-			"localpath":  filename,
-		}, true)
-		if err != nil {
-			t.Skipf("Upload failed (infrastructure issue): %s", strings.Join(output, "\n"))
-			return
+		var uploadErr error
+		var output []string
+		for attempt := 0; attempt < 3; attempt++ {
+			output, uploadErr = uploadFile(t, configPath, map[string]interface{}{
+				"allocation": allocationId,
+				"remotepath": "/file_" + filepath.Base(filename),
+				"localpath":  filename,
+			}, true)
+			if uploadErr == nil {
+				break
+			}
+			t.Logf("Upload attempt %d/3 failed, retrying in 30s: %s", attempt+1, strings.Join(output, "\n"))
+			time.Sleep(30 * time.Second)
 		}
+		require.Nil(t, uploadErr, "Upload failed after 3 retries: %s", strings.Join(output, "\n"))
 
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
 		configFile := filepath.Join(wd, "config", configPath)
 
 		addedBlobberID, err := GetBlobberIDNotPartOfAllocation(walletFile, configFile, allocationId)
-		if err != nil || addedBlobberID == "" {
-			t.Skip("No spare blobber available to add — need more than 2 blobbers registered")
-			return
-		}
+		require.Nil(t, err, "Error finding spare blobber")
+		require.NotEmpty(t, addedBlobberID, "No spare blobber available to add — need more than 2 blobbers registered")
 
 		// If selected blobber is enterprise, find a non-enterprise one
 		addedBlobber := getBlobber(t, addedBlobberID)
@@ -356,17 +393,12 @@ func TestProtocolChallenge(testSetup *testing.T) {
 					break
 				}
 			}
-			if addedBlobberID == "" {
-				t.Skip("No non-enterprise spare blobber available")
-				return
-			}
+			require.NotEmpty(t, addedBlobberID, "No non-enterprise spare blobber available")
 		}
 
 		replacedBlobberID, err := GetRandomBlobber(walletFile, configFile, allocationId, addedBlobberID)
-		if err != nil || replacedBlobberID == "" {
-			t.Skip("No blobber available to replace")
-			return
-		}
+		require.Nil(t, err, "Error finding blobber to replace")
+		require.NotEmpty(t, replacedBlobberID, "No blobber available to replace")
 
 		params := createParams(map[string]interface{}{
 			"allocation":     allocationId,
@@ -374,36 +406,25 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			"remove_blobber": replacedBlobberID,
 		})
 		output, err = updateAllocation(t, configPath, params, true)
-		if err != nil {
-			errStr := strings.Join(output, "\n")
-			if strings.Contains(errStr, "auth ticket") {
-				t.Skip("Selected blobber requires auth ticket (enterprise blobber)")
-				return
-			}
-			t.Skipf("Replace blobber failed (infrastructure issue): %s", errStr)
-			return
-		}
+		require.Nil(t, err, "Replace blobber failed: %s", strings.Join(output, "\n"))
 
 		// Added blobber should get challenges for this allocation
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, addedBlobberID)
 
-		// Poll for challenges — added blobber needs time after replace
+		// Poll for challenges — added blobber needs time after replace (up to 10 minutes)
 		var challenges map[string]int64
-		for i := 0; i < 6; i++ {
+		for i := 0; i < 20; i++ {
 			challenges, err = countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 			require.Nil(t, err, "error counting challenges")
 			if challenges["total"] > 0 {
 				break
 			}
-			if i < 5 {
-				t.Logf("No challenges yet for added blobber (attempt %d/6), waiting 30s...", i+1)
+			if i < 19 {
+				t.Logf("No challenges yet for added blobber (attempt %d/20), waiting 30s...", i+1)
 				time.Sleep(30 * time.Second)
 			}
 		}
-		if challenges["total"] == 0 {
-			t.Skip("Added blobber has no challenges after 3 minutes — chain needs more time")
-			return
-		}
+		require.Greater(t, challenges["total"], int64(0), "Added blobber has no challenges after 10 minutes")
 
 		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
 		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
@@ -435,16 +456,32 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		require.Less(t, challenges["total"], int64(720), "number of challenges should not exceed threshold")
 	})
 
-	t.RunWithTimeout("Challenges success rate and blobber distribution should be good", 5*time.Minute, func(t *test.SystemTest) {
-		allChallengesCount, err := countChallengesByQuery(t, "", sharderBaseURLs)
-		if err != nil {
-			t.Skip("Could not count challenges (sharder endpoint unavailable): " + err.Error())
-			return
+	t.RunWithTimeout("Challenges success rate and blobber distribution should be good", 10*time.Minute, func(t *test.SystemTest) {
+		// Retry sharder endpoint with wait
+		var allChallengesCount map[string]int64
+		var err error
+		for attempt := 0; attempt < 6; attempt++ {
+			allChallengesCount, err = countChallengesByQuery(t, "", sharderBaseURLs)
+			if err == nil {
+				break
+			}
+			t.Logf("Sharder endpoint unavailable (attempt %d/6), retrying in 30s: %s", attempt+1, err.Error())
+			time.Sleep(30 * time.Second)
 		}
+		require.Nil(t, err, "Could not count challenges after 6 retries (sharder endpoint unavailable)")
 
+		// Poll for challenges if none generated yet (up to 5 minutes)
 		if allChallengesCount["total"] == 0 {
-			t.Skip("No challenges generated — challenge_enabled may be false or infrastructure not ready")
-			return
+			for attempt := 0; attempt < 10; attempt++ {
+				t.Logf("No challenges generated yet (attempt %d/10), waiting 30s...", attempt+1)
+				time.Sleep(30 * time.Second)
+				allChallengesCount, err = countChallengesByQuery(t, "", sharderBaseURLs)
+				require.Nil(t, err, "error counting challenges")
+				if allChallengesCount["total"] > 0 {
+					break
+				}
+			}
+			require.Greater(t, allChallengesCount["total"], int64(0), "No challenges generated after extended wait — challenge_enabled may be false or infrastructure not ready")
 		}
 
 		failedCount := allChallengesCount["failed"]
