@@ -60,9 +60,8 @@ func TestRegisterBlobber(testSetup *testing.T) {
 	})
 
 	t.RunSequentiallyWithTimeout("Write price lower than min_write_price should not allow register", 10*time.Minute, func(t *test.SystemTest) {
-		// When min_write_price=0 on the chain, no write price can be "lower than min",
-		// so this test verifies the registration succeeds with a very low write price.
-		// When min_write_price>0, it verifies the SC rejects prices below the minimum.
+		// min_write_price is 0.001 ZCN on the test chain. A write price below that
+		// should be rejected by the SC with "write_price is less than min_write_price".
 		mnemonic := crypto.GenerateMnemonics(t)
 		wallet := apiClient.CreateWalletForMnemonic(t, mnemonic)
 		apiClient.FundWallet(t, wallet, 5.0, client.TxSuccessfulStatus)
@@ -76,7 +75,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.BaseURL = generateRandomURL()
 		sn.Capacity = 10240 * GB
 
-		// Very low write price — 0.0001 ZCN
+		// 0.0001 ZCN — below min_write_price (0.001 ZCN)
 		sn.Terms.ReadPrice = 0
 		sn.Terms.WritePrice = 1000000
 
@@ -85,12 +84,7 @@ func TestRegisterBlobber(testSetup *testing.T) {
 		sn.StakePoolSettings.ServiceCharge = 0.2
 		sn.ManagingWallet = wallet.Id
 
-		// If min_write_price=0, registration should succeed (status 1).
-		// If min_write_price>0, registration should fail with the expected error (status 2).
-		apiClient.RegisterBlobber(t, wallet, sn, 1, "", false)
-
-		// Clean up the fake blobber
-		killBlobber(t, wallet.Id)
+		apiClient.RegisterBlobber(t, wallet, sn, 2, "write_price is less than min_write_price", false)
 	})
 
 	t.RunSequentiallyWithTimeout("Write price higher than max_write_price should not allow register", 10*time.Minute, func(t *test.SystemTest) {
