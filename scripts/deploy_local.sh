@@ -10824,42 +10824,11 @@ clean_service_databases() {
                 "TRUNCATE TABLE ${tables} CASCADE;" 2>/dev/null
             print_status "0box database truncated"
         fi
-        # CRITICAL: Bootstrap 0box lastProcessedRound after DB truncate.
-        # 0box's GroupByRound needs msgMap[lastProcessedRound+1] to exist in Kafka.
-        # After truncate, lastProcessedRound=0, so it needs round 1 — but Kafka may
-        # not have round 1 (retention policy or topic purge). Fix: insert a snapshot
-        # at the current chain round so 0box starts processing from NOW, not round 1.
-        # Also purge Kafka events topic and reset consumer offset so old events don't
-        # create a mismatch between 0box's expected round and Kafka's served round.
-        local current_round
-        current_round=$(curl -s "http://198.18.0.81:7171/v1/current-round" 2>/dev/null || echo "0")
-        if [ "$current_round" -gt 0 ] 2>/dev/null; then
-            docker exec postgres-0box psql -U zbox_user -d zbox -c \
-                "INSERT INTO snapshots (round) VALUES ($current_round);" 2>/dev/null \
-                && print_status "Bootstrapped 0box snapshot at round $current_round" \
-                || print_warning "Failed to bootstrap 0box snapshot"
-        fi
-        if docker ps --format '{{.Names}}' | grep -q "kafka"; then
-            docker stop 0box 2>/dev/null || true
-            # Purge events topic by setting retention to 1ms, then restore
-            docker cp /dev/stdin kafka:/tmp/sasl.props <<'SASLEOF'
-security.protocol=SASL_PLAINTEXT
-sasl.mechanism=PLAIN
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
-SASLEOF
-            docker exec kafka /opt/kafka/bin/kafka-configs.sh --bootstrap-server kafka:9092 \
-                --command-config /tmp/sasl.props --entity-type topics --entity-name events \
-                --alter --add-config retention.ms=1 2>/dev/null
-            sleep 10
-            docker exec kafka /opt/kafka/bin/kafka-configs.sh --bootstrap-server kafka:9092 \
-                --command-config /tmp/sasl.props --entity-type topics --entity-name events \
-                --alter --delete-config retention.ms 2>/dev/null
-            # Delete consumer group so 0box starts fresh
-            docker exec kafka /opt/kafka/bin/kafka-consumer-groups.sh --bootstrap-server kafka:9092 \
-                --command-config /tmp/sasl.props --group events-consumer --delete 2>/dev/null
-            print_status "Kafka events purged and consumer group reset"
-            docker start 0box 2>/dev/null || true
-        fi
+        # WARNING: After truncating 0box DB, the Kafka pipeline is broken —
+        # 0box's lastProcessedRound resets to 0 but Kafka is at round N>>1.
+        # The caller (clean_service_databases) should only be used for non-clean
+        # deploys where the chain is reused. For fresh redeploy, do NOT call
+        # clean_service_databases — let 0box keep its data from round 1.
     else
         print_warning "postgres-0box not running, skipping"
     fi
@@ -13456,16 +13425,18 @@ main() {
     # Phase 9: Update nginx with full service routes, logs, and configs
     setup_nginx || print_warning "Nginx setup had issues (non-critical)"
 
-    # Phase 9b: Clean stale service data BEFORE seeding providers.
-    # clean_service_databases truncates blobbers/allocations/write_markers.
-    # seed_0box_providers repopulates blobbers from sharder events_db.
-    # Order matters: truncate first, then seed — otherwise the seed is wiped out.
-    clean_service_databases
-
-    # Phase 9c: Seed 0box provider tables so Blimp/Explorer see blobbers immediately.
-    # Kafka health-check events take ~90 min to populate these tables organically.
-    # This bootstraps them from the sharder events_db so apps work right after deploy.
-    seed_0box_providers || print_warning "0box provider seeding had issues (non-critical)"
+    # Phase 9b: Clean stale service data — ONLY for non-clean deploys (e.g. `all` without prior `clean`).
+    # On fresh redeploy, chain data is clean and 0box has been receiving events from round 1 since
+    # Phase 3b. Truncating now would destroy all accumulated data and break the Kafka pipeline
+    # (0box resets lastProcessedRound to 0 but Kafka is at round N>>1, causing permanent skip).
+    if [ "${1:-}" != "redeploy" ]; then
+        # clean_service_databases truncates blobbers/allocations/write_markers.
+        # seed_0box_providers repopulates from sharder events_db.
+        clean_service_databases
+        seed_0box_providers || print_warning "0box provider seeding had issues (non-critical)"
+    else
+        print_status "Skipping clean_service_databases (fresh redeploy — 0box has events from round 1)"
+    fi
 
     # Phase 10: Test setup — wallets, configs, funding, tools
     cleanup_stale_test_artifacts
