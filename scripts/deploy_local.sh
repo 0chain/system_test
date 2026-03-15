@@ -8000,7 +8000,7 @@ server {
     server_name DOMAIN_PLACEHOLDER;
 
     # Increase body size for file uploads
-    client_max_body_size 100m;
+    client_max_body_size 5g;
 
     # Common proxy headers
     proxy_set_header Host $host;
@@ -8196,7 +8196,7 @@ server {
     location /blobber07/ { proxy_pass http://localhost:5057/; include snippets/provider-cors.conf; }
     location /blobber08/ { proxy_pass http://localhost:5058/; include snippets/provider-cors.conf; }
     location /blobber09/ { proxy_pass http://localhost:5059/; include snippets/provider-cors.conf; }
-    location /blobber10/ { proxy_pass http://localhost:50610/; include snippets/provider-cors.conf; }
+    location /blobber10/ { proxy_pass http://localhost:5060/; include snippets/provider-cors.conf; }
     location /blobber11/ { proxy_pass http://localhost:50611/; include snippets/provider-cors.conf; }
     location /blobber12/ { proxy_pass http://localhost:50612/; include snippets/provider-cors.conf; }
 
@@ -8212,7 +8212,7 @@ server {
     location /validator07/ { proxy_pass http://localhost:5067/; include snippets/provider-cors.conf; }
     location /validator08/ { proxy_pass http://localhost:5068/; include snippets/provider-cors.conf; }
     location /validator09/ { proxy_pass http://localhost:5069/; include snippets/provider-cors.conf; }
-    location /validator10/ { proxy_pass http://localhost:50710/; include snippets/provider-cors.conf; }
+    location /validator10/ { proxy_pass http://localhost:5070/; include snippets/provider-cors.conf; }
     location /validator11/ { proxy_pass http://localhost:50711/; include snippets/provider-cors.conf; }
     location /validator12/ { proxy_pass http://localhost:50712/; include snippets/provider-cors.conf; }
 
@@ -8789,7 +8789,7 @@ server {
     listen 80;
     server_name ${fqdn};
 
-    client_max_body_size 100m;
+    client_max_body_size 5g;
 
     # Docker IP rewriting for browser SDK
     include /etc/nginx/snippets/docker-ip-rewrite.conf;
@@ -8916,7 +8916,7 @@ server {
     listen 80;
     server_name ${fqdn};
 
-    client_max_body_size 100m;
+    client_max_body_size 5g;
 
     location / {
         proxy_pass http://127.0.0.1:${port}/;
