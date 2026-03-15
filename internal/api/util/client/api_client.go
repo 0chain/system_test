@@ -590,7 +590,10 @@ func (c *APIClient) V1TransactionGetConfirmation(
 
 	var resp *resty.Response
 	var err error
-	for retry := 0; retry < 3; retry++ {
+	// On young chains under load, finalization can take 10-15s. Retry up to 8 times
+	// with 3s backoff (total ~24s window) to avoid false "unexpected end of JSON input"
+	// failures that pass on mature chains (round 70k+) but fail on fresh deploys (round 10k).
+	for retry := 0; retry < 8; retry++ {
 		transactionGetConfirmationResponse = nil
 		resp, err = c.executeForAllServiceProviders(
 			t,
@@ -603,9 +606,9 @@ func (c *APIClient) V1TransactionGetConfirmation(
 			SharderServiceProvider)
 
 		if err != nil && strings.Contains(err.Error(), "unexpected end of JSON input") {
-			t.Logf("Transient confirmation error (retry %d/3): %s — refreshing 0dns", retry+1, err.Error())
+			t.Logf("Transient confirmation error (retry %d/8): %s — refreshing 0dns", retry+1, err.Error())
 			c.RefreshServiceProviders()
-			time.Sleep(2 * time.Second)
+			time.Sleep(3 * time.Second)
 			continue
 		}
 		break
