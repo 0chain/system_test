@@ -13507,6 +13507,21 @@ main() {
         [ -d "${BASE_DIR}/${_sd}/.git" ] && git config --global --add safe.directory "${BASE_DIR}/${_sd}" 2>/dev/null || true
     done
 
+    # Clean stale renamed test files. rsync doesn't use --delete, so when files are
+    # renamed (e.g., 0_foo_test.go → zy_foo_test.go), the old file persists on remote
+    # and causes "redeclared in this block" build failures.
+    for test_dir in "${SYSTEM_TEST_DIR}/tests/cli_tests" "${SYSTEM_TEST_DIR}/tests/api_tests"; do
+        [ -d "$test_dir" ] || continue
+        for old in "$test_dir"/0_*_test.go; do
+            [ -f "$old" ] || continue
+            local new="${old/0_/zy_}"
+            if [ -f "$new" ]; then
+                rm -f "$old"
+                print_status "Removed stale duplicate: $(basename "$old")"
+            fi
+        done
+    done
+
     # Phase 0: Clear old logs and monitoring data for fresh start
     clear_all_logs
 
