@@ -9007,14 +9007,15 @@ setup_auto_funding() {
         print_status "Added watchdog cron: ${CRON_LINE}"
     fi
 
-    # Start the daemon now if not running
-    if [ -f /tmp/auto_fund_daemon.pid ] && kill -0 "$(cat /tmp/auto_fund_daemon.pid)" 2>/dev/null; then
-        print_status "Auto-fund daemon already running (PID: $(cat /tmp/auto_fund_daemon.pid))"
-    else
-        print_status "Starting auto-fund daemon..."
-        nohup bash "${INSTALL_DIR}/auto_fund_daemon.sh" 120 5 20 >> /dev/null 2>&1 &
-        print_status "Auto-fund daemon started"
-    fi
+    # Kill ALL stale daemon instances before starting (prevents accumulation across deploys)
+    pkill -f 'auto_fund_daemon' 2>/dev/null || true
+    sleep 1
+    rm -f /tmp/auto_fund_daemon.pid
+
+    # Start fresh
+    print_status "Starting auto-fund daemon..."
+    nohup bash "${INSTALL_DIR}/auto_fund_daemon.sh" 120 5 20 >> /dev/null 2>&1 &
+    print_status "Auto-fund daemon started (PID: $!)"
 
     print_status "Auto-funding setup complete"
 }
@@ -9053,6 +9054,12 @@ setup_log_snapshots() {
     # NOTE: Uses BASE_DIR from deploy to locate config files. Defaults to ~/Code.
     cat > /usr/local/bin/refresh-0chain-logs.sh << 'LOGEOF'
 #!/bin/bash
+# Prevent multiple instances from accumulating (cron runs every 5 min;
+# if docker is slow, the previous run may not have finished).
+LOCKFILE="/tmp/refresh-0chain-logs.lock"
+exec 200>"$LOCKFILE"
+flock -n 200 || exit 0
+
 LOG_DIR="/var/log/0chain"
 BASE="${OCHAIN_BASE_DIR:-$HOME/Code}"
 mkdir -p "$LOG_DIR"
@@ -9291,8 +9298,9 @@ LOGEOF
     # Run once immediately
     /usr/local/bin/refresh-0chain-logs.sh
 
-    # Setup cron to refresh every 60 seconds
-    local CRON_ENTRY="* * * * * /usr/local/bin/refresh-0chain-logs.sh"
+    # Setup cron to refresh every 5 minutes (was every 60s — caused zombie process
+    # accumulation when docker was slow, leading to 790+ stuck cron children and load 800+)
+    local CRON_ENTRY="*/5 * * * * /usr/local/bin/refresh-0chain-logs.sh"
     (crontab -l 2>/dev/null | grep -v "refresh-0chain-logs" ; echo "$CRON_ENTRY") | crontab -
     print_status "Log snapshot refresh cron installed (every 60s)"
 }
