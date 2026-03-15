@@ -3198,8 +3198,19 @@ start_zauth() {
     docker build -f Dockerfile -t zauthserver ../ 2>&1 || print_error "zauthserver image build failed"
     cleanup_injected_gosdk "${BASE_DIR}/zauth-server"
 
-    # Start only zauth and postgres (skip pgadmin — we manage pgadmin separately with auto-login)
-    docker compose -p zauth up -d --force-recreate zauthserver postgres
+    # Start postgres first, wait for it to accept connections, then start zauthserver.
+    # Without this, zauthserver exits immediately with "connection refused" because
+    # depends_on without healthcheck only waits for container start, not readiness.
+    docker compose -p zauth up -d --force-recreate postgres
+    print_status "Waiting for zauth postgres to be ready..."
+    for _i in $(seq 1 30); do
+        if docker exec zauth-postgres-1 pg_isready -U zauth_user -d zauth >/dev/null 2>&1; then
+            print_status "zauth postgres ready"
+            break
+        fi
+        sleep 1
+    done
+    docker compose -p zauth up -d --force-recreate zauthserver
     print_status "zauth-server started on port 8080"
 }
 
@@ -3254,8 +3265,17 @@ start_zvault() {
         docker build -f Dockerfile -t zvault ../ 2>&1 || print_error "zvault image build failed"
     fi
 
-    # Start only zvault and postgres (skip pgadmin_zvault — we manage pgadmin separately with auto-login)
-    docker compose -p zvault up -d --force-recreate zvault postgreszv
+    # Start postgres first, wait for readiness, then start zvault.
+    docker compose -p zvault up -d --force-recreate postgreszv
+    print_status "Waiting for zvault postgres to be ready..."
+    for _i in $(seq 1 30); do
+        if docker exec zvault-postgreszv-1 pg_isready -U zvault_user -d zvault >/dev/null 2>&1; then
+            print_status "zvault postgres ready"
+            break
+        fi
+        sleep 1
+    done
+    docker compose -p zvault up -d --force-recreate zvault
     print_status "zvault started on port 8090"
 }
 
