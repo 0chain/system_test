@@ -183,7 +183,8 @@ func TestExpiredAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 
 		// assert balance reduced by at least 1 ZCN (may include txn fee)
-		require.LessOrEqual(t, balanceAfterLock, balance-1)
+		// Use InDelta to avoid floating point precision issues (e.g. 15.99 vs 15.989999999999998)
+		require.InDelta(t, balance-1, balanceAfterLock, 0.01, "balance should decrease by ~1 ZCN")
 
 		// Write pool balance should increment by 1
 		allocation := getAllocation(t, allocationID)
