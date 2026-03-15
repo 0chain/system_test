@@ -34,8 +34,13 @@ func setupMcAlias(t *test.SystemTest, serverUrl string) {
 }
 
 func TestZs3ServerOperations(testSetup *testing.T) {
+	// Re-check ZS3 availability at test time (not just at TestMain init).
+	// ZS3 may start during Phase 1 (mc suite) but TestMain runs before that.
 	if !zs3Available {
-		testSetup.Skip("zs3 server is not available, skipping zs3 tests")
+		zs3Available = isServiceResponding(parsedConfig.ZS3ServerUrl)
+	}
+	if !zs3Available {
+		testSetup.Fatalf("zs3 server not available at %s", parsedConfig.ZS3ServerUrl)
 	}
 
 	// Check mc binary is available

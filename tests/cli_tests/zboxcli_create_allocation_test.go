@@ -468,22 +468,40 @@ func createNewAllocation(t *test.SystemTest, cliConfigFilename, params string) (
 
 func createNewAllocationForWallet(t *test.SystemTest, wallet, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("Creating new allocation...")
-	return cliutils.RunCommand(t, fmt.Sprintf(
+	output, err := cliutils.RunCommand(t, fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
 		wallet+"_wallet.json",
 		cliConfigFilename,
 		wallet+"_allocation.txt"), 5, time.Second*15)
+	// Filter out gosdk noise lines (e.g., "signingKey: <hash>") that appear
+	// even with --silent. Tests expect exactly 1 line ("Allocation created: <hash>").
+	var filtered []string
+	for _, line := range output {
+		if strings.HasPrefix(line, "signingKey:") || strings.HasPrefix(line, "0chain-core-sdk") {
+			continue
+		}
+		filtered = append(filtered, line)
+	}
+	return filtered, err
 }
 
 func createNewAllocationWithoutRetry(t *test.SystemTest, cliConfigFilename, params string) ([]string, error) {
 	t.Logf("params values %v...", params)
-	return cliutils.RunCommandWithoutRetry(fmt.Sprintf(
+	output, err := cliutils.RunCommandWithoutRetry(fmt.Sprintf(
 		"./zbox newallocation %s --silent --wallet %s --configDir ./config --config %s --allocationFileName %s",
 		params,
 		escapedTestName(t)+"_wallet.json",
 		cliConfigFilename,
 		escapedTestName(t)+"_allocation.txt"))
+	var filtered []string
+	for _, line := range output {
+		if strings.HasPrefix(line, "signingKey:") || strings.HasPrefix(line, "0chain-core-sdk") {
+			continue
+		}
+		filtered = append(filtered, line)
+	}
+	return filtered, err
 }
 
 func createAllocationTestTeardown(t *test.SystemTest, allocationID string) {
