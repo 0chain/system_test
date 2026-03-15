@@ -280,11 +280,19 @@ func confirmPoolPayments(
 	if len(poolsBlockRewarded) == 0 {
 		return
 	}
-	if numRewards > len(pools) {
-		numRewards = len(pools)
+	// Count only pools with non-zero balance; the chain skips empty pools.
+	activePools := 0
+	for id := range pools {
+		if pools[id].Balance > 0 {
+			activePools++
+		}
+	}
+	if numRewards > activePools {
+		numRewards = activePools
 	}
 	require.Equal(t, len(poolsBlockRewarded), numRewards,
-		"expected reward payments %d does not equal actual payment count %d", numRewards, len(poolsBlockRewarded))
+		"expected reward payments %d does not equal actual payment count %d (active pools with balance: %d, total pools: %d)",
+		numRewards, len(poolsBlockRewarded), activePools, len(pools))
 	var total float64
 	for id := range poolsBlockRewarded {
 		total += float64(pools[id].Balance)

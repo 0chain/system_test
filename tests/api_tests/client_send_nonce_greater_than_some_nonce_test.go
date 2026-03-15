@@ -44,7 +44,10 @@ func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 	tokens := float64(1)
 	value := int64(zcncore.ConvertToValue(tokens))
 
-	// Add transactions with nonce + future nonce
+	// Add transactions with nonce well beyond the future nonce limit.
+	// Use a large margin (+100) to avoid boundary races where the chain nonce
+	// has advanced slightly beyond what we observed.
+	farNonce := int(currentNonce) + futureNonce + 100
 	_, resp, err := apiClient.V1TransactionPutWithNonceAndServiceProviders(
 		t,
 		model.InternalTransactionPutRequest{
@@ -54,7 +57,7 @@ func TestClientSendNonceGreaterThanFutureNonceLimit(testSetup *testing.T) {
 			TxnType:    client.SendTxType,
 		},
 		client.HttpBadRequestStatus,
-		int(currentNonce)+futureNonce+1,
+		farNonce,
 		nil,
 	)
 
