@@ -141,6 +141,20 @@ func TestMain(m *testing.M) {
 	zs3Available = isServiceResponding(parsedConfig.ZS3ServerUrl)
 	firebaseTokenValid = parsedConfig.FirebaseAPIKey != "" && parsedConfig.FirebaseEmail != "" && parsedConfig.FirebasePassword != ""
 
+	// Obtain real Firebase ID token for 0box API tests.
+	// Without this, X_APP_ID_TOKEN stays as "test_firebase_token" and 0box
+	// rejects all requests that require authenticated owner records.
+	if firebaseTokenValid {
+		if err := client.RefreshFirebaseToken(parsedConfig.FirebaseAPIKey, parsedConfig.FirebaseEmail, parsedConfig.FirebasePassword); err != nil {
+			log.Printf("WARNING: Firebase token refresh failed: %v — 0box tests requiring auth will fail", err)
+		}
+		if parsedConfig.FirebaseEmailR != "" && parsedConfig.FirebasePasswordR != "" {
+			if err := client.RefreshFirebaseToken_R(parsedConfig.FirebaseAPIKey, parsedConfig.FirebaseEmailR, parsedConfig.FirebasePasswordR); err != nil {
+				log.Printf("WARNING: Firebase _R token refresh failed: %v", err)
+			}
+		}
+	}
+
 	os.Exit(m.Run())
 }
 

@@ -19,7 +19,7 @@ import (
 
 func TestGetStakableProviders(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
+	// NOT parallel: modifies miner num_delegates, races with TestMinerStake/TestMinerUpdateSettings.
 
 	t.RunSequentially("get stakable miners should work", func(t *test.SystemTest) {
 		createWallet(t)
@@ -133,7 +133,8 @@ func TestGetStakableProviders(testSetup *testing.T) {
 		}
 		require.True(t, hasSelectedMiner, "selected miner should be found in miners list")
 
-		// Stake tokens on this miner
+		// Stake tokens on this miner. If max_delegates was lowered by another test
+		// that ran earlier, restore it and retry.
 		output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
 			"miner_id": selectedMinerID,
 			"tokens":   1,
@@ -141,7 +142,16 @@ func TestGetStakableProviders(testSetup *testing.T) {
 		if err != nil {
 			combined := strings.Join(output, "\n")
 			if strings.Contains(combined, "max_delegates reached") {
-				t.Skip("Concurrent test filled delegate pool before stake: " + combined)
+				t.Logf("max_delegates reached — restoring num_delegates to %d and retrying", targetNumDelegates)
+				_, _ = minerSharderUpdateSettings(t, configPath, delegateWalletForMiner, createParams(map[string]interface{}{
+					"id":            selectedMinerID,
+					"num_delegates": 200,
+				}), true)
+				cliutil.Wait(t, 5*time.Second)
+				output, err = minerOrSharderLock(t, configPath, createParams(map[string]interface{}{
+					"miner_id": selectedMinerID,
+					"tokens":   1,
+				}), true)
 			}
 		}
 		require.Nilf(t, err, "err staking tokens on miner: %v", err)

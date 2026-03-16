@@ -17,9 +17,12 @@ const (
 	mcAlias = "zs3test"
 )
 
+// mcPath is the resolved path to the mc binary (set in TestZs3ServerOperations).
+var mcPath = "mc"
+
 // mcCmd runs an mc CLI command and returns stdout, stderr, and error.
 func mcCmd(args ...string) (string, string, error) {
-	cmd := exec.Command("mc", args...)
+	cmd := exec.Command(mcPath, args...)
 	var stdout, stderr strings.Builder
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -43,9 +46,20 @@ func TestZs3ServerOperations(testSetup *testing.T) {
 		testSetup.Fatalf("zs3 server not available at %s", parsedConfig.ZS3ServerUrl)
 	}
 
-	// Check mc binary is available
+	// Check mc binary is available (in PATH or at known locations)
 	if _, err := exec.LookPath("mc"); err != nil {
-		testSetup.Skip("mc (MinIO client) binary not found in PATH, skipping zs3 tests")
+		// mc not in PATH — check common locations
+		found := false
+		for _, path := range []string{"../cli_tests/mc", "../cli_tests/mc_tests/mc"} {
+			if _, err := os.Stat(path); err == nil {
+				mcPath = path
+				found = true
+				break
+			}
+		}
+		if !found {
+			testSetup.Fatalf("mc (MinIO client) binary not found in PATH or ../cli_tests/mc")
+		}
 	}
 
 	t := test.NewSystemTest(testSetup)

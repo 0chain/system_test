@@ -72,7 +72,7 @@ declare -A LONG_TEST_PATTERNS=(
 # Firebase auth) or are destructive (kill tests destroy providers on-chain).
 declare -A EXCLUDED_PATTERNS=(
     [api]="Test0BoxNFT|TestFileReferencePath|Test0BoxJWT|Test0BoxTransactions|TestZauthOperations"
-    [cli]="TestKillBlobber|TestKillSharder|TestKillMiner|Test0Dropbox|Test0Gdrive|Test0S3Migration|TestLivestreamDownload|TestStreamUploadDownload|TestMaxFileSize|TestLFBSharderSync|TestRestrictedBlobbers|TestUpdateGlobalConfig|Move_file_concurrently|Copy_file_concurrently|TestSharderFeeRewards"
+    [cli]="TestKillBlobber|TestKillSharder|TestKillMiner|Test0Dropbox|Test0Gdrive|Test0S3Migration|TestLivestreamDownload|TestStreamUploadDownload|TestMaxFileSize|TestLFBSharderSync|TestRestrictedBlobbers|TestUpdateGlobalConfig|TestSharderFeeRewards"
     [tokenomics]="TestBlobberReadReward"
     [zs3]="TestWarpAnalysis"
 )

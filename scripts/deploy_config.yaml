@@ -59,7 +59,7 @@ repositories:
 
   # Crawler
   crawler:
-    branch: main
+    branch: fix/blobber-discovery
     path: crawler
     build_required: true
     containers:

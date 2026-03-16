@@ -81,7 +81,8 @@ func TestMinerStake(testSetup *testing.T) {
 		}
 	})
 
-	t.Parallel()
+	// NOT parallel: subtests modify global max_delegates and per-miner num_delegates,
+	// which races with TestMinerUpdateSettings, TestMinerUpdateConfig, and TestGetStakableProviders.
 
 	t.RunSequentiallyWithTimeout("Staking tokens against valid miner with valid tokens should work", 5*time.Minute, func(t *test.SystemTest) { // todo: slow
 		// Select a miner that is NOT miner02ID to avoid conflicts with other tests

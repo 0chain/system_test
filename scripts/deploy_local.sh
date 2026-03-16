@@ -235,27 +235,41 @@ checkout_branches() {
         git stash 2>/dev/null || true
         git clean -fd 2>/dev/null || true
 
+        # Critical repos fail hard on checkout errors; optional repos warn and continue.
+        local is_critical=false
+        case "$repo" in
+            0chain|blobber|eblobber|0box|gosdk|zauth-server|zvault) is_critical=true ;;
+        esac
+
         # Fetch ALL remote branches (not just tracked ones — needed for first-time checkout)
         if ! git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null; then
-            print_error "FATAL: Failed to fetch ${repo} — check network/git access"
-            return 1
+            if $is_critical; then
+                print_error "FATAL: Failed to fetch ${repo} — check network/git access"
+                return 1
+            else
+                print_warning "Failed to fetch ${repo} — using local branch (non-critical)"
+            fi
         fi
 
         # Checkout branch with force (handles dirty index and untracked file conflicts)
         if git rev-parse --verify "origin/${branch}" >/dev/null 2>&1; then
             git checkout -f "$branch" 2>/dev/null || git checkout -B "$branch" "origin/${branch}" 2>/dev/null || {
-                print_error "FATAL: Failed to checkout ${branch} for ${repo}"
-                return 1
+                if $is_critical; then print_error "FATAL: Failed to checkout ${branch} for ${repo}"; return 1
+                else print_warning "Failed to checkout ${branch} for ${repo}"; fi
             }
             git reset --hard "origin/${branch}" 2>/dev/null || true
         elif git rev-parse --verify "$branch" >/dev/null 2>&1; then
             git checkout -f "$branch" 2>/dev/null || {
-                print_error "FATAL: Failed to checkout ${branch} for ${repo}"
-                return 1
+                if $is_critical; then print_error "FATAL: Failed to checkout ${branch} for ${repo}"; return 1
+                else print_warning "Failed to checkout ${branch} for ${repo}"; fi
             }
         else
-            print_error "FATAL: Branch '${branch}' not found for ${repo} (not on remote)"
-            return 1
+            if $is_critical; then
+                print_error "FATAL: Branch '${branch}' not found for ${repo} (not on remote)"
+                return 1
+            else
+                print_warning "Branch '${branch}' not found for ${repo} — staying on current branch (non-critical)"
+            fi
         fi
 
         # Verify we're on the right branch
