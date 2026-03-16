@@ -11827,14 +11827,14 @@ swap_image() {
         # Normal case: git repo already present, just checkout + pull
         print_status "Checking out ${branch}..."
         cd "$repo_path"
-        git fetch origin 2>/dev/null || true
         git stash 2>/dev/null || true
+        git clean -fd 2>/dev/null || true
+        git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null || true
         if git rev-parse --verify "origin/${branch}" >/dev/null 2>&1; then
-            git checkout "$branch" 2>/dev/null || git checkout -b "$branch" "origin/${branch}" 2>/dev/null || true
-            git fetch origin "$branch" 2>/dev/null || true
-            git reset --hard "origin/${branch}" 2>/dev/null || git pull origin "$branch" 2>/dev/null || true
+            git checkout -f "$branch" 2>/dev/null || git checkout -B "$branch" "origin/${branch}" 2>/dev/null || true
+            git reset --hard "origin/${branch}" 2>/dev/null || true
         elif git rev-parse --verify "$branch" >/dev/null 2>&1; then
-            git checkout "$branch" 2>/dev/null || true
+            git checkout -f "$branch" 2>/dev/null || true
         else
             print_error "Branch '${branch}' not found"
             return 1
@@ -11855,9 +11855,10 @@ swap_image() {
             # gosdk is a library — check out the branch and rebuild all CLI dependents
             print_status "Checking out gosdk branch and rebuilding CLI dependents..."
             cd "$repo_path"
-            git fetch origin 2>/dev/null || true
-            git checkout "$branch" 2>/dev/null || git checkout -b "$branch" "origin/${branch}" 2>/dev/null || true
-            git pull origin "$branch" 2>/dev/null || true
+            git stash 2>/dev/null || true
+            git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null || true
+            git checkout -f "$branch" 2>/dev/null || git checkout -B "$branch" "origin/${branch}" 2>/dev/null || true
+            git reset --hard "origin/${branch}" 2>/dev/null || true
             local short_hash_sdk=$(git rev-parse --short HEAD 2>/dev/null)
             print_status "gosdk now at ${branch} (${short_hash_sdk})"
             # Rebuild zboxcli with local gosdk replace
