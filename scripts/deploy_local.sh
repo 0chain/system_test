@@ -11906,11 +11906,11 @@ swap_image() {
     print_status "On ${branch} (${short_hash})"
 
     # Step 2: Rebuild the Docker image
-    # Auto-detect gosdk branch if not explicitly provided via --gosdk-branch.
-    # This ensures a prior `swap-image gosdk <branch>` is honored by all dependents.
-    if [ -z "$gosdk_branch_override" ] && [ -d "${BASE_DIR}/gosdk/.git" ]; then
-        gosdk_branch_override=$(git -C "${BASE_DIR}/gosdk" branch --show-current 2>/dev/null)
-    fi
+    # gosdk branch is determined by checkout_gosdk_for_dependent() which reads
+    # the per-repo gosdk_branch from deploy_config.yaml. Do NOT auto-detect from
+    # the current gosdk checkout — that would use whatever branch was left from
+    # the last swap, ignoring per-repo overrides (e.g. zs3server needs
+    # feat/enterprise-blobber, not fix/lfb-aware-sharder-selection).
     print_status "Rebuilding Docker image..."
     case "$repo" in
         gosdk)
