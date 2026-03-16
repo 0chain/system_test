@@ -12067,6 +12067,17 @@ swap_image() {
             inject_local_gosdk "$repo_path" "${repo_path}/docker.local/Dockerfile"
             if [ "$apply_config" = "1" ]; then
                 patch_zauth_faucet
+                # Sync JWT secret with 0box (must match for token verification)
+                local _zauth_cfg="${repo_path}/config/zauthserver.yaml"
+                local _obox_cfg="${BASE_DIR}/0box/docker.local/config/0box.yaml"
+                if [ -f "$_zauth_cfg" ] && [ -f "$_obox_cfg" ]; then
+                    local _obox_jwt
+                    _obox_jwt=$(grep -A1 '^jwt:' "$_obox_cfg" | grep 'secret_key:' | head -1 | awk '{print $2}' | tr -d '"')
+                    if [ -n "$_obox_jwt" ]; then
+                        sed -i "s|jwt_secret:.*|jwt_secret: \"${_obox_jwt}\"|" "$_zauth_cfg"
+                        print_status "Synced zauth JWT secret with 0box"
+                    fi
+                fi
             fi
             cd "${repo_path}/docker.local"
             docker build -f Dockerfile -t zauthserver ../ 2>&1 || print_error "zauthserver image build failed"
