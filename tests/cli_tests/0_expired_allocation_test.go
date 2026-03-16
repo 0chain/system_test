@@ -222,6 +222,4 @@ func TestExpiredAllocation(testSetup *testing.T) {
 	})
 }
 
-func sizeInGB(size int64) float64 {
-	return float64(size) / (1024 * 1024 * 1024)
-}
+// sizeInGB moved to zboxcli_create_allocation_test.go (shared helper)

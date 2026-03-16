@@ -509,3 +509,8 @@ func createAllocationTestTeardown(t *test.SystemTest, allocationID string) {
 		_, _ = cancelAllocation(t, configPath, allocationID, false)
 	})
 }
+
+// sizeInGB converts bytes to GB. Used by allocation cost calculations.
+func sizeInGB(size int64) float64 {
+	return float64(size) / (1024 * 1024 * 1024)
+}
