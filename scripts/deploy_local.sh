@@ -9822,11 +9822,29 @@ print(m.group(1) if m else '')
         ${ZWALLET} faucet --methodName pour --tokens 100 --silent $WO 2>/dev/null || true
         sleep 2
 
-        print_status "Creating crawler allocation on-chain (data=10, parity=2 = all 12 regular blobbers)..."
+        # Auto-detect blobber count and set data/parity to use ALL blobbers.
+        # With 2 parity shards, the rest are data. This guarantees the allocation
+        # includes every blobber so all get challenge data from crawler uploads.
+        local blobber_count
+        blobber_count=$(curl -s "http://198.18.0.81:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/getblobbers" -m 5 2>/dev/null | \
+            python3 -c "import json,sys; d=json.load(sys.stdin); print(len([n for n in d.get('Nodes',[]) if not n.get('is_enterprise',False)]))" 2>/dev/null || echo "0")
+        local crawler_parity=2
+        local crawler_data=$((blobber_count - crawler_parity))
+        if [ "$crawler_data" -lt 1 ]; then
+            crawler_data=2
+            crawler_parity=2
+        fi
+        print_status "Creating crawler allocation (${crawler_data} data + ${crawler_parity} parity = ${blobber_count} blobbers)..."
         local alloc_output
-        alloc_output=$(${ZBOX} newallocation --size 10737418240 --lock 100 --data 10 --parity 2 \
+        alloc_output=$(${ZBOX} newallocation --size 10737418240 --lock 100 --data "$crawler_data" --parity "$crawler_parity" \
             --silent $WO 2>&1) || true
-        local crawler_alloc_id=$(echo "$alloc_output" | grep -oE '[0-9a-f]{64}' | head -1)
+        # Parse allocation ID — exclude wallet client_id from matches
+        local wallet_cid
+        wallet_cid=$(python3 -c "import json; print(json.load(open('${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}'))['client_id'])" 2>/dev/null || echo "")
+        local crawler_alloc_id=$(echo "$alloc_output" | grep -i 'Allocation created' | grep -oE '[0-9a-f]{64}' | head -1)
+        if [ -z "$crawler_alloc_id" ]; then
+            crawler_alloc_id=$(echo "$alloc_output" | grep -oE '[0-9a-f]{64}' | grep -v "$wallet_cid" | tail -1)
+        fi
 
         if [ -z "$crawler_alloc_id" ]; then
             print_warning "Could not create crawler allocation — starting crawler with empty allocations"
