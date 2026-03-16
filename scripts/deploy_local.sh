@@ -13759,9 +13759,32 @@ main() {
     wait_for_blobbers_ready 4 600 || print_warning "Blobbers may not be fully ready — tests may fail with 'not enough blobbers'"
 
     # Phase 11c: Full environment verification
+    # verify_all.sh must pass with zero [FAIL] items. [WARN] items are logged but allowed.
+    # Results are recorded to /var/log/0chain/verify_all.log for audit.
     print_header "Running Full Environment Verification"
+    local VERIFY_LOG="/var/log/0chain/verify_all.log"
+    mkdir -p /var/log/0chain
     if [ -f "${SCRIPT_DIR}/verify_all.sh" ]; then
-        bash "${SCRIPT_DIR}/verify_all.sh" || print_warning "verify_all.sh reported issues — check output above before running tests"
+        echo "=== verify_all.sh started at $(date -u '+%Y-%m-%dT%H:%M:%SZ') ===" > "$VERIFY_LOG"
+        bash "${SCRIPT_DIR}/verify_all.sh" 2>&1 | tee -a "$VERIFY_LOG"
+        local verify_exit=${PIPESTATUS[0]}
+        echo "=== verify_all.sh finished at $(date -u '+%Y-%m-%dT%H:%M:%SZ') exit=$verify_exit ===" >> "$VERIFY_LOG"
+
+        # Count FAIL items (not WARN — those are acceptable)
+        local fail_count
+        fail_count=$(grep -c '\[FAIL\]' "$VERIFY_LOG" 2>/dev/null || echo "0")
+        local warn_count
+        warn_count=$(grep -c '\[WARN\]' "$VERIFY_LOG" 2>/dev/null || echo "0")
+        print_status "verify_all: ${fail_count} FAIL, ${warn_count} WARN (log: ${VERIFY_LOG})"
+
+        if [ "$fail_count" -gt 0 ]; then
+            print_error "========================================="
+            print_error "  VERIFY FAILED — ${fail_count} critical issue(s)"
+            print_error "========================================="
+            grep '\[FAIL\]' "$VERIFY_LOG" | head -10
+            print_error "Fix the FAIL items above before running tests."
+            return 1
+        fi
     else
         print_warning "verify_all.sh not found, skipping full verification"
     fi
@@ -13886,6 +13909,19 @@ main() {
         print_warning "Smoke tests FAILED (chain may need more time to stabilize)"
     fi
     /usr/local/bin/refresh-0chain-logs.sh 2>/dev/null || true
+
+    # Deployment readiness summary — record all gate results before tests
+    print_header "Deployment Readiness Summary"
+    local smoke_result="UNKNOWN"
+    if grep -q 'PASS' "$SMOKE_LOG" 2>/dev/null; then smoke_result="PASS"
+    elif grep -q 'FAIL' "$SMOKE_LOG" 2>/dev/null; then smoke_result="FAIL"
+    fi
+    local verify_fails=$(grep -c '\[FAIL\]' /var/log/0chain/verify_all.log 2>/dev/null || echo "?")
+    local verify_warns=$(grep -c '\[WARN\]' /var/log/0chain/verify_all.log 2>/dev/null || echo "?")
+    print_status "  Smoke tests:    ${smoke_result}"
+    print_status "  verify_all:     ${verify_fails} FAIL, ${verify_warns} WARN"
+    print_status "  Pre-flight:     PASS (wallets funded, services up, chain advancing)"
+    print_status "  Logs:           /var/log/0chain/verify_all.log, /tmp/smoke_test.log"
 
     # Phase 12: Start system tests sequentially to avoid nonce conflicts (chaos stays off)
     if [ -f "${SCRIPT_DIR}/run_tests.sh" ]; then
@@ -14344,9 +14380,26 @@ EOF
         fi
 
         # Verify environment health before running tests
+        # verify_all must pass with zero [FAIL] items.
         print_header "Environment Verification (pre-test)"
+        local VERIFY_LOG="/var/log/0chain/verify_all.log"
+        mkdir -p /var/log/0chain
         if [ -f "${SCRIPT_DIR}/verify_all.sh" ]; then
-            bash "${SCRIPT_DIR}/verify_all.sh" || print_warning "verify_all.sh reported issues — tests may fail; investigate before proceeding"
+            echo "=== verify_all.sh (pre-test) started at $(date -u '+%Y-%m-%dT%H:%M:%SZ') ===" > "$VERIFY_LOG"
+            bash "${SCRIPT_DIR}/verify_all.sh" 2>&1 | tee -a "$VERIFY_LOG"
+            echo "=== verify_all.sh finished at $(date -u '+%Y-%m-%dT%H:%M:%SZ') ===" >> "$VERIFY_LOG"
+
+            local fail_count
+            fail_count=$(grep -c '\[FAIL\]' "$VERIFY_LOG" 2>/dev/null || echo "0")
+            local warn_count
+            warn_count=$(grep -c '\[WARN\]' "$VERIFY_LOG" 2>/dev/null || echo "0")
+            print_status "verify_all: ${fail_count} FAIL, ${warn_count} WARN (log: ${VERIFY_LOG})"
+
+            if [ "$fail_count" -gt 0 ]; then
+                print_error "verify_all has ${fail_count} FAIL items — fix before running tests"
+                grep '\[FAIL\]' "$VERIFY_LOG" | head -10
+                return 1
+            fi
         else
             print_warning "verify_all.sh not found, skipping pre-test verification"
         fi
