@@ -8215,7 +8215,7 @@ server {
     location /blobber07/ { proxy_pass http://localhost:5057/; include snippets/provider-cors.conf; }
     location /blobber08/ { proxy_pass http://localhost:5058/; include snippets/provider-cors.conf; }
     location /blobber09/ { proxy_pass http://localhost:5059/; include snippets/provider-cors.conf; }
-    location /blobber10/ { proxy_pass http://localhost:5060/; include snippets/provider-cors.conf; }
+    location /blobber10/ { proxy_pass http://localhost:50610/; include snippets/provider-cors.conf; }
     location /blobber11/ { proxy_pass http://localhost:50611/; include snippets/provider-cors.conf; }
     location /blobber12/ { proxy_pass http://localhost:50612/; include snippets/provider-cors.conf; }
 
@@ -8231,7 +8231,7 @@ server {
     location /validator07/ { proxy_pass http://localhost:5067/; include snippets/provider-cors.conf; }
     location /validator08/ { proxy_pass http://localhost:5068/; include snippets/provider-cors.conf; }
     location /validator09/ { proxy_pass http://localhost:5069/; include snippets/provider-cors.conf; }
-    location /validator10/ { proxy_pass http://localhost:5070/; include snippets/provider-cors.conf; }
+    location /validator10/ { proxy_pass http://localhost:50710/; include snippets/provider-cors.conf; }
     location /validator11/ { proxy_pass http://localhost:50711/; include snippets/provider-cors.conf; }
     location /validator12/ { proxy_pass http://localhost:50712/; include snippets/provider-cors.conf; }
 
@@ -13703,7 +13703,27 @@ main() {
     # Phase 11d: Swap-image tests — skipped (already tested, takes too long in deploy pipeline)
     # test_swap_image
 
-    # Phase 11e: Smoke tests
+    # Phase 11e: Wait for chain to mature before tests.
+    # Fresh chains have unreliable sharder confirmations in the first ~5000 rounds
+    # (many registration/staking/config txns in initial blocks). Tests that create
+    # allocations fail with "unexpected end of JSON input" if run too early.
+    local MIN_ROUND=5000
+    local current_round
+    current_round=$(curl -s "http://198.18.0.81:7171/v1/chain/get/stats" -m 5 2>/dev/null | \
+        python3 -c "import json,sys; print(json.load(sys.stdin).get('current_round',0))" 2>/dev/null || echo "0")
+    if [ "${current_round:-0}" -lt "$MIN_ROUND" ]; then
+        print_status "Chain at round ${current_round} — waiting for round ${MIN_ROUND} before tests (sharder confirmation reliability)..."
+        while [ "${current_round:-0}" -lt "$MIN_ROUND" ]; do
+            sleep 10
+            current_round=$(curl -s "http://198.18.0.81:7171/v1/chain/get/stats" -m 5 2>/dev/null | \
+                python3 -c "import json,sys; print(json.load(sys.stdin).get('current_round',0))" 2>/dev/null || echo "0")
+            echo -n "."
+        done
+        echo ""
+        print_status "Chain at round ${current_round} — proceeding with tests"
+    fi
+
+    # Phase 11f: Smoke tests
     print_header "Running Smoke Tests"
     local SMOKE_LOG="/tmp/smoke_test.log"
     echo "" > "$SMOKE_LOG"
