@@ -9884,9 +9884,9 @@ ${alloc_entry}
 
 kafka:
   enabled: true
-  host: "kafka:9092"
+  host: "${KAFKA_HOST:-198.19.0.99:9092}"
   username: "admin"
-  password: "admin-secret"
+  password: "${KAFKA_PASSWORD:-admin-secret}"
   eventsTopic: "monitor"
   eventsGroupId: "events-consumer"
   eventsRetryTopic: "monitor-retry"
@@ -9901,6 +9901,12 @@ CRAWLEREOF
         "$CRAWLER_DIR/docker.local/docker-compose.yml" 2>/dev/null || true
     sed -i 's|--config_path=/crawler/config|--config_path=/usr/src/app/docker.local/config|g' \
         "$CRAWLER_DIR/docker.local/docker-compose.yml" 2>/dev/null || true
+
+    # Expose crawler API port (9081 inside container → 3030 on host)
+    if ! grep -q "ports:" "$CRAWLER_DIR/docker.local/docker-compose.yml" 2>/dev/null; then
+        sed -i '/restart: always/a\    ports:\n      - "3030:9081"' \
+            "$CRAWLER_DIR/docker.local/docker-compose.yml" 2>/dev/null || true
+    fi
 
     # Stop existing crawler if running (to pick up new image)
     if docker ps --format "{{.Names}}" | grep -q "^crawler$"; then
