@@ -14,7 +14,7 @@ import (
 func Test0BoxReferral(testSetup *testing.T) {
 	require.True(testSetup, isZboxResponding(), "0box service must be available")
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
+	// NOT parallel: shares identity with other 0box tests; concurrent Teardown deletes wallet rows.
 	t.SetSmokeTests("Post referrals with correct CSRF should work properly")
 
 	t.RunSequentially("Get referral code with owner should work", func(t *test.SystemTest) {

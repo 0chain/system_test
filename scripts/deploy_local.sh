@@ -3209,13 +3209,9 @@ start_zauth() {
     # Patch: allow faucet pour for split wallets
     patch_zauth_faucet
 
-    # Checkout correct gosdk branch for zauth-server.
-    # NOTE: Do NOT inject local gosdk into zauth — it's a key management server, not a chain
-    # client. The LFB-aware gosdk branch may be missing symbols (e.g. zcncore.AvailableRestrictions)
-    # that zauth's staging branch expects. Let zauth use its own gosdk dependency.
+    # Checkout correct gosdk branch and inject into zauth-server build
     checkout_gosdk_for_dependent "zauth-server"
-    # Tidy go.mod after gosdk version change so go.sum is correct for docker build
-    (cd "${BASE_DIR}/zauth-server" && go mod tidy 2>&1) || print_warning "zauth go mod tidy failed"
+    inject_local_gosdk "${BASE_DIR}/zauth-server" "${BASE_DIR}/zauth-server/docker.local/Dockerfile"
 
     cd "${BASE_DIR}/zauth-server/docker.local"
 
@@ -11665,7 +11661,7 @@ checkout_gosdk_for_dependent() {
                     gosdk_branch=$(echo "$line" | awk -F': ' '{print $2}' | sed 's/#.*//' | tr -d ' "'"'"'')
                     break
                 fi
-                if echo "$line" | grep -qP '^\s+\w+:$'; then
+                if echo "$line" | grep -qP '^\s+[\w-]+:\s*$'; then
                     break
                 fi
             fi
@@ -12008,6 +12004,12 @@ swap_image() {
             # Force-restore Dockerfiles to committed version in case of local modifications
             git checkout -- docker.local/build.miner/Dockerfile docker.local/build.sharder/Dockerfile 2>/dev/null || true
             print_status "Miner Dockerfile vendor line: $(grep 'go mod vendor' docker.local/build.miner/Dockerfile)"
+            # CRITICAL: Replace sync_clock.sh with no-op on VPS (hangs indefinitely on Hetzner)
+            local _sync_clock="${repo_path}/docker.local/bin/sync_clock.sh"
+            if [ -f "$_sync_clock" ] && grep -q 'hwclock' "$_sync_clock" 2>/dev/null; then
+                printf '#!/bin/bash\necho "sync_clock skipped (VPS — no hardware clock)"\n' > "$_sync_clock"
+                print_status "Replaced sync_clock.sh with no-op (VPS fix)"
+            fi
             # Ensure base images exist (needed after docker system prune)
             if ! docker image inspect zchain_build_base > /dev/null 2>&1; then
                 print_status "Building base images..."

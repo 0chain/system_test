@@ -319,6 +319,10 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Add blobber failed: %s", strings.Join(output, "\n"))
 
+		// Upload a new file so the added blobber receives data shards.
+		// Without data, the chain won't generate challenges for this blobber.
+		generateFileAndUpload(t, allocationId, "/", int64(1*MB))
+
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, blobberId)
 
 		// Poll for challenges — added blobber needs time to accumulate them (up to 10 minutes)
@@ -407,6 +411,10 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		})
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Replace blobber failed: %s", strings.Join(output, "\n"))
+
+		// Upload a new file so the replacement blobber receives data shards.
+		// Without data, the chain won't generate challenges for this blobber.
+		generateFileAndUpload(t, allocationId, "/", int64(1*MB))
 
 		// Added blobber should get challenges for this allocation
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, addedBlobberID)

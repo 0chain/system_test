@@ -38,7 +38,7 @@ func NewTestShareinfo() map[string]string {
 func Test0BoxShareinfo(testSetup *testing.T) {
 	require.True(testSetup, isZboxResponding(), "0box service must be available")
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
+	// NOT parallel: shares identity with other 0box tests; concurrent Teardown deletes wallet rows.
 
 	t.RunSequentially("Create shareinfo valid auth ticket should work", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)

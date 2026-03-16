@@ -259,7 +259,12 @@ func checkMinerDelegatePoolBlockRewards(
 			)
 		}
 		for poolId := range afterMiners[i].StakePool.Pools {
-			actualReward := afterMiners[i].StakePool.Pools[poolId].Reward - beforeMiners[i].StakePool.Pools[poolId].Reward
+			// Guard against pools added between before/after snapshots (e.g. auto_fund_daemon staking).
+			var beforeReward int64
+			if bp, ok := beforeMiners[i].StakePool.Pools[poolId]; ok && bp != nil {
+				beforeReward = bp.Reward
+			}
+			actualReward := afterMiners[i].StakePool.Pools[poolId].Reward - beforeReward
 			// events_db may miss DelegateReward entries during view changes (under-reporting is acceptable).
 			// Only fail if events over-report actual chain rewards by more than cumulativeDelta.
 			if actualReward >= 0 {

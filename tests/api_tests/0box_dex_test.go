@@ -20,7 +20,7 @@ func NewTestDex() map[string]string {
 func Test0BoxDex(testSetup *testing.T) {
 	require.True(testSetup, isZboxResponding(), "0box service must be available")
 	t := test.NewSystemTest(testSetup)
-	t.Parallel()
+	// NOT parallel: shares identity with other 0box tests; concurrent Teardown deletes wallet rows.
 
 	t.RunSequentially("Create dex should work", func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)

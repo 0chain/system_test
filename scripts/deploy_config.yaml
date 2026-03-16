@@ -62,6 +62,7 @@ repositories:
     branch: fix/blobber-discovery
     path: crawler
     build_required: true
+    gosdk_branch: fix/lfb-aware-sharder-selection  # gosdk branch to use when building
     containers:
       - crawler
 
@@ -90,6 +91,7 @@ repositories:
     branch: staging
     path: zauth-server
     build_required: true
+    gosdk_branch: fix/lfb-aware-sharder-selection  # gosdk branch to use when building
     containers:
       - zauth
 
