@@ -13749,11 +13749,48 @@ main() {
         fi
     fi
 
-    if [ "$preflight_ok" != "true" ]; then
-        print_error "Pre-flight checks FAILED. Aborting tests."
+    # Check critical services are running
+    local svc_ok=true
+    for svc_check in "0box:9081" "zauth:8080" "zvault:8090"; do
+        local svc_name="${svc_check%%:*}"
+        local svc_port="${svc_check##*:}"
+        if ! curl -sf "http://localhost:${svc_port}/" -m 3 > /dev/null 2>&1; then
+            print_error "FATAL: ${svc_name} not responding on port ${svc_port}"
+            svc_ok=false
+        fi
+    done
+
+    # Check minimum blobbers registered and staked
+    local blobber_count
+    blobber_count=$(curl -s "http://198.18.0.81:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/getblobbers" -m 5 2>/dev/null | \
+        python3 -c "import json,sys; d=json.load(sys.stdin); print(len([n for n in d.get('Nodes',[]) if n.get('total_stake',0)>0]))" 2>/dev/null || echo "0")
+    if [ "${blobber_count:-0}" -lt 4 ]; then
+        print_error "FATAL: Only ${blobber_count} staked blobbers (need at least 4 for allocations)"
+        svc_ok=false
+    else
+        print_status "Blobbers: ${blobber_count} registered and staked"
+    fi
+
+    # Check chain is advancing
+    local r1 r2
+    r1=$(curl -s "http://198.18.0.81:7171/v1/chain/get/stats" -m 3 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('current_round',0))" 2>/dev/null || echo "0")
+    sleep 3
+    r2=$(curl -s "http://198.18.0.81:7171/v1/chain/get/stats" -m 3 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('current_round',0))" 2>/dev/null || echo "0")
+    if [ "${r1:-0}" -eq "${r2:-0}" ] || [ "${r2:-0}" -eq 0 ]; then
+        print_error "FATAL: Chain not advancing (round ${r1} → ${r2})"
+        svc_ok=false
+    else
+        print_status "Chain advancing: round ${r1} → ${r2}"
+    fi
+
+    if [ "$preflight_ok" != "true" ] || [ "$svc_ok" != "true" ]; then
+        print_error "========================================="
+        print_error "  DEPLOYMENT FAILED — DO NOT RUN TESTS"
+        print_error "========================================="
+        print_error "Fix the issues above before running tests."
         return 1
     fi
-    print_status "Pre-flight checks passed — wallets funded, proceeding with tests"
+    print_status "All pre-flight checks passed — services up, wallets funded, chain healthy"
 
     # Phase 11f: Smoke tests
     print_header "Running Smoke Tests"
