@@ -236,22 +236,35 @@ checkout_branches() {
         git clean -fd 2>/dev/null || true
 
         # Fetch ALL remote branches (not just tracked ones — needed for first-time checkout)
-        git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null || {
-            print_warning "Failed to fetch ${repo}, using local branch"
-        }
+        if ! git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null; then
+            print_error "FATAL: Failed to fetch ${repo} — check network/git access"
+            return 1
+        fi
 
         # Checkout branch with force (handles dirty index and untracked file conflicts)
         if git rev-parse --verify "origin/${branch}" >/dev/null 2>&1; then
-            git checkout -f "$branch" 2>/dev/null || git checkout -B "$branch" "origin/${branch}" 2>/dev/null || true
+            git checkout -f "$branch" 2>/dev/null || git checkout -B "$branch" "origin/${branch}" 2>/dev/null || {
+                print_error "FATAL: Failed to checkout ${branch} for ${repo}"
+                return 1
+            }
             git reset --hard "origin/${branch}" 2>/dev/null || true
         elif git rev-parse --verify "$branch" >/dev/null 2>&1; then
-            git checkout -f "$branch" 2>/dev/null || true
+            git checkout -f "$branch" 2>/dev/null || {
+                print_error "FATAL: Failed to checkout ${branch} for ${repo}"
+                return 1
+            }
         else
-            print_warning "Branch '${branch}' not found for ${repo}, staying on current branch"
+            print_error "FATAL: Branch '${branch}' not found for ${repo} (not on remote)"
+            return 1
         fi
 
+        # Verify we're on the right branch
         local current=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
         local short_hash=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+        if [ "$current" != "$branch" ]; then
+            print_error "FATAL: ${repo} on '${current}' instead of '${branch}' after checkout"
+            return 1
+        fi
         print_status "  ${repo}: ${current} (${short_hash})"
     done
 
@@ -11829,14 +11842,29 @@ swap_image() {
         cd "$repo_path"
         git stash 2>/dev/null || true
         git clean -fd 2>/dev/null || true
-        git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null || true
+        if ! git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null; then
+            print_error "FATAL: Failed to fetch ${repo} — check network/git access"
+            return 1
+        fi
         if git rev-parse --verify "origin/${branch}" >/dev/null 2>&1; then
-            git checkout -f "$branch" 2>/dev/null || git checkout -B "$branch" "origin/${branch}" 2>/dev/null || true
+            git checkout -f "$branch" 2>/dev/null || git checkout -B "$branch" "origin/${branch}" 2>/dev/null || {
+                print_error "FATAL: Failed to checkout ${branch} for ${repo}"
+                return 1
+            }
             git reset --hard "origin/${branch}" 2>/dev/null || true
         elif git rev-parse --verify "$branch" >/dev/null 2>&1; then
-            git checkout -f "$branch" 2>/dev/null || true
+            git checkout -f "$branch" 2>/dev/null || {
+                print_error "FATAL: Failed to checkout ${branch} for ${repo}"
+                return 1
+            }
         else
-            print_error "Branch '${branch}' not found"
+            print_error "FATAL: Branch '${branch}' not found for ${repo}"
+            return 1
+        fi
+        # Verify correct branch
+        local actual_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+        if [ "$actual_branch" != "$branch" ]; then
+            print_error "FATAL: ${repo} on '${actual_branch}' instead of '${branch}'"
             return 1
         fi
     fi
@@ -11856,8 +11884,14 @@ swap_image() {
             print_status "Checking out gosdk branch and rebuilding CLI dependents..."
             cd "$repo_path"
             git stash 2>/dev/null || true
-            git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null || true
-            git checkout -f "$branch" 2>/dev/null || git checkout -B "$branch" "origin/${branch}" 2>/dev/null || true
+            if ! git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null; then
+                print_error "FATAL: Failed to fetch gosdk"
+                return 1
+            fi
+            git checkout -f "$branch" 2>/dev/null || git checkout -B "$branch" "origin/${branch}" 2>/dev/null || {
+                print_error "FATAL: Failed to checkout gosdk ${branch}"
+                return 1
+            }
             git reset --hard "origin/${branch}" 2>/dev/null || true
             local short_hash_sdk=$(git rev-parse --short HEAD 2>/dev/null)
             print_status "gosdk now at ${branch} (${short_hash_sdk})"

@@ -101,7 +101,7 @@ server {
     location /blobber07/ { proxy_pass http://localhost:5057/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
     location /blobber08/ { proxy_pass http://localhost:5058/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
     location /blobber09/ { proxy_pass http://localhost:5059/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
-    location /blobber10/ { proxy_pass http://localhost:5060/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
+    location /blobber10/ { proxy_pass http://localhost:50610/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
     location /blobber11/ { proxy_pass http://localhost:50611/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
     location /blobber12/ { proxy_pass http://localhost:50612/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
 
@@ -115,7 +115,7 @@ server {
     location /validator07/ { proxy_pass http://localhost:5067/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
     location /validator08/ { proxy_pass http://localhost:5068/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
     location /validator09/ { proxy_pass http://localhost:5069/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
-    location /validator10/ { proxy_pass http://localhost:5070/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
+    location /validator10/ { proxy_pass http://localhost:50710/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
     location /validator11/ { proxy_pass http://localhost:50711/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
     location /validator12/ { proxy_pass http://localhost:50712/; proxy_set_header Host $host; proxy_set_header X-Real-IP $remote_addr; }
 
