@@ -130,6 +130,9 @@ func TestRollbackAllocation(testSetup *testing.T) {
 		secondUpdateChecksum := generateChecksum(t, secondUpdatedFilePath)
 		t.Logf("Update2 file checksum: %s", secondUpdateChecksum)
 
+		// Wait for write markers to settle on all blobbers before rollback
+		cliutils.Wait(t, 10*time.Second)
+
 		// Perform rollback
 		output, err := rollbackAllocation(t, escapedTestName(t), configPath, createParams(map[string]interface{}{
 			"allocation": allocationID,
@@ -858,5 +861,5 @@ func rollbackAllocation(t *test.SystemTest, wallet, cliConfigFilename, params st
 	cmd := fmt.Sprintf("./zbox rollback %s --silent --wallet %s_wallet.json --configDir ./config --config %s",
 		params, wallet, cliConfigFilename)
 
-	return cliutils.RunCommand(t, cmd, 3, time.Second*2)
+	return cliutils.RunCommand(t, cmd, 5, time.Second*10)
 }

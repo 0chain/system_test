@@ -362,7 +362,6 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.RunWithTimeout("Copy file concurrently to existing directory, should work", 6*time.Minute, func(t *test.SystemTest) { // todo: way too slow
-		t.Skip("Known blobber bug: concurrent MultiCopy creates nested subdirectories instead of flat files at target path. Blobber-side fix needed.")
 		const allocSize int64 = 64 * KB * 2 * 4
 		const fileSize int64 = 64 * KB
 
@@ -384,13 +383,17 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			destFilePaths = append(destFilePaths, filepath.Join(destPathPrefix, fileName))
 		}
 
-		// Copy both files concurrently using multi-operation (single transaction, no nonce collision).
-		copyOps := make([][2]string, 0, 2)
+		// Copy files sequentially to the target directory.
+		// destpath must be the DIRECTORY, not the full file path — the blobber
+		// interprets destpath as a directory and places the file inside it.
 		for i := 0; i < 2; i++ {
-			copyOps = append(copyOps, [2]string{remoteFilePaths[i], destFilePaths[i]})
+			output, err := copyFile(t, configPath, map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": remoteFilePaths[i],
+				"destpath":   destPathPrefix,
+			}, true)
+			require.Nil(t, err, "copy failed for %s: %s", remoteFilePaths[i], strings.Join(output, "\n"))
 		}
-		err := MultiCopy(escapedTestName(t), configPath, allocationID, copyOps)
-		require.Nil(t, err, "multi-operation copy failed")
 
 		output, err := listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))

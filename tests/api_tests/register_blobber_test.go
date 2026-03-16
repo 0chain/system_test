@@ -154,10 +154,11 @@ func TestRegisterBlobber(testSetup *testing.T) {
 
 		// Use read_price = 0 to ensure it's within valid range (max_read_price is 0.0 in config)
 		// This allows the service_charge validation to be tested without triggering read_price validation first.
-		// WritePrice must be above min_write_price (0.001 ZCN = 10^7 SAS, but concurrent tests may change it).
-		// Use 10 ZCN (10^11 SAS) to safely exceed any temporary min_write_price.
+		// WritePrice must be between min_write_price (0.001 ZCN) and max_write_price (7 ZCN).
+		// Use 5 ZCN (5×10^10 SAS) — TestUpdateStorageSCConfig temporarily bumps min_write_price
+		// by +0.1 ZCN during its bulk update, so we need a large margin above any temporary bump.
 		sn.Terms.ReadPrice = 0
-		sn.Terms.WritePrice = 100000000000
+		sn.Terms.WritePrice = 50000000000
 
 		sn.StakePoolSettings.DelegateWallet = "config.Configuration.DelegateWallet"
 		sn.StakePoolSettings.NumDelegates = 2

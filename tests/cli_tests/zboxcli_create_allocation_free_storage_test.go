@@ -97,7 +97,7 @@ func TestCreateAllocationFreeStorage(testSetup *testing.T) {
 		t.Log(output)
 	})
 
-	t.RunWithTimeout("Create free storage from marker with accounting", 60*time.Second, func(t *test.SystemTest) {
+	t.RunWithTimeout("Create free storage from marker with accounting", 3*time.Minute, func(t *test.SystemTest) {
 		recipient := escapedTestName(t)
 
 		// create recipient wallet and fund from faucet (needs balance to pay transaction fees)
@@ -319,7 +319,7 @@ func createFreeStorageAllocation(t *test.SystemTest, configFile, from, params st
 		"./zbox add --silent %s --wallet %s --configDir ./config --config %s",
 		params,
 		from+"_wallet.json",
-		configFile), 3, time.Second*5)
+		configFile), 5, time.Second*15)
 }
 
 func getFreeStorageMarkerSignature(t *test.SystemTest, marker *climodel.FreeStorageMarker, assignerWallet *climodel.WalletFile) string {

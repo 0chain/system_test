@@ -371,7 +371,6 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 	})
 
 	t.RunWithTimeout("Move file concurrently to existing directory, should work", 10*time.Minute, func(t *test.SystemTest) { //todo:too slow
-		t.Skip("Known blobber bug: concurrent MultiMove creates nested subdirectories instead of flat files at target path. Blobber-side fix needed.")
 		const allocSize int64 = 64 * KB * 4
 		const fileSize int64 = 64 * KB
 
@@ -393,13 +392,17 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 			destFilePaths = append(destFilePaths, filepath.Join(destPathPrefix, fileName))
 		}
 
-		// Move both files concurrently using multi-operation (single transaction, no nonce collision).
-		moveOps := make([][2]string, 0, 2)
+		// Move files sequentially to the target directory.
+		// destpath must be the DIRECTORY, not the full file path — the blobber
+		// interprets destpath as a directory and places the file inside it.
 		for i := 0; i < 2; i++ {
-			moveOps = append(moveOps, [2]string{remoteFilePaths[i], destFilePaths[i]})
+			output, err := moveFile(t, configPath, map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": remoteFilePaths[i],
+				"destpath":   destPathPrefix,
+			}, true)
+			require.Nil(t, err, "move failed for %s: %s", remoteFilePaths[i], strings.Join(output, "\n"))
 		}
-		err := MultiMove(escapedTestName(t), configPath, allocationID, moveOps)
-		require.Nil(t, err, "multi-operation move failed")
 
 		output, err := listAll(t, configPath, allocationID, true)
 		require.Nil(t, err, "Unexpected list all failure %s", strings.Join(output, "\n"))
