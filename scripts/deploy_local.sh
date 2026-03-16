@@ -231,22 +231,21 @@ checkout_branches() {
 
         cd "$repo_path"
 
-        # Stash any local changes
-        local stash_output
-        stash_output=$(git stash 2>&1) || true
+        # Clean and stash local changes (dirty trees block branch switches)
+        git stash 2>/dev/null || true
+        git clean -fd 2>/dev/null || true
 
-        # Fetch latest
-        git fetch origin 2>/dev/null || {
+        # Fetch ALL remote branches (not just tracked ones — needed for first-time checkout)
+        git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null || {
             print_warning "Failed to fetch ${repo}, using local branch"
         }
 
-        # Checkout branch
+        # Checkout branch with force (handles dirty index and untracked file conflicts)
         if git rev-parse --verify "origin/${branch}" >/dev/null 2>&1; then
-            git checkout "$branch" 2>/dev/null || git checkout -b "$branch" "origin/${branch}" 2>/dev/null || true
-            git fetch origin "$branch" 2>/dev/null || true
-            git reset --hard "origin/${branch}" 2>/dev/null || git pull origin "$branch" 2>/dev/null || true
+            git checkout -f "$branch" 2>/dev/null || git checkout -B "$branch" "origin/${branch}" 2>/dev/null || true
+            git reset --hard "origin/${branch}" 2>/dev/null || true
         elif git rev-parse --verify "$branch" >/dev/null 2>&1; then
-            git checkout "$branch" 2>/dev/null || true
+            git checkout -f "$branch" 2>/dev/null || true
         else
             print_warning "Branch '${branch}' not found for ${repo}, staying on current branch"
         fi
@@ -11635,10 +11634,10 @@ checkout_gosdk_for_dependent() {
 
     print_status "Checking out gosdk → ${gosdk_branch} (for ${dependent_repo})..."
     cd "$gosdk_dir"
-    git fetch origin 2>/dev/null || true
+    git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null || true
     git stash 2>/dev/null || true
     if git rev-parse --verify "origin/${gosdk_branch}" >/dev/null 2>&1; then
-        git checkout "$gosdk_branch" 2>/dev/null || git checkout -b "$gosdk_branch" "origin/${gosdk_branch}" 2>/dev/null || true
+        git checkout -f "$gosdk_branch" 2>/dev/null || git checkout -B "$gosdk_branch" "origin/${gosdk_branch}" 2>/dev/null || true
         git pull origin "$gosdk_branch" 2>/dev/null || true
     elif git rev-parse --verify "$gosdk_branch" >/dev/null 2>&1; then
         git checkout "$gosdk_branch" 2>/dev/null || true
