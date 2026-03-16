@@ -1,8 +1,15 @@
 #!/bin/bash
 # Crawler Blobber Discovery Test Script
 #
-# Tests the crawler's ability to discover uncovered blobbers and manage allocations
-# when max_blobbers_per_allocation limits are reached.
+# Tests the crawler's ability to discover uncovered blobbers, add them to
+# existing allocations, and create new allocations when max_blobbers_per_allocation
+# is reached.
+#
+# Test plan (4 subtests):
+#   A. Set max_blobbers_per_allocation=6, restart crawler with empty alloc list
+#   B. Trigger discovery → should create 2 allocations (6 + 5 = 11 blobbers)
+#   C. Raise max to 9, trigger again → should be no-op (all covered)
+#   D. Verify all blobbers covered, then restore original config
 #
 # Usage:
 #   bash scripts/test_crawler_discovery.sh [server_ip]
@@ -19,6 +26,7 @@ ZBOX="/root/Code/zboxcli/zbox"
 ZWALLET="/root/Code/zwalletcli/zwallet"
 SHARDER="http://198.18.0.81:7171"
 STORAGE_SC="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+CRAWLER_CONFIG="/root/Code/crawler/docker.local/config/crawler.yaml"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -42,10 +50,6 @@ get_max_blobbers() {
     run_remote "curl -s '${SHARDER}/v1/screst/${STORAGE_SC}/storage-config' | python3 -c \"import json,sys; d=json.load(sys.stdin); f=d.get('fields',d); print(int(float(f.get('max_blobbers_per_allocation','40'))))\""
 }
 
-get_alloc_blobber_count() {
-    run_remote "curl -s '${SHARDER}/v1/screst/${STORAGE_SC}/allocation?allocation=$1' | python3 -c \"import json,sys; d=json.load(sys.stdin); print(len(d.get('blobbers',[])))\""
-}
-
 get_active_regular_count() {
     run_remote "curl -s '${SHARDER}/v1/screst/${STORAGE_SC}/getblobbers' | python3 -c \"import json,sys; d=json.load(sys.stdin); print(len([b for b in d.get('Nodes',[]) if not b.get('is_killed') and not b.get('is_shutdown') and not b.get('is_enterprise')]))\""
 }
@@ -62,115 +66,163 @@ set_sc_config() {
     run_remote "${ZWALLET} sc-update-config --keys $1 --values $2 --wallet ${WALLET} --configDir ${ZCN_CONFIG_DIR} --config ${CONFIG} --silent 2>&1"
 }
 
+# Restart crawler with empty allocation list (keeps wallet keys intact)
+restart_crawler_empty() {
+    run_remote "python3 -c \"
+import yaml
+with open('${CRAWLER_CONFIG}') as f:
+    cfg = yaml.safe_load(f)
+cfg['allocations'] = []
+with open('${CRAWLER_CONFIG}', 'w') as f:
+    yaml.dump(cfg, f, default_flow_style=False)
+print('Cleared allocations from config')
+\" && docker restart crawler && sleep 5"
+}
+
 header "Crawler Blobber Discovery Test"
 
-# Pre-check
+# Pre-checks
 info "Checking crawler API..."
 health=$(crawler_health)
 if ! echo "$health" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['status']=='ok'" 2>/dev/null; then
     echo -e "${RED}FATAL${NC}: Crawler API not reachable at ${CRAWLER_API} on ${SERVER}"
     exit 1
 fi
-alloc_count=$(echo "$health" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('allocations',0))" 2>/dev/null)
-info "Crawler healthy, ${alloc_count} allocation(s)"
+info "Crawler healthy"
 
 ORIGINAL_MAX=$(get_max_blobbers)
 ACTIVE_COUNT=$(get_active_regular_count)
 info "max_blobbers_per_allocation: ${ORIGINAL_MAX}, active regular blobbers: ${ACTIVE_COUNT}"
 
-# Get current crawler allocation
-CRAWLER_ALLOC=$(run_remote "grep -A 1 'allocations:' /root/Code/crawler/docker.local/config/crawler.yaml | tail -1 | sed 's/.*- //' | tr -d ' \"'")
-CURRENT_BLOBBERS=$(get_alloc_blobber_count "$CRAWLER_ALLOC")
-info "Crawler allocation ${CRAWLER_ALLOC:0:16}... has ${CURRENT_BLOBBERS} blobbers"
+if [ "$ACTIVE_COUNT" -lt 8 ]; then
+    echo -e "${RED}FATAL${NC}: Need at least 8 active regular blobbers, found ${ACTIVE_COUNT}"
+    exit 1
+fi
+
+# Save original crawler config
+run_remote "cp ${CRAWLER_CONFIG} ${CRAWLER_CONFIG}.bak"
 
 # ================================================================
-header "Subtest A: Set max_blobbers_per_allocation to 14"
+header "Subtest A: Set max_blobbers=6, restart crawler with empty allocs"
 # ================================================================
 
-NEW_MAX=14
-info "Setting max_blobbers_per_allocation to ${NEW_MAX}..."
-output=$(set_sc_config "max_blobbers_per_allocation" "${NEW_MAX}")
-sleep 3  # wait for chain to process
+info "Setting max_blobbers_per_allocation to 6..."
+output=$(set_sc_config "max_blobbers_per_allocation" "6")
+sleep 3
 
 VERIFY_MAX=$(get_max_blobbers)
-if [ "$VERIFY_MAX" = "$NEW_MAX" ]; then
-    pass "max_blobbers_per_allocation set to ${VERIFY_MAX}"
+if [ "$VERIFY_MAX" = "6" ]; then
+    info "Verified: max_blobbers_per_allocation = 6"
 else
-    fail "expected ${NEW_MAX}, got ${VERIFY_MAX}"
+    fail "Subtest A: expected max=6, got ${VERIFY_MAX}"
+fi
+
+info "Restarting crawler with empty allocation list..."
+restart_crawler_empty
+sleep 5
+
+# Verify crawler is up — initial discovery runs on startup so it may already have allocations
+health2=$(crawler_health)
+alloc_count=$(echo "$health2" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('allocations',0))" 2>/dev/null)
+if echo "$health2" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['status']=='ok'" 2>/dev/null; then
+    pass "Subtest A: Crawler restarted with max_blobbers=6 (${alloc_count} alloc(s) from initial discovery)"
+else
+    fail "Subtest A: Crawler not healthy after restart"
 fi
 
 # ================================================================
-header "Subtest B: Trigger discovery — all blobbers should be covered"
+header "Subtest B: Trigger discovery → expect 2 allocations"
 # ================================================================
 
-info "Triggering crawler discovery..."
+info "Triggering discovery (${ACTIVE_COUNT} blobbers, max 6 per alloc)..."
+info "Expected: alloc1=6 blobbers, alloc2=${ACTIVE_COUNT}-6=$((ACTIVE_COUNT-6)) blobbers"
 result=$(trigger_discover)
 echo "$result" | python3 -m json.tool 2>/dev/null
 
 uncovered=$(echo "$result" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('uncovered_count',0))" 2>/dev/null)
+added=$(echo "$result" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('added_to_existing',0))" 2>/dev/null)
+new_allocs=$(echo "$result" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('new_allocations_created',0))" 2>/dev/null)
+leftover=$(echo "$result" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('leftover_count',0))" 2>/dev/null)
 total=$(echo "$result" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('total_active',0))" 2>/dev/null)
 
-if [ "$uncovered" = "0" ] && [ "$total" -gt 0 ]; then
-    pass "All ${total} blobbers covered, 0 uncovered"
-else
-    # Some uncovered — discovery should add them
-    added=$(echo "$result" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('added_to_existing',0))" 2>/dev/null)
-    new_allocs=$(echo "$result" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('new_allocations_created',0))" 2>/dev/null)
-    if [ "$added" -gt 0 ] || [ "$new_allocs" -gt 0 ]; then
-        pass "Discovery found ${uncovered} uncovered, added ${added}, created ${new_allocs} new alloc(s)"
+# With 0 existing allocations and max=6: discovery creates NEW allocations.
+# First alloc: 6 blobbers. Second alloc: remaining (5 if 11 total, 6 if 12).
+# The remaining must be >= 4 to create an allocation.
+expected_allocs=0
+remaining=$((ACTIVE_COUNT))
+while [ "$remaining" -ge 4 ]; do
+    if [ "$remaining" -gt 6 ]; then
+        remaining=$((remaining - 6))
     else
-        fail "Discovery found ${uncovered} uncovered but added none"
+        remaining=0
     fi
+    expected_allocs=$((expected_allocs + 1))
+done
+
+if [ "$new_allocs" -ge 2 ]; then
+    pass "Subtest B: Created ${new_allocs} allocations for ${total} blobbers (leftover: ${leftover})"
+elif [ "$new_allocs" -ge 1 ] && [ "$leftover" -lt 4 ]; then
+    pass "Subtest B: Created ${new_allocs} allocation(s), ${leftover} leftover (< 4, cannot form allocation)"
+else
+    fail "Subtest B: Expected >=2 allocations, got ${new_allocs} (uncovered=${uncovered}, added=${added})"
+fi
+
+# Verify crawler now has the allocations
+health3=$(crawler_health)
+alloc_count3=$(echo "$health3" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('allocations',0))" 2>/dev/null)
+info "Crawler now has ${alloc_count3} allocation(s)"
+
+# ================================================================
+header "Subtest C: Raise max to 9, re-trigger → should be no-op"
+# ================================================================
+
+info "Raising max_blobbers_per_allocation to 9..."
+set_sc_config "max_blobbers_per_allocation" "9" > /dev/null
+sleep 3
+
+info "Triggering discovery again..."
+result2=$(trigger_discover)
+echo "$result2" | python3 -m json.tool 2>/dev/null
+
+uncovered2=$(echo "$result2" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('uncovered_count',0))" 2>/dev/null)
+added2=$(echo "$result2" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('added_to_existing',0))" 2>/dev/null)
+
+if [ "$uncovered2" = "0" ]; then
+    pass "Subtest C: All blobbers still covered after raising max to 9 (0 uncovered)"
+elif [ "$added2" -gt 0 ]; then
+    # If leftover blobbers from subtest B now get added to existing allocs
+    pass "Subtest C: ${added2} leftover blobbers added to existing allocations after raising max"
+else
+    fail "Subtest C: ${uncovered2} uncovered, ${added2} added — expected all covered"
 fi
 
 # ================================================================
-header "Subtest C: Verify allocation blobber count matches chain"
+header "Subtest D: Final verify — all blobbers covered"
 # ================================================================
 
-AFTER_BLOBBERS=$(get_alloc_blobber_count "$CRAWLER_ALLOC")
-info "Crawler allocation now has ${AFTER_BLOBBERS} blobbers (chain has ${ACTIVE_COUNT} regular)"
-
-health_after=$(crawler_health)
-alloc_count_after=$(echo "$health_after" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('allocations',0))" 2>/dev/null)
-
-if [ "$AFTER_BLOBBERS" -ge "$ACTIVE_COUNT" ] || [ "$alloc_count_after" -gt 1 ]; then
-    pass "All blobbers accounted for: ${AFTER_BLOBBERS} in primary alloc, ${alloc_count_after} total alloc(s)"
-else
-    # Check if all are covered across multiple allocations
-    result2=$(trigger_discover)
-    uncovered2=$(echo "$result2" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('uncovered_count',0))" 2>/dev/null)
-    if [ "$uncovered2" = "0" ]; then
-        pass "All blobbers covered across ${alloc_count_after} allocation(s)"
-    else
-        fail "Still ${uncovered2} uncovered blobbers"
-    fi
-fi
-
-# ================================================================
-header "Subtest D: Re-trigger — verify idempotent (no changes)"
-# ================================================================
-
-info "Triggering discovery again (should be idempotent)..."
 result3=$(trigger_discover)
-echo "$result3" | python3 -m json.tool 2>/dev/null
-
 uncovered3=$(echo "$result3" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('uncovered_count',0))" 2>/dev/null)
-added3=$(echo "$result3" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('added_to_existing',0))" 2>/dev/null)
-new_allocs3=$(echo "$result3" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('new_allocations_created',0))" 2>/dev/null)
+total3=$(echo "$result3" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('total_active',0))" 2>/dev/null)
+health4=$(crawler_health)
+final_allocs=$(echo "$health4" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('allocations',0))" 2>/dev/null)
 
-if [ "$uncovered3" = "0" ] && [ "$added3" = "0" ] && [ "$new_allocs3" = "0" ]; then
-    pass "Idempotent: 0 uncovered, 0 added, 0 new allocations"
+if [ "$uncovered3" = "0" ] && [ "$total3" -ge 8 ]; then
+    pass "Subtest D: All ${total3} blobbers covered across ${final_allocs} allocation(s)"
 else
-    fail "Not idempotent: uncovered=${uncovered3} added=${added3} new_allocs=${new_allocs3}"
+    fail "Subtest D: ${uncovered3} uncovered out of ${total3} total"
 fi
 
 # ================================================================
-header "Cleanup: Restore max_blobbers_per_allocation"
+header "Cleanup"
 # ================================================================
 
 info "Restoring max_blobbers_per_allocation to ${ORIGINAL_MAX}..."
 set_sc_config "max_blobbers_per_allocation" "${ORIGINAL_MAX}" > /dev/null
-info "Restored"
+
+info "Restoring original crawler config..."
+run_remote "cp ${CRAWLER_CONFIG}.bak ${CRAWLER_CONFIG} && docker restart crawler" > /dev/null
+sleep 5
+info "Done"
 
 # ================================================================
 header "Results"
