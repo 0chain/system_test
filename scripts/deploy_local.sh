@@ -13783,13 +13783,30 @@ main() {
         fi
     fi
 
-    # Check critical services are running
+    # Check critical services are running.
+    # Use HTTP status code check (any response = alive), not curl -f (fails on 4xx).
+    # zauth/zvault return 404 on root path — that's normal, means the service is up.
+    # Retry 3 times with 1 minute delay before marking FATAL.
     local svc_ok=true
     for svc_check in "0box:9081" "zauth:8080" "zvault:8090"; do
         local svc_name="${svc_check%%:*}"
         local svc_port="${svc_check##*:}"
-        if ! curl -sf "http://localhost:${svc_port}/" -m 3 > /dev/null 2>&1; then
-            print_error "FATAL: ${svc_name} not responding on port ${svc_port}"
+        local svc_alive=false
+        for _attempt in 1 2 3; do
+            local http_code
+            http_code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:${svc_port}/" -m 5 2>/dev/null) || http_code="000"
+            if [ "$http_code" != "000" ]; then
+                print_status "${svc_name} responding on port ${svc_port} (HTTP ${http_code})"
+                svc_alive=true
+                break
+            fi
+            if [ "$_attempt" -lt 3 ]; then
+                print_warning "${svc_name} not responding on port ${svc_port} (attempt ${_attempt}/3), retrying in 60s..."
+                sleep 60
+            fi
+        done
+        if [ "$svc_alive" != "true" ]; then
+            print_error "FATAL: ${svc_name} not responding on port ${svc_port} after 3 attempts"
             svc_ok=false
         fi
     done
