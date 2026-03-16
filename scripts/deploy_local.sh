@@ -13703,25 +13703,57 @@ main() {
     # Phase 11d: Swap-image tests — skipped (already tested, takes too long in deploy pipeline)
     # test_swap_image
 
-    # Phase 11e: Wait for chain to mature before tests.
-    # Fresh chains have unreliable sharder confirmations in the first ~5000 rounds
-    # (many registration/staking/config txns in initial blocks). Tests that create
-    # allocations fail with "unexpected end of JSON input" if run too early.
-    local MIN_ROUND=5000
-    local current_round
-    current_round=$(curl -s "http://198.18.0.81:7171/v1/chain/get/stats" -m 5 2>/dev/null | \
-        python3 -c "import json,sys; print(json.load(sys.stdin).get('current_round',0))" 2>/dev/null || echo "0")
-    if [ "${current_round:-0}" -lt "$MIN_ROUND" ]; then
-        print_status "Chain at round ${current_round} — waiting for round ${MIN_ROUND} before tests (sharder confirmation reliability)..."
-        while [ "${current_round:-0}" -lt "$MIN_ROUND" ]; do
-            sleep 10
-            current_round=$(curl -s "http://198.18.0.81:7171/v1/chain/get/stats" -m 5 2>/dev/null | \
-                python3 -c "import json,sys; print(json.load(sys.stdin).get('current_round',0))" 2>/dev/null || echo "0")
-            echo -n "."
+    # Phase 11e: Pre-flight check — verify key wallets are funded before tests.
+    # Tests WILL fail if wallets have zero balance (faucet pours need fee balance).
+    # Fund if needed, FAIL HARD if funding doesn't work — don't waste 60+ min on doomed tests.
+    print_header "Pre-flight: Verifying Wallet Funding"
+    local preflight_ok=true
+
+    # Check primary deploy wallet (local.json) — used by test-setup and faucet operations
+    local deploy_balance
+    deploy_balance=$(curl -s "http://198.18.0.82:7172/v1/client/get/balance?client_id=$(python3 -c "import json; print(json.load(open('${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}'))['client_id'])" 2>/dev/null)" -m 5 2>/dev/null \
+        | python3 -c "import json,sys; print(json.load(sys.stdin).get('balance',0))" 2>/dev/null || echo "0")
+    local deploy_zcn=$(python3 -c "print(${deploy_balance:-0}/1e10)" 2>/dev/null || echo "0")
+    if [ "$(python3 -c "print(1 if ${deploy_balance:-0} < 10000000000 else 0)")" = "1" ]; then
+        print_warning "Deploy wallet balance low (${deploy_zcn} ZCN) — topping up via faucet..."
+        for _pf in 1 2 3; do
+            sync_wallet_nonce_from_chain "${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}" 2>/dev/null
+            $ZWALLET faucet --methodName pour --input '{Pay day}' --tokens 100 \
+                --wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null && break
+            sleep 5
         done
-        echo ""
-        print_status "Chain at round ${current_round} — proceeding with tests"
+        sleep 5
+        deploy_balance=$(curl -s "http://198.18.0.82:7172/v1/client/get/balance?client_id=$(python3 -c "import json; print(json.load(open('${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}'))['client_id'])" 2>/dev/null)" -m 5 2>/dev/null \
+            | python3 -c "import json,sys; print(json.load(sys.stdin).get('balance',0))" 2>/dev/null || echo "0")
+        deploy_zcn=$(python3 -c "print(${deploy_balance:-0}/1e10)" 2>/dev/null || echo "0")
+        if [ "$(python3 -c "print(1 if ${deploy_balance:-0} < 10000000000 else 0)")" = "1" ]; then
+            print_error "FATAL: Deploy wallet has ${deploy_zcn} ZCN after faucet attempts. Tests WILL fail."
+            print_error "Check: chain health, faucet SC config, sharder confirmations."
+            preflight_ok=false
+        else
+            print_status "Deploy wallet funded: ${deploy_zcn} ZCN"
+        fi
+    else
+        print_status "Deploy wallet OK: ${deploy_zcn} ZCN"
     fi
+
+    # Check SC owner wallet (owner.json) — used for SC config updates
+    if [ -f "${ZCN_CONFIG_DIR}/owner.json" ]; then
+        local owner_balance
+        owner_balance=$(curl -s "http://198.18.0.82:7172/v1/client/get/balance?client_id=$(python3 -c "import json; print(json.load(open('${ZCN_CONFIG_DIR}/owner.json'))['client_id'])" 2>/dev/null)" -m 5 2>/dev/null \
+            | python3 -c "import json,sys; print(json.load(sys.stdin).get('balance',0))" 2>/dev/null || echo "0")
+        if [ "$(python3 -c "print(1 if ${owner_balance:-0} < 10000000000 else 0)")" = "1" ]; then
+            print_warning "SC owner wallet low — funding..."
+            $ZWALLET faucet --methodName pour --input '{Pay day}' --tokens 100 \
+                --wallet owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent 2>/dev/null || true
+        fi
+    fi
+
+    if [ "$preflight_ok" != "true" ]; then
+        print_error "Pre-flight checks FAILED. Aborting tests."
+        return 1
+    fi
+    print_status "Pre-flight checks passed — wallets funded, proceeding with tests"
 
     # Phase 11f: Smoke tests
     print_header "Running Smoke Tests"
