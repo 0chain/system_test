@@ -8300,13 +8300,13 @@ server {
         add_header 'Access-Control-Allow-Origin' $http_origin always;
         add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
-        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck,X-App-Session-ID' always;
         add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
         if ($request_method = 'OPTIONS') {
             add_header 'Access-Control-Allow-Origin' $http_origin;
             add_header 'Access-Control-Allow-Credentials' 'true';
             add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
-            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck';
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck,X-App-Session-ID';
             add_header 'Access-Control-Max-Age' 1728000;
             add_header 'Content-Type' 'text/plain; charset=utf-8';
             add_header 'Content-Length' 0;
@@ -8330,13 +8330,13 @@ server {
         add_header 'Access-Control-Allow-Origin' $http_origin always;
         add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
-        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck,X-App-Session-ID' always;
         add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
         if ($request_method = 'OPTIONS') {
             add_header 'Access-Control-Allow-Origin' $http_origin;
             add_header 'Access-Control-Allow-Credentials' 'true';
             add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
-            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck';
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck,X-App-Session-ID';
             add_header 'Access-Control-Max-Age' 1728000;
             add_header 'Content-Type' 'text/plain; charset=utf-8';
             add_header 'Content-Length' 0;
@@ -8360,13 +8360,13 @@ server {
         add_header 'Access-Control-Allow-Origin' $http_origin always;
         add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
-        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck,X-App-Session-ID' always;
         add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
         if ($request_method = 'OPTIONS') {
             add_header 'Access-Control-Allow-Origin' $http_origin;
             add_header 'Access-Control-Allow-Credentials' 'true';
             add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
-            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck';
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck,X-App-Session-ID';
             add_header 'Access-Control-Max-Age' 1728000;
             add_header 'Content-Type' 'text/plain; charset=utf-8';
             add_header 'Content-Length' 0;
