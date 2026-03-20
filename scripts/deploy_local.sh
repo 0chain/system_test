@@ -12463,6 +12463,7 @@ PYEOF
             # Fix config before restart so block_worker points to local chain (not dev.0chain.net)
             if [ "$apply_config" = "1" ]; then
                 fix_blobber_config
+                fix_validator_config
             fi
             for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
                 docker rm -f "blobber-$i" "validator-$i" 2>/dev/null || true
@@ -14332,7 +14333,9 @@ EOF
         ;;
     test-setup)
         cleanup_stale_blobbers || true
-        clean_service_databases
+        # NOTE: Do NOT call clean_service_databases here — it truncates 0box owner/wallet
+        # tables, zvault keys, and zauth split_wallets, destroying user login sessions.
+        # Tests create their own wallets and don't need a clean DB.
         seed_0box_providers || print_warning "0box provider seeding had issues (non-critical)"
         cleanup_stale_test_artifacts
         setup_test_wallets
