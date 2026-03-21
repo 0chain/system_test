@@ -231,6 +231,13 @@ checkout_branches() {
 
         cd "$repo_path"
 
+        # Preserve local .env files before git operations
+        local _env_bak="/tmp/checkout_env_backup_${repo}"
+        rm -rf "$_env_bak" 2>/dev/null; mkdir -p "$_env_bak"
+        find . -maxdepth 4 -name ".env" -not -path "*/node_modules/*" -not -path "*/.next/*" | while read -r ef; do
+            mkdir -p "$_env_bak/$(dirname "$ef")"; cp "$ef" "$_env_bak/$(dirname "$ef")/" 2>/dev/null
+        done
+
         # Clean and stash local changes (dirty trees block branch switches)
         git stash 2>/dev/null || true
         git clean -fd 2>/dev/null || true
@@ -279,6 +286,17 @@ checkout_branches() {
             print_error "FATAL: ${repo} on '${current}' instead of '${branch}' after checkout"
             return 1
         fi
+
+        # Restore preserved .env files
+        if [ -d "$_env_bak" ] && [ "$(ls -A "$_env_bak" 2>/dev/null)" ]; then
+            find "$_env_bak" -name ".env" | while read -r ef; do
+                local rel="${ef#$_env_bak/}"
+                [ -f "$rel" ] && cp "$ef" "$rel"
+            done
+            print_status "  Restored local .env files"
+        fi
+        rm -rf "$_env_bak" 2>/dev/null
+
         print_status "  ${repo}: ${current} (${short_hash})"
     done
 
@@ -8005,7 +8023,7 @@ if ($request_method = OPTIONS) {
 add_header 'Access-Control-Allow-Origin' $http_origin always;
 add_header 'Access-Control-Allow-Credentials' 'true' always;
 add_header 'Access-Control-Allow-Methods' 'GET,POST,PUT,DELETE,OPTIONS' always;
-add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-Client-Signature-V2,X-App-Timestamp,ALLOCATION-ID,ALLOCATION-TX,X-Connection-Id,x-connection-id,x-mode,X-App-ID-Token,X-App-Type,X-App-User-ID,Range' always;
+add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-Client-Signature-V2,X-App-Timestamp,X-App-Session-Id,X-App-Type,X-App-User-ID,X-App-ID-Token,ALLOCATION-ID,ALLOCATION-TX,X-Connection-Id,x-connection-id,x-mode,Range' always;
 add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range,X-App-Error-Code' always;
 add_header 'Cross-Origin-Resource-Policy' 'cross-origin' always;
 CORSEOF
@@ -8060,12 +8078,12 @@ server {
     #  If add_header is only inside if{}, the 301 redirect response has no CORS
     #  headers and browsers refuse to follow the cross-origin redirect.
     # =====================================================================
-    location = /miner01 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /miner01/; }
-    location = /miner02 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /miner02/; }
-    location = /miner03 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /miner03/; }
-    location = /miner04 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /miner04/; }
-    location = /sharder01 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /sharder01/; }
-    location = /sharder02 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /sharder02/; }
+    location = /miner01 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,X-App-Session-Id,X-App-Type,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /miner01/; }
+    location = /miner02 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,X-App-Session-Id,X-App-Type,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /miner02/; }
+    location = /miner03 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,X-App-Session-Id,X-App-Type,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /miner03/; }
+    location = /miner04 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,X-App-Session-Id,X-App-Type,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /miner04/; }
+    location = /sharder01 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,X-App-Session-Id,X-App-Type,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /sharder01/; }
+    location = /sharder02 { add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always; add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always; add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,X-App-Session-Id,X-App-Type,Access-Control-Allow-Origin' always; if ($request_method = OPTIONS) { return 204; } return 301 /sharder02/; }
     location /miner01/ {
         proxy_hide_header Access-Control-Allow-Origin;
         proxy_hide_header Access-Control-Allow-Credentials;
@@ -8073,7 +8091,7 @@ server {
         proxy_hide_header Access-Control-Allow-Headers;
         add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always;
-        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always;
+        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,X-App-Session-Id,X-App-Type,Access-Control-Allow-Origin' always;
         if ($request_method = OPTIONS) { return 204; }
         proxy_pass http://localhost:7071/;
         proxy_set_header Accept-Encoding "";
@@ -8099,7 +8117,7 @@ server {
         proxy_hide_header Access-Control-Allow-Headers;
         add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always;
-        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always;
+        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,X-App-Session-Id,X-App-Type,Access-Control-Allow-Origin' always;
         if ($request_method = OPTIONS) { return 204; }
         proxy_pass http://localhost:7072/;
         proxy_set_header Accept-Encoding "";
@@ -8125,7 +8143,7 @@ server {
         proxy_hide_header Access-Control-Allow-Headers;
         add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always;
-        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always;
+        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,X-App-Session-Id,X-App-Type,Access-Control-Allow-Origin' always;
         if ($request_method = OPTIONS) { return 204; }
         proxy_pass http://localhost:7073/;
         proxy_set_header Accept-Encoding "";
@@ -8151,7 +8169,7 @@ server {
         proxy_hide_header Access-Control-Allow-Headers;
         add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always;
-        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always;
+        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,X-App-Session-Id,X-App-Type,Access-Control-Allow-Origin' always;
         if ($request_method = OPTIONS) { return 204; }
         proxy_pass http://localhost:7074/;
         proxy_set_header Accept-Encoding "";
@@ -8178,7 +8196,7 @@ server {
         proxy_hide_header Access-Control-Allow-Headers;
         add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always;
-        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always;
+        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,X-App-Session-Id,X-App-Type,Access-Control-Allow-Origin' always;
         if ($request_method = OPTIONS) { return 204; }
         proxy_pass http://localhost:7171/;
         proxy_set_header Accept-Encoding "";
@@ -8204,7 +8222,7 @@ server {
         proxy_hide_header Access-Control-Allow-Headers;
         add_header 'Access-Control-Allow-Origin' $http_origin always; add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE' always;
-        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,Access-Control-Allow-Origin' always;
+        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,X-App-Client-Id,X-App-Client-Key,X-App-Client-Signature,X-App-Timestamp,X-App-Session-Id,X-App-Type,Access-Control-Allow-Origin' always;
         if ($request_method = OPTIONS) { return 204; }
         proxy_pass http://localhost:7172/;
         proxy_set_header Accept-Encoding "";
@@ -11874,6 +11892,19 @@ swap_image() {
         # Normal case: git repo already present, just checkout + pull
         print_status "Checking out ${branch}..."
         cd "$repo_path"
+
+        # Preserve local .env files before git operations (they contain per-server
+        # config like Firebase keys, domain, APP_ENV that must not be overwritten
+        # by the branch defaults which point to mainnet/demo).
+        local _env_backup_dir="/tmp/swap_env_backup_${repo}"
+        rm -rf "$_env_backup_dir" 2>/dev/null
+        mkdir -p "$_env_backup_dir"
+        find . -maxdepth 4 -name ".env" -not -path "*/node_modules/*" -not -path "*/.next/*" | while read -r ef; do
+            local edir="$_env_backup_dir/$(dirname "$ef")"
+            mkdir -p "$edir"
+            cp "$ef" "$edir/" 2>/dev/null
+        done
+
         git stash 2>/dev/null || true
         git clean -fd 2>/dev/null || true
         if ! git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null; then
@@ -11901,6 +11932,19 @@ swap_image() {
             print_error "FATAL: ${repo} on '${actual_branch}' instead of '${branch}'"
             return 1
         fi
+
+        # Restore preserved .env files (git reset/clean overwrites them with
+        # branch defaults that point to mainnet/demo instead of local test env)
+        if [ -d "$_env_backup_dir" ] && [ "$(ls -A "$_env_backup_dir" 2>/dev/null)" ]; then
+            find "$_env_backup_dir" -name ".env" | while read -r ef; do
+                local rel_path="${ef#$_env_backup_dir/}"
+                if [ -f "$rel_path" ]; then
+                    cp "$ef" "$rel_path"
+                fi
+            done
+            print_status "Restored local .env files (preserved from before checkout)"
+        fi
+        rm -rf "$_env_backup_dir" 2>/dev/null
     fi
     local short_hash=$(git -C "$repo_path" rev-parse --short HEAD 2>/dev/null)
     print_status "On ${branch} (${short_hash})"
