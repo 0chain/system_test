@@ -12517,18 +12517,18 @@ PYEOF
             for i in 1 2 3 4 5 6; do
                 cd "${repo_path}/docker.local"
                 if [ -f "b0docker-compose-${i}.yml" ]; then
-                    docker compose -p blobber$i -f b0docker-compose-${i}.yml up -d --force-recreate 2>/dev/null || true
+                    docker compose -p blobber$i -f b0docker-compose-${i}.yml up -d --force-recreate 2>&1 | tail -3 || print_warning "blobber-$i failed to start"
                 else
-                    BLOBBER=$i docker compose -p blobber$i -f b0docker-compose.yml up -d --force-recreate 2>/dev/null || true
+                    BLOBBER=$i docker compose -p blobber$i -f b0docker-compose.yml up -d --force-recreate 2>&1 | tail -3 || print_warning "blobber-$i failed to start"
                 fi
             done
             # Blobbers 7-12: use specific compose if available, else generic (10-12 have specific files to avoid invalid ports)
             for i in 7 8 9 10 11 12; do
                 cd "${repo_path}/docker.local"
                 if [ -f "b0docker-compose-${i}.yml" ]; then
-                    docker compose -p blobber$i -f b0docker-compose-${i}.yml up -d --force-recreate 2>/dev/null || true
+                    docker compose -p blobber$i -f b0docker-compose-${i}.yml up -d --force-recreate 2>&1 | tail -3 || print_warning "blobber-$i failed to start"
                 else
-                    BLOBBER=$i docker compose -p blobber$i -f b0docker-compose.yml up -d --force-recreate 2>/dev/null || true
+                    BLOBBER=$i docker compose -p blobber$i -f b0docker-compose.yml up -d --force-recreate 2>&1 | tail -3 || print_warning "blobber-$i failed to start"
                 fi
             done
             ;;
