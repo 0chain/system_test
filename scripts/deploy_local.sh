@@ -3028,6 +3028,12 @@ networks:
 COMPOSEEOF
     done
 
+    # Ensure PebbleDB persistent directories exist (challenge Merkle trees)
+    for _pb in 1 2 3 4 5 6 7 8 9 10 11 12; do
+        mkdir -p "${BLOBBER_DIR}/blobber${_pb}/pebble/data"
+        mkdir -p "${BLOBBER_DIR}/blobber${_pb}/pebble/wal"
+    done
+
     # Create containers for blobbers 1-6
     # --force-recreate ensures fresh containers with no stale state from previous deploys.
     for i in 1 2 3 4 5 6; do
@@ -7241,14 +7247,15 @@ build_web_apps() {
     print_status "Building shared package..."
     yarn workspace shared build 2>/dev/null || $PKG_MGR run shared:build 2>/dev/null || true
 
-    # Remove basePath from each app's next.config.js (apps serve from / on their own subdomain)
+    # Remove basePath from each app — apps serve from / on their own port.
+    # Nginx strips the /vult/, /bolt/ etc. prefix via trailing slash on proxy_pass.
     local WEB_APPS_TO_BUILD="vult bolt blimp explorer chimney"
     for app in $WEB_APPS_TO_BUILD; do
         local next_config="${WEB_APPS_DIR}/packages/${app}/next.config.js"
         if [ -f "$next_config" ] && grep -q "basePath" "$next_config"; then
             sed -i.tmp "/^[[:space:]]*basePath:/d" "$next_config"
             rm -f "${next_config}.tmp"
-            print_status "Removed basePath from ${app}/next.config.js (subdomain mode)"
+            print_status "Removed basePath from ${app}/next.config.js"
         fi
     done
 
@@ -8470,36 +8477,37 @@ server {
     location /info { default_type text/html; alias /var/www/html/deploy-info.html; }
 
     # =====================================================================
-    #  WEB APPS (proxy to Next.js Docker containers)
-    #  Apps are built WITH basePath (e.g. basePath: '/vult'), so requests
-    #  are passed as-is (no trailing slash on proxy_pass = no prefix strip).
+    #  WEB APPS (proxy to Next.js apps on localhost)
+    #  Apps are built WITHOUT basePath — they serve at /.
+    #  Trailing slash on both location and proxy_pass strips the /vult/ prefix:
+    #    /vult/zcn.wasm → http://localhost:3003/zcn.wasm
     # =====================================================================
-    location /vult {
-        proxy_pass http://localhost:3003;
+    location /vult/ {
+        proxy_pass http://localhost:3003/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
     }
-    location /bolt {
-        proxy_pass http://localhost:3002;
+    location /bolt/ {
+        proxy_pass http://localhost:3002/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
     }
-    location /blimp {
-        proxy_pass http://localhost:3006;
+    location /blimp/ {
+        proxy_pass http://localhost:3006/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
     }
-    location /explorer {
-        proxy_pass http://localhost:3001;
+    location /explorer/ {
+        proxy_pass http://localhost:3001/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
     }
-    location /chimney {
-        proxy_pass http://localhost:3005;
+    location /chimney/ {
+        proxy_pass http://localhost:3005/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
@@ -8881,7 +8889,7 @@ server {
         add_header 'Access-Control-Allow-Origin' \$http_origin always;
         add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
-        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck,Access-Control-Allow-Origin' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck,X-App-Session-ID,X-App-Session-Id,Access-Control-Allow-Origin' always;
         add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
 
         # Prevent browser caching of API responses — all API data must always be fresh.
@@ -8894,7 +8902,7 @@ server {
             add_header 'Access-Control-Allow-Origin' \$http_origin;
             add_header 'Access-Control-Allow-Credentials' 'true';
             add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
-            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck,Access-Control-Allow-Origin';
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-App-Client-ID,X-App-Client-Key,X-App-Client-Signature,X-App-ID-Token,X-App-ID-TOKEN,X-App-Phone-Number,X-App-Signature,X-App-Timestamp,X-App-Type,X-APP-TYPE,X-App-User-ID,X-App-Alloc-ID,X-App-Alloc-Type,X-CSRF-TOKEN,X-CSRF-Token,X-Jwt-Token,X-JWT-TOKEN,X-Access-Token,X-Client-ID,X-Client-Version,X-User-ID,X-Admin-User-ID,X-Organization-User-ID,X-Peer-Public-Key,X-Firebase-AppCheck,X-App-Session-ID,X-App-Session-Id,Access-Control-Allow-Origin';
             add_header 'Access-Control-Max-Age' 1728000;
             add_header 'Content-Type' 'text/plain; charset=utf-8';
             add_header 'Content-Length' 0;
@@ -12513,6 +12521,11 @@ PYEOF
                 docker rm -f "blobber-$i" "validator-$i" 2>/dev/null || true
             done
             sleep 2
+            # Ensure PebbleDB persistent directories exist
+            for _pb in 1 2 3 4 5 6 7 8 9 10 11 12; do
+                mkdir -p "${repo_path}/docker.local/blobber${_pb}/pebble/data"
+                mkdir -p "${repo_path}/docker.local/blobber${_pb}/pebble/wal"
+            done
             # Blobbers 1-6: use specific compose if available, else generic
             for i in 1 2 3 4 5 6; do
                 cd "${repo_path}/docker.local"
