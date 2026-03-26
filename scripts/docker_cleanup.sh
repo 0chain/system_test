@@ -12,9 +12,9 @@ echo "Disk before: $BEFORE"
 echo "--- Pruning unused images ---"
 docker image prune -af --filter "until=72h" 2>/dev/null | tail -2
 
-# 2. Remove build cache older than 3 days
+# 2. Remove ALL build cache (safe — only used during docker build, not at runtime)
 echo "--- Pruning build cache ---"
-docker builder prune -af --filter "until=72h" 2>/dev/null | tail -2
+docker builder prune -af 2>/dev/null | tail -2
 
 # 3. Remove dangling volumes (not used by any container)
 echo "--- Pruning dangling volumes ---"
