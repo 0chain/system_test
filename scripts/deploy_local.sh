@@ -756,7 +756,7 @@ bootstrap_server() {
     fi
 
     # --- Go ---
-    local GO_VERSION="1.22.9"
+    local GO_VERSION="1.24.5"
     if ! command -v go &> /dev/null || ! go version | grep -q "go${GO_VERSION}"; then
         print_status "Installing Go ${GO_VERSION}..."
         local GO_ARCH="amd64"

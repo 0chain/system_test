@@ -130,10 +130,16 @@ repositories:
 
   # Web applications (needs zcn.wasm built from gosdk)
   web-apps:
-    branch: master
+    branch: fix/atlus-explorer-improvements
     path: web-apps
     build_required: true
     gosdk_branch: fix/lfb-aware-sharder-selection   # gosdk branch to build zcn.wasm from
+
+  # System test scripts (self-referencing for branch tracking)
+  system_test:
+    branch: fix/deploy-infrastructure-and-tests
+    path: system_test
+    build_required: false
 
   # rclone plugin
   rclone_zus:
