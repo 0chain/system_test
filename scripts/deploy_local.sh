@@ -14396,9 +14396,9 @@ EOF
         # If TestOwnerUpdate ran and cleanup failed, SC owner may be permanently changed.
         # Detect this early so the user knows before running tests.
         print_status "Validating SC owner wallet..."
-        local onchain_owner=""
+        onchain_owner=""
         onchain_owner=$(curl -s "http://198.18.0.81:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/storage-config" 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); f=d.get('fields',d); print(f.get('owner_id',''))" 2>/dev/null || true)
-        local wallet_owner=""
+        wallet_owner=""
         if [ -f "${ZCN_CONFIG_DIR}/owner.json" ]; then
             wallet_owner=$(python3 -c "import json; d=json.load(open('${ZCN_CONFIG_DIR}/owner.json')); print(d.get('client_id',''))" 2>/dev/null || true)
         fi
