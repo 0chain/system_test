@@ -10670,6 +10670,51 @@ verify_blobber_delegate_wallets() {
 # On a fresh chain, the SC owner is defined in 0chain sc.yaml and matches
 # the wallet at ~/.zcn/local.json. The blobber delegate wallet is the same
 # wallet (set in blobber config). We copy this wallet to all test dirs.
+configure_test_configs() {
+    print_header "Configuring Test Configs"
+
+    local TEST_DIR="${BASE_DIR}/system_test/tests"
+    local ZDNS_URL="http://198.18.0.100:9091"
+
+    # Fix block_worker in ALL test config files to point to local 0dns.
+    # After fresh redeploy or rsync from CI, configs may have http://127.0.0.1:9099
+    # or dev.zus.network URLs that don't work on local test chains.
+    for cfg in \
+        "${TEST_DIR}/cli_tests/config/zbox_config.yaml" \
+        "${TEST_DIR}/api_tests/config/api_tests_config.yaml" \
+        "${TEST_DIR}/tokenomics_tests/config/zbox_config.yaml" \
+        "${TEST_DIR}/sdk_tests/config/zbox_config.yaml"; do
+        if [ -f "$cfg" ]; then
+            local current_bw=$(grep 'block_worker:' "$cfg" | head -1 | awk '{print $2}')
+            if [ "$current_bw" != "$ZDNS_URL" ]; then
+                sed -i "s|block_worker:.*|block_worker: ${ZDNS_URL}|" "$cfg"
+                print_status "Fixed block_worker in $(basename $(dirname $cfg))/$(basename $cfg): $current_bw → $ZDNS_URL"
+            fi
+        fi
+    done
+
+    # Fix sharder URLs in nodes.yaml (CLI tests use this for direct sharder queries)
+    local NODES_YAML="${TEST_DIR}/cli_tests/config/nodes.yaml"
+    if [ -f "$NODES_YAML" ]; then
+        # Ensure it has the correct local sharder URLs
+        if ! grep -q "198.18.0.81" "$NODES_YAML" 2>/dev/null; then
+            print_status "Updating nodes.yaml with local sharder URLs..."
+            cat > "$NODES_YAML" << 'NODESEOF'
+miners:
+  - http://198.18.0.71:7071
+  - http://198.18.0.72:7072
+  - http://198.18.0.73:7073
+  - http://198.18.0.74:7074
+sharders:
+  - http://198.18.0.81:7171
+  - http://198.18.0.82:7172
+NODESEOF
+        fi
+    fi
+
+    print_status "Test configs configured for local chain"
+}
+
 setup_test_wallets() {
     print_header "Setting Up Test Wallets"
 
@@ -10695,7 +10740,7 @@ setup_test_wallets() {
 
     # IMPORTANT: Verify the on-chain SC owner before copying wallets.
     local onchain_sc_owner=""
-    onchain_sc_owner=$(curl -s http://127.0.0.1:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/storage-config 2>/dev/null \
+    onchain_sc_owner=$(curl -s http://198.18.0.81:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/storage-config 2>/dev/null \
         | python3 -c "import sys,json; print(json.load(sys.stdin).get('fields',{}).get('owner_id',''))" 2>/dev/null || true)
 
     if [ -n "$onchain_sc_owner" ] && [ "$onchain_sc_owner" != "$sc_owner_id" ]; then
