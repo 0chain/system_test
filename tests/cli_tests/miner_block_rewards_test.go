@@ -54,22 +54,29 @@ func TestMinerBlockRewards(testSetup *testing.T) { // nolint:gocyclo // team pre
 		minerIds := getSortedMinerIds(t, sharderUrl)
 		require.True(t, len(minerIds) > 0, "no miners found")
 
-		beforeMiners := getNodes(t, minerIds, sharderUrl)
+		// Wait until RoundServiceChargeLastUpdated is recent (within 200 rounds of current).
+		// On a fresh chain, miners haven't received service charge yet, so the round range
+		// from getStartAndEndRounds would span thousands of blocks. Poll until it stabilizes.
+		var beforeMiners, afterMiners climodel.NodeList
+		var startRound, endRound int64
+		settled := false
+		for attempt := 0; attempt < 30; attempt++ {
+			beforeMiners = getNodes(t, minerIds, sharderUrl)
+			cliutil.Wait(t, 3*time.Second)
+			afterMiners = getNodes(t, minerIds, sharderUrl)
 
-		// ------------------------------------
-		cliutil.Wait(t, 3*time.Second)
-		// ------------------------------------
-
-		afterMiners := getNodes(t, minerIds, sharderUrl)
-
-		// we add rewards at the end of the round, and they don't appear until the next round
-
-		startRound, endRound := getStartAndEndRounds(
-			t, beforeMiners.Nodes, afterMiners.Nodes, nil, nil,
-		)
-
-		require.LessOrEqual(t, endRound-startRound, int64(200),
-			"Round range too large (%d rounds) — node RoundServiceChargeLastUpdated is stale", endRound-startRound)
+			startRound, endRound = getStartAndEndRounds(
+				t, beforeMiners.Nodes, afterMiners.Nodes, nil, nil,
+			)
+			if endRound-startRound <= 200 {
+				settled = true
+				break
+			}
+			t.Logf("Round range %d too large (attempt %d/30), waiting 10s for service charge update...", endRound-startRound, attempt+1)
+			cliutil.Wait(t, 10*time.Second)
+		}
+		require.True(t, settled,
+			"RoundServiceChargeLastUpdated never stabilized — round range %d after 5 min of polling", endRound-startRound)
 
 		time.Sleep(time.Second) // give time for last round to be saved
 		history := cliutil.NewHistory(startRound, endRound)
