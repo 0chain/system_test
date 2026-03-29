@@ -4350,7 +4350,7 @@ fund_0box() {
     local box_public_key=""
     if [ -f "$BOX_YAML" ]; then
         box_assigner_name=$(grep -A3 '^free_storage:' "$BOX_YAML" | grep '^\s*name:' | head -1 | awk '{print $2}' | tr -d '"')
-        box_public_key=$(grep -A5 '^free_storage:' "$BOX_YAML" | grep 'public_key:' | head -1 | awk -F'"' '{print $2}')
+        box_public_key=$(grep -A5 '^free_storage:' "$BOX_YAML" | grep 'public_key:' | head -1 | sed "s/.*public_key:[[:space:]]*['\"]\\{0,1\\}\\([^'\"]*\\)['\"]\\{0,1\\}/\\1/" | tr -d ' ')
     fi
 
     if [ -z "$box_public_key" ] || [ "$box_public_key" = "null" ]; then
