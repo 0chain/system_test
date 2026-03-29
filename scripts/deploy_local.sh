@@ -238,9 +238,9 @@ checkout_branches() {
             mkdir -p "$_env_bak/$(dirname "$ef")"; cp "$ef" "$_env_bak/$(dirname "$ef")/" 2>/dev/null
         done
 
-        # Clean and stash local changes (dirty trees block branch switches)
+        # Stash local changes (dirty trees block branch switches)
+        # Do NOT run git clean — it deletes generated files (keys, .env, configs, data dirs)
         git stash 2>/dev/null || true
-        git clean -fd 2>/dev/null || true
 
         # Critical repos fail hard on checkout errors; optional repos warn and continue.
         local is_critical=false
@@ -11901,20 +11901,10 @@ swap_image() {
         print_status "Checking out ${branch}..."
         cd "$repo_path"
 
-        # Preserve local .env files before git operations (they contain per-server
-        # config like Firebase keys, domain, APP_ENV that must not be overwritten
-        # by the branch defaults which point to mainnet/demo).
-        local _env_backup_dir="/tmp/swap_env_backup_${repo}"
-        rm -rf "$_env_backup_dir" 2>/dev/null
-        mkdir -p "$_env_backup_dir"
-        find . -maxdepth 4 -name ".env" -not -path "*/node_modules/*" -not -path "*/.next/*" | while read -r ef; do
-            local edir="$_env_backup_dir/$(dirname "$ef")"
-            mkdir -p "$edir"
-            cp "$ef" "$edir/" 2>/dev/null
-        done
-
+        # Stash local changes (dirty trees block branch switches)
+        # Do NOT run git clean — it deletes generated files (keys, .env, configs, data dirs)
+        # git stash + git checkout -f + git reset --hard is sufficient for branch switching
         git stash 2>/dev/null || true
-        git clean -fd 2>/dev/null || true
         if ! git fetch origin '+refs/heads/*:refs/remotes/origin/*' 2>/dev/null; then
             print_error "FATAL: Failed to fetch ${repo} — check network/git access"
             return 1
@@ -14401,6 +14391,26 @@ EOF
         setup_zs3_test_tools || true
         seed_challenge_data || true
         generate_challenge_protocol_files || print_warning "Challenge protocol file generation failed (non-critical)"
+
+        # Validate SC owner wallet matches on-chain owner.
+        # If TestOwnerUpdate ran and cleanup failed, SC owner may be permanently changed.
+        # Detect this early so the user knows before running tests.
+        print_status "Validating SC owner wallet..."
+        local onchain_owner=""
+        onchain_owner=$(curl -s "http://198.18.0.81:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/storage-config" 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); f=d.get('fields',d); print(f.get('owner_id',''))" 2>/dev/null || true)
+        local wallet_owner=""
+        if [ -f "${ZCN_CONFIG_DIR}/owner.json" ]; then
+            wallet_owner=$(python3 -c "import json; d=json.load(open('${ZCN_CONFIG_DIR}/owner.json')); print(d.get('client_id',''))" 2>/dev/null || true)
+        fi
+        if [ -n "$onchain_owner" ] && [ -n "$wallet_owner" ] && [ "$onchain_owner" != "$wallet_owner" ]; then
+            print_error "WARNING: SC owner mismatch!"
+            print_error "  On-chain owner: ${onchain_owner}"
+            print_error "  Wallet (owner.json): ${wallet_owner}"
+            print_error "  Tests that require SC owner (free storage, owner update) will FAIL."
+            print_error "  Fix: redeploy chain (deploy_local.sh redeploy) to reset SC owner."
+        else
+            print_status "SC owner wallet validated OK"
+        fi
         ;;
     challenge-files)
         generate_challenge_protocol_files
@@ -14434,6 +14444,37 @@ EOF
         stale_pids=$(pgrep -f "run_tests.sh" 2>/dev/null || true)
         if [ -n "$stale_pids" ]; then
             echo "$stale_pids" | xargs kill -9 2>/dev/null || true
+        fi
+
+        # Ensure system_test go.mod uses local gosdk (must match blobber's gosdk)
+        # Without this, `go test` downloads the published gosdk from GitHub which
+        # has different signing code than the local blobber build → invalid_signature.
+        local _gomod="${BASE_DIR}/system_test/go.mod"
+        if [ -f "$_gomod" ]; then
+            if grep -q '^//replace github.com/0chain/gosdk => \.\./gosdk' "$_gomod"; then
+                sed -i 's|^//replace github.com/0chain/gosdk => \.\./gosdk|replace github.com/0chain/gosdk => ../gosdk|' "$_gomod"
+                print_status "Re-enabled gosdk replace in go.mod (was commented out)"
+            elif ! grep -q '^replace github.com/0chain/gosdk' "$_gomod"; then
+                echo 'replace github.com/0chain/gosdk => ../gosdk' >> "$_gomod"
+                print_status "Added gosdk replace to go.mod"
+            fi
+        fi
+
+        # Ensure CLI binaries exist in test directory
+        local _cli_dir="${BASE_DIR}/system_test/tests/cli_tests"
+        if [ ! -f "$_cli_dir/zbox" ] && [ -f "${BASE_DIR}/zboxcli/zbox" ]; then
+            cp "${BASE_DIR}/zboxcli/zbox" "$_cli_dir/zbox"
+            print_status "Copied zbox binary to test directory"
+        fi
+        if [ ! -f "$_cli_dir/zwallet" ] && [ -f "${BASE_DIR}/zwalletcli/zwallet" ]; then
+            cp "${BASE_DIR}/zwalletcli/zwallet" "$_cli_dir/zwallet"
+            print_status "Copied zwallet binary to test directory"
+        fi
+
+        # Ensure ffmpeg is installed (required for streaming upload tests)
+        if ! command -v ffmpeg &>/dev/null; then
+            print_status "Installing ffmpeg (required for streaming tests)..."
+            apt-get update -qq && apt-get install -y -qq ffmpeg >/dev/null 2>&1 || print_warning "ffmpeg installation failed (streaming tests will fail)"
         fi
 
         # Reset test state: unstake pools and clean stale artifacts before tests

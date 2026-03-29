@@ -42,18 +42,30 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.Greater(t, len(blobberList), 0, "blobber list is empty")
 
-		// Select a blobber whose delegate_wallet matches blobber_owner_wallet
-		found := false
+		// Collect all blobbers whose delegate_wallet matches blobber_owner_wallet.
+		// Sort by most available capacity first (allocated < capacity preferred),
+		// so write_price/all-params tests can find a blobber with headroom.
+		var candidateBlobbers []climodel.BlobberDetails
 		for _, bl := range blobberList {
 			if bl.StakePoolSettings.DelegateWallet == blobberOwnerWalletModel.ClientID &&
 				!bl.IsKilled && !bl.IsShutdown {
-				intialBlobberInfo = bl
-				found = true
-				break
+				candidateBlobbers = append(candidateBlobbers, bl)
 			}
 		}
-		if !found {
-			t.Errorf("No active blobber found with delegate_wallet matching blobber_owner_wallet (%s)", blobberOwnerWalletModel.ClientID)
+		require.Greater(t, len(candidateBlobbers), 0,
+			"No active blobber found with delegate_wallet matching blobber_owner_wallet (%s)", blobberOwnerWalletModel.ClientID)
+
+		// Pick the blobber with least allocated/capacity ratio (most headroom)
+		intialBlobberInfo = candidateBlobbers[0]
+		bestRatio := float64(1.0)
+		for _, bl := range candidateBlobbers {
+			if bl.Capacity > 0 {
+				ratio := float64(bl.Allocated) / float64(bl.Capacity)
+				if ratio < bestRatio {
+					bestRatio = ratio
+					intialBlobberInfo = bl
+				}
+			}
 		}
 	})
 

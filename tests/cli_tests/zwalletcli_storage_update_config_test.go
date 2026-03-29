@@ -1,6 +1,7 @@
 package cli_tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"os"
@@ -25,6 +26,23 @@ func TestStorageUpdateConfig(testSetup *testing.T) {
 
 	if _, err := os.Stat("./config/" + scOwnerWallet + "_wallet.json"); err != nil {
 		t.Errorf("SC owner wallet located at %s is missing", "./config/"+scOwnerWallet+"_wallet.json")
+	}
+
+	// Verify SC owner wallet matches on-chain owner before running update tests
+	createWallet(t)
+	scOutput, scErr := getStorageSCConfig(t, configPath, true)
+	if scErr == nil && len(scOutput) > 0 {
+		scCfg, _ := keyValuePairStringToMap(scOutput)
+		scWalletData, readErr := os.ReadFile("./config/" + scOwnerWallet + "_wallet.json")
+		if readErr == nil {
+			var scWalletJSON map[string]interface{}
+			if json.Unmarshal(scWalletData, &scWalletJSON) == nil {
+				walletClientID := scWalletJSON["client_id"].(string)
+				if chainOwner := scCfg["owner_id"]; chainOwner != walletClientID {
+					testSetup.Skipf("SC owner wallet mismatch: on-chain owner is %s but wallet has %s", chainOwner, walletClientID)
+				}
+			}
+		}
 	}
 
 	t.RunSequentiallyWithTimeout("should allow update setting updates", 3*time.Minute, func(t *test.SystemTest) { // todo: too slow

@@ -31,7 +31,8 @@ func NewTestShareinfo() map[string]string {
 	}
 	ticketJSON, _ := json.Marshal(ticket)
 	return map[string]string{
-		"auth_ticket": base64.StdEncoding.EncodeToString(ticketJSON),
+		"auth_ticket":     base64.StdEncoding.EncodeToString(ticketJSON),
+		"share_info_type": "0",
 	}
 }
 

@@ -68,9 +68,9 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		}
 		if blobberToDeactivate == "" {
 			if len(allAvailableIDs) == 0 {
-				t.Skip("No active non-enterprise blobbers found on chain — infrastructure issue, cannot test availability toggle")
+				t.Fatalf("No active non-enterprise blobbers found on chain — run deploy_local.sh blobbers")
 			} else {
-				t.Skip("No blobber managed by blobber_owner_wallet found — blobber_owner_wallet.json doesn't match any on-chain blobber delegate_wallet; run 'bash scripts/deploy_local.sh test-setup' to fix wallet configs")
+				t.Fatalf("No blobber managed by blobber_owner_wallet found — run deploy_local.sh test-setup to fix wallet configs")
 			}
 		}
 		totalAvailable := len(allAvailableIDs)
@@ -81,6 +81,10 @@ func TestBlobberAvailability(testSetup *testing.T) {
 		// considers blobbers we've verified as non-enterprise. Without this,
 		// the chain may pick blobbers that are enterprise on-chain but not flagged
 		// in the API, causing repeated "is enterprise" failures that drain wallet fees.
+		// Use ALL available blobbers. The SC's alloc_blobbers endpoint filters by capacity,
+		// health, and availability. We need data+parity = exactly the number the SC can
+		// actually provide, so that deactivating one blobber causes failure.
+		// Strategy: binary-search for the max allocation size the SC can honor.
 		preferredBlobbers := strings.Join(allAvailableIDs, ",")
 		dataShards := totalAvailable - 1
 		parityShards := 1
@@ -99,21 +103,27 @@ func TestBlobberAvailability(testSetup *testing.T) {
 				"size":               "10000",
 				"preferred_blobbers": preferredBlobbers,
 			}))
-			if err != nil && (strings.Contains(strings.Join(output, " "), "is enterprise") ||
-				strings.Contains(strings.Join(output, " "), "Not enough blobbers")) {
+			if err != nil {
 				errMsg := strings.Join(output, " ")
-				t.Logf("Allocation failed (likely enterprise mismatch), removing enterprise blobber: %s", errMsg)
-				// Extract the enterprise blobber ID from error and remove it
-				for i, id := range allAvailableIDs {
-					if strings.Contains(errMsg, id) && strings.Contains(errMsg, "is enterprise") {
-						allAvailableIDs = append(allAvailableIDs[:i], allAvailableIDs[i+1:]...)
-						break
+				if strings.Contains(errMsg, "is enterprise") {
+					t.Logf("Allocation failed (enterprise mismatch), removing enterprise blobber")
+					for i, id := range allAvailableIDs {
+						if strings.Contains(errMsg, id) && strings.Contains(errMsg, "is enterprise") {
+							allAvailableIDs = append(allAvailableIDs[:i], allAvailableIDs[i+1:]...)
+							break
+						}
 					}
+					totalAvailable = len(allAvailableIDs)
+					dataShards = totalAvailable - 1
+					preferredBlobbers = strings.Join(allAvailableIDs, ",")
+					continue
 				}
-				totalAvailable = len(allAvailableIDs)
-				dataShards = totalAvailable - 1
-				preferredBlobbers = strings.Join(allAvailableIDs, ",")
-				continue
+				if strings.Contains(errMsg, "not enough blobbers") || strings.Contains(errMsg, "Not enough blobbers") {
+					// SC can't find enough blobbers with capacity — reduce shard count
+					dataShards--
+					t.Logf("Not enough blobbers, reducing data shards to %d", dataShards)
+					continue
+				}
 			}
 			require.NoError(t, err, strings.Join(output, "\n"))
 			beforeAllocationId, err = getAllocationID(output[0])

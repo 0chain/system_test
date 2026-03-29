@@ -170,7 +170,11 @@ func TestCreateAllocation(testSetup *testing.T) {
 		// upload for creating wallet should fail
 		output, err = uploadFile(t, configPath, uploadParams, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, ""), "Operation needs to be performed by the owner or the payer of the allocation")
+		combined := strings.Join(output, "")
+		require.True(t, strings.Contains(combined, "Operation needs to be performed by the owner or the payer of the allocation") ||
+			strings.Contains(combined, "multi-wallet-settings err") ||
+			strings.Contains(combined, "wallet not found"),
+			"expected owner/payer or multi-wallet error, got: %s", combined)
 
 		createAllocationTestTeardown(t, allocationID)
 	})

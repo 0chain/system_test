@@ -52,7 +52,7 @@ func TestOwnerUpdate(testSetup *testing.T) {
 		cfgBefore, _ := keyValuePairStringToMap(output)
 		origMaxReadPrice := cfgBefore["max_read_price"]
 		if currentOwner := cfgBefore[ownerKey]; currentOwner != oldOwner {
-			t.Errorf("StorageSC owner on chain (%s) does not match expected owner (%s) - skipping owner update test", currentOwner, oldOwner)
+			t.Fatalf("SC owner wallet mismatch: on-chain owner is %s but sc_owner_wallet has %s — run deploy_local.sh chain to fix", currentOwner, oldOwner)
 		}
 
 		t.Cleanup(func() {
@@ -60,9 +60,19 @@ func TestOwnerUpdate(testSetup *testing.T) {
 			if origMaxReadPrice != "" {
 				restoreParams["max_read_price"] = origMaxReadPrice
 			}
-			output, err := updateStorageSCConfig(t, newOwnerName, restoreParams, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 2, strings.Join(output, "\n"))
+			// Use best-effort restore — do NOT use require (panics are swallowed
+			// by handleTestCaseExit, causing PERMANENT SC owner loss).
+			// Retry up to 3 times with increasing delays.
+			for attempt := 1; attempt <= 3; attempt++ {
+				output, err := updateStorageSCConfig(t, newOwnerName, restoreParams, false)
+				if err == nil && len(output) >= 2 {
+					t.Logf("StorageSC owner restored to %s on attempt %d", oldOwner, attempt)
+					return
+				}
+				t.Logf("WARNING: StorageSC owner restore attempt %d/3 failed: %v %s", attempt, err, strings.Join(output, "\n"))
+				time.Sleep(time.Duration(attempt*5) * time.Second)
+			}
+			t.Errorf("CRITICAL: Failed to restore StorageSC owner to %s after 3 attempts — SC owner may be permanently changed!", oldOwner)
 		})
 
 		output, err = updateStorageSCConfig(t, scOwnerWallet, map[string]string{
@@ -88,9 +98,7 @@ func TestOwnerUpdate(testSetup *testing.T) {
 			}
 		}
 
-		if !found {
-			t.Skip("operation timed out to reach valid round - chain is too slow")
-		}
+		require.True(t, found, "operation timed out to reach valid round — chain is too slow to commit config within 200 rounds")
 
 		output, err = getStorageSCConfig(t, configPath, true)
 		require.NoError(t, err, strings.Join(output, "\n"))
@@ -132,16 +140,25 @@ func TestOwnerUpdate(testSetup *testing.T) {
 		cfgBefore, _ := keyValuePairStringToMap(output)
 		currentOwner := cfgBefore[ownerKey]
 		if currentOwner != oldOwner {
-			t.Skipf("MinerSC owner on chain (%s) does not match expected owner (%s) in miner_sc_owner_wallet.json — infrastructure: MinerSC owner wallet misconfigured", currentOwner, oldOwner)
+			t.Fatalf("MinerSC owner on chain (%s) does not match expected owner (%s) in miner_sc_owner_wallet.json — run deploy_local.sh chain to fix", currentOwner, oldOwner)
 		}
 
 		t.Cleanup(func() {
-			output, err := updateMinerSCConfig(t, newOwnerName, map[string]interface{}{
-				"keys":   ownerKey,
-				"values": oldOwner,
-			}, true)
-			require.Nil(t, err, strings.Join(output, "\n"))
-			require.Len(t, output, 2, strings.Join(output, "\n"))
+			// Use best-effort restore — do NOT use require (panics are swallowed,
+			// causing PERMANENT MinerSC owner loss).
+			for attempt := 1; attempt <= 3; attempt++ {
+				output, err := updateMinerSCConfig(t, newOwnerName, map[string]interface{}{
+					"keys":   ownerKey,
+					"values": oldOwner,
+				}, false)
+				if err == nil && len(output) >= 2 {
+					t.Logf("MinerSC owner restored to %s on attempt %d", oldOwner, attempt)
+					return
+				}
+				t.Logf("WARNING: MinerSC owner restore attempt %d/3 failed: %v %s", attempt, err, strings.Join(output, "\n"))
+				time.Sleep(time.Duration(attempt*5) * time.Second)
+			}
+			t.Errorf("CRITICAL: Failed to restore MinerSC owner to %s after 3 attempts — MinerSC owner may be permanently changed!", oldOwner)
 		})
 
 		output, err = updateMinerSCConfig(t, minerScOwnerWallet, map[string]interface{}{
@@ -167,9 +184,7 @@ func TestOwnerUpdate(testSetup *testing.T) {
 				break
 			}
 		}
-		if !found {
-			t.Skip("operation timed out to reach valid round - chain is too slow")
-		}
+		require.True(t, found, "operation timed out to reach valid round — chain is too slow to commit MinerSC config within 200 rounds")
 
 		output, err = getMinerSCConfig(t, configPath, true)
 		require.Nil(t, err, strings.Join(output, "\n"))

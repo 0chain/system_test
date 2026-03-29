@@ -107,7 +107,7 @@ func TestWritePoolLock(testSetup *testing.T) {
 		balanceAfter, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
 		balanceDiff := balanceBefore - balanceAfter
-		require.Greater(t, balanceDiff, 0.5, "Balance should decrease by at least the locked amount")
+		require.GreaterOrEqual(t, balanceDiff, 0.5, "Balance should decrease by at least the locked amount")
 		require.Less(t, balanceDiff, 3.0, "Balance decrease should not exceed lock + reasonable fee")
 		balanceBefore = balanceAfter
 

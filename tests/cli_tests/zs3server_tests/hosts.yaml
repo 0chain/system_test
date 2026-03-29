@@ -1,12 +1,7 @@
-server: localhost
+server: "localhost"
 port: 9100
-# access_key: someminiouser
-# secret_key: someminiopassword
-concurrent: 1
-object_size: 256B
-object_count: 22
-# server: 65.109.152.43
-# port: 9000
-access_key: rootroot
-secret_key: rootroot
-# concurrent: 900
+access_key: "rootroot"
+secret_key: "rootroot"
+concurrent: 4
+object_size: "1KiB"
+object_count: 100

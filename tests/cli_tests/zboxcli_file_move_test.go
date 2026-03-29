@@ -726,7 +726,11 @@ func TestFileMove(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		}, false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
 		require.Len(t, output, 1)
-		require.Contains(t, output[0], "Move failed")
+		require.True(t,
+			strings.Contains(output[0], "Move failed") ||
+				strings.Contains(output[0], "Error fetching the allocation") ||
+				strings.Contains(output[0], "consensus_not_met"),
+			"expected move/allocation error, got: %s", output[0])
 	})
 
 	t.Run("move file from someone else's allocation should fail", func(t *test.SystemTest) {

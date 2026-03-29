@@ -834,8 +834,10 @@ func (c *APIClient) V1SCRestGetAllocationBlobbers(t *test.SystemTest, scRestGetA
 		SharderServiceProvider)
 
 	scRestGetAllocationBlobbersResponse.Blobbers = blobbers
-	for range *blobbers {
-		scRestGetAllocationBlobbersResponse.BlobberAuthTickets = append(scRestGetAllocationBlobbersResponse.BlobberAuthTickets, "")
+	if blobbers != nil {
+		for range *blobbers {
+			scRestGetAllocationBlobbersResponse.BlobberAuthTickets = append(scRestGetAllocationBlobbersResponse.BlobberAuthTickets, "")
+		}
 	}
 	scRestGetAllocationBlobbersResponse.BlobberRequirements = scRestGetAllocationBlobbersRequest.BlobberRequirements
 
@@ -1667,10 +1669,11 @@ func (c *APIClient) CancelAllocation(
 func (c *APIClient) GetAllocationBlobbers(t *test.SystemTest, wallet *model.Wallet, blobberRequirements *model.BlobberRequirements, requiredStatusCode int) *model.SCRestGetAllocationBlobbersResponse {
 	t.Log("Get allocation blobbers...")
 
-	// Request extra blobbers to allow filtering out enterprise ones
+	// Request extra blobbers to allow filtering out enterprise ones.
+	// Use +2 (not +4) to stay within typical test chain capacity of 7-10 blobbers.
 	inflatedReqs := *blobberRequirements
 	needed := blobberRequirements.DataShards + blobberRequirements.ParityShards
-	inflatedReqs.DataShards = blobberRequirements.DataShards + 4 // request 4 extra
+	inflatedReqs.DataShards = blobberRequirements.DataShards + 2 // request 2 extra
 	inflatedReqs.ParityShards = blobberRequirements.ParityShards
 
 	scRestGetAllocationBlobbersResponse, resp, err := c.V1SCRestGetAllocationBlobbers(
@@ -1679,10 +1682,11 @@ func (c *APIClient) GetAllocationBlobbers(t *test.SystemTest, wallet *model.Wall
 			ClientID:            wallet.Id,
 			ClientKey:           wallet.PublicKey,
 			BlobberRequirements: inflatedReqs,
-		}, requiredStatusCode)
+		}, 0) // any status OK for inflated request; fallback uses original if this fails
 
 	// If inflated request fails (not enough blobbers), fall back to original count
-	if err != nil || scRestGetAllocationBlobbersResponse == nil || scRestGetAllocationBlobbersResponse.Blobbers == nil {
+	noBlobbers := scRestGetAllocationBlobbersResponse == nil || scRestGetAllocationBlobbersResponse.Blobbers == nil || len(*scRestGetAllocationBlobbersResponse.Blobbers) == 0
+	if err != nil || noBlobbers {
 		t.Log("Inflated blobber request failed, trying with original shard counts...")
 		scRestGetAllocationBlobbersResponse, resp, err = c.V1SCRestGetAllocationBlobbers(
 			t,
