@@ -139,7 +139,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			"sharder":       "",
 		}), true)
 		if err != nil && len(output) > 0 && strings.Contains(output[0], "access denied") {
-			t.Skip("Sharder delegate wallet does not have access - delegate wallet may not match on-chain config")
+			t.Fatalf("Sharder delegate wallet does not have access — delegate_wallet may not match on-chain config. Run deploy_local.sh chain to fix.")
 		}
 		require.Nil(t, err, "error updating num_delegated in sharder node")
 		require.Len(t, output, 2)
@@ -181,7 +181,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		combined := strings.Join(output, "\n")
 		if strings.Contains(combined, "too less sharders") || strings.Contains(combined, "unexpected end of JSON input") || strings.Contains(combined, "invalid transaction nonce") {
-			t.Skip("Chain undergoing view change — skipping num_delegates validation assertion")
+			t.Fatalf("Chain undergoing view change — skipping num_delegates validation assertion")
 		}
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "number_of_delegates greater than max_delegates of SC")
@@ -210,7 +210,7 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		require.NotNil(t, err, "expected error when updating negative num_delegates but got output:", strings.Join(output, "\n"))
 		combined2 := strings.Join(output, "\n")
 		if strings.Contains(combined2, "too less sharders") || strings.Contains(combined2, "unexpected end of JSON input") || strings.Contains(combined2, "invalid transaction nonce") {
-			t.Skip("Chain undergoing view change — skipping negative num_delegates assertion")
+			t.Fatalf("Chain undergoing view change — skipping negative num_delegates assertion")
 		}
 		require.Len(t, output, 1)
 		const expected = "update_sharder_settings: invalid non-positive number_of_delegates: -1"
