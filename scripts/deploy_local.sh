@@ -2375,11 +2375,16 @@ fix_blobber_config() {
     print_status "Fixing blobber block_worker to local 0dns (http://198.18.0.100:9091)..."
     sed -i.bak "s|block_worker:.*|block_worker: http://198.18.0.100:9091|" "$BLOBBER_CONFIG"
 
-    # Ensure storage_version is 1 (required for SDK v2 allocations)
+    # Set storage_version to 0 (V1 commit path).
+    # The blobber's fix/finalize-worker-and-logs branch does NOT implement V2
+    # commit handling, but gosdk's fix/lfb-aware-sharder-selection uses V2 when
+    # storage_version=1. This mismatch causes "Invalid connection id. Connection
+    # does not have any changes" on createdir/copy/move/delete operations.
+    # Change to 1 ONLY after blobber implements commitV2 handler.
     if grep -q 'storage_version:' "$BLOBBER_CONFIG"; then
-        sed -i.bak 's/storage_version:.*/storage_version: 1/' "$BLOBBER_CONFIG"
+        sed -i.bak 's/storage_version:.*/storage_version: 0/' "$BLOBBER_CONFIG"
     else
-        sed -i.bak '/^capacity:/a\storage_version: 1' "$BLOBBER_CONFIG"
+        sed -i.bak '/^capacity:/a\storage_version: 0' "$BLOBBER_CONFIG"
     fi
 
     # Set read_price to 0 (required for free allocation tests)
