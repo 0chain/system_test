@@ -12537,6 +12537,29 @@ PYEOF
                 cd "${repo_path}/docker.local/build.miner"
                 MINER=$i docker compose -p miner$i -f b0docker-compose.yml up -d --force-recreate 2>/dev/null || true
             done
+            cd "$SCRIPT_DIR"
+
+            # After 0chain swap, wait for chain to start and re-apply chain config.
+            # New 0chain builds may change fee validation — without this, blobber
+            # health check transactions are rejected ("insufficient fee") and
+            # blobbers become invisible to alloc_blobbers endpoint.
+            print_status "Waiting for chain to start after 0chain swap..."
+            local _chain_ok=false
+            for _attempt in $(seq 1 30); do
+                local _r=$(curl -s "http://198.18.0.81:7171/v1/chain/get/stats" -m 5 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('current_round',0))" 2>/dev/null || echo "0")
+                if [ "$_r" -gt 0 ] 2>/dev/null; then
+                    _chain_ok=true
+                    print_status "Chain responding at round $_r"
+                    break
+                fi
+                sleep 10
+            done
+            if $_chain_ok; then
+                print_status "Re-applying chain config after 0chain swap..."
+                ensure_chain_config || print_warning "chain config after swap failed (blobber health checks may be rejected)"
+            else
+                print_error "Chain did not start after swap — manual intervention required"
+            fi
             ;;
         blobber)
             # Fix config before restart so block_worker points to local chain (not dev.0chain.net)
@@ -14535,6 +14558,69 @@ EOF
             kill "$(cat /tmp/results_gen.pid)" 2>/dev/null || true
             rm -f /tmp/results_gen.pid
         fi
+
+        # ================================================================
+        # PRE-FLIGHT CHECKS: Validate and auto-fix everything that has
+        # caused test failures in the past. Each check either fixes the
+        # issue or fails with a clear message.
+        # ================================================================
+        print_header "Pre-flight Checks"
+
+        # 1. block_worker must point to local 0dns (not CI default 127.0.0.1:9099)
+        configure_test_configs 2>/dev/null || true
+        local _bw=$(grep 'block_worker:' "${BASE_DIR}/system_test/tests/cli_tests/config/zbox_config.yaml" 2>/dev/null | awk '{print $2}')
+        if [ "$_bw" != "http://198.18.0.100:9091" ]; then
+            print_error "PREFLIGHT FAIL: block_worker is '$_bw' (expected http://198.18.0.100:9091)"
+            print_error "configure_test_configs failed — fixing manually"
+            sed -i "s|block_worker:.*|block_worker: http://198.18.0.100:9091|" \
+                "${BASE_DIR}/system_test/tests/cli_tests/config/zbox_config.yaml" \
+                "${BASE_DIR}/system_test/tests/api_tests/config/api_tests_config.yaml" 2>/dev/null
+        else
+            print_status "PREFLIGHT OK: block_worker → 198.18.0.100:9091"
+        fi
+
+        # 2. Chain must be alive and advancing
+        local _round1=$(curl -s "http://198.18.0.81:7171/v1/chain/get/stats" -m 5 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('current_round',0))" 2>/dev/null || echo "0")
+        if [ "$_round1" = "0" ]; then
+            print_error "PREFLIGHT FAIL: Chain not responding (sharder-1)"
+            return 1
+        fi
+        print_status "PREFLIGHT OK: Chain at round $_round1"
+
+        # 3. Minimum blobbers available for allocations (data=2, parity=2 = 4 needed)
+        local _blob_count=$(curl -s "http://198.18.0.81:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/alloc_blobbers?allocation_data=%7B%22data_shards%22%3A2%2C%22parity_shards%22%3A2%2C%22size%22%3A10240%2C%22owner_id%22%3A%22test%22%2C%22owner_public_key%22%3A%22test%22%2C%22expiration_date%22%3A1900000000%2C%22read_price_range%22%3A%7B%22min%22%3A0%2C%22max%22%3A9223372036854775807%7D%2C%22write_price_range%22%3A%7B%22min%22%3A0%2C%22max%22%3A9223372036854775807%7D%2C%22storage_version%22%3A1%7D" -m 10 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d)) if isinstance(d,list) else print(0)" 2>/dev/null || echo "0")
+        if [ "$_blob_count" -lt 4 ]; then
+            print_error "PREFLIGHT FAIL: Only $_blob_count blobbers available for allocations (need >= 4)"
+            print_error "Blobber health checks may be stale. Restarting all blobbers..."
+            for i in $(seq 1 12); do docker restart blobber-$i 2>/dev/null; done
+            sleep 90
+            _blob_count=$(curl -s "http://198.18.0.81:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/alloc_blobbers?allocation_data=%7B%22data_shards%22%3A2%2C%22parity_shards%22%3A2%2C%22size%22%3A10240%2C%22owner_id%22%3A%22test%22%2C%22owner_public_key%22%3A%22test%22%2C%22expiration_date%22%3A1900000000%2C%22read_price_range%22%3A%7B%22min%22%3A0%2C%22max%22%3A9223372036854775807%7D%2C%22write_price_range%22%3A%7B%22min%22%3A0%2C%22max%22%3A9223372036854775807%7D%2C%22storage_version%22%3A1%7D" -m 10 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d)) if isinstance(d,list) else print(0)" 2>/dev/null || echo "0")
+            if [ "$_blob_count" -lt 4 ]; then
+                print_error "PREFLIGHT FAIL: Still only $_blob_count blobbers after restart. Run: deploy_local.sh blobbers"
+                return 1
+            fi
+        fi
+        print_status "PREFLIGHT OK: $_blob_count blobbers available for allocations"
+
+        # 4. SC owner wallet valid
+        local _sc_owner=$(curl -s "http://198.18.0.81:7171/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/storage-config" -m 5 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('fields',d).get('owner_id',''))" 2>/dev/null || true)
+        local _wallet_owner=$(python3 -c "import json; print(json.load(open('${ZCN_CONFIG_DIR}/owner.json')).get('client_id',''))" 2>/dev/null || true)
+        if [ -n "$_sc_owner" ] && [ -n "$_wallet_owner" ] && [ "$_sc_owner" != "$_wallet_owner" ]; then
+            print_error "PREFLIGHT FAIL: SC owner mismatch (chain: ${_sc_owner:0:16}, wallet: ${_wallet_owner:0:16})"
+            print_error "Tests requiring SC owner will fail. Fix: deploy_local.sh redeploy"
+        else
+            print_status "PREFLIGHT OK: SC owner wallet matches"
+        fi
+
+        # 5. 0dns responding
+        local _0dns=$(curl -s "http://198.18.0.100:9091/network" -m 5 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d.get('miners',[])))" 2>/dev/null || echo "0")
+        if [ "$_0dns" = "0" ]; then
+            print_error "PREFLIGHT FAIL: 0dns not responding or has 0 miners"
+            return 1
+        fi
+        print_status "PREFLIGHT OK: 0dns has $_0dns miners"
+
+        print_status "All pre-flight checks passed"
 
         # Verify environment health before running tests
         # verify_all must pass with zero [FAIL] items.
