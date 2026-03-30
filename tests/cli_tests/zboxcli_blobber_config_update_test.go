@@ -333,8 +333,9 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &currentBlobberInfo)
 		require.Nil(t, err, strings.Join(output, "\n"))
 
-		// Round to 4 decimal places to avoid floating-point precision issues with zbox CLI
-		newWritePrice := math.Round((intToZCN(currentBlobberInfo.Terms.WritePrice)+0.01)*1e4) / 1e4
+		// Use a whole-ZCN increment to avoid float rounding between CLI → SC → readback.
+		// Small increments like +0.01 can lose precision in the ZCN↔SAS conversion chain.
+		newWritePrice := math.Round(intToZCN(currentBlobberInfo.Terms.WritePrice)) + 1.0
 
 		output, err = updateBlobberInfo(t, configPath, createParams(map[string]interface{}{"blobber_id": intialBlobberInfo.ID, "write_price": newWritePrice}))
 		if err != nil && strings.Contains(strings.Join(output, "\n"), "staked capacity") {
@@ -369,8 +370,9 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 
 		// Use current write_price as base (may have been changed by other tests)
-		// Round to 4 decimal places to avoid floating-point precision issues with zbox CLI
-		newWritePrice := math.Round((intToZCN(currentBlobberInfo.Terms.WritePrice)+0.01)*1e4) / 1e4
+		// Use a whole-ZCN increment to avoid float rounding between CLI → SC → readback.
+		// Small increments like +0.01 can lose precision in the ZCN↔SAS conversion chain.
+		newWritePrice := math.Round(intToZCN(currentBlobberInfo.Terms.WritePrice)) + 1.0
 		if newWritePrice < 0.1 {
 			newWritePrice = 0.1
 		}
