@@ -14625,6 +14625,29 @@ EOF
         fi
         print_status "PREFLIGHT OK: 0dns has $_0dns miners"
 
+        # 6. Faucet transaction must confirm (catches LFMB 304 / cold sharder cache)
+        # On a young chain, sharders may return empty JSON for confirmations.
+        # Wait until a real transaction can confirm before starting tests.
+        print_status "Verifying transaction confirmation works..."
+        local _faucet_ok=false
+        for _try in $(seq 1 10); do
+            local _faucet_out
+            _faucet_out=$($ZWALLET faucet --methodName pour --tokens 0.1 \
+                --wallet ${ZCN_WALLET_FILE} --configDir ${ZCN_CONFIG_DIR} --config ${ZCN_CONFIG_FILE} 2>&1 || true)
+            if echo "$_faucet_out" | grep -qi "success"; then
+                _faucet_ok=true
+                print_status "PREFLIGHT OK: Faucet transaction confirmed on attempt $_try"
+                break
+            fi
+            print_status "  Faucet attempt $_try/10 failed, waiting 15s... ($( echo "$_faucet_out" | tail -1 | head -c 80))"
+            sleep 15
+        done
+        if ! $_faucet_ok; then
+            print_error "PREFLIGHT FAIL: Faucet transaction could not confirm after 10 attempts"
+            print_error "Chain sharders may be unhealthy. Check sharder logs."
+            return 1
+        fi
+
         print_status "All pre-flight checks passed"
 
         # Verify environment health before running tests

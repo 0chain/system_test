@@ -113,10 +113,10 @@ func TestMinerStake(testSetup *testing.T) {
 		if err != nil {
 			combined := strings.Join(output, "\n")
 			if strings.Contains(combined, "max_delegates reached") {
-				t.Skip("Miner has reached max_delegates - cannot stake: " + combined)
+				t.Fatalf("Miner has reached max_delegates - cannot stake: " + combined)
 			}
 			if strings.Contains(combined, "too less sharders") || strings.Contains(combined, "unexpected end of JSON") {
-				t.Skip("Chain transient error during stake: " + combined)
+				t.Fatalf("Chain transient error during stake: " + combined)
 			}
 		}
 		require.Nil(t, err, "error staking tokens against a node")
@@ -195,7 +195,7 @@ func TestMinerStake(testSetup *testing.T) {
 		err = json.Unmarshal([]byte(output[0]), &poolsInfo)
 		require.NoError(t, err)
 		if len(poolsInfo.Pools[testMiner.ID]) == 0 {
-			t.Skip("Pool not reflected in mn-user-info; chain may be experiencing instability (max_delegates too low or sharder lag)")
+			t.Fatalf("Pool not reflected in mn-user-info; chain may be experiencing instability (max_delegates too low or sharder lag)")
 		}
 		require.Len(t, poolsInfo.Pools[testMiner.ID], 1)
 	})
@@ -212,7 +212,7 @@ func TestMinerStake(testSetup *testing.T) {
 		combined := strings.Join(output, "\n")
 		if strings.Contains(combined, "too less sharders") || strings.Contains(combined, "unexpected end of JSON") ||
 			strings.Contains(combined, "invalid transaction nonce") {
-			t.Skip("Chain transient error during insufficient-balance stake test: " + combined)
+			t.Fatalf("Chain transient error during insufficient-balance stake test: " + combined)
 		}
 		require.Len(t, output, 1)
 		require.Equal(t, "stake_pool_lock_failed: stake pool digging error: lock amount is greater than balance", output[0])
@@ -302,17 +302,7 @@ func TestMinerStake(testSetup *testing.T) {
 			"keys":   "max_delegates",
 			"values": strconv.Itoa(testMaxDelegates),
 		}, true)
-		if err != nil {
-			combined := strings.Join(output, "\n")
-			if strings.Contains(combined, "unauthorized access") || strings.Contains(combined, "access denied") {
-				t.Skip("MinerSC owner wallet does not match on-chain owner - cannot update max_delegates")
-			}
-			if strings.Contains(combined, "too less sharders") || strings.Contains(combined, "too few sharders") ||
-				strings.Contains(combined, "unexpected end of JSON") || strings.Contains(combined, "invalid transaction nonce") {
-				t.Skip("Chain transient error while lowering global max_delegates: " + combined)
-			}
-			require.Nil(t, err, "failed to lower global max_delegates: "+strings.Join(output, "\n"))
-		}
+		require.Nil(t, err, "failed to lower global max_delegates: "+strings.Join(output, "\n"))
 
 		// Also lower the per-miner num_delegates. The delegate wallet for all infra miners
 		// is miner01NodeDelegateWalletName (same key used for all nodes).
@@ -320,17 +310,12 @@ func TestMinerStake(testSetup *testing.T) {
 			"id":            newMiner.ID,
 			"num_delegates": testMaxDelegates,
 		}), true)
-		if err != nil {
-			combined := strings.Join(output, "\n")
-			if strings.Contains(combined, "unauthorized access") || strings.Contains(combined, "access denied") {
-				t.Skip("Miner delegate wallet does not have access - delegate wallet may not match on-chain config")
-			}
-			if strings.Contains(combined, "too less sharders") || strings.Contains(combined, "too few sharders") ||
-				strings.Contains(combined, "unexpected end of JSON") || strings.Contains(combined, "invalid transaction nonce") {
-				t.Skip("Chain transient error while lowering miner num_delegates: " + combined)
-			}
-			require.Nil(t, err, "failed to lower miner num_delegates: "+strings.Join(output, "\n"))
-		}
+		require.Nil(t, err, "failed to lower miner num_delegates: "+strings.Join(output, "\n"))
+
+		// Wait for both settings to commit on chain before staking.
+		// Without this, the chain still has the old num_delegates and staking succeeds
+		// when it should fail — causing "expected error but got success".
+		cliutils.Wait(t, 10*time.Second)
 
 		// Pre-unlock stale test wallet pools from previous runs to free up slots.
 		// Wallet names are deterministic: escapedTestName(t)+"0" through +"(testMaxDelegates-2)".
@@ -393,7 +378,7 @@ func TestMinerStake(testSetup *testing.T) {
 		}()
 
 		if slotsToFill <= 0 {
-			t.Skipf("miner %s has %d existing pools >= testMaxDelegates=%d after pre-unlock; cannot test limit", newMiner.ID[:16], actualPoolCount, testMaxDelegates)
+			t.Fatalf("miner %s has %d existing pools >= testMaxDelegates=%d after pre-unlock; run deploy_local.sh chain to reset num_delegates", newMiner.ID[:16], actualPoolCount, testMaxDelegates)
 			return
 		}
 		maxDelegates := int64(testMaxDelegates)
@@ -474,7 +459,7 @@ func TestMinerStake(testSetup *testing.T) {
 		require.Len(t, output, 1)
 		combined := strings.Join(output, "\n")
 		if strings.Contains(combined, "invalid transaction nonce") || strings.Contains(combined, "too less sharders") || strings.Contains(combined, "unexpected end of JSON") {
-			t.Skip("Chain transient error during invalid node id unlock test: " + combined)
+			t.Fatalf("Chain transient error during invalid node id unlock test: " + combined)
 		}
 		require.Equal(t, "stake_pool_unlock_failed: can't get related stake pool: get_stake_pool: miner not found or genesis miner used", output[0])
 
