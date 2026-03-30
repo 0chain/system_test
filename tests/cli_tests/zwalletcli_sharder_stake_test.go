@@ -95,10 +95,12 @@ func TestSharderStake(testSetup *testing.T) {
 	t.RunSequentiallyWithTimeout("Staking tokens against valid sharder with valid tokens should work, unlocking should work", 80*time.Second, func(t *test.SystemTest) {
 		createWallet(t)
 
-		// Pre-unlock any existing stake from previous runs to avoid balance accumulation
+		// Pre-unlock any existing stake from previous runs to avoid balance accumulation.
+		// Use retry=false to avoid consuming nonces on "no such delegate pool" failures —
+		// each failed retry increments the client nonce, desynchronizing subsequent transactions.
 		_, _ = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
-		}), true)
+		}), false)
 		cliutils.Wait(t, 5*time.Second)
 
 		// Record balance before locking (pre-unlock may not clear a stale pool immediately)
@@ -117,7 +119,7 @@ func TestSharderStake(testSetup *testing.T) {
 			"tokens":     1,
 		}), true)
 		if err != nil && strings.Contains(strings.Join(output, "\n"), "max_delegates reached") {
-			t.Skip("sharder delegate pools full (max_delegates reached) — infrastructure: sharder num_delegates exhausted from prior test runs, requires mn-update-settings")
+			t.Fatalf("sharder delegate pools full (max_delegates reached) — run deploy_local.sh chain to reset num_delegates")
 		}
 		require.Nil(t, err, "error locking tokens against a node")
 		require.Len(t, output, 1)
@@ -152,10 +154,12 @@ func TestSharderStake(testSetup *testing.T) {
 		createWallet(t)
 		faucetFundWalletOrSkip(t, escapedTestName(t), 9.0)
 
-		// Pre-unlock any existing stake from previous runs to avoid balance accumulation
+		// Pre-unlock any existing stake from previous runs to avoid balance accumulation.
+		// Use retry=false to avoid consuming nonces on "no such delegate pool" failures —
+		// each failed retry increments the client nonce, desynchronizing subsequent transactions.
 		_, _ = minerOrSharderUnlock(t, configPath, createParams(map[string]interface{}{
 			"sharder_id": sharder.ID,
-		}), true)
+		}), false)
 		cliutils.Wait(t, 5*time.Second)
 
 		// Ensure cleanup: unstake after test regardless of outcome
@@ -181,7 +185,7 @@ func TestSharderStake(testSetup *testing.T) {
 			"tokens":     2,
 		}), true)
 		if err != nil && strings.Contains(strings.Join(output, "\n"), "max_delegates reached") {
-			t.Skip("sharder delegate pools full (max_delegates reached) — infrastructure: sharder num_delegates exhausted from prior test runs, requires mn-update-settings")
+			t.Fatalf("sharder delegate pools full (max_delegates reached) — run deploy_local.sh chain to reset num_delegates")
 		}
 		require.NoError(t, err, "error staking tokens against node")
 		require.Len(t, output, 1)
@@ -275,7 +279,7 @@ func TestSharderStake(testSetup *testing.T) {
 			"tokens":     1,
 		}), true)
 		if err != nil && strings.Contains(strings.Join(output, "\n"), "max_delegates reached") {
-			t.Skip("sharder delegate pools full (max_delegates reached) — infrastructure: sharder num_delegates exhausted from prior test runs, requires mn-update-settings")
+			t.Fatalf("sharder delegate pools full (max_delegates reached) — run deploy_local.sh chain to reset num_delegates")
 		}
 		require.Nil(t, err, "error staking tokens against a node")
 		require.Len(t, output, 1)

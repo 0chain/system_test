@@ -78,6 +78,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 
 		// Use the existing RepairAllocation method which will handle the repair
 		// The repair should skip invalid blobbers gracefully
+		// Wait for write markers to commit on all blobbers before repairing
+		time.Sleep(15 * time.Second)
 		sdkClient.RepairAllocation(t, allocationID)
 
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
@@ -105,6 +107,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
 		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(validBlobbers))
 
+		// Wait for write markers to commit on all blobbers before repairing
+		time.Sleep(15 * time.Second)
 		sdkClient.RepairAllocation(t, allocationID)
 		for _, op := range ops {
 			_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
@@ -138,6 +142,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		// Without this, repair races against in-flight writes and fails.
 		time.Sleep(15 * time.Second)
 
+		// Wait for write markers to commit on all blobbers before repairing
+		time.Sleep(15 * time.Second)
 		sdkClient.RepairAllocation(t, allocationID)
 
 		updatedRef, err := sdk.GetFileRefFromBlobber(allocationID, firstBlobber.ID, op.RemotePath)
@@ -172,6 +178,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		// Wait for write markers to commit before repair
 		time.Sleep(15 * time.Second)
 
+		// Wait for write markers to commit on all blobbers before repairing
+		time.Sleep(15 * time.Second)
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
 		require.NotNil(t, err)
@@ -199,6 +207,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{moveOp}, client.WithRepair(validBlobbers))
 
+		// Wait for write markers to commit on all blobbers before repairing
+		time.Sleep(15 * time.Second)
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, newPath)
 		require.Nil(t, err)
@@ -226,6 +236,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{copyOP}, client.WithRepair(validBlobbers))
 
+		// Wait for write markers to commit on all blobbers before repairing
+		time.Sleep(15 * time.Second)
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, newPath)
 		require.Nil(t, err)
@@ -255,6 +267,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
 		sdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{renameOp}, client.WithRepair(validBlobbers))
 
+		// Wait for write markers to commit on all blobbers before repairing
+		time.Sleep(15 * time.Second)
 		sdkClient.RepairAllocation(t, allocationID)
 		_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, "/"+newName)
 		require.Nil(t, err)
@@ -285,6 +299,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
 		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(validBlobbers))
 
+		// Wait for write markers to commit on all blobbers before repairing
+		time.Sleep(15 * time.Second)
 		sdkClient.RepairAllocation(t, allocationID)
 		for _, op := range ops {
 			_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
@@ -317,6 +333,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
 		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(validBlobbers))
 
+		// Wait for write markers to commit on all blobbers before repairing
+		time.Sleep(15 * time.Second)
 		sdkClient.RepairAllocation(t, allocationID)
 		for _, op := range ops {
 			_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
@@ -353,6 +371,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
 		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(validBlobbers))
 
+		// Wait for write markers to commit on all blobbers before repairing
+		time.Sleep(15 * time.Second)
 		sdkClient.RepairAllocation(t, allocationID)
 		for _, op := range ops {
 			_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
@@ -394,6 +414,8 @@ func TestRepairAllocation(testSetup *testing.T) {
 		validBlobbers := filterValidBlobbers(alloc.Blobbers, int(blobberRequirements.DataShards))
 		sdkClient.MultiOperation(t, allocationID, ops, client.WithRepair(validBlobbers))
 
+		// Wait for write markers to commit on all blobbers before repairing
+		time.Sleep(15 * time.Second)
 		sdkClient.RepairAllocation(t, allocationID)
 		for _, op := range ops {
 			_, err = sdk.GetFileRefFromBlobber(allocationID, lastBlobber.ID, op.RemotePath)
