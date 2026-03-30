@@ -16,8 +16,13 @@ func Teardown(t *test.SystemTest, headers map[string]string) {
 	// "duplicate key" errors in subsequent subtests.
 	// Owner deletion cascades to wallet, active_wallet, etc. via ON DELETE CASCADE.
 	// Delete wallets first (explicit, in case ON DELETE CASCADE is not set), then owners.
+	// Delete in correct dependency order: allocation → wallet → owner.
+	// allocation.wallet_id references wallet.id; wallet.owner_id references owner.id.
+	// Use separate statements so one failure doesn't block the rest.
 	cmd := exec.Command("docker", "exec", "postgres-0box", "psql", "-U", "zbox_user", "-d", "zbox", "-c",
-		"DELETE FROM allocation WHERE owner_id IN (SELECT id FROM owner WHERE username LIKE 'test_%' OR username LIKE 'ref_%' OR username = 'referred_user'); DELETE FROM wallet WHERE owner_id IN (SELECT id FROM owner WHERE username LIKE 'test_%' OR username LIKE 'ref_%' OR username = 'referred_user'); DELETE FROM owner WHERE username LIKE 'test_%' OR username LIKE 'ref_%' OR username = 'referred_user';")
+		`DELETE FROM allocation WHERE wallet_id IN (SELECT w.id FROM wallet w JOIN owner o ON w.owner_id = o.id WHERE o.username LIKE 'test_%' OR o.username LIKE 'ref_%' OR o.username = 'referred_user');
+		 DELETE FROM wallet WHERE owner_id IN (SELECT id FROM owner WHERE username LIKE 'test_%' OR username LIKE 'ref_%' OR username = 'referred_user');
+		 DELETE FROM owner WHERE username LIKE 'test_%' OR username LIKE 'ref_%' OR username = 'referred_user';`)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Logf("Teardown SQL cleanup warning: %v (output: %s)", err, string(output))
