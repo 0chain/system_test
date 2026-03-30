@@ -891,7 +891,7 @@ func (c *ZboxClient) GetShareInfoShared(t *test.SystemTest, headers map[string]s
 	urlBuilder.SetPath("/v2/shareinfo/shared")
 
 	formData := map[string]string{
-		"share_info_type": "public",
+		"share_info_type": "private",
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
@@ -914,7 +914,7 @@ func (c *ZboxClient) GetShareInfoReceived(t *test.SystemTest, headers map[string
 	urlBuilder.SetPath("/v2/shareinfo/received")
 
 	formData := map[string]string{
-		"share_info_type": "public",
+		"share_info_type": "private",
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
