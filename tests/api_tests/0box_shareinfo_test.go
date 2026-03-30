@@ -17,7 +17,7 @@ import (
 // wallet, and 0box validates that the owner_id exists on-chain.
 func NewTestShareinfo() map[string]string {
 	ticket := map[string]interface{}{
-		"client_id":      "",
+		"client_id":      client.X_APP_CLIENT_ID,
 		"owner_id":       client.X_APP_CLIENT_ID,
 		"allocation_id":  "e0c2cd2d5faaad13fc53733dd759749f2b2f01af46332009c678221a2c488153",
 		"file_path_hash": "e724a2201e22653d32167fca1bf12b2e44bac6337d3ebdb7427fba4eecaa4c9d",
