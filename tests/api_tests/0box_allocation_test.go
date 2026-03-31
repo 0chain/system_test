@@ -109,12 +109,12 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err, "0box wallet setup")
 
 		allocInput := NewTestAllocation()
-		allocInput["id"] = "c0360331837a7376d27007614e124db83811e4416dd2f1577345dd96c8621bf6"
+		allocInput["id"] = fmt.Sprintf("%064x", time.Now().UnixNano())
 		_, response, err := zboxClient.CreateAllocation(t, headers, allocInput)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		allocInput["id"] = "834d8db33f30952238d9ccc4eb7215ed39752b9686ed858aa7e9653f3d41e79b"
+		allocInput["id"] = fmt.Sprintf("%064x", time.Now().UnixNano()+1)
 		_, response, err = zboxClient.CreateAllocation(t, headers, allocInput)
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -140,7 +140,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
-		allocInput["id"] = "834d8db33f30952238d9ccc4eb7215ed39752b9686ed858aa7e9653f3d41e79b"
+		allocInput["id"] = fmt.Sprintf("%064x", time.Now().UnixNano()+2)
 		_, response, err = zboxClient.CreateAllocation(t, headers, allocInput)
 		require.NoError(t, err)
 		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
