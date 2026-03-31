@@ -2375,23 +2375,19 @@ fix_blobber_config() {
     print_status "Fixing blobber block_worker to local 0dns (http://198.18.0.100:9091)..."
     sed -i.bak "s|block_worker:.*|block_worker: http://198.18.0.100:9091|" "$BLOBBER_CONFIG"
 
-    # storage_version controls the gosdk commit path:
-    #   0 = V1 (allocation_changes rows) — compatible with all blobber builds
-    #   1 = V2 (trie-based, ProcessChangeV2) — requires gosdk V2 to create allocation_changes
+    # storage_version=1 (V2) — production standard. Both blobber staging and
+    # fix/finalize-worker-and-logs support V2 (upload, update, delete, challenge handlers).
     #
-    # The blobber supports V2 reads/writes but its commit handler ALWAYS checks
-    # allocation_changes rows (len(connectionObj.Changes) == 0 → reject).
-    # gosdk staging uses V1 changes even with storage_version=1 (no V2 code path).
-    # gosdk fix/lfb-aware-sharder-selection has a V2 code path that bypasses
-    # allocation_changes row creation → commit fails with "Connection does not
-    # have any changes" on createdir/copy/move/delete.
-    #
-    # Set to 0 when using gosdk fix/lfb-aware-sharder-selection.
-    # Set to 1 when using gosdk staging or when the V2 commit path is fixed.
+    # KNOWN ISSUE: gosdk fix/lfb-aware-sharder-selection has a V2 bug where
+    # ProcessChangeV2 skips buildChange() → no allocation_changes rows → blobber
+    # commit handler rejects with "Connection does not have any changes" on
+    # createdir/copy/move/delete. Fix needed in gosdk multi_operation_worker.go
+    # line ~211: V2 branch must also call buildChange() to create allocation_changes rows.
+    # Until fixed, 5 CLI tests fail (createdir/copy/move/delete operations).
     if grep -q 'storage_version:' "$BLOBBER_CONFIG"; then
-        sed -i.bak 's/storage_version:.*/storage_version: 0/' "$BLOBBER_CONFIG"
+        sed -i.bak 's/storage_version:.*/storage_version: 1/' "$BLOBBER_CONFIG"
     else
-        sed -i.bak '/^capacity:/a\storage_version: 0' "$BLOBBER_CONFIG"
+        sed -i.bak '/^capacity:/a\storage_version: 1' "$BLOBBER_CONFIG"
     fi
 
     # Set read_price to 0 (required for free allocation tests)
