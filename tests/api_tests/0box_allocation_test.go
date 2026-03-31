@@ -139,7 +139,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		allocInput["id"] = fmt.Sprintf("%064x", time.Now().UnixNano()+2)
 		_, response, err = zboxClient.CreateAllocation(t, headers, allocInput)
 		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		// 0box returns 409 (conflict) when a vult allocation already exists for this wallet
+		require.True(t, response.StatusCode() == 400 || response.StatusCode() == 409,
+			"Second vult allocation should be rejected (400 or 409), got %d. Output: [%v]", response.StatusCode(), response.String())
 	})
 
 	t.RunSequentiallyWithTimeout("Post allocation for chimney should not work", 10*time.Minute, func(t *test.SystemTest) {
@@ -169,7 +171,9 @@ func Test0BoxAllocation(testSetup *testing.T) {
 
 		_, response, err = zboxClient.CreateAllocation(t, headers, allocInput)
 		require.NoError(t, err)
-		require.Equal(t, 400, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
+		// 0box returns 409 (conflict) for duplicate allocation ID
+		require.True(t, response.StatusCode() == 400 || response.StatusCode() == 409,
+			"Duplicate allocation should be rejected (400 or 409), got %d. Output: [%v]", response.StatusCode(), response.String())
 	})
 
 	t.RunSequentiallyWithTimeout("Get an allocation with allocation present should work", 10*time.Minute, func(t *test.SystemTest) {
