@@ -911,6 +911,8 @@ func TestFileCopy(testSetup *testing.T) { // nolint:gocyclo // team preference i
 		allocationID := strings.Fields(output[0])[2]
 		t.Logf("Allocation ID: %s", allocationID)
 
+		// Wait for allocation to be visible on sharder REST API (indexing delay)
+		cliutils.Wait(t, 5*time.Second)
 		initialAllocation := getAllocation(t, allocationID)
 		t.Logf("Initial allocation: %+v", initialAllocation)
 

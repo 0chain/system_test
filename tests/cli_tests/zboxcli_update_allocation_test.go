@@ -582,6 +582,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
+		// Wait for SC to commit the update before reading back
+		cliutils.Wait(t, 5*time.Second)
+
 		// get allocation
 		alloc := getAllocation(t, allocationID)
 		require.True(t, alloc.ThirdPartyExtendable)
@@ -621,6 +624,9 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "error updating allocation", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
+
+		// Wait for SC to commit the update before reading back
+		cliutils.Wait(t, 5*time.Second)
 
 		// get allocation
 		alloc := getAllocation(t, allocationID)
