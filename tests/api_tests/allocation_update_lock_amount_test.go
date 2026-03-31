@@ -64,6 +64,8 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		t.Logf("Min lock required: %v (with buffer: %v ZCN)", minLockRequired, minLockRequiredInZcn)
 
 		apiClient.UpdateAllocation(t, wallet, allocationID, uar, minLockRequiredInZcn, client.TxSuccessfulStatus)
+		// Wait for SC to commit the size update before reading back
+		time.Sleep(5 * time.Second)
 		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		require.Equal(t, int64(2*GB), alloc.Size, "Allocation size is not updated")
@@ -319,6 +321,8 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		t.Logf("Min lock required: %v ZCN (%v SAS)", minLockRequiredInZcn, minLockRequired)
 
 		apiClient.UpdateAllocation(t, wallet, allocationID, uar, minLockRequiredInZcn, client.TxSuccessfulStatus)
+		// Wait for SC to commit the size update before reading back
+		time.Sleep(5 * time.Second)
 		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		require.Equal(t, int64(2*GB), alloc.Size, "Allocation size is not updated")
