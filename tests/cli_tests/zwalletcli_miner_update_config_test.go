@@ -226,6 +226,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with min values")
 
+		time.Sleep(5 * time.Second)
 		updatedConfigMap := getMinerScConfigsForKeys(t, configPath, keys)
 
 		// Assert that each updated value matches the expected value
@@ -295,6 +296,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with min values")
 
+		time.Sleep(5 * time.Second)
 		updatedConfigMap := getMinerScConfigsForKeys(t, configPath, keys)
 
 		// Assert that each updated value matches the expected value
@@ -364,6 +366,7 @@ func TestMinerUpdateConfig(testSetup *testing.T) {
 		require.Nil(t, err, strings.Join(output, "\n"))
 		require.True(t, isUpdateSuccess(output), "Update to config parameters succeeded with min values")
 
+		time.Sleep(5 * time.Second)
 		updatedConfigMap := getMinerScConfigsForKeys(t, configPath, keys)
 
 		// Assert that each updated value matches the expected value

@@ -146,6 +146,9 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		require.Equal(t, "settings updated", output[0])
 		require.Regexp(t, regexp.MustCompile("Hash: ([a-f0-9]{64})"), output[1])
 
+		// Wait for SC to commit the settings update before readback
+		time.Sleep(5 * time.Second)
+
 		output, err = minerInfoForWallet(t, configPath, createParams(map[string]interface{}{
 			"id": selectedSharderID,
 		}), sharder01NodeDelegateWalletName, true)
