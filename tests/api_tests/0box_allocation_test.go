@@ -101,7 +101,7 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.GreaterOrEqual(t, len(allocationList), 1)
 	})
 
-	t.RunSequentiallyWithTimeout("multiple allocations with blimp argument should work", 10*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("multiple allocations with blimp argument should be rejected", 10*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		Teardown(t, headers)
 
@@ -114,15 +114,11 @@ func Test0BoxAllocation(testSetup *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
+		// Second allocation should be rejected (0box enforces one-allocation-per-wallet for blimp)
 		allocInput["id"] = fmt.Sprintf("%064x", time.Now().UnixNano()+1)
 		_, response, err = zboxClient.CreateAllocation(t, headers, allocInput)
 		require.NoError(t, err)
-		require.Equal(t, 201, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-
-		allocationList, response, err := zboxClient.ListAllocation(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
-		require.Len(t, allocationList, 2)
+		require.Equal(t, 409, response.StatusCode(), "Second blimp allocation should be rejected. Output: [%v]", response.String())
 	})
 
 	t.RunSequentiallyWithTimeout("multiple allocations with vult argument should not work", 10*time.Minute, func(t *test.SystemTest) {
