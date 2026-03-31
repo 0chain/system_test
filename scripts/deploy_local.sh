@@ -11453,6 +11453,80 @@ except:
 }
 
 # Seed challenge data: create a warm-up allocation and upload 2MB of data so the
+# manage_blobber_capacity: prevent blobber capacity exhaustion by cancelling
+# old test allocations when any blobber exceeds 50% allocated capacity.
+# Crawler and test allocations accumulate over time. Without cleanup, blobbers
+# fill up and tests fail with "not enough free space".
+manage_blobber_capacity() {
+    print_header "Managing Blobber Capacity"
+
+    local W="--wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent"
+    local SHARDER="http://198.18.0.81:7171"
+    local SC="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+
+    # Check if any blobber is >50% allocated
+    local worst_pct=0
+    worst_pct=$(curl -s "${SHARDER}/v1/screst/${SC}/getblobbers" -m 10 2>/dev/null | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+nodes=d.get('Nodes',d.get('nodes',[]))
+worst=0
+for b in nodes:
+    if b.get('is_killed') or b.get('is_enterprise'): continue
+    cap=b.get('capacity',1)
+    alloc=b.get('allocated',0)
+    pct=int(100*alloc/cap) if cap>0 else 0
+    if pct>worst: worst=pct
+print(worst)
+" 2>/dev/null || echo "0")
+
+    if [ "$worst_pct" -lt 50 ]; then
+        print_status "Blobber capacity OK (worst: ${worst_pct}% allocated)"
+        return 0
+    fi
+
+    print_warning "Blobber capacity high (${worst_pct}% allocated) — cancelling old allocations to free space"
+
+    # List all allocations from our wallet and cancel the oldest ones
+    local alloc_list
+    alloc_list=$($ZBOX listallocations --json $W 2>/dev/null || true)
+    if [ -z "$alloc_list" ] || [ "$alloc_list" = "null" ] || [ "$alloc_list" = "[]" ]; then
+        print_status "No allocations found to clean up"
+        return 0
+    fi
+
+    # Parse allocations, sort by creation date, cancel oldest 25%
+    local total_allocs cancel_count
+    total_allocs=$(echo "$alloc_list" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "0")
+    cancel_count=$(( (total_allocs + 3) / 4 ))  # 25% rounded up
+
+    if [ "$cancel_count" -lt 1 ]; then
+        print_status "Too few allocations ($total_allocs) to cancel"
+        return 0
+    fi
+
+    print_status "Cancelling $cancel_count of $total_allocs allocations (oldest 25%)..."
+
+    # Get oldest allocation IDs (sorted by expiration ascending = oldest first)
+    local alloc_ids
+    alloc_ids=$(echo "$alloc_list" | python3 -c "
+import json,sys
+allocs=json.load(sys.stdin)
+allocs.sort(key=lambda a: a.get('expiration_date',0))
+for a in allocs[:${cancel_count}]:
+    print(a['id'])
+" 2>/dev/null || true)
+
+    local cancelled=0
+    for aid in $alloc_ids; do
+        print_status "  Cancelling ${aid:0:16}..."
+        $ZBOX cancel --allocation "$aid" $W 2>&1 | tail -1 || true
+        cancelled=$((cancelled + 1))
+    done
+
+    print_status "Cancelled $cancelled allocations. Blobber capacity should decrease as finalizations process."
+}
+
 # challenge protocol starts generating challenges. Without active allocations with
 # data, challenge tests fail because no challenges are ever created.
 seed_challenge_data() {
@@ -14559,6 +14633,7 @@ EOF
         reset_test_state || true
         cleanup_stale_test_artifacts || true
         fund_test_wallets || true
+        manage_blobber_capacity || true
         seed_challenge_data || true
 
         # Ensure zs3server is running with a valid (non-expired) allocation before tests

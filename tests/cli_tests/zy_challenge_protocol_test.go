@@ -319,9 +319,15 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Add blobber failed: %s", strings.Join(output, "\n"))
 
-		// Upload a new file so the added blobber receives data shards.
-		// Without data, the chain won't generate challenges for this blobber.
-		generateFileAndUpload(t, allocationId, "/", int64(1*MB))
+		// Upload multiple files so the added blobber receives enough data for challenges.
+		// A single 1MB file may not be sufficient — the SC needs committed write markers
+		// on the blobber before generating challenges. Upload 5x2MB = 10MB total.
+		for i := 0; i < 5; i++ {
+			generateFileAndUpload(t, allocationId, "/", int64(2*MB))
+		}
+		t.Logf("Uploaded 10MB across 5 files to allocation with added blobber")
+		// Wait for write markers to be committed and challenges to start generating
+		cliutil.Wait(t, 30*time.Second)
 
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, blobberId)
 
@@ -412,9 +418,12 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		output, err = updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Replace blobber failed: %s", strings.Join(output, "\n"))
 
-		// Upload a new file so the replacement blobber receives data shards.
-		// Without data, the chain won't generate challenges for this blobber.
-		generateFileAndUpload(t, allocationId, "/", int64(1*MB))
+		// Upload multiple files so the replacement blobber receives enough data for challenges.
+		for i := 0; i < 5; i++ {
+			generateFileAndUpload(t, allocationId, "/", int64(2*MB))
+		}
+		t.Logf("Uploaded 10MB across 5 files to allocation with replaced blobber")
+		cliutil.Wait(t, 30*time.Second)
 
 		// Added blobber should get challenges for this allocation
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, addedBlobberID)
