@@ -508,6 +508,9 @@ func TestFileRename(testSetup *testing.T) { // nolint:gocyclo // team preference
 		// Expected cost is given in "per 720 hours", we need 1 hour
 		actualExpectedUploadCostInZCN := expectedUploadCostInZCN / 720
 
+		// Wait for SC to finalize the rename transaction before reading pool
+		cliutils.Wait(t, 5*time.Second)
+
 		finalAllocation := getAllocation(t, allocationID)
 
 		actualCost := initialAllocation.WritePool - finalAllocation.WritePool
