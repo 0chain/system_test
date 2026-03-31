@@ -2375,15 +2375,7 @@ fix_blobber_config() {
     print_status "Fixing blobber block_worker to local 0dns (http://198.18.0.100:9091)..."
     sed -i.bak "s|block_worker:.*|block_worker: http://198.18.0.100:9091|" "$BLOBBER_CONFIG"
 
-    # storage_version=1 (V2) — production standard. Both blobber staging and
-    # fix/finalize-worker-and-logs support V2 (upload, update, delete, challenge handlers).
-    #
-    # KNOWN ISSUE: gosdk fix/lfb-aware-sharder-selection has a V2 bug where
-    # ProcessChangeV2 skips buildChange() → no allocation_changes rows → blobber
-    # commit handler rejects with "Connection does not have any changes" on
-    # createdir/copy/move/delete. Fix needed in gosdk multi_operation_worker.go
-    # line ~211: V2 branch must also call buildChange() to create allocation_changes rows.
-    # Until fixed, 5 CLI tests fail (createdir/copy/move/delete operations).
+    # storage_version=1 (V2) — production standard.
     if grep -q 'storage_version:' "$BLOBBER_CONFIG"; then
         sed -i.bak 's/storage_version:.*/storage_version: 1/' "$BLOBBER_CONFIG"
     else
