@@ -177,7 +177,6 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}
 
 		var output []string
-		var err error
 		for attempt := 0; attempt < 3; attempt++ {
 			output, err = minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 				"id":            selectedSharderID,
@@ -213,7 +212,6 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 		}
 
 		var output []string
-		var err error
 		for attempt := 0; attempt < 3; attempt++ {
 			output, err = minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
 				"id":            selectedSharderID,
