@@ -11474,16 +11474,21 @@ seed_challenge_data() {
     fi
     print_status "  Regular allocation: ${alloc_id:0:16}..."
 
-    dd if=/dev/urandom of=/tmp/warmup_challenge_regular.bin bs=1M count=10 2>/dev/null
-    print_status "Uploading 10MB to regular blobber allocation..."
-    $ZBOX upload --allocation "$alloc_id" --remotepath /warmup_data.bin \
-        --localpath /tmp/warmup_challenge_regular.bin $W 2>&1 || {
-        print_warning "Failed to upload to regular allocation"
-        rm -f /tmp/warmup_challenge_regular.bin
-        return 1
-    }
-    rm -f /tmp/warmup_challenge_regular.bin
-    print_status "  Regular blobber challenge data seeded (10MB across 6 blobbers)."
+    # Upload multiple files totaling 50MB+ so every blobber has enough data
+    # for challenge generation. A single 10MB file spread across 6 blobbers
+    # gives only ~1.7MB per blobber — insufficient for reliable challenges.
+    local total_uploaded=0
+    for _f in 1 2 3 4 5; do
+        dd if=/dev/urandom of=/tmp/warmup_challenge_${_f}.bin bs=1M count=10 2>/dev/null
+        print_status "Uploading file ${_f}/5 (10MB) to regular allocation..."
+        $ZBOX upload --allocation "$alloc_id" --remotepath /warmup_data_${_f}.bin \
+            --localpath /tmp/warmup_challenge_${_f}.bin $W 2>&1 || {
+            print_warning "Upload ${_f} failed (continuing)"
+        }
+        rm -f /tmp/warmup_challenge_${_f}.bin
+        total_uploaded=$((total_uploaded + 10))
+    done
+    print_status "  Regular blobber challenge data seeded (${total_uploaded}MB across 6 blobbers)."
 
     # --- Enterprise blobbers: 5 eblobbers (4 data + 1 parity), 5MB upload ---
     print_status "Creating enterprise blobber warm-up allocation (4 data + 1 parity = 5 eblobbers)..."
