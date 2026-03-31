@@ -11520,7 +11520,7 @@ for a in allocs[:${cancel_count}]:
     local cancelled=0
     for aid in $alloc_ids; do
         print_status "  Cancelling ${aid:0:16}..."
-        $ZBOX cancel --allocation "$aid" $W 2>&1 | tail -1 || true
+        $ZBOX alloc-cancel --allocation "$aid" $W 2>&1 | tail -1 || true
         cancelled=$((cancelled + 1))
     done
 
