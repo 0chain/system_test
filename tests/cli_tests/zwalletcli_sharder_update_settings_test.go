@@ -176,16 +176,23 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":            selectedSharderID,
-			"num_delegates": 10001,
-			"sharder":       "",
-		}), false)
-		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
-		combined := strings.Join(output, "\n")
-		if strings.Contains(combined, "too less sharders") || strings.Contains(combined, "unexpected end of JSON input") || strings.Contains(combined, "invalid transaction nonce") {
-			t.Fatalf("Chain undergoing view change — skipping num_delegates validation assertion")
+		var output []string
+		var err error
+		for attempt := 0; attempt < 3; attempt++ {
+			output, err = minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
+				"id":            selectedSharderID,
+				"num_delegates": 10001,
+				"sharder":       "",
+			}), false)
+			combined := strings.Join(output, "\n")
+			if strings.Contains(combined, "too less sharders") || strings.Contains(combined, "unexpected end of JSON input") || strings.Contains(combined, "invalid transaction nonce") {
+				t.Logf("Transient chain error (attempt %d/3), retrying in 10s: %s", attempt+1, combined)
+				time.Sleep(10 * time.Second)
+				continue
+			}
+			break
 		}
+		require.NotNil(t, err, "expected error when updating num_delegates greater than max allowed but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		require.Contains(t, output[0], "number_of_delegates greater than max_delegates of SC")
 	})
@@ -205,16 +212,23 @@ func TestSharderUpdateSettings(testSetup *testing.T) { //nolint cyclomatic compl
 			}
 		}
 
-		output, err := minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
-			"id":            selectedSharderID,
-			"num_delegates": -1,
-			"sharder":       "",
-		}), false)
-		require.NotNil(t, err, "expected error when updating negative num_delegates but got output:", strings.Join(output, "\n"))
-		combined2 := strings.Join(output, "\n")
-		if strings.Contains(combined2, "too less sharders") || strings.Contains(combined2, "unexpected end of JSON input") || strings.Contains(combined2, "invalid transaction nonce") {
-			t.Fatalf("Chain undergoing view change — skipping negative num_delegates assertion")
+		var output []string
+		var err error
+		for attempt := 0; attempt < 3; attempt++ {
+			output, err = minerSharderUpdateSettings(t, configPath, sharder01NodeDelegateWalletName, createParams(map[string]interface{}{
+				"id":            selectedSharderID,
+				"num_delegates": -1,
+				"sharder":       "",
+			}), false)
+			combined2 := strings.Join(output, "\n")
+			if strings.Contains(combined2, "too less sharders") || strings.Contains(combined2, "unexpected end of JSON input") || strings.Contains(combined2, "invalid transaction nonce") {
+				t.Logf("Transient chain error (attempt %d/3), retrying in 10s: %s", attempt+1, combined2)
+				time.Sleep(10 * time.Second)
+				continue
+			}
+			break
 		}
+		require.NotNil(t, err, "expected error when updating negative num_delegates but got output:", strings.Join(output, "\n"))
 		require.Len(t, output, 1)
 		const expected = "update_sharder_settings: invalid non-positive number_of_delegates: -1"
 		require.Equal(t, expected, output[0])
