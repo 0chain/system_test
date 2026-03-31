@@ -256,6 +256,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
+		cliutils.Wait(t, 3*time.Second)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(0), alloc.FileOptions&(1<<1))
 
@@ -274,6 +275,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
+		cliutils.Wait(t, 3*time.Second)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(0), alloc.FileOptions&(1<<2))
 
@@ -292,6 +294,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
+		cliutils.Wait(t, 3*time.Second)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(0), alloc.FileOptions&(1<<3))
 
@@ -310,6 +313,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
+		cliutils.Wait(t, 3*time.Second)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(0), alloc.FileOptions&(1<<4)) // 63 - 31 = 32 = 00100000
 
@@ -328,6 +332,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
+		cliutils.Wait(t, 3*time.Second)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(0), alloc.FileOptions&(1<<5))
 
@@ -347,6 +352,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
+		cliutils.Wait(t, 3*time.Second)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(1), alloc.FileOptions) // 0 + 1 = 1 = 00000001
 
@@ -365,6 +371,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
+		cliutils.Wait(t, 3*time.Second)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(2), alloc.FileOptions&(1<<1))
 
@@ -383,6 +390,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
+		cliutils.Wait(t, 3*time.Second)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(4), alloc.FileOptions&(1<<2)) // 3 + 4 = 7 = 00000111
 
@@ -400,7 +408,11 @@ func TestUpdateAllocation(testSetup *testing.T) {
 			assertOutputMatchesAllocationRegex(t, updateAllocationRegex, output[0])
 		}
 
+		// Wait for SC to commit the forbid update before reading back
+		cliutils.Wait(t, 5*time.Second)
+
 		// get allocation
+		cliutils.Wait(t, 3*time.Second)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(8), alloc.FileOptions&(1<<3))
 
@@ -419,6 +431,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
+		cliutils.Wait(t, 3*time.Second)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(16), alloc.FileOptions&(1<<4))
 
@@ -437,6 +450,7 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		}
 
 		// get allocation
+		cliutils.Wait(t, 3*time.Second)
 		alloc = getAllocation(t, allocationID)
 		require.Equal(t, uint16(32), alloc.FileOptions&(1<<5))
 	})
@@ -494,7 +508,8 @@ func TestUpdateAllocation(testSetup *testing.T) {
 		// get allocation — retry a few times for propagation
 		var alloc climodel.Allocation
 		for attempt := 0; attempt < 3; attempt++ {
-			alloc = getAllocation(t, allocationID)
+			cliutils.Wait(t, 3*time.Second)
+		alloc = getAllocation(t, allocationID)
 			if alloc.ThirdPartyExtendable {
 				break
 			}
