@@ -206,7 +206,7 @@ func TestBlobberConfigUpdate(testSetup *testing.T) {
 		require.Len(t, output, 1)
 
 		// Wait for SC to commit the settings change before reading back
-		cliutil.Wait(t, 5*time.Second)
+		cliutils.Wait(t, 5*time.Second)
 
 		output, err = getBlobberInfo(t, configPath, createParams(map[string]interface{}{"json": "", "blobber_id": intialBlobberInfo.ID}))
 		require.Nil(t, err, strings.Join(output, "\n"))
