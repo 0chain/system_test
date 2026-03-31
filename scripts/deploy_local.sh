@@ -11461,9 +11461,12 @@ seed_challenge_data() {
     local W="--wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent"
 
     # --- Regular blobbers: 4+2=6 shards (works with 9 blobbers, exceeds 4+2 requirement) ---
+    # Use 100MB allocation (not 2GB) to avoid filling blobber capacity.
+    # Each test creates ~2GB allocations. With 100+ tests, 200GB+ gets allocated.
+    # The warm-up only needs enough data for challenge generation (~50MB).
     print_status "Creating regular blobber warm-up allocation (4 data + 2 parity = 6 blobbers)..."
     local alloc_output
-    alloc_output=$($ZBOX newallocation --size 2147483648 --data 4 --parity 2 --lock 5 $W 2>&1) || {
+    alloc_output=$($ZBOX newallocation --size 104857600 --data 4 --parity 2 --lock 5 $W 2>&1) || {
         print_warning "Failed to create regular warm-up allocation: $alloc_output"
         return 1
     }
