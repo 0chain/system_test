@@ -5454,7 +5454,6 @@ fund_blobbers_and_validators() {
 regenerate_killed_provider_keys() {
     local KEYS_DIR="${BASE_DIR}/blobber/docker.local/keys_config"
     local sharder_url="http://198.18.0.82:7172"
-    local KEYGEN_BIN="/tmp/0chain_keygen"
     local SC_ADDRESS="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
     local regenerated=0
 
@@ -5468,55 +5467,72 @@ regenerate_killed_provider_keys() {
         return 0
     fi
 
+    # Get ALL blobber IDs from getblobbers (only returns non-killed ones)
+    local alive_blobbers
+    alive_blobbers=$(curl -s "${sharder_url}/v1/screst/${SC_ADDRESS}/getblobbers" -m 10 2>/dev/null \
+        | python3 -c "import json,sys; d=json.load(sys.stdin); [print(n['id']) for n in d.get('Nodes',[])]" 2>/dev/null || echo "")
+    local alive_count
+    alive_count=$(echo "$alive_blobbers" | grep -c '[a-f0-9]' 2>/dev/null || echo "0")
+
+    # Strategy: get wallet IDs from running containers (docker logs show the real ID)
+    # then check if they're killed (not in alive list but getBlobber returns is_killed=True)
     for i in $(seq 1 12); do
         local bkeys="${KEYS_DIR}/b0bnode${i}_keys.txt"
         local vkeys="${KEYS_DIR}/b0vnode${i}_keys.txt"
 
-        # Check blobber key
-        if [ -f "$bkeys" ]; then
-            local pub_key
-            pub_key=$(grep -v '^$' "$bkeys" | head -1 2>/dev/null)
-            if [ -n "$pub_key" ]; then
-                local wallet_id
-                wallet_id=$(echo -n "$pub_key" | python3 -c "import hashlib,sys; print(hashlib.sha3_256(sys.stdin.read().encode()).hexdigest())" 2>/dev/null)
-                if [ -n "$wallet_id" ]; then
-                    local is_killed
-                    is_killed=$(curl -s "${sharder_url}/v1/screst/${SC_ADDRESS}/getBlobber?blobber_id=${wallet_id}" -m 5 2>/dev/null \
-                        | python3 -c "import json,sys; print(json.load(sys.stdin).get('is_killed','unknown'))" 2>/dev/null || echo "unknown")
-                    if [ "$is_killed" = "True" ]; then
-                        print_warning "blobber-$i ($wallet_id) is KILLED on chain — regenerating keys..."
-                        rm -f "$bkeys"
-                        regenerated=$((regenerated + 1))
-                    fi
+        # Get blobber wallet ID from container logs (most reliable source)
+        if [ -f "$bkeys" ] && docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^blobber-${i}$"; then
+            local wallet_id
+            wallet_id=$(docker logs "blobber-${i}" 2>&1 | grep -m1 'ID:' | awk '{print $NF}' | tr -d '[:space:]')
+            if [ -n "$wallet_id" ] && [ ${#wallet_id} -ge 60 ]; then
+                # Check if killed
+                local is_killed
+                is_killed=$(curl -s "${sharder_url}/v1/screst/${SC_ADDRESS}/getBlobber?blobber_id=${wallet_id}" -m 5 2>/dev/null \
+                    | python3 -c "import json,sys; print(json.load(sys.stdin).get('is_killed','unknown'))" 2>/dev/null || echo "unknown")
+                if [ "$is_killed" = "True" ]; then
+                    print_warning "blobber-$i ($wallet_id) is KILLED on chain — regenerating keys..."
+                    rm -f "$bkeys"
+                    regenerated=$((regenerated + 1))
                 fi
             fi
         fi
 
-        # Check validator key
-        if [ -f "$vkeys" ]; then
-            local vpub_key
-            vpub_key=$(grep -v '^$' "$vkeys" | head -1 2>/dev/null)
-            if [ -n "$vpub_key" ]; then
-                local vwallet_id
-                vwallet_id=$(echo -n "$vpub_key" | python3 -c "import hashlib,sys; print(hashlib.sha3_256(sys.stdin.read().encode()).hexdigest())" 2>/dev/null)
-                if [ -n "$vwallet_id" ]; then
-                    local vis_killed
-                    vis_killed=$(curl -s "${sharder_url}/v1/screst/${SC_ADDRESS}/getBlobber?blobber_id=${vwallet_id}" -m 5 2>/dev/null \
-                        | python3 -c "import json,sys; print(json.load(sys.stdin).get('is_killed','unknown'))" 2>/dev/null || echo "unknown")
-                    if [ "$vis_killed" = "True" ]; then
-                        print_warning "validator-$i ($vwallet_id) is KILLED on chain — regenerating keys..."
-                        rm -f "$vkeys"
-                        regenerated=$((regenerated + 1))
-                    fi
+        # Get validator wallet ID from container logs
+        if [ -f "$vkeys" ] && docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^validator-${i}$"; then
+            local vwallet_id
+            vwallet_id=$(docker logs "validator-${i}" 2>&1 | grep -m1 'ID:' | awk '{print $NF}' | tr -d '[:space:]')
+            if [ -n "$vwallet_id" ] && [ ${#vwallet_id} -ge 60 ]; then
+                local vis_killed
+                vis_killed=$(curl -s "${sharder_url}/v1/screst/${SC_ADDRESS}/getBlobber?blobber_id=${vwallet_id}" -m 5 2>/dev/null \
+                    | python3 -c "import json,sys; print(json.load(sys.stdin).get('is_killed','unknown'))" 2>/dev/null || echo "unknown")
+                if [ "$vis_killed" = "True" ]; then
+                    print_warning "validator-$i ($vwallet_id) is KILLED on chain — regenerating keys..."
+                    rm -f "$vkeys"
+                    regenerated=$((regenerated + 1))
                 fi
             fi
         fi
     done
 
+    # Fallback: if getblobbers returns 0 but containers are running and sending heartbeats,
+    # ALL providers are likely killed. Regenerate all keys.
+    if [ "$alive_count" -eq 0 ] && [ "$regenerated" -eq 0 ]; then
+        local running_blobbers
+        running_blobbers=$(docker ps --format '{{.Names}}' 2>/dev/null | grep -c '^blobber-[0-9]' || echo "0")
+        if [ "$running_blobbers" -gt 0 ]; then
+            print_warning "0 alive blobbers on chain but $running_blobbers containers running — likely all killed"
+            print_warning "Regenerating ALL blobber and validator keys..."
+            for i in $(seq 1 12); do
+                rm -f "${KEYS_DIR}/b0bnode${i}_keys.txt" "${KEYS_DIR}/b0vnode${i}_keys.txt" 2>/dev/null
+            done
+            regenerated=24
+        fi
+    fi
+
     if [ "$regenerated" -gt 0 ]; then
-        print_status "Regenerated $regenerated killed provider key(s) — build_and_create_blobbers will generate fresh keys"
+        print_status "Removed $regenerated killed provider key(s) — build_and_create_blobbers will generate fresh keys"
     else
-        print_status "No killed providers found — all keys are valid"
+        print_status "No killed providers found — all keys are valid (${alive_count} alive on chain)"
     fi
 }
 
