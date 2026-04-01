@@ -5448,6 +5448,78 @@ fund_blobbers_and_validators() {
     print_status "Blobber and validator funding complete!"
 }
 
+# Check if any blobber/validator keys correspond to killed providers on-chain.
+# If killed, regenerate keys so the provider registers with a fresh ID.
+# Must be called BEFORE build_and_create_blobbers() (before containers start).
+regenerate_killed_provider_keys() {
+    local KEYS_DIR="${BASE_DIR}/blobber/docker.local/keys_config"
+    local sharder_url="http://198.18.0.82:7172"
+    local KEYGEN_BIN="/tmp/0chain_keygen"
+    local SC_ADDRESS="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7"
+    local regenerated=0
+
+    print_header "Checking for Killed Blobber/Validator Providers"
+
+    # Quick check: is the chain even responding?
+    local chain_ok
+    chain_ok=$(curl -s "${sharder_url}/v1/chain/get/stats" -m 5 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('current_round',0))" 2>/dev/null || echo "0")
+    if [ "$chain_ok" = "0" ] || [ -z "$chain_ok" ]; then
+        print_status "Chain not responding — skipping killed provider check (fresh deploy?)"
+        return 0
+    fi
+
+    for i in $(seq 1 12); do
+        local bkeys="${KEYS_DIR}/b0bnode${i}_keys.txt"
+        local vkeys="${KEYS_DIR}/b0vnode${i}_keys.txt"
+
+        # Check blobber key
+        if [ -f "$bkeys" ]; then
+            local pub_key
+            pub_key=$(grep -v '^$' "$bkeys" | head -1 2>/dev/null)
+            if [ -n "$pub_key" ]; then
+                local wallet_id
+                wallet_id=$(echo -n "$pub_key" | python3 -c "import hashlib,sys; print(hashlib.sha3_256(sys.stdin.read().encode()).hexdigest())" 2>/dev/null)
+                if [ -n "$wallet_id" ]; then
+                    local is_killed
+                    is_killed=$(curl -s "${sharder_url}/v1/screst/${SC_ADDRESS}/getBlobber?blobber_id=${wallet_id}" -m 5 2>/dev/null \
+                        | python3 -c "import json,sys; print(json.load(sys.stdin).get('is_killed','unknown'))" 2>/dev/null || echo "unknown")
+                    if [ "$is_killed" = "True" ]; then
+                        print_warning "blobber-$i ($wallet_id) is KILLED on chain — regenerating keys..."
+                        rm -f "$bkeys"
+                        regenerated=$((regenerated + 1))
+                    fi
+                fi
+            fi
+        fi
+
+        # Check validator key
+        if [ -f "$vkeys" ]; then
+            local vpub_key
+            vpub_key=$(grep -v '^$' "$vkeys" | head -1 2>/dev/null)
+            if [ -n "$vpub_key" ]; then
+                local vwallet_id
+                vwallet_id=$(echo -n "$vpub_key" | python3 -c "import hashlib,sys; print(hashlib.sha3_256(sys.stdin.read().encode()).hexdigest())" 2>/dev/null)
+                if [ -n "$vwallet_id" ]; then
+                    local vis_killed
+                    vis_killed=$(curl -s "${sharder_url}/v1/screst/${SC_ADDRESS}/getBlobber?blobber_id=${vwallet_id}" -m 5 2>/dev/null \
+                        | python3 -c "import json,sys; print(json.load(sys.stdin).get('is_killed','unknown'))" 2>/dev/null || echo "unknown")
+                    if [ "$vis_killed" = "True" ]; then
+                        print_warning "validator-$i ($vwallet_id) is KILLED on chain — regenerating keys..."
+                        rm -f "$vkeys"
+                        regenerated=$((regenerated + 1))
+                    fi
+                fi
+            fi
+        fi
+    done
+
+    if [ "$regenerated" -gt 0 ]; then
+        print_status "Regenerated $regenerated killed provider key(s) — build_and_create_blobbers will generate fresh keys"
+    else
+        print_status "No killed providers found — all keys are valid"
+    fi
+}
+
 # Restart blobbers/validators that failed to register due to insufficient balance at first start.
 # Must be called AFTER fund_blobbers_and_validators() so wallets are funded.
 restart_failed_blobbers() {
@@ -5456,15 +5528,15 @@ restart_failed_blobbers() {
     local restarted=0
     for i in $(seq 1 12); do
         if docker ps --format '{{.Names}}' | grep -q "^blobber-${i}$"; then
-            # Check if blobber failed to register (insufficient balance or not registered)
-            if docker logs "blobber-${i}" 2>&1 | grep -q "insufficient balance to pay fee"; then
+            # Check if blobber failed to register (insufficient balance, fee errors, or not registered)
+            if docker logs "blobber-${i}" 2>&1 | grep -q "insufficient balance\|pay fee\|transaction_not_found\|submit error"; then
                 print_status "blobber-$i: failed to register — restarting after funding..."
                 docker restart "blobber-${i}" 2>/dev/null || true
                 restarted=$((restarted + 1))
             fi
         fi
         if docker ps --format '{{.Names}}' | grep -q "^validator-${i}$"; then
-            if docker logs "validator-${i}" 2>&1 | grep -q "insufficient balance to pay fee"; then
+            if docker logs "validator-${i}" 2>&1 | grep -q "insufficient balance\|pay fee\|transaction_not_found\|submit error"; then
                 print_status "validator-$i: failed to register — restarting after funding..."
                 docker restart "validator-${i}" 2>/dev/null || true
                 restarted=$((restarted + 1))
@@ -13898,6 +13970,7 @@ main() {
     # 0box already running → receives TagAddOrOverwriteBlobber events as blobbers register.
     fix_blobber_config
     fix_validator_config
+    regenerate_killed_provider_keys
     build_and_create_blobbers
     ensure_blobber_hdd_tablespace
     # Wait for blobber wallets to appear in logs before funding
@@ -14467,6 +14540,7 @@ EOF
         reset_wallet_nonces
         fix_blobber_config
         fix_validator_config
+        regenerate_killed_provider_keys
         build_and_create_blobbers
         ensure_blobber_hdd_tablespace
         # Wait for blobber wallets to appear in logs before funding

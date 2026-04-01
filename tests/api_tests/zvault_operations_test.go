@@ -1,6 +1,7 @@
 package api_tests
 
 import (
+	"os/exec"
 	"testing"
 
 	"github.com/0chain/system_test/internal/api/model"
@@ -18,8 +19,20 @@ const (
 	MNEMONIC_A    = "toss ocean track betray donate pioneer broken seek glare two force decade master invite harvest oval thing few leaf toss avoid immense orbit ribbon"
 )
 
+func cleanZvaultTestKeys() {
+	// Remove stale keys from previous test runs to avoid unique constraint violations.
+	// The keys table has a unique constraint on private_key, so leftover rows from
+	// failed runs prevent Store() from succeeding with the same PRIVATE_KEY constant.
+	sql := "DELETE FROM keys WHERE private_key = '" + PRIVATE_KEY + "'"
+	_ = exec.Command("docker", "exec", "zvault-postgreszv-1",
+		"psql", "-U", "zvault_user", "-d", "zvault", "-c", sql).Run()
+}
+
 func TestZvaultOperations(testSetup *testing.T) {
 	t := test.NewSystemTest(testSetup)
+
+	// Clean stale keys from any previous failed runs
+	cleanZvaultTestKeys()
 
 	t.RunSequentially("Retrieve split keys for default client id, should be empty", func(w *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
@@ -115,6 +128,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 
 		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
 
+		// Clean up stale zvault keys from previous runs to avoid unique constraint violations
+		zvaultClient.Delete(t, CLIENT_ID_V, headers) //nolint:errcheck
+
 		response, err = zvaultClient.Store(t, PRIVATE_KEY, MNEMONIC, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -154,6 +170,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 
 		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
 
+		// Clean up stale zvault keys from previous runs to avoid unique constraint violations
+		zvaultClient.Delete(t, CLIENT_ID_V, headers) //nolint:errcheck
+
 		response, err = zvaultClient.Store(t, PRIVATE_KEY, "", headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -189,6 +208,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 
 		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
 
+		// Clean up stale zvault keys from previous runs to avoid unique constraint violations
+		zvaultClient.Delete(t, CLIENT_ID_V, headers) //nolint:errcheck
+
 		response, err = zvaultClient.Store(t, PRIVATE_KEY_I, MNEMONIC, headers)
 		// Invalid private key should be rejected — expect either a client error or server error
 		require.True(t, response.StatusCode() >= 400,
@@ -205,6 +227,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
+
+		// Clean up stale zvault keys from previous runs to avoid unique constraint violations
+		zvaultClient.Delete(t, CLIENT_ID_V, headers) //nolint:errcheck
 
 		response, err = zvaultClient.Store(t, PRIVATE_KEY, MNEMONIC, headers)
 		require.NoError(t, err)
@@ -241,6 +266,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 
 		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
 
+		// Clean up stale zvault keys from previous runs to avoid unique constraint violations
+		zvaultClient.Delete(t, CLIENT_ID_V, headers) //nolint:errcheck
+
 		response, err = zvaultClient.Store(t, PRIVATE_KEY, MNEMONIC_A, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
@@ -275,6 +303,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
+
+		// Clean up stale zvault keys from previous runs to avoid unique constraint violations
+		zvaultClient.Delete(t, CLIENT_ID_V, headers) //nolint:errcheck
 
 		response, err = zvaultClient.Store(t, PRIVATE_KEY, MNEMONIC_A, headers)
 		require.NoError(t, err)
@@ -341,6 +372,9 @@ func TestZvaultOperations(testSetup *testing.T) {
 		require.Equal(t, 200, response.StatusCode(), "Response status code does not match expected. Output: [%v]", response.String())
 
 		headers = zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
+
+		// Clean up stale zvault keys from previous runs to avoid unique constraint violations
+		zvaultClient.Delete(t, CLIENT_ID_V, headers) //nolint:errcheck
 
 		response, err = zvaultClient.Store(t, PRIVATE_KEY, MNEMONIC, headers)
 		require.NoError(t, err)

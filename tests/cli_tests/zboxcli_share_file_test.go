@@ -400,10 +400,13 @@ func TestShareFile(testSetup *testing.T) {
 		// Download the file (delete local copy first)
 		os.Remove(file)
 
+		// Use lookuphash instead of remotepath when downloading from a shared folder
+		// with auth ticket — remotepath causes the SDK to resolve the path as the
+		// downloader (not owner), resulting in "not owner" error.
 		downloadParams := createParams(map[string]interface{}{
 			"localpath":  file,
 			"authticket": authTicket,
-			"remotepath": remoteOwnerPath,
+			"lookuphash": GetReferenceLookup(allocationID, remoteOwnerPath),
 		})
 		output, err = downloadFileForWallet(t, receiverWallet, configPath, downloadParams, false)
 		require.Nil(t, err, strings.Join(output, "\n"))

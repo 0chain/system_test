@@ -71,6 +71,7 @@ repositories:
     branch: fix/finalize-worker-and-logs
     path: blobber
     build_required: true
+    gosdk_branch: fix/lfb-aware-sharder-selection  # gosdk branch to use when building
     containers:
       - blobber-7
       - blobber-8

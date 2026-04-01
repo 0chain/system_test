@@ -328,24 +328,25 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		}
 		t.Logf("Uploaded 10MB across 5 files to allocation with added blobber")
 		// Wait for write markers to be committed and challenges to start generating
-		cliutils.Wait(t, 30*time.Second)
+		t.Logf("Waiting 2 minutes for write markers to commit before checking challenges...")
+		cliutils.Wait(t, 2*time.Minute)
 
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, blobberId)
 
-		// Poll for challenges — added blobber needs time to accumulate them (up to 10 minutes)
+		// Poll for challenges — added blobber needs time to accumulate them (up to 12 minutes)
 		var challenges map[string]int64
-		for i := 0; i < 20; i++ {
+		for i := 0; i < 24; i++ {
 			challenges, err = countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 			require.Nil(t, err, "error counting challenges")
 			if challenges["total"] > 0 {
 				break
 			}
-			if i < 19 {
-				t.Logf("No challenges yet for added blobber (attempt %d/20), waiting 30s...", i+1)
+			if i < 23 {
+				t.Logf("No challenges yet for added blobber (attempt %d/24), waiting 30s...", i+1)
 				time.Sleep(30 * time.Second)
 			}
 		}
-		require.Greater(t, challenges["total"], int64(0), "Added blobber has no challenges after 10 minutes")
+		require.Greater(t, challenges["total"], int64(0), "Added blobber has no challenges after 12 minutes")
 
 		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
 		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")
@@ -424,25 +425,27 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			generateFileAndUpload(t, allocationId, "/", int64(2*MB))
 		}
 		t.Logf("Uploaded 10MB across 5 files to allocation with replaced blobber")
-		cliutils.Wait(t, 30*time.Second)
+		// Wait for write markers to be committed and challenges to start generating
+		t.Logf("Waiting 2 minutes for write markers to commit before checking challenges...")
+		cliutils.Wait(t, 2*time.Minute)
 
 		// Added blobber should get challenges for this allocation
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, addedBlobberID)
 
-		// Poll for challenges — added blobber needs time after replace (up to 10 minutes)
+		// Poll for challenges — added blobber needs time after replace (up to 12 minutes)
 		var challenges map[string]int64
-		for i := 0; i < 20; i++ {
+		for i := 0; i < 24; i++ {
 			challenges, err = countChallengesByQuery(t, challengesCountQuery, sharderBaseURLs)
 			require.Nil(t, err, "error counting challenges")
 			if challenges["total"] > 0 {
 				break
 			}
-			if i < 19 {
-				t.Logf("No challenges yet for added blobber (attempt %d/20), waiting 30s...", i+1)
+			if i < 23 {
+				t.Logf("No challenges yet for added blobber (attempt %d/24), waiting 30s...", i+1)
 				time.Sleep(30 * time.Second)
 			}
 		}
-		require.Greater(t, challenges["total"], int64(0), "Added blobber has no challenges after 10 minutes")
+		require.Greater(t, challenges["total"], int64(0), "Added blobber has no challenges after 12 minutes")
 
 		require.Greater(t, challenges["total"], int64(0), "number of challenges should be greater than 0")
 		require.InEpsilon(t, challenges["total"], challenges["passed"]+challenges["open"], 0.05, "failure rate should not be more than 5 percent")

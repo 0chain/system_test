@@ -365,18 +365,33 @@ func TestFileStats(testSetup *testing.T) {
 		// update size for the file
 		updateFileWithRandomlyGeneratedData(t, allocationID, "/"+fname, int64(1*MB))
 
-		cliutils.Wait(t, 2*time.Minute)
-		// fetch file stats after update
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remoteFilePath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
+		// Poll for update stats to be reflected (blobber stats may lag)
+		updateReflected := false
+		for attempt := 0; attempt < 12; attempt++ {
+			cliutils.Wait(t, 15*time.Second)
 
-		err = json.Unmarshal([]byte(output[0]), &stats)
-		require.Nil(t, err)
+			output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": remoteFilePath,
+				"json":       "",
+			}), true)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+
+			err = json.Unmarshal([]byte(output[0]), &stats)
+			require.Nil(t, err)
+
+			for _, data := range stats {
+				if data.NumOfUpdates >= 2 {
+					updateReflected = true
+					break
+				}
+			}
+			if updateReflected {
+				break
+			}
+			t.Logf("Update stats not yet reflected (attempt %d/12), retrying...", attempt+1)
+		}
 
 		for _, data := range stats {
 			require.Equal(t, fname, data.Name)
@@ -453,25 +468,38 @@ func TestFileStats(testSetup *testing.T) {
 		require.Contains(t, aggregatedOutput, StatusCompletedCB)
 		require.Contains(t, aggregatedOutput, filepath.Base(filename))
 
-		cliutils.Wait(t, 2*time.Minute)
-		// get file stats after download
-		output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
-			"allocation": allocationID,
-			"remotepath": remoteFilePath,
-			"json":       "",
-		}), true)
-		require.Nil(t, err, strings.Join(output, "\n"))
-		require.Len(t, output, 1)
-
-		err = json.Unmarshal([]byte(output[0]), &stats)
-		require.Nil(t, err)
-
+		// Poll for download stats to be reflected (blobber stats may lag)
 		downloadedBlobbers := 0
+		for attempt := 0; attempt < 12; attempt++ {
+			cliutils.Wait(t, 15*time.Second)
+
+			output, err = getFileStats(t, configPath, createParams(map[string]interface{}{
+				"allocation": allocationID,
+				"remotepath": remoteFilePath,
+				"json":       "",
+			}), true)
+			require.Nil(t, err, strings.Join(output, "\n"))
+			require.Len(t, output, 1)
+
+			err = json.Unmarshal([]byte(output[0]), &stats)
+			require.Nil(t, err)
+
+			downloadedBlobbers = 0
+			for _, data := range stats {
+				if data.NumOfBlockDownloads > 0 {
+					downloadedBlobbers++
+				}
+			}
+			if downloadedBlobbers > 0 {
+				break
+			}
+			t.Logf("Download stats not yet reflected (attempt %d/12), retrying...", attempt+1)
+		}
+
 		for _, data := range stats {
 			require.Equal(t, fname, data.Name)
 			require.Equal(t, remoteFilePath, data.Path)
 			if data.NumOfBlockDownloads > 0 {
-				downloadedBlobbers++
 				require.GreaterOrEqual(t, data.NumOfBlockDownloads, int64(1))
 			}
 			require.Equal(t, fmt.Sprintf("%x", sha3.Sum256([]byte(allocationID+":"+remoteFilePath))), data.PathHash)
