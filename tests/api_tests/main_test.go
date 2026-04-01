@@ -13,6 +13,7 @@ import (
 
 	coreClient "github.com/0chain/gosdk/core/client"
 	"github.com/0chain/gosdk/core/conf"
+	"github.com/0chain/gosdk/core/zcncrypto"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -37,6 +38,7 @@ var (
 	blobberOwnerWallet          *model.Wallet
 	blobberOwnerWalletMnemonics string
 	parsedConfig                *config.Config
+	sdkWallet                   *zcncrypto.Wallet
 
 	initialisedWallets []*model.Wallet
 	walletIdx          int64
@@ -132,6 +134,27 @@ func TestMain(m *testing.M) {
 		}
 
 		initialisedWallets = append(initialisedWallets, initialisedWallet)
+	}
+
+	// Initialize sdkWallet from the first pre-funded wallet (used by transcoder and SDK-based tests)
+	if len(initialisedWallets) > 0 {
+		w := initialisedWallets[0]
+		var dateCreated string
+		if w.CreationDate != nil {
+			dateCreated = time.Unix(int64(*w.CreationDate), 0).Format(time.RFC3339)
+		}
+		sdkWallet = &zcncrypto.Wallet{
+			ClientID:  w.Id,
+			ClientKey: w.PublicKey,
+			Keys: []zcncrypto.KeyPair{{
+				PublicKey:  w.PublicKey,
+				PrivateKey: w.Keys.PrivateKey.Value,
+			}},
+			Mnemonic:    w.Mnemonics,
+			Version:     "1.0",
+			DateCreated: dateCreated,
+		}
+		log.Printf("sdkWallet initialized: %s", w.Id[:16])
 	}
 
 	// Check service availability
