@@ -9,61 +9,149 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test0BoxActivitySync tests activity sync and operation tracking through its observable effects.
-// WebSocket /ws/sync cannot be tested via HTTP, so we verify that operations performed through
-// the 0box API are tracked and persisted correctly by checking their results.
+// Test0BoxActivitySync tests that 0box tracks real user operations by performing
+// operations and verifying their state changes are persisted. The operation_tracker
+// middleware wraps all authenticated endpoints, so every API call is an implicit
+// activity sync verification.
 func Test0BoxActivitySync(testSetup *testing.T) {
 	require.True(testSetup, isZboxResponding(), "0box service must be available")
 	t := test.NewSystemTest(testSetup)
 
-	t.RunSequentiallyWithTimeout("Wallet creation operation is tracked and persisted", 3*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Wallet creation is tracked and persisted", 3*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_VULT)
 		Teardown(t, headers)
 
-		// Create a wallet - the 0box middleware tracks this as an operation
+		// Create wallet -- this operation passes through the operation_tracker middleware
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err, "0box wallet creation should succeed")
 
-		// Verify the creation operation was tracked: the wallet must exist and be retrievable
+		// Read back to verify the creation was tracked and persisted
 		wallet, resp, err := zboxClient.GetWalletKeys(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode(),
-			"Wallet should be retrievable after creation. Got %d: %s", resp.StatusCode(), resp.String())
-		require.NotEmpty(t, wallet.PublicKey, "Wallet public key should be populated after tracked creation")
+			"Wallet should be retrievable after tracked creation. Got %d: %s", resp.StatusCode(), resp.String())
+		require.NotEmpty(t, wallet.PublicKey, "Wallet public key should be populated")
 		require.Equal(t, headers["X-App-Client-Key"], wallet.PublicKey,
-			"Wallet public key should match the client key used in creation")
-		t.Logf("Wallet creation tracked: publicKey=%s, name=%s", wallet.PublicKey, wallet.Name)
+			"Wallet public key should match the key used at creation time")
+		require.Equal(t, "test_wallet_name", wallet.Name,
+			"Wallet name should match what was passed to CreateWallet")
+		t.Logf("Wallet creation tracked: clientID=%s, name=%s", wallet.ClientID, wallet.Name)
 	})
 
-	t.RunSequentiallyWithTimeout("Wallet update operation is tracked and persisted", 3*time.Minute, func(t *test.SystemTest) {
+	t.RunSequentiallyWithTimeout("Allocation creation is tracked and persisted", 3*time.Minute, func(t *test.SystemTest) {
 		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_VULT)
 		Teardown(t, headers)
 
-		// Create wallet first
+		// Create wallet + allocation
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err, "0box wallet creation should succeed")
 
-		// Perform a tracked update operation
-		walletUpdate := map[string]string{
-			"name":        "activity_tracked_wallet",
-			"description": "wallet updated to verify activity tracking",
-			"mnemonic":    "updated_mnemonic_for_tracking",
+		allocationData := NewTestAllocation()
+		alloc, resp, err := zboxClient.CreateAllocation(t, headers, allocationData)
+		require.NoError(t, err, "CreateAllocation transport error")
+		require.Equal(t, 201, resp.StatusCode(),
+			"CreateAllocation should succeed. Got %d: %s", resp.StatusCode(), resp.String())
+		require.NotEmpty(t, alloc.ID, "Created allocation should have an ID")
+
+		// Read back to verify the allocation was tracked and persisted
+		allocations, resp, err := zboxClient.ListAllocation(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode(),
+			"ListAllocation should succeed. Got %d: %s", resp.StatusCode(), resp.String())
+		require.GreaterOrEqual(t, len(allocations), 1,
+			"At least one allocation should exist after tracked creation")
+
+		found := false
+		for _, a := range allocations {
+			if a.ID == alloc.ID {
+				found = true
+				require.Equal(t, allocationData["name"], a.Name,
+					"Allocation name should match what was passed to CreateAllocation")
+				break
+			}
 		}
-		message, resp, err := zboxClient.UpdateWallet(t, headers, walletUpdate)
+		require.True(t, found, "Created allocation %s should appear in the list", alloc.ID)
+		t.Logf("Allocation creation tracked: id=%s, name=%s", alloc.ID, alloc.Name)
+	})
+
+	t.RunSequentiallyWithTimeout("Shareinfo create and delete are tracked and persisted", 3*time.Minute, func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_VULT)
+		Teardown(t, headers)
+
+		err := Create0boxTestWallet(t, headers)
+		require.NoError(t, err, "0box wallet creation should succeed")
+
+		// Create shareinfo -- tracked operation
+		shareinfoData := NewTestShareinfo()
+		shareinfoResp, resp, err := zboxClient.CreateShareInfo(t, headers, shareinfoData)
+		require.NoError(t, err, "CreateShareInfo transport error")
+		require.Equal(t, 201, resp.StatusCode(),
+			"CreateShareInfo should succeed. Got %d: %s", resp.StatusCode(), resp.String())
+		require.Equal(t, "shareinfo added successfully", shareinfoResp.Message)
+
+		// Verify the share was persisted
+		sharedList, resp, err := zboxClient.GetShareInfoShared(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+		require.Equal(t, 1, len(sharedList.Data),
+			"Exactly one share should exist after tracked creation")
+		require.Equal(t, client.X_APP_CLIENT_ID, sharedList.Data[0].Receiver,
+			"Share receiver should match the client ID")
+		t.Logf("Shareinfo creation tracked: receiver=%s", sharedList.Data[0].Receiver)
+
+		// Delete shareinfo -- tracked operation
+		delMsg, resp, err := zboxClient.DeleteShareinfo(t, headers, shareinfoData["auth_ticket"])
+		require.NoError(t, err, "DeleteShareinfo transport error")
+		require.Equal(t, 200, resp.StatusCode(),
+			"DeleteShareinfo should succeed. Got %d: %s", resp.StatusCode(), resp.String())
+		require.NotNil(t, delMsg)
+		t.Logf("Shareinfo delete tracked: message=%s", delMsg.Message)
+
+		// Verify the share was removed (delete operation was persisted)
+		sharedListAfter, resp, err := zboxClient.GetShareInfoShared(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+		require.Equal(t, 0, len(sharedListAfter.Data),
+			"No shares should exist after tracked deletion")
+		t.Logf("Shareinfo deletion verified: shares remaining=%d", len(sharedListAfter.Data))
+	})
+
+	t.RunSequentiallyWithTimeout("Wallet update is tracked and persisted", 3*time.Minute, func(t *test.SystemTest) {
+		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_VULT)
+		Teardown(t, headers)
+
+		err := Create0boxTestWallet(t, headers)
+		require.NoError(t, err, "0box wallet creation should succeed")
+
+		// Verify initial state
+		walletBefore, resp, err := zboxClient.GetWalletKeys(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+		require.Equal(t, "test_wallet_name", walletBefore.Name)
+
+		// Update wallet -- tracked operation
+		walletUpdate := map[string]string{
+			"name":        "activity_tracked_update",
+			"description": "updated via activity sync test",
+			"mnemonic":    "updated_mnemonic_tracking",
+		}
+		msg, resp, err := zboxClient.UpdateWallet(t, headers, walletUpdate)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode(),
 			"Wallet update should succeed. Got %d: %s", resp.StatusCode(), resp.String())
-		require.Equal(t, "updating wallet successful", message.Message)
+		require.Equal(t, "updating wallet successful", msg.Message)
 
-		// Verify the update was persisted (confirms the operation was tracked end-to-end)
-		wallet, resp, err := zboxClient.GetWalletKeys(t, headers)
+		// Verify the update was persisted
+		walletAfter, resp, err := zboxClient.GetWalletKeys(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, "activity_tracked_wallet", wallet.Name,
-			"Wallet name should reflect the tracked update operation")
-		require.Equal(t, "wallet updated to verify activity tracking", wallet.Description,
-			"Wallet description should reflect the tracked update operation")
-		t.Logf("Wallet update tracked: name=%s, description=%s", wallet.Name, wallet.Description)
+		require.Equal(t, "activity_tracked_update", walletAfter.Name,
+			"Wallet name should reflect the tracked update")
+		require.Equal(t, "updated via activity sync test", walletAfter.Description,
+			"Wallet description should reflect the tracked update")
+		require.Equal(t, "updated_mnemonic_tracking", walletAfter.Mnemonic,
+			"Wallet mnemonic should reflect the tracked update")
+		t.Logf("Wallet update tracked: name=%s -> %s", walletBefore.Name, walletAfter.Name)
 	})
 
 	t.RunSequentiallyWithTimeout("Multiple sequential operations are all tracked", 3*time.Minute, func(t *test.SystemTest) {
@@ -74,141 +162,105 @@ func Test0BoxActivitySync(testSetup *testing.T) {
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err, "Wallet creation should succeed")
 
-		// Verify operation 1 was tracked
 		wallet, resp, err := zboxClient.GetWalletKeys(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Equal(t, "test_wallet_name", wallet.Name, "Initial wallet name should be set")
 
-		// Operation 2: Update wallet name
-		update1 := map[string]string{
-			"name":        "first_update",
-			"description": "first tracked update",
+		// Operation 2: Create allocation
+		allocData := NewTestAllocation()
+		alloc, resp, err := zboxClient.CreateAllocation(t, headers, allocData)
+		require.NoError(t, err)
+		require.Equal(t, 201, resp.StatusCode(),
+			"Allocation creation should succeed. Got %d: %s", resp.StatusCode(), resp.String())
+
+		// Operation 3: Create shareinfo
+		shareinfoData := NewTestShareinfo()
+		_, resp, err = zboxClient.CreateShareInfo(t, headers, shareinfoData)
+		require.NoError(t, err)
+		require.Equal(t, 201, resp.StatusCode(),
+			"ShareInfo creation should succeed. Got %d: %s", resp.StatusCode(), resp.String())
+
+		// Operation 4: Update wallet
+		update := map[string]string{
+			"name":        "multi_op_final",
+			"description": "after all operations",
 			"mnemonic":    "test_mnemonic",
 		}
-		msg, resp, err := zboxClient.UpdateWallet(t, headers, update1)
+		msg, resp, err := zboxClient.UpdateWallet(t, headers, update)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.Equal(t, "updating wallet successful", msg.Message)
 
-		// Verify operation 2 was tracked
-		wallet, resp, err = zboxClient.GetWalletKeys(t, headers)
+		// Verify all operations were tracked by reading back all state
+		walletFinal, resp, err := zboxClient.GetWalletKeys(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, "first_update", wallet.Name, "First update should be tracked")
+		require.Equal(t, "multi_op_final", walletFinal.Name,
+			"Wallet name should reflect the final tracked update")
 
-		// Operation 3: Update wallet name again
-		update2 := map[string]string{
-			"name":        "second_update",
-			"description": "second tracked update",
-			"mnemonic":    "test_mnemonic",
+		allocList, resp, err := zboxClient.ListAllocation(t, headers)
+		require.NoError(t, err)
+		require.Equal(t, 200, resp.StatusCode())
+		found := false
+		for _, a := range allocList {
+			if a.ID == alloc.ID {
+				found = true
+				break
+			}
 		}
-		msg, resp, err = zboxClient.UpdateWallet(t, headers, update2)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, "updating wallet successful", msg.Message)
+		require.True(t, found, "Allocation should be in the list after all operations")
 
-		// Verify operation 3 was tracked - final state reflects the last operation
-		wallet, resp, err = zboxClient.GetWalletKeys(t, headers)
+		sharedList, resp, err := zboxClient.GetShareInfoShared(t, headers)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
-		require.Equal(t, "second_update", wallet.Name,
-			"Final wallet name should reflect the last tracked operation")
-		require.Equal(t, "second tracked update", wallet.Description,
-			"Final description should reflect the last tracked operation")
-		t.Logf("All 3 operations tracked: final name=%s", wallet.Name)
+		require.GreaterOrEqual(t, len(sharedList.Data), 1,
+			"At least one share should exist after all operations")
+
+		t.Logf("All 4 operations tracked: wallet=%s, alloc=%s, shares=%d",
+			walletFinal.Name, alloc.ID, len(sharedList.Data))
+
+		// Cleanup share
+		_, _, _ = zboxClient.DeleteShareinfo(t, headers, shareinfoData["auth_ticket"])
 	})
 
-	t.RunSequentiallyWithTimeout("Cross-app-type tracking: different app types see separate contexts", 3*time.Minute, func(t *test.SystemTest) {
-		// Create wallet using vult app type
+	t.RunSequentiallyWithTimeout("Cross-app-type tracking isolation", 3*time.Minute, func(t *test.SystemTest) {
 		vultHeaders := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_VULT)
 		Teardown(t, vultHeaders)
 
+		// Create wallet using vult app type
 		err := Create0boxTestWallet(t, vultHeaders)
 		require.NoError(t, err, "Vult wallet creation should succeed")
 
-		// Verify vult wallet was tracked and persisted
 		vultWallet, resp, err := zboxClient.GetWalletKeys(t, vultHeaders)
 		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode(),
-			"Vult wallet should be retrievable. Got %d: %s", resp.StatusCode(), resp.String())
+		require.Equal(t, 200, resp.StatusCode())
 		require.NotEmpty(t, vultWallet.PublicKey, "Vult wallet should have a public key")
-		t.Logf("Vult app wallet created and tracked: publicKey=%s", vultWallet.PublicKey)
+		t.Logf("Vult wallet created: publicKey=%s", vultWallet.PublicKey)
 
-		// Attempt to create wallet using blimp app type (same user, different app)
-		// 0box tracks operations per app type. The same Firebase user already has a wallet
-		// under vult, so creating under blimp for the same user tests cross-app tracking.
+		// Same user attempting wallet creation under blimp should fail
+		// because 0box tracks operations per user, not per app type
 		blimpHeaders := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BLIMP)
 		_, resp, err = zboxClient.CreateWallet(t, blimpHeaders, NewTestWallet())
 		require.NoError(t, err)
-		// 0box rejects creating a second wallet for the same user under a different app type
-		// because the user already has a wallet tracked under vult. This confirms app-type isolation.
 		require.Equal(t, 400, resp.StatusCode(),
-			"Blimp wallet creation for same user should be rejected (cross-app tracking). Got %d: %s",
+			"Blimp wallet creation for same user should be rejected. Got %d: %s",
 			resp.StatusCode(), resp.String())
-		t.Logf("Blimp app type tracked separately: creation rejected for existing user (status %d)", resp.StatusCode())
 
-		// Verify bolt app type also sees the same cross-app tracking boundary
+		// Same user attempting under bolt should also fail
 		boltHeaders := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_BOLT)
 		_, resp, err = zboxClient.CreateWallet(t, boltHeaders, NewTestWallet())
 		require.NoError(t, err)
 		require.Equal(t, 400, resp.StatusCode(),
-			"Bolt wallet creation for same user should be rejected (cross-app tracking). Got %d: %s",
+			"Bolt wallet creation for same user should be rejected. Got %d: %s",
 			resp.StatusCode(), resp.String())
-		t.Logf("Bolt app type tracked separately: creation rejected for existing user (status %d)", resp.StatusCode())
-	})
 
-	t.RunSequentiallyWithTimeout("Zvault operations are tracked alongside 0box wallet", 3*time.Minute, func(t *test.SystemTest) {
-		require.True(t, zvaultAvailable, "zvault must be available")
-
-		headers := zboxClient.NewZboxHeadersWithCSRF(t, client.X_APP_VULT)
-		Teardown(t, headers)
-
-		// Operation 1: Create 0box wallet (tracked by 0box)
-		err := Create0boxTestWallet(t, headers)
-		require.NoError(t, err, "0box wallet creation should succeed")
-
-		wallet, resp, err := zboxClient.GetWalletKeys(t, headers)
+		// Verify the original vult wallet is unchanged
+		vultWalletAfter, resp, err := zboxClient.GetWalletKeys(t, vultHeaders)
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
-		require.NotEmpty(t, wallet.PublicKey)
-		t.Logf("0box wallet created: publicKey=%s", wallet.PublicKey)
-
-		// Operation 2: Get JWT and store in zvault (tracked by zvault)
-		jwtToken, resp, err := zboxClient.CreateJwtToken(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.NotEmpty(t, jwtToken.JwtToken)
-
-		zvaultHeaders := zvaultClient.NewZvaultHeaders(jwtToken.JwtToken)
-
-		resp, err = zvaultClient.Store(t, PRIVATE_KEY, MNEMONIC, zvaultHeaders)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode(),
-			"Zvault store should succeed. Got %d: %s", resp.StatusCode(), resp.String())
-
-		// Operation 3: Generate split key (tracked by zvault)
-		resp, err = zvaultClient.GenerateSplitKey(t, CLIENT_ID_V, zvaultHeaders)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode(),
-			"Split key generation should succeed. Got %d: %s", resp.StatusCode(), resp.String())
-
-		// Verify both systems tracked their operations: 0box wallet + zvault keys
-		wallet, resp, err = zboxClient.GetWalletKeys(t, headers)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.NotEmpty(t, wallet.PublicKey, "0box wallet should still exist after zvault operations")
-
-		keys, resp, err := zvaultClient.GetKeys(t, CLIENT_ID_V, zvaultHeaders)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
-		require.Len(t, keys.Keys, 1, "Zvault should have 1 split key from tracked operation")
-		t.Logf("Both 0box and zvault operations tracked: wallet=%s, splitKeys=%d",
-			wallet.PublicKey, len(keys.Keys))
-
-		// Cleanup zvault
-		resp, err = zvaultClient.Delete(t, CLIENT_ID_V, zvaultHeaders)
-		require.NoError(t, err)
-		require.Equal(t, 200, resp.StatusCode())
+		require.Equal(t, vultWallet.PublicKey, vultWalletAfter.PublicKey,
+			"Vult wallet should be unchanged after cross-app creation attempts")
+		t.Logf("Cross-app tracking verified: vult wallet intact, blimp/bolt rejected")
 	})
 }
