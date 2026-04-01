@@ -12342,6 +12342,23 @@ swap_image() {
             docker compose -p zauth up -d --force-recreate zauthserver
             ;;
         zvault)
+            # Apply config fixes BEFORE build (postgres host, zauth_server, JWT secret)
+            local ZVAULT_CONFIG="${repo_path}/config/zvault.yaml"
+            if [ -f "$ZVAULT_CONFIG" ]; then
+                sed -i 's/host:.*localhost.*/host: postgreszv/' "$ZVAULT_CONFIG" 2>/dev/null || true
+                if grep -q "zauth_server:.*localhost" "$ZVAULT_CONFIG"; then
+                    sed -i 's|zauth_server:.*|zauth_server: http://172.17.0.1:8080|' "$ZVAULT_CONFIG"
+                    print_status "Fixed zvault zauth_server URL"
+                fi
+                local _obox_cfg="${BASE_DIR}/0box/docker.local/config/0box.yaml"
+                if [ -f "$_obox_cfg" ]; then
+                    local _obox_jwt
+                    _obox_jwt=$(grep -A1 '^jwt:' "$_obox_cfg" | grep 'secret_key:' | head -1 | awk '{print $2}' | tr -d '"')
+                    if [ -n "$_obox_jwt" ]; then
+                        sed -i "s|jwt_secret:.*|jwt_secret: \"${_obox_jwt}\"|" "$ZVAULT_CONFIG"
+                    fi
+                fi
+            fi
             cd "${repo_path}/docker.local"
             docker compose build 2>/dev/null || true
             ;;
