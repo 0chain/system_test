@@ -327,7 +327,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		}
 		t.Logf("Uploaded 10MB across 5 files to allocation with added blobber")
 		// Wait for write markers to be committed and challenges to start generating
-		cliutil.Wait(t, 30*time.Second)
+		cliutils.Wait(t, 30*time.Second)
 
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, blobberId)
 
@@ -423,7 +423,7 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			generateFileAndUpload(t, allocationId, "/", int64(2*MB))
 		}
 		t.Logf("Uploaded 10MB across 5 files to allocation with replaced blobber")
-		cliutil.Wait(t, 30*time.Second)
+		cliutils.Wait(t, 30*time.Second)
 
 		// Added blobber should get challenges for this allocation
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, addedBlobberID)
