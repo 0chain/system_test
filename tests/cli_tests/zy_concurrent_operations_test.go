@@ -69,9 +69,9 @@ func TestConcurrentFileOperations(testSetup *testing.T) {
 		results := make(chan opResult, 5)
 
 		// Create target dirs first (sequential — createdir needs its own connection)
-		output, err := createDir(t, configPath, allocationID, "/copied")
+		output, err := createDir(t, configPath, allocationID, "/copied", true)
 		require.Nil(t, err, "createdir /copied failed: %s", output)
-		output, err = createDir(t, configPath, allocationID, "/moved")
+		output, err = createDir(t, configPath, allocationID, "/moved", true)
 		require.Nil(t, err, "createdir /moved failed: %s", output)
 
 		cliutils.Wait(t, 3*time.Second)
@@ -120,10 +120,10 @@ func TestConcurrentFileOperations(testSetup *testing.T) {
 
 		// Delete file 4
 		go func() {
-			_, err := deleteFile(t, configPath, map[string]interface{}{
+			_, err := deleteFile(t, configPath, createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"remotepath": "/concurrent_4.bin",
-			}, true)
+			}), true)
 			results <- opResult{"delete", err}
 		}()
 
