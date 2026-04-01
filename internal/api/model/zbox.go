@@ -255,3 +255,28 @@ type ZboxTransactionsDataResponse struct {
 
 type ZboxGraphEndpoint func(*test.SystemTest, *ZboxGraphRequest) (*ZboxGraphInt64Response, *resty.Response, error)
 type ZboxGraphBlobberEndpoint func(*test.SystemTest, string, *ZboxGraphRequest) (*ZboxGraphInt64Response, *resty.Response, error)
+
+// TranscodingEntity represents the transcoding entity metadata
+type TranscodingEntity struct {
+	ID           int64   `json:"ID"`
+	UserID       string  `json:"UserID"`
+	ClientID     string  `json:"ClientID"`
+	Remotepath   string  `json:"Remotepath"`
+	FilePath     string  `json:"FilePath"`
+	AllocationID string  `json:"AllocationID"`
+	FileName     string  `json:"FileName"`
+	Mode         string  `json:"Mode"`
+	FileSize     int64   `json:"FileSize"`
+	DoThumbnail  bool    `json:"DoThumbnail"`
+	Status       int     `json:"Status"`
+	AppType      int     `json:"AppType"`
+	CreatedAt    string  `json:"CreatedAt"`
+	UpdatedAt    string  `json:"UpdatedAt"`
+	Deleted      *string `json:"Deleted"`
+}
+
+// GetTranscodingEntityResponse wraps API responses for GET metadata endpoint
+type GetTranscodingEntityResponse struct {
+	Message string            `json:"message"`
+	Data    TranscodingEntity `json:"data"`
+}
