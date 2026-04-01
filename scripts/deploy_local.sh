@@ -496,6 +496,12 @@ parse_branch_overrides() {
                     local _prefix="${2%%.*}"
                     export APP_DOMAIN_PREFIX="$_prefix"
                     print_status "Domain override: ${2} (prefix: ${_prefix})"
+                    # Persist domain to deploy_config.yaml so it survives rsync overwrites
+                    if [ -f "$CONFIG_FILE" ]; then
+                        sed -i "s|^  domain:.*|  domain: \"${2}\"|" "$CONFIG_FILE"
+                        sed -i "s|^  domain_prefix:.*|  domain_prefix: \"${_prefix}\"|" "$CONFIG_FILE"
+                        print_status "Updated deploy_config.yaml with domain: ${2}"
+                    fi
                 fi
                 shift 2
                 ;;
@@ -2832,6 +2838,28 @@ regenerate_blobber_keys() {
 
 build_and_create_blobbers() {
     print_header "Building and Creating Blobber/Validator Containers"
+
+    # Validate domain: blobber URLs are frozen at registration time,
+    # so if the domain is wrong here, blobbers will be permanently unreachable.
+    local _validate_domain="${NGINX_DOMAIN:-}"
+    if [ -z "$_validate_domain" ] && [ -f "$CONFIG_FILE" ]; then
+        _validate_domain=$(grep "^  domain:" "$CONFIG_FILE" 2>/dev/null | awk -F': ' '{print $2}' | tr -d '"' | xargs)
+    fi
+    if [ -n "$_validate_domain" ]; then
+        local _hostname
+        _hostname=$(hostname -f 2>/dev/null || hostname 2>/dev/null || echo "")
+        # Check if /etc/hosts has a mapping (most reliable on Docker hosts)
+        if grep -q "$_validate_domain" /etc/hosts 2>/dev/null; then
+            print_status "Domain $_validate_domain found in /etc/hosts — OK"
+        elif host "$_validate_domain" >/dev/null 2>&1; then
+            print_status "Domain $_validate_domain resolves via DNS — OK"
+        else
+            print_warning "Domain '$_validate_domain' does not resolve. Blobbers will register with this URL."
+            print_warning "If this is wrong, abort and re-run with: --domain <correct-domain>"
+            print_warning "Continuing in 5 seconds..."
+            sleep 5
+        fi
+    fi
 
     # Checkout correct gosdk branch for blobber (lfb branch by default)
     checkout_gosdk_for_dependent "blobber"
