@@ -279,12 +279,19 @@ checkout_branches() {
             fi
         fi
 
-        # Verify we're on the right branch
+        # Verify we're on the right branch/commit
         local current=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
         local short_hash=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+        local full_hash=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
         if [ "$current" != "$branch" ]; then
-            print_error "FATAL: ${repo} on '${current}' instead of '${branch}' after checkout"
-            return 1
+            # If target was a commit hash (not a branch name), verify by hash instead
+            if [[ "$branch" =~ ^[0-9a-f]{6,40}$ ]] && [[ "$full_hash" == "$branch"* ]]; then
+                # Detached HEAD at the correct commit — OK
+                true
+            else
+                print_error "FATAL: ${repo} on '${current}' instead of '${branch}' after checkout"
+                return 1
+            fi
         fi
 
         # Restore preserved .env files
@@ -12131,9 +12138,10 @@ swap_image() {
             print_error "FATAL: Branch '${branch}' not found for ${repo}"
             return 1
         fi
-        # Verify correct branch
+        # Verify correct branch/commit
         local actual_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-        if [ "$actual_branch" != "$branch" ]; then
+        local actual_hash=$(git rev-parse HEAD 2>/dev/null)
+        if [ "$actual_branch" != "$branch" ] && ! { [[ "$branch" =~ ^[0-9a-f]{6,40}$ ]] && [[ "$actual_hash" == "$branch"* ]]; }; then
             print_error "FATAL: ${repo} on '${actual_branch}' instead of '${branch}'"
             return 1
         fi
