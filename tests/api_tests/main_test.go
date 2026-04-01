@@ -148,7 +148,7 @@ func TestMain(m *testing.M) {
 			ClientKey: w.PublicKey,
 			Keys: []zcncrypto.KeyPair{{
 				PublicKey:  w.PublicKey,
-				PrivateKey: w.Keys.PrivateKey.Value,
+				PrivateKey: w.Keys.PrivateKey.SerializeToHexStr(),
 			}},
 			Mnemonic:    w.Mnemonics,
 			Version:     "1.0",

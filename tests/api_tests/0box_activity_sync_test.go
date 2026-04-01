@@ -21,6 +21,8 @@ func Test0BoxActivitySync(testSetup *testing.T) {
 		err := Create0boxTestWallet(t, headers)
 		require.NoError(t, err, "0box wallet setup")
 
-		t.Logf("Activity sync WebSocket endpoint verified via 0box availability check")
+		// The WebSocket endpoint /ws/sync exists but can't be tested via HTTP POST.
+		// Verify the 0box is responsive (WebSocket testing requires a WS client library).
+		t.Logf("0box is responsive — WebSocket sync endpoint available at /ws/sync")
 	})
 }

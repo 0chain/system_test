@@ -301,6 +301,30 @@ func NewZboxClient(zboxEntrypoint string) *ZboxClient {
 	return zboxClient
 }
 
+// Entrypoint returns the 0box base URL.
+func (c *ZboxClient) Entrypoint() string { return c.zboxEntrypoint }
+
+// PostJSON sends a POST request with JSON body to the given path and returns the response.
+func (c *ZboxClient) PostJSON(t *test.SystemTest, path string, headers map[string]string, body map[string]interface{}) (*resty.Response, error) {
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath(path)
+
+	jsonHeaders := make(map[string]string)
+	for k, v := range headers {
+		jsonHeaders[k] = v
+	}
+	jsonHeaders["Content-Type"] = "application/json"
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            jsonHeaders,
+		Body:               body,
+		RequiredStatusCode: 0,
+	}, HttpPOSTMethod)
+	return resp, err
+}
+
 // ClearCookies replaces the HTTP cookie jar with a fresh one, isolating
 // subsequent requests from any session cookies set by earlier calls.
 // Use this when switching between different user identities (e.g. primary
