@@ -118,9 +118,9 @@ func TestConcurrentFileOperations(testSetup *testing.T) {
 			results <- opResult{"download", err}
 		}()
 
-		// Delete file 4
+		// Delete file 4 — use the test wallet name, not configPath
 		go func() {
-			_, err := deleteFile(t, configPath, createParams(map[string]interface{}{
+			_, err := deleteFile(t, escapedTestName(t), createParams(map[string]interface{}{
 				"allocation": allocationID,
 				"remotepath": "/concurrent_4.bin",
 			}), true)
