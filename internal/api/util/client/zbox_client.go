@@ -1906,3 +1906,95 @@ func (c *ZboxClient) GetMetadata(t *test.SystemTest, headers map[string]string, 
 	}
 	return nil, resp, fmt.Errorf("transcoding entity not found in response")
 }
+
+// CreateShortLink creates a short.io link via 0box.
+func (c *ZboxClient) CreateShortLink(t *test.SystemTest, headers map[string]string, body map[string]interface{}) (*resty.Response, error) {
+	t.Logf("Creating short link via 0box...")
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/shortio/link")
+
+	jsonHeaders := make(map[string]string)
+	for k, v := range headers {
+		jsonHeaders[k] = v
+	}
+	jsonHeaders["Content-Type"] = "application/json"
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            jsonHeaders,
+		Body:               body,
+		RequiredStatusCode: 0,
+	}, HttpPOSTMethod)
+	return resp, err
+}
+
+// CreateReferralLink creates a referral short link via 0box.
+func (c *ZboxClient) CreateReferralLink(t *test.SystemTest, headers map[string]string, body map[string]interface{}) (*resty.Response, error) {
+	t.Logf("Creating referral link via 0box...")
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/shortio/referral")
+
+	jsonHeaders := make(map[string]string)
+	for k, v := range headers {
+		jsonHeaders[k] = v
+	}
+	jsonHeaders["Content-Type"] = "application/json"
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            jsonHeaders,
+		Body:               body,
+		RequiredStatusCode: 0,
+	}, HttpPOSTMethod)
+	return resp, err
+}
+
+// CheckPublicShareExists checks if a public share exists for a file.
+func (c *ZboxClient) CheckPublicShareExists(t *test.SystemTest, headers map[string]string, queryParams map[string]string) (*resty.Response, error) {
+	t.Logf("Checking public share exists...")
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/shareinfo/public/check")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            headers,
+		QueryParams:        queryParams,
+		RequiredStatusCode: 0,
+	}, HttpGETMethod)
+	return resp, err
+}
+
+// GetPublicShareRecipients gets all recipients of a public share.
+func (c *ZboxClient) GetPublicShareRecipients(t *test.SystemTest, headers map[string]string, queryParams map[string]string) (*resty.Response, error) {
+	t.Logf("Getting public share recipients...")
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/shareinfo/public/recipients")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            headers,
+		QueryParams:        queryParams,
+		RequiredStatusCode: 0,
+	}, HttpGETMethod)
+	return resp, err
+}
+
+// RevokePublicShare revokes a public share for a file.
+func (c *ZboxClient) RevokePublicShare(t *test.SystemTest, headers map[string]string, queryParams map[string]string) (*resty.Response, error) {
+	t.Logf("Revoking public share...")
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/shareinfo/public/revoke")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            headers,
+		QueryParams:        queryParams,
+		RequiredStatusCode: 0,
+	}, HttpDELETEMethod)
+	return resp, err
+}
