@@ -3238,6 +3238,26 @@ PYEOF
         exit 1
     fi
     print_status "zcn_blimp.js: patched to load WASM from local /zcn.wasm (not CDN)"
+
+    # Also patch zcn_vult.js — Vult uses a separate loader that tries CDN by default.
+    # Without this, Vult loads stale WASM from cdn.vult.network instead of local build.
+    local VULT_LOADER="${WEB_APPS_DIR}/packages/shared/src/lib/wasm/zcn_vult.js"
+    if [ -f "$VULT_LOADER" ]; then
+        if grep -q 'FORCE LOCAL WASM' "$VULT_LOADER" 2>/dev/null; then
+            print_status "zcn_vult.js: local WASM patch already applied"
+        else
+            # Simplest fix: make zcn_vult.js re-export zcn_blimp.js (which is already patched)
+            # This ensures Vult uses the exact same local WASM loading logic as other apps.
+            cp "$VULT_LOADER" "${VULT_LOADER}.bak"
+            cat > "$VULT_LOADER" << 'VULTEOF'
+// FORCE LOCAL WASM - redirected to zcn_blimp.js by deploy_local.sh
+// Vult's original loader tried cdn.vult.network which serves stale production WASM.
+// In test/dev mode, we want the locally-built WASM from gosdk.
+export { createWasm } from './zcn_blimp'
+VULTEOF
+            print_status "zcn_vult.js: redirected to zcn_blimp.js (forces local WASM)"
+        fi
+    fi
 }
 
 # Start supporting services
