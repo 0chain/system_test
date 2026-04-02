@@ -282,35 +282,20 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Added blobber in an allocation should also be challenged for this blobber allocation", 15*time.Minute, func(t *test.SystemTest) {
-		// Use 1+1 shards so spare blobbers are available to add.
-		// After adding a blobber it becomes 1+1+1=3 blobbers (1 data shard).
-		// Need at least 10MB per data shard, so upload 30MB to be safe.
+		// Use 2+2 shards (4 blobbers). After adding one: 2+2+1=5 blobbers.
+		// Upload 60MB total: with 2 data shards, each shard gets 30MB (>10MB min).
 		allocationId := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   100 * MB,
+			"size":   500 * MB,
 			"lock":   9,
-			"data":   1,
-			"parity": 1,
+			"data":   2,
+			"parity": 2,
 		})
 
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, 1*MB)
-		require.Nil(t, err)
-
-		var uploadErr error
-		var output []string
-		for attempt := 0; attempt < 3; attempt++ {
-			output, uploadErr = uploadFile(t, configPath, map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": "/file_" + filepath.Base(filename),
-				"localpath":  filename,
-			}, true)
-			if uploadErr == nil {
-				break
-			}
-			t.Logf("Upload attempt %d/3 failed, retrying in 30s: %s", attempt+1, strings.Join(output, "\n"))
-			time.Sleep(30 * time.Second)
+		// Upload initial data BEFORE adding blobber so allocation_root is set
+		for i := 0; i < 3; i++ {
+			generateFileAndUpload(t, allocationId, "/", int64(10*MB))
 		}
-		require.Nil(t, uploadErr, "Upload failed after 3 retries: %s", strings.Join(output, "\n"))
+		t.Logf("Uploaded 30MB initial data to allocation")
 
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
@@ -318,25 +303,26 @@ func TestProtocolChallenge(testSetup *testing.T) {
 
 		blobberId, err := GetBlobberIDNotPartOfAllocation(walletFile, configFile, allocationId)
 		require.Nil(t, err, "Error finding spare blobber")
-		require.NotEmpty(t, blobberId, "No spare blobber available to add — need more than 2 blobbers registered")
+		require.NotEmpty(t, blobberId, "No spare blobber available to add — need more than 4 blobbers registered")
 
 		params := createParams(map[string]interface{}{
 			"allocation":  allocationId,
 			"add_blobber": blobberId,
 		})
-		output, err = updateAllocation(t, configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Add blobber failed: %s", strings.Join(output, "\n"))
 
-		// Upload multiple files so the added blobber receives enough data for challenges.
-		// With 1 data shard, each blobber gets the full file. Upload 6x5MB = 30MB total
-		// to ensure each blobber has well above the 10MB minimum for challenge generation.
+		// Upload MORE data after adding blobber so the new blobber gets data
+		// and allocation_root is updated to include it. The SC needs to see
+		// a commit from the new blobber before generating challenges for it.
 		for i := 0; i < 6; i++ {
-			generateFileAndUpload(t, allocationId, "/", int64(5*MB))
+			generateFileAndUpload(t, allocationId, "/", int64(10*MB))
 		}
-		t.Logf("Uploaded 30MB across 6 files to allocation with added blobber")
-		// Wait for write markers to be committed and challenges to start generating
-		t.Logf("Waiting 3 minutes for write markers to commit before checking challenges...")
-		cliutils.Wait(t, 3*time.Minute)
+		t.Logf("Uploaded 60MB more data after adding blobber (90MB total)")
+
+		// Wait for write markers to commit — blobber needs to send WM to chain
+		t.Logf("Waiting 1 minute for write markers to commit...")
+		cliutils.Wait(t, 1*time.Minute)
 
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, blobberId)
 
@@ -360,35 +346,20 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Replaced blobber in an allocation should not be challenged for this blobber allocation", 15*time.Minute, func(t *test.SystemTest) {
-		// Use 1+1 shards so spare blobbers are available to add/replace.
-		// After replace it stays 1+1=2 blobbers (1 data shard).
-		// Need at least 10MB per data shard, so upload 30MB to be safe.
+		// Use 2+2 shards (4 blobbers). After replace: still 2+2=4 (1 replaced).
+		// Upload 60MB: with 2 data shards, each shard gets 30MB (>10MB min).
 		allocationId := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   100 * MB,
+			"size":   500 * MB,
 			"lock":   9,
-			"data":   1,
-			"parity": 1,
+			"data":   2,
+			"parity": 2,
 		})
 
-		filename := generateRandomTestFileName(t)
-		err := createFileWithSize(filename, 1*MB)
-		require.Nil(t, err)
-
-		var uploadErr error
-		var output []string
-		for attempt := 0; attempt < 3; attempt++ {
-			output, uploadErr = uploadFile(t, configPath, map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": "/file_" + filepath.Base(filename),
-				"localpath":  filename,
-			}, true)
-			if uploadErr == nil {
-				break
-			}
-			t.Logf("Upload attempt %d/3 failed, retrying in 30s: %s", attempt+1, strings.Join(output, "\n"))
-			time.Sleep(30 * time.Second)
+		// Upload initial data so allocation_root is established
+		for i := 0; i < 3; i++ {
+			generateFileAndUpload(t, allocationId, "/", int64(10*MB))
 		}
-		require.Nil(t, uploadErr, "Upload failed after 3 retries: %s", strings.Join(output, "\n"))
+		t.Logf("Uploaded 30MB initial data to allocation")
 
 		wd, _ := os.Getwd()
 		walletFile := filepath.Join(wd, "config", escapedTestName(t)+"_wallet.json")
@@ -426,19 +397,18 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			"add_blobber":    addedBlobberID,
 			"remove_blobber": replacedBlobberID,
 		})
-		output, err = updateAllocation(t, configPath, params, true)
+		output, err := updateAllocation(t, configPath, params, true)
 		require.Nil(t, err, "Replace blobber failed: %s", strings.Join(output, "\n"))
 
-		// Upload multiple files so the replacement blobber receives enough data for challenges.
-		// With 1 data shard, each blobber gets the full file. Upload 6x5MB = 30MB total
-		// to ensure each blobber has well above the 10MB minimum for challenge generation.
+		// Upload data after replace so the replacement blobber gets data and
+		// allocation_root is updated. Upload 60MB with 2 data shards = 30MB per shard.
 		for i := 0; i < 6; i++ {
-			generateFileAndUpload(t, allocationId, "/", int64(5*MB))
+			generateFileAndUpload(t, allocationId, "/", int64(10*MB))
 		}
-		t.Logf("Uploaded 30MB across 6 files to allocation with replaced blobber")
-		// Wait for write markers to be committed and challenges to start generating
-		t.Logf("Waiting 3 minutes for write markers to commit before checking challenges...")
-		cliutils.Wait(t, 3*time.Minute)
+		t.Logf("Uploaded 60MB more data after replacing blobber (90MB total)")
+		// Wait for write markers to commit — new blobber needs to send WM to chain
+		t.Logf("Waiting 1 minute for write markers to commit...")
+		cliutils.Wait(t, 1*time.Minute)
 
 		// Added blobber should get challenges for this allocation
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, addedBlobberID)
