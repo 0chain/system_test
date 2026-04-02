@@ -122,7 +122,7 @@ test_swap() {
 
     # Step 1: Swap to previous commit
     info "  [1/4] Swapping $service -> $prev_commit..."
-    if ! bash scripts/deploy_local.sh swap-image "$service" "$prev_commit" 2>&1 | tail -3; then
+    if ! bash scripts/deploy_local.sh swap-image "$service" "$prev_commit" >/dev/null 2>&1; then
         fail "$service: swap to $prev_commit failed"
         return
     fi
@@ -137,7 +137,7 @@ test_swap() {
 
     # Step 3: Swap back to HEAD
     info "  [3/4] Swapping $service -> $branch (HEAD)..."
-    if ! bash scripts/deploy_local.sh swap-image "$service" "$branch" 2>&1 | tail -3; then
+    if ! bash scripts/deploy_local.sh swap-image "$service" "$branch" >/dev/null 2>&1; then
         fail "$service: swap back to $branch failed"
         return
     fi
