@@ -7355,8 +7355,15 @@ build_web_apps() {
             print_status "gosdk wasmsdk/wallet.go patched (privateKey guard added)"
         fi
 
+        # Update VERSIONSTR to match actual git tag (the file has a stale hardcoded value)
+        local _wasm_ver
+        _wasm_ver=$(git describe --tags --always 2>/dev/null || echo "local")
+        if [ -f "core/version/version.go" ]; then
+            sed -i "s|VERSIONSTR = .*|VERSIONSTR = \"${_wasm_ver}\"|" core/version/version.go
+        fi
+
         # Build WASM
-        print_status "Building zcn.wasm from gosdk ($(git log --oneline -1 2>/dev/null))..."
+        print_status "Building zcn.wasm from gosdk ${_wasm_ver}..."
         CGO_ENABLED=0 GOOS=js GOARCH=wasm go build -ldflags="-s -w" -buildvcs=false -o zcn.wasm ./wasmsdk 2>/dev/null || {
             print_warning "zcn.wasm build failed (may need specific gosdk branch)"
         }
