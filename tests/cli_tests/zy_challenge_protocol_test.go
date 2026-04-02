@@ -159,19 +159,21 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Allocation with writes should get challenges", 12*time.Minute, func(t *test.SystemTest) {
-		// Temporarily set time_unit=10m to speed up challenge generation for this test
+		// Temporarily set time_unit=10m to speed up challenge generation for this test.
+		// CRITICAL: Reset to 720h IMMEDIATELY after allocation creation (not in defer)
+		// because other parallel tests will create allocations that inherit the short time_unit,
+		// causing them to expire in ~10 minutes and fail with "use of expired allocation".
 		_, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{"time_unit": "10m"}, true)
 		if err != nil { t.Skip("SC owner wallet mismatch: cannot set time_unit=10m"); return }
-		defer func() {
-			_, _ = updateStorageSCConfig(t, scOwnerWallet, map[string]string{"time_unit": "720h"}, true)
-		}()
 
-		// Default allocation is 2+1=3 blobbers. Need at least 10MB per data shard (2 shards),
-		// so upload 40MB total (5x8MB) to ensure ~20MB per data shard — safely above 10MB minimum.
 		allocationId := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 200 * MB,
 			"lock": 9,
 		})
+
+		// Reset time_unit IMMEDIATELY — our allocation already has the short expiry baked in,
+		// but other parallel tests need the normal 720h for their allocations.
+		_, _ = updateStorageSCConfig(t, scOwnerWallet, map[string]string{"time_unit": "720h"}, true)
 
 		// Upload multiple files totaling 40MB to ensure enough data per blobber for challenges
 		for i := 0; i < 5; i++ {
