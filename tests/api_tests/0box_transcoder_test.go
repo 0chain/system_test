@@ -33,6 +33,10 @@ func Test0BoxTranscoder(testSetup *testing.T) {
 	sdkClient.SetWallet(t, wallet)
 
 	// Create a real on-chain allocation for file uploads
+	// NOTE: ProtocolChallenge (CLI) may set time_unit=10m on-chain while API tests run in parallel.
+	// Allocations created during that window expire in ~10 minutes. We use a large allocation size
+	// and accept that if time_unit is temporarily short, later subtests may see "expired allocation".
+	// The safety net in run_tests.sh resets time_unit to 720h after each suite completes.
 	blobberRequirements := model.DefaultBlobberRequirements(wallet.Id, wallet.PublicKey)
 	blobberRequirements.DataShards = 2
 	blobberRequirements.ParityShards = 2
