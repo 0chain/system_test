@@ -158,6 +158,9 @@ func getBlobberNotPartOfAllocation(walletname, configFile, allocationID string) 
 		allocationBlobsMap[b.BlobberID] = true
 	}
 
+	// Minimum free capacity required (1MB) to avoid "free capacity insufficient" errors
+	const minFreeCapacity = 1048576
+
 	for _, blobber := range blobbers {
 		if _, ok := allocationBlobsMap[string(blobber.ID)]; !ok {
 			// Skip restricted blobbers (require auth tickets)
@@ -169,11 +172,17 @@ func getBlobberNotPartOfAllocation(walletname, configFile, allocationID string) 
 				log.Printf("Skipping enterprise blobber %s", string(blobber.ID))
 				continue
 			}
+			// Skip blobbers with insufficient free capacity
+			freeCapacity := int64(blobber.Capacity) - int64(blobber.Allocated)
+			if freeCapacity < minFreeCapacity {
+				log.Printf("Skipping blobber %s: free capacity %d < %d", string(blobber.ID), freeCapacity, minFreeCapacity)
+				continue
+			}
 			return blobber, nil
 		}
 	}
 
-	return nil, fmt.Errorf("failed to get blobber not part of allocation")
+	return nil, fmt.Errorf("failed to get blobber not part of allocation (all blobbers are either in allocation, enterprise, restricted, or have insufficient free capacity)")
 }
 
 // GetBlobberIdAndUrlNotPartOfAllocation returns a blobber not part of current allocation

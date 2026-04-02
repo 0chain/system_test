@@ -166,31 +166,36 @@ func TestProtocolChallenge(testSetup *testing.T) {
 			_, _ = updateStorageSCConfig(t, scOwnerWallet, map[string]string{"time_unit": "720h"}, true)
 		}()
 
+		// Default allocation is 2+1=3 blobbers. Need at least 10MB per data shard (2 shards),
+		// so upload 40MB total (5x8MB) to ensure ~20MB per data shard — safely above 10MB minimum.
 		allocationId := setupAllocation(t, configPath, map[string]interface{}{
-			"size": 100 * MB,
+			"size": 200 * MB,
 			"lock": 9,
 		})
 
-		// Upload a large file to ensure challenge generation
-		filename := generateRandomTestFileName(t)
-		err = createFileWithSize(filename, 10*MB)
-		require.Nil(t, err)
+		// Upload multiple files totaling 40MB to ensure enough data per blobber for challenges
+		for i := 0; i < 5; i++ {
+			filename := generateRandomTestFileName(t)
+			err = createFileWithSize(filename, 8*MB)
+			require.Nil(t, err)
 
-		var uploadErr error
-		var output []string
-		for attempt := 0; attempt < 3; attempt++ {
-			output, uploadErr = uploadFile(t, configPath, map[string]interface{}{
-				"allocation": allocationId,
-				"remotepath": "/file_" + filepath.Base(filename),
-				"localpath":  filename,
-			}, true)
-			if uploadErr == nil {
-				break
+			var uploadErr error
+			var output []string
+			for attempt := 0; attempt < 3; attempt++ {
+				output, uploadErr = uploadFile(t, configPath, map[string]interface{}{
+					"allocation": allocationId,
+					"remotepath": fmt.Sprintf("/file_%d_%s", i, filepath.Base(filename)),
+					"localpath":  filename,
+				}, true)
+				if uploadErr == nil {
+					break
+				}
+				t.Logf("Upload attempt %d/3 failed, retrying in 30s: %s", attempt+1, strings.Join(output, "\n"))
+				time.Sleep(30 * time.Second)
 			}
-			t.Logf("Upload attempt %d/3 failed, retrying in 30s: %s", attempt+1, strings.Join(output, "\n"))
-			time.Sleep(30 * time.Second)
+			require.Nil(t, uploadErr, "Upload file %d failed after 3 retries: %s", i, strings.Join(output, "\n"))
 		}
-		require.Nil(t, uploadErr, "Upload failed after 3 retries: %s", strings.Join(output, "\n"))
+		t.Logf("Uploaded 40MB across 5 files to allocation")
 
 		// With time_unit=10m, wait 5 minutes for challenges to accumulate
 		t.Logf("Waiting 5 minutes for challenges to accumulate (time_unit=10m)...")
@@ -277,9 +282,11 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Added blobber in an allocation should also be challenged for this blobber allocation", 15*time.Minute, func(t *test.SystemTest) {
-		// Use 1+1 shards so spare blobbers are available to add
+		// Use 1+1 shards so spare blobbers are available to add.
+		// After adding a blobber it becomes 1+1+1=3 blobbers (1 data shard).
+		// Need at least 10MB per data shard, so upload 30MB to be safe.
 		allocationId := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
+			"size":   100 * MB,
 			"lock":   9,
 			"data":   1,
 			"parity": 1,
@@ -321,15 +328,15 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "Add blobber failed: %s", strings.Join(output, "\n"))
 
 		// Upload multiple files so the added blobber receives enough data for challenges.
-		// A single 1MB file may not be sufficient — the SC needs committed write markers
-		// on the blobber before generating challenges. Upload 5x2MB = 10MB total.
-		for i := 0; i < 5; i++ {
-			generateFileAndUpload(t, allocationId, "/", int64(2*MB))
+		// With 1 data shard, each blobber gets the full file. Upload 6x5MB = 30MB total
+		// to ensure each blobber has well above the 10MB minimum for challenge generation.
+		for i := 0; i < 6; i++ {
+			generateFileAndUpload(t, allocationId, "/", int64(5*MB))
 		}
-		t.Logf("Uploaded 10MB across 5 files to allocation with added blobber")
+		t.Logf("Uploaded 30MB across 6 files to allocation with added blobber")
 		// Wait for write markers to be committed and challenges to start generating
-		t.Logf("Waiting 2 minutes for write markers to commit before checking challenges...")
-		cliutils.Wait(t, 2*time.Minute)
+		t.Logf("Waiting 3 minutes for write markers to commit before checking challenges...")
+		cliutils.Wait(t, 3*time.Minute)
 
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, blobberId)
 
@@ -353,9 +360,11 @@ func TestProtocolChallenge(testSetup *testing.T) {
 	})
 
 	t.RunWithTimeout("Replaced blobber in an allocation should not be challenged for this blobber allocation", 15*time.Minute, func(t *test.SystemTest) {
-		// Use 1+1 shards so spare blobbers are available to add/replace
+		// Use 1+1 shards so spare blobbers are available to add/replace.
+		// After replace it stays 1+1=2 blobbers (1 data shard).
+		// Need at least 10MB per data shard, so upload 30MB to be safe.
 		allocationId := setupAllocation(t, configPath, map[string]interface{}{
-			"size":   10 * MB,
+			"size":   100 * MB,
 			"lock":   9,
 			"data":   1,
 			"parity": 1,
@@ -421,13 +430,15 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		require.Nil(t, err, "Replace blobber failed: %s", strings.Join(output, "\n"))
 
 		// Upload multiple files so the replacement blobber receives enough data for challenges.
-		for i := 0; i < 5; i++ {
-			generateFileAndUpload(t, allocationId, "/", int64(2*MB))
+		// With 1 data shard, each blobber gets the full file. Upload 6x5MB = 30MB total
+		// to ensure each blobber has well above the 10MB minimum for challenge generation.
+		for i := 0; i < 6; i++ {
+			generateFileAndUpload(t, allocationId, "/", int64(5*MB))
 		}
-		t.Logf("Uploaded 10MB across 5 files to allocation with replaced blobber")
+		t.Logf("Uploaded 30MB across 6 files to allocation with replaced blobber")
 		// Wait for write markers to be committed and challenges to start generating
-		t.Logf("Waiting 2 minutes for write markers to commit before checking challenges...")
-		cliutils.Wait(t, 2*time.Minute)
+		t.Logf("Waiting 3 minutes for write markers to commit before checking challenges...")
+		cliutils.Wait(t, 3*time.Minute)
 
 		// Added blobber should get challenges for this allocation
 		challengesCountQuery := fmt.Sprintf("allocation_id = '%s' AND blobber_id = '%s'", allocationId, addedBlobberID)

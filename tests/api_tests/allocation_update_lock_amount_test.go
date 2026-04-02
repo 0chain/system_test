@@ -84,10 +84,16 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		allocationID := apiClient.CreateAllocationWithLockValue(t, wallet, allocationBlobbers, 0.2, client.TxSuccessfulStatus)
 		t.Log("Allocation ID: ", allocationID)
 
+		// Wait for allocation to be indexed on sharder before upload
+		apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
+
 		uploadOp := sdkClient.AddUploadOperation(t, "", "", 512)
 		chimneySdkClient.MultiOperation(t, allocationID, []sdk.OperationRequest{uploadOp})
 
 		time.Sleep(10 * time.Second)
+
+		// Re-set wallet to ensure SDK context is correct after chimneySdkClient operation
+		sdkClient.SetWallet(t, wallet)
 
 		uar := &model.UpdateAllocationRequest{
 			ID:     allocationID,
@@ -95,6 +101,8 @@ func TestAllocationUpdateLockAmount(testSetup *testing.T) {
 		}
 
 		apiClient.UpdateAllocation(t, wallet, allocationID, uar, 0.1, client.TxSuccessfulStatus)
+		// Wait for SC to commit the duration update before reading back
+		time.Sleep(5 * time.Second)
 		alloc := apiClient.GetAllocation(t, allocationID, client.HttpOkStatus)
 
 		require.Equal(t, int64(1*GB), alloc.Size, "Allocation size is not updated")

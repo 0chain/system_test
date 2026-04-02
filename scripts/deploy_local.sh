@@ -11653,12 +11653,11 @@ seed_challenge_data() {
     local W="--wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE --silent"
 
     # --- Regular blobbers: 4+2=6 shards (works with 9 blobbers, exceeds 4+2 requirement) ---
-    # Use 100MB allocation (not 2GB) to avoid filling blobber capacity.
-    # Each test creates ~2GB allocations. With 100+ tests, 200GB+ gets allocated.
-    # The warm-up only needs enough data for challenge generation (~50MB).
+    # Use 200MB allocation. With 4 data shards and 100MB upload, each blobber gets ~25MB
+    # which is safely above the 10MB minimum for challenge generation.
     print_status "Creating regular blobber warm-up allocation (4 data + 2 parity = 6 blobbers)..."
     local alloc_output
-    alloc_output=$($ZBOX newallocation --size 104857600 --data 4 --parity 2 --lock 5 $W 2>&1) || {
+    alloc_output=$($ZBOX newallocation --size 209715200 --data 4 --parity 2 --lock 5 $W 2>&1) || {
         print_warning "Failed to create regular warm-up allocation: $alloc_output"
         return 1
     }
@@ -11669,13 +11668,12 @@ seed_challenge_data() {
     fi
     print_status "  Regular allocation: ${alloc_id:0:16}..."
 
-    # Upload multiple files totaling 50MB+ so every blobber has enough data
-    # for challenge generation. A single 10MB file spread across 6 blobbers
-    # gives only ~1.7MB per blobber — insufficient for reliable challenges.
+    # Upload 10x10MB = 100MB total. With 4 data shards, each blobber gets ~25MB,
+    # safely above the 10MB minimum for reliable challenge generation.
     local total_uploaded=0
-    for _f in 1 2 3 4 5; do
+    for _f in 1 2 3 4 5 6 7 8 9 10; do
         dd if=/dev/urandom of=/tmp/warmup_challenge_${_f}.bin bs=1M count=10 2>/dev/null
-        print_status "Uploading file ${_f}/5 (10MB) to regular allocation..."
+        print_status "Uploading file ${_f}/10 (10MB) to regular allocation..."
         $ZBOX upload --allocation "$alloc_id" --remotepath /warmup_data_${_f}.bin \
             --localpath /tmp/warmup_challenge_${_f}.bin $W 2>&1 || {
             print_warning "Upload ${_f} failed (continuing)"
@@ -14606,6 +14604,7 @@ EOF
         register_0box_render_user
         ;;
     blobbers)
+        cleanup_stale_blobbers || true
         reset_wallet_nonces
         fix_blobber_config
         fix_validator_config
@@ -14678,6 +14677,9 @@ EOF
         setup_test_wallets
         configure_test_configs
         fund_test_wallets
+        # Ensure free storage assigner is registered (idempotent — skips if already registered).
+        # Without this, Test0BoxFreeStorage fails after chain restarts or SC state resets.
+        fund_0box || print_warning "Free storage assigner setup had issues (non-critical for most tests)"
         setup_zs3_test_tools || true
         seed_challenge_data || true
         generate_challenge_protocol_files || print_warning "Challenge protocol file generation failed (non-critical)"

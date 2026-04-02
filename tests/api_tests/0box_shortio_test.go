@@ -37,7 +37,7 @@ func Test0BoxShortIO(testSetup *testing.T) {
 		require.Equal(t, "shareinfo added successfully", shareinfoResp.Message)
 
 		// Verify the shareinfo was persisted by reading it back
-		sharedList, resp, err := zboxClient.GetShareInfoShared(t, headers)
+		sharedList, resp, err := zboxClient.GetShareInfoShared(t, headers, publicShareData["share_info_type"])
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.GreaterOrEqual(t, len(sharedList.Data), 1,
@@ -87,7 +87,7 @@ func Test0BoxShortIO(testSetup *testing.T) {
 		require.Equal(t, "shareinfo added successfully", shareinfoResp.Message)
 
 		// Verify the private share was persisted
-		sharedList, resp, err := zboxClient.GetShareInfoShared(t, headers)
+		sharedList, resp, err := zboxClient.GetShareInfoShared(t, headers, privateShareData["share_info_type"])
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.GreaterOrEqual(t, len(sharedList.Data), 1,
@@ -132,7 +132,7 @@ func Test0BoxShortIO(testSetup *testing.T) {
 		require.Equal(t, "shareinfo added successfully", shareinfoResp.Message)
 
 		// Verify the folder share was persisted
-		sharedList, resp, err := zboxClient.GetShareInfoShared(t, headers)
+		sharedList, resp, err := zboxClient.GetShareInfoShared(t, headers, folderShareData["share_info_type"])
 		require.NoError(t, err)
 		require.Equal(t, 200, resp.StatusCode())
 		require.GreaterOrEqual(t, len(sharedList.Data), 1,

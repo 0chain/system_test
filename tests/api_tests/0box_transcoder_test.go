@@ -99,7 +99,8 @@ func Test0BoxTranscoder(testSetup *testing.T) {
 		}
 
 		deadline := time.Now().Add(3 * time.Minute)
-		var lastStatus int
+		// Start with the status returned by UpdateUploadStatus (at least 1)
+		lastStatus := updatedEntity.Status
 		for time.Now().Before(deadline) {
 			getEntity, getResp, getErr := zboxClient.GetMetadata(t, headers, queryParams)
 			if getErr == nil && getResp.StatusCode() == 200 && getEntity != nil {
@@ -164,7 +165,8 @@ func Test0BoxTranscoder(testSetup *testing.T) {
 		}
 
 		deadline := time.Now().Add(90 * time.Second)
-		var lastStatus int
+		// Start with the status returned by UpdateUploadStatus (at least 1)
+		lastStatus := updatedEntity.Status
 		for time.Now().Before(deadline) {
 			getEntity, getResp, getErr := zboxClient.GetMetadata(t, headers, queryParams)
 			if getErr == nil && getResp.StatusCode() == 200 && getEntity != nil {

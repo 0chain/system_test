@@ -905,7 +905,7 @@ func (c *ZboxClient) GetGraphWritePrice(t *test.SystemTest, req *model.ZboxGraph
 	return &graphWritePrice, resp, err
 }
 
-func (c *ZboxClient) GetShareInfoShared(t *test.SystemTest, headers map[string]string) (*model.ZboxMessageDataShareinfoResponse, *resty.Response, error) {
+func (c *ZboxClient) GetShareInfoShared(t *test.SystemTest, headers map[string]string, shareInfoType ...string) (*model.ZboxMessageDataShareinfoResponse, *resty.Response, error) {
 	t.Logf("Getting share Info for [%v] using 0box...", headers["X-App-User-ID"])
 	var ZboxShareInfoList *model.ZboxMessageDataShareinfoResponse
 
@@ -914,8 +914,12 @@ func (c *ZboxClient) GetShareInfoShared(t *test.SystemTest, headers map[string]s
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/shareinfo/shared")
 
+	siType := "private"
+	if len(shareInfoType) > 0 && shareInfoType[0] != "" {
+		siType = shareInfoType[0]
+	}
 	formData := map[string]string{
-		"share_info_type": "private",
+		"share_info_type": siType,
 	}
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
