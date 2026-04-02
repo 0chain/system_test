@@ -12778,6 +12778,11 @@ PYEOF
             if $_chain_ok; then
                 print_status "Re-applying chain config after 0chain swap..."
                 ensure_chain_config || print_warning "chain config after swap failed (blobber health checks may be rejected)"
+                # After 0chain swap, blobbers/validators restart and may need funding
+                # to re-register (add_blobber/add_validator transactions require fee).
+                print_status "Funding blobbers/validators after 0chain swap..."
+                fund_blobbers_and_validators || print_warning "blobber/validator funding after 0chain swap failed"
+                restart_failed_blobbers || true
             else
                 print_error "Chain did not start after swap — manual intervention required"
             fi
