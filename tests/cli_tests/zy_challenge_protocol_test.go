@@ -162,16 +162,20 @@ func TestProtocolChallenge(testSetup *testing.T) {
 		// Run SEQUENTIALLY because this test changes time_unit=10m on-chain.
 		// If run in parallel, other tests create allocations that inherit the short time_unit
 		// and expire in ~10 minutes, causing cascading "use of expired allocation" failures.
+		// Set time_unit=10m, create allocation, then IMMEDIATELY reset to 720h.
+		// The allocation's expiry is set at creation time (inherits time_unit=10m).
+		// Resetting immediately minimizes the window where other parallel tests
+		// (including API suite) could create allocations with the short time_unit.
 		_, err := updateStorageSCConfig(t, scOwnerWallet, map[string]string{"time_unit": "10m"}, true)
 		if err != nil { t.Skip("SC owner wallet mismatch: cannot set time_unit=10m"); return }
-		defer func() {
-			_, _ = updateStorageSCConfig(t, scOwnerWallet, map[string]string{"time_unit": "720h"}, true)
-		}()
 
 		allocationId := setupAllocation(t, configPath, map[string]interface{}{
 			"size": 200 * MB,
 			"lock": 9,
 		})
+
+		// Reset IMMEDIATELY after allocation creation — don't wait for defer
+		_, _ = updateStorageSCConfig(t, scOwnerWallet, map[string]string{"time_unit": "720h"}, true)
 
 		// Upload multiple files totaling 40MB to ensure enough data per blobber for challenges
 		for i := 0; i < 5; i++ {
