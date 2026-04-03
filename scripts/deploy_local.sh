@@ -15241,6 +15241,9 @@ EOF
         # Does NOT rebuild images or restart the chain — only fixes configs and restarts affected services.
         print_header "Restoring All Service Configs"
 
+        print_status "[0/8] Resetting wallet nonces..."
+        reset_wallet_nonces
+
         print_status "[1/8] Chain SC config (time_unit, fees, hardforks)..."
         ensure_chain_config || print_warning "Chain config failed"
 
