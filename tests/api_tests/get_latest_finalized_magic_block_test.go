@@ -39,7 +39,9 @@ func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 		var res map[string]interface{}
 		err = json.Unmarshal(resp.Body(), &res)
 		require.Nil(t, err, res)
-		require.Equal(t, hash, res["hash"])
+		magicBlock, ok := res["magic_block"].(map[string]interface{})
+		require.True(t, ok, "magic_block field missing")
+		require.Equal(t, hash, magicBlock["hash"])
 	})
 
 	t.Run("Different node-lfmb-hash provided, return http 200 and return the lfmb the sharder has", func(t *test.SystemTest) {
@@ -54,7 +56,9 @@ func TestGetLatestFinalizedMagicBlock(testSetup *testing.T) {
 		var res map[string]interface{}
 		err = json.Unmarshal(resp.Body(), &res)
 		require.Nil(t, err, res)
-		require.NotEqual(t, false_hash, res["hash"])
+		magicBlock, ok := res["magic_block"].(map[string]interface{})
+		require.True(t, ok, "magic_block field missing")
+		require.NotEqual(t, false_hash, magicBlock["hash"])
 	})
 }
 
@@ -68,7 +72,13 @@ func getCurrentHash(t *test.SystemTest) (string, error) {
 	err = decoder.Decode(&res)
 	require.Nil(t, err, res)
 
-	resultHash := res["hash"]
+	// With view_change=false the outer "hash" field is empty.
+	// The magic_block.hash is always populated regardless of view_change setting.
+	magicBlock, ok := res["magic_block"].(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("magic_block field missing or not a map")
+	}
+	resultHash := magicBlock["hash"]
 
 	strHash := fmt.Sprintf("%s", resultHash)
 

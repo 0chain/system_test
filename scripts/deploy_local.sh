@@ -3045,6 +3045,7 @@ services:
       - ./blobber${_n}/log:/blobber/log
       - ./keys_config:/blobber/keysconfig
       - ./blobber${_n}/data/tmp:/tmp
+      - ./blobber${_n}/pebble:/pebble/data
     ports:
       - "${_blobber_host_port}:${_blobber_port}"
       - "${_grpc_host_port}:${_grpc_port}"
@@ -3067,6 +3068,23 @@ COMPOSEEOF
     for _pb in 1 2 3 4 5 6 7 8 9 10 11 12; do
         mkdir -p "${BLOBBER_DIR}/blobber${_pb}/pebble/data"
         mkdir -p "${BLOBBER_DIR}/blobber${_pb}/pebble/wal"
+    done
+
+    # Ensure PebbleDB volume mount in docker-compose (prevents pebble loss on recreate).
+    # Without this, /pebble/data/ is ephemeral and wiped on every force-recreate,
+    # causing "pebble: not found" on challenge responses and ZS3 writes.
+    local _bc="${BLOBBER_DIR}/b0docker-compose.yml"
+    if [ -f "$_bc" ] && ! grep -q 'pebble' "$_bc"; then
+        sed -i '/\.\/blobber\${BLOBBER}\/data\/tmp:\/tmp/a\\      - ./blobber${BLOBBER}/pebble:/pebble/data' "$_bc"
+        print_status "Added PebbleDB volume mount to b0docker-compose.yml"
+    fi
+    for _cf in "${BLOBBER_DIR}"/b0docker-compose-*.yml; do
+        [ -f "$_cf" ] || continue
+        if ! grep -q 'pebble' "$_cf"; then
+            local _bn=$(echo "$_cf" | grep -oP '\d+(?=\.yml)')
+            [ -z "$_bn" ] && continue
+            sed -i "/\/blobber\/data/a\\      - ./blobber${_bn}/pebble:/pebble/data" "$_cf" 2>/dev/null || true
+        fi
     done
 
     # Create containers for blobbers 1-6
@@ -12857,6 +12875,22 @@ PYEOF
             for _pb in 1 2 3 4 5 6 7 8 9 10 11 12; do
                 mkdir -p "${repo_path}/docker.local/blobber${_pb}/pebble/data"
                 mkdir -p "${repo_path}/docker.local/blobber${_pb}/pebble/wal"
+            done
+            # Ensure PebbleDB volume mount in docker-compose (prevents pebble loss on recreate)
+            local _bc="${repo_path}/docker.local/b0docker-compose.yml"
+            if [ -f "$_bc" ] && ! grep -q 'pebble' "$_bc"; then
+                sed -i '/\.\/blobber\${BLOBBER}\/data\/tmp:\/tmp/a\\      - ./blobber${BLOBBER}/pebble:/pebble/data' "$_bc"
+                print_status "Added PebbleDB volume mount to b0docker-compose.yml"
+            fi
+            # Also patch individual compose files for blobbers 1,2,10,11,12
+            for _cf in "${repo_path}/docker.local"/b0docker-compose-*.yml; do
+                [ -f "$_cf" ] || continue
+                if ! grep -q 'pebble' "$_cf"; then
+                    # Extract blobber number from filename
+                    local _bn=$(echo "$_cf" | grep -oP '\d+(?=\.yml)')
+                    [ -z "$_bn" ] && continue
+                    sed -i "/\/blobber\/data/a\\      - ./blobber${_bn}/pebble:/pebble/data" "$_cf" 2>/dev/null || true
+                fi
             done
             # Blobbers 1-6: use specific compose if available, else generic
             for i in 1 2 3 4 5 6; do
