@@ -236,21 +236,28 @@ checkout_branches() {
         # (0chain.yaml, sc.yaml, kafka config, .env) that were patched by deploy_local.sh.
         local _env_bak="/tmp/checkout_env_backup_${repo}"
         rm -rf "$_env_bak" 2>/dev/null; mkdir -p "$_env_bak"
-        find . -maxdepth 4 -name ".env" -not -path "*/node_modules/*" -not -path "*/.next/*" | while read -r ef; do
-            mkdir -p "$_env_bak/$(dirname "$ef")"; cp "$ef" "$_env_bak/$(dirname "$ef")/" 2>/dev/null
+        # Preserve .env files (all repos including web-apps packages/*/.env)
+        find . -maxdepth 5 -name ".env" \
+            -not -path "*/node_modules/*" -not -path "*/.next/*" | while read -r ef; do
+            mkdir -p "$_env_bak/$(dirname "$ef")"; cp "$ef" "$_env_bak/$ef" 2>/dev/null
         done
-        # Preserve ALL config YAML files for every repo.
-        # git checkout -f resets tracked files — deploy_local.sh patches configs with
-        # local chain URLs, block_worker, delegate_wallet, kafka, view_change, etc.
-        # Swap-image should only change the binary, never the config.
+        # Preserve config YAML files (all repos — 0chain.yaml, sc.yaml, blobber, 0box, etc.)
         find . -maxdepth 5 \( -name "*.yaml" -o -name "*.yml" \) \
             -not -path "*/node_modules/*" -not -path "*/.next/*" \
             -not -path "*/vendor/*" -not -path "*/.git/*" \
-            -path "*/config/*" -o -path "*/docker.local/*.yml" -o -path "*/docker.local/*.yaml" \
-            2>/dev/null | while read -r _cfg; do
+            2>/dev/null | grep -E 'config/|docker.local/' | while read -r _cfg; do
             mkdir -p "$_env_bak/$(dirname "$_cfg")"
             cp "$_cfg" "$_env_bak/$_cfg" 2>/dev/null
         done
+        # For web-apps: preserve patched WASM loaders (zcn_vult.js, zcn_blimp.js)
+        if [ "$repo" = "web-apps" ]; then
+            for _wl in packages/shared/src/lib/wasm/zcn_vult.js packages/shared/src/lib/wasm/zcn_blimp.js; do
+                if [ -f "$_wl" ]; then
+                    mkdir -p "$_env_bak/$(dirname "$_wl")"
+                    cp "$_wl" "$_env_bak/$_wl" 2>/dev/null
+                fi
+            done
+        fi
 
         # Stash local changes (dirty trees block branch switches)
         # Do NOT run git clean — it deletes generated files (keys, .env, configs, data dirs)
@@ -308,13 +315,13 @@ checkout_branches() {
             fi
         fi
 
-        # Restore ALL preserved .env and config files
+        # Restore ALL preserved files (.env, config YAML, patched JS loaders)
         if [ -d "$_env_bak" ] && [ "$(ls -A "$_env_bak" 2>/dev/null)" ]; then
-            find "$_env_bak" \( -name ".env" -o -name "*.yaml" -o -name "*.yml" \) | while read -r ef; do
+            find "$_env_bak" \( -name ".env" -o -name "*.yaml" -o -name "*.yml" -o -name "*.js" \) | while read -r ef; do
                 local rel="${ef#$_env_bak/}"
                 [ -d "$(dirname "$rel")" ] && cp "$ef" "$rel" 2>/dev/null
             done
-            print_status "  Restored local .env + config YAML files (swap only changes binary, not config)"
+            print_status "  Restored local .env + config + patched files (swap only changes binary)"
         fi
         rm -rf "$_env_bak" 2>/dev/null
 
