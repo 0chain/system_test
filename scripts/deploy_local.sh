@@ -4388,9 +4388,26 @@ EOF
     # Step 4: Start 0box. With truncated DB (last_processed_round=0) and no consumer group,
     # 0box will start consuming from Kafka's earliest offset and process ALL events from round 1,
     # including provider registrations (TagAddMiner, TagAddSharder, TagAddBlobber).
-    print_status "Starting 0box..."
-    docker compose -p 0box up -d --force-recreate 0box
-    print_status "0box started on port 9081 (processing events from round 1)"
+    print_status "Starting 0box + Elasticsearch..."
+    # Start both ES and 0box together to prevent orphan removal.
+    # If ES is started separately and then 'docker compose up 0box' runs,
+    # compose may remove ES as an orphan, causing 0box to crash with
+    # "FATAL: Error getting Elasticsearch info".
+    docker compose -p 0box up -d --force-recreate elasticsearch 0box
+    # Wait for 0box to connect to ES (0box crashes with FATAL if ES isn't ready)
+    local _0box_up=false
+    for _try in 1 2 3 4 5 6; do
+        if curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:9081/ -m 3 2>/dev/null | grep -qE '200|404|405'; then
+            _0box_up=true; break
+        fi
+        print_status "  0box not ready (attempt ${_try}/6), waiting 10s..."
+        sleep 10
+    done
+    if $_0box_up; then
+        print_status "0box started on port 9081"
+    else
+        print_warning "0box may still be starting — check: docker logs 0box --tail 5"
+    fi
 }
 
 # Sync a wallet file's nonce to match the on-chain nonce.
