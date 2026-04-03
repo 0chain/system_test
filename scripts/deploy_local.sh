@@ -239,15 +239,18 @@ checkout_branches() {
         find . -maxdepth 4 -name ".env" -not -path "*/node_modules/*" -not -path "*/.next/*" | while read -r ef; do
             mkdir -p "$_env_bak/$(dirname "$ef")"; cp "$ef" "$_env_bak/$(dirname "$ef")/" 2>/dev/null
         done
-        # For 0chain: preserve config YAML files that have local chain settings
-        if [ "$repo" = "0chain" ]; then
-            for _cfg in docker.local/config/0chain.yaml docker.local/config/sc.yaml; do
-                if [ -f "$_cfg" ]; then
-                    mkdir -p "$_env_bak/$(dirname "$_cfg")"
-                    cp "$_cfg" "$_env_bak/$_cfg" 2>/dev/null
-                fi
-            done
-        fi
+        # Preserve ALL config YAML files for every repo.
+        # git checkout -f resets tracked files — deploy_local.sh patches configs with
+        # local chain URLs, block_worker, delegate_wallet, kafka, view_change, etc.
+        # Swap-image should only change the binary, never the config.
+        find . -maxdepth 5 \( -name "*.yaml" -o -name "*.yml" \) \
+            -not -path "*/node_modules/*" -not -path "*/.next/*" \
+            -not -path "*/vendor/*" -not -path "*/.git/*" \
+            -path "*/config/*" -o -path "*/docker.local/*.yml" -o -path "*/docker.local/*.yaml" \
+            2>/dev/null | while read -r _cfg; do
+            mkdir -p "$_env_bak/$(dirname "$_cfg")"
+            cp "$_cfg" "$_env_bak/$_cfg" 2>/dev/null
+        done
 
         # Stash local changes (dirty trees block branch switches)
         # Do NOT run git clean — it deletes generated files (keys, .env, configs, data dirs)
@@ -305,15 +308,13 @@ checkout_branches() {
             fi
         fi
 
-        # Restore preserved .env and config files
+        # Restore ALL preserved .env and config files
         if [ -d "$_env_bak" ] && [ "$(ls -A "$_env_bak" 2>/dev/null)" ]; then
-            find "$_env_bak" -name ".env" -o -name "0chain.yaml" -o -name "sc.yaml" | while read -r ef; do
+            find "$_env_bak" \( -name ".env" -o -name "*.yaml" -o -name "*.yml" \) | while read -r ef; do
                 local rel="${ef#$_env_bak/}"
-                if [ -f "$rel" ] || [ -f "$(dirname "$rel")" ]; then
-                    cp "$ef" "$rel" 2>/dev/null
-                fi
+                [ -d "$(dirname "$rel")" ] && cp "$ef" "$rel" 2>/dev/null
             done
-            print_status "  Restored local .env + config files (0chain.yaml, sc.yaml preserved)"
+            print_status "  Restored local .env + config YAML files (swap only changes binary, not config)"
         fi
         rm -rf "$_env_bak" 2>/dev/null
 
