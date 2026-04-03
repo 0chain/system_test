@@ -231,12 +231,23 @@ checkout_branches() {
 
         cd "$repo_path"
 
-        # Preserve local .env files before git operations
+        # Preserve local .env and config files before git operations.
+        # git checkout -f resets all tracked files — this preserves local overrides
+        # (0chain.yaml, sc.yaml, kafka config, .env) that were patched by deploy_local.sh.
         local _env_bak="/tmp/checkout_env_backup_${repo}"
         rm -rf "$_env_bak" 2>/dev/null; mkdir -p "$_env_bak"
         find . -maxdepth 4 -name ".env" -not -path "*/node_modules/*" -not -path "*/.next/*" | while read -r ef; do
             mkdir -p "$_env_bak/$(dirname "$ef")"; cp "$ef" "$_env_bak/$(dirname "$ef")/" 2>/dev/null
         done
+        # For 0chain: preserve config YAML files that have local chain settings
+        if [ "$repo" = "0chain" ]; then
+            for _cfg in docker.local/config/0chain.yaml docker.local/config/sc.yaml; do
+                if [ -f "$_cfg" ]; then
+                    mkdir -p "$_env_bak/$(dirname "$_cfg")"
+                    cp "$_cfg" "$_env_bak/$_cfg" 2>/dev/null
+                fi
+            done
+        fi
 
         # Stash local changes (dirty trees block branch switches)
         # Do NOT run git clean — it deletes generated files (keys, .env, configs, data dirs)
@@ -294,13 +305,15 @@ checkout_branches() {
             fi
         fi
 
-        # Restore preserved .env files
+        # Restore preserved .env and config files
         if [ -d "$_env_bak" ] && [ "$(ls -A "$_env_bak" 2>/dev/null)" ]; then
-            find "$_env_bak" -name ".env" | while read -r ef; do
+            find "$_env_bak" -name ".env" -o -name "0chain.yaml" -o -name "sc.yaml" | while read -r ef; do
                 local rel="${ef#$_env_bak/}"
-                [ -f "$rel" ] && cp "$ef" "$rel"
+                if [ -f "$rel" ] || [ -f "$(dirname "$rel")" ]; then
+                    cp "$ef" "$rel" 2>/dev/null
+                fi
             done
-            print_status "  Restored local .env files"
+            print_status "  Restored local .env + config files (0chain.yaml, sc.yaml preserved)"
         fi
         rm -rf "$_env_bak" 2>/dev/null
 
