@@ -145,7 +145,7 @@ parse_args() {
             SUITES=("sdk" "api" "cli")
         else
             # Full run: all suites
-            SUITES=("sdk" "mc" "rclone" "zs3" "api" "cli")
+            SUITES=("sdk" "mc" "rclone" "zs3" "cli" "api")
         fi
     fi
 }
@@ -946,8 +946,15 @@ main() {
             run_parallel_group "${warmup_suites[@]}" || overall_rc=1
         fi
         if [ ${#main_suites[@]} -gt 0 ]; then
-            log_info "Phase 2 (main): ${main_suites[*]}"
-            run_parallel_group "${main_suites[@]}" || overall_rc=1
+            # Run main suites SEQUENTIALLY (CLI first, then API).
+            # CLI's ProtocolChallenge sets time_unit=10m on-chain temporarily.
+            # If API runs in parallel, its allocations inherit the short time_unit
+            # and expire in ~10 minutes, causing Test0BoxTranscoder and other failures.
+            log_info "Phase 2 (main): ${main_suites[*]} (sequential — CLI before API to avoid time_unit race)"
+            for suite in "${main_suites[@]}"; do
+                log_info "========== Starting ${suite^^} tests =========="
+                _INITIAL_MODE="$initial_mode" run_suite_with_retries "$suite" || overall_rc=1
+            done
         fi
     fi
 
