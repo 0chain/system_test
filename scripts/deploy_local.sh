@@ -10554,6 +10554,14 @@ verify_services() {
     # Check zauth via Docker IP (how API tests reach it)
     check_service "  zauth (8080)" "http://127.0.0.1:8080/" "http://198.18.0.200:8080/" false
     check_service "  zvault (8090)" "http://127.0.0.1:8090/" "http://198.18.0.210:8090/" false
+    # 0box may need 30-60s to start after docker compose up (Go binary + DB migrations + Kafka connect)
+    local _0box_ok=false
+    for _0box_try in 1 2 3 4 5 6; do
+        if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:9081/" -m 3 2>/dev/null | grep -qE '200|404|405'; then
+            _0box_ok=true; break
+        fi
+        [ "$_0box_try" -lt 6 ] && { print_status "  0box not ready yet (attempt ${_0box_try}/6), waiting 10s..."; sleep 10; }
+    done
     check_service "  0box (9081)" "http://127.0.0.1:9081/" "http://198.18.0.220:9081/" false
 
     # ---- Optional Services ----
