@@ -15235,6 +15235,41 @@ EOF
         # Trigger HTML conversion immediately
         /usr/local/bin/refresh-0chain-logs.sh 2>/dev/null || true
         ;;
+    restore-configs)
+        # Restore all service configs to deploy-ready state without rebuilding.
+        # Use after swap-image or when configs get reset by git checkout.
+        # Does NOT rebuild images or restart the chain — only fixes configs and restarts affected services.
+        print_header "Restoring All Service Configs"
+
+        print_status "[1/8] Chain SC config (time_unit, fees, hardforks)..."
+        ensure_chain_config || print_warning "Chain config failed"
+
+        print_status "[2/8] Blobber config (block_worker, delegate_wallet, URLs)..."
+        fix_blobber_config || print_warning "Blobber config failed"
+
+        print_status "[3/8] Validator config (block_worker, delegate_wallet)..."
+        fix_validator_config || print_warning "Validator config failed"
+
+        print_status "[4/8] 0box config (block_worker, domain, redis)..."
+        fix_0box_config || print_warning "0box config failed"
+
+        print_status "[5/8] zvault config (postgres host, zauth URL, JWT)..."
+        start_zvault || print_warning "zvault config failed"
+
+        print_status "[6/8] Test configs (block_worker in test YAML files)..."
+        configure_test_configs || print_warning "Test configs failed"
+
+        print_status "[7/8] Restarting services with fixed configs..."
+        docker restart 0box 2>/dev/null || true
+        cd "${BASE_DIR}/zvault/docker.local" && docker compose -p zvault restart 2>/dev/null || true
+        cd "${BASE_DIR}/zauth-server/docker.local" && docker compose restart 2>/dev/null || true
+        cd "$SCRIPT_DIR"
+
+        print_status "[8/8] Test wallets (fund, reset nonces)..."
+        fund_test_wallets || print_warning "Wallet funding failed"
+
+        print_status "All configs restored!"
+        ;;
     fix-blobbers)
         # Apply updated blobber config (service_charge, write_price, etc.) and
         # rebuild the blobber binary using local gosdk (with nonce fix).
