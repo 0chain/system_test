@@ -144,7 +144,7 @@ repositories:
 
   # rclone plugin
   rclone_zus:
-    branch: master
+    branch: feature/static-builds-and-rclone-compat
     path: rclone_zus
     build_required: false
 
