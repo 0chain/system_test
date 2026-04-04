@@ -7570,6 +7570,21 @@ build_web_apps() {
 
     print_status "Web apps build complete (built: ${WEB_APPS_TO_BUILD})"
 
+    # Copy WASM loaders to each app's public/js/ (yarn build may not copy them from shared/)
+    local _shared_wasm="${WEB_APPS_DIR}/packages/shared/src/lib/wasm"
+    for app in $WEB_APPS_TO_BUILD; do
+        local _pub_js="${WEB_APPS_DIR}/packages/${app}/public/js"
+        mkdir -p "$_pub_js"
+        if [ "$app" = "vult" ] && [ -f "$_shared_wasm/zcn_vult.js" ]; then
+            cp "$_shared_wasm/zcn_vult.js" "$_pub_js/zcn_vult.js"
+            print_status "${app}: copied zcn_vult.js to public/js/"
+        fi
+        if [[ "$app" =~ ^(blimp|bolt|explorer|chimney)$ ]] && [ -f "$_shared_wasm/zcn_blimp.js" ]; then
+            cp "$_shared_wasm/zcn_blimp.js" "$_pub_js/zcn_blimp.js"
+            print_status "${app}: copied zcn_blimp.js to public/js/"
+        fi
+    done
+
     # Fix prerender-manifest.json for each app: the .js source only stores the preview section.
     # Next.js 13.x requires the full JSON (version, routes, dynamicRoutes, preview, notFoundRoutes).
     for app in $WEB_APPS_TO_BUILD; do
