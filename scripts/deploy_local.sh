@@ -7675,6 +7675,21 @@ start_web_apps() {
             continue
         fi
 
+        # Verify critical WASM files exist before starting (patching may have been
+        # undone by git checkout during swap-image). Re-copy if missing.
+        if [ ! -f "${app_dir}/public/zcn.wasm" ]; then
+            local wasm_src="${WEB_APPS_DIR}/packages/shared/public/zcn.wasm"
+            [ -f "$wasm_src" ] && cp "$wasm_src" "${app_dir}/public/zcn.wasm" && \
+                print_status "${app}: restored missing zcn.wasm"
+        fi
+        # zcn_vult.js / zcn_blimp.js — critical WASM loaders
+        if [ "$app" = "vult" ] && [ ! -f "${app_dir}/public/js/zcn_vult.js" ]; then
+            print_warning "${app}: zcn_vult.js missing — WASM SDK won't load!"
+        fi
+        if [ "$app" = "blimp" ] && [ ! -f "${app_dir}/public/js/zcn_blimp.js" ]; then
+            print_warning "${app}: zcn_blimp.js missing — WASM SDK won't load!"
+        fi
+
         if command -v pm2 &>/dev/null; then
             pm2 start "npx next start -p ${port}" --name "$app" --cwd "$app_dir" 2>/dev/null || {
                 print_warning "${app}: PM2 start failed, trying nohup"
