@@ -3312,7 +3312,7 @@ if start_idx == -1 or end_idx == -1:
     sys.exit(1)
 
 new_func = """const getWasmUrl = () => {
-  const isEnterpriseMode = getIsEnterpriseMode()
+  const isEnterpriseMode = false
   let suffix = 'mainnet'
   const currentLocation = window?.location?.hostname
   const isHost = host => currentLocation?.includes(host)
@@ -3366,7 +3366,7 @@ if si == -1 or ei == -1:
     print(f'WARN: Could not find getWasmUrl in zcn_vult.js (start={si}, end={ei})')
     sys.exit(0)
 new_func = """const getWasmUrl = () => {
-  const isEnterpriseMode = getIsEnterpriseMode()
+  const isEnterpriseMode = false
   let suffix = 'mainnet'
   const currentLocation = window?.location?.hostname
   const isHost = host => currentLocation?.includes(host)
