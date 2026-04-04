@@ -941,6 +941,15 @@ main() {
             esac
         done
 
+        # Force CLI before API to avoid time_unit race (regardless of user-supplied order).
+        local sorted_main=()
+        for s in cli tokenomics api; do
+            for m in "${main_suites[@]}"; do
+                [[ "$m" == "$s" ]] && sorted_main+=("$s")
+            done
+        done
+        main_suites=("${sorted_main[@]}")
+
         if [ ${#warmup_suites[@]} -gt 0 ]; then
             log_info "Phase 1 (warm-up): ${warmup_suites[*]}"
             run_parallel_group "${warmup_suites[@]}" || overall_rc=1

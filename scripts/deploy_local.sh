@@ -62,6 +62,16 @@ if [ -f "$LOCAL_CONFIG_FILE" ]; then
     fi
 fi
 
+# Fallback: read nginx.domain from deploy_config.yaml if NGINX_DOMAIN still not set.
+# This ensures restore-configs, fix_blobber_config etc. use the correct domain
+# even without --domain flag or deploy_config.local.yaml.
+if [ -z "${NGINX_DOMAIN:-}" ] && [ -f "$CONFIG_FILE" ]; then
+    _yaml_domain=$(grep "^  domain:" "$CONFIG_FILE" 2>/dev/null | head -1 | awk -F': ' '{print $2}' | tr -d '"' | xargs)
+    if [ -n "$_yaml_domain" ]; then
+        export NGINX_DOMAIN="$_yaml_domain"
+    fi
+fi
+
 # Load secrets from .secrets.env (gitignored) if it exists.
 # Secrets include: Firebase keys, Auth0 credentials, Alchemy API key,
 # Tenderly RPC URLs, Zendesk token, Kafka/MinIO passwords, etc.
@@ -1232,6 +1242,62 @@ init_chain_config() {
             fi
         else
             print_error "No wallet file found with client_id=${current_sc_owner:0:16}... — SC config updates may fail!"
+        fi
+    fi
+
+    # ========== Restore MinerSC owner if a test changed it ==========
+    # TestOwnerUpdate/MinerSC temporarily changes the MinerSC owner_id; if cleanup fails
+    # the owner gets permanently stuck on a random wallet.
+    local miner_sc="6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d9"
+    local expected_miner_owner=""
+    # Determine expected MinerSC owner: prefer miner_sc_owner.json, fall back to owner.json
+    if [ -f "${ZCN_CONFIG_DIR}/miner_sc_owner.json" ]; then
+        expected_miner_owner=$(jq -r '.client_id' "${ZCN_CONFIG_DIR}/miner_sc_owner.json" 2>/dev/null)
+    fi
+    if [ -z "$expected_miner_owner" ]; then
+        expected_miner_owner=$(jq -r '.client_id' "${ZCN_CONFIG_DIR}/${ZCN_SC_OWNER_WALLET}" 2>/dev/null)
+    fi
+    local current_miner_owner
+    current_miner_owner=$(curl -sf "${sharder_url}/v1/screst/${miner_sc}/configs" 2>/dev/null \
+        | python3 -c "import sys,json; d=json.load(sys.stdin); f=d.get('fields',d); print(f.get('owner_id',''))" 2>/dev/null || echo "")
+    if [ -n "$expected_miner_owner" ] && [ -n "$current_miner_owner" ] && [ "$current_miner_owner" != "$expected_miner_owner" ]; then
+        print_warning "MinerSC owner mismatch: on-chain=${current_miner_owner:0:16}... expected=${expected_miner_owner:0:16}... — attempting restore..."
+        # Find a wallet file with the current (wrong) owner's client_id to sign the update
+        local miner_restore_wallet=""
+        for candidate in "${ZCN_CONFIG_DIR}/miner_sc_owner.json" "${ZCN_CONFIG_DIR}/${ZCN_SC_OWNER_WALLET}"; do
+            if [ -f "$candidate" ]; then
+                local cid
+                cid=$(jq -r '.client_id // empty' "$candidate" 2>/dev/null)
+                if [ "$cid" = "$current_miner_owner" ]; then
+                    miner_restore_wallet="$candidate"
+                    break
+                fi
+            fi
+        done
+        # Search test config wallets
+        if [ -z "$miner_restore_wallet" ]; then
+            while IFS= read -r f; do
+                [ "$(basename "$f")" = "wallets.json" ] && continue
+                local cid
+                cid=$(jq -r '.client_id // empty' "$f" 2>/dev/null)
+                if [ "$cid" = "$current_miner_owner" ]; then
+                    miner_restore_wallet="$f"
+                    break
+                fi
+            done < <(find "${BASE_DIR}/system_test/tests/cli_tests/config/" -name '*.json' 2>/dev/null)
+        fi
+        if [ -n "$miner_restore_wallet" ]; then
+            print_status "Using wallet: $miner_restore_wallet"
+            jq '.nonce = 0' "$miner_restore_wallet" > "${ZCN_CONFIG_DIR}/restore_miner_owner.json"
+            local WOM_RESTORE="--wallet restore_miner_owner.json --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE"
+            if $ZWALLET mn-update-config --keys owner_id --values "$expected_miner_owner" $WOM_RESTORE 2>&1; then
+                print_status "MinerSC owner restored to ${expected_miner_owner:0:16}..."
+                sleep 5
+            else
+                print_error "Failed to restore MinerSC owner"
+            fi
+        else
+            print_error "No wallet found with client_id=${current_miner_owner:0:16}... — MinerSC owner NOT restored"
         fi
     fi
 
@@ -11022,6 +11088,19 @@ if w:
         cp "$SC_OWNER_WALLET" "${dir}/zcnsc_owner_wallet.json"
         print_status "Copied zcnsc_owner to ${dir##*/}"
 
+        # MinerSC owner wallet (may differ from SC owner on chains with historical state)
+        # TestOwnerUpdate/MinerSC reads from config/wallets/miner_sc_owner_wallet.json
+        local wallets_dir="${dir}/wallets"
+        mkdir -p "$wallets_dir"
+        if [ -f "${ZCN_CONFIG_DIR}/miner_sc_owner.json" ]; then
+            cp "${ZCN_CONFIG_DIR}/miner_sc_owner.json" "${wallets_dir}/miner_sc_owner_wallet.json"
+            print_status "Copied miner_sc_owner to ${dir##*/}/wallets/"
+        else
+            # Fallback: MinerSC owner = StorageSC owner (common on fresh deploys)
+            cp "$SC_OWNER_WALLET" "${wallets_dir}/miner_sc_owner_wallet.json"
+            print_status "Copied sc_owner as miner_sc_owner to ${dir##*/}/wallets/ (no separate miner_sc_owner.json)"
+        fi
+
         # zbox_team wallet (used by tokenomics tests for enterprise blobber auth tickets)
         cp "$SC_OWNER_WALLET" "${dir}/zbox_team_wallet.json"
         print_status "Copied zbox_team to ${dir##*/}"
@@ -15292,6 +15371,29 @@ EOF
         cd "${BASE_DIR}/zvault/docker.local" && docker compose -p zvault restart 2>/dev/null || true
         cd "${BASE_DIR}/zauth-server/docker.local" && docker compose restart 2>/dev/null || true
         cd "$SCRIPT_DIR"
+
+        # Restart blobbers to pick up hosturl changes in docker-compose.
+        # fix_blobber_config patches --hosturl in compose files but blobbers need
+        # a recreate (not just restart) because the command line changed.
+        print_status "[7b/8] Recreating blobbers with fixed hosturls..."
+        local _bb_dir="${BASE_DIR}/blobber/docker.local"
+        if [ -d "$_bb_dir" ]; then
+            cd "$_bb_dir"
+            for _bi in $(seq 1 9); do
+                if docker ps -q --filter "name=^blobber-${_bi}$" 2>/dev/null | grep -q .; then
+                    BLOBBER=$_bi docker compose -p "blobber${_bi}" -f b0docker-compose.yml up -d --force-recreate --no-deps blobber >/dev/null 2>&1 &
+                fi
+            done
+            for _bn in 10 11 12; do
+                local _cf="b0docker-compose-${_bn}.yml"
+                if [ -f "$_cf" ] && docker ps -q --filter "name=^blobber-${_bn}$" 2>/dev/null | grep -q .; then
+                    docker compose -p "blobber${_bn}" -f "$_cf" up -d --force-recreate --no-deps blobber >/dev/null 2>&1 &
+                fi
+            done
+            wait
+            cd "$SCRIPT_DIR"
+            print_status "All running blobbers recreated"
+        fi
 
         print_status "[8/8] Test wallets (fund, reset nonces)..."
         fund_test_wallets || print_warning "Wallet funding failed"

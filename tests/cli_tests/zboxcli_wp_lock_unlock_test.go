@@ -55,7 +55,10 @@ func TestWritePoolLock(testSetup *testing.T) {
 
 		balanceAfterLock, err := getBalanceZCN(t, configPath)
 		require.NoError(t, err)
-		require.LessOrEqual(t, balanceAfterLock, balanceAfterAlloc-1)
+		// Use InEpsilon instead of LessOrEqual to handle floating point rounding
+		// (e.g., 15.99 vs 15.989999999999998)
+		require.InEpsilon(t, balanceAfterAlloc-1, balanceAfterLock, 0.01,
+			"balance after lock (%f) should be approximately %f", balanceAfterLock, balanceAfterAlloc-1)
 
 		// Write pool balance should increment by 1
 		allocation := getAllocation(t, allocationID)

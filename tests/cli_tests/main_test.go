@@ -86,7 +86,7 @@ const (
 	scOwnerWallet                   = "wallets/sc_owner"
 	// All infrastructure nodes (miners, sharders, blobbers, validators) use the same
 	// on-chain delegate wallet (sc_owner). Use a single wallet file for all of them.
-	minerScOwnerWallet              = "wallets/sc_owner"
+	minerScOwnerWallet              = "wallets/miner_sc_owner"
 	blobberOwnerWallet              = "wallets/sc_owner"
 	miner01NodeDelegateWalletName   = "wallets/sc_owner"
 	miner02NodeDelegateWalletName   = "wallets/sc_owner"
