@@ -7782,89 +7782,126 @@ EOF
 # Reads allocation ID from /root/.zcn/allocation.txt, checks expiry via sharder REST API.
 renew_zs3_allocation() {
     local ZS3_ALLOC_FILE="${ZCN_CONFIG_DIR}/allocation.txt"
+    local W="--wallet $ZCN_WALLET_FILE --configDir $ZCN_CONFIG_DIR --config $ZCN_CONFIG_FILE"
+    local TIMEOUT=120  # seconds — never hang forever
     local now
     now=$(date +%s)
 
-    # Get current allocation ID
+    # Step 1: Check if we have an allocation ID on disk
     local alloc_id=""
     if [ -f "$ZS3_ALLOC_FILE" ]; then
-        alloc_id=$(cat "$ZS3_ALLOC_FILE")
+        alloc_id=$(cat "$ZS3_ALLOC_FILE" | tr -d '[:space:]')
     fi
 
     if [ -z "$alloc_id" ]; then
-        print_status "No ZS3 allocation found — creating one..."
-        start_zs3server
-        return
-    fi
-
-    # Check expiry via sharder REST
-    local expiry
-    expiry=$(curl -sf "http://198.18.0.82:7172/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/allocation?allocation=${alloc_id}" 2>/dev/null | \
-        python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('expiration_date',0))" 2>/dev/null || echo "0")
-
-    local margin=$((2 * 24 * 3600))  # 2 days (allocation may only last ~25 days total)
-    if [ "$expiry" -gt "$((now + margin))" ] 2>/dev/null; then
-        print_status "ZS3 allocation ${alloc_id:0:16}... is valid (expires $(date -d @$expiry 2>/dev/null || date -r $expiry 2>/dev/null || echo $expiry))"
-
-        # Verify the running ZS3 server is using THIS allocation; restart if mismatched or not running.
-        local running_alloc
-        running_alloc=$(pgrep -a -f "minio gateway zcn" 2>/dev/null | grep -o -- '--allocationId [a-f0-9]\{64\}' | awk '{print $2}' | head -1)
-        if [ -z "$running_alloc" ]; then
-            print_status "ZS3 server not running — starting it..."
-            pkill -f "minio gateway zcn" 2>/dev/null || true
-            sleep 2
-            start_zs3server
-            return
-        elif [ "$running_alloc" = "$alloc_id" ]; then
-            # Allocation matches. Check for write_marker_verification_failed errors in recent logs:
-            # these occur when minio was restarted with an existing allocation that has blobber state
-            # it can't reconcile (prev_allocation_root mismatch). A fresh allocation fixes this.
-            local write_marker_errors=0
-            write_marker_errors=$(tail -100 /var/log/zs3server.log 2>/dev/null | grep -c "write_marker_verification_failed" 2>/dev/null || true)
-            write_marker_errors="${write_marker_errors:-0}"
-            if (( write_marker_errors > 0 )); then
-                print_status "ZS3 server has write_marker errors (stale blobber state) — creating fresh allocation..."
-                pkill -f "minio gateway zcn" 2>/dev/null || true
-                sleep 2
-                start_zs3server
-                return
-            fi
-            # Check for repair_required errors from last test run — means blobbers have inconsistent
-            # state from a partially-committed write; a fresh allocation clears this.
-            # Only check recently-modified logs (within 1 hour) to avoid false positives from
-            # previous sessions.
-            local repair_required_count=0
-            local zs3_log="/tmp/test_zs3.log"
-            if [ -f "$zs3_log" ] && (( $(date +%s) - $(stat -c %Y "$zs3_log" 2>/dev/null || echo 0) < 3600 )); then
-                repair_required_count=$(grep -c "repair_required" "$zs3_log" 2>/dev/null || true)
-                repair_required_count="${repair_required_count:-0}"
-            fi
-            if (( repair_required_count > 0 )); then
-                print_status "ZS3 allocation has repair_required state (${repair_required_count} occurrences) — creating fresh allocation..."
-                pkill -f "minio gateway zcn" 2>/dev/null || true
-                sleep 2
-                start_zs3server
-                return
-            fi
-            print_status "ZS3 server running with correct allocation — OK"
-            return
+        # No allocation.txt — try to find one via list allocations
+        print_status "No allocation.txt — checking chain for existing allocations..."
+        local list_output
+        list_output=$(timeout $TIMEOUT $ZBOX listallocations $W 2>&1 || true)
+        alloc_id=$(echo "$list_output" | grep -o '[a-f0-9]\{64\}' | head -1)
+        if [ -n "$alloc_id" ]; then
+            echo "$alloc_id" > "$ZS3_ALLOC_FILE"
+            print_status "Found existing allocation on chain: ${alloc_id:0:16}..."
         else
-            # Running minio uses a different allocation — zcnconfig state is stale.
-            # Create a fresh allocation to avoid write_marker_verification_failed errors.
-            print_status "ZS3 server running with wrong allocation (${running_alloc:0:16}... ≠ ${alloc_id:0:16}...) — creating fresh allocation..."
-            pkill -f "minio gateway zcn" 2>/dev/null || true
-            sleep 2
+            print_status "No allocations found on chain — creating new one..."
             start_zs3server
             return
         fi
     fi
 
-    print_status "ZS3 allocation expired or expiring soon (expiry=$expiry, now=$now) — creating new allocation and restarting zs3server..."
-    # Stop existing zs3server
-    pkill -f "minio gateway zcn" 2>/dev/null || true
-    sleep 2
-    # start_zs3server creates a new allocation and starts the server
-    start_zs3server
+    # Step 2: Check allocation expiry via sharder REST (fast, no transaction)
+    local expiry alloc_info
+    alloc_info=$(curl -sf --max-time 10 \
+        "http://198.18.0.82:7172/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/allocation?allocation=${alloc_id}" 2>/dev/null || echo "{}")
+    expiry=$(echo "$alloc_info" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('expiration_date',0))" 2>/dev/null || echo "0")
+
+    if [ "$expiry" = "0" ] || ! [[ "$expiry" =~ ^[0-9]+$ ]]; then
+        print_warning "Allocation ${alloc_id:0:16}... not found on chain — creating new one..."
+        pkill -f "minio gateway zcn" 2>/dev/null || true
+        sleep 2
+        start_zs3server
+        return
+    fi
+
+    local margin=$((2 * 24 * 3600))  # 2 days
+    local extend_margin=$((7 * 24 * 3600))  # 7 days — extend if expiring within a week
+
+    if [ "$expiry" -lt "$now" ] 2>/dev/null; then
+        # Already expired
+        print_status "ZS3 allocation expired — creating new one..."
+        pkill -f "minio gateway zcn" 2>/dev/null || true
+        sleep 2
+        start_zs3server
+        return
+    elif [ "$expiry" -lt "$((now + extend_margin))" ] 2>/dev/null; then
+        # Expiring soon — extend it (much faster than creating new)
+        print_status "ZS3 allocation expiring soon ($(date -d @$expiry 2>/dev/null || date -r $expiry 2>/dev/null || echo $expiry)) — extending..."
+        local extend_output
+        extend_output=$(timeout $TIMEOUT $ZBOX updateallocation \
+            --allocation "$alloc_id" --extend --lock 5 $W 2>&1 || true)
+        if echo "$extend_output" | grep -qi "updated\|Allocation updated"; then
+            print_status "ZS3 allocation extended successfully"
+            # Re-read new expiry
+            expiry=$(curl -sf --max-time 10 \
+                "http://198.18.0.82:7172/v1/screst/6dba10422e368813802877a85039d3985d96760ed844092319743fb3a76712d7/allocation?allocation=${alloc_id}" 2>/dev/null \
+                | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('expiration_date',0))" 2>/dev/null || echo "0")
+            print_status "New expiry: $(date -d @$expiry 2>/dev/null || date -r $expiry 2>/dev/null || echo $expiry)"
+        else
+            print_warning "Failed to extend allocation — creating new one..."
+            print_warning "Output: $(echo "$extend_output" | tail -3)"
+            pkill -f "minio gateway zcn" 2>/dev/null || true
+            sleep 2
+            start_zs3server
+            return
+        fi
+    else
+        print_status "ZS3 allocation ${alloc_id:0:16}... is valid (expires $(date -d @$expiry 2>/dev/null || date -r $expiry 2>/dev/null || echo $expiry))"
+    fi
+
+    # Step 3: Verify ZS3 server is running with the correct allocation
+    local running_alloc
+    running_alloc=$(pgrep -a -f "minio gateway zcn" 2>/dev/null | grep -o -- '--allocationId [a-f0-9]\{64\}' | awk '{print $2}' | head -1)
+    if [ -z "$running_alloc" ]; then
+        print_status "ZS3 server not running — starting it..."
+        pkill -f "minio gateway zcn" 2>/dev/null || true
+        sleep 2
+        start_zs3server
+        return
+    elif [ "$running_alloc" != "$alloc_id" ]; then
+        print_status "ZS3 server running with wrong allocation (${running_alloc:0:16}... ≠ ${alloc_id:0:16}...) — restarting..."
+        pkill -f "minio gateway zcn" 2>/dev/null || true
+        sleep 2
+        start_zs3server
+        return
+    fi
+
+    # Step 4: Check for write_marker or repair errors (stale blobber state)
+    local write_marker_errors=0
+    write_marker_errors=$(tail -100 /var/log/zs3server.log 2>/dev/null | grep -c "write_marker_verification_failed" 2>/dev/null || true)
+    write_marker_errors="${write_marker_errors:-0}"
+    if (( write_marker_errors > 0 )); then
+        print_status "ZS3 server has write_marker errors — creating fresh allocation..."
+        pkill -f "minio gateway zcn" 2>/dev/null || true
+        sleep 2
+        start_zs3server
+        return
+    fi
+
+    local repair_required_count=0
+    local zs3_log="/tmp/test_zs3.log"
+    if [ -f "$zs3_log" ] && (( $(date +%s) - $(stat -c %Y "$zs3_log" 2>/dev/null || echo 0) < 3600 )); then
+        repair_required_count=$(grep -c "repair_required" "$zs3_log" 2>/dev/null || true)
+        repair_required_count="${repair_required_count:-0}"
+    fi
+    if (( repair_required_count > 0 )); then
+        print_status "ZS3 allocation has repair_required state — creating fresh allocation..."
+        pkill -f "minio gateway zcn" 2>/dev/null || true
+        sleep 2
+        start_zs3server
+        return
+    fi
+
+    print_status "ZS3 server running with correct allocation — OK"
 }
 
 # Setup zs3/mc/warp test tools in CLI test directory
