@@ -2026,3 +2026,119 @@ func (c *ZboxClient) RevokePublicShare(t *test.SystemTest, headers map[string]st
 	}, HttpDELETEMethod)
 	return resp, err
 }
+
+// GetWalletNonce fetches a nonce for wallet signature verification (public endpoint).
+func (c *ZboxClient) GetWalletNonce(t *test.SystemTest, headers map[string]string) (*resty.Response, error) {
+	t.Logf("Getting wallet nonce...")
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/wallet/nonce")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            headers,
+		RequiredStatusCode: 0,
+	}, HttpGETMethod)
+	return resp, err
+}
+
+// VerifyWalletSignature posts a wallet signature verification request (public endpoint).
+func (c *ZboxClient) VerifyWalletSignature(t *test.SystemTest, headers map[string]string, body map[string]interface{}) (*resty.Response, error) {
+	t.Logf("Verifying wallet signature...")
+	return c.PostJSON(t, "/v2/wallet/verify", headers, body)
+}
+
+// CreateGroup creates a new group (private endpoint, requires auth).
+func (c *ZboxClient) CreateGroup(t *test.SystemTest, headers map[string]string, body map[string]interface{}) (*resty.Response, error) {
+	t.Logf("Creating group...")
+	return c.PostJSON(t, "/v2/groups", headers, body)
+}
+
+// GetMyGroups returns groups owned by the current user (private endpoint).
+func (c *ZboxClient) GetMyGroups(t *test.SystemTest, headers map[string]string) (*resty.Response, error) {
+	t.Logf("Getting my groups...")
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/groups/my")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            headers,
+		RequiredStatusCode: 0,
+	}, HttpGETMethod)
+	return resp, err
+}
+
+// AddGroupMember adds a member to a group (private endpoint).
+func (c *ZboxClient) AddGroupMember(t *test.SystemTest, headers map[string]string, groupID string, body map[string]interface{}) (*resty.Response, error) {
+	t.Logf("Adding member to group %s...", groupID)
+	return c.PostJSON(t, "/v2/groups/"+groupID+"/members", headers, body)
+}
+
+// GetGroupMembers returns members of a group (private endpoint).
+func (c *ZboxClient) GetGroupMembers(t *test.SystemTest, headers map[string]string, groupID string) (*resty.Response, error) {
+	t.Logf("Getting members for group %s...", groupID)
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/groups/" + groupID + "/members")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            headers,
+		RequiredStatusCode: 0,
+	}, HttpGETMethod)
+	return resp, err
+}
+
+// UpdateGroup updates a group (private endpoint).
+func (c *ZboxClient) UpdateGroup(t *test.SystemTest, headers map[string]string, groupID string, body map[string]interface{}) (*resty.Response, error) {
+	t.Logf("Updating group %s...", groupID)
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/groups/" + groupID)
+
+	jsonHeaders := make(map[string]string)
+	for k, v := range headers {
+		jsonHeaders[k] = v
+	}
+	jsonHeaders["Content-Type"] = "application/json"
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            jsonHeaders,
+		Body:               body,
+		RequiredStatusCode: 0,
+	}, HttpPUTMethod)
+	return resp, err
+}
+
+// DeleteGroup deletes a group (private endpoint).
+func (c *ZboxClient) DeleteGroup(t *test.SystemTest, headers map[string]string, groupID string) (*resty.Response, error) {
+	t.Logf("Deleting group %s...", groupID)
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/groups/" + groupID)
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            headers,
+		RequiredStatusCode: 0,
+	}, HttpDELETEMethod)
+	return resp, err
+}
+
+// SearchGroups searches public groups by query (public endpoint).
+func (c *ZboxClient) SearchGroups(t *test.SystemTest, headers map[string]string, query string) (*resty.Response, error) {
+	t.Logf("Searching groups with query: %s", query)
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/groups/search")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Headers:            headers,
+		QueryParams:        map[string]string{"q": query},
+		RequiredStatusCode: 0,
+	}, HttpGETMethod)
+	return resp, err
+}
