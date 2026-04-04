@@ -3287,111 +3287,21 @@ PYEOF
 # and copies it to each app's public/ dir, so we force loading from local /zcn.wasm.
 patch_wasm_loader_local() {
     local WEB_APPS_DIR="$1"
-    local WASM_LOADER="${WEB_APPS_DIR}/packages/shared/src/lib/wasm/zcn_blimp.js"
-    if [ ! -f "$WASM_LOADER" ]; then
-        print_error "FATAL: zcn_blimp.js not found at $WASM_LOADER — WASM will load from CDN (stale), faucet will NOT work"
-        exit 1
-    fi
-    if grep -q 'FORCE LOCAL WASM' "$WASM_LOADER" 2>/dev/null; then
-        print_status "zcn_blimp.js: local WASM patch already applied"
-        return 0
-    fi
-    python3 - "$WASM_LOADER" << 'PYEOF'
-import sys
-wasm_loader = sys.argv[1]
-with open(wasm_loader, 'r') as f:
-    content = f.read()
 
-# Replace getWasmUrl function to always return local path
-old_start = 'const getWasmUrl = () => {'
-new_func_marker = 'const getCachedWasmResponse'
-start_idx = content.find(old_start)
-end_idx = content.find(new_func_marker)
-if start_idx == -1 or end_idx == -1:
-    print('FATAL: Could not find getWasmUrl function boundaries in zcn_blimp.js — WASM will load from CDN')
-    sys.exit(1)
-
-new_func = """const getWasmUrl = () => {
-  const isEnterpriseMode = false
-  let suffix = 'mainnet'
-  const currentLocation = window?.location?.hostname
-  const isHost = host => currentLocation?.includes(host)
-  if (isHost('localhost') || isHost('mob')) suffix = 'mob'
-  else if (isHost('dev') || isHost('mob.desktop')) suffix = 'dev'
-  else if (isHost('demo')) suffix = 'demo'
-  else if (isHost('staging')) suffix = 'staging'
-  else if (isHost('test')) suffix = 'test'
-  const wasmPath = isEnterpriseMode ? '/enterprise-zcn.wasm' : '/zcn.wasm'
-  // FORCE LOCAL WASM - bypass CDN and caching (deploy_local.sh builds fresh WASM from gosdk)
-  return { suffix, wasmUrl: wasmPath, wasmPath, defaultUrl: wasmPath }
-}
-
-"""
-content = content[:start_idx] + new_func + content[end_idx:]
-
-# Also make getCachedWasmResponse always return null to skip stale browser cache
-old_cache = 'const getCachedWasmResponse = async ({ wasmCache, wasmPath }) => {'
-if old_cache in content and 'return null // FORCE LOCAL WASM' not in content:
-    content = content.replace(old_cache, old_cache + '\n  return null // FORCE LOCAL WASM - skip cache')
-
-with open(wasm_loader, 'w') as f:
-    f.write(content)
-print('OK: zcn_blimp.js patched for local WASM')
-PYEOF
-    if [ $? -ne 0 ]; then
-        print_error "FATAL: Failed to patch zcn_blimp.js — WASM will load from CDN (stale), faucet will NOT work"
-        exit 1
-    fi
-    print_status "zcn_blimp.js: patched to load WASM from local /zcn.wasm (not CDN)"
-
-    # Also patch zcn_vult.js — Vult uses a separate loader that tries CDN by default.
-    # Without this, Vult loads stale WASM from cdn.vult.network instead of local build.
-    # NOTE: Cannot redirect to zcn_blimp.js (breaks Next.js build). Must patch inline.
-    local VULT_LOADER="${WEB_APPS_DIR}/packages/shared/src/lib/wasm/zcn_vult.js"
-    if [ -f "$VULT_LOADER" ]; then
-        if grep -q 'FORCE LOCAL WASM' "$VULT_LOADER" 2>/dev/null; then
-            print_status "zcn_vult.js: local WASM patch already applied"
+    # Set USE_CACHED_WASM=false in all app .env files so WASM loads from local
+    # /zcn.wasm instead of CDN. The JS loaders (zcn_vult.js, zcn_blimp.js) already
+    # check this env var — no JS patching needed.
+    # This survives git checkout -f because we restore .env files from backup.
+    for app in vult bolt blimp explorer chimney; do
+        local env_file="${WEB_APPS_DIR}/packages/${app}/.env"
+        [ -f "$env_file" ] || continue
+        if grep -q "USE_CACHED_WASM" "$env_file"; then
+            sed -i "s|.*USE_CACHED_WASM.*|USE_CACHED_WASM=false|" "$env_file"
         else
-            cp "$VULT_LOADER" "${VULT_LOADER}.bak"
-            python3 - "$VULT_LOADER" << 'VULTPYEOF'
-import sys
-f = sys.argv[1]
-with open(f) as fh:
-    content = fh.read()
-old_start = 'const getWasmUrl = () => {'
-new_func_marker = 'const getCachedWasmResponse'
-si = content.find(old_start)
-ei = content.find(new_func_marker)
-if si == -1 or ei == -1:
-    print(f'WARN: Could not find getWasmUrl in zcn_vult.js (start={si}, end={ei})')
-    sys.exit(0)
-new_func = """const getWasmUrl = () => {
-  const isEnterpriseMode = false
-  let suffix = 'mainnet'
-  const currentLocation = window?.location?.hostname
-  const isHost = host => currentLocation?.includes(host)
-  if (isHost('localhost') || isHost('mob')) suffix = 'mob'
-  else if (isHost('dev') || isHost('mob.desktop')) suffix = 'dev'
-  else if (isHost('demo')) suffix = 'demo'
-  else if (isHost('staging')) suffix = 'staging'
-  else if (isHost('test')) suffix = 'test'
-  const wasmPath = isEnterpriseMode ? '/enterprise-zcn.wasm' : '/zcn.wasm'
-  // FORCE LOCAL WASM - bypass CDN (deploy_local.sh builds fresh WASM from gosdk)
-  return { suffix, wasmUrl: wasmPath, wasmPath, defaultUrl: wasmPath }
-}
-
-"""
-content = content[:si] + new_func + content[ei:]
-old_cache = 'const getCachedWasmResponse = async ({ wasmCache, wasmPath }) => {'
-if old_cache in content and 'return null // FORCE LOCAL WASM' not in content:
-    content = content.replace(old_cache, old_cache + '\n  return null // FORCE LOCAL WASM - skip cache')
-with open(f, 'w') as fh:
-    fh.write(content)
-print('OK: zcn_vult.js patched for local WASM')
-VULTPYEOF
-            print_status "zcn_vult.js: patched to load WASM from local /zcn.wasm (not CDN)"
+            echo "USE_CACHED_WASM=false" >> "$env_file"
         fi
-    fi
+    done
+    print_status "All web-app .env files: USE_CACHED_WASM=false (local WASM, not CDN)"
 }
 
 # Start supporting services
