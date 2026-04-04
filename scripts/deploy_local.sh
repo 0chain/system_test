@@ -883,7 +883,7 @@ clone_repos() {
         ["web-apps"]="https://github.com/0chain/web-apps.git"
         ["zboxcli"]="https://github.com/0chain/zboxcli.git"
         ["zwalletcli"]="https://github.com/0chain/zwalletcli.git"
-        ["rclone_zus"]="https://github.com/0chain/rclone.git"
+        ["rclone_zus"]="https://github.com/0chain/rclone_zus.git"
     )
 
     for repo in "${!REPO_URLS[@]}"; do
@@ -7718,7 +7718,7 @@ build_rclone_zus() {
     # Clone repo if not present
     if [ ! -d "$RCLONE_DIR" ]; then
         print_status "Cloning rclone_zus repo..."
-        git clone https://github.com/0chain/rclone.git "$RCLONE_DIR" 2>&1 || {
+        git clone https://github.com/0chain/rclone_zus.git "$RCLONE_DIR" 2>&1 || {
             print_warning "Failed to clone rclone_zus repo — skipping rclone-zus build"
             return 0
         }
@@ -12311,7 +12311,7 @@ swap_image() {
         ["web-apps"]="https://github.com/0chain/web-apps.git"
         ["zboxcli"]="https://github.com/0chain/zboxcli.git"
         ["zwalletcli"]="https://github.com/0chain/zwalletcli.git"
-        ["rclone_zus"]="https://github.com/0chain/rclone.git"
+        ["rclone_zus"]="https://github.com/0chain/rclone_zus.git"
     )
 
     print_header "Swapping Image: ${repo} (branch: ${branch})"
