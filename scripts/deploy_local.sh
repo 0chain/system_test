@@ -12317,6 +12317,16 @@ swap_image() {
         print_status "Checking out ${branch}..."
         cd "$repo_path"
 
+        # Backup .env files before checkout (git reset --hard overwrites/deletes them)
+        local _env_backup_dir="/tmp/swap_env_backup_${repo}"
+        rm -rf "$_env_backup_dir" 2>/dev/null
+        mkdir -p "$_env_backup_dir"
+        find "$repo_path" -maxdepth 3 -name ".env" -path "*/packages/*" -exec sh -c '
+            rel=$(echo "$1" | sed "s|^$2/||")
+            mkdir -p "$3/$(dirname "$rel")"
+            cp "$1" "$3/$rel"
+        ' _ {} "$repo_path" "$_env_backup_dir" \;
+
         # Stash local changes (dirty trees block branch switches)
         # Do NOT run git clean — it deletes generated files (keys, .env, configs, data dirs)
         # git stash + git checkout -f + git reset --hard is sufficient for branch switching
@@ -12360,6 +12370,9 @@ swap_image() {
             print_status "Restored local .env files (preserved from before checkout)"
         fi
         rm -rf "$_env_backup_dir" 2>/dev/null
+
+        # Try to restore stashed local changes (non-fatal if conflicts)
+        git stash pop 2>/dev/null && print_status "Restored stashed local changes" || true
     fi
     local short_hash=$(git -C "$repo_path" rev-parse --short HEAD 2>/dev/null)
     print_status "On ${branch} (${short_hash})"
