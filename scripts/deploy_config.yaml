@@ -112,11 +112,13 @@ repositories:
     containers:
       - minioserver
 
-  # Datalake (Blimp backend)
+  # Datalake (Blimp backend — Zus Cloud Native server)
   zusCloudNative:
-    branch: main
+    branch: feat/security-fixes-and-tests
     path: zusCloudNative
     build_required: true
+    containers:
+      - go-terraform-server
 
   # CLI tools (no containers -- built as binaries)
   zboxcli:

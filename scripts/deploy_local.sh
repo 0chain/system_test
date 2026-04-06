@@ -884,6 +884,7 @@ clone_repos() {
         ["zboxcli"]="https://github.com/0chain/zboxcli.git"
         ["zwalletcli"]="https://github.com/0chain/zwalletcli.git"
         ["rclone_zus"]="https://github.com/0chain/rclone_zus.git"
+        ["zusCloudNative"]="https://github.com/0chain/zusCloudNative.git"
     )
 
     for repo in "${!REPO_URLS[@]}"; do
@@ -10040,6 +10041,99 @@ print(count)
     fi
 }
 
+# Build and start the Zus Cloud Native (datalake/blimp backend) service.
+# Provides cluster management, billing, and storage APIs for the Blimp web app.
+# Runs on port 8088, needs its own postgres (blimp-postgres on port 5482).
+build_and_start_zuscloudnative() {
+    print_header "Building and Starting zusCloudNative"
+
+    local ZCN_DIR="${BASE_DIR}/zusCloudNative"
+    if [ ! -d "$ZCN_DIR" ]; then
+        print_warning "zusCloudNative repo not found — skipping"
+        return 0
+    fi
+
+    cd "$ZCN_DIR"
+
+    # Write development.yaml with correct local settings
+    local _domain="${NGINX_DOMAIN:-test.zus.network}"
+    local _wallet="${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}"
+    local _client_id=$(jq -r '.client_id' "$_wallet" 2>/dev/null || echo "")
+
+    cat > development.yaml << ZCNEOF
+app:
+  port: "8088"
+  server_url: "https://${_domain}/datalake"
+  frontend_url: "https://${_domain}/blimp/"
+  resources_dir: "./resources"
+  terraform_plugin_cache_dir: "./plugin-cache"
+
+postgres:
+  host: "postgres"
+  port: 5432
+  user: "myuser"
+  password: "mypassword"
+  db: "mydb"
+
+datalake_wallet:
+  secret_name: ""
+  client_id: "${_client_id}"
+  client_key: ""
+  wallet_path: ""
+
+auth:
+  mode: "firebase"
+
+billing:
+  product_code: "ag3fep9mnrtkict8we7l528eh"
+  hourly_node_price_usd: 0.5
+  gb_storage_price_usd: 0.02
+
+terraform:
+  network: "test"
+  gosdk_version: "default"
+  zs3server_branch: "feat/enterprise-timings"
+ZCNEOF
+    print_status "Generated development.yaml"
+
+    # Build and start via docker compose
+    print_status "Building zusCloudNative Docker image..."
+    docker compose build 2>&1 | tail -5 || {
+        print_warning "zusCloudNative build failed"
+        return 0
+    }
+
+    # Stop existing containers
+    docker compose down 2>/dev/null || true
+
+    # Start (postgres + app)
+    docker compose up -d 2>&1 | tail -5
+    print_status "zusCloudNative started (port 8088)"
+
+    # Add nginx route if not exists
+    local nginx_conf="/etc/nginx/sites-enabled/${_domain}"
+    if [ -f "$nginx_conf" ] && ! grep -q '/datalake/' "$nginx_conf"; then
+        # Insert datalake route before the closing server block
+        sed -i '/^}/i\    location /datalake/ { proxy_pass http://localhost:8088/; include snippets/provider-cors.conf; }' "$nginx_conf" 2>/dev/null && {
+            nginx -t 2>/dev/null && nginx -s reload 2>/dev/null
+            print_status "Added /datalake/ nginx route → localhost:8088"
+        } || print_warning "Could not add /datalake/ nginx route"
+    elif [ -f "$nginx_conf" ]; then
+        print_status "Nginx /datalake/ route already exists"
+    fi
+
+    # Wait and verify
+    sleep 5
+    if curl -sf --max-time 5 http://localhost:8088/health >/dev/null 2>&1 || \
+       curl -sf --max-time 5 http://localhost:8088/ >/dev/null 2>&1; then
+        print_status "zusCloudNative responding on port 8088"
+    else
+        print_warning "zusCloudNative not responding yet (may need more time to start)"
+    fi
+
+    cd "$SCRIPT_DIR"
+}
+
 # Build and start the crawler service.
 # The crawler watches allocations on-chain and indexes file metadata into elasticsearch.
 # Prerequisites: elasticsearch running, chain live, testnet0 Docker network exists.
@@ -13161,11 +13255,12 @@ ZS3PYEOF
         crawler)
             docker stop crawler 2>/dev/null || true
             docker rm -f crawler 2>/dev/null || true
-            # git checkout during swap-image resets config.yaml to repo defaults
-            # (block_worker=dev.zus.network, empty wallet keys, wrong kafka host).
-            # Always regenerate via build_and_start_crawler which writes correct config.
             print_status "Regenerating crawler config and restarting..."
             build_and_start_crawler
+            cd "$SCRIPT_DIR"
+            ;;
+        zusCloudNative)
+            build_and_start_zuscloudnative
             cd "$SCRIPT_DIR"
             ;;
         0dns)
@@ -14340,6 +14435,9 @@ main() {
     build_and_start_crawler || print_warning "Crawler build/start failed (non-critical)"
     refresh_crawler_allocation || print_warning "Crawler allocation refresh failed (non-critical)"
     start_crawler_monitor || print_warning "Crawler monitor start failed (non-critical)"
+
+    # Phase 10c: Zus Cloud Native (datalake/blimp backend)
+    build_and_start_zuscloudnative || print_warning "zusCloudNative build/start failed (non-critical)"
 
     # Phase 11: Verify everything
     verify_services
