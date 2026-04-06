@@ -14271,6 +14271,11 @@ main() {
     sleep 30
     stake_and_configure_blobbers
 
+    # Stake miners and sharders (check_and_fund_providers handles all provider types).
+    # Without this, miners/sharders have 0 stake → Atlus shows empty stake pools,
+    # and TestMinerStake/TestSharderStake tests fail.
+    check_and_fund_providers || print_warning "Provider funding/staking failed (non-critical)"
+
     # NOTE: 0box is populated via Kafka (chain events) — do NOT seed manually.
     # 0box started before the chain (Phase 2) so it receives all events from block 0.
 
@@ -14840,6 +14845,8 @@ EOF
         print_status "Waiting 30s for blobbers to register after restart..."
         sleep 30
         stake_and_configure_blobbers
+        # Also stake miners/sharders (may have lost stake after chain restart)
+        check_and_fund_providers || print_warning "Provider funding/staking failed (non-critical)"
         build_and_deploy_enterprise_blobbers
         stake_enterprise_blobbers
         refresh_crawler_allocation || print_warning "Crawler allocation refresh failed (non-critical)"
