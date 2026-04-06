@@ -10096,6 +10096,15 @@ terraform:
 ZCNEOF
     print_status "Generated development.yaml"
 
+    # Patch docker-compose to mount development.yaml and fix port mapping
+    local _compose="${ZCN_DIR}/docker-compose.yaml"
+    # Fix port: app listens on 8080 but we want host:8088
+    sed -i 's|"8088:8088"|"8088:8080"|' "$_compose" 2>/dev/null
+    # Add config volume mount if not present
+    if ! grep -q 'development.yaml' "$_compose"; then
+        sed -i '/\.\/resources:\/app\/resources/a\      - ./development.yaml:/app/development.yaml' "$_compose" 2>/dev/null
+    fi
+
     # Build and start via docker compose
     print_status "Building zusCloudNative Docker image..."
     docker compose build 2>&1 | tail -5 || {
@@ -10108,7 +10117,7 @@ ZCNEOF
 
     # Start (postgres + app)
     docker compose up -d 2>&1 | tail -5
-    print_status "zusCloudNative started (port 8088)"
+    print_status "zusCloudNative started (port 8088 → app:8080)"
 
     # Add nginx route if not exists
     local nginx_conf="/etc/nginx/sites-enabled/${_domain}"
