@@ -467,7 +467,7 @@ DASHEOF
 
     cat >> /var/www/html/dashboard.html << 'DASHEOF2'
 <h3>Services</h3>
-<a href="/logs/0box.log">0box</a> | <a href="/logs/zauth.log">zauth</a> | <a href="/logs/zvault.log">zvault</a> | <a href="/logs/elasticsearch.log">Elastic</a> | <a href="/logs/kafka.log">Kafka</a> | <a href="/logs/render.log">Render</a> | <a href="/logs/crawler.log">Crawler</a> | <a href="/datalake/api/v1/health-check">Datalake</a>
+<a href="/logs/0box.log">0box</a> | <a href="/logs/zauth.log">zauth</a> | <a href="/logs/zvault.log">zvault</a> | <a href="/logs/elasticsearch.log">Elastic</a> | <a href="/logs/kafka.log">Kafka</a> | <a href="/logs/render.log">Render</a> | <a href="/logs/crawler.log">Crawler</a> | <a href="/logs/datalake.log">Datalake</a>
 <h3>Monitoring</h3>
 <a href="/vc/html">VC</a> | <a href="/chaos/html">Chaos</a> | <a href="/funding/html">Funding</a> | <a href="/dkg/html">DKG</a> | <a href="/deploy/html">Deploy</a> | <a href="/smoke/html">Smoke Test</a>
 <h3>Tests</h3>
@@ -10131,10 +10131,22 @@ ZCNEOF
         print_status "Nginx /datalake/ route already exists"
     fi
 
+    # Set up log streaming (docker logs → file for nginx)
+    pkill -f "docker logs -f go-terraform-server" 2>/dev/null || true
+    mkdir -p /var/log/0chain
+    nohup docker logs -f go-terraform-server > /var/log/0chain/datalake.log 2>&1 &
+
+    # Add nginx log route if not exists
+    if [ -f "$nginx_conf" ] && ! grep -q 'datalake.log' "$nginx_conf"; then
+        sed -i '/crawler.log/a\    location /logs/datalake.log { default_type text/plain; alias /var/log/0chain/datalake.log; }' "$nginx_conf" 2>/dev/null && {
+            nginx -t 2>/dev/null && nginx -s reload 2>/dev/null
+            print_status "Added /logs/datalake.log nginx route"
+        } || true
+    fi
+
     # Wait and verify
     sleep 5
-    if curl -sf --max-time 5 http://localhost:8088/health >/dev/null 2>&1 || \
-       curl -sf --max-time 5 http://localhost:8088/ >/dev/null 2>&1; then
+    if curl -sf --max-time 5 http://localhost:8088/api/v1/health-check >/dev/null 2>&1; then
         print_status "zusCloudNative responding on port 8088"
     else
         print_warning "zusCloudNative not responding yet (may need more time to start)"
