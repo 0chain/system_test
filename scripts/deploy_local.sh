@@ -10079,7 +10079,7 @@ build_and_start_crawler() {
 
     # Ensure config directory and file exist
     local CRAWLER_CONFIG_DIR="${CRAWLER_DIR}/docker.local/config"
-    local CRAWLER_CONFIG="${CRAWLER_CONFIG_DIR}/crawler.yaml"
+    local CRAWLER_CONFIG="${CRAWLER_CONFIG_DIR}/config.yaml"
     mkdir -p "$CRAWLER_CONFIG_DIR"
 
     local ZCN_WALLET="${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}"
