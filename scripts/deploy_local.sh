@@ -13027,6 +13027,14 @@ PYEOF
             cd "$SCRIPT_DIR"
             return 0
             ;;
+        zusCloudNative)
+            cd "$repo_path"
+            print_status "Building zusCloudNative Docker image..."
+            docker compose build 2>&1 | tail -10 || {
+                print_error "zusCloudNative Docker build failed"
+                return 1
+            }
+            ;;
         *)
             print_error "Don't know how to build image for: $repo"
             return 1
