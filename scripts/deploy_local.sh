@@ -467,7 +467,7 @@ DASHEOF
 
     cat >> /var/www/html/dashboard.html << 'DASHEOF2'
 <h3>Services</h3>
-<a href="/logs/0box.log">0box</a> | <a href="/logs/zauth.log">zauth</a> | <a href="/logs/zvault.log">zvault</a> | <a href="/logs/elasticsearch.log">Elastic</a> | <a href="/logs/kafka.log">Kafka</a> | <a href="/logs/render.log">Render</a> | <a href="/logs/crawler.log">Crawler</a>
+<a href="/logs/0box.log">0box</a> | <a href="/logs/zauth.log">zauth</a> | <a href="/logs/zvault.log">zvault</a> | <a href="/logs/elasticsearch.log">Elastic</a> | <a href="/logs/kafka.log">Kafka</a> | <a href="/logs/render.log">Render</a> | <a href="/logs/crawler.log">Crawler</a> | <a href="/datalake/api/v1/health-check">Datalake</a>
 <h3>Monitoring</h3>
 <a href="/vc/html">VC</a> | <a href="/chaos/html">Chaos</a> | <a href="/funding/html">Funding</a> | <a href="/dkg/html">DKG</a> | <a href="/deploy/html">Deploy</a> | <a href="/smoke/html">Smoke Test</a>
 <h3>Tests</h3>
