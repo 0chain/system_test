@@ -13144,6 +13144,15 @@ ZS3PYEOF
         crawler)
             docker stop crawler 2>/dev/null || true
             docker rm -f crawler 2>/dev/null || true
+            # Regenerate crawler config if wallet credentials are missing
+            # (git reset --hard during swap-image wipes the generated config)
+            local crawler_config="${repo_path}/docker.local/config/crawler.yaml"
+            if [ ! -f "$crawler_config" ] || ! grep -q 'wallet_client_id' "$crawler_config" 2>/dev/null; then
+                print_status "Crawler config missing or invalid — regenerating via build_and_start_crawler..."
+                build_and_start_crawler
+                cd "$SCRIPT_DIR"
+                return 0
+            fi
             cd "${repo_path}/docker.local"
             # Fix volume mount if needed (crawler reads from /usr/src/app/docker.local/config)
             local crawler_compose="${repo_path}/docker.local/docker-compose.yml"
@@ -13188,6 +13197,16 @@ ZS3PYEOF
     if [ -d "${BASE_DIR}/system_test/tests" ]; then
         configure_test_configs 2>/dev/null || true
     fi
+
+    # After swap-image for chain/blobber/validator repos, re-run staking
+    # to ensure all providers have non-zero stake (needed for atlus dashboard).
+    case "$repo" in
+        0chain|blobber|eblobber)
+            print_status "Re-running staking after ${repo} swap..."
+            fund_blobbers_and_validators 2>/dev/null || true
+            stake_and_configure_blobbers 2>/dev/null || true
+            ;;
+    esac
 
     print_status "Image swap complete for ${repo}!"
     print_status "Branch: ${branch} (${short_hash})"
