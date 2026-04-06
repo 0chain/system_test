@@ -10134,23 +10134,38 @@ print(m.group(1) if m else '')
             crawler_data=2
             crawler_parity=2
         fi
-        print_status "Creating crawler allocation (${crawler_data} data + ${crawler_parity} parity = ${blobber_count} blobbers)..."
-        local alloc_output
-        alloc_output=$(${ZBOX} newallocation --size 10737418240 --lock 100 --data "$crawler_data" --parity "$crawler_parity" \
-            --silent $WO 2>&1) || true
-        # Parse allocation ID — exclude wallet client_id from matches
         local wallet_cid
         wallet_cid=$(python3 -c "import json; print(json.load(open('${ZCN_CONFIG_DIR}/${ZCN_WALLET_FILE}'))['client_id'])" 2>/dev/null || echo "")
-        local crawler_alloc_id=$(echo "$alloc_output" | grep -i 'Allocation created' | grep -oE '[0-9a-f]{64}' | head -1)
-        if [ -z "$crawler_alloc_id" ]; then
-            crawler_alloc_id=$(echo "$alloc_output" | grep -oE '[0-9a-f]{64}' | grep -v "$wallet_cid" | tail -1)
-        fi
+        local crawler_alloc_id=""
+
+        # Try allocation creation with retries and fallback to smaller size
+        for _attempt in 1 2 3; do
+            if [ "$_attempt" -gt 1 ]; then
+                # Fallback: smaller allocation (4+2) if large one fails
+                crawler_data=4; crawler_parity=2
+                print_status "Retry $_attempt: smaller allocation (${crawler_data}+${crawler_parity})..."
+                sleep 5
+            else
+                print_status "Creating crawler allocation (${crawler_data} data + ${crawler_parity} parity)..."
+            fi
+            local alloc_output
+            alloc_output=$(timeout 120 ${ZBOX} newallocation --size 1073741824 --lock 10 \
+                --data "$crawler_data" --parity "$crawler_parity" \
+                $WO 2>&1) || true
+            crawler_alloc_id=$(echo "$alloc_output" | grep -i 'Allocation created' | grep -oE '[0-9a-f]{64}' | head -1)
+            if [ -z "$crawler_alloc_id" ]; then
+                crawler_alloc_id=$(echo "$alloc_output" | grep -oE '[0-9a-f]{64}' | grep -v "$wallet_cid" | tail -1)
+            fi
+            if [ -n "$crawler_alloc_id" ] && [ "$crawler_alloc_id" != "$wallet_cid" ]; then
+                print_status "Crawler allocation created: ${crawler_alloc_id}"
+                break
+            fi
+            crawler_alloc_id=""
+            print_warning "Attempt $_attempt failed: $(echo "$alloc_output" | grep -iE 'error|fail' | head -1)"
+        done
 
         if [ -z "$crawler_alloc_id" ]; then
-            print_warning "Could not create crawler allocation — starting crawler with empty allocations"
-            crawler_alloc_id=""
-        else
-            print_status "Crawler allocation created: ${crawler_alloc_id}"
+            print_warning "Could not create crawler allocation after 3 attempts — starting crawler with empty allocations"
         fi
 
         # Write alloc entry (empty list if no allocation)
@@ -12371,8 +12386,10 @@ swap_image() {
         fi
         rm -rf "$_env_backup_dir" 2>/dev/null
 
-        # Try to restore stashed local changes (non-fatal if conflicts)
-        git stash pop 2>/dev/null && print_status "Restored stashed local changes" || true
+        # Drop the stash — local patches (e.g. patch_web_apps_for_dev) are re-applied
+        # after checkout anyway. Stash pop can leave merge conflict markers that
+        # silently break builds (all errors suppressed by || true).
+        git stash drop 2>/dev/null || true
     fi
     local short_hash=$(git -C "$repo_path" rev-parse --short HEAD 2>/dev/null)
     print_status "On ${branch} (${short_hash})"
