@@ -10062,7 +10062,7 @@ build_and_start_zuscloudnative() {
 
     cat > development.yaml << ZCNEOF
 app:
-  port: "8088"
+  port: "8080"
   server_url: "https://${_domain}/datalake"
   frontend_url: "https://${_domain}/blimp/"
   resources_dir: "./resources"
