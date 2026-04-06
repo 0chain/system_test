@@ -10090,7 +10090,7 @@ billing:
   gb_storage_price_usd: 0.02
 
 terraform:
-  network: "test"
+  network: "testnet"
   gosdk_version: "default"
   zs3server_branch: "feat/enterprise-timings"
 ZCNEOF
