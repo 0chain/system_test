@@ -13144,22 +13144,12 @@ ZS3PYEOF
         crawler)
             docker stop crawler 2>/dev/null || true
             docker rm -f crawler 2>/dev/null || true
-            # Regenerate crawler config if wallet credentials are missing
-            # (git reset --hard during swap-image wipes the generated config)
-            local crawler_config="${repo_path}/docker.local/config/crawler.yaml"
-            if [ ! -f "$crawler_config" ] || ! grep -q 'wallet_client_id' "$crawler_config" 2>/dev/null; then
-                print_status "Crawler config missing or invalid — regenerating via build_and_start_crawler..."
-                build_and_start_crawler
-                cd "$SCRIPT_DIR"
-                return 0
-            fi
-            cd "${repo_path}/docker.local"
-            # Fix volume mount if needed (crawler reads from /usr/src/app/docker.local/config)
-            local crawler_compose="${repo_path}/docker.local/docker-compose.yml"
-            if [ -f "$crawler_compose" ] && grep -q './config:/crawler/config' "$crawler_compose"; then
-                sed -i 's|./config:/crawler/config|./config:/usr/src/app/docker.local/config|g' "$crawler_compose"
-            fi
-            docker compose up -d --force-recreate 2>/dev/null || true
+            # git checkout during swap-image resets config.yaml to repo defaults
+            # (block_worker=dev.zus.network, empty wallet keys, wrong kafka host).
+            # Always regenerate via build_and_start_crawler which writes correct config.
+            print_status "Regenerating crawler config and restarting..."
+            build_and_start_crawler
+            cd "$SCRIPT_DIR"
             ;;
         0dns)
             docker stop 0dns 2>/dev/null || true
@@ -13198,13 +13188,14 @@ ZS3PYEOF
         configure_test_configs 2>/dev/null || true
     fi
 
-    # After swap-image for chain/blobber/validator repos, re-run staking
-    # to ensure all providers have non-zero stake (needed for atlus dashboard).
+    # After swap-image, re-run funding and staking for ALL providers.
+    # swap-image restarts containers which may reset stake pools (especially
+    # miners/sharders after 0chain swap). check_and_fund_providers handles
+    # miners, sharders, blobbers, and validators in one call.
     case "$repo" in
         0chain|blobber|eblobber)
-            print_status "Re-running staking after ${repo} swap..."
-            fund_blobbers_and_validators 2>/dev/null || true
-            stake_and_configure_blobbers 2>/dev/null || true
+            print_status "Re-running funding + staking after ${repo} swap..."
+            check_and_fund_providers 2>/dev/null || true
             ;;
     esac
 
