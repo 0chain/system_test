@@ -13190,19 +13190,30 @@ t = re.sub(r'\n\s+- elasticsearch:elasticsearch', '', t)
 with open('$box_compose','w') as f: f.write(t)
 " 2>/dev/null || true
             fi
-            docker rm -f 0box 0box-redis postgres-0box 2>/dev/null || true
+            # CRITICAL: Only recreate 0box app container. NEVER remove postgres-0box
+            # (contains wallet data) or 0box-redis (contains session cache).
+            # docker rm -f postgres-0box would WIPE ALL WALLET DATA permanently.
+            docker rm -f 0box 2>/dev/null || true
             cd "${repo_path}/docker.local"
-            docker compose up -d --no-deps postgres redis 0box 2>/dev/null || true
+            # Start postgres + redis if not running (no-recreate preserves existing data)
+            docker compose up -d --no-recreate postgres redis 2>/dev/null || true
+            sleep 3
+            # Recreate only the 0box app container with the new image
+            docker compose up -d --force-recreate --no-deps 0box 2>/dev/null || true
             ;;
         zauth-server)
             docker stop zauth 2>/dev/null || true
             cd "${repo_path}/docker.local"
-            docker compose -p zauth up -d --force-recreate 2>/dev/null || true
+            # Start postgres if not running (preserve data), recreate only zauth app
+            docker compose -p zauth up -d --no-recreate 2>/dev/null || true
+            docker compose -p zauth up -d --force-recreate --no-deps zauth 2>/dev/null || true
             ;;
         zvault)
             docker stop zvault 2>/dev/null || true
             cd "${repo_path}/docker.local"
-            docker compose -p zvault up -d --force-recreate 2>/dev/null || true
+            # Start postgres if not running (preserve data), recreate only zvault app
+            docker compose -p zvault up -d --no-recreate 2>/dev/null || true
+            docker compose -p zvault up -d --force-recreate --no-deps zvault 2>/dev/null || true
             ;;
         zs3server)
             docker rm -f minioserver environment-logsearchapi-1 environment-postgres-db-1 postgres-db minioclient 2>/dev/null || true
