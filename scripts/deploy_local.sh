@@ -5591,6 +5591,14 @@ regenerate_killed_provider_keys() {
     local alive_count
     alive_count=$(echo "$alive_blobbers" | grep -c '[a-f0-9]' 2>/dev/null || echo "0")
 
+    # On fresh chain with 0 blobbers, skip the entire loop (nothing to check)
+    local running_blobbers_count
+    running_blobbers_count=$(docker ps --format '{{.Names}}' 2>/dev/null | grep -c '^blobber-[0-9]' || echo "0")
+    if [ "$alive_count" -eq 0 ] && [ "$running_blobbers_count" -eq 0 ]; then
+        print_status "Fresh chain (0 blobbers registered, 0 running) — skipping killed check"
+        return 0
+    fi
+
     # Strategy: get wallet IDs from running containers (docker logs show the real ID)
     # then check if they're killed (not in alive list but getBlobber returns is_killed=True)
     for i in $(seq 1 12); do
