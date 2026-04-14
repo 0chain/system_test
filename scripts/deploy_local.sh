@@ -26,6 +26,62 @@ if [ -z "$_DEPLOY_LOGGING_SET" ]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# ---- Single-instance guard (prevents zombie deploy loops) ----
+_DEPLOY_SUBCMD="${1:-all}"
+_DEPLOY_FORCE_RUN=0
+for _arg in "$@"; do
+    if [ "$_arg" = "--force-run" ]; then
+        _DEPLOY_FORCE_RUN=1
+    fi
+done
+
+case "$_DEPLOY_SUBCMD" in
+    --help|-h|help|verify|verify-all|fund|fund-daemon|status|test)
+        _DEPLOY_SKIP_GUARD=1 ;;
+    *) _DEPLOY_SKIP_GUARD=0 ;;
+esac
+
+if [ "$_DEPLOY_SKIP_GUARD" = "0" ]; then
+    _DEPLOY_PIDFILE="/var/run/deploy_local.pid"
+    if ! ( : > "$_DEPLOY_PIDFILE" ) 2>/dev/null; then
+        _DEPLOY_PIDFILE="/tmp/deploy_local.pid"
+    fi
+    if [ -s "$_DEPLOY_PIDFILE" ]; then
+        _existing_pid=$(cat "$_DEPLOY_PIDFILE" 2>/dev/null | head -1 | tr -dc '0-9')
+    else
+        _existing_pid=""
+    fi
+    if [ -n "$_existing_pid" ] && [ "$_existing_pid" != "$$" ] && kill -0 "$_existing_pid" 2>/dev/null; then
+        _existing_cmd=$(ps -o args= -p "$_existing_pid" 2>/dev/null | head -1)
+        _existing_start=$(ps -o lstart= -p "$_existing_pid" 2>/dev/null | head -1)
+        if [ "$_DEPLOY_FORCE_RUN" = "1" ]; then
+            echo "WARN: --force-run: killing existing deploy_local PID $_existing_pid (started $_existing_start)" >&2
+            kill -TERM "$_existing_pid" 2>/dev/null || true
+            sleep 2
+            kill -KILL "$_existing_pid" 2>/dev/null || true
+        else
+            echo "ERROR: deploy_local.sh is already running." >&2
+            echo "  PID:     $_existing_pid" >&2
+            echo "  Started: $_existing_start" >&2
+            echo "  Command: $_existing_cmd" >&2
+            echo "  Pidfile: $_DEPLOY_PIDFILE" >&2
+            echo "To override: re-run with --force-run" >&2
+            echo "Or kill manually: kill $_existing_pid" >&2
+            exit 1
+        fi
+    fi
+    echo $$ > "$_DEPLOY_PIDFILE"
+    _deploy_cleanup_pidfile() {
+        if [ -f "$_DEPLOY_PIDFILE" ] && [ "$(cat "$_DEPLOY_PIDFILE" 2>/dev/null)" = "$$" ]; then
+            rm -f "$_DEPLOY_PIDFILE"
+        fi
+    }
+    trap _deploy_cleanup_pidfile EXIT HUP INT TERM
+fi
+# ---- end single-instance guard ----
+
+
 CONFIG_FILE="${SCRIPT_DIR}/deploy_config.yaml"
 LOCAL_CONFIG_FILE="${SCRIPT_DIR}/deploy_config.local.yaml"  # Per-host overrides (excluded from rsync)
 BASE_DIR="${HOME}/Code"
@@ -3440,12 +3496,12 @@ start_elasticsearch() {
     local ES_COMPOSE="${BASE_DIR}/0box/docker.local/docker-compose.yml"
     if [ -f "$ES_COMPOSE" ]; then
         if ! grep -q "ES_JAVA_OPTS" "$ES_COMPOSE"; then
-            print_status "Adding ES_JAVA_OPTS=-Xms512m -Xmx512m to elasticsearch compose..."
-            sed -i.bak '/discovery.type=single-node/a\      - ES_JAVA_OPTS=-Xms512m -Xmx512m' "$ES_COMPOSE"
+            print_status "Adding ES_JAVA_OPTS=-Xms4g -Xmx4g to elasticsearch compose..."
+            sed -i.bak '/discovery.type=single-node/a\      - ES_JAVA_OPTS=-Xms4g -Xmx4g' "$ES_COMPOSE"
             rm -f "${ES_COMPOSE}.bak"
         else
             # Update any existing ES_JAVA_OPTS value to 512m
-            sed -i.bak 's|ES_JAVA_OPTS=.*|ES_JAVA_OPTS=-Xms512m -Xmx512m|' "$ES_COMPOSE"
+            sed -i.bak 's|ES_JAVA_OPTS=.*|ES_JAVA_OPTS=-Xms4g -Xmx4g|' "$ES_COMPOSE"
             rm -f "${ES_COMPOSE}.bak"
         fi
     fi
@@ -4288,8 +4344,8 @@ start_0box() {
     # Fix Elasticsearch heap: default (50% of RAM) can be >30GB on 62GB servers → OOM kill.
     # 512MB is sufficient for test environment indexing.
     if [ -f "$BOX_COMPOSE" ] && ! grep -q "ES_JAVA_OPTS" "$BOX_COMPOSE"; then
-        print_status "Adding ES_JAVA_OPTS=-Xms512m -Xmx512m to elasticsearch (prevent OOM)"
-        sed -i 's/- discovery.type=single-node/- discovery.type=single-node\n      - ES_JAVA_OPTS=-Xms512m -Xmx512m/' "$BOX_COMPOSE"
+        print_status "Adding ES_JAVA_OPTS=-Xms4g -Xmx4g to elasticsearch (prevent OOM)"
+        sed -i 's/- discovery.type=single-node/- discovery.type=single-node\n      - ES_JAVA_OPTS=-Xms4g -Xmx4g/' "$BOX_COMPOSE"
     fi
 
     # Pin Redis image to 7.4.3-alpine — redis:alpine (v8+) crashes with SIGSEGV (exit 139)
@@ -6141,6 +6197,21 @@ for v in nodes:
             sleep 1
         done
         print_status "Enterprise blobber configuration complete."
+
+    # Step 6b: Apply eblobber allocations schema migrations (idempotent)
+    # Adds columns required by the writemarker commit path on newer eblobber code;
+    # avoids SQLSTATE 42703 errors if an older postgres volume is reused.
+    print_status "Applying eblobber allocations schema migrations..."
+    for i in $(seq 1 $ENTERPRISE_COUNT); do
+        local pg_mig_container="postgres-eblob-${i}"
+        if docker ps --format '{{.Names}}' | grep -q "^${pg_mig_container}$"; then
+            docker exec "$pg_mig_container" psql -U blobber_user -d blobber_meta -c \
+                "ALTER TABLE allocations ADD COLUMN IF NOT EXISTS prev_used_size BIGINT NOT NULL DEFAULT 0; ALTER TABLE allocations ADD COLUMN IF NOT EXISTS allocation_version BIGINT NOT NULL DEFAULT 0; ALTER TABLE allocations ADD COLUMN IF NOT EXISTS prev_blobber_size_used BIGINT NOT NULL DEFAULT 0;" 2>/dev/null || true
+            print_status "Migrated allocations schema in $pg_mig_container"
+        else
+            print_warning "$pg_mig_container not running, skipping schema migration"
+        fi
+    done
     fi
 }
 
@@ -10262,7 +10333,7 @@ print(m.group(1) if m else '')
         local crawler_alloc_id=""
 
         # Try allocation creation with retries and fallback to smaller size
-        for _attempt in 1 2 3; do
+        for _attempt in 1 2 3 4 5; do
             if [ "$_attempt" -gt 1 ]; then
                 # Fallback: smaller allocation (4+2) if large one fails
                 crawler_data=4; crawler_parity=2
@@ -10401,6 +10472,12 @@ build_and_start_zs3server() {
     if [ ! -f "$ZS3_DIR/minio" ]; then
         print_status "Building zs3server (minio binary)..."
         cd "$ZS3_DIR"
+
+        # Idempotent: uncomment the local gosdk replace directive so zs3server builds from local branch.
+        if [ -f go.mod ] && grep -qE '^// replace github.com/0chain/gosdk => \.\./gosdk' go.mod; then
+            sed -i 's|^// replace github.com/0chain/gosdk => \.\./gosdk|replace github.com/0chain/gosdk => ../gosdk|' go.mod
+            print_status "Uncommented local gosdk replace in zs3server go.mod"
+        fi
 
         # Build using golang:1.22.5 Docker (zs3server requires go 1.22, Makefile uses golang:1.20 which fails)
         print_status "Building with Docker golang:1.22.5..."
@@ -10754,11 +10831,11 @@ verify_services() {
     check_service "  zvault (8090)" "http://127.0.0.1:8090/" "http://198.18.0.210:8090/" false
     # 0box may need 30-60s to start after docker compose up (Go binary + DB migrations + Kafka connect)
     local _0box_ok=false
-    for _0box_try in 1 2 3 4 5 6; do
+    for _0box_try in $(seq 1 18); do
         if curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:9081/" -m 3 2>/dev/null | grep -qE '200|404|405'; then
             _0box_ok=true; break
         fi
-        [ "$_0box_try" -lt 6 ] && { print_status "  0box not ready yet (attempt ${_0box_try}/6), waiting 10s..."; sleep 10; }
+        [ "$_0box_try" -lt 6 ] && { print_status "  0box not ready yet (attempt ${_0box_try}/18), waiting 10s..."; sleep 10; }
     done
     check_service "  0box (9081)" "http://127.0.0.1:9081/" "http://198.18.0.220:9081/" false
 
