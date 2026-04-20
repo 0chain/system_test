@@ -1,6 +1,8 @@
 module github.com/0chain/system_test
 
-go 1.22.0
+go 1.22.5
+
+toolchain go1.24.5
 
 require (
 	github.com/0chain/errors v1.0.3
@@ -21,6 +23,7 @@ require (
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/anishathalye/porcupine v1.1.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/hack-pad/go-webworkers v0.1.0 // indirect
