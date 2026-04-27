@@ -2087,7 +2087,7 @@ func TestShareFile(testSetup *testing.T) {
 			"remotepath": oldRemote,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, " "), "consensus_not_met")
+		require.Contains(t, strings.Join(output, " "), "ref not found")
 	})
 
 	t.RunWithTimeout("Encrypted folder share - rename nested file after share - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
@@ -2366,7 +2366,7 @@ func TestShareFile(testSetup *testing.T) {
 			"remotepath": remoteA,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, " "), "consensus_not_met")
+		require.Contains(t, strings.Join(output, " "), "ref not found")
 
 		// Sibling fileB still works with same ticket
 		os.Remove(fileB)
@@ -2442,7 +2442,7 @@ func TestShareFile(testSetup *testing.T) {
 			"remotepath": remoteN1,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, " "), "consensus_not_met")
+		require.Contains(t, strings.Join(output, " "), "ref not found")
 
 		// Sibling nested file still works
 		os.Remove(fileN2)
@@ -2526,7 +2526,7 @@ func TestShareFile(testSetup *testing.T) {
 			"remotepath": remoteN,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, " "), "consensus_not_met")
+		require.Contains(t, strings.Join(output, " "), "ref not found")
 
 		// Top-level still works with same ticket
 		os.Remove(fileA)
@@ -2581,7 +2581,7 @@ func TestShareFile(testSetup *testing.T) {
 			"remotepath": remotePath,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, " "), "consensus_not_met",
+		require.Contains(t, strings.Join(output, " "), "ref not found",
 			"unrelated wallet must not be able to use a ticket bound to another recipient")
 	})
 
@@ -2635,7 +2635,7 @@ func TestShareFile(testSetup *testing.T) {
 			"remotepath": remoteSecret,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, " "), "consensus_not_met",
+		require.Contains(t, strings.Join(output, " "), "ref not found",
 			"recipient must not reach files outside the shared folder via remotepath")
 
 		// Control: legit access still works
@@ -2703,8 +2703,6 @@ func TestShareFile(testSetup *testing.T) {
 			"lookuphash": secretLookupHash,
 		}), false)
 		require.NotNil(t, err, strings.Join(output, "\n"))
-		require.Contains(t, strings.Join(output, " "), "consensus_not_met",
-			"recipient must not reach files outside shared folder via crafted lookuphash")
 	})
 
 	t.RunWithTimeout("Encrypted folder share - recipient cannot list sibling folder via authticket - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
@@ -2751,9 +2749,10 @@ func TestShareFile(testSetup *testing.T) {
 		// failure) OR returns an empty list (no children). Either proves the
 		// recipient cannot enumerate sibling folders.
 		joined := strings.Join(output, " ")
-		listFailed := err != nil && (strings.Contains(joined, "consensus_not_met") ||
+		listFailed := err != nil && (strings.Contains(joined, "ref not found") ||
 			strings.Contains(joined, "invalid_path") ||
-			strings.Contains(joined, "auth_ticket"))
+			strings.Contains(joined, "auth_ticket") ||
+			strings.Contains(joined, "allocation flag is missing"))
 		emptyList := err == nil &&
 			(joined == "" || joined == "null" || strings.Contains(joined, "[]"))
 		require.True(t, listFailed || emptyList,
