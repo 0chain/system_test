@@ -17,7 +17,7 @@
 set -o pipefail
 
 SERVER="${1:-37.27.65.188}"
-PASS_ENV="${SERVER_PASS:-***REDACTED***}"
+PASS_ENV="${SERVER_PASS:?set SERVER_PASS env var (no hardcoded default)}"
 CRAWLER_API="http://localhost:3030"
 ZCN_CONFIG_DIR="/root/.zcn"
 WALLET="owner.json"
