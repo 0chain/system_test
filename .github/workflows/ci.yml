@@ -4,9 +4,6 @@ concurrency:
   group: "system-tests-${{ github.ref }}-${{ github.event_name }}"
   cancel-in-progress: true
 on:
-  push:
-    branches: [master, staging, sprint*]
-  pull_request:
   workflow_dispatch:
     inputs:
       repo_snapshots_branch:
