@@ -1,0 +1,10 @@
+block_worker: https://dev.zus.network/dns
+default_test_case_timeout: 45s
+signature_scheme: bls0chain
+chain_id: 0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe
+max_txn_query: 5
+query_sleep_time: 5
+min_submit: 10
+min_confirmation: 10
+# Test wallet mnemonics for multi-wallet testing
+test_wallet_mnemonics: "cactus panther essence ability copper fox wise actual need cousin boat uncover ride diamond group jacket anchor current float rely tragic omit child payment"
