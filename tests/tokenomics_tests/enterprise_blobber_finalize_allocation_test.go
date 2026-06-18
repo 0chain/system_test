@@ -36,7 +36,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		require.Nil(t, err, "Error updating sc config", strings.Join(output, "\n"))
 	})
 
-	t.RunWithTimeout("Finalize allocation after waiting for 11 minutes check finalization and balance.", time.Minute*20, func(t *test.SystemTest) {
+	t.RunWithTimeout("Finalize allocation after waiting for 7 minutes check finalization and balance.", time.Minute*20, func(t *test.SystemTest) {
 		utils.SetupWalletWithCustomTokens(t, configPath, 10)
 
 		wallet, err := utils.GetWalletForName(t, configPath, utils.EscapedTestName(t))
@@ -62,7 +62,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		beforeBalance = afterBalance
 
 		t.Log("Waiting for 11 minutes ....")
-		waitForTimeInMinutesWhileLogging(t, 11)
+		waitForTimeInMinutesWhileLogging(t, 7)
 
 		// Finalize the allocation
 		output, err := finalizeAllocation(t, configPath, allocationID, true)
@@ -141,7 +141,7 @@ func TestFinalizeEnterpriseAllocation(testSetup *testing.T) {
 		output, err := utils.UpdateAllocation(t, configPath, updateAllocationParams, true)
 		require.Nil(t, err, "Updating allocation duration failed", strings.Join(output, "\n"))
 
-		waitForTimeInMinutesWhileLogging(t, 11)
+		waitForTimeInMinutesWhileLogging(t, 7)
 
 		// Finalize the allocation
 		output, err = finalizeAllocation(t, configPath, allocationID, true)
