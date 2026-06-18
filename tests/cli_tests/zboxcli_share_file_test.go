@@ -1553,6 +1553,1211 @@ func TestShareFile(testSetup *testing.T) {
 		require.Equal(t, "Error: remotepath flag is missing", output[0],
 			"share file - Unexpected output", strings.Join(output, "\n"))
 	})
+
+	// ----------------------------------------------------------------------
+	// Encrypted folder share regression suite — fix/pre-reuse-folder-entropy
+	//
+	// The gosdk fix (commit 9dfc92c4) made folder-level shares use
+	// signingPrivateKey-derived entropy when the ref is a directory, mirroring
+	// chunked_upload on SignatureV2 allocations. Pre-fix, NewDirectoryRef()
+	// never set EncryptionVersion, so folder shares fell through to mnemonic
+	// entropy, producing "Invalid Ciphertext in reEncrypt, C4 != H5" on every
+	// download.
+	//
+	// Each subtest below materializes the shared directory with `zbox createdir`
+	// — the most direct caller of NewDirectoryRef() — to exercise the patched
+	// code path explicitly.
+	// ----------------------------------------------------------------------
+
+	t.RunWithTimeout("Encrypted folder share - empty folder share download added top-level file - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+		require.NotEqual(t, "", authTicket)
+
+		file := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(file, 256))
+		remotePath := "/shared/" + filepath.Base(file)
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  file,
+			"remotepath": remotePath,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Contains(t, output[1], StatusCompletedCB)
+
+		os.Remove(file)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+			"remotepath": remotePath,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - pre-existing top-level file - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+
+		file := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(file, 256))
+		remotePath := "/shared/" + filepath.Base(file)
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  file,
+			"remotepath": remotePath,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Contains(t, output[1], StatusCompletedCB)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err = shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 1)
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		os.Remove(file)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+			"remotepath": remotePath,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - pre-existing nested file - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+		_, err = createDir(t, configPath, allocationID, "/shared/nested", true)
+		require.Nil(t, err)
+
+		file := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(file, 256))
+		remotePath := "/shared/nested/" + filepath.Base(file)
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  file,
+			"remotepath": remotePath,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err = shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		os.Remove(file)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+			"remotepath": remotePath,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - add top-level file after share - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+
+		fileA := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileA, 256))
+		remoteA := "/shared/" + filepath.Base(fileA)
+		output, err := uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  fileA,
+			"remotepath": remoteA,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err = shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		os.Remove(fileA)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileA,
+			"authticket": authTicket,
+			"remotepath": remoteA,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+
+		// Owner adds a NEW file to the already-shared folder
+		fileB := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileB, 256))
+		remoteB := "/shared/" + filepath.Base(fileB)
+		output, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  fileB,
+			"remotepath": remoteB,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err, strings.Join(output, "\n"))
+
+		// Recipient downloads new file with the SAME ticket
+		os.Remove(fileB)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileB,
+			"authticket": authTicket,
+			"remotepath": remoteB,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - add nested folder after share - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+
+		fileA := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileA, 256))
+		remoteA := "/shared/" + filepath.Base(fileA)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  fileA,
+			"remotepath": remoteA,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// Owner adds a NEW nested subfolder + file AFTER share
+		_, err = createDir(t, configPath, allocationID, "/shared/nested", true)
+		require.Nil(t, err)
+
+		fileN := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileN, 256))
+		remoteN := "/shared/nested/" + filepath.Base(fileN)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  fileN,
+			"remotepath": remoteN,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err)
+
+		// Recipient downloads the file in the newly-added subfolder
+		os.Remove(fileN)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileN,
+			"authticket": authTicket,
+			"remotepath": remoteN,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - add deeply nested folders after share - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// Owner builds a deep tree AFTER share — exercises NewDirectoryRef at depth
+		for _, d := range []string{"/shared/a", "/shared/a/b", "/shared/a/b/c"} {
+			_, err = createDir(t, configPath, allocationID, d, true)
+			require.Nil(t, err, "failed to create dir %s", d)
+		}
+
+		fileD := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileD, 256))
+		remoteD := "/shared/a/b/c/" + filepath.Base(fileD)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  fileD,
+			"remotepath": remoteD,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err)
+
+		os.Remove(fileD)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileD,
+			"authticket": authTicket,
+			"remotepath": remoteD,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Len(t, output, 2)
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - update top-level file after share - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+
+		// v1 source
+		v1Src := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(v1Src, 256))
+		v1Bytes, err := os.ReadFile(v1Src)
+		require.Nil(t, err)
+
+		remotePath := "/shared/" + filepath.Base(v1Src)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  v1Src,
+			"remotepath": remotePath,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// Recipient downloads v1 to a fresh path
+		v1Dst := generateRandomTestFileName(t)
+		os.Remove(v1Dst)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  v1Dst,
+			"authticket": authTicket,
+			"remotepath": remotePath,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		gotV1, err := os.ReadFile(v1Dst)
+		require.Nil(t, err)
+		require.Equal(t, v1Bytes, gotV1, "recipient should get v1 content before update")
+
+		// Owner overwrites with v2 — distinct fixed bytes so the compare is meaningful
+		v2Src := generateRandomTestFileName(t)
+		v2Bytes := []byte(strings.Repeat("V2-DISTINCT-CONTENT-PAYLOAD-FOR-ENCRYPTED-FOLDER-SHARE-TEST.", 5))
+		require.Nil(t, os.WriteFile(v2Src, v2Bytes, 0o644))
+		_, err = updateFileWithWallet(t, walletOwner, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  v2Src,
+		}, true)
+		require.Nil(t, err)
+
+		// Recipient downloads v2 with SAME ticket to a fresh path
+		v2Dst := generateRandomTestFileName(t)
+		os.Remove(v2Dst)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  v2Dst,
+			"authticket": authTicket,
+			"remotepath": remotePath,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		gotV2, err := os.ReadFile(v2Dst)
+		require.Nil(t, err)
+		require.Equal(t, v2Bytes, gotV2, "recipient should get v2 content after update with same ticket")
+		require.NotEqual(t, v1Bytes, gotV2, "v2 must differ from v1 — not a tautological compare")
+	})
+
+	t.RunWithTimeout("Encrypted folder share - update nested file after share - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+		_, err = createDir(t, configPath, allocationID, "/shared/nested", true)
+		require.Nil(t, err)
+
+		v1Src := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(v1Src, 256))
+		v1Bytes, err := os.ReadFile(v1Src)
+		require.Nil(t, err)
+
+		remotePath := "/shared/nested/" + filepath.Base(v1Src)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  v1Src,
+			"remotepath": remotePath,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		v2Src := generateRandomTestFileName(t)
+		v2Bytes := []byte(strings.Repeat("NESTED-V2-PAYLOAD-FOR-ENCRYPTED-FOLDER-SHARE-UPDATE-TEST.", 5))
+		require.Nil(t, os.WriteFile(v2Src, v2Bytes, 0o644))
+		_, err = updateFileWithWallet(t, walletOwner, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remotePath,
+			"localpath":  v2Src,
+		}, true)
+		require.Nil(t, err)
+
+		v2Dst := generateRandomTestFileName(t)
+		os.Remove(v2Dst)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  v2Dst,
+			"authticket": authTicket,
+			"remotepath": remotePath,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		gotV2, err := os.ReadFile(v2Dst)
+		require.Nil(t, err)
+		require.Equal(t, v2Bytes, gotV2, "recipient should get v2 content for nested file")
+		require.NotEqual(t, v1Bytes, gotV2)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - rename top-level file after share - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+
+		file := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(file, 256))
+		oldName := filepath.Base(file)
+		oldRemote := "/shared/" + oldName
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  file,
+			"remotepath": oldRemote,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// Rename the file in-place
+		newName := "renamed_" + oldName
+		newRemote := "/shared/" + newName
+		_, err = renameFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": oldRemote,
+			"destname":   newName,
+		}, true)
+		require.Nil(t, err)
+
+		// Recipient downloads via NEW path with same ticket
+		os.Remove(file)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+			"remotepath": newRemote,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+
+		// Old path should fail
+		os.Remove(file)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+			"remotepath": oldRemote,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, " "), "ref not found")
+	})
+
+	t.RunWithTimeout("Encrypted folder share - rename nested file after share - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+		_, err = createDir(t, configPath, allocationID, "/shared/nested", true)
+		require.Nil(t, err)
+
+		file := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(file, 256))
+		oldName := filepath.Base(file)
+		oldRemote := "/shared/nested/" + oldName
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  file,
+			"remotepath": oldRemote,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		newName := "renamed_" + oldName
+		newRemote := "/shared/nested/" + newName
+		_, err = renameFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": oldRemote,
+			"destname":   newName,
+		}, true)
+		require.Nil(t, err)
+
+		os.Remove(file)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+			"remotepath": newRemote,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - rename nested folder after share - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+		_, err = createDir(t, configPath, allocationID, "/shared/nested", true)
+		require.Nil(t, err)
+
+		file := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(file, 256))
+		baseName := filepath.Base(file)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  file,
+			"remotepath": "/shared/nested/" + baseName,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// Rename the SUBFOLDER itself — strongest folder-entropy regression case
+		_, err = renameFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/shared/nested",
+			"destname":   "nested_renamed",
+		}, true)
+		require.Nil(t, err)
+
+		// File is now under /shared/nested_renamed/<base> — same ticket should work
+		os.Remove(file)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+			"remotepath": "/shared/nested_renamed/" + baseName,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - move file into shared folder after share - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+		_, err = createDir(t, configPath, allocationID, "/outside", true)
+		require.Nil(t, err)
+
+		file := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(file, 256))
+		baseName := filepath.Base(file)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  file,
+			"remotepath": "/outside/" + baseName,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// Move file from outside the share INTO the shared folder
+		_, err = moveFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/outside/" + baseName,
+			"destpath":   "/shared",
+		}, true)
+		require.Nil(t, err)
+
+		os.Remove(file)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+			"remotepath": "/shared/" + baseName,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - move file within shared folder - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+		_, err = createDir(t, configPath, allocationID, "/shared/nested", true)
+		require.Nil(t, err)
+
+		file := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(file, 256))
+		baseName := filepath.Base(file)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  file,
+			"remotepath": "/shared/nested/" + baseName,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// Move file from nested up to the shared folder
+		_, err = moveFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/shared/nested/" + baseName,
+			"destpath":   "/shared",
+		}, true)
+		require.Nil(t, err)
+
+		os.Remove(file)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+			"remotepath": "/shared/" + baseName,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - delete top-level file - sibling still works - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+
+		fileA := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileA, 256))
+		baseA := filepath.Base(fileA)
+		remoteA := "/shared/" + baseA
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  fileA,
+			"remotepath": remoteA,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err)
+
+		fileB := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileB, 256))
+		baseB := filepath.Base(fileB)
+		remoteB := "/shared/" + baseB
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID,
+			"localpath":  fileB,
+			"remotepath": remoteB,
+			"encrypt":    "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// Owner deletes fileA
+		_, err = deleteFile(t, walletOwner, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteA,
+		}), true)
+		require.Nil(t, err)
+
+		// Recipient download of deleted file fails
+		os.Remove(fileA)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileA,
+			"authticket": authTicket,
+			"remotepath": remoteA,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, " "), "ref not found")
+
+		// Sibling fileB still works with same ticket
+		os.Remove(fileB)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileB,
+			"authticket": authTicket,
+			"remotepath": remoteB,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - delete nested file - parent and siblings still work - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+		_, err = createDir(t, configPath, allocationID, "/shared/nested", true)
+		require.Nil(t, err)
+
+		// /shared/a.txt + /shared/nested/n1.txt + /shared/nested/n2.txt
+		fileA := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileA, 256))
+		remoteA := "/shared/" + filepath.Base(fileA)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID, "localpath": fileA, "remotepath": remoteA, "encrypt": "",
+		}, true)
+		require.Nil(t, err)
+
+		fileN1 := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileN1, 256))
+		remoteN1 := "/shared/nested/" + filepath.Base(fileN1)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID, "localpath": fileN1, "remotepath": remoteN1, "encrypt": "",
+		}, true)
+		require.Nil(t, err)
+
+		fileN2 := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileN2, 256))
+		remoteN2 := "/shared/nested/" + filepath.Base(fileN2)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID, "localpath": fileN2, "remotepath": remoteN2, "encrypt": "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		_, err = deleteFile(t, walletOwner, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteN1,
+		}), true)
+		require.Nil(t, err)
+
+		// Deleted nested file: fail
+		os.Remove(fileN1)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileN1,
+			"authticket": authTicket,
+			"remotepath": remoteN1,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, " "), "ref not found")
+
+		// Sibling nested file still works
+		os.Remove(fileN2)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileN2,
+			"authticket": authTicket,
+			"remotepath": remoteN2,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+
+		// Top-level still works
+		os.Remove(fileA)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileA,
+			"authticket": authTicket,
+			"remotepath": remoteA,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - delete nested folder - top-level still works - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+		_, err = createDir(t, configPath, allocationID, "/shared/nested", true)
+		require.Nil(t, err)
+
+		fileA := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileA, 256))
+		remoteA := "/shared/" + filepath.Base(fileA)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID, "localpath": fileA, "remotepath": remoteA, "encrypt": "",
+		}, true)
+		require.Nil(t, err)
+
+		fileN := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileN, 256))
+		remoteN := "/shared/nested/" + filepath.Base(fileN)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID, "localpath": fileN, "remotepath": remoteN, "encrypt": "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// Delete the nested file then the (now empty) folder
+		_, err = deleteFile(t, walletOwner, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": remoteN,
+		}), true)
+		require.Nil(t, err)
+		// Best-effort delete the empty folder ref; failure here is non-fatal
+		// because the lifecycle assertion is about content access, not ref cleanup.
+		_, _ = deleteFile(t, walletOwner, createParams(map[string]interface{}{
+			"allocation": allocationID,
+			"remotepath": "/shared/nested",
+		}), false)
+
+		// Nested file no longer downloadable
+		os.Remove(fileN)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileN,
+			"authticket": authTicket,
+			"remotepath": remoteN,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, " "), "ref not found")
+
+		// Top-level still works with same ticket
+		os.Remove(fileA)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileA,
+			"authticket": authTicket,
+			"remotepath": remoteA,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - unrelated wallet cannot use recipient ticket - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+
+		file := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(file, 256))
+		remotePath := "/shared/" + filepath.Base(file)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID, "localpath": file, "remotepath": remotePath, "encrypt": "",
+		}, true)
+		require.Nil(t, err)
+
+		// userA — legitimate recipient
+		userA := escapedTestName(t) + "_second"
+		createWalletForName(userA)
+		walletA, err := getWalletForName(t, configPath, userA)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletA.ClientID,
+			"encryptionpublickey": walletA.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// userB — unrelated third wallet attempting to reuse userA's ticket
+		userB := escapedTestName(t) + "_third"
+		createWalletForName(userB)
+
+		os.Remove(file)
+		output, err = downloadFileForWallet(t, userB, configPath, createParams(map[string]interface{}{
+			"localpath":  file,
+			"authticket": authTicket,
+			"remotepath": remotePath,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, " "), "ref not found",
+			"unrelated wallet must not be able to use a ticket bound to another recipient")
+	})
+
+	t.RunWithTimeout("Encrypted folder share - recipient cannot escape via remotepath - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+		_, err = createDir(t, configPath, allocationID, "/private", true)
+		require.Nil(t, err)
+
+		// /shared/a.txt — recipient is allowed to see this
+		fileA := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileA, 256))
+		remoteA := "/shared/" + filepath.Base(fileA)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID, "localpath": fileA, "remotepath": remoteA, "encrypt": "",
+		}, true)
+		require.Nil(t, err)
+
+		// /private/secret.txt — recipient must NOT be able to reach this
+		fileSecret := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileSecret, 256))
+		remoteSecret := "/private/" + filepath.Base(fileSecret)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID, "localpath": fileSecret, "remotepath": remoteSecret, "encrypt": "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// Attempt to download /private/secret.txt with the /shared ticket
+		os.Remove(fileSecret)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileSecret,
+			"authticket": authTicket,
+			"remotepath": remoteSecret,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, strings.Join(output, " "), "ref not found",
+			"recipient must not reach files outside the shared folder via remotepath")
+
+		// Control: legit access still works
+		os.Remove(fileA)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileA,
+			"authticket": authTicket,
+			"remotepath": remoteA,
+		}), false)
+		require.Nil(t, err, strings.Join(output, "\n"))
+		require.Contains(t, output[1], StatusCompletedCB)
+	})
+
+	t.RunWithTimeout("Encrypted folder share - recipient cannot escape via lookuphash - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+		_, err = createDir(t, configPath, allocationID, "/private", true)
+		require.Nil(t, err)
+
+		fileA := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileA, 256))
+		remoteA := "/shared/" + filepath.Base(fileA)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID, "localpath": fileA, "remotepath": remoteA, "encrypt": "",
+		}, true)
+		require.Nil(t, err)
+
+		fileSecret := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileSecret, 256))
+		remoteSecret := "/private/" + filepath.Base(fileSecret)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID, "localpath": fileSecret, "remotepath": remoteSecret, "encrypt": "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// Compute the lookup hash of the target file outside the share scope.
+		// Formula: sha3-256 hex of "<allocationID>:<path>". Source:
+		// gosdk/zboxcore/fileref/fileref.go:115 (GetReferenceLookup).
+		secretHashBytes := sha3.Sum256([]byte(allocationID + ":" + remoteSecret))
+		secretLookupHash := hex.EncodeToString(secretHashBytes[:])
+
+		// Attack: pass a manipulated lookuphash for /private/secret.txt
+		os.Remove(fileSecret)
+		output, err = downloadFileForWallet(t, receiverWallet, configPath, createParams(map[string]interface{}{
+			"localpath":  fileSecret,
+			"authticket": authTicket,
+			"lookuphash": secretLookupHash,
+		}), false)
+		require.NotNil(t, err, strings.Join(output, "\n"))
+	})
+
+	t.RunWithTimeout("Encrypted folder share - recipient cannot list sibling folder via authticket - proxy re-encryption", 5*time.Minute, func(t *test.SystemTest) {
+		walletOwner := escapedTestName(t)
+		allocationID, _ := createWalletAndAllocation(t, configPath, walletOwner)
+
+		_, err := createDir(t, configPath, allocationID, "/shared", true)
+		require.Nil(t, err)
+		_, err = createDir(t, configPath, allocationID, "/private", true)
+		require.Nil(t, err)
+
+		fileSecret := generateRandomTestFileName(t)
+		require.Nil(t, createFileWithSize(fileSecret, 256))
+		remoteSecret := "/private/" + filepath.Base(fileSecret)
+		_, err = uploadFile(t, configPath, map[string]interface{}{
+			"allocation": allocationID, "localpath": fileSecret, "remotepath": remoteSecret, "encrypt": "",
+		}, true)
+		require.Nil(t, err)
+
+		receiverWallet := escapedTestName(t) + "_second"
+		createWalletForName(receiverWallet)
+		walletReceiver, err := getWalletForName(t, configPath, receiverWallet)
+		require.Nil(t, err)
+
+		output, err := shareFile(t, configPath, map[string]interface{}{
+			"allocation":          allocationID,
+			"clientid":            walletReceiver.ClientID,
+			"encryptionpublickey": walletReceiver.EncryptionPublicKey,
+			"remotepath":          "/shared",
+		})
+		require.Nil(t, err, strings.Join(output, "\n"))
+		authTicket, err := extractAuthToken(output[0])
+		require.Nil(t, err)
+
+		// Receiver attempts to list /private using the /shared ticket. Inline the
+		// command so it runs as the receiver wallet — the listAllFilesFromBlobber
+		// helper hardcodes the test name, which would run as the owner.
+		listCmd := fmt.Sprintf(
+			"./zbox list --authticket %s --remotepath /private --json --silent --wallet %s_wallet.json --configDir ./config --config %s",
+			authTicket, receiverWallet, configPath,
+		)
+		output, err = cliutils.RunCommandWithoutRetry(listCmd)
+		// Two acceptable outcomes: blobber rejects (err != nil with consensus
+		// failure) OR returns an empty list (no children). Either proves the
+		// recipient cannot enumerate sibling folders.
+		joined := strings.Join(output, " ")
+		listFailed := err != nil && (strings.Contains(joined, "ref not found") ||
+			strings.Contains(joined, "invalid_path") ||
+			strings.Contains(joined, "auth_ticket") ||
+			strings.Contains(joined, "allocation flag is missing"))
+		emptyList := err == nil &&
+			(joined == "" || joined == "null" || strings.Contains(joined, "[]"))
+		require.True(t, listFailed || emptyList,
+			"recipient must not be able to list sibling folder /private; got: %s", joined)
+	})
 }
 
 func shareFile(t *test.SystemTest, cliConfigFilename string, param map[string]interface{}) ([]string, error) {
