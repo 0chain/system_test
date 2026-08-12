@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -282,6 +283,11 @@ func (c *ZboxClient) CreateWallet(t *test.SystemTest, headers, wallet map[string
 	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
 	require.NoError(t, err, "URL parse error")
 	urlBuilder.SetPath("/v2/wallet")
+
+	// t.Logf("wallet input: %v", wallet)
+	// t.Logf("CreateWallet URL: %v", urlBuilder.String())
+	// t.Logf("CreateWallet Headers: %v", headers)
+	// t.Logf("CreateWallet Wallet: %v", wallet)
 
 	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
 		Dst:                &zboxWallet,
@@ -1469,4 +1475,136 @@ func (c *ZboxClient) GetCSRFToken(t *test.SystemTest) (*model.CSRFToken, *resty.
 	}, HttpGETMethod)
 
 	return csrfToken, resp, err
+}
+
+// CreateMetadata posts transcoding metadata to the server and returns parsed response.
+func (c *ZboxClient) CreateMetadata(t *test.SystemTest, headers map[string]string, body map[string]interface{}) (*model.TranscodingEntity, *resty.Response, error) {
+	t.Logf("creating transcoding metadata for user [%v] using 0box...", headers["X-App-User-ID"])
+
+	// Log request body
+	bodyJSON, err := json.Marshal(body)
+	if err == nil {
+		t.Logf("CreateMetadata request body: %s", string(bodyJSON))
+	} else {
+		t.Logf("CreateMetadata request body (marshal error): %v", body)
+	}
+
+	var res *model.GetTranscodingEntityResponse
+
+	urlBuilder := NewURLBuilder()
+	err = urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/metadata")
+
+	// Ensure Content-Type is set to JSON
+	jsonHeaders := make(map[string]string)
+	for k, v := range headers {
+		jsonHeaders[k] = v
+	}
+	jsonHeaders["Content-Type"] = "application/json"
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &res,
+		Headers:            jsonHeaders,
+		Body:               body,
+		RequiredStatusCode: 201,
+	}, HttpPOSTMethod)
+
+	if err != nil {
+		t.Errorf("CreateMetadata response error: %v, response body: %s", err, string(resp.Body()))
+		return nil, resp, err
+	}
+
+	// Log response body
+	t.Logf("CreateMetadata response status: %d, response body: %s", resp.StatusCode(), string(resp.Body()))
+
+	if res != nil && res.Data.ID != 0 {
+		return &res.Data, resp, nil
+	}
+
+	return nil, resp, fmt.Errorf("transcoding entity not found in response")
+}
+
+// UpdateUploadStatus updates status for an uploaded file and returns parsed response.
+func (c *ZboxClient) UpdateUploadStatus(t *test.SystemTest, headers map[string]string, body map[string]interface{}) (*model.TranscodingEntity, *resty.Response, error) {
+	t.Logf("updating upload status for user [%v] using 0box...", headers["X-App-User-ID"])
+
+	// Log request body
+	bodyJSON, err := json.Marshal(body)
+	if err == nil {
+		t.Logf("UpdateUploadStatus request body: %s", string(bodyJSON))
+	} else {
+		t.Logf("UpdateUploadStatus request body (marshal error): %v", body)
+	}
+
+	var res *model.GetTranscodingEntityResponse
+
+	urlBuilder := NewURLBuilder()
+	err = urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/updateUploadStatus")
+
+	// Ensure Content-Type is set to JSON
+	jsonHeaders := make(map[string]string)
+	for k, v := range headers {
+		jsonHeaders[k] = v
+	}
+	jsonHeaders["Content-Type"] = "application/json"
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &res,
+		Headers:            jsonHeaders,
+		Body:               body,
+		RequiredStatusCode: 201,
+	}, HttpPUTMethod)
+
+	if err != nil {
+		t.Errorf("UpdateUploadStatus response error: %v, response body: %s", err, string(resp.Body()))
+		return nil, resp, err
+	}
+
+	// Log response body
+	t.Logf("UpdateUploadStatus response status: %d, response body: %s", resp.StatusCode(), string(resp.Body()))
+
+	if res != nil && res.Data.ID != 0 {
+		return &res.Data, resp, nil
+	}
+
+	return nil, resp, fmt.Errorf("transcoding entity not found in response")
+}
+
+// GetMetadata gets transcoding entity metadata and returns parsed response.
+func (c *ZboxClient) GetMetadata(t *test.SystemTest, headers map[string]string, queryParams map[string]string) (*model.TranscodingEntity, *resty.Response, error) {
+	t.Logf("getting transcoding metadata for user [%v] using 0box...", headers["X-App-User-ID"])
+
+	// Log query parameters
+	t.Logf("GetMetadata query params: %v", queryParams)
+
+	var res *model.GetTranscodingEntityResponse
+
+	urlBuilder := NewURLBuilder()
+	err := urlBuilder.MustShiftParse(c.zboxEntrypoint)
+	require.NoError(t, err, "URL parse error")
+	urlBuilder.SetPath("/v2/metadata")
+
+	resp, err := c.executeForServiceProvider(t, urlBuilder.String(), model.ExecutionRequest{
+		Dst:                &res,
+		Headers:            headers,
+		QueryParams:        queryParams,
+		RequiredStatusCode: 200,
+	}, HttpGETMethod)
+
+	if err != nil {
+		t.Errorf("GetMetadata response error: %v, response body: %s", err, string(resp.Body()))
+		return nil, resp, err
+	}
+
+	// Log response body
+	t.Logf("GetMetadata response status: %d, response body: %s", resp.StatusCode(), string(resp.Body()))
+
+	if res != nil && res.Data.ID != 0 {
+		return &res.Data, resp, nil
+	}
+
+	return nil, resp, fmt.Errorf("transcoding entity not found in response")
 }

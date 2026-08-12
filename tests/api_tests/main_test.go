@@ -12,6 +12,8 @@ import (
 
 	coreClient "github.com/0chain/gosdk/core/client"
 	"github.com/0chain/gosdk/core/conf"
+	"github.com/0chain/gosdk/core/zcncrypto"
+	"github.com/0chain/gosdk/zcncore"
 
 	"github.com/0chain/system_test/internal/api/model"
 	"github.com/0chain/system_test/internal/api/util/client"
@@ -36,6 +38,7 @@ var (
 	blobberOwnerWallet          *model.Wallet
 	blobberOwnerWalletMnemonics string
 	parsedConfig                *config.Config
+	sdkWallet                   *zcncrypto.Wallet
 
 	initialisedWallets []*model.Wallet
 	walletIdx          int64
@@ -79,8 +82,24 @@ func TestMain(m *testing.M) {
 		QuerySleepTime:  5,
 		MinSubmit:       10,
 		MinConfirmation: 10,
+		ZauthServer:     parsedConfig.ZauthUrl,
 	})
 	require.NoError(t, err)
+	coreClient.SetSdkInitialized(true)
+
+	// err = coreClient.InitSDK(
+	// 	"{}",
+	// 	parsedConfig.BlockWorker,
+	// 	"0afc093ffb509f059c55478bc1a60351cef7b4e9c008a53a6cc8241ca8617dfe",
+	// 	"bls0chain",
+	// 	0, true,
+	// )
+	// if err != nil {
+	// 	log.Println("Error in sdk init", err)
+	// 	return
+	// }
+
+	zcncore.RegisterZauthServer(parsedConfig.ZauthUrl)
 
 	blobberOwnerWalletMnemonics = parsedConfig.BlobberOwnerWalletMnemonics
 	blobberOwnerWallet = apiClient.CreateWalletForMnemonic(t, blobberOwnerWalletMnemonics)
@@ -125,6 +144,40 @@ func TestMain(m *testing.M) {
 		}
 
 		initialisedWallets = append(initialisedWallets, initialisedWallet)
+	}
+
+	if len(initialisedWallets) > 0 {
+		walletMutex.Lock()
+		wallet := initialisedWallets[walletIdx]
+		walletIdx++
+		walletMutex.Unlock()
+
+		var dateCreated string
+		if wallet.CreationDate != nil {
+			dateCreated = time.Unix(int64(*wallet.CreationDate), 0).Format(time.RFC3339)
+		}
+		sdkWallet = &zcncrypto.Wallet{
+			ClientID:  wallet.Id,
+			ClientKey: wallet.PublicKey,
+			Keys: []zcncrypto.KeyPair{{
+				PublicKey:  wallet.Keys.PublicKey.SerializeToHexStr(),
+				PrivateKey: wallet.Keys.PrivateKey.SerializeToHexStr(),
+			}},
+			Mnemonic: wallet.Mnemonics,
+			Version:  wallet.Version,
+			DateCreated: dateCreated,
+		}
+		log.Printf("SDK wallet: %+v", sdkWallet)
+		wBytes, err := json.Marshal(sdkWallet)
+		if err != nil {
+			log.Println("Error serializing SDK wallet:", err)
+		} else if err = zcncore.SetGeneralWalletInfo(string(wBytes), "bls0chain"); err != nil {
+			log.Printf("Failed to set general wallet info: %v", err)
+		} else {
+			log.Printf("SDK wallet general info loaded for clientID %s", sdkWallet.ClientID)
+		}
+	} else {
+		log.Println("No wallets available to set SDK wallet")
 	}
 
 	os.Exit(m.Run())
