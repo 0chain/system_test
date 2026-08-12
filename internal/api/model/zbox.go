@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"github.com/0chain/gosdk/core/common"
 	"github.com/0chain/system_test/internal/api/util/test"
 	resty "github.com/go-resty/resty/v2"
@@ -14,6 +16,11 @@ type CSRFToken struct {
 
 type ZboxMessageResponse struct {
 	Message string `json:"message"`
+}
+
+type ZboxMessageDataResponse[T any] struct {
+	Message string `json:"message"`
+	Data    T      `json:"data"`
 }
 
 type ZboxMessageDataShareinfoResponse struct {
@@ -140,6 +147,19 @@ type ZboxShareInfo struct {
 	LookUpHash string `json:"lookup_hash"`
 	CreatedAt  string `json:"CreatedAt"`
 	UpdatedAt  string `json:"UpdatedAt"`
+}
+
+type ZboxShareRequest struct {
+	ID         int64
+	OwnerID    string
+	ClientID   string
+	LookupHash string
+	AuthTicket string
+	Message    *string
+	Status     uint8
+	AppType    int64
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 type ZboxNftCollection struct {
